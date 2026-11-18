@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Read-only verification for remaining all-runner task stages and final audit."""
 from __future__ import annotations
-import argparse,json,math,os,subprocess,time
+import argparse,json,math,os,stat,subprocess,time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from disdex_h48_protected_hold import H48ProtectedHoldError, validate_h48_protected_hold
 
 MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"
 V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"
@@ -32,6 +34,7 @@ KILL=Path("/var/lib/disdex/shared/kill-switch.json")
 RISK=Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN=Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING=Path("/var/lib/disdex/shared/pending-exposure.json")
+H48_HOLD_RECEIPT=Path("/etc/disdex/stable4/holds/e0e4f1d8f22b62e9410188ef6e590a20e31f760f.json")
 HYPE_SELFTEST=Path("/var/lib/disdex/hype-zec-long/runtime-overlays/v4-stop-ownership-v1/selftest.ts")
 HYPE_SOURCE=BASE/MAIN/"lib/hype-zec-long-runner.ts"
 
@@ -58,10 +61,42 @@ def readj(path):
     x=json.loads(path.read_text());req(isinstance(x,dict),"STATE_NOT_OBJECT")
     return x
 
+def h48_protected_hold_observation(now_ms):
+    """Prove an active H48 HOLD is still a no-order safety boundary.
+
+    This path is intentionally available only to read-only verification.  An
+    expired receipt is reported as provenance-only and never becomes a
+    deployment/order authorization.
+    """
+    req(KILL.is_file() and not KILL.is_symlink(),"KILL_STATE_INVALID")
+    kill_stat=KILL.stat()
+    req(stat.S_ISREG(kill_stat.st_mode) and not kill_stat.st_mode & 0o022,
+        "KILL_STATE_PERMISSIONS_INVALID")
+    kill_bytes=KILL.read_bytes()
+    kill=json.loads(kill_bytes)
+    req(isinstance(kill,dict),"KILL_STATE_NOT_OBJECT")
+    req(H48_HOLD_RECEIPT.is_file() and not H48_HOLD_RECEIPT.is_symlink(),
+        "H48_HOLD_RECEIPT_MISSING")
+    hold_stat=H48_HOLD_RECEIPT.stat()
+    req(stat.S_ISREG(hold_stat.st_mode) and hold_stat.st_uid==0
+        and not hold_stat.st_mode & 0o222,"H48_HOLD_RECEIPT_NOT_ROOT_IMMUTABLE")
+    receipt=json.loads(H48_HOLD_RECEIPT.read_text())
+    try:
+        return validate_h48_protected_hold(
+            kill,receipt,kill_bytes,now_ms,allow_expired_observation=True
+        )
+    except H48ProtectedHoldError as error:
+        raise RuntimeError(str(error)) from None
+
 def shared_health():
     req(os.path.realpath(CURRENT)==str(BASE/MAIN),"CURRENT_SHA_MISMATCH")
-    k=readj(KILL);req(k.get("active") is False,"KILL_SWITCH_ACTIVE")
     now=int(time.time()*1000)
+    k=readj(KILL)
+    protected_hold=None
+    if k.get("active") is True:
+        protected_hold=h48_protected_hold_observation(now)
+    else:
+        req(k.get("active") is False,"KILL_SWITCH_ACTIVE_OR_INVALID")
     r=readj(RISK);req(r.get("sourceComplete") is True and r.get("tripped") is False,"SHARED_RISK_BAD")
     updated=r.get("updatedAt")
     req(r.get("utcDay")==datetime.fromtimestamp(now/1000,timezone.utc).date().isoformat()
@@ -85,6 +120,7 @@ def shared_health():
     req(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_INVALID")
     req(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),
         "PENDING_ACTIVE")
+    return protected_hold
 
 def validate_flat_signed_get(value, now_ms):
     req(isinstance(value, dict), "ASTER_GET_INVALID")
@@ -134,7 +170,10 @@ def hype_overlay_verify(pid):
         "HYPE_OVERLAY_SELFTEST_FAILED")
 
 def verify_step(step):
-    shared_health()
+    protected_hold=shared_health()
+    if isinstance(protected_hold,dict):
+        print("PROTECTED_HOLD_OBSERVATION=H48_NO_ORDER")
+        print("PROTECTED_HOLD_RECEIPT_EXPIRED="+str(protected_hold["expired"]).upper())
     if step in SERVICES:
         unit,root=SERVICES[step];pid=verify_service(step,unit,root)
         print("VERIFIED_UNIT="+unit);print("PID="+str(pid));return

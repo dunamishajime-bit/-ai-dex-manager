@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py"
+      - "scripts/ops/deploy/disdex_h48_protected_hold.py"
       - "tests/test_allrunner_resume_freshness.py"
       - ".github/workflows/disdex-allrunner-v4-idle-live-resume.yml"
       - ".github/workflows/disdex-allrunner-v4-idle-resume-ci.yml"
@@ -24,7 +25,7 @@ jobs:
         shell: bash
         run: python3 -m py_compile scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py
       - name: Verify signed-evidence freshness and ambiguity fail closed
-        run: python3 -m unittest tests.test_allrunner_resume_freshness -v
+        run: python3 -m unittest tests.test_disdex_h48_protected_hold tests.test_allrunner_resume_freshness -v
       - name: Enforce exact task and service safety contract
         shell: bash
         run: |
@@ -45,6 +46,7 @@ jobs:
             'IDLE_STATE_STALE_REPAIR_REQUIRED',
             'ASTER_FLAT_BEFORE_AFTER=TRUE',
             'ORDERS_SENT_BY_HELPER=0 CANCELS_SENT_BY_HELPER=0 STOP_CHANGES_BY_HELPER=0',
+            'H48_NO_ORDER','allow_expired_observation',
           ]:
               assert x in h,x
           for x in [

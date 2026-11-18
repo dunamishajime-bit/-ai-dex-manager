@@ -12,11 +12,14 @@ import argparse
 import json
 import math
 import os
+import stat
 from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 import sys
 import time
+
+from disdex_h48_protected_hold import H48ProtectedHoldError, validate_h48_protected_hold
 
 BASE=Path("/home/deploy/disdex-trading/releases")
 MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"
@@ -26,6 +29,7 @@ KILL=Path("/var/lib/disdex/shared/kill-switch.json")
 RISK=Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN=Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING=Path("/var/lib/disdex/shared/pending-exposure.json")
+H48_HOLD_RECEIPT=Path("/etc/disdex/stable4/holds/e0e4f1d8f22b62e9410188ef6e590a20e31f760f.json")
 IDLE_STATE=Path("/var/lib/disdex/idle-priority/residual-long-state.json")
 V52_UNIT=f"disdex-v52-aster-only@{V52}.service"
 MARGIN_UNIT=f"disdex-v12-v52-margin-guard@{MAIN}.service"
@@ -73,9 +77,35 @@ def prop(unit: str,key: str) -> str:
 def active(unit: str) -> bool:
     return prop(unit,"ActiveState")=="active"
 
+def h48_protected_hold_observation(now_ms: int) -> dict:
+    require(KILL.is_file() and not KILL.is_symlink(),"KILL_STATE_INVALID")
+    kill_stat=KILL.stat()
+    require(stat.S_ISREG(kill_stat.st_mode) and not kill_stat.st_mode & 0o022,
+            "KILL_STATE_PERMISSIONS_INVALID")
+    kill_bytes=KILL.read_bytes()
+    kill=json.loads(kill_bytes)
+    require(isinstance(kill,dict),"KILL_STATE_NOT_OBJECT")
+    require(H48_HOLD_RECEIPT.is_file() and not H48_HOLD_RECEIPT.is_symlink(),
+            "H48_HOLD_RECEIPT_MISSING")
+    hold_stat=H48_HOLD_RECEIPT.stat()
+    require(stat.S_ISREG(hold_stat.st_mode) and hold_stat.st_uid==0
+            and not hold_stat.st_mode & 0o222,"H48_HOLD_RECEIPT_NOT_ROOT_IMMUTABLE")
+    receipt=json.loads(H48_HOLD_RECEIPT.read_text())
+    try:
+        return validate_h48_protected_hold(
+            kill,receipt,kill_bytes,now_ms,allow_expired_observation=True
+        )
+    except H48ProtectedHoldError as error:
+        raise RuntimeError(str(error)) from None
+
 def shared_health(runner: str) -> None:
     kill=json_file(KILL)
-    require(kill.get("active") is False,"SHARED_KILL_SWITCH_ACTIVE")
+    now=int(time.time()*1000)
+    protected_hold=None
+    if kill.get("active") is True:
+        protected_hold=h48_protected_hold_observation(now)
+    else:
+        require(kill.get("active") is False,"SHARED_KILL_SWITCH_ACTIVE_OR_INVALID")
     risk=json_file(RISK)
     require(risk.get("sourceComplete") is True and risk.get("tripped") is False,
             "SHARED_RISK_NOT_HEALTHY")
@@ -117,6 +147,7 @@ def shared_health(runner: str) -> None:
         updated=state.get("updatedAt")
         require(type(updated) in (int,float) and -1000 <= now-updated <= 20*60_000,
                 "IDLE_STATE_STALE_REPAIR_REQUIRED")
+    return protected_hold
 
 def activation_ready(spec: dict) -> None:
     gate=spec["root"]/ "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
@@ -191,7 +222,10 @@ def main(runner: str,run_id: str) -> None:
     require(run_id.isdecimal() and len(run_id)<21,"RUN_ID_INVALID")
     require(runner in RUNNERS,"RUNNER_NOT_ALLOWED")
     spec=RUNNERS[runner]
-    shared_health(runner)
+    protected_hold=shared_health(runner)
+    if isinstance(protected_hold,dict):
+        print("PROTECTED_HOLD_OBSERVATION=H48_NO_ORDER")
+        print("PROTECTED_HOLD_RECEIPT_EXPIRED="+str(protected_hold["expired"]).upper())
     activation_ready(spec)
     before=signed_get()
     pid,already=stable_start(spec)
