@@ -129,7 +129,8 @@ try {
     "tar -C \"$runtime\" -czf /tmp/disdex-hp-approval-ui-runtime.tgz .",
     "[[ -f \"$stage/server.js\" && -f \"$stage/.next/BUILD_ID\" ]]",
     "runuser -u deploy -- node --check \"$stage/server.js\"",
-    "EnvironmentFile=/etc/disdex/hp-owner-session.env",
+    "owner_session_env='/etc/disdex/hp-owner-session.env'",
+    "EnvironmentFile=$owner_session_env",
     "DISDEX_OWNER_SESSION_HMAC_KEY",
   ]) {
     if (!workflow.includes(required)) {
