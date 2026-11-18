@@ -1,0 +1,222 @@
+name: STABLE4 Runner-scoped order enable
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-stable4-runner-scoped-order-enable.yml"
+      - "lib/runner-order-permit.ts"
+      - "scripts/ops/deploy/disdex_runner_scoped_order_enable.py"
+      - "scripts/ops/deploy/disdex_owner_approval.py"
+      - "scripts/ops/deploy/disdex_deployment_contract.py"
+      - "scripts/ops/root/disdex-runner-scoped-order-enable"
+      - "scripts/ops/root/install-disdex-runner-scoped-order-enable"
+      - "scripts/ops/test_disdex_runner_scoped_order_enable.py"
+      - "scripts/ops/test_disdex_runner_scoped_order_enable_workflow.py"
+      - "tests/runner-order-permit.test.ts"
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Exact HP Owner-approved Runner-scoped order-enable request ID
+        type: string
+        required: true
+      runner:
+        description: One Runner only; HYPE uses its separate H48 workflow
+        type: choice
+        required: true
+        options:
+          - V12_V4
+          - PENGU_V8
+          - QUALITY102_CAUSAL_V1
+          - V52
+          - FET_BRK48_RESIDUAL
+          - IDLE_PRIORITY_SHORT
+      source_sha:
+        description: Immutable release SHA approved by HP
+        type: string
+        required: true
+      plan_sha256:
+        description: Exact plan/context SHA256 approved by HP
+        type: string
+        required: true
+      scope:
+        description: Must exactly equal the selected Runner
+        type: string
+        required: true
+      operation:
+        description: Must be RUNNER_SCOPED_ORDER_ENABLE operation for the selected Runner
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Run fail-closed no-mutation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_runner_scoped_order_enable.py scripts/ops/test_disdex_runner_scoped_order_enable_workflow.py -v
+          npx tsx tests/runner-order-permit.test.ts
+          npx tsc --noEmit
+          python3 -B - <<'PY'
+          import ast
+          from pathlib import Path
+          for name in ('disdex_runner_scoped_order_enable.py','disdex_owner_approval.py','disdex_deployment_contract.py'):
+              ast.parse((Path('scripts/ops/deploy')/name).read_text(encoding='utf-8-sig'))
+          print('RUNNER_SCOPED_ORDER_ENABLE_SOURCE_OK=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+
+  formal-owner-gate:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify exact Runner contract before redeem
+        shell: bash
+        env:
+          RUNNER: ${{ inputs.runner }}
+          SCOPE: ${{ inputs.scope }}
+          OPERATION: ${{ inputs.operation }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          case "$RUNNER" in
+            V12_V4|PENGU_V8|QUALITY102_CAUSAL_V1|V52|FET_BRK48_RESIDUAL|IDLE_PRIORITY_SHORT) ;;
+            *) echo RUNNER_NOT_SUPPORTED >&2; exit 65 ;;
+          esac
+          [[ "$SCOPE" == "$RUNNER" ]]
+          [[ "$OPERATION" == "${RUNNER}_SCOPED_ORDER_ENABLE" ]]
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_runner_scoped_order_enable.py scripts/ops/test_disdex_runner_scoped_order_enable_workflow.py -v
+          npx tsx tests/runner-order-permit.test.ts
+      - name: Redeem exact Runner Owner approval through official HP bridge
+        shell: bash
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          RUNNER: ${{ inputs.runner }}
+          SCOPE: ${{ inputs.scope }}
+          OPERATION: ${{ inputs.operation }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/runner-scoped-order-public.pem"
+          PYTHONPATH=scripts/ops/deploy python3 -B - <<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          from disdex_owner_approval import verify
+          aid=os.environ['APPROVAL_ID']; run_id=os.environ['GITHUB_RUN_ID']
+          body=json.dumps({'action':'redeem','approval_id':aid,'operation':os.environ['OPERATION'],
+              'scope':os.environ['SCOPE'],'target_sha':os.environ['SOURCE_SHA'],
+              'plan_sha256':os.environ['PLAN_SHA256'],'run_id':run_id}).encode()
+          req=urllib.request.Request('https://professional-dismanager.net/api/system/deploy-approval',
+              data=body,method='POST',headers={'Authorization':'Bearer '+os.environ['BRIDGE'],
+              'Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=15) as response:
+              result=json.load(response)
+          approval=result.get('approval') or {}
+          assert result.get('ok') is True
+          for key, want in [('id',aid),('operation',os.environ['OPERATION']),('scope',os.environ['SCOPE']),
+                            ('targetSha',os.environ['SOURCE_SHA']),('planSha256',os.environ['PLAN_SHA256'])]:
+              assert approval.get(key)==want, key
+          assert approval.get('ordersEnabled') is True
+          token=result['token']
+          payload=verify(token, Path(os.environ['RUNNER_TEMP'])/'runner-scoped-order-public.pem',
+              'dunamishajime-bit/-ai-dex-manager', os.environ['SOURCE_SHA'], os.environ['SCOPE'],
+              'dunamishajime-bit', os.environ['PLAN_SHA256'], route='GITHUB_ACTIONS',
+              deployment_target='professional-dismanager.net', operator_target='DD1296_FINAL_ALLIN_10BPS',
+              orders_enabled=True)
+          Path(os.environ['RUNNER_TEMP'],'runner-scoped-order-token').write_text(token,encoding='ascii')
+          print('HP_SIGNED_RUNNER_ORDER_APPROVAL_EXACT_VALID=TRUE')
+          print('RUNNER='+os.environ['RUNNER'])
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Stage Root-owned Runner gate and execute formally
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          RUNNER: ${{ inputs.runner }}
+          SCOPE: ${{ inputs.scope }}
+          OPERATION: ${{ inputs.operation }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          port="$PORT"; [[ -n "$port" ]] || port=22
+          [[ "$port" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          dir="$RUNNER_TEMP/runner-scoped-order-ssh"; mkdir -m 0700 -p "$dir"
+          printf '%s\n' "$KEY" > "$dir/id_root"
+          printf '%s\n' "$HOST_KEYS" > "$dir/known_hosts"
+          ssh-keygen -y -f "$dir/id_root" >/dev/null
+          opts=(-i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -o ConnectTimeout=12 -p "$port")
+          stage="/var/lib/disdex/unified-deploy/runner-scoped-order-enable/$GITHUB_RUN_ID"
+          ssh -nT ${opts[@]} "root@$HOST" "install -d -o root -g root -m 0700 '$stage'"
+          for source in \
+            scripts/ops/deploy/disdex_runner_scoped_order_enable.py \
+            scripts/ops/deploy/disdex_owner_approval.py \
+            scripts/ops/deploy/disdex_deployment_contract.py \
+            lib/runner-order-permit.ts \
+            scripts/ops/root/disdex-runner-scoped-order-enable \
+            scripts/ops/root/install-disdex-runner-scoped-order-enable; do
+            file="$(basename "$source")"
+            scp -q -i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -P "$port" "$source" "root@$HOST:$stage/$file"
+            expected="$(sha256sum "$source" | awk '{print $1}')"
+            actual="$(ssh -nT ${opts[@]} "root@$HOST" "chown root:root '$stage/$file' && chmod 0444 '$stage/$file' && sha256sum '$stage/$file'" | awk '{print $1}')"
+            [[ "$expected" == "$actual" ]]
+          done
+          ssh -nT ${opts[@]} "root@$HOST" "chmod 0555 '$stage/disdex-runner-scoped-order-enable' '$stage/install-disdex-runner-scoped-order-enable' && '$stage/install-disdex-runner-scoped-order-enable' '$stage'"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-runner-scoped-order-enable --runner '$RUNNER' --source-sha '$SOURCE_SHA' --plan-sha256 '$PLAN_SHA256' --scope '$SCOPE' --operation '$OPERATION' --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --preflight-readonly --read-approval-stdin" < "$RUNNER_TEMP/runner-scoped-order-token" > "$RUNNER_TEMP/runner-scoped-order-preflight.json"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-runner-scoped-order-enable --runner '$RUNNER' --source-sha '$SOURCE_SHA' --plan-sha256 '$PLAN_SHA256' --scope '$SCOPE' --operation '$OPERATION' --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --execute --read-approval-stdin" < "$RUNNER_TEMP/runner-scoped-order-token" > "$RUNNER_TEMP/runner-scoped-order-result.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result=json.loads((Path(os.environ['RUNNER_TEMP'])/'runner-scoped-order-result.json').read_text())
+          assert result['status']=='RUNNER_SCOPED_ORDER_ENABLE_INSTALLED_GLOBAL_HOLD_REMAINS_ACTIVE'
+          assert result['runner']==os.environ['RUNNER'] and result['scope']==os.environ['SCOPE']
+          assert all(result.get(k)==0 for k in ('ordersSent','cancelsSent','positionChangesSent'))
+          print('RUNNER_SCOPED_ORDER_ENABLE=TRUE')
+          print('GLOBAL_HOLD_REMAINS_ACTIVE=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Erase ephemeral approval and SSH files
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/runner-scoped-order-ssh"
+          rm -f "$RUNNER_TEMP/runner-scoped-order-token" "$RUNNER_TEMP/runner-scoped-order-public.pem" "$RUNNER_TEMP/runner-scoped-order-preflight.json" "$RUNNER_TEMP/runner-scoped-order-result.json"

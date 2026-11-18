@@ -8,6 +8,11 @@ export const RUNNER_ORDER_PERMIT_KILL_SWITCH_PATH = "/var/lib/disdex/shared/kill
 export const RUNNER_ORDER_PERMIT_ROOT = "/etc/disdex/runner-order-enable" as const;
 export const RUNNER_ORDER_PERMIT_HOLD_OPERATOR = "disdex-stable4-formal-owner-hold" as const;
 export const RUNNER_ORDER_PERMIT_HOLD_STRATEGY = "STABLE4_H48_CUTOVER" as const;
+// The canonical GLOBAL HOLD is created for the reviewed STABLE4/H48 cutover
+// source.  Runner permits bind to the HOLD bytes/digest below; they do not
+// silently manufacture a per-Runner HOLD reason from their own source SHA.
+export const RUNNER_ORDER_PERMIT_HOLD_REASON =
+  "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f" as const;
 
 export const RUNNER_ORDER_PERMIT_RUNNERS = [
   "V12_V4",
@@ -32,25 +37,29 @@ export type RunnerOrderPermitOperation = (typeof RUNNER_ORDER_PERMIT_OPERATIONS)
 export type RunnerOrderPermitScope = RunnerOrderPermitRunner;
 
 export type RunnerOrderPermit = {
-  schema: typeof RUNNER_ORDER_PERMIT_SCHEMA;
+  // Runtime validation is deliberately stricter than this structural type.
+  // Keeping mutable fields broad lets negative tests construct malformed
+  // permits without relying on unsafe casts; validateRunnerOrderPermit is the
+  // authority that narrows an unknown value to a trusted permit.
+  schema: string;
   approvedSha: string;
   planSha256: string;
-  deploymentTarget: "professional-dismanager.net";
-  operation: RunnerOrderPermitOperation;
-  scope: RunnerOrderPermitScope;
-  runner: RunnerOrderPermitRunner;
-  policy: typeof RUNNER_ORDER_PERMIT_POLICY;
-  ordersEnabled: true;
-  killSwitchPath: typeof RUNNER_ORDER_PERMIT_KILL_SWITCH_PATH;
+  deploymentTarget: string;
+  operation: string;
+  scope: string;
+  runner: string;
+  policy: string;
+  ordersEnabled: boolean;
+  killSwitchPath: string;
   killSwitchSha256: string;
   approvalId: string;
   approvalNonceSha256: string;
   issuedAt: number;
   expiresAt: number;
-  operator: typeof RUNNER_ORDER_PERMIT_OPERATOR;
-  ordersSent: 0;
-  cancelsSent: 0;
-  positionChangesSent: 0;
+  operator: string;
+  ordersSent: number;
+  cancelsSent: number;
+  positionChangesSent: number;
 };
 
 export type RunnerOrderPermitHold = {
@@ -143,7 +152,7 @@ export function validateRunnerOrderPermit(
   if (hold.active !== true || hold.action !== "HOLD_PROTECTED" || hold.scope !== "GLOBAL"
       || hold.operator !== RUNNER_ORDER_PERMIT_HOLD_OPERATOR
       || hold.strategyId !== RUNNER_ORDER_PERMIT_HOLD_STRATEGY
-      || hold.reason !== `STABLE4_RESEARCH_ROLLOUT:${input.sourceSha}`) fail("GLOBAL_HOLD");
+      || hold.reason !== RUNNER_ORDER_PERMIT_HOLD_REASON) fail("GLOBAL_HOLD");
   return Object.freeze({ ...value }) as RunnerOrderPermit;
 }
 
