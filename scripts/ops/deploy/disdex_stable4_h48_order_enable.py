@@ -78,6 +78,14 @@ def sha256(value: bytes) -> str:
 def canonical(value: object) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False) + "\n").encode("ascii")
 
+def chown_root_if_privileged(path: str) -> None:
+    if os.name == "nt":
+        return
+    try:
+        os.chown(path, 0, 0)
+    except PermissionError:
+        require(os.geteuid() != 0, "ROOT_CHOWN_FAILED")
+
 def read_json(path: Path) -> tuple[dict, bytes]:
     st = path.lstat()
     require(stat.S_ISREG(st.st_mode) and not path.is_symlink() and st.st_size <= 2_000_000,
@@ -241,7 +249,7 @@ def publish_permit_transaction(target: Path, raw: bytes, post_validate: Callable
         fd, temp_name = tempfile.mkstemp(prefix="." + target.name + ".", dir=str(target.parent))
         with os.fdopen(fd, "wb") as handle:
             handle.write(raw); handle.flush(); os.fsync(handle.fileno())
-        if os.name != "nt": os.chown(temp_name, 0, 0)
+        chown_root_if_privileged(temp_name)
         os.chmod(temp_name, 0o444)
         os.replace(temp_name, target); temp_name = None
         if post_validate:
@@ -255,7 +263,7 @@ def publish_permit_transaction(target: Path, raw: bytes, post_validate: Callable
             try:
                 with os.fdopen(fd, "wb") as handle:
                     handle.write(previous); handle.flush(); os.fsync(handle.fileno())
-                if os.name != "nt": os.chown(rollback, 0, 0)
+                chown_root_if_privileged(rollback)
                 os.chmod(rollback, 0o444)
                 if os.name == "nt": os.chmod(target, 0o666)
                 os.replace(rollback, target)
@@ -274,7 +282,11 @@ def install_exact(path: Path, raw: bytes, mode: int = 0o444) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), mode)
     try:
-        if os.name != "nt": os.fchown(fd, 0, 0)
+        if os.name != "nt":
+            try:
+                os.fchown(fd, 0, 0)
+            except PermissionError:
+                require(os.geteuid() != 0, "ROOT_FCHOWN_FAILED")
         os.fchmod(fd, mode); os.write(fd, raw); os.fsync(fd)
     finally:
         os.close(fd)
