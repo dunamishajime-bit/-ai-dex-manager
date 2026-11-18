@@ -1,0 +1,171 @@
+name: STABLE4 H48 HYPE scoped order enable
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-stable4-h48-order-enable.yml"
+      - "lib/hype-h48-order-permit.ts"
+      - "scripts/ops/deploy/disdex_stable4_h48_order_enable.py"
+      - "scripts/ops/deploy/disdex_owner_approval.py"
+      - "scripts/ops/deploy/disdex_deployment_contract.py"
+      - "scripts/ops/root/disdex-stable4-h48-order-enable"
+      - "scripts/ops/root/install-disdex-stable4-h48-order-enable"
+      - "scripts/ops/test_disdex_stable4_h48_order_enable.py"
+      - "scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py"
+      - "tests/hype-h48-order-permit.test.ts"
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Exact HP Owner-approved HYPE_STABLE4_H48_TIME_ONLY_LIVE request ID
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Run fail-closed no-mutation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py -v
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
+          npx tsx tests/hype-h48-order-permit.test.ts
+          python3 -B - <<'PY'
+          import ast
+          from pathlib import Path
+          for name in ('disdex_stable4_h48_order_enable.py','disdex_owner_approval.py','disdex_deployment_contract.py'):
+              ast.parse((Path('scripts/ops/deploy')/name).read_text(encoding='utf-8-sig'))
+          print('STABLE4_H48_ORDER_ENABLE_SOURCE_OK=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+
+  formal-owner-gate:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify exact source and run no-mutation tests
+        shell: bash
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
+          npx tsx tests/hype-h48-order-permit.test.ts
+      - name: Redeem exact HYPE Owner approval through official HP bridge
+        shell: bash
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/stable4-h48-order-public.pem"
+          PYTHONPATH=scripts/ops/deploy python3 -B - <<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          from disdex_owner_approval import verify
+          import disdex_stable4_h48_order_enable as fixed
+          aid=os.environ['APPROVAL_ID']; run_id=os.environ['GITHUB_RUN_ID']
+          assert re.fullmatch(r'[0-9a-f-]{36}', aid)
+          body=json.dumps({'action':'redeem','approval_id':aid,'operation':fixed.OPERATION,
+              'scope':fixed.SCOPE,'target_sha':fixed.SOURCE,'plan_sha256':fixed.PLAN,
+              'run_id':run_id}).encode()
+          req=urllib.request.Request('https://professional-dismanager.net/api/system/deploy-approval',
+              data=body,method='POST',headers={'Authorization':'Bearer '+os.environ['BRIDGE'],
+              'Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=15) as response:
+              result=json.load(response)
+          approval=result.get('approval') or {}
+          assert result.get('ok') is True
+          assert approval.get('id')==aid and approval.get('operation')==fixed.OPERATION
+          assert approval.get('scope')==fixed.SCOPE and approval.get('targetSha')==fixed.SOURCE
+          assert approval.get('planSha256')==fixed.PLAN and approval.get('ordersEnabled') is True
+          token=result['token']
+          verify(token, Path(os.environ['RUNNER_TEMP'])/'stable4-h48-order-public.pem',
+              fixed.REPO, fixed.SOURCE, fixed.SCOPE, 'dunamishajime-bit', fixed.PLAN,
+              route='GITHUB_ACTIONS', deployment_target=fixed.DEPLOYMENT_TARGET,
+              operator_target=fixed.OPERATOR_TARGET, orders_enabled=True)
+          Path(os.environ['RUNNER_TEMP'],'stable4-h48-order-token').write_text(token,encoding='ascii')
+          print('HP_SIGNED_H48_ORDER_APPROVAL_EXACT_VALID=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Stage Root-owned HYPE-only gate and execute formal order enable
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          port="$PORT"; [[ -n "$port" ]] || port=22; [[ "$port" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          dir="$RUNNER_TEMP/stable4-h48-order-ssh"; mkdir -m 0700 -p "$dir"
+          printf '%s\n' "$KEY" > "$dir/id_root"
+          printf '%s\n' "$HOST_KEYS" > "$dir/known_hosts"
+          ssh-keygen -y -f "$dir/id_root" >/dev/null
+          opts=(-i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -o ConnectTimeout=12 -p "$port")
+          stage="/var/lib/disdex/unified-deploy/stable4-h48-order-enable/$GITHUB_RUN_ID"
+          ssh -nT ${opts[@]} "root@$HOST" "install -d -o root -g root -m 0700 '$stage'"
+          for source in \
+            scripts/ops/deploy/disdex_stable4_h48_order_enable.py \
+            scripts/ops/deploy/disdex_owner_approval.py \
+            scripts/ops/deploy/disdex_deployment_contract.py \
+            lib/hype-h48-order-permit.ts \
+            scripts/ops/root/disdex-stable4-h48-order-enable \
+            scripts/ops/root/install-disdex-stable4-h48-order-enable; do
+            file="$(basename "$source")"
+            scp -q -i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -P "$port" "$source" "root@$HOST:$stage/$file"
+            expected="$(sha256sum "$source" | awk '{print $1}')"
+            actual="$(ssh -nT ${opts[@]} "root@$HOST" "chown root:root '$stage/$file' && chmod 0444 '$stage/$file' && sha256sum '$stage/$file'" | awk '{print $1}')"
+            [[ "$expected" == "$actual" ]]
+          done
+          ssh -nT ${opts[@]} "root@$HOST" "chmod 0555 '$stage/disdex-stable4-h48-order-enable' '$stage/install-disdex-stable4-h48-order-enable' && '$stage/install-disdex-stable4-h48-order-enable' '$stage'"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-stable4-h48-order-enable --preflight-readonly --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --read-approval-stdin" < "$RUNNER_TEMP/stable4-h48-order-token" > "$RUNNER_TEMP/stable4-h48-order-preflight.json"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-stable4-h48-order-enable --execute --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --read-approval-stdin" < "$RUNNER_TEMP/stable4-h48-order-token" > "$RUNNER_TEMP/stable4-h48-order-result.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result=json.loads((Path(os.environ['RUNNER_TEMP'])/'stable4-h48-order-result.json').read_text())
+          assert result['status']=='HYPE_SCOPED_ORDER_ENABLE_INSTALLED_GLOBAL_HOLD_REMAINS_ACTIVE'
+          assert result['scope']=='HYPE_TREND_LONG' and result['policy']=='H48_TIME_ONLY'
+          assert all(result.get(k)==0 for k in ('ordersSent','cancelsSent','positionChangesSent'))
+          print('HYPE_SCOPED_ORDER_ENABLE=TRUE')
+          print('GLOBAL_HOLD_REMAINS_ACTIVE=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Erase ephemeral approval and SSH files
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/stable4-h48-order-ssh"
+          rm -f "$RUNNER_TEMP/stable4-h48-order-token" "$RUNNER_TEMP/stable4-h48-order-public.pem" "$RUNNER_TEMP/stable4-h48-order-preflight.json" "$RUNNER_TEMP/stable4-h48-order-result.json"
