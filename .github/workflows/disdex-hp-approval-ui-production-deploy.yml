@@ -256,23 +256,57 @@ jobs:
           approval_dropin="$dropin_dir/95-disdex-hp-production-approval.conf"
           install -d -o root -g root -m 0755 "$dropin_dir"
 
-          mapfile -t work_files < <(grep -lFx "WorkingDirectory=$current" "$dropin_dir"/*.conf 2>/dev/null || true)
-          [[ "${#work_files[@]}" -eq 1 ]] || {
-            echo "WORKDIR_DROPIN_COUNT=${#work_files[@]}"
+          backup_root="/var/lib/disdex-hp-deploy/$REQUEST_ID"
+          stale_dropins="$backup_root/stale-dropins"
+          install -d -o root -g root -m 0700 "$backup_root"
+          install -d -o root -g root -m 0700 "$stale_dropins"
+
+          # The canonical drop-in is the only release selector. Any duplicate
+          # carrying the previous path/SHA is archived (not deleted) before switch.
+          canonical_dropin="$dropin_dir/90-current-ui-release.conf"
+          [[ -f "$canonical_dropin" && ! -L "$canonical_dropin" ]] || {
+            echo "CANONICAL_UI_DROPIN_MISSING=$canonical_dropin"
             exit 43
           }
-          mapfile -t sha_files < <(grep -lF "DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_SHA" "$dropin_dir"/*.conf 2>/dev/null || true)
-          [[ "${#sha_files[@]}" -eq 1 ]] || {
-            echo "SHA_DROPIN_COUNT=${#sha_files[@]}"
+          grep -Fxq "WorkingDirectory=$current" "$canonical_dropin" || {
+            echo "CANONICAL_UI_WORKDIR_MISMATCH=$canonical_dropin"
+            exit 43
+          }
+          grep -Fq "DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_SHA" "$canonical_dropin" || {
+            echo "CANONICAL_UI_SHA_MISMATCH=$canonical_dropin"
             exit 44
           }
+          work_files=("$canonical_dropin")
+          sha_files=("$canonical_dropin")
 
-          backup_root="/var/lib/disdex-hp-deploy/$REQUEST_ID"
-          install -d -o root -g root -m 0700 "$backup_root"
-          cp -a -- "${work_files[0]}" "$backup_root/workdir.conf"
-          if [[ "${sha_files[0]}" != "${work_files[0]}" ]]; then
-            cp -a -- "${sha_files[0]}" "$backup_root/sha.conf"
-          fi
+          mapfile -t stale_files < <(
+            for f in "$dropin_dir"/*.conf; do
+              [[ -f "$f" && "$f" != "$canonical_dropin" ]] || continue
+              if grep -Fq "WorkingDirectory=$current" "$f" || grep -Fq "DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_SHA" "$f"; then
+                printf '%s\n' "$f"
+              fi
+            done
+          )
+          for f in "${stale_files[@]}"; do
+            [[ -n "$f" ]] || continue
+            base="$(basename "$f")"
+            [[ ! -e "$stale_dropins/$base" ]] || {
+              echo "STALE_DROPIN_ARCHIVE_COLLISION=$base"
+              exit 45
+            }
+            cp -a -- "$f" "$stale_dropins/$base"
+            rm -f -- "$f"
+            echo "STALE_DROPIN_ARCHIVED=$f"
+          done
+          for f in "$dropin_dir"/*.conf; do
+            [[ -f "$f" && "$f" != "$canonical_dropin" ]] || continue
+            if grep -Fq "WorkingDirectory=$current" "$f" || grep -Fq "DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_SHA" "$f"; then
+              echo "STALE_DROPIN_REMAINS=$f"
+              exit 46
+            fi
+          done
+
+          cp -a -- "$canonical_dropin" "$backup_root/canonical.conf"
           if [[ -f "$approval_dropin" ]]; then
             cp -a -- "$approval_dropin" "$backup_root/approval.conf"
             touch "$backup_root/approval-existed"
@@ -282,9 +316,13 @@ jobs:
             rc=$?
             trap - ERR
             set +e
-            cp -a -- "$backup_root/workdir.conf" "${work_files[0]}"
-            if [[ -f "$backup_root/sha.conf" ]]; then
-              cp -a -- "$backup_root/sha.conf" "${sha_files[0]}"
+            cp -a -- "$backup_root/canonical.conf" "$canonical_dropin"
+            if [[ -d "$stale_dropins" ]]; then
+              for archived in "$stale_dropins"/*; do
+                [[ -f "$archived" ]] || continue
+                base="$(basename "$archived")"
+                cp -a -- "$archived" "$dropin_dir/$base"
+              done
             fi
             if [[ -f "$backup_root/approval-existed" ]]; then
               cp -a -- "$backup_root/approval.conf" "$approval_dropin"
