@@ -74,6 +74,10 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     return <AuthGuard>{children}</AuthGuard>;
   }
 
+  // Keep the existing Owner AuthGuard, but isolate this read-only workspace.
+  if (pathname === "/bt-verification" || pathname?.startsWith("/bt-verification/")) {
+    return <AuthGuard><div className="min-h-dvh bg-[#081321] text-slate-100">{children}</div></AuthGuard>;
+  }
   return (
     <AuthGuard>
       <div className="flex h-dvh min-h-0 overflow-hidden bg-cyber-black text-white">
