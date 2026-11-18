@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import { Activity, ArrowRight, Download, FileUp, Pause, Play, RotateCcw, ShieldCheck } from "lucide-react";
 import { BTWorkspaceShell, type BTWorkspaceTab } from "@/components/bt-verification/BTWorkspaceShell";
+import { BTResearchConditions } from "@/components/bt-verification/BTResearchConditions";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
 import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocationPanel";
@@ -105,6 +106,7 @@ export default function BTVerification() {
       </div>
 
       {tab === "config" && display(<>
+        <BTResearchConditions />
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <section className={tile}>
             <h2 className="text-lg font-bold text-white">模擬BTの条件設定</h2>
