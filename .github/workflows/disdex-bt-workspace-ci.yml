@@ -1,0 +1,68 @@
+name: BT Workspace verification (read-only)
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - ".github/workflows/disdex-bt-workspace-ci.yml"
+      - "app/bt-verification/**"
+      - "components/bt-verification/**"
+      - "lib/bt-verification/**"
+      - "scripts/research/verify_bt_vps_runner_sources.py"
+      - "scripts/research/build_bt_stable4_research_replays.py"
+      - "tests/bt-*.test.ts"
+      - "tests/test_bt_vps_runner_sources.py"
+      - "package.json"
+      - "package-lock.json"
+  push:
+    branches: [feat/bt-workspace-phase1-20261118]
+    paths:
+      - ".github/workflows/disdex-bt-workspace-ci.yml"
+      - "app/bt-verification/**"
+      - "components/bt-verification/**"
+      - "lib/bt-verification/**"
+      - "scripts/research/verify_bt_vps_runner_sources.py"
+      - "scripts/research/build_bt_stable4_research_replays.py"
+      - "tests/bt-*.test.ts"
+      - "tests/test_bt_vps_runner_sources.py"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bt-workspace-verification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: BT tests, typecheck and website build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out PR source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package dependencies
+        run: npm ci
+      - name: Python BT parity verifier unit tests (no SSH)
+        run: python -m unittest discover -s tests -p 'test_bt_vps_runner_sources.py' -v
+      - name: BT replay and UI unit tests
+        run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build website (no deployment)
+        run: npm run build
