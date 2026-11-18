@@ -46,6 +46,26 @@ EXECUTION_LOCK = Path("/var/lib/disdex/unified-deploy/deployment-execution.lock"
 RECEIPT_ROOT = Path("/var/lib/disdex/unified-deploy/receipts")
 ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 
+# These are the immutable Runner pins audited immediately before this
+# implementation.  A new release must update this map and its Owner-approved
+# plan hash; arbitrary SHA/plan combinations are rejected by preflight.
+PINNED_SOURCE_BY_RUNNER = {
+    "V12_V4": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+    "PENGU_V8": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+    "QUALITY102_CAUSAL_V1": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+    "V52": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+    "FET_BRK48_RESIDUAL": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "IDLE_PRIORITY_SHORT": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+}
+PINNED_PLAN_BY_RUNNER = {
+    "V12_V4": "9fc3cc72c9520a758f1b700ed648f0e1e11a54eb92c514b08992f22605d9e515",
+    "PENGU_V8": "8928520a2391d8190c2cdda8b6e3e36959a452ed151d36a820a2ce3f8ec01568",
+    "QUALITY102_CAUSAL_V1": "01110a52b9ab740652cca48354e246edf71759916df476797b8e9753221ae4b6",
+    "V52": "a43d6e47acdc862953801a89e396f8819eeb9a580cc2aaadc901d926c23d011c",
+    "FET_BRK48_RESIDUAL": "12272418221383c53382b98bcefdda7eaba20f2655e9489eebbbdd73713c4717",
+    "IDLE_PRIORITY_SHORT": "ed6e7da737480349a6454868ed78bcbc4db5f3990a6f4cc2bbb6e111cc3346db",
+}
+
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -658,6 +678,8 @@ def _preflight(*, approval_id: str, run_id: str, token: str, runner: str,
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     spec = _runner_spec(runner)
     require(scope == spec["scope"] and operation == spec["operation"], "RUNNER_SCOPE_OPERATION_INVALID")
+    require(PINNED_SOURCE_BY_RUNNER.get(runner) == source_sha, "RUNNER_SOURCE_NOT_AUDITED_PIN")
+    require(PINNED_PLAN_BY_RUNNER.get(runner) == plan_sha256, "RUNNER_PLAN_NOT_AUDITED_PIN")
     now_ms = _now_ms()
     locations = _permit_locations(runner, source_sha)
     unit = spec["unit_template"].format(sha=source_sha)
