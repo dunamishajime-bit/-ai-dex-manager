@@ -632,6 +632,54 @@ def _validate_candidate_source(source_sha: str) -> bytes:
     return raw
 
 
+def normalize_common_module_permissions(path: str | Path) -> None:
+    """Remove write bits without changing the candidate module bytes.
+
+    Release provisioning historically left this shared module at 0644 even
+    though the release directory and marker were root-owned.  The formal Root
+    path may normalize that metadata only after checking the caller supplied
+    the exact pinned release; the content is never rewritten here.
+    """
+    target = Path(path)
+    st = target.lstat()
+    require(stat.S_ISREG(st.st_mode) and not target.is_symlink(),
+            "COMMON_MODULE_NOT_REGULAR")
+    if st.st_mode & 0o222:
+        os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
+
+
+def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
+    require(os.geteuid() == 0, "ROOT_REQUIRED")
+    require(PINNED_SOURCE_BY_RUNNER.get(runner) == source_sha,
+            "RUNNER_SOURCE_NOT_AUDITED_PIN")
+    release = RELEASE_ROOT / source_sha
+    marker = release / ".disdex-release-sha"
+    root_immutable(marker)
+    require(marker.read_text(encoding="utf-8").strip() == source_sha,
+            "RELEASE_MARKER_INVALID")
+    trusted_dir(release)
+    source = release / COMMON_MODULE
+    st = source.lstat()
+    require(stat.S_ISREG(st.st_mode) and not source.is_symlink()
+            and st.st_uid == 0 and st.st_gid == 0,
+            "COMMON_MODULE_OWNER_INVALID")
+    before = sha256(source.read_bytes())
+    normalize_common_module_permissions(source)
+    root_immutable(source)
+    after = sha256(source.read_bytes())
+    require(before == after, "COMMON_MODULE_CONTENT_CHANGED")
+    return {
+        "status": "COMMON_MODULE_IMMUTABLE_NORMALIZED",
+        "runner": runner,
+        "sourceSha": source_sha,
+        "commonModule": str(source),
+        "commonModuleSha256": after,
+        "ordersSent": 0,
+        "cancelsSent": 0,
+        "positionChangesSent": 0,
+    }
+
+
 def _validate_service_before(unit: str, release: Path) -> int:
     require(_service_property(unit, "ActiveState") == "active"
             and _service_property(unit, "SubState") == "running", "RUNNER_UNIT_NOT_ACTIVE")
@@ -917,9 +965,13 @@ def main() -> int:
     mode.add_argument("--preflight-readonly", action="store_true")
     mode.add_argument("--execute", action="store_true")
     mode.add_argument("--rollback", action="store_true")
+    mode.add_argument("--normalize-source", action="store_true")
     args = parser.parse_args()
     try:
-        if args.rollback:
+        if args.normalize_source:
+            require(args.runner and args.source_sha, "NORMALIZE_IDENTITY_REQUIRED")
+            result = _normalize_candidate_source(args.source_sha, args.runner)
+        elif args.rollback:
             require(args.runner and args.source_sha, "ROLLBACK_IDENTITY_REQUIRED")
             result = _rollback(runner=args.runner, source_sha=args.source_sha)
         else:
