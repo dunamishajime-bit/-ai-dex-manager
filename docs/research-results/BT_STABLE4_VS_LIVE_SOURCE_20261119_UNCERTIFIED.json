@@ -1,0 +1,219 @@
+{
+  "schema": "disdex-bt-stable4-vps-source-comparison/v1",
+  "created_at_utc": "2026-11-18T22:14:59.545280+00:00",
+  "observed_live_snapshot_utc": "2026-11-18T22:07:32.844395+00:00",
+  "current_live_reference_source": "GitHub commit per active systemd unit + normalized VPS entrypoint bytes",
+  "shared_risk_sha": "2737c30e1f6d014d24a2c6d025e7f91332bf7962",
+  "shared_risk_applied_to_research_replay_verified": false,
+  "full_eight_runner_causal_backtest_verified": false,
+  "research_to_current_production_backtest_certified": false,
+  "requires_source_dependent_files_and_trade_reexecution": true,
+  "scenarios": {
+    "10": {
+      "modeled_exits": 1027,
+      "sha_mismatched_modeled_exits": 806,
+      "sha_mismatch_pct": 78.481013,
+      "all_research_model_shas_match_live": false,
+      "reported_max_dd_pct": -22.5950788661174,
+      "target_max_dd_le_20pct": false,
+      "modeled_not_actual_exchange_fills": true,
+      "models": [
+        {
+          "model": "FET",
+          "modeled_exits": 8,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 8
+          }
+        },
+        {
+          "model": "HYPE",
+          "modeled_exits": 5,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+          "source_sha_matches_live": false,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          }
+        },
+        {
+          "model": "IDLE",
+          "modeled_exits": 10,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 10
+          }
+        },
+        {
+          "model": "PENGU",
+          "modeled_exits": 45,
+          "source_shas": [
+            "1657e173d250ad58f53e62f7bb0a3428fb405496"
+          ],
+          "observed_live_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 45
+          }
+        },
+        {
+          "model": "Q102",
+          "modeled_exits": 106,
+          "source_shas": [
+            "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+          ],
+          "observed_live_sha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 106
+          }
+        },
+        {
+          "model": "V4",
+          "modeled_exits": 801,
+          "source_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "observed_live_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+          "source_sha_matches_live": false,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 801
+          }
+        },
+        {
+          "model": "V52",
+          "modeled_exits": 52,
+          "source_shas": [
+            "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+          ],
+          "observed_live_sha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52
+          }
+        }
+      ]
+    },
+    "30": {
+      "modeled_exits": 1023,
+      "sha_mismatched_modeled_exits": 802,
+      "sha_mismatch_pct": 78.396872,
+      "all_research_model_shas_match_live": false,
+      "reported_max_dd_pct": -23.219482096692147,
+      "target_max_dd_le_20pct": false,
+      "modeled_not_actual_exchange_fills": true,
+      "models": [
+        {
+          "model": "FET",
+          "modeled_exits": 8,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 8
+          }
+        },
+        {
+          "model": "HYPE",
+          "modeled_exits": 5,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+          "source_sha_matches_live": false,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          }
+        },
+        {
+          "model": "IDLE",
+          "modeled_exits": 11,
+          "source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 11
+          }
+        },
+        {
+          "model": "PENGU",
+          "modeled_exits": 44,
+          "source_shas": [
+            "1657e173d250ad58f53e62f7bb0a3428fb405496"
+          ],
+          "observed_live_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 44
+          }
+        },
+        {
+          "model": "Q102",
+          "modeled_exits": 106,
+          "source_shas": [
+            "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+          ],
+          "observed_live_sha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 106
+          }
+        },
+        {
+          "model": "V4",
+          "modeled_exits": 797,
+          "source_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "observed_live_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+          "source_sha_matches_live": false,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 797
+          }
+        },
+        {
+          "model": "V52",
+          "modeled_exits": 52,
+          "source_shas": [
+            "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+          ],
+          "observed_live_sha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+          "source_sha_matches_live": true,
+          "execution_parity_certified": false,
+          "exit_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52
+          }
+        }
+      ]
+    }
+  }
+}

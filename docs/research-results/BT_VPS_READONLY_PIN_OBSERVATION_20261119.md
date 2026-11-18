@@ -38,3 +38,9 @@ At subsequent systemctl show, V52 service ActiveState=activating and previous Ex
 - During earlier sampling, V52 was absent from the active-running service list; verifier correctly failed closed.
 - Subsequent V52 systemd sampling returned active/running with NRestarts=2277 and RestartUSec=30s. Transient successful check is NOT proof of sustained V52 health.
 - This verifies selected entrypoint files only, NOT imported source dependencies, weights, market data, model fills, exits or full 8-runner BT parity.
+## STABLE4 modeled fill provenance vs observed LIVE (separate reproducible gate)
+- The read-only source audit (scripts/research/audit_bt_stable4_live_source_pins.py) compares each historical research source SHA to observed live service SHA and saves docs/research-results/BT_STABLE4_VS_LIVE_SOURCE_20261119_UNCERTIFIED.json.
+- Historical 10bps exits: 806/1,027 (78.481013%) have SHA different from the corresponding current LIVE runner; V4 and HYPE.
+- Historical 30bps exits: 802/1,023 (78.396872%) have SHA different from current LIVE runner; V4 and HYPE.
+- A source SHA match for the other modeled groups does NOT prove parity: exit approximations, priorities, market data, shared risk, Gross and funding remain unverified. Do not promote research to certified production BT.
+- Dedicated BT CI runs Python parity tests, research mismatch audit, BT replay tests, TypeScript typecheck and Next.js build, without VPS credentials or deploy permissions.

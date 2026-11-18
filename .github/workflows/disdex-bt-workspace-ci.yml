@@ -12,6 +12,8 @@ on:
       - "scripts/research/build_bt_stable4_research_replays.py"
       - "tests/bt-*.test.ts"
       - "tests/test_bt_vps_runner_sources.py"
+      - "tests/test_bt_stable4_live_source_pins.py"
+      - "scripts/research/audit_bt_stable4_live_source_pins.py"
       - "package.json"
       - "package-lock.json"
   push:
@@ -25,6 +27,8 @@ on:
       - "scripts/research/build_bt_stable4_research_replays.py"
       - "tests/bt-*.test.ts"
       - "tests/test_bt_vps_runner_sources.py"
+      - "tests/test_bt_stable4_live_source_pins.py"
+      - "scripts/research/audit_bt_stable4_live_source_pins.py"
       - "package.json"
       - "package-lock.json"
 
@@ -60,6 +64,10 @@ jobs:
         run: npm ci
       - name: Python BT parity verifier unit tests (no SSH)
         run: python -m unittest discover -s tests -p 'test_bt_vps_runner_sources.py' -v
+      - name: STABLE4 vs LIVE pin mismatch unit tests (no SSH)
+        run: python -m unittest discover -s tests -p 'test_bt_stable4_live_source_pins.py' -v
+      - name: Generate untrusted STABLE4 mismatch audit (no live access)
+        run: python scripts/research/audit_bt_stable4_live_source_pins.py --output /tmp/disdex-bt-study-vs-live.json
       - name: BT replay and UI unit tests
         run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
       - name: Typecheck
