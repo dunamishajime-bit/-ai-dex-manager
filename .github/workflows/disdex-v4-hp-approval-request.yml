@@ -28,7 +28,8 @@ jobs:
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_STABLE4_H48_TIME_ONLY_LIVE ') ||
-        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ')
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE ')
       )
     environment:
       name: disdex-production
@@ -85,6 +86,10 @@ jobs:
           )
           v4_continuity = re.fullmatch(
               r"DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          runner_scoped = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE RUNNER=(V12_V4|PENGU_V8|QUALITY102_CAUSAL_V1|V52|FET_BRK48_RESIDUAL|IDLE_PRIORITY_SHORT) SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
               body,
           )
 
@@ -154,6 +159,11 @@ jobs:
                   raise SystemExit("V4_HYPE_CONTINUITY_ONLY_REVIEWED_V4")
               operation = "V4_HYPE_PEER_PIN_CONTINUITY"
               scope = "V12_V4"
+              orders_enabled = "true"
+          elif runner_scoped:
+              runner, target, plan = runner_scoped.groups()
+              operation = runner + "_SCOPED_ORDER_ENABLE"
+              scope = runner
               orders_enabled = "true"
           else:
               raise SystemExit("request comment does not match a protected production request grammar")

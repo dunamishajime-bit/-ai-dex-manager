@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+if [ "$#" -ne 1 ]; then
+  echo 'usage: install-disdex-runner-scoped-order-enable <staged-directory>' >&2
+  exit 64
+fi
+stage=$1
+case "$stage" in
+  /var/lib/disdex/unified-deploy/runner-scoped-order-enable/*) ;;
+  *) echo 'RUNNER_SCOPED_ORDER_ENABLE_STAGE_INVALID' >&2; exit 65 ;;
+esac
+target=/usr/local/libexec/disdex-runner-scoped-order-enable
+install -d -o root -g root -m 0755 "$target"
+for file in disdex_runner_scoped_order_enable.py disdex_owner_approval.py disdex_deployment_contract.py runner-order-permit.ts; do
+  install -o root -g root -m 0444 "$stage/$file" "$target/$file"
+done
+install -o root -g root -m 0555 "$stage/disdex-runner-scoped-order-enable" /usr/local/sbin/disdex-runner-scoped-order-enable
+printf '%s\n' RUNNER_SCOPED_ORDER_ENABLE_ROOT_INSTALL=PASS
