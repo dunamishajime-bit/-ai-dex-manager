@@ -12,6 +12,7 @@ import { createPreviewReplay, type DemoScenario, DEMO_BASE_JPY } from "@/lib/bt-
 import { grossForFrame, validateReplay, type Replay, type ReplayFrame } from "@/lib/bt-verification/replay";
 import {portfolioMetrics} from "@/lib/bt-verification/portfolio-metrics";
 import {compareReplayPair} from "@/lib/bt-verification/compare-replays";
+import {classifyBTEvent} from "@/lib/bt-verification/event-types";
 
 const SCENARIOS: { value: DemoScenario; label: string; hint: string }[] = [
   { value: "trend", label: "上昇トレンド", hint: "トレンドが続く相場" },
@@ -254,7 +255,15 @@ export default function BTVerification() {
             <div className="max-h-72 space-y-2 overflow-y-auto">
               {events.length ? events.slice(0, 35).map((ev, i) => <button key={ev.index + "-" + i} type="button" onClick={() => {setRunning(false);setCursor(ev.index);}}
                 className="w-full rounded-lg border border-[#294257] bg-[#0b1d2e] p-2 text-left text-xs text-[#c4d5e4] hover:border-cyan-500">
-                <span className="block font-mono text-[#7ea8c1]">{ev.time.slice(0, 16)}</span>{ev.event}
+                                <span className="block font-mono text-[#7ea8c1]">{ev.time.slice(0, 16)}</span>
+                <span className={"my-1 inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold "+({
+                  risk:"border-rose-600/50 text-rose-300",
+                  entry:"border-cyan-600/50 text-cyan-300",
+                  exit:"border-emerald-600/50 text-emerald-300",
+                  cash:"border-violet-600/50 text-violet-300",
+                  neutral:"border-[#3a5b71] text-[#adc6d6]"
+                }[classifyBTEvent(ev.event).severity])}>{classifyBTEvent(ev.event).label}</span>
+                <span className="block break-words">{ev.event}</span>
               </button>) : <p className="text-sm text-[#94aec1]">イベントはまだありません。</p>}
             </div>
           </section>
