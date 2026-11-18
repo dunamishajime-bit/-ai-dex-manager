@@ -69,6 +69,65 @@ def build(folder,bps,btc,btc_sha):
     if source_rows[-1]["utc"]!=END:raise ValueError("MISSING_END_SNAPSHOT")
     trades=read_csv(files["fills"])
     if len(trades)!=summary["modeled_fills"]:raise ValueError("FILL_COUNT_MISMATCH")
+    # Provenance-only strategy/route catalogue and closed-model-trade statistics.
+    catalog={}
+    by_symbol={}
+    for item in trades:
+        logic=item["strategy"]
+        sym=item["symbol"]
+        source_sha=item["source_runtime_sha"].lower()
+        route=item["route"]
+        catalog_item=catalog.setdefault(logic,{"trades":0,"sha":set(),"classes":set(),"routes":set(),"symbols":set()})
+        catalog_item["trades"]+=1
+        catalog_item["sha"].add(source_sha)
+        catalog_item["classes"].add(item["model_class"])
+        catalog_item["routes"].add(route)
+        catalog_item["symbols"].add(sym)
+        key=(logic,sym)
+        model=by_symbol.setdefault(key,{"trades":0,"closed":0,"wins":0,"net":0.0,"losses":[],"adverse":0,"netLosses":0})
+        model["trades"]+=1
+        model["closed"]+=1
+        pnl=float(item["net_pnl_jpy"])
+        model["net"]+=pnl
+        if pnl>0:model["wins"]+=1
+        if pnl<0:
+            model["losses"].append(pnl)
+            model["netLosses"]+=1
+        entry_price=float(item["model_entry_price"])
+        exit_price=float(item["model_exit_price"])
+        if entry_price<=0 or exit_price<=0:raise ValueError("INVALID_PRICE_SOURCE_FILL")
+        # Opposite terminal price direction, not a proof of wrong entry signal.
+        adverse=(exit_price<entry_price) if item["side"]=="LONG" else (exit_price>entry_price)
+        if adverse:model["adverse"]+=1
+    terminal=[]
+    for item in summary.get("terminal_open_positions",[]):
+        logic=item["strategy"];sym=item["symbol"]
+        t=item["entry_utc"]
+        if not START<=t<END:raise ValueError("TERMINAL_ENTRY_OUTSIDE_PERIOD")
+        position={
+          "logic":logic,"symbol":sym,"side":item["side"],"openedAt":t,
+          "entryPrice":float(item["entry_price"]),"entryGrossX":float(item["gross_x"]),
+          "route":item["route"],"modeledFutureExitAt":item.get("modeled_future_exit_utc"),
+          "evidence":"SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE"}
+        terminal.append(position)
+        record=by_symbol.setdefault((logic,sym),
+          {"trades":0,"closed":0,"wins":0,"net":0.0,"losses":[],"adverse":0,"netLosses":0})
+        record["trades"]+=1
+    if len(terminal)!=summary.get("terminal_open_count",0):
+        raise ValueError("TERMINAL_OPEN_COUNT_MISMATCH")
+    strategy_catalog=[{
+      "logic":logic,"trades":item["trades"],"sourceRuntimeShas":sorted(item["sha"]),
+      "modelClasses":sorted(item["classes"]),"routes":len(item["routes"]),
+      "symbols":len(item["symbols"]),"status":"RESEARCH_SOURCE_UNVERIFIED"}
+      for logic,item in sorted(catalog.items())]
+    strategy_stats=[{
+      "logic":logic,"symbol":sym,"tradeCount":item["trades"],
+      "closedCount":item["closed"],"wins":item["wins"],
+      "netPnlJpy":round(item["net"],6),
+      "maxLossJpy":min(item["losses"]) if item["losses"] else None,
+      "winRatePct":100*item["wins"]/item["closed"] if item["closed"] else None,
+      "adverseExitCount":item["adverse"],"netLossCount":item["netLosses"]}
+      for (logic,sym),item in sorted(by_symbol.items())]
     events=defaultdict(list)
     for item in trades:
         if item["signed_execution_verified"]!="False" or item["actual_venue_order_id"]:
@@ -115,7 +174,10 @@ def build(folder,bps,btc,btc_sha):
     return {
      "schema":"disdex-bt-portfolio-v1","mode":"EXTERNAL","seed":0,
      "engineSha":"STABLE4_RESEARCH_SOURCE_ONLY_NOT_PRODUCTION_CERTIFIED",
-     "frames":frames,"btcCandles":btc,"limits":{"total":3.5,"crypto":3.0,"stock":1.5},
+     "frames":frames,"btcCandles":btc,
+     "strategyCatalog":strategy_catalog,"strategyStats":strategy_stats,
+     "terminalModelPositions":terminal,
+     "limits":{"total":3.5,"crypto":3.0,"stock":1.5},
      "researchSummary":{"costBps":bps,"initialJpy":summary["initial_jpy"],
        "finalEquityJpy":summary["final_compounded_jpy"],"maxDdPct":summary["max_hourly_dd_pct"],
        "modelFills":summary["modeled_fills"],"winRatePct":summary["win_rate_pct"],

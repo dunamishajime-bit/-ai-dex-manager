@@ -104,6 +104,8 @@ export type StrategyStat = {
   netPnlJpy: number;
   maxLossJpy: number | null;
   winRatePct: number | null;
+  adverseExitCount?: number;
+  netLossCount?: number;
 };
 export type TerminalModelPosition = {
   logic:string;
@@ -252,7 +254,11 @@ export function validateReplay(value:unknown):value is Replay {
          !number(x.closedCount)||x.closedCount<0||x.closedCount>x.tradeCount||
          !number(x.wins)||x.wins<0||x.wins>x.closedCount||
          !number(x.netPnlJpy)||!(x.maxLossJpy===null||number(x.maxLossJpy))||
-         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100)))return false;
+         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100))||
+         (x.adverseExitCount!==undefined&&(!number(x.adverseExitCount)||!Number.isInteger(x.adverseExitCount)||
+           x.adverseExitCount<0||x.adverseExitCount>x.closedCount))||
+         (x.netLossCount!==undefined&&(!number(x.netLossCount)||!Number.isInteger(x.netLossCount)||
+           x.netLossCount<0||x.netLossCount>x.closedCount)))return false;
     }
   }
   if(value.strategyCatalog!==undefined){
