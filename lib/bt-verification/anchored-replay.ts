@@ -29,13 +29,13 @@ export function createAnchoredChartReplay(config:AnchoredReplayConfig):Replay{
  let netDeposits=0;
  const firstTs=config.startDate+"T00:00:00Z";
  const frames:ReplayFrame[]=[{timestamp:firstTs,btc:btc[0].open,equity:config.initialJpy,
-  realized:0,positions:[],events:["模擬価格のみ。Productionロジック未接続・発注なし。"]}];
+  realized:0,netDepositsJpy:0,tradingPnlJpy:0,positions:[],events:["模擬価格のみ。Productionロジック未接続・発注なし。"]}];
  for(const bar of btc){
   const deposited=byDate.get(bar.time)??0;
   netDeposits+=deposited;
   const ts=new Date(Date.parse(bar.time+"T00:00:00Z")+86400000).toISOString().replace(".000Z","Z");
   frames.push({timestamp:ts,btc:bar.close,equity:config.initialJpy+netDeposits,
-   realized:0,positions:[],events:deposited>0?["EXTERNAL DEPOSIT "+deposited+" JPY (取引損益ではない)"]:[]});
+   realized:0,netDepositsJpy:netDeposits,tradingPnlJpy:0,positions:[],events:deposited>0?["EXTERNAL DEPOSIT "+deposited+" JPY (取引損益ではない)"]:[]});
  }
  return {
   schema:"disdex-bt-portfolio-v1",mode:"DEMO",

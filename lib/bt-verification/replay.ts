@@ -59,6 +59,8 @@ export type ReplayFrame = {
   btc: number | null;
   equity: number;
   realized: number;
+  netDepositsJpy?: number;
+  tradingPnlJpy?: number;
   positions: Position[];
   events: string[];
   gross?: GrossSnapshot;
@@ -296,6 +298,8 @@ export function validateReplay(value:unknown):value is Replay {
     last=frame.timestamp;
     if(!nullableNumber(frame.btc) || (frame.btc!==null && frame.btc<0))return false;
     if(!number(frame.equity)||!number(frame.realized)||!Array.isArray(frame.positions)||frame.positions.length>300)return false;
+    if(frame.netDepositsJpy!==undefined&&(!number(frame.netDepositsJpy)||frame.netDepositsJpy<0))return false;
+    if(frame.tradingPnlJpy!==undefined&&!number(frame.tradingPnlJpy))return false;
     if(!Array.isArray(frame.events)||frame.events.length>500||frame.events.some((e:unknown)=>typeof e!=="string"||e.length>600))return false;
     if(frame.gross!==undefined && !validGross(frame.gross))return false;
     if(frame.sourceOpenCount!==undefined){

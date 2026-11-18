@@ -10,6 +10,7 @@ import { EquityTimelineChart } from "@/components/bt-verification/EquityTimeline
 import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocationPanel";
 import { createPreviewReplay, type DemoScenario, DEMO_BASE_JPY } from "@/lib/bt-verification/demo";
 import { grossForFrame, validateReplay, type Replay, type ReplayFrame } from "@/lib/bt-verification/replay";
+import {portfolioMetrics} from "@/lib/bt-verification/portfolio-metrics";
 
 const SCENARIOS: { value: DemoScenario; label: string; hint: string }[] = [
   { value: "trend", label: "上昇トレンド", hint: "トレンドが続く相場" },
@@ -21,16 +22,6 @@ const JPY = (value: number) => "¥" + value.toLocaleString("ja-JP", { maximumFra
 const NUM = (value: number) => value.toLocaleString("ja-JP", { maximumFractionDigits: 2 });
 const pct = (value: number) => value.toFixed(2) + "%";
 
-function metrics(frames: ReplayFrame[], cursor: number) {
-  let peak = -Infinity, maxDD = 0;
-  for (let i = 0; i <= cursor; i++) {
-    peak = Math.max(peak, frames[i].equity);
-    if (peak > 0) maxDD = Math.min(maxDD, 100 * (frames[i].equity / peak - 1));
-  }
-  const first = frames[0].equity;
-  const current = frames[cursor].equity;
-  return { first, current, net: current - first, maxDD };
-}
 function download(name: string, contents: string, mime: string) {
   const url = URL.createObjectURL(new Blob([contents], { type: mime }));
   const a = document.createElement("a");
@@ -124,7 +115,7 @@ export default function BTVerification() {
   useEffect(() => { if (cursor >= last) setRunning(false); }, [cursor, last]);
 
   const frame = replay.frames[cursor];
-  const summary = useMemo(() => metrics(replay.frames, cursor), [replay, cursor]);
+  const summary = useMemo(() => portfolioMetrics(replay.frames, cursor), [replay, cursor]);
   const events = useMemo(() => replay.frames.slice(0, cursor + 1).flatMap((f, i) =>
     f.events.map((event) => ({ event, time: f.timestamp, index: i }))).slice(-80).reverse(), [replay, cursor]);
   const entryCount = events.filter(({ event }) => event.includes("ENTRY ")).length;
@@ -259,7 +250,8 @@ export default function BTVerification() {
         <section className={tile}><h2 className="text-lg font-bold text-white">再生区間の検証結果</h2>
           <p className="mt-1 text-xs text-[#91aec4]">以下は{isDemo ? "人工市場の模擬結果" : "持込研究データの再生結果"}です。LIVE実績の証明ではありません。</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[["開始資金", JPY(summary.first)], ["現在資産", JPY(summary.current)], ["損益差額", JPY(summary.net)],
+            {[["開始資金", JPY(summary.first)], ["現在資産", JPY(summary.current)], ["入金控除後の運用損益", JPY(summary.net)],
+              ["積立累計", JPY(summary.netDeposits)],
               ["最大DD", pct(summary.maxDD)], ["モデル建玉", frame.positions.length + "件"], ["イベント（直近80件）", events.length + "件"],
               ["総Gross", (isDemo || frame.gross ? NUM(gross.total)+"x" : "未確認")], ["対象時点", (cursor + 1) + "/" + totalFrames]].map(([name, value]) =>
               <div key={name} className="rounded-lg border border-[#2a4459] bg-[#0c2033] p-4"><p className="text-xs text-[#91adc3]">{name}</p><p className="mt-2 text-lg font-bold text-white">{value}</p></div>)}
@@ -279,8 +271,8 @@ export default function BTVerification() {
           </div>
           <div className="flex flex-col justify-center gap-3">
             <button type="button" className={button} onClick={() => download("disdex-bt-portfolio.csv",
-              csv([["utc","equity_jpy","realized_jpy","gross_total_x","gross_crypto_x","gross_stock_x","open_model_positions"], ...replay.frames.map((f) => {
-                const g = grossForFrame(f);return [f.timestamp, f.equity, f.realized, g.total, g.crypto, g.stock, f.positions.length];
+              csv([["utc","equity_jpy","realized_jpy","gross_total_x","gross_crypto_x","gross_stock_x","open_model_positions","net_deposits_jpy","trading_pnl_jpy"], ...replay.frames.map((f) => {
+                const g = grossForFrame(f);return [f.timestamp, f.equity, f.realized, g.total, g.crypto, g.stock, f.positions.length, f.netDepositsJpy??0, f.tradingPnlJpy??(f.equity-replay.frames[0].equity-(f.netDepositsJpy??0))];
               })]),"text/csv;charset=utf-8")}>
               <Download className="h-4 w-4"/> 資産・GrossのCSVを保存
             </button>
