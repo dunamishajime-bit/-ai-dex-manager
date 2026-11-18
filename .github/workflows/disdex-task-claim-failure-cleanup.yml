@@ -1,0 +1,62 @@
+name: DisDex Failed Task Claim Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: Parent ALL_RUNNERS_LIVE_RESTORE task ID
+        required: true
+        type: string
+      run_id:
+        description: Failed GitHub Actions run ID that owns the claim
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Mark failed claim retryable
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+          CLAIM_RUN_ID: ${{ inputs.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ "$CLAIM_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ -n "$BRIDGE" ]]
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = json.dumps({
+              "action": "finish_task_step",
+              "task_id": os.environ["TASK_ID"],
+              "step": "IDLE_FLAT_STALE_REPAIR",
+              "run_id": os.environ["CLAIM_RUN_ID"],
+              "outcome": "failure",
+          }).encode()
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body, method="POST",
+              headers={"Authorization": "Bearer " + os.environ["BRIDGE"],
+                       "Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          assert result.get("ok") and result.get("status") == "APPROVED", result
+          print("FAILED_TASK_CLAIM_CLEANED=TRUE")
