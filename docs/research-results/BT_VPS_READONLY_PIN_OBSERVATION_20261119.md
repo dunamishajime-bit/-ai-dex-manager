@@ -27,3 +27,6 @@ The following running systemd service instances were additionally observed:
 - V52 monitor (read-only): 0d955214a4aeeb7481bced711e1df7f163d2d25c
 - V4 rate budget broker: multiple concurrent active SHA-tagged units (including e788abc82...); exact runtime authority and overlap NOT established.
 These are service instance names with running state, not independent proof of trade permission, actual source execution parity, healthy orders or certified backtest. Confirm ExecStart/WorkingDirectory, immutable release source content and strategy-to-route mapping before reproducing BT. No mutation performed.
+## Eight entrypoint file SHA256 verification
+Compared VPS release entrypoint SHA256 to owner PC Git SHA blobs. Six TypeScript entries match exactly after LF-to-CRLF normalization; Q102 and V52 match raw bytes. Verified: V4, Q102, V52, PENGU, HYPE, Shared Risk, FET, IDLE. This is entrypoint-only parity, NOT full imported-module/config/execution/BT parity.
+At subsequent systemctl show, V52 service ActiveState=activating and previous ExecStart exited status=1, despite an earlier running snapshot. Requires separate read-only diagnosis; no service changes made.
