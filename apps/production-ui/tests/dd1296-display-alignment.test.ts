@@ -21,9 +21,12 @@ test('Formal BT reads current authoritative DD12.96 files and reconciles trades'
  assert.equal(bt.accounting,'PASS');
 });
 test('Every policy summary consumes Side sizing; formal page no old fixed BT',async()=>{
- for(const p of ['app/page.tsx','app/positions/page.tsx','components/layout/LiveProductionBanner.tsx','components/features/DecisionStatusPanel.tsx','lib/server/disdex-decision-status.ts']){
+ for(const p of ['app/page.tsx','app/positions/page.tsx','components/features/DecisionStatusPanel.tsx','lib/server/disdex-decision-status.ts']){
   const s=await readFile(p,'utf8');assert.match(s,/formatQ102SideGross/);assert.doesNotMatch(s,/familyGross\.(HIGH_VOL|REV|PB)/);
  }
+ // LiveProductionBanner delegates policy/side sizing to the read-only CurrentLogicPanel.
+ const banner=await readFile('components/layout/LiveProductionBanner.tsx','utf8');
+ assert.match(banner,/CurrentLogicPanel/);assert.doesNotMatch(banner,/familyGross\.(HIGH_VOL|REV|PB)/);
  const s=await readFile('app/api/system/formal-priority-status/route.ts','utf8');
  assert.match(s,/loadFormalBtAnchor/);assert.doesNotMatch(s,/1229065462|1275|21\.296/);
 });
