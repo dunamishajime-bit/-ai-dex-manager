@@ -646,7 +646,6 @@ def normalize_common_module_permissions(path: str | Path) -> None:
             "COMMON_MODULE_NOT_REGULAR")
     if st.st_mode & 0o222:
         os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
-    root_immutable(target)
 
 
 def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
@@ -666,6 +665,7 @@ def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
             "COMMON_MODULE_OWNER_INVALID")
     before = sha256(source.read_bytes())
     normalize_common_module_permissions(source)
+    root_immutable(source)
     after = sha256(source.read_bytes())
     require(before == after, "COMMON_MODULE_CONTENT_CHANGED")
     return {
