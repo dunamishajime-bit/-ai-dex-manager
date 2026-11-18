@@ -11,6 +11,7 @@ import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocati
 import { createPreviewReplay, type DemoScenario, DEMO_BASE_JPY } from "@/lib/bt-verification/demo";
 import { grossForFrame, validateReplay, type Replay, type ReplayFrame } from "@/lib/bt-verification/replay";
 import {portfolioMetrics} from "@/lib/bt-verification/portfolio-metrics";
+import {compareReplayPair} from "@/lib/bt-verification/compare-replays";
 
 const SCENARIOS: { value: DemoScenario; label: string; hint: string }[] = [
   { value: "trend", label: "上昇トレンド", hint: "トレンドが続く相場" },
@@ -47,6 +48,8 @@ export default function BTVerification() {
   const [notice, setNotice] = useState("");
   const [baselineFiles,setBaselineFiles]=useState<Record<string,{label:string;replay:Replay}>>({});
   const [baselineSelected,setBaselineSelected]=useState("");
+  const [comparisonA,setComparisonA]=useState("IDLE_10");
+  const [comparisonB,setComparisonB]=useState("IDLE_30");
   function openBaseline(key:string){
     const item=baselineFiles[key];
     if(!item)return;
@@ -121,6 +124,9 @@ export default function BTVerification() {
   const entryCount = events.filter(({ event }) => event.includes("ENTRY ")).length;
   const gross = grossForFrame(frame);
   const anchoredPriceOnly = replay.source?.kind === "SYNTHETIC_ANCHORED_DAILY_NO_STRATEGY";
+  const comparison = useMemo(()=>baselineFiles[comparisonA] && baselineFiles[comparisonB] && comparisonA!==comparisonB
+    ?compareReplayPair(baselineFiles[comparisonA].replay,baselineFiles[comparisonB].replay):null,
+    [baselineFiles,comparisonA,comparisonB]);
   const sourceLabel = anchoredPriceOnly ? "前日終値アンカー・価格のみ（戦略未接続）" : isDemo ? "模擬デモ・実取引なし" : "持込BTデータ・未認証";
   const sourceWarning = anchoredPriceOnly
     ? "前日実終値をAster公開日足で検証し、指定期間の価格のみ人工生成しています。実取引、Productionロジック判定、仮想約定は実施していません。"
@@ -258,7 +264,30 @@ export default function BTVerification() {
           </div>
         </section>
         <section className={tile}><EquityTimelineChart frames={replay.frames} cursor={cursor}/></section>
-      </>)}
+        {Object.keys(baselineFiles).length>=2&&<section className={tile}>
+          <h3 className="text-base font-bold text-white">同一データ・コスト条件比較（単独研究モデル）</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <label className="text-xs text-[#9bbbd0]">比較A
+              <select className="mt-1 block w-full rounded-lg border border-[#365a70] bg-[#0a1b2b] p-2 text-sm text-white" value={comparisonA} onChange={e=>setComparisonA(e.target.value)}>
+                {Object.entries(baselineFiles).map(([key,item])=><option key={key} value={key}>{item.label}</option>)}
+              </select>
+            </label>
+            <label className="text-xs text-[#9bbbd0]">比較B
+              <select className="mt-1 block w-full rounded-lg border border-[#365a70] bg-[#0a1b2b] p-2 text-sm text-white" value={comparisonB} onChange={e=>setComparisonB(e.target.value)}>
+                {Object.entries(baselineFiles).map(([key,item])=><option key={key} value={key}>{item.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <p className={"mt-3 text-xs leading-6 "+(comparison?.comparable?"text-cyan-200":"text-amber-200")}>
+            {comparison?.reason??"比較する異なる2データを選択してください。"}
+          </p>
+          {comparison?.comparable&&comparison.stats&&<div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-[#29465a] bg-[#0a1b2d] p-3"><p className="text-xs text-[#91afc4]">Aの運用損益</p><p className="mt-1 font-semibold">{JPY(comparison.stats.pnlA)}</p></div>
+            <div className="rounded-lg border border-[#29465a] bg-[#0a1b2d] p-3"><p className="text-xs text-[#91afc4]">Bの運用損益</p><p className="mt-1 font-semibold">{JPY(comparison.stats.pnlB)}</p></div>
+            <div className="rounded-lg border border-[#29465a] bg-[#0a1b2d] p-3"><p className="text-xs text-[#91afc4]">B − A</p><p className="mt-1 font-semibold">{JPY(comparison.stats.pnlDifference)}</p></div>
+            <p className="text-xs text-[#9eb8cb]">最大DD A: {pct(comparison.stats.maxDdA)} / B: {pct(comparison.stats.maxDdB)}</p>
+          </div>}
+        </section>}      </>)}
 
       {tab === "report" && display(<section className={tile}>
         <h2 className="text-lg font-bold text-white">BT再生レポート</h2>
@@ -275,6 +304,17 @@ export default function BTVerification() {
                 const g = grossForFrame(f);return [f.timestamp, f.equity, f.realized, g.total, g.crypto, g.stock, f.positions.length, f.netDepositsJpy??0, f.tradingPnlJpy??(f.equity-replay.frames[0].equity-(f.netDepositsJpy??0))];
               })]),"text/csv;charset=utf-8")}>
               <Download className="h-4 w-4"/> 資産・GrossのCSVを保存
+            </button>
+            <button type="button" className={button} onClick={() => download("disdex-bt-events.csv",
+              csv([["utc","event","source_kind"],...replay.frames.flatMap(f=>f.events.map(e=>[f.timestamp,e,replay.source?.kind??replay.mode]))]),
+              "text/csv;charset=utf-8")}>
+              <Download className="h-4 w-4"/> 発火・決済・入金のイベント台帳CSV
+            </button>
+            <button type="button" className={button} onClick={() => download("disdex-bt-evidence.json",
+              JSON.stringify({mode:replay.mode,engineSha:replay.engineSha,seed:replay.seed,
+                source:replay.source,frames:replay.frames.length,range:[replay.frames[0].timestamp,replay.frames.at(-1)?.timestamp],
+                certification:"NOT_CERTIFIED_PRODUCTION_PARITY"}),"application/json")}>
+              <Download className="h-4 w-4"/> 入力条件・証跡JSON
             </button>
             <button type="button" className={button} onClick={() => setTab("library")}>JSONの保存・読込へ</button>
             <p className="text-xs text-[#94b0c4]">研究BTの正規約定、LIVE一致認証、勝率の保証は行いません。</p>
