@@ -85,6 +85,9 @@ export function CurrentLogicPanel() {
           const observed = classifyRunnerObservation(row, snapshot.safety, row.id !== "SHARED_CRYPTO_RISK" && row.id !== "MARGIN_GUARD");
           const localLabel = { FAULT: "停止検知", ATTENTION: "要確認", UNVERIFIED: "未検証", OBSERVED: "観測一致" }[observed.local];
           const protectionLabel = { BLOCK_REPORTED: "BLOCKを報告", SHARED_HOLD_REPORTED: "共有HOLDを観測（適用範囲は別判定）", AUTHORITY_UNVERIFIED: "取引許可未検証" }[observed.protection];
+          const recoveryLabel = row.recovery ? {
+            UNKNOWN: "未検証", ATTENTION: "異常継続", VERIFYING: "復旧確認中", HEALTHY_OBSERVED: "正常復帰検知",
+          }[row.recovery.label] : undefined;
           return (
           <div key={row.id} className="min-w-0 rounded-xl border border-white/15 bg-black/25 p-2.5">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -97,6 +100,7 @@ export function CurrentLogicPanel() {
             </div>
             <dl className="mt-2 grid gap-1 text-[10px]">
               <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">個別監視</dt><dd className={observed.local === "OBSERVED" ? "text-white/80" : "text-amber-200"}>{localLabel}</dd></div>
+              {recoveryLabel ? <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">復旧確認</dt><dd className={row.recovery?.label === "HEALTHY_OBSERVED" ? "text-emerald-200" : "text-amber-200"}>{recoveryLabel}{row.recovery?.streak ? `（${row.recovery.streak}/3）` : ""}</dd></div> : null}
               <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">取引保護・許可</dt><dd className="text-amber-200">{protectionLabel}</dd></div>
             </dl>
             <p className="mt-1 break-words leading-5 text-white/75">{row.description}</p>
@@ -132,8 +136,9 @@ export function CurrentLogicPanel() {
       </div>
       <p className="inline-flex items-center gap-1.5 text-[10px] text-white/55">
         <ShieldAlert className="h-3 w-3" />
-        プロセスと取引保護は別表示です。観測一致は発注許可を意味しません。この画面は読み取り専用です。
+        プロセス・個別監視・復旧観測と取引保護は別表示です。正常復帰検知は新しいheartbeatの3回連続観測を示すだけで、発注許可を意味しません。この画面は読み取り専用です。
       </p>
     </div>
   );
 }
+
