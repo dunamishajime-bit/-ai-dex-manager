@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 1
 
       - name: Claim exact non-order IDLE repair stage
-        id: claim
+        id: claim_api
         shell: bash
         env:
           TASK_ID: ${{ inputs.task_id }}
@@ -73,9 +73,18 @@ jobs:
           print("::add-mask::" + token)
           print("IDLE_H48_TASK_STAGE_CLAIMED=TRUE")
           PY
+
+      - name: Verify claimed owner token
+        id: claim_verify
+        if: ${{ steps.claim_api.outcome == 'success' }}
+        shell: bash
+        env:
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
           printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/idle-h48-owner.pub"
           cat "$RUNNER_TEMP/idle-h48-token" |
-            python3 scripts/ops/deploy_owner_approval.py verify \
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
               --public-key "$RUNNER_TEMP/idle-h48-owner.pub" \
               --repository "$GITHUB_REPOSITORY" \
               --sha 7688ed7c93a1918d8b44837339b7da5584a868f5 \
@@ -147,7 +156,7 @@ jobs:
             "python3 /tmp/disdex-idle-h48-$GITHUB_RUN_ID/disdex_idle_h48_protected_recovery.py --run-id $GITHUB_RUN_ID"
 
       - name: Finish exact task stage
-        if: ${{ always() && steps.claim.outcome == 'success' }}
+        if: ${{ always() && steps.claim_api.outcome == 'success' }}
         env:
           BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
           TASK_ID: ${{ inputs.task_id }}
