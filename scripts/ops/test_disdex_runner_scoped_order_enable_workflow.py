@@ -24,6 +24,7 @@ class RunnerScopedWorkflowContractTests(unittest.TestCase):
             "RUNNER_SCOPED_ORDER_ENABLE",
             "GLOBAL_HOLD_REMAINS_ACTIVE=TRUE",
             "TRADING_MUTATIONS=0",
+            "--normalize-source",
             "--preflight-readonly",
             "--execute",
         ):
