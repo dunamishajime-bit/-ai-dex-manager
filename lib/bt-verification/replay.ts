@@ -107,6 +107,7 @@ export type StrategyStat = {
   adverseExitCount?: number;
   netLossCount?: number;
 };
+export type StrategyRouteStat = StrategyStat & {route:string};
 export type TerminalModelPosition = {
   logic:string;
   symbol:string;
@@ -132,6 +133,7 @@ export type Replay = {
   /** Sourced model positions still open at period end and absent from completed FILLS. */
   terminalModelPositions?: TerminalModelPosition[];
   strategyStats?: StrategyStat[];
+  strategyRouteStats?: StrategyRouteStat[];
   limits: { total: number; crypto: number; stock: number };
   source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; positionSnapshotsSha256?: string | null; positionGrossSnapshotsSha256?: string | null; modelEntriesSha256?: string | null; positionExposureEvidence?: "SOURCE_ENGINE_TIMEPOINT_RECONCILED" | "SOURCE_MODEL_GROSS_ONLY_NO_QUANTITY_FX" | "MISSING_SOURCE_POSITION_MARKS"; grossCapEvidence?: string; note?: string };
 };
@@ -259,6 +261,25 @@ export function validateReplay(value:unknown):value is Replay {
            x.adverseExitCount<0||x.adverseExitCount>x.closedCount))||
          (x.netLossCount!==undefined&&(!number(x.netLossCount)||!Number.isInteger(x.netLossCount)||
            x.netLossCount<0||x.netLossCount>x.closedCount)))return false;
+    }
+  }
+  if(value.strategyRouteStats!==undefined){
+    if(!Array.isArray(value.strategyRouteStats)||value.strategyRouteStats.length>4000)return false;
+    const seen=new Set<string>();
+    for(const x of value.strategyRouteStats){
+      if(!isObj(x)||typeof x.route!=="string"||!x.route||x.route.length>200||
+         typeof x.logic!=="string"||!x.logic||x.logic.length>100||
+         typeof x.symbol!=="string"||!x.symbol||x.symbol.length>100||
+         (!number(x.tradeCount)||!Number.isInteger(x.tradeCount))||x.tradeCount<0||
+         (!number(x.closedCount)||!Number.isInteger(x.closedCount))||x.closedCount<0||x.closedCount>x.tradeCount||
+         (!number(x.wins)||!Number.isInteger(x.wins))||x.wins<0||x.wins>x.closedCount||
+         !number(x.netPnlJpy)||!(x.maxLossJpy===null||number(x.maxLossJpy))||
+         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100))||
+         (!number(x.adverseExitCount)||!Number.isInteger(x.adverseExitCount))||x.adverseExitCount<0||x.adverseExitCount>x.closedCount||
+         (!number(x.netLossCount)||!Number.isInteger(x.netLossCount))||x.netLossCount<0||x.netLossCount>x.closedCount)return false;
+      const key=JSON.stringify([x.logic,x.route,x.symbol]);
+      if(seen.has(key))return false;
+      seen.add(key);
     }
   }
   if(value.strategyCatalog!==undefined){

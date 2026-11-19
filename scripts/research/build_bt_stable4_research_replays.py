@@ -72,6 +72,7 @@ def build(folder,bps,btc,btc_sha):
     # Provenance-only strategy/route catalogue and closed-model-trade statistics.
     catalog={}
     by_symbol={}
+    by_route={}
     for item in trades:
         logic=item["strategy"]
         sym=item["symbol"]
@@ -99,6 +100,16 @@ def build(folder,bps,btc,btc_sha):
         # Opposite terminal price direction, not a proof of wrong entry signal.
         adverse=(exit_price<entry_price) if item["side"]=="LONG" else (exit_price>entry_price)
         if adverse:model["adverse"]+=1
+        route_model=by_route.setdefault((logic,route,sym),
+          {"trades":0,"closed":0,"wins":0,"net":0.0,"losses":[],"adverse":0,"netLosses":0})
+        route_model["trades"]+=1
+        route_model["closed"]+=1
+        route_model["net"]+=pnl
+        if pnl>0:route_model["wins"]+=1
+        if pnl<0:
+            route_model["losses"].append(pnl)
+            route_model["netLosses"]+=1
+        if adverse:route_model["adverse"]+=1
     terminal=[]
     for item in summary.get("terminal_open_positions",[]):
         logic=item["strategy"];sym=item["symbol"]
@@ -113,6 +124,9 @@ def build(folder,bps,btc,btc_sha):
         record=by_symbol.setdefault((logic,sym),
           {"trades":0,"closed":0,"wins":0,"net":0.0,"losses":[],"adverse":0,"netLosses":0})
         record["trades"]+=1
+        route_record=by_route.setdefault((logic,item["route"],sym),
+          {"trades":0,"closed":0,"wins":0,"net":0.0,"losses":[],"adverse":0,"netLosses":0})
+        route_record["trades"]+=1
     if len(terminal)!=summary.get("terminal_open_count",0):
         raise ValueError("TERMINAL_OPEN_COUNT_MISMATCH")
     strategy_catalog=[{
@@ -128,6 +142,16 @@ def build(folder,bps,btc,btc_sha):
       "winRatePct":100*item["wins"]/item["closed"] if item["closed"] else None,
       "adverseExitCount":item["adverse"],"netLossCount":item["netLosses"]}
       for (logic,sym),item in sorted(by_symbol.items())]
+    strategy_route_stats=[{
+      "logic":logic,"route":route,"symbol":sym,"tradeCount":item["trades"],
+      "closedCount":item["closed"],"wins":item["wins"],
+      "netPnlJpy":round(item["net"],6),
+      "maxLossJpy":min(item["losses"]) if item["losses"] else None,
+      "winRatePct":100*item["wins"]/item["closed"] if item["closed"] else None,
+      "adverseExitCount":item["adverse"],"netLossCount":item["netLosses"]}
+      for (logic,route,sym),item in sorted(by_route.items())]
+    if sum(row["closedCount"] for row in strategy_route_stats)!=len(trades):
+        raise ValueError("SOURCE_ROUTE_STATS_CLOSED_COUNT_MISMATCH")
     events=defaultdict(list)
     for item in trades:
         if item["signed_execution_verified"]!="False" or item["actual_venue_order_id"]:
@@ -176,6 +200,7 @@ def build(folder,bps,btc,btc_sha):
      "engineSha":"STABLE4_RESEARCH_SOURCE_ONLY_NOT_PRODUCTION_CERTIFIED",
      "frames":frames,"btcCandles":btc,
      "strategyCatalog":strategy_catalog,"strategyStats":strategy_stats,
+     "strategyRouteStats":strategy_route_stats,
      "terminalModelPositions":terminal,
      "limits":{"total":3.5,"crypto":3.0,"stock":1.5},
      "researchSummary":{"costBps":bps,"initialJpy":summary["initial_jpy"],

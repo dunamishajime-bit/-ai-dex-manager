@@ -91,3 +91,12 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - A source SHA match is labeled SHA_MATCH_NOT_PARITY; no data from the UI grants trading authority or certifies historical modeled fills.
 - Tests/bt-source-pin-compat.test.ts covers mismatched, matching-but-uncertified, ambiguous/unverified evidence and unknown source; entire BT suite 41 PASS, TS typecheck PASS locally.
 - The comparison never claims the stored VPS snapshot represents real-time current process state; no outbound SSH/API call is made by the UI.
+## STABLE4 private route-by-symbol replay enhancement (new v2 export, 2026-11-19)
+- Added strategyRouteStats to replay contract and fail-closed validator: lib/bt-verification/replay.ts.
+- Source export builder scripts/research/build_bt_stable4_research_replays.py now aggregates closed modeled exits and terminal open counts by (strategy, route, symbol).
+- Added route diagnostics to BT Results UI with loss count, adverse terminal price count, win rate and model PnL; sorted by cases instead of only raw compounded loss magnitudes.
+- Added offline verifier scripts/research/verify_stable4_replay_route_export.ts; validates every imported JSON SHA256 against local manifest, source status, route/strategy/symbol reconciliation, and terminal open counts.
+- New private export path (original untouched): C:\tmp\disdex-stable4-research-baseline-export-20261119-v2 (MANIFEST_UNCERTIFIED.json + 10/30bps research replay JSON); do not commit private large raw exports.
+- New export integrity: 10bps 1,027 model exits, 321 route+symbol rows, 1 terminal open model position; 30bps 1,023 model exits, 321 rows, 1 terminal open model position. SHA256/route reconciliation and validateReplay all PASS.
+- BT targeted suite 45 PASS; TypeScript typecheck PASS. These are historical STABLE4 research models, not production-certified or present LIVE trade fills.
+- Historical DD still breaches user target -20%; 10bps -22.5951%, 30bps -23.2195%. Reexecute current LIVE V4/HYPE plus Shared Risk/Gross with causal bars before any production-equivalent BT claim.
