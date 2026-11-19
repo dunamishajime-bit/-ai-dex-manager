@@ -22,6 +22,8 @@ on:
       - "tests/test_bt_stable4_v4_hype_git_diff.py"
       - "scripts/research/audit_bt_stable4_static_graph_delta.py"
       - "tests/test_bt_stable4_static_graph_delta.py"
+      - "scripts/research/audit_bt_stable4_model_loss_forensics.py"
+      - "tests/test_bt_stable4_model_loss_forensics.py"
       - "package.json"
       - "package-lock.json"
   push:
@@ -45,6 +47,8 @@ on:
       - "tests/test_bt_stable4_v4_hype_git_diff.py"
       - "scripts/research/audit_bt_stable4_static_graph_delta.py"
       - "tests/test_bt_stable4_static_graph_delta.py"
+      - "scripts/research/audit_bt_stable4_model_loss_forensics.py"
+      - "tests/test_bt_stable4_model_loss_forensics.py"
       - "package.json"
       - "package-lock.json"
 
@@ -99,6 +103,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_bt_stable4_static_graph_delta.py' -v
       - name: Compare STABLE4-to-LIVE static execution graphs (no VPS)
         run: python scripts/research/audit_bt_stable4_static_graph_delta.py --output /tmp/disdex-bt-static-graph-diff.json
+      - name: V4/HYPE model loss forensics tests (synthetic fixtures only)
+        run: python -m unittest discover -s tests -p 'test_bt_stable4_model_loss_forensics.py' -v
       - name: BT replay and UI unit tests
         run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
       - name: Typecheck

@@ -1,0 +1,2878 @@
+{
+  "schema": "disdex-bt-model-only-v4-hype-loss-forensics/v1",
+  "created_utc": "2026-11-19T04:48:11.674644+00:00",
+  "period_utc_start_inclusive": "2025-10-01T00:00:00Z",
+  "period_utc_end_exclusive": "2026-10-01T00:00:00Z",
+  "not_actual_exchange_fills": true,
+  "historical_research_not_current_live": true,
+  "future_information_leakage_and_causal_replay_verified": false,
+  "modeled_adverse_price_not_wrong_signal_proof": true,
+  "production_bt_parity_certified": false,
+  "scenarios": {
+    "10": {
+      "fills_source_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+      "source_modeled_exits": 1027,
+      "by_model": {
+        "V4": {
+          "research_source_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "observed_live_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+          "current_live_source_matches": false,
+          "requires_live_code_reexecution": true,
+          "total": {
+            "exits": 801,
+            "wins": 494,
+            "net_losses": 307,
+            "adverse_price_exits": 297,
+            "positive_pnl_jpy": 7101657.527569,
+            "negative_pnl_jpy": -2609180.663444,
+            "net_pnl_jpy": 4492476.864125,
+            "worst_exit_pnl_jpy": -193944.154071,
+            "win_rate_pct": 61.6729,
+            "negative_pnl_exit_pct": 38.3271,
+            "adverse_exit_price_direction_pct": 37.0787,
+            "exit_reasons": {
+              "V4_CORE_STOP": 10,
+              "V4_CORE_TAKE_PROFIT": 2,
+              "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 19,
+              "V4_NATIVE_STOP": 25,
+              "V4_NATIVE_TAKE_PROFIT": 3,
+              "V4_NATIVE_TIME": 559,
+              "V4_NATIVE_TP": 20,
+              "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 44,
+              "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 15,
+              "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 60,
+              "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 44
+            },
+            "model_classes": {
+              "PINNED_ENTRY_H1_APPROX_EXIT": 801
+            }
+          },
+          "routes": {
+            "CONT_SHORT_MID_AGE24_48": {
+              "exits": 17,
+              "wins": 14,
+              "net_losses": 3,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 28581.074117,
+              "negative_pnl_jpy": -7871.598581,
+              "net_pnl_jpy": 20709.475535,
+              "worst_exit_pnl_jpy": -7296.413628,
+              "win_rate_pct": 82.3529,
+              "negative_pnl_exit_pct": 17.6471,
+              "adverse_exit_price_direction_pct": 17.6471,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 17
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 17
+              }
+            },
+            "FAILED_BREAK_REV_SHORT_6H": {
+              "exits": 31,
+              "wins": 17,
+              "net_losses": 14,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 423249.286836,
+              "negative_pnl_jpy": -240204.365058,
+              "net_pnl_jpy": 183044.921778,
+              "worst_exit_pnl_jpy": -128496.201797,
+              "win_rate_pct": 54.8387,
+              "negative_pnl_exit_pct": 45.1613,
+              "adverse_exit_price_direction_pct": 38.7097,
+              "exit_reasons": {
+                "V4_CORE_STOP": 10,
+                "V4_CORE_TAKE_PROFIT": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 19
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 31
+              }
+            },
+            "REC_G1_MID_REL_LOWVOL": {
+              "exits": 15,
+              "wins": 9,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 67882.464273,
+              "negative_pnl_jpy": -14264.208112,
+              "net_pnl_jpy": 53618.256161,
+              "worst_exit_pnl_jpy": -6024.683995,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_G2_EARLY_BTC_OPPOSE_VOL": {
+              "exits": 43,
+              "wins": 26,
+              "net_losses": 17,
+              "adverse_price_exits": 17,
+              "positive_pnl_jpy": 164476.006035,
+              "negative_pnl_jpy": -26964.396392,
+              "net_pnl_jpy": 137511.609643,
+              "worst_exit_pnl_jpy": -11688.916529,
+              "win_rate_pct": 60.4651,
+              "negative_pnl_exit_pct": 39.5349,
+              "adverse_exit_price_direction_pct": 39.5349,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 43
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 43
+              }
+            },
+            "REC_G3_LATE_BTC_REL": {
+              "exits": 57,
+              "wins": 33,
+              "net_losses": 24,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 116172.408491,
+              "negative_pnl_jpy": -127105.416767,
+              "net_pnl_jpy": -10933.008275,
+              "worst_exit_pnl_jpy": -42372.525098,
+              "win_rate_pct": 57.8947,
+              "negative_pnl_exit_pct": 42.1053,
+              "adverse_exit_price_direction_pct": 38.5965,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 10,
+                "V4_NATIVE_TAKE_PROFIT": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 44
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 57
+              }
+            },
+            "REC_G4_MATURE_REL_RANGE": {
+              "exits": 15,
+              "wins": 7,
+              "net_losses": 8,
+              "adverse_price_exits": 8,
+              "positive_pnl_jpy": 634698.778817,
+              "negative_pnl_jpy": -170511.191289,
+              "net_pnl_jpy": 464187.587529,
+              "worst_exit_pnl_jpy": -58808.483957,
+              "win_rate_pct": 46.6667,
+              "negative_pnl_exit_pct": 53.3333,
+              "adverse_exit_price_direction_pct": 53.3333,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 14,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_G5_SLOW_TREND": {
+              "exits": 33,
+              "wins": 17,
+              "net_losses": 16,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 92538.58765,
+              "negative_pnl_jpy": -53756.791023,
+              "net_pnl_jpy": 38781.796627,
+              "worst_exit_pnl_jpy": -17056.176268,
+              "win_rate_pct": 51.5152,
+              "negative_pnl_exit_pct": 48.4848,
+              "adverse_exit_price_direction_pct": 48.4848,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 27,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 33
+              }
+            },
+            "REC_X01_TIME_24H": {
+              "exits": 20,
+              "wins": 17,
+              "net_losses": 3,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 245809.369264,
+              "negative_pnl_jpy": -36994.688236,
+              "net_pnl_jpy": 208814.681028,
+              "worst_exit_pnl_jpy": -32193.95395,
+              "win_rate_pct": 85.0,
+              "negative_pnl_exit_pct": 15.0,
+              "adverse_exit_price_direction_pct": 15.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 20
+              }
+            },
+            "REC_X02_TIME_36H": {
+              "exits": 46,
+              "wins": 26,
+              "net_losses": 20,
+              "adverse_price_exits": 19,
+              "positive_pnl_jpy": 244463.420925,
+              "negative_pnl_jpy": -124177.183409,
+              "net_pnl_jpy": 120286.237516,
+              "worst_exit_pnl_jpy": -54346.449071,
+              "win_rate_pct": 56.5217,
+              "negative_pnl_exit_pct": 43.4783,
+              "adverse_exit_price_direction_pct": 41.3043,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 37,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 46
+              }
+            },
+            "REC_X03_TIME_12H": {
+              "exits": 41,
+              "wins": 26,
+              "net_losses": 15,
+              "adverse_price_exits": 14,
+              "positive_pnl_jpy": 230284.811878,
+              "negative_pnl_jpy": -57395.664123,
+              "net_pnl_jpy": 172889.147755,
+              "worst_exit_pnl_jpy": -37511.029781,
+              "win_rate_pct": 63.4146,
+              "negative_pnl_exit_pct": 36.5854,
+              "adverse_exit_price_direction_pct": 34.1463,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 41
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 41
+              }
+            },
+            "REC_X04_TIME_24H": {
+              "exits": 33,
+              "wins": 21,
+              "net_losses": 12,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 186317.662781,
+              "negative_pnl_jpy": -226959.85175,
+              "net_pnl_jpy": -40642.188968,
+              "worst_exit_pnl_jpy": -61135.893656,
+              "win_rate_pct": 63.6364,
+              "negative_pnl_exit_pct": 36.3636,
+              "adverse_exit_price_direction_pct": 36.3636,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 20,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 33
+              }
+            },
+            "REC_X05_TIME_36H": {
+              "exits": 44,
+              "wins": 22,
+              "net_losses": 22,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 282931.625198,
+              "negative_pnl_jpy": -150296.389273,
+              "net_pnl_jpy": 132635.235926,
+              "worst_exit_pnl_jpy": -50653.443688,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 33,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 44
+              }
+            },
+            "REC_X06_TIME_12H": {
+              "exits": 42,
+              "wins": 23,
+              "net_losses": 19,
+              "adverse_price_exits": 18,
+              "positive_pnl_jpy": 213019.125347,
+              "negative_pnl_jpy": -110706.612984,
+              "net_pnl_jpy": 102312.512363,
+              "worst_exit_pnl_jpy": -46561.236853,
+              "win_rate_pct": 54.7619,
+              "negative_pnl_exit_pct": 45.2381,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 33,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 42
+              }
+            },
+            "REC_X07_TIME_6H": {
+              "exits": 27,
+              "wins": 10,
+              "net_losses": 17,
+              "adverse_price_exits": 17,
+              "positive_pnl_jpy": 13348.607024,
+              "negative_pnl_jpy": -7782.055878,
+              "net_pnl_jpy": 5566.551147,
+              "worst_exit_pnl_jpy": -1880.551469,
+              "win_rate_pct": 37.037,
+              "negative_pnl_exit_pct": 62.963,
+              "adverse_exit_price_direction_pct": 62.963,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 27
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 27
+              }
+            },
+            "REC_X08_TIME_48H": {
+              "exits": 13,
+              "wins": 6,
+              "net_losses": 7,
+              "adverse_price_exits": 7,
+              "positive_pnl_jpy": 256575.46214,
+              "negative_pnl_jpy": -56649.977135,
+              "net_pnl_jpy": 199925.485005,
+              "worst_exit_pnl_jpy": -27492.332577,
+              "win_rate_pct": 46.1538,
+              "negative_pnl_exit_pct": 53.8462,
+              "adverse_exit_price_direction_pct": 53.8462,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 9,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 13
+              }
+            },
+            "REC_X09_TIME_48H": {
+              "exits": 17,
+              "wins": 13,
+              "net_losses": 4,
+              "adverse_price_exits": 4,
+              "positive_pnl_jpy": 32250.929455,
+              "negative_pnl_jpy": -6109.378443,
+              "net_pnl_jpy": 26141.551012,
+              "worst_exit_pnl_jpy": -3058.501517,
+              "win_rate_pct": 76.4706,
+              "negative_pnl_exit_pct": 23.5294,
+              "adverse_exit_price_direction_pct": 23.5294,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 7,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 10
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 17
+              }
+            },
+            "REC_X10_TIME_48H": {
+              "exits": 20,
+              "wins": 14,
+              "net_losses": 6,
+              "adverse_price_exits": 5,
+              "positive_pnl_jpy": 342720.45285,
+              "negative_pnl_jpy": -188452.257801,
+              "net_pnl_jpy": 154268.195048,
+              "worst_exit_pnl_jpy": -163021.275589,
+              "win_rate_pct": 70.0,
+              "negative_pnl_exit_pct": 30.0,
+              "adverse_exit_price_direction_pct": 25.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 16,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 20
+              }
+            },
+            "REC_X11_TIME_48H": {
+              "exits": 7,
+              "wins": 3,
+              "net_losses": 4,
+              "adverse_price_exits": 4,
+              "positive_pnl_jpy": 17303.26412,
+              "negative_pnl_jpy": -60009.092858,
+              "net_pnl_jpy": -42705.828738,
+              "worst_exit_pnl_jpy": -47907.572237,
+              "win_rate_pct": 42.8571,
+              "negative_pnl_exit_pct": 57.1429,
+              "adverse_exit_price_direction_pct": 57.1429,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 7
+              }
+            },
+            "REC_X12_TIME_12H": {
+              "exits": 25,
+              "wins": 12,
+              "net_losses": 13,
+              "adverse_price_exits": 13,
+              "positive_pnl_jpy": 132296.200006,
+              "negative_pnl_jpy": -32480.775688,
+              "net_pnl_jpy": 99815.424319,
+              "worst_exit_pnl_jpy": -24814.455778,
+              "win_rate_pct": 48.0,
+              "negative_pnl_exit_pct": 52.0,
+              "adverse_exit_price_direction_pct": 52.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 24,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 25
+              }
+            },
+            "REC_X13_TP1.5_SL1_H24": {
+              "exits": 35,
+              "wins": 20,
+              "net_losses": 15,
+              "adverse_price_exits": 15,
+              "positive_pnl_jpy": 45576.84877,
+              "negative_pnl_jpy": -38681.317663,
+              "net_pnl_jpy": 6895.531107,
+              "worst_exit_pnl_jpy": -11591.80398,
+              "win_rate_pct": 57.1429,
+              "negative_pnl_exit_pct": 42.8571,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 15,
+                "V4_NATIVE_TP": 20
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 35
+              }
+            },
+            "REC_X14_TIME_48H": {
+              "exits": 10,
+              "wins": 8,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 91043.86091,
+              "negative_pnl_jpy": -18881.678008,
+              "net_pnl_jpy": 72162.182902,
+              "worst_exit_pnl_jpy": -10932.147141,
+              "win_rate_pct": 80.0,
+              "negative_pnl_exit_pct": 20.0,
+              "adverse_exit_price_direction_pct": 20.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 9,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 10
+              }
+            },
+            "REC_Y01_REV_D0_T72": {
+              "exits": 11,
+              "wins": 11,
+              "net_losses": 0,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 121598.541164,
+              "negative_pnl_jpy": 0.0,
+              "net_pnl_jpy": 121598.541164,
+              "worst_exit_pnl_jpy": 633.321104,
+              "win_rate_pct": 100.0,
+              "negative_pnl_exit_pct": 0.0,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 11
+              }
+            },
+            "REC_Y02_REV_D0_T12": {
+              "exits": 13,
+              "wins": 11,
+              "net_losses": 2,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 334741.671146,
+              "negative_pnl_jpy": -4124.172047,
+              "net_pnl_jpy": 330617.499098,
+              "worst_exit_pnl_jpy": -2194.098397,
+              "win_rate_pct": 84.6154,
+              "negative_pnl_exit_pct": 15.3846,
+              "adverse_exit_price_direction_pct": 7.6923,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 13
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 13
+              }
+            },
+            "REC_Y03_REV_D0_T36": {
+              "exits": 14,
+              "wins": 8,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 168688.040177,
+              "negative_pnl_jpy": -29328.252153,
+              "net_pnl_jpy": 139359.788024,
+              "worst_exit_pnl_jpy": -20894.218304,
+              "win_rate_pct": 57.1429,
+              "negative_pnl_exit_pct": 42.8571,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 10,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 14
+              }
+            },
+            "REC_Y06_REV_D0_T72": {
+              "exits": 117,
+              "wins": 82,
+              "net_losses": 35,
+              "adverse_price_exits": 35,
+              "positive_pnl_jpy": 1465130.682237,
+              "negative_pnl_jpy": -799217.980425,
+              "net_pnl_jpy": 665912.701812,
+              "worst_exit_pnl_jpy": -193944.154071,
+              "win_rate_pct": 70.0855,
+              "negative_pnl_exit_pct": 29.9145,
+              "adverse_exit_price_direction_pct": 29.9145,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 86,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 18,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 13
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 117
+              }
+            },
+            "REC_Y07_REV_D0_T72": {
+              "exits": 7,
+              "wins": 5,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 451110.118476,
+              "negative_pnl_jpy": -6154.847795,
+              "net_pnl_jpy": 444955.270681,
+              "worst_exit_pnl_jpy": -5391.977585,
+              "win_rate_pct": 71.4286,
+              "negative_pnl_exit_pct": 28.5714,
+              "adverse_exit_price_direction_pct": 28.5714,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 7
+              }
+            },
+            "REC_Y08_REV_D0_T6": {
+              "exits": 11,
+              "wins": 7,
+              "net_losses": 4,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 4410.662558,
+              "negative_pnl_jpy": -765.223311,
+              "net_pnl_jpy": 3645.439247,
+              "worst_exit_pnl_jpy": -519.563783,
+              "win_rate_pct": 63.6364,
+              "negative_pnl_exit_pct": 36.3636,
+              "adverse_exit_price_direction_pct": 27.2727,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 11
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 11
+              }
+            },
+            "REC_Y11_REV_D0_T36": {
+              "exits": 15,
+              "wins": 9,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 36865.440165,
+              "negative_pnl_jpy": -12102.28721,
+              "net_pnl_jpy": 24763.152955,
+              "worst_exit_pnl_jpy": -6037.17464,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_Y12_REV_D0_T24": {
+              "exits": 12,
+              "wins": 9,
+              "net_losses": 3,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 646595.187542,
+              "negative_pnl_jpy": -1100.471615,
+              "net_pnl_jpy": 645494.715927,
+              "worst_exit_pnl_jpy": -798.299856,
+              "win_rate_pct": 75.0,
+              "negative_pnl_exit_pct": 25.0,
+              "adverse_exit_price_direction_pct": 25.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 12
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 12
+              }
+            },
+            "REC_Y15_REV_D0_T3": {
+              "exits": 6,
+              "wins": 4,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 371.702428,
+              "negative_pnl_jpy": -132.53842,
+              "net_pnl_jpy": 239.164007,
+              "worst_exit_pnl_jpy": -69.159932,
+              "win_rate_pct": 66.6667,
+              "negative_pnl_exit_pct": 33.3333,
+              "adverse_exit_price_direction_pct": 33.3333,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 6
+              }
+            },
+            "REC_Y16_REV_D0_T6": {
+              "exits": 4,
+              "wins": 4,
+              "net_losses": 0,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 10605.234787,
+              "negative_pnl_jpy": 0.0,
+              "net_pnl_jpy": 10605.234787,
+              "worst_exit_pnl_jpy": 71.786877,
+              "win_rate_pct": 100.0,
+              "negative_pnl_exit_pct": 0.0,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 4
+              }
+            }
+          },
+          "symbols": {
+            "AAVEUSDT": {
+              "exits": 56,
+              "wins": 33,
+              "net_losses": 23,
+              "adverse_price_exits": 23,
+              "positive_pnl_jpy": 340109.710997,
+              "negative_pnl_jpy": -162658.905414,
+              "net_pnl_jpy": 177450.805583,
+              "worst_exit_pnl_jpy": -37511.029781,
+              "win_rate_pct": 58.9286,
+              "negative_pnl_exit_pct": 41.0714,
+              "adverse_exit_price_direction_pct": 41.0714,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 39,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 56
+              }
+            },
+            "ADAUSDT": {
+              "exits": 92,
+              "wins": 66,
+              "net_losses": 26,
+              "adverse_price_exits": 24,
+              "positive_pnl_jpy": 2081803.567364,
+              "negative_pnl_jpy": -226401.21539,
+              "net_pnl_jpy": 1855402.351973,
+              "worst_exit_pnl_jpy": -163021.275589,
+              "win_rate_pct": 71.7391,
+              "negative_pnl_exit_pct": 28.2609,
+              "adverse_exit_price_direction_pct": 26.087,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 6,
+                "V4_NATIVE_TAKE_PROFIT": 2,
+                "V4_NATIVE_TIME": 66,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 7,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 92
+              }
+            },
+            "ATOMUSDT": {
+              "exits": 38,
+              "wins": 19,
+              "net_losses": 19,
+              "adverse_price_exits": 18,
+              "positive_pnl_jpy": 516092.315293,
+              "negative_pnl_jpy": -244559.732087,
+              "net_pnl_jpy": 271532.583206,
+              "worst_exit_pnl_jpy": -49267.151009,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 47.3684,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 25,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 38
+              }
+            },
+            "AVAXUSDT": {
+              "exits": 41,
+              "wins": 27,
+              "net_losses": 14,
+              "adverse_price_exits": 14,
+              "positive_pnl_jpy": 451950.030896,
+              "negative_pnl_jpy": -45191.117334,
+              "net_pnl_jpy": 406758.913561,
+              "worst_exit_pnl_jpy": -17056.176268,
+              "win_rate_pct": 65.8537,
+              "negative_pnl_exit_pct": 34.1463,
+              "adverse_exit_price_direction_pct": 34.1463,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 25,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 41
+              }
+            },
+            "BNBUSDT": {
+              "exits": 62,
+              "wins": 33,
+              "net_losses": 29,
+              "adverse_price_exits": 28,
+              "positive_pnl_jpy": 190499.763703,
+              "negative_pnl_jpy": -135620.65419,
+              "net_pnl_jpy": 54879.109513,
+              "worst_exit_pnl_jpy": -48056.575853,
+              "win_rate_pct": 53.2258,
+              "negative_pnl_exit_pct": 46.7742,
+              "adverse_exit_price_direction_pct": 45.1613,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 44,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 62
+              }
+            },
+            "BTCUSDT": {
+              "exits": 68,
+              "wins": 40,
+              "net_losses": 28,
+              "adverse_price_exits": 28,
+              "positive_pnl_jpy": 159337.74852,
+              "negative_pnl_jpy": -102915.415394,
+              "net_pnl_jpy": 56422.333126,
+              "worst_exit_pnl_jpy": -24814.455778,
+              "win_rate_pct": 58.8235,
+              "negative_pnl_exit_pct": 41.1765,
+              "adverse_exit_price_direction_pct": 41.1765,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 57,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 68
+              }
+            },
+            "DOGEUSDT": {
+              "exits": 73,
+              "wins": 42,
+              "net_losses": 31,
+              "adverse_price_exits": 30,
+              "positive_pnl_jpy": 216309.230035,
+              "negative_pnl_jpy": -234518.114864,
+              "net_pnl_jpy": -18208.884829,
+              "worst_exit_pnl_jpy": -58808.483957,
+              "win_rate_pct": 57.5342,
+              "negative_pnl_exit_pct": 42.4658,
+              "adverse_exit_price_direction_pct": 41.0959,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 54,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 73
+              }
+            },
+            "ETHUSDT": {
+              "exits": 68,
+              "wins": 43,
+              "net_losses": 25,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 343207.787531,
+              "negative_pnl_jpy": -48296.72985,
+              "net_pnl_jpy": 294911.057681,
+              "worst_exit_pnl_jpy": -7107.911131,
+              "win_rate_pct": 63.2353,
+              "negative_pnl_exit_pct": 36.7647,
+              "adverse_exit_price_direction_pct": 32.3529,
+              "exit_reasons": {
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 47,
+                "V4_NATIVE_TP": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 68
+              }
+            },
+            "INJUSDT": {
+              "exits": 44,
+              "wins": 26,
+              "net_losses": 18,
+              "adverse_price_exits": 18,
+              "positive_pnl_jpy": 1128240.263159,
+              "negative_pnl_jpy": -511389.161507,
+              "net_pnl_jpy": 616851.101652,
+              "worst_exit_pnl_jpy": -190297.914018,
+              "win_rate_pct": 59.0909,
+              "negative_pnl_exit_pct": 40.9091,
+              "adverse_exit_price_direction_pct": 40.9091,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 24,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 44
+              }
+            },
+            "LINKUSDT": {
+              "exits": 34,
+              "wins": 18,
+              "net_losses": 16,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 152426.547515,
+              "negative_pnl_jpy": -26655.520628,
+              "net_pnl_jpy": 125771.026887,
+              "worst_exit_pnl_jpy": -16345.701305,
+              "win_rate_pct": 52.9412,
+              "negative_pnl_exit_pct": 47.0588,
+              "adverse_exit_price_direction_pct": 47.0588,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 23,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 34
+              }
+            },
+            "LTCUSDT": {
+              "exits": 24,
+              "wins": 12,
+              "net_losses": 12,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 105669.030576,
+              "negative_pnl_jpy": -88449.484629,
+              "net_pnl_jpy": 17219.545947,
+              "worst_exit_pnl_jpy": -50653.443688,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_TIME": 16,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 24
+              }
+            },
+            "NEARUSDT": {
+              "exits": 70,
+              "wins": 54,
+              "net_losses": 16,
+              "adverse_price_exits": 15,
+              "positive_pnl_jpy": 980201.722645,
+              "negative_pnl_jpy": -263744.566842,
+              "net_pnl_jpy": 716457.155803,
+              "worst_exit_pnl_jpy": -193944.154071,
+              "win_rate_pct": 77.1429,
+              "negative_pnl_exit_pct": 22.8571,
+              "adverse_exit_price_direction_pct": 21.4286,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 52,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 70
+              }
+            },
+            "SOLUSDT": {
+              "exits": 66,
+              "wins": 41,
+              "net_losses": 25,
+              "adverse_price_exits": 25,
+              "positive_pnl_jpy": 336524.804716,
+              "negative_pnl_jpy": -307992.335493,
+              "net_pnl_jpy": 28532.469223,
+              "worst_exit_pnl_jpy": -61135.893656,
+              "win_rate_pct": 62.1212,
+              "negative_pnl_exit_pct": 37.8788,
+              "adverse_exit_price_direction_pct": 37.8788,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 40,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 9,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 66
+              }
+            },
+            "XRPUSDT": {
+              "exits": 65,
+              "wins": 40,
+              "net_losses": 25,
+              "adverse_price_exits": 24,
+              "positive_pnl_jpy": 99285.004621,
+              "negative_pnl_jpy": -210787.709822,
+              "net_pnl_jpy": -111502.705201,
+              "worst_exit_pnl_jpy": -140488.63281,
+              "win_rate_pct": 61.5385,
+              "negative_pnl_exit_pct": 38.4615,
+              "adverse_exit_price_direction_pct": 36.9231,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 47,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 7
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 65
+              }
+            }
+          },
+          "entry_months": {
+            "2025-10": {
+              "exits": 90,
+              "wins": 54,
+              "net_losses": 36,
+              "adverse_price_exits": 35,
+              "positive_pnl_jpy": 8206.392339,
+              "negative_pnl_jpy": -5570.836382,
+              "net_pnl_jpy": 2635.555958,
+              "worst_exit_pnl_jpy": -798.299856,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 38.8889,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 5,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 57,
+                "V4_NATIVE_TP": 5,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 90
+              }
+            },
+            "2025-11": {
+              "exits": 129,
+              "wins": 74,
+              "net_losses": 55,
+              "adverse_price_exits": 53,
+              "positive_pnl_jpy": 35387.113822,
+              "negative_pnl_jpy": -16904.050649,
+              "net_pnl_jpy": 18483.063173,
+              "worst_exit_pnl_jpy": -1613.154389,
+              "win_rate_pct": 57.3643,
+              "negative_pnl_exit_pct": 42.6357,
+              "adverse_exit_price_direction_pct": 41.0853,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 9,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 82,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 12,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 14
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 129
+              }
+            },
+            "2025-12": {
+              "exits": 66,
+              "wins": 35,
+              "net_losses": 31,
+              "adverse_price_exits": 31,
+              "positive_pnl_jpy": 32643.064,
+              "negative_pnl_jpy": -17678.803205,
+              "net_pnl_jpy": 14964.260795,
+              "worst_exit_pnl_jpy": -2748.67273,
+              "win_rate_pct": 53.0303,
+              "negative_pnl_exit_pct": 46.9697,
+              "adverse_exit_price_direction_pct": 46.9697,
+              "exit_reasons": {
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_TIME": 43,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 10,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 66
+              }
+            },
+            "2026-01": {
+              "exits": 94,
+              "wins": 66,
+              "net_losses": 28,
+              "adverse_price_exits": 27,
+              "positive_pnl_jpy": 87533.307684,
+              "negative_pnl_jpy": -18161.814586,
+              "net_pnl_jpy": 69371.493097,
+              "worst_exit_pnl_jpy": -2998.568374,
+              "win_rate_pct": 70.2128,
+              "negative_pnl_exit_pct": 29.7872,
+              "adverse_exit_price_direction_pct": 28.7234,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 74,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 94
+              }
+            },
+            "2026-02": {
+              "exits": 113,
+              "wins": 70,
+              "net_losses": 43,
+              "adverse_price_exits": 42,
+              "positive_pnl_jpy": 413794.561945,
+              "negative_pnl_jpy": -120149.873384,
+              "net_pnl_jpy": 293644.688561,
+              "worst_exit_pnl_jpy": -14007.787543,
+              "win_rate_pct": 61.9469,
+              "negative_pnl_exit_pct": 38.0531,
+              "adverse_exit_price_direction_pct": 37.1681,
+              "exit_reasons": {
+                "V4_CORE_STOP": 3,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 77,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 11,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 11,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 7
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 113
+              }
+            },
+            "2026-03": {
+              "exits": 53,
+              "wins": 34,
+              "net_losses": 19,
+              "adverse_price_exits": 19,
+              "positive_pnl_jpy": 242551.94451,
+              "negative_pnl_jpy": -94812.320518,
+              "net_pnl_jpy": 147739.623993,
+              "worst_exit_pnl_jpy": -15572.600566,
+              "win_rate_pct": 64.1509,
+              "negative_pnl_exit_pct": 35.8491,
+              "adverse_exit_price_direction_pct": 35.8491,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 49,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 53
+              }
+            },
+            "2026-04": {
+              "exits": 39,
+              "wins": 22,
+              "net_losses": 17,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 183060.933724,
+              "negative_pnl_jpy": -89720.672602,
+              "net_pnl_jpy": 93340.261122,
+              "worst_exit_pnl_jpy": -33977.436603,
+              "win_rate_pct": 56.4103,
+              "negative_pnl_exit_pct": 43.5897,
+              "adverse_exit_price_direction_pct": 41.0256,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_TIME": 28,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 39
+              }
+            },
+            "2026-05": {
+              "exits": 34,
+              "wins": 22,
+              "net_losses": 12,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 360369.043329,
+              "negative_pnl_jpy": -112118.259021,
+              "net_pnl_jpy": 248250.784308,
+              "worst_exit_pnl_jpy": -32193.95395,
+              "win_rate_pct": 64.7059,
+              "negative_pnl_exit_pct": 35.2941,
+              "adverse_exit_price_direction_pct": 35.2941,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_TIME": 26,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 34
+              }
+            },
+            "2026-06": {
+              "exits": 118,
+              "wins": 83,
+              "net_losses": 35,
+              "adverse_price_exits": 33,
+              "positive_pnl_jpy": 3377406.438629,
+              "negative_pnl_jpy": -490658.877376,
+              "net_pnl_jpy": 2886747.561253,
+              "worst_exit_pnl_jpy": -50653.443688,
+              "win_rate_pct": 70.339,
+              "negative_pnl_exit_pct": 29.661,
+              "adverse_exit_price_direction_pct": 27.9661,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 8,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 76,
+                "V4_NATIVE_TP": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 12,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 8
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 118
+              }
+            },
+            "2026-07": {
+              "exits": 46,
+              "wins": 26,
+              "net_losses": 20,
+              "adverse_price_exits": 20,
+              "positive_pnl_jpy": 2160552.371045,
+              "negative_pnl_jpy": -706910.795355,
+              "net_pnl_jpy": 1453641.575689,
+              "worst_exit_pnl_jpy": -61135.893656,
+              "win_rate_pct": 56.5217,
+              "negative_pnl_exit_pct": 43.4783,
+              "adverse_exit_price_direction_pct": 43.4783,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 31,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 4,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 46
+              }
+            },
+            "2026-08": {
+              "exits": 19,
+              "wins": 8,
+              "net_losses": 11,
+              "adverse_price_exits": 9,
+              "positive_pnl_jpy": 200152.356541,
+              "negative_pnl_jpy": -936494.360365,
+              "net_pnl_jpy": -736342.003824,
+              "worst_exit_pnl_jpy": -193944.154071,
+              "win_rate_pct": 42.1053,
+              "negative_pnl_exit_pct": 57.8947,
+              "adverse_exit_price_direction_pct": 47.3684,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_TIME": 16,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 19
+              }
+            }
+          }
+        },
+        "HYPE": {
+          "research_source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+          "current_live_source_matches": false,
+          "requires_live_code_reexecution": true,
+          "total": {
+            "exits": 5,
+            "wins": 3,
+            "net_losses": 2,
+            "adverse_price_exits": 2,
+            "positive_pnl_jpy": 451521.198762,
+            "negative_pnl_jpy": -17525.042732,
+            "net_pnl_jpy": 433996.15603,
+            "worst_exit_pnl_jpy": -14100.45769,
+            "win_rate_pct": 60.0,
+            "negative_pnl_exit_pct": 40.0,
+            "adverse_exit_price_direction_pct": 40.0,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 2,
+              "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+            },
+            "model_classes": {
+              "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+              "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+            }
+          },
+          "routes": {
+            "HYPE_REDESIGN_CAUSAL_H48R4_WSIG": {
+              "exits": 5,
+              "wins": 3,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 451521.198762,
+              "negative_pnl_jpy": -17525.042732,
+              "net_pnl_jpy": 433996.15603,
+              "worst_exit_pnl_jpy": -14100.45769,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 2,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+              }
+            }
+          },
+          "symbols": {
+            "HYPEUSDT": {
+              "exits": 5,
+              "wins": 3,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 451521.198762,
+              "negative_pnl_jpy": -17525.042732,
+              "net_pnl_jpy": 433996.15603,
+              "worst_exit_pnl_jpy": -14100.45769,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 2,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+              }
+            }
+          },
+          "entry_months": {
+            "2026-02": {
+              "exits": 1,
+              "wins": 0,
+              "net_losses": 1,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 0.0,
+              "negative_pnl_jpy": -3424.585042,
+              "net_pnl_jpy": -3424.585042,
+              "worst_exit_pnl_jpy": -3424.585042,
+              "win_rate_pct": 0.0,
+              "negative_pnl_exit_pct": 100.0,
+              "adverse_exit_price_direction_pct": 100.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 1
+              },
+              "model_classes": {
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+              }
+            },
+            "2026-08": {
+              "exits": 2,
+              "wins": 1,
+              "net_losses": 1,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 22717.86925,
+              "negative_pnl_jpy": -14100.45769,
+              "net_pnl_jpy": 8617.41156,
+              "worst_exit_pnl_jpy": -14100.45769,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 1,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 1,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+              }
+            },
+            "2026-09": {
+              "exits": 2,
+              "wins": 2,
+              "net_losses": 0,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 428803.329512,
+              "negative_pnl_jpy": 0.0,
+              "net_pnl_jpy": 428803.329512,
+              "worst_exit_pnl_jpy": 133215.143317,
+              "win_rate_pct": 100.0,
+              "negative_pnl_exit_pct": 0.0,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "30": {
+      "fills_source_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+      "source_modeled_exits": 1023,
+      "by_model": {
+        "V4": {
+          "research_source_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "observed_live_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+          "current_live_source_matches": false,
+          "requires_live_code_reexecution": true,
+          "total": {
+            "exits": 797,
+            "wins": 467,
+            "net_losses": 330,
+            "adverse_price_exits": 293,
+            "positive_pnl_jpy": 3312335.37554,
+            "negative_pnl_jpy": -1165936.604378,
+            "net_pnl_jpy": 2146398.771162,
+            "worst_exit_pnl_jpy": -71756.174547,
+            "win_rate_pct": 58.5947,
+            "negative_pnl_exit_pct": 41.4053,
+            "adverse_exit_price_direction_pct": 36.7629,
+            "exit_reasons": {
+              "V4_CORE_STOP": 10,
+              "V4_CORE_TAKE_PROFIT": 2,
+              "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 19,
+              "V4_NATIVE_STOP": 25,
+              "V4_NATIVE_TAKE_PROFIT": 3,
+              "V4_NATIVE_TIME": 557,
+              "V4_NATIVE_TP": 20,
+              "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 44,
+              "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 15,
+              "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 58,
+              "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 44
+            },
+            "model_classes": {
+              "PINNED_ENTRY_H1_APPROX_EXIT": 797
+            }
+          },
+          "routes": {
+            "CONT_SHORT_MID_AGE24_48": {
+              "exits": 17,
+              "wins": 12,
+              "net_losses": 5,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 11386.813145,
+              "negative_pnl_jpy": -4882.473033,
+              "net_pnl_jpy": 6504.340111,
+              "worst_exit_pnl_jpy": -4297.724394,
+              "win_rate_pct": 70.5882,
+              "negative_pnl_exit_pct": 29.4118,
+              "adverse_exit_price_direction_pct": 17.6471,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 17
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 17
+              }
+            },
+            "FAILED_BREAK_REV_SHORT_6H": {
+              "exits": 31,
+              "wins": 14,
+              "net_losses": 17,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 178366.463174,
+              "negative_pnl_jpy": -140940.905484,
+              "net_pnl_jpy": 37425.55769,
+              "worst_exit_pnl_jpy": -61982.327007,
+              "win_rate_pct": 45.1613,
+              "negative_pnl_exit_pct": 54.8387,
+              "adverse_exit_price_direction_pct": 38.7097,
+              "exit_reasons": {
+                "V4_CORE_STOP": 10,
+                "V4_CORE_TAKE_PROFIT": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 19
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 31
+              }
+            },
+            "REC_G1_MID_REL_LOWVOL": {
+              "exits": 15,
+              "wins": 9,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 33157.110478,
+              "negative_pnl_jpy": -10408.143113,
+              "net_pnl_jpy": 22748.967364,
+              "worst_exit_pnl_jpy": -3758.215861,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_G2_EARLY_BTC_OPPOSE_VOL": {
+              "exits": 43,
+              "wins": 25,
+              "net_losses": 18,
+              "adverse_price_exits": 17,
+              "positive_pnl_jpy": 76408.968405,
+              "negative_pnl_jpy": -17963.89565,
+              "net_pnl_jpy": 58445.072756,
+              "worst_exit_pnl_jpy": -6652.868022,
+              "win_rate_pct": 58.1395,
+              "negative_pnl_exit_pct": 41.8605,
+              "adverse_exit_price_direction_pct": 39.5349,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 43
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 43
+              }
+            },
+            "REC_G3_LATE_BTC_REL": {
+              "exits": 57,
+              "wins": 29,
+              "net_losses": 28,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 52870.050035,
+              "negative_pnl_jpy": -73676.129221,
+              "net_pnl_jpy": -20806.079186,
+              "worst_exit_pnl_jpy": -21293.480184,
+              "win_rate_pct": 50.8772,
+              "negative_pnl_exit_pct": 49.1228,
+              "adverse_exit_price_direction_pct": 38.5965,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 10,
+                "V4_NATIVE_TAKE_PROFIT": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 44
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 57
+              }
+            },
+            "REC_G4_MATURE_REL_RANGE": {
+              "exits": 15,
+              "wins": 7,
+              "net_losses": 8,
+              "adverse_price_exits": 8,
+              "positive_pnl_jpy": 271960.431771,
+              "negative_pnl_jpy": -94387.985058,
+              "net_pnl_jpy": 177572.446713,
+              "worst_exit_pnl_jpy": -30760.948989,
+              "win_rate_pct": 46.6667,
+              "negative_pnl_exit_pct": 53.3333,
+              "adverse_exit_price_direction_pct": 53.3333,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 14,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_G5_SLOW_TREND": {
+              "exits": 33,
+              "wins": 17,
+              "net_losses": 16,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 48384.769779,
+              "negative_pnl_jpy": -33912.423022,
+              "net_pnl_jpy": 14472.346757,
+              "worst_exit_pnl_jpy": -9412.280718,
+              "win_rate_pct": 51.5152,
+              "negative_pnl_exit_pct": 48.4848,
+              "adverse_exit_price_direction_pct": 48.4848,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 27,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 33
+              }
+            },
+            "REC_X01_TIME_24H": {
+              "exits": 20,
+              "wins": 16,
+              "net_losses": 4,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 110875.696501,
+              "negative_pnl_jpy": -21832.469681,
+              "net_pnl_jpy": 89043.22682,
+              "worst_exit_pnl_jpy": -17789.784275,
+              "win_rate_pct": 80.0,
+              "negative_pnl_exit_pct": 20.0,
+              "adverse_exit_price_direction_pct": 15.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 20
+              }
+            },
+            "REC_X02_TIME_36H": {
+              "exits": 46,
+              "wins": 25,
+              "net_losses": 21,
+              "adverse_price_exits": 19,
+              "positive_pnl_jpy": 119778.546665,
+              "negative_pnl_jpy": -70171.121506,
+              "net_pnl_jpy": 49607.425159,
+              "worst_exit_pnl_jpy": -26519.860113,
+              "win_rate_pct": 54.3478,
+              "negative_pnl_exit_pct": 45.6522,
+              "adverse_exit_price_direction_pct": 41.3043,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 37,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 46
+              }
+            },
+            "REC_X03_TIME_12H": {
+              "exits": 41,
+              "wins": 22,
+              "net_losses": 19,
+              "adverse_price_exits": 14,
+              "positive_pnl_jpy": 100886.283533,
+              "negative_pnl_jpy": -35788.326602,
+              "net_pnl_jpy": 65097.95693,
+              "worst_exit_pnl_jpy": -19152.019133,
+              "win_rate_pct": 53.6585,
+              "negative_pnl_exit_pct": 46.3415,
+              "adverse_exit_price_direction_pct": 34.1463,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 41
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 41
+              }
+            },
+            "REC_X04_TIME_24H": {
+              "exits": 33,
+              "wins": 21,
+              "net_losses": 12,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 93619.324923,
+              "negative_pnl_jpy": -110024.134982,
+              "net_pnl_jpy": -16404.81006,
+              "worst_exit_pnl_jpy": -28946.851714,
+              "win_rate_pct": 63.6364,
+              "negative_pnl_exit_pct": 36.3636,
+              "adverse_exit_price_direction_pct": 36.3636,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 20,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 33
+              }
+            },
+            "REC_X05_TIME_36H": {
+              "exits": 44,
+              "wins": 21,
+              "net_losses": 23,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 134331.175045,
+              "negative_pnl_jpy": -81966.209192,
+              "net_pnl_jpy": 52364.965854,
+              "worst_exit_pnl_jpy": -25495.490276,
+              "win_rate_pct": 47.7273,
+              "negative_pnl_exit_pct": 52.2727,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 33,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 44
+              }
+            },
+            "REC_X06_TIME_12H": {
+              "exits": 42,
+              "wins": 22,
+              "net_losses": 20,
+              "adverse_price_exits": 18,
+              "positive_pnl_jpy": 105363.547101,
+              "negative_pnl_jpy": -59429.857636,
+              "net_pnl_jpy": 45933.689465,
+              "worst_exit_pnl_jpy": -21326.51252,
+              "win_rate_pct": 52.381,
+              "negative_pnl_exit_pct": 47.619,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 33,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 42
+              }
+            },
+            "REC_X07_TIME_6H": {
+              "exits": 27,
+              "wins": 10,
+              "net_losses": 17,
+              "adverse_price_exits": 17,
+              "positive_pnl_jpy": 6692.10398,
+              "negative_pnl_jpy": -5134.375059,
+              "net_pnl_jpy": 1557.728921,
+              "worst_exit_pnl_jpy": -1065.809552,
+              "win_rate_pct": 37.037,
+              "negative_pnl_exit_pct": 62.963,
+              "adverse_exit_price_direction_pct": 62.963,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 27
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 27
+              }
+            },
+            "REC_X08_TIME_48H": {
+              "exits": 13,
+              "wins": 6,
+              "net_losses": 7,
+              "adverse_price_exits": 7,
+              "positive_pnl_jpy": 113516.119565,
+              "negative_pnl_jpy": -32067.965454,
+              "net_pnl_jpy": 81448.154111,
+              "worst_exit_pnl_jpy": -14526.116504,
+              "win_rate_pct": 46.1538,
+              "negative_pnl_exit_pct": 53.8462,
+              "adverse_exit_price_direction_pct": 53.8462,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 9,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 13
+              }
+            },
+            "REC_X09_TIME_48H": {
+              "exits": 17,
+              "wins": 11,
+              "net_losses": 6,
+              "adverse_price_exits": 4,
+              "positive_pnl_jpy": 10926.389979,
+              "negative_pnl_jpy": -5704.621408,
+              "net_pnl_jpy": 5221.768571,
+              "worst_exit_pnl_jpy": -2861.739825,
+              "win_rate_pct": 64.7059,
+              "negative_pnl_exit_pct": 35.2941,
+              "adverse_exit_price_direction_pct": 23.5294,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 7,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 10
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 17
+              }
+            },
+            "REC_X10_TIME_48H": {
+              "exits": 20,
+              "wins": 14,
+              "net_losses": 6,
+              "adverse_price_exits": 5,
+              "positive_pnl_jpy": 155065.71953,
+              "negative_pnl_jpy": -89049.371722,
+              "net_pnl_jpy": 66016.347807,
+              "worst_exit_pnl_jpy": -71756.174547,
+              "win_rate_pct": 70.0,
+              "negative_pnl_exit_pct": 30.0,
+              "adverse_exit_price_direction_pct": 25.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 16,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 20
+              }
+            },
+            "REC_X11_TIME_48H": {
+              "exits": 7,
+              "wins": 3,
+              "net_losses": 4,
+              "adverse_price_exits": 4,
+              "positive_pnl_jpy": 11336.489344,
+              "negative_pnl_jpy": -33525.138525,
+              "net_pnl_jpy": -22188.649182,
+              "worst_exit_pnl_jpy": -25146.935149,
+              "win_rate_pct": 42.8571,
+              "negative_pnl_exit_pct": 57.1429,
+              "adverse_exit_price_direction_pct": 57.1429,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 7
+              }
+            },
+            "REC_X12_TIME_12H": {
+              "exits": 25,
+              "wins": 12,
+              "net_losses": 13,
+              "adverse_price_exits": 13,
+              "positive_pnl_jpy": 60181.566592,
+              "negative_pnl_jpy": -19955.510141,
+              "net_pnl_jpy": 40226.056451,
+              "worst_exit_pnl_jpy": -13312.647426,
+              "win_rate_pct": 48.0,
+              "negative_pnl_exit_pct": 52.0,
+              "adverse_exit_price_direction_pct": 52.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 24,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 25
+              }
+            },
+            "REC_X13_TP1.5_SL1_H24": {
+              "exits": 35,
+              "wins": 20,
+              "net_losses": 15,
+              "adverse_price_exits": 15,
+              "positive_pnl_jpy": 21834.94888,
+              "negative_pnl_jpy": -21999.910152,
+              "net_pnl_jpy": -164.961272,
+              "worst_exit_pnl_jpy": -6246.778493,
+              "win_rate_pct": 57.1429,
+              "negative_pnl_exit_pct": 42.8571,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 15,
+                "V4_NATIVE_TP": 20
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 35
+              }
+            },
+            "REC_X14_TIME_48H": {
+              "exits": 10,
+              "wins": 8,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 40680.786516,
+              "negative_pnl_jpy": -9295.410543,
+              "net_pnl_jpy": 31385.375973,
+              "worst_exit_pnl_jpy": -5336.892201,
+              "win_rate_pct": 80.0,
+              "negative_pnl_exit_pct": 20.0,
+              "adverse_exit_price_direction_pct": 20.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 9,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 10
+              }
+            },
+            "REC_Y01_REV_D0_T72": {
+              "exits": 11,
+              "wins": 10,
+              "net_losses": 1,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 56458.856885,
+              "negative_pnl_jpy": -38.007674,
+              "net_pnl_jpy": 56420.849211,
+              "worst_exit_pnl_jpy": -38.007674,
+              "win_rate_pct": 90.9091,
+              "negative_pnl_exit_pct": 9.0909,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 11
+              }
+            },
+            "REC_Y02_REV_D0_T12": {
+              "exits": 13,
+              "wins": 11,
+              "net_losses": 2,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 153449.964298,
+              "negative_pnl_jpy": -4952.14921,
+              "net_pnl_jpy": 148497.815088,
+              "worst_exit_pnl_jpy": -3535.478961,
+              "win_rate_pct": 84.6154,
+              "negative_pnl_exit_pct": 15.3846,
+              "adverse_exit_price_direction_pct": 7.6923,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 13
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 13
+              }
+            },
+            "REC_Y03_REV_D0_T36": {
+              "exits": 14,
+              "wins": 8,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 78078.72902,
+              "negative_pnl_jpy": -18269.965592,
+              "net_pnl_jpy": 59808.763428,
+              "worst_exit_pnl_jpy": -12101.335825,
+              "win_rate_pct": 57.1429,
+              "negative_pnl_exit_pct": 42.8571,
+              "adverse_exit_price_direction_pct": 42.8571,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 10,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 14
+              }
+            },
+            "REC_Y06_REV_D0_T72": {
+              "exits": 113,
+              "wins": 82,
+              "net_losses": 31,
+              "adverse_price_exits": 31,
+              "positive_pnl_jpy": 699983.251873,
+              "negative_pnl_jpy": -151765.648218,
+              "net_pnl_jpy": 548217.603655,
+              "worst_exit_pnl_jpy": -23925.036695,
+              "win_rate_pct": 72.5664,
+              "negative_pnl_exit_pct": 27.4336,
+              "adverse_exit_price_direction_pct": 27.4336,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 84,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 16,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 13
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 113
+              }
+            },
+            "REC_Y07_REV_D0_T72": {
+              "exits": 7,
+              "wins": 5,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 209005.378332,
+              "negative_pnl_jpy": -4392.886325,
+              "net_pnl_jpy": 204612.492007,
+              "worst_exit_pnl_jpy": -3701.191309,
+              "win_rate_pct": 71.4286,
+              "negative_pnl_exit_pct": 28.5714,
+              "adverse_exit_price_direction_pct": 28.5714,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 7
+              }
+            },
+            "REC_Y08_REV_D0_T6": {
+              "exits": 11,
+              "wins": 5,
+              "net_losses": 6,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 1549.179207,
+              "negative_pnl_jpy": -752.125714,
+              "net_pnl_jpy": 797.053494,
+              "worst_exit_pnl_jpy": -408.325265,
+              "win_rate_pct": 45.4545,
+              "negative_pnl_exit_pct": 54.5455,
+              "adverse_exit_price_direction_pct": 27.2727,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 11
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 11
+              }
+            },
+            "REC_Y11_REV_D0_T36": {
+              "exits": 15,
+              "wins": 9,
+              "net_losses": 6,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 22929.99694,
+              "negative_pnl_jpy": -8353.005116,
+              "net_pnl_jpy": 14576.991824,
+              "worst_exit_pnl_jpy": -3819.197621,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 15
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 15
+              }
+            },
+            "REC_Y12_REV_D0_T24": {
+              "exits": 12,
+              "wins": 7,
+              "net_losses": 5,
+              "adverse_price_exits": 3,
+              "positive_pnl_jpy": 328885.455241,
+              "negative_pnl_jpy": -5053.894781,
+              "net_pnl_jpy": 323831.560461,
+              "worst_exit_pnl_jpy": -3946.955119,
+              "win_rate_pct": 58.3333,
+              "negative_pnl_exit_pct": 41.6667,
+              "adverse_exit_price_direction_pct": 25.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 12
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 12
+              }
+            },
+            "REC_Y15_REV_D0_T3": {
+              "exits": 6,
+              "wins": 2,
+              "net_losses": 4,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 153.866453,
+              "negative_pnl_jpy": -242.544565,
+              "net_pnl_jpy": -88.678112,
+              "worst_exit_pnl_jpy": -89.994183,
+              "win_rate_pct": 33.3333,
+              "negative_pnl_exit_pct": 66.6667,
+              "adverse_exit_price_direction_pct": 33.3333,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 6
+              }
+            },
+            "REC_Y16_REV_D0_T6": {
+              "exits": 4,
+              "wins": 4,
+              "net_losses": 0,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 4217.392349,
+              "negative_pnl_jpy": 0.0,
+              "net_pnl_jpy": 4217.392349,
+              "worst_exit_pnl_jpy": 36.229075,
+              "win_rate_pct": 100.0,
+              "negative_pnl_exit_pct": 0.0,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 4
+              }
+            }
+          },
+          "symbols": {
+            "AAVEUSDT": {
+              "exits": 56,
+              "wins": 31,
+              "net_losses": 25,
+              "adverse_price_exits": 23,
+              "positive_pnl_jpy": 163331.233931,
+              "negative_pnl_jpy": -92266.878789,
+              "net_pnl_jpy": 71064.355142,
+              "worst_exit_pnl_jpy": -19354.513096,
+              "win_rate_pct": 55.3571,
+              "negative_pnl_exit_pct": 44.6429,
+              "adverse_exit_price_direction_pct": 41.0714,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 39,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 4
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 56
+              }
+            },
+            "ADAUSDT": {
+              "exits": 92,
+              "wins": 60,
+              "net_losses": 32,
+              "adverse_price_exits": 23,
+              "positive_pnl_jpy": 954801.13513,
+              "negative_pnl_jpy": -111715.977195,
+              "net_pnl_jpy": 843085.157935,
+              "worst_exit_pnl_jpy": -71756.174547,
+              "win_rate_pct": 65.2174,
+              "negative_pnl_exit_pct": 34.7826,
+              "adverse_exit_price_direction_pct": 25.0,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 6,
+                "V4_NATIVE_TAKE_PROFIT": 2,
+                "V4_NATIVE_TIME": 66,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 7,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 92
+              }
+            },
+            "ATOMUSDT": {
+              "exits": 38,
+              "wins": 18,
+              "net_losses": 20,
+              "adverse_price_exits": 18,
+              "positive_pnl_jpy": 217891.562008,
+              "negative_pnl_jpy": -138017.826267,
+              "net_pnl_jpy": 79873.735742,
+              "worst_exit_pnl_jpy": -26406.287474,
+              "win_rate_pct": 47.3684,
+              "negative_pnl_exit_pct": 52.6316,
+              "adverse_exit_price_direction_pct": 47.3684,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 25,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 38
+              }
+            },
+            "AVAXUSDT": {
+              "exits": 41,
+              "wins": 27,
+              "net_losses": 14,
+              "adverse_price_exits": 14,
+              "positive_pnl_jpy": 215168.036999,
+              "negative_pnl_jpy": -28948.088864,
+              "net_pnl_jpy": 186219.948135,
+              "worst_exit_pnl_jpy": -9412.280718,
+              "win_rate_pct": 65.8537,
+              "negative_pnl_exit_pct": 34.1463,
+              "adverse_exit_price_direction_pct": 34.1463,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 25,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 41
+              }
+            },
+            "BNBUSDT": {
+              "exits": 62,
+              "wins": 31,
+              "net_losses": 31,
+              "adverse_price_exits": 28,
+              "positive_pnl_jpy": 90039.151134,
+              "negative_pnl_jpy": -78051.047566,
+              "net_pnl_jpy": 11988.103567,
+              "worst_exit_pnl_jpy": -23925.036695,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 45.1613,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 44,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 62
+              }
+            },
+            "BTCUSDT": {
+              "exits": 68,
+              "wins": 39,
+              "net_losses": 29,
+              "adverse_price_exits": 28,
+              "positive_pnl_jpy": 83514.58983,
+              "negative_pnl_jpy": -62312.761015,
+              "net_pnl_jpy": 21201.828815,
+              "worst_exit_pnl_jpy": -13312.647426,
+              "win_rate_pct": 57.3529,
+              "negative_pnl_exit_pct": 42.6471,
+              "adverse_exit_price_direction_pct": 41.1765,
+              "exit_reasons": {
+                "V4_NATIVE_TIME": 57,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 68
+              }
+            },
+            "DOGEUSDT": {
+              "exits": 73,
+              "wins": 41,
+              "net_losses": 32,
+              "adverse_price_exits": 30,
+              "positive_pnl_jpy": 109722.957837,
+              "negative_pnl_jpy": -131874.648944,
+              "net_pnl_jpy": -22151.691107,
+              "worst_exit_pnl_jpy": -30760.948989,
+              "win_rate_pct": 56.1644,
+              "negative_pnl_exit_pct": 43.8356,
+              "adverse_exit_price_direction_pct": 41.0959,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 54,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 73
+              }
+            },
+            "ETHUSDT": {
+              "exits": 68,
+              "wins": 41,
+              "net_losses": 27,
+              "adverse_price_exits": 22,
+              "positive_pnl_jpy": 161716.491574,
+              "negative_pnl_jpy": -39040.580743,
+              "net_pnl_jpy": 122675.910832,
+              "worst_exit_pnl_jpy": -4199.176344,
+              "win_rate_pct": 60.2941,
+              "negative_pnl_exit_pct": 39.7059,
+              "adverse_exit_price_direction_pct": 32.3529,
+              "exit_reasons": {
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 47,
+                "V4_NATIVE_TP": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 8,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 68
+              }
+            },
+            "INJUSDT": {
+              "exits": 43,
+              "wins": 25,
+              "net_losses": 18,
+              "adverse_price_exits": 17,
+              "positive_pnl_jpy": 519749.865639,
+              "negative_pnl_jpy": -168141.347886,
+              "net_pnl_jpy": 351608.517754,
+              "worst_exit_pnl_jpy": -61982.327007,
+              "win_rate_pct": 58.1395,
+              "negative_pnl_exit_pct": 41.8605,
+              "adverse_exit_price_direction_pct": 39.5349,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 23,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 43
+              }
+            },
+            "LINKUSDT": {
+              "exits": 34,
+              "wins": 17,
+              "net_losses": 17,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 67684.415374,
+              "negative_pnl_jpy": -16816.840159,
+              "net_pnl_jpy": 50867.575215,
+              "worst_exit_pnl_jpy": -8943.67947,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 47.0588,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 23,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 34
+              }
+            },
+            "LTCUSDT": {
+              "exits": 24,
+              "wins": 10,
+              "net_losses": 14,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 43116.787631,
+              "negative_pnl_jpy": -54642.886502,
+              "net_pnl_jpy": -11526.098871,
+              "worst_exit_pnl_jpy": -25495.490276,
+              "win_rate_pct": 41.6667,
+              "negative_pnl_exit_pct": 58.3333,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_TIME": 16,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 3,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 24
+              }
+            },
+            "NEARUSDT": {
+              "exits": 69,
+              "wins": 51,
+              "net_losses": 18,
+              "adverse_price_exits": 14,
+              "positive_pnl_jpy": 471105.809153,
+              "negative_pnl_jpy": -43472.820273,
+              "net_pnl_jpy": 427632.98888,
+              "worst_exit_pnl_jpy": -13813.681479,
+              "win_rate_pct": 73.913,
+              "negative_pnl_exit_pct": 26.087,
+              "adverse_exit_price_direction_pct": 20.2899,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 51,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 69
+              }
+            },
+            "SOLUSDT": {
+              "exits": 66,
+              "wins": 37,
+              "net_losses": 29,
+              "adverse_price_exits": 25,
+              "positive_pnl_jpy": 156443.000239,
+              "negative_pnl_jpy": -157624.66791,
+              "net_pnl_jpy": -1181.667671,
+              "worst_exit_pnl_jpy": -28946.851714,
+              "win_rate_pct": 56.0606,
+              "negative_pnl_exit_pct": 43.9394,
+              "adverse_exit_price_direction_pct": 37.8788,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 3,
+                "V4_NATIVE_TIME": 40,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 9,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 66
+              }
+            },
+            "XRPUSDT": {
+              "exits": 63,
+              "wins": 39,
+              "net_losses": 24,
+              "adverse_price_exits": 23,
+              "positive_pnl_jpy": 58050.339059,
+              "negative_pnl_jpy": -43010.232265,
+              "net_pnl_jpy": 15040.106794,
+              "worst_exit_pnl_jpy": -6964.640468,
+              "win_rate_pct": 61.9048,
+              "negative_pnl_exit_pct": 38.0952,
+              "adverse_exit_price_direction_pct": 36.5079,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_NATIVE_STOP": 2,
+                "V4_NATIVE_TIME": 47,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 63
+              }
+            }
+          },
+          "entry_months": {
+            "2025-10": {
+              "exits": 90,
+              "wins": 53,
+              "net_losses": 37,
+              "adverse_price_exits": 35,
+              "positive_pnl_jpy": 7150.469093,
+              "negative_pnl_jpy": -5664.998799,
+              "net_pnl_jpy": 1485.470294,
+              "worst_exit_pnl_jpy": -769.456795,
+              "win_rate_pct": 58.8889,
+              "negative_pnl_exit_pct": 41.1111,
+              "adverse_exit_price_direction_pct": 38.8889,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 5,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 57,
+                "V4_NATIVE_TP": 5,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 5,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 90
+              }
+            },
+            "2025-11": {
+              "exits": 129,
+              "wins": 71,
+              "net_losses": 58,
+              "adverse_price_exits": 53,
+              "positive_pnl_jpy": 27935.315086,
+              "negative_pnl_jpy": -15042.319596,
+              "net_pnl_jpy": 12892.99549,
+              "worst_exit_pnl_jpy": -1334.648657,
+              "win_rate_pct": 55.0388,
+              "negative_pnl_exit_pct": 44.9612,
+              "adverse_exit_price_direction_pct": 41.0853,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 9,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 82,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 12,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 14
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 129
+              }
+            },
+            "2025-12": {
+              "exits": 66,
+              "wins": 32,
+              "net_losses": 34,
+              "adverse_price_exits": 31,
+              "positive_pnl_jpy": 23595.586147,
+              "negative_pnl_jpy": -14546.68292,
+              "net_pnl_jpy": 9048.903227,
+              "worst_exit_pnl_jpy": -2046.654701,
+              "win_rate_pct": 48.4848,
+              "negative_pnl_exit_pct": 51.5152,
+              "adverse_exit_price_direction_pct": 46.9697,
+              "exit_reasons": {
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_TIME": 43,
+                "V4_NATIVE_TP": 4,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 10,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 66
+              }
+            },
+            "2026-01": {
+              "exits": 93,
+              "wins": 63,
+              "net_losses": 30,
+              "adverse_price_exits": 26,
+              "positive_pnl_jpy": 56906.723511,
+              "negative_pnl_jpy": -13765.64203,
+              "net_pnl_jpy": 43141.081481,
+              "worst_exit_pnl_jpy": -2220.096532,
+              "win_rate_pct": 67.7419,
+              "negative_pnl_exit_pct": 32.2581,
+              "adverse_exit_price_direction_pct": 27.957,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 74,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 93
+              }
+            },
+            "2026-02": {
+              "exits": 113,
+              "wins": 66,
+              "net_losses": 47,
+              "adverse_price_exits": 42,
+              "positive_pnl_jpy": 254791.898845,
+              "negative_pnl_jpy": -81912.123463,
+              "net_pnl_jpy": 172879.775382,
+              "worst_exit_pnl_jpy": -8784.691997,
+              "win_rate_pct": 58.4071,
+              "negative_pnl_exit_pct": 41.5929,
+              "adverse_exit_price_direction_pct": 37.1681,
+              "exit_reasons": {
+                "V4_CORE_STOP": 3,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 77,
+                "V4_NATIVE_TP": 2,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 11,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 11,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 7
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 113
+              }
+            },
+            "2026-03": {
+              "exits": 53,
+              "wins": 33,
+              "net_losses": 20,
+              "adverse_price_exits": 19,
+              "positive_pnl_jpy": 136851.249785,
+              "negative_pnl_jpy": -61935.123014,
+              "net_pnl_jpy": 74916.126771,
+              "worst_exit_pnl_jpy": -9685.800385,
+              "win_rate_pct": 62.2642,
+              "negative_pnl_exit_pct": 37.7358,
+              "adverse_exit_price_direction_pct": 35.8491,
+              "exit_reasons": {
+                "V4_NATIVE_STOP": 1,
+                "V4_NATIVE_TIME": 49,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 53
+              }
+            },
+            "2026-04": {
+              "exits": 39,
+              "wins": 21,
+              "net_losses": 18,
+              "adverse_price_exits": 16,
+              "positive_pnl_jpy": 94927.707163,
+              "negative_pnl_jpy": -58500.992491,
+              "net_pnl_jpy": 36426.714672,
+              "worst_exit_pnl_jpy": -19354.513096,
+              "win_rate_pct": 53.8462,
+              "negative_pnl_exit_pct": 46.1538,
+              "adverse_exit_price_direction_pct": 41.0256,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 4,
+                "V4_NATIVE_TIME": 28,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 39
+              }
+            },
+            "2026-05": {
+              "exits": 34,
+              "wins": 17,
+              "net_losses": 17,
+              "adverse_price_exits": 12,
+              "positive_pnl_jpy": 178859.584403,
+              "negative_pnl_jpy": -67824.80034,
+              "net_pnl_jpy": 111034.784063,
+              "worst_exit_pnl_jpy": -17789.784275,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 35.2941,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 3,
+                "V4_NATIVE_TIME": 26,
+                "V4_NATIVE_TP": 1,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 34
+              }
+            },
+            "2026-06": {
+              "exits": 118,
+              "wins": 79,
+              "net_losses": 39,
+              "adverse_price_exits": 33,
+              "positive_pnl_jpy": 1547307.348332,
+              "negative_pnl_jpy": -277455.142776,
+              "net_pnl_jpy": 1269852.205556,
+              "worst_exit_pnl_jpy": -25495.490276,
+              "win_rate_pct": 66.9492,
+              "negative_pnl_exit_pct": 33.0508,
+              "adverse_exit_price_direction_pct": 27.9661,
+              "exit_reasons": {
+                "V4_CORE_STOP": 1,
+                "V4_CORE_TAKE_PROFIT": 1,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_STOP": 8,
+                "V4_NATIVE_TAKE_PROFIT": 1,
+                "V4_NATIVE_TIME": 76,
+                "V4_NATIVE_TP": 3,
+                "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 12,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 8
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 118
+              }
+            },
+            "2026-07": {
+              "exits": 46,
+              "wins": 25,
+              "net_losses": 21,
+              "adverse_price_exits": 20,
+              "positive_pnl_jpy": 913336.485311,
+              "negative_pnl_jpy": -363053.163194,
+              "net_pnl_jpy": 550283.322117,
+              "worst_exit_pnl_jpy": -30760.948989,
+              "win_rate_pct": 54.3478,
+              "negative_pnl_exit_pct": 45.6522,
+              "adverse_exit_price_direction_pct": 43.4783,
+              "exit_reasons": {
+                "V4_CORE_STOP": 2,
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 1,
+                "V4_NATIVE_TIME": 31,
+                "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 4,
+                "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7,
+                "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 46
+              }
+            },
+            "2026-08": {
+              "exits": 16,
+              "wins": 7,
+              "net_losses": 9,
+              "adverse_price_exits": 6,
+              "positive_pnl_jpy": 70673.007862,
+              "negative_pnl_jpy": -206235.615755,
+              "net_pnl_jpy": -135562.607893,
+              "worst_exit_pnl_jpy": -71756.174547,
+              "win_rate_pct": 43.75,
+              "negative_pnl_exit_pct": 56.25,
+              "adverse_exit_price_direction_pct": 37.5,
+              "exit_reasons": {
+                "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 2,
+                "V4_NATIVE_TIME": 14
+              },
+              "model_classes": {
+                "PINNED_ENTRY_H1_APPROX_EXIT": 16
+              }
+            }
+          }
+        },
+        "HYPE": {
+          "research_source_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+          "current_live_source_matches": false,
+          "requires_live_code_reexecution": true,
+          "total": {
+            "exits": 5,
+            "wins": 3,
+            "net_losses": 2,
+            "adverse_price_exits": 2,
+            "positive_pnl_jpy": 151635.516567,
+            "negative_pnl_jpy": -15450.12876,
+            "net_pnl_jpy": 136185.387806,
+            "worst_exit_pnl_jpy": -12785.601226,
+            "win_rate_pct": 60.0,
+            "negative_pnl_exit_pct": 40.0,
+            "adverse_exit_price_direction_pct": 40.0,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 2,
+              "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+            },
+            "model_classes": {
+              "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+              "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+            }
+          },
+          "routes": {
+            "HYPE_REDESIGN_CAUSAL_H48R4_WSIG": {
+              "exits": 5,
+              "wins": 3,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 151635.516567,
+              "negative_pnl_jpy": -15450.12876,
+              "net_pnl_jpy": 136185.387806,
+              "worst_exit_pnl_jpy": -12785.601226,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 2,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+              }
+            }
+          },
+          "symbols": {
+            "HYPEUSDT": {
+              "exits": 5,
+              "wins": 3,
+              "net_losses": 2,
+              "adverse_price_exits": 2,
+              "positive_pnl_jpy": 151635.516567,
+              "negative_pnl_jpy": -15450.12876,
+              "net_pnl_jpy": 136185.387806,
+              "worst_exit_pnl_jpy": -12785.601226,
+              "win_rate_pct": 60.0,
+              "negative_pnl_exit_pct": 40.0,
+              "adverse_exit_price_direction_pct": 40.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 2,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+              }
+            }
+          },
+          "entry_months": {
+            "2026-02": {
+              "exits": 1,
+              "wins": 0,
+              "net_losses": 1,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 0.0,
+              "negative_pnl_jpy": -2664.527534,
+              "net_pnl_jpy": -2664.527534,
+              "worst_exit_pnl_jpy": -2664.527534,
+              "win_rate_pct": 0.0,
+              "negative_pnl_exit_pct": 100.0,
+              "adverse_exit_price_direction_pct": 100.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 1
+              },
+              "model_classes": {
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+              }
+            },
+            "2026-08": {
+              "exits": 2,
+              "wins": 1,
+              "net_losses": 1,
+              "adverse_price_exits": 1,
+              "positive_pnl_jpy": 1184.072644,
+              "negative_pnl_jpy": -12785.601226,
+              "net_pnl_jpy": -11601.528582,
+              "worst_exit_pnl_jpy": -12785.601226,
+              "win_rate_pct": 50.0,
+              "negative_pnl_exit_pct": 50.0,
+              "adverse_exit_price_direction_pct": 50.0,
+              "exit_reasons": {
+                "FORMAL_PRIORITY": 1,
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 1
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 1,
+                "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+              }
+            },
+            "2026-09": {
+              "exits": 2,
+              "wins": 2,
+              "net_losses": 0,
+              "adverse_price_exits": 0,
+              "positive_pnl_jpy": 150451.443922,
+              "negative_pnl_jpy": 0.0,
+              "net_pnl_jpy": 150451.443922,
+              "worst_exit_pnl_jpy": 44389.03851,
+              "win_rate_pct": 100.0,
+              "negative_pnl_exit_pct": 0.0,
+              "adverse_exit_price_direction_pct": 0.0,
+              "exit_reasons": {
+                "HYPE_REDESIGN_TIME48_NEXTOPEN": 2
+              },
+              "model_classes": {
+                "PINNED_ENTRY_M5_PRICE_EXIT": 2
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

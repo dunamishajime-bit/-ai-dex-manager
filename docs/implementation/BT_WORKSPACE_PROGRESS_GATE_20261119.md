@@ -77,3 +77,11 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - HYPE contains 11 heuristically named signal/entry-classified changed paths; the V4 delta contains no filename-based signal/entry classifications, but changes in authority, risk, order execution and exit protection.
 - Filename classification is a triage aid, NOT evidence that a module has changed economic behavior, that a signal stayed identical, or that any historical fill would pass current LIVE gates.
 - Research-to-current re-execution remains mandatory, with causal signal, exit, funding, STOP, priority, gross, account freshness, approval and Shared Risk evidence; no trading mutations authorized.
+## STABLE4 V4/HYPE modeled loss forensics (not current LIVE BT)
+- Input: original private STABLE4 modeled fills CSVs at C:\tmp\disdex-bt-20251001-20261001\STABLE4_OPPORTUNITY_PROD_CAPS_20261114, hashed against the independent research-source audit; raw private CSVs are not committed.
+- Reusable aggregator: scripts/research/audit_bt_stable4_model_loss_forensics.py; aggregated report docs/research-results/BT_STABLE4_V4_HYPE_LOSS_FORENSICS_20261119_UNCERTIFIED.json.
+- V4 historical model, 10bps: 801 exits, 494 winners (61.6729%), 307 losses, 297 exits with adverse closing-price direction.
+- V4 historical model, 30bps: 797 exits, 467 winners (58.5947%), 330 losses, 293 exits with adverse closing-price direction.
+- HYPE historical model: 5 exits, 3 winners, 2 losses in both independent fee scenarios; SOURCE SHA DOES NOT MATCH CURRENT LIVE.
+- Breakdown includes strategy, route, symbol, entry month, exit reasons, negative PnL and adverse-price exit counts. These are model outputs, not exchange fills, and gross PnL magnitudes are compounded path-dependent; adverse exit is NOT proof of incorrect causal entry.
+- Prioritize historical failure-mode test cases for current V4/HYPE reexecution, not overfit to largest historical money loss. Demand out-of-sample validation and complete gross/share-risk context.
