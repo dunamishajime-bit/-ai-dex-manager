@@ -51,3 +51,8 @@ Progress completed on feature branch feat/bt-workspace-phase1-20261118, PR #500:
 - No order, position, protective stop, trading credential, risk limit, service state or Kill Switch was modified.
 
 NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pinned LIVE V4/HYPE to STABLE4 study or recompute using actual live code; actual causal market bars and complete eight-runner risk/priority/fill/exit modeling; variable-cash-flow portfolio re-execution; live stability and CI on latest head; Owner-approved HP-only release. A source SHA or a single successful CI build never certifies production-equivalent BT. Always preserve uncommitted state and resume using scripts/research/resume_bt_workspace_checkpoint.ps1.
+## Pinned Git dependency-closure checkpoint
+- Reproducible local read-only dependency inventory: scripts/research/audit_bt_live_dependency_closure.py.
+- Source file closure counts: V4=69, Q102=36, V52=1, PENGU=25, HYPE=66, SharedRisk=11, FET=11, IDLE=35. No unresolved relative imports in the TypeScript graph. V52 Python import closure is explicitly NOT verified.
+- Evidence: docs/research-results/BT_LIVE_GIT_DEPENDENCY_CLOSURE_20261119_UNCERTIFIED.json, including SHA256 per pinned Git source file.
+- This is local Git source provenance ONLY. All runtime dependent file hashes on VPS, external npm/python modules, runtime dynamic imports, and exact replay economics are still blocked. No certification implied.

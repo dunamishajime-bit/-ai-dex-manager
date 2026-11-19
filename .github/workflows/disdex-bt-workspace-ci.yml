@@ -14,6 +14,8 @@ on:
       - "tests/test_bt_vps_runner_sources.py"
       - "tests/test_bt_stable4_live_source_pins.py"
       - "scripts/research/audit_bt_stable4_live_source_pins.py"
+      - "scripts/research/audit_bt_live_dependency_closure.py"
+      - "tests/test_bt_live_dependency_closure.py"
       - "package.json"
       - "package-lock.json"
   push:
@@ -29,6 +31,8 @@ on:
       - "tests/test_bt_vps_runner_sources.py"
       - "tests/test_bt_stable4_live_source_pins.py"
       - "scripts/research/audit_bt_stable4_live_source_pins.py"
+      - "scripts/research/audit_bt_live_dependency_closure.py"
+      - "tests/test_bt_live_dependency_closure.py"
       - "package.json"
       - "package-lock.json"
 
@@ -68,6 +72,10 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_bt_stable4_live_source_pins.py' -v
       - name: Generate untrusted STABLE4 mismatch audit (no live access)
         run: python scripts/research/audit_bt_stable4_live_source_pins.py --output /tmp/disdex-bt-study-vs-live.json
+      - name: Pinned LIVE Git dependency graph unit tests
+        run: python -m unittest discover -s tests -p 'test_bt_live_dependency_closure.py' -v
+      - name: Reconstruct pinned LIVE Git dependency graph (no VPS)
+        run: python scripts/research/audit_bt_live_dependency_closure.py --output /tmp/disdex-bt-live-git-closure.json
       - name: BT replay and UI unit tests
         run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
       - name: Typecheck

@@ -1,0 +1,1550 @@
+{
+  "schema": "disdex-bt-live-git-dependency-closure/v1",
+  "generated_at_utc": "2026-11-19T04:25:02.337110+00:00",
+  "scope": "LOCAL_PINNED_GIT_IMPORT_GRAPH_NOT_VPS_DEPENDENCY_PARITY",
+  "all_entrypoints_verified_by_separate_evidence": true,
+  "all_runtime_dependencies_verified": false,
+  "production_bt_parity_certified": false,
+  "runners": {
+    "V4": {
+      "git_commit": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+      "entrypoint": "scripts/v12-v4-production-runner.ts",
+      "resolved_repo_files": 69,
+      "files": [
+        {
+          "path": "config/disdexStrictBt33404708902Runtime.ts",
+          "git_sha256": "d51a9cdfacbd3983ff4fb2d93df61a439b8126d63b7f708dea00e574484635cd",
+          "size_bytes": 1072
+        },
+        {
+          "path": "config/hypeZecLongPolicy.ts",
+          "git_sha256": "d65c82393b3d60928eb01fad93a8d82d67116a836d009bd88adb46bcc824501e",
+          "size_bytes": 3250
+        },
+        {
+          "path": "config/integratedProductionRiskPolicy.ts",
+          "git_sha256": "0175132715014ab9e09165ee30a9141eaeb6e610f6e8bc158cc99399a47d29a9",
+          "size_bytes": 4779
+        },
+        {
+          "path": "config/q102FamilySideGross.json",
+          "git_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+          "size_bytes": 187
+        },
+        {
+          "path": "config/v12-v4-evidence-validity.json",
+          "git_sha256": "b0df5cb5264a3e992c8743fb2e38fa31eac7f0a7d33e91593e737b14ecd978eb",
+          "size_bytes": 54
+        },
+        {
+          "path": "config/v12V4AdoptionRiskPolicy.ts",
+          "git_sha256": "d550cfbc44601300dd29d6a67400a36d8cff29fd61b601155eb920be7b68b0bf",
+          "size_bytes": 271
+        },
+        {
+          "path": "config/v12X1AllRuntime.ts",
+          "git_sha256": "9060246d828c9a0052b677ffd424acb8607f217c1a79e46de0615fb49019fc3f",
+          "size_bytes": 4092
+        },
+        {
+          "path": "config/v52V50Runtime.json",
+          "git_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+          "size_bytes": 450
+        },
+        {
+          "path": "docs/implementation/v12-v4-v2-full-year-priority.json",
+          "git_sha256": "bae4573f6ff516bec2b27e7e10d35e5027c7265c67bbdb101c1038066b5f7c27",
+          "size_bytes": 21629
+        },
+        {
+          "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json",
+          "git_sha256": "3b30e222b6d175845f34e1ac614e8d1a92c8980d01da6b38d955f59261ad59e8",
+          "size_bytes": 80531
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+          "size_bytes": 23345
+        },
+        {
+          "path": "lib/dd1296-entry-policy.ts",
+          "git_sha256": "8d2f8c3d9b9598d581d8e8b3722977b93bda18815dd8422a609d69c4385b4a56",
+          "size_bytes": 2189
+        },
+        {
+          "path": "lib/disdex-account-lock-bounded-retry.ts",
+          "git_sha256": "f2d13947e0ee43873a61fe7a835129b381a9b59629092e591100767e8cc7a24b",
+          "size_bytes": 929
+        },
+        {
+          "path": "lib/disdex-account-order-lock.ts",
+          "git_sha256": "210818dec8806f20770c5047e8205a626a10218b9f158ba206857fe3da169135",
+          "size_bytes": 11255
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "3d18daa670e615e1996d2bc7cf0e682d10ba161d0112e7eb84094a67e2199f33",
+          "size_bytes": 16275
+        },
+        {
+          "path": "lib/disdex-aster-portfolio-classifier.ts",
+          "git_sha256": "07908d4b9ec649cc97cb3610facba3fbe917ca501b50a0e9f6c30292c13f7fdc",
+          "size_bytes": 3971
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-integrated-gross-governor.ts",
+          "git_sha256": "5a9d1a62c4f47c6f0a76a9c818520b5f177cf0ba98574ebe9b95f4a2fd988fbf",
+          "size_bytes": 4644
+        },
+        {
+          "path": "lib/disdex-pending-exposure-registry.ts",
+          "git_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+          "size_bytes": 8981
+        },
+        {
+          "path": "lib/disdex-portfolio-dd-governor.ts",
+          "git_sha256": "fe5bce1aa0ce4b8c1c763042c39cf143573a83245e2e23d0c206aed9c61963b5",
+          "size_bytes": 6863
+        },
+        {
+          "path": "lib/disdex-runner-tick-heartbeat.ts",
+          "git_sha256": "e82827d50b86c6a35c105d02a6d94efa0dfdd7391163616aae4b7713c6f08f69",
+          "size_bytes": 6660
+        },
+        {
+          "path": "lib/disdex-shared-crypto-daily-risk.ts",
+          "git_sha256": "6dfe3fe275e8eec281e5b6d5cec5c5d9c14786a1cc3d5bee783162d19f360170",
+          "size_bytes": 6612
+        },
+        {
+          "path": "lib/disdex-shared-kill-switch.ts",
+          "git_sha256": "3c349bb7ed3363a5b5c69f6693b4a21bcbca37c94b437aec88eb804efa36f0a6",
+          "size_bytes": 4607
+        },
+        {
+          "path": "lib/disdex-strict-portfolio-planner.ts",
+          "git_sha256": "2d0fc771c3d7c0192fc7cfd48e4fad4e548c491db25eaa925c5af70531b42224",
+          "size_bytes": 45629
+        },
+        {
+          "path": "lib/disdex-v4-rate-budget-proxy.ts",
+          "git_sha256": "3a4e6bcaabfac71d4632f249419cebc4e1728711b148a2426fe4cfd799da5763",
+          "size_bytes": 5222
+        },
+        {
+          "path": "lib/disdex-v96-order-quantity.ts",
+          "git_sha256": "a297b73abc8c515ea0d1d9bdcfb4c01c9a9f14b3a7c0884b1edf93baf6084870",
+          "size_bytes": 3244
+        },
+        {
+          "path": "lib/market-pre-submit-entry-error.ts",
+          "git_sha256": "b402fbe29194a0139260db33784887ba4e84e5a3160b33634c8687f4d7de9863",
+          "size_bytes": 653
+        },
+        {
+          "path": "lib/market-slippage-guard-error.ts",
+          "git_sha256": "52fbed6b33dae09b216e677895955efd3e35b88a8e8687d66048155840b84fd4",
+          "size_bytes": 466
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d",
+          "size_bytes": 15894
+        },
+        {
+          "path": "lib/v12-multilogic-v4-shadow.ts",
+          "git_sha256": "b3045118116422d7c950de54b05e751b0f62dbe542413889f9943e45c09e0105",
+          "size_bytes": 14256
+        },
+        {
+          "path": "lib/v12-v4-account-freshness.ts",
+          "git_sha256": "8159466cdc0fe1425cfacc1d562c2a7df2c362dbb361253add76de39769c4db9",
+          "size_bytes": 136
+        },
+        {
+          "path": "lib/v12-v4-canary-permit.ts",
+          "git_sha256": "bc2c96f461c774743add3e3dd8db48b4be6014cdd89ef435c67ce329fc4c67f1",
+          "size_bytes": 4796
+        },
+        {
+          "path": "lib/v12-v4-certified-gates.ts",
+          "git_sha256": "833387bb14f345ff3da66cac963b341864e748c955091d15dd6478fecc3c8401",
+          "size_bytes": 16680
+        },
+        {
+          "path": "lib/v12-v4-core-candidate.ts",
+          "git_sha256": "f3bb68b8c015f64be7191475b6616e725a04fca253227b54b88541eb5a5fe4c0",
+          "size_bytes": 2388
+        },
+        {
+          "path": "lib/v12-v4-durable-orders.ts",
+          "git_sha256": "f1d130562b5f153e52aac0980561259f231291cdd41770c6ff3397be4d0459c2",
+          "size_bytes": 10120
+        },
+        {
+          "path": "lib/v12-v4-entry-safety.ts",
+          "git_sha256": "c6a31b5d9ad091ead2d27980585604eb5219da37b2eccb5db1f59f181eb70036",
+          "size_bytes": 1425
+        },
+        {
+          "path": "lib/v12-v4-execution-phase.ts",
+          "git_sha256": "71cb1f9b424cb91c779cd7dfedbb22ef72d16e095d03e1ec6cc6a4d1d94cd5fc",
+          "size_bytes": 2676
+        },
+        {
+          "path": "lib/v12-v4-execution-store.ts",
+          "git_sha256": "df932d83a4bc53b28e5f6595763248b9e29e782f9c6735529f3a899e2fbdf291",
+          "size_bytes": 9396
+        },
+        {
+          "path": "lib/v12-v4-four-rule-policy.ts",
+          "git_sha256": "77f4b5c8fa9a9e5f2f7b6a670d9a16bf44d34fe19bddfae88a2446c57c80b19c",
+          "size_bytes": 8740
+        },
+        {
+          "path": "lib/v12-v4-funding-ledger.ts",
+          "git_sha256": "df12874659ac1172fd0b05792411c460c09d34f5af26c33400fb4232295f49e2",
+          "size_bytes": 2388
+        },
+        {
+          "path": "lib/v12-v4-live-candidate-builder.ts",
+          "git_sha256": "c1817d626fae2d885bf91480b53d0c8afac2bb507099a0ecdf2bbf59d2996069",
+          "size_bytes": 6722
+        },
+        {
+          "path": "lib/v12-v4-live-exit-feed.ts",
+          "git_sha256": "1bde7b495af20a1f608aafaaeb2e461cc4498d5edf2f19358885a9d753c7d4a9",
+          "size_bytes": 3093
+        },
+        {
+          "path": "lib/v12-v4-local-entry-rejection.ts",
+          "git_sha256": "166eed9c22be61d117343da055e8cfef1d6ef951e1920bf8e4f51838c05c7bc9",
+          "size_bytes": 1958
+        },
+        {
+          "path": "lib/v12-v4-lock-contention-observer.ts",
+          "git_sha256": "2d38ef0d9a8dd9d5cb3a24625663f6ea979b8d466e96679f650bc5a3db992782",
+          "size_bytes": 4911
+        },
+        {
+          "path": "lib/v12-v4-monitor-only.ts",
+          "git_sha256": "6499bce0d9cee20dd3e1936b54c4e99fb974a09e0f292d0fa3dbc29493f019f3",
+          "size_bytes": 11933
+        },
+        {
+          "path": "lib/v12-v4-native-core.ts",
+          "git_sha256": "55bc8917969acee14b43e04d46bc51eb3b9a6a5f35460ad59d022bd0f1c9583c",
+          "size_bytes": 5681
+        },
+        {
+          "path": "lib/v12-v4-native-source.ts",
+          "git_sha256": "8220063dcd0ae2a738632b271b86dcfe7d0eb58affa6df2eaf9fdd2c578bcddb",
+          "size_bytes": 2962
+        },
+        {
+          "path": "lib/v12-v4-order-cycle.ts",
+          "git_sha256": "bea2d0458b6d67116d373fa8db70623329366d23378a0f62ae7e55341b63a65f",
+          "size_bytes": 5876
+        },
+        {
+          "path": "lib/v12-v4-peer-account-mark.ts",
+          "git_sha256": "b1aad44df45b2f3f4ce50182039dddd1723f877ee4cc58490c3df1d3ac16e45e",
+          "size_bytes": 2277
+        },
+        {
+          "path": "lib/v12-v4-peer-pending.ts",
+          "git_sha256": "4fc2becee5e965e95a9dda078dd2cdb5461055d04f8ef5faf847a1c1a687f017",
+          "size_bytes": 1432
+        },
+        {
+          "path": "lib/v12-v4-peer-service-attestation.ts",
+          "git_sha256": "66f679a86f9d1c22a47088a4f04c1a7618f578578d1de66bbef4ac410792034e",
+          "size_bytes": 3734
+        },
+        {
+          "path": "lib/v12-v4-peer-state-owners.ts",
+          "git_sha256": "da73ce64fdd03101613db89c4da46514db2d665bf15306ad0221f877be511074",
+          "size_bytes": 7231
+        },
+        {
+          "path": "lib/v12-v4-production-contract.ts",
+          "git_sha256": "9b706232a722eec92db34ddfb6a1b7b5f977d11f35fbc15c9419a083540e7117",
+          "size_bytes": 356
+        },
+        {
+          "path": "lib/v12-v4-production-features.ts",
+          "git_sha256": "03c71845c829751a1122747fa3e1a72f2bac067e18a8237d57a0d48a261c6a02",
+          "size_bytes": 7704
+        },
+        {
+          "path": "lib/v12-v4-production-lifecycle.ts",
+          "git_sha256": "e895fdc89e493c4340c45fc90f9852c4b387603897151fa9701eb5b168eead61",
+          "size_bytes": 26355
+        },
+        {
+          "path": "lib/v12-v4-refresh-commit.ts",
+          "git_sha256": "42680bd03bc7fc77fae9aa817da3a15139c1ca2ec0bf0cfa66011076ddad815b",
+          "size_bytes": 2260
+        },
+        {
+          "path": "lib/v12-v4-resident-stop-owners.ts",
+          "git_sha256": "739f42ef6077c5edc03342a352771af26a31038f765553263f55d251e097c160",
+          "size_bytes": 2532
+        },
+        {
+          "path": "lib/v12-v4-runner-engine.ts",
+          "git_sha256": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
+          "size_bytes": 39543
+        },
+        {
+          "path": "lib/v12-v4-shared-reservations.ts",
+          "git_sha256": "20d2856af6cbe952cb85ef41c67feb3d916248de3d367245db9e1dc8767d0711",
+          "size_bytes": 8998
+        },
+        {
+          "path": "lib/v12-v4-signed-bootstrap.ts",
+          "git_sha256": "880f102a59e6c49987b54a51f1fe13e134cac5c0e154f44e94ad109e7cc2ec57",
+          "size_bytes": 1691
+        },
+        {
+          "path": "lib/v12-v4-stop-retirement.ts",
+          "git_sha256": "acce480ca167220973ed994380aacae4c10f85991759fb87380fb181e7e748ca",
+          "size_bytes": 5201
+        },
+        {
+          "path": "lib/v12-v4-time-emergency-stop-research.ts",
+          "git_sha256": "ed2e0914efd1b008d76f109bab266aeb3b8a123bd0571206c598c45b760f24cc",
+          "size_bytes": 1460
+        },
+        {
+          "path": "lib/v12-v4-time-stop-approval.ts",
+          "git_sha256": "9d1dc0811ce5d063d749b812ee97198d4953620ab50bbeb16446316ca3f92eb1",
+          "size_bytes": 3277
+        },
+        {
+          "path": "lib/v12-v4-v2-shadow.ts",
+          "git_sha256": "3261c99372725beb2c27984eb6878bdba6189d49ddf53f6b2e009174ab1b8d05",
+          "size_bytes": 11116
+        },
+        {
+          "path": "lib/v12-v4-venue-exit.ts",
+          "git_sha256": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd",
+          "size_bytes": 8607
+        },
+        {
+          "path": "lib/v12-v4-venue-fills.ts",
+          "git_sha256": "b3bca1ef51faa72b068bdfb79e02a80b5fcce6843aeaf6612e7facab17f0c2c7",
+          "size_bytes": 3604
+        },
+        {
+          "path": "lib/v12-x1-all.ts",
+          "git_sha256": "968d8cb98fe8327c3f39bad6291caaeda0d1eaef53e66c302d8d7bd1260bde14",
+          "size_bytes": 24115
+        },
+        {
+          "path": "scripts/v12-v4-monitor-only-runner.ts",
+          "git_sha256": "aa0e2e88ce0ea74c011c7f1863110225659bbae6baf6b95d406640d011706d02",
+          "size_bytes": 7647
+        },
+        {
+          "path": "scripts/v12-v4-production-runner.ts",
+          "git_sha256": "607b69cea06c6a4a17e6cd34a020de930224024d0e3fb279ec1192b59ac24df6",
+          "size_bytes": 34907
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/integratedProductionRiskPolicy",
+        "@/config/v12X1AllRuntime",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-portfolio-dd-governor",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:child_process",
+        "node:crypto",
+        "node:fs",
+        "node:fs/promises",
+        "node:net",
+        "node:path",
+        "node:timers/promises",
+        "node:util",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "Q102": {
+      "git_commit": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "entrypoint": "scripts/disdex-quality102-causal-v1-live-runner.ts",
+      "resolved_repo_files": 36,
+      "files": [
+        {
+          "path": "config/disdexQuality102CausalV1Runtime.ts",
+          "git_sha256": "fa2d883162d0adf752d8d2899a1b97b7d96ea49b98ae396500160188f4847414",
+          "size_bytes": 2410
+        },
+        {
+          "path": "config/disdexQuality102CausalV4Model.ts",
+          "git_sha256": "4f2b3d6ad2b7fc4a6f4278cfffdfc0007a85e65afe8a03a0978187593bc23c50",
+          "size_bytes": 7783
+        },
+        {
+          "path": "config/disdexStrictBt33404708902Runtime.ts",
+          "git_sha256": "d51a9cdfacbd3983ff4fb2d93df61a439b8126d63b7f708dea00e574484635cd",
+          "size_bytes": 1072
+        },
+        {
+          "path": "config/integratedProductionRiskPolicy.ts",
+          "git_sha256": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+          "size_bytes": 4634
+        },
+        {
+          "path": "config/q102FamilySideGross.json",
+          "git_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+          "size_bytes": 187
+        },
+        {
+          "path": "config/sharedCryptoRiskPolicy.ts",
+          "git_sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+          "size_bytes": 546
+        },
+        {
+          "path": "config/v52V50Runtime.json",
+          "git_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+          "size_bytes": 450
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+          "size_bytes": 23345
+        },
+        {
+          "path": "lib/dd1296-entry-policy.ts",
+          "git_sha256": "8d2f8c3d9b9598d581d8e8b3722977b93bda18815dd8422a609d69c4385b4a56",
+          "size_bytes": 2189
+        },
+        {
+          "path": "lib/direct-trade-executor.ts",
+          "git_sha256": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
+          "size_bytes": 35472
+        },
+        {
+          "path": "lib/disdex-account-order-lock.ts",
+          "git_sha256": "210818dec8806f20770c5047e8205a626a10218b9f158ba206857fe3da169135",
+          "size_bytes": 11255
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "7b377a45e704ff27080c1a32ba28e444cccf267a308e5ef5ae375f2ea380ce1f",
+          "size_bytes": 14837
+        },
+        {
+          "path": "lib/disdex-aster-portfolio-classifier.ts",
+          "git_sha256": "07908d4b9ec649cc97cb3610facba3fbe917ca501b50a0e9f6c30292c13f7fdc",
+          "size_bytes": 3971
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-exit-overlay-contract.ts",
+          "git_sha256": "0404e6832f59fec37a8099f246341d45957d630533ed622809a90f0189627737",
+          "size_bytes": 8603
+        },
+        {
+          "path": "lib/disdex-managed-protective-orders.ts",
+          "git_sha256": "9783a91a1b7eb837f01a3a79e0aed3a0980d9868bebfca270d4f2b403f688aea",
+          "size_bytes": 19326
+        },
+        {
+          "path": "lib/disdex-pending-exposure-registry.ts",
+          "git_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+          "size_bytes": 8981
+        },
+        {
+          "path": "lib/disdex-quality102-causal-pipeline.ts",
+          "git_sha256": "60506624475511abfca2941f267c81d32c112c9d8bd6345995abc30cfa26aa81",
+          "size_bytes": 39094
+        },
+        {
+          "path": "lib/disdex-quality102-causal-selector.ts",
+          "git_sha256": "6bdd82f6230d54a1c40f58d13b2719db60bda6369135da417c04563efc4fab24",
+          "size_bytes": 17276
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-market-data.ts",
+          "git_sha256": "b7b6af93a39222b8cf635e478cc89113d0001d00b1d25b2cf6737343d4341333",
+          "size_bytes": 19968
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+          "git_sha256": "21b5aa269cab268795d4e4f12ccbe23bc45d838886f3d6a0ee9f9c6d1d445243",
+          "size_bytes": 3455
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-runner.ts",
+          "git_sha256": "3e34195ba507f55a25db3f24ae557e3a3c84824b0527389f1139260fa22d1644",
+          "size_bytes": 100941
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-signal.ts",
+          "git_sha256": "5193793b88a6100df1b3dcb0b4bbd8d6c6b4a7ecee566790cd02041aec86dc56",
+          "size_bytes": 21097
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-state.ts",
+          "git_sha256": "6d9dbeaa7459d073f5875b361049e8d149cafbab41a52e82b077d737490ca237",
+          "size_bytes": 20795
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v4-observability.ts",
+          "git_sha256": "7688aa4afe4a50c5fcba64533db7e5f8e5886a1dfd41af66471d7245b8873aa7",
+          "size_bytes": 13536
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v4-ranking.ts",
+          "git_sha256": "1e1df072a7f74d53ac4f1be334ca4ed76b7ae19177b727af124ebf3f5cade02f",
+          "size_bytes": 13059
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v4-s34.ts",
+          "git_sha256": "d549f1db65c2714854d9c9018258c43d1afc3bcbeeda9979d35aaf06c825b741",
+          "size_bytes": 11083
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v4-signal.ts",
+          "git_sha256": "f4f1ffdc54e730c8add11bed9ccebd4df51b3df5d1995e1dab7eb794c30e9d28",
+          "size_bytes": 6555
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/pengu-recovery-v8-protective-orders.ts",
+          "git_sha256": "e20d5730b659a48fb66886a894eced883c52b8ae1c467f24c6a0bcef7246e6e9",
+          "size_bytes": 16586
+        },
+        {
+          "path": "lib/quality102-live-scheduling.ts",
+          "git_sha256": "9f8b8bcad1189dcaddbce1aff1d7eeb9651b2d748161052415ca7e82b2e88eb3",
+          "size_bytes": 1594
+        },
+        {
+          "path": "lib/resident-stop-ledger.ts",
+          "git_sha256": "f41901dd3aeee5f68f96cd3698c9f195f66115aeaaadddbae13647c08198972a",
+          "size_bytes": 4145
+        },
+        {
+          "path": "lib/signed-paper-direct-trade-executor.ts",
+          "git_sha256": "fceb1da0c2837e4018e2943d44cf9105459b08224594c9984acf18dbadd3c9a1",
+          "size_bytes": 9730
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d",
+          "size_bytes": 15894
+        },
+        {
+          "path": "lib/venue-resident-stop.ts",
+          "git_sha256": "344167f6ee0cd8b136b44f1ec3b54e93e0f3e48882965b9f818825d69ca94f1f",
+          "size_bytes": 9000
+        },
+        {
+          "path": "scripts/disdex-quality102-causal-v1-live-runner.ts",
+          "git_sha256": "7b4d5c664af21cfbe77b059bbc6e5b28ddc5ada4faa63f040904410901b3f227",
+          "size_bytes": 35428
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/disdexQuality102CausalV1Runtime",
+        "@/config/penguRecoveryV8",
+        "@/config/v12X1AllRuntime",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-account-order-lock",
+        "@/lib/disdex-aster-portfolio-classifier",
+        "@/lib/disdex-aster-rate-budget-policy",
+        "@/lib/disdex-exit-overlay-contract",
+        "@/lib/disdex-managed-protective-orders",
+        "@/lib/disdex-pending-exposure-registry",
+        "@/lib/disdex-portfolio-dd-governor",
+        "@/lib/disdex-quality102-adopted-exit-policy",
+        "@/lib/disdex-quality102-causal-pipeline",
+        "@/lib/disdex-quality102-causal-v1-signal",
+        "@/lib/disdex-quality102-causal-v1-state",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/disdex-strict-portfolio-planner",
+        "@/lib/disdex-v96-live-risk-controls",
+        "@/lib/fet-brk48-live-reduction",
+        "@/lib/hype-zec-priority-capacity",
+        "@/lib/idle-residual-long-preemption",
+        "@/lib/live-runner-state",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-aster-live-adapter",
+        "@/lib/v12-dynamic-residual-live-reduction",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:child_process",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "node:util",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "V52": {
+      "git_commit": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+      "entrypoint": "scripts/disdex_v52_aster_only_live_engine.py",
+      "resolved_repo_files": 1,
+      "files": [
+        {
+          "path": "scripts/disdex_v52_aster_only_live_engine.py",
+          "git_sha256": "3dfd77807992d72a04bb5395901cf5d1bcf3ae116cf89638c5c50ad1e6eb7d8e",
+          "size_bytes": 31885
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [],
+      "python_dependency_closure_verified": false,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "PENGU": {
+      "git_commit": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "entrypoint": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+      "resolved_repo_files": 25,
+      "files": [
+        {
+          "path": "config/integratedProductionRiskPolicy.ts",
+          "git_sha256": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+          "size_bytes": 4634
+        },
+        {
+          "path": "config/penguDualLsV2Runtime.ts",
+          "git_sha256": "18ed5fee4f5f40cb012285a76f5bf9215d03961153df493a362d09aa4dcf26d0",
+          "size_bytes": 6110
+        },
+        {
+          "path": "config/penguRecoveryV8.ts",
+          "git_sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+          "size_bytes": 2070
+        },
+        {
+          "path": "config/q102FamilySideGross.json",
+          "git_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+          "size_bytes": 187
+        },
+        {
+          "path": "config/sharedCryptoRiskPolicy.ts",
+          "git_sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+          "size_bytes": 546
+        },
+        {
+          "path": "config/v52V50Runtime.json",
+          "git_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+          "size_bytes": 450
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+          "size_bytes": 23345
+        },
+        {
+          "path": "lib/direct-trade-executor.ts",
+          "git_sha256": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
+          "size_bytes": 35472
+        },
+        {
+          "path": "lib/disdex-account-order-lock.ts",
+          "git_sha256": "210818dec8806f20770c5047e8205a626a10218b9f158ba206857fe3da169135",
+          "size_bytes": 11255
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "7b377a45e704ff27080c1a32ba28e444cccf267a308e5ef5ae375f2ea380ce1f",
+          "size_bytes": 14837
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-pending-exposure-registry.ts",
+          "git_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+          "size_bytes": 8981
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/pengu-dual-ls-v2-market-data-provider.ts",
+          "git_sha256": "5264b370aec63f45829b743899d5af6cf578369c0c5c7de8250b3774415f7ead",
+          "size_bytes": 7215
+        },
+        {
+          "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+          "git_sha256": "2a7daeae50b3aaed7e77e06efea06768771db97eebea3814f2f59bb31bab9467",
+          "size_bytes": 91023
+        },
+        {
+          "path": "lib/pengu-dual-ls-v2-runner-state.ts",
+          "git_sha256": "bfd2894adb959a52a15331d65382bc15922cd2c71251c3f8c395a9569cbd5ee4",
+          "size_bytes": 24831
+        },
+        {
+          "path": "lib/pengu-live-scheduling.ts",
+          "git_sha256": "ba84867fde31ce2d9b29546624a9a098af0893721066bc9ccea83e9f2929b0ba",
+          "size_bytes": 824
+        },
+        {
+          "path": "lib/pengu-quality102-integration-status.ts",
+          "git_sha256": "1f24164bc7662f91fe4601dda59a17de7dc82332b7468fc1b05b090d550aabd4",
+          "size_bytes": 323
+        },
+        {
+          "path": "lib/pengu-recovery-v8-protective-orders.ts",
+          "git_sha256": "e20d5730b659a48fb66886a894eced883c52b8ae1c467f24c6a0bcef7246e6e9",
+          "size_bytes": 16586
+        },
+        {
+          "path": "lib/resident-stop-ledger.ts",
+          "git_sha256": "f41901dd3aeee5f68f96cd3698c9f195f66115aeaaadddbae13647c08198972a",
+          "size_bytes": 4145
+        },
+        {
+          "path": "lib/signed-paper-direct-trade-executor.ts",
+          "git_sha256": "fceb1da0c2837e4018e2943d44cf9105459b08224594c9984acf18dbadd3c9a1",
+          "size_bytes": 9730
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d",
+          "size_bytes": 15894
+        },
+        {
+          "path": "lib/v12-strict-live-adapter.ts",
+          "git_sha256": "a592e55b98881ff5724337af779adbedb2668186e712935cadb46bd3bd42d519",
+          "size_bytes": 17178
+        },
+        {
+          "path": "lib/venue-resident-stop.ts",
+          "git_sha256": "344167f6ee0cd8b136b44f1ec3b54e93e0f3e48882965b9f818825d69ca94f1f",
+          "size_bytes": 9000
+        },
+        {
+          "path": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+          "git_sha256": "603091fca47726daa4a080c57c69cba830c5e5622abc1c2267b99ec95a338df1",
+          "size_bytes": 9043
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/integratedProductionRiskPolicy",
+        "@/config/penguDualLsV2Runtime",
+        "@/config/penguRecoveryV8",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-account-order-lock",
+        "@/lib/disdex-aster-portfolio-classifier",
+        "@/lib/disdex-aster-rate-budget-policy",
+        "@/lib/disdex-exit-overlay-contract",
+        "@/lib/disdex-managed-protective-orders",
+        "@/lib/disdex-pending-exposure-registry",
+        "@/lib/disdex-portfolio-dd-governor",
+        "@/lib/disdex-quality102-causal-v1-live-reduction",
+        "@/lib/disdex-quality102-causal-v1-ownership",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/disdex-strict-portfolio-planner",
+        "@/lib/disdex-v35-signal-engine",
+        "@/lib/disdex-v96-live-risk-controls",
+        "@/lib/fet-brk48-live-reduction",
+        "@/lib/fet-preempt-owner-pins",
+        "@/lib/hype-zec-priority-capacity",
+        "@/lib/idle-residual-long-preemption",
+        "@/lib/live-runner-state",
+        "@/lib/pengu-dual-ls-v2",
+        "@/lib/pengu-dual-ls-v2-runner-state",
+        "@/lib/pengu-recovery-v8",
+        "@/lib/pengu-recovery-v8-protective-orders",
+        "@/lib/pengu-route-quarantine-dd-governor",
+        "@/lib/pengu-short-v20",
+        "@/lib/pengu-short-v20-timed-stop",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-aster-live-adapter",
+        "@/lib/v12-dynamic-residual-live-reduction",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:child_process",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "node:util",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "HYPE": {
+      "git_commit": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+      "entrypoint": "scripts/disdex-hype-zec-long-live-runner.ts",
+      "resolved_repo_files": 66,
+      "files": [
+        {
+          "path": "config/disdexQuality102CausalV4Model.ts",
+          "git_sha256": "4f2b3d6ad2b7fc4a6f4278cfffdfc0007a85e65afe8a03a0978187593bc23c50",
+          "size_bytes": 7783
+        },
+        {
+          "path": "config/disdexStable4Opportunity.ts",
+          "git_sha256": "3ebe944817303c5131b3f4280546f8eef07a9ccc591f05c1558834148f36e4fb",
+          "size_bytes": 2270
+        },
+        {
+          "path": "config/disdexStrictBt33404708902Runtime.ts",
+          "git_sha256": "d51a9cdfacbd3983ff4fb2d93df61a439b8126d63b7f708dea00e574484635cd",
+          "size_bytes": 1072
+        },
+        {
+          "path": "config/hypeTrendLongPolicy.ts",
+          "git_sha256": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad",
+          "size_bytes": 973
+        },
+        {
+          "path": "config/hypeZecLongPolicy.ts",
+          "git_sha256": "d65c82393b3d60928eb01fad93a8d82d67116a836d009bd88adb46bcc824501e",
+          "size_bytes": 3250
+        },
+        {
+          "path": "config/hypeZecLongRuntime.ts",
+          "git_sha256": "1d061773510f11214bde24d24a0b53a677536bcc683aaeb7c03251f0ff333f6a",
+          "size_bytes": 6027
+        },
+        {
+          "path": "config/integratedProductionRiskPolicy.ts",
+          "git_sha256": "0175132715014ab9e09165ee30a9141eaeb6e610f6e8bc158cc99399a47d29a9",
+          "size_bytes": 4779
+        },
+        {
+          "path": "config/q102FamilySideGross.json",
+          "git_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+          "size_bytes": 187
+        },
+        {
+          "path": "config/v12X1AllRuntime.ts",
+          "git_sha256": "9060246d828c9a0052b677ffd424acb8607f217c1a79e46de0615fb49019fc3f",
+          "size_bytes": 4092
+        },
+        {
+          "path": "config/v52V50Runtime.json",
+          "git_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+          "size_bytes": 450
+        },
+        {
+          "path": "docs/implementation/v12-v4-v2-full-year-priority.json",
+          "git_sha256": "bae4573f6ff516bec2b27e7e10d35e5027c7265c67bbdb101c1038066b5f7c27",
+          "size_bytes": 21629
+        },
+        {
+          "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json",
+          "git_sha256": "3b30e222b6d175845f34e1ac614e8d1a92c8980d01da6b38d955f59261ad59e8",
+          "size_bytes": 80531
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "1dd78d90fbdd462182bcbe804f2cc0f7f6e167680d51260ad984af16f0ad81b7",
+          "size_bytes": 23742
+        },
+        {
+          "path": "lib/dd1296-entry-policy.ts",
+          "git_sha256": "8d2f8c3d9b9598d581d8e8b3722977b93bda18815dd8422a609d69c4385b4a56",
+          "size_bytes": 2189
+        },
+        {
+          "path": "lib/direct-trade-executor.ts",
+          "git_sha256": "0be8500c711ada9d629e2d8444ba943b953108a1f3f0b81e3eb0db7ce10b07ef",
+          "size_bytes": 47308
+        },
+        {
+          "path": "lib/disdex-account-lock-retry-scheduling.ts",
+          "git_sha256": "2b7203b14c6397c51fea1f86674c458f752877c7e3ad2b874888748f368255bc",
+          "size_bytes": 520
+        },
+        {
+          "path": "lib/disdex-account-order-lock.ts",
+          "git_sha256": "210818dec8806f20770c5047e8205a626a10218b9f158ba206857fe3da169135",
+          "size_bytes": 11255
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "3d18daa670e615e1996d2bc7cf0e682d10ba161d0112e7eb84094a67e2199f33",
+          "size_bytes": 16275
+        },
+        {
+          "path": "lib/disdex-aster-portfolio-classifier.ts",
+          "git_sha256": "07908d4b9ec649cc97cb3610facba3fbe917ca501b50a0e9f6c30292c13f7fdc",
+          "size_bytes": 3971
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-exit-overlay-contract.ts",
+          "git_sha256": "0404e6832f59fec37a8099f246341d45957d630533ed622809a90f0189627737",
+          "size_bytes": 8603
+        },
+        {
+          "path": "lib/disdex-integrated-gross-governor.ts",
+          "git_sha256": "5a9d1a62c4f47c6f0a76a9c818520b5f177cf0ba98574ebe9b95f4a2fd988fbf",
+          "size_bytes": 4644
+        },
+        {
+          "path": "lib/disdex-managed-protective-orders.ts",
+          "git_sha256": "9783a91a1b7eb837f01a3a79e0aed3a0980d9868bebfca270d4f2b403f688aea",
+          "size_bytes": 19326
+        },
+        {
+          "path": "lib/disdex-peer-decision-cycle.ts",
+          "git_sha256": "e1c8515949df771ed5e846a89f4ca304b8c9e4a46ccd75ef16cb1e93b1d0bcec",
+          "size_bytes": 2142
+        },
+        {
+          "path": "lib/disdex-pending-exposure-registry.ts",
+          "git_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+          "size_bytes": 8981
+        },
+        {
+          "path": "lib/disdex-portfolio-dd-governor.ts",
+          "git_sha256": "fe5bce1aa0ce4b8c1c763042c39cf143573a83245e2e23d0c206aed9c61963b5",
+          "size_bytes": 6863
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+          "git_sha256": "fbc837af80c511b90f6e0699dc39e24602ccd88236162553182e0aaa24bf25cb",
+          "size_bytes": 3789
+        },
+        {
+          "path": "lib/disdex-runner-mutation-telemetry.ts",
+          "git_sha256": "1c85d77d557c5c59e5bb41dccf15f5204b3a391b7e99d1eeda6afbeb66c952c2",
+          "size_bytes": 740
+        },
+        {
+          "path": "lib/disdex-runner-tick-heartbeat.ts",
+          "git_sha256": "e82827d50b86c6a35c105d02a6d94efa0dfdd7391163616aae4b7713c6f08f69",
+          "size_bytes": 6660
+        },
+        {
+          "path": "lib/disdex-shared-crypto-daily-risk.ts",
+          "git_sha256": "6dfe3fe275e8eec281e5b6d5cec5c5d9c14786a1cc3d5bee783162d19f360170",
+          "size_bytes": 6612
+        },
+        {
+          "path": "lib/disdex-shared-kill-switch.ts",
+          "git_sha256": "3c349bb7ed3363a5b5c69f6693b4a21bcbca37c94b437aec88eb804efa36f0a6",
+          "size_bytes": 4607
+        },
+        {
+          "path": "lib/disdex-strict-portfolio-planner.ts",
+          "git_sha256": "2d0fc771c3d7c0192fc7cfd48e4fad4e548c491db25eaa925c5af70531b42224",
+          "size_bytes": 45629
+        },
+        {
+          "path": "lib/disdex-v4-rate-budget-proxy.ts",
+          "git_sha256": "3a4e6bcaabfac71d4632f249419cebc4e1728711b148a2426fe4cfd799da5763",
+          "size_bytes": 5222
+        },
+        {
+          "path": "lib/disdex-v96-order-quantity.ts",
+          "git_sha256": "a297b73abc8c515ea0d1d9bdcfb4c01c9a9f14b3a7c0884b1edf93baf6084870",
+          "size_bytes": 3244
+        },
+        {
+          "path": "lib/hype-stable4-opportunity-signal.ts",
+          "git_sha256": "ff9ba19429dd4c4f933d1b8a28c4726f474afd77cbfe216baf07e814ddd68063",
+          "size_bytes": 3504
+        },
+        {
+          "path": "lib/hype-stable4-time-only-authority.ts",
+          "git_sha256": "413d84c7d9e2fafb9025f5ea65468dc6e2ff775b5a811c569db8443de6a9749c",
+          "size_bytes": 5532
+        },
+        {
+          "path": "lib/hype-stable4-time-only-contract.ts",
+          "git_sha256": "2c27fa29c54d467d31f6e8625fd6f93c24340b6fc7bd9a907ffe1eaa5cc09c25",
+          "size_bytes": 4255
+        },
+        {
+          "path": "lib/hype-trend-long-runner.ts",
+          "git_sha256": "9a62729e55767d89f7fc34ba7d6a44e3920f4f3354ecaf03d6aaf7adf6b446a2",
+          "size_bytes": 2469
+        },
+        {
+          "path": "lib/hype-trend-long-signal.ts",
+          "git_sha256": "ee81fe2beeaeacaf5ce3bd06cbeb9aa76cb00086e35878e9b7435d8584d5f13c",
+          "size_bytes": 6557
+        },
+        {
+          "path": "lib/hype-zec-long-market-data.ts",
+          "git_sha256": "695188a46f38da6f840e3b28ffba1a9e6168a266ef379710c0724c63bf53a148",
+          "size_bytes": 5067
+        },
+        {
+          "path": "lib/hype-zec-long-recovery-contract.ts",
+          "git_sha256": "ed6bc02af0760f74002528aa57adcb1e3dfbe71968ca7c33e0737e625329c3f7",
+          "size_bytes": 115
+        },
+        {
+          "path": "lib/hype-zec-long-runner-state.ts",
+          "git_sha256": "8cbb48f00f4db1c1647f6a638dfa663514e93aeecb5ad347a06338350e6ca3b6",
+          "size_bytes": 18421
+        },
+        {
+          "path": "lib/hype-zec-long-runner.ts",
+          "git_sha256": "25acd3a80384c683f780c5a6d604b170c2174e61a3fdb8d80507df69e0cf4056",
+          "size_bytes": 65664
+        },
+        {
+          "path": "lib/hype-zec-long-sleeves.ts",
+          "git_sha256": "a6273fb614bea482369f40d5fe87b4e5c6700d240b9bc1632ff7784aad508f50",
+          "size_bytes": 9873
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/market-pre-submit-entry-error.ts",
+          "git_sha256": "b402fbe29194a0139260db33784887ba4e84e5a3160b33634c8687f4d7de9863",
+          "size_bytes": 653
+        },
+        {
+          "path": "lib/market-slippage-guard-error.ts",
+          "git_sha256": "52fbed6b33dae09b216e677895955efd3e35b88a8e8687d66048155840b84fd4",
+          "size_bytes": 466
+        },
+        {
+          "path": "lib/stable4-entry-gross-guard.ts",
+          "git_sha256": "1f51954e83593b3277d2f85659a71b11ee7c5995072c692730f25acc16bfe4fa",
+          "size_bytes": 8816
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-book.ts",
+          "git_sha256": "d318a818c2a005d6cad0d49f60838a6bdffa930dcd940db5fbf33a09a7346526",
+          "size_bytes": 10922
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-publisher.ts",
+          "git_sha256": "55ab888885b6630b8dd8358188168073460fb3fbf293c924267321f10785cf65",
+          "size_bytes": 8989
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-runtime.ts",
+          "git_sha256": "7261e5cc0293f3f91025f7d954b1afdc1fdeb07e15f4f7cb46b8ba8892236e47",
+          "size_bytes": 1584
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-store.ts",
+          "git_sha256": "19cd0a23789e8559252016cf7a80f02068d397e534f107571cb2bea0c97172f2",
+          "size_bytes": 4445
+        },
+        {
+          "path": "lib/stable4-hype-entry-features.ts",
+          "git_sha256": "cdea377b2937e5cc3c2c6d1ea8c330283103521f7557f3077bc022c2864972c5",
+          "size_bytes": 1357
+        },
+        {
+          "path": "lib/stable4-opportunity-corpus.ts",
+          "git_sha256": "8a7e4efc8286d5e1928a9cbbbe22cde3c44e15b1d4ffbb49f12283e483d5ce6e",
+          "size_bytes": 4029
+        },
+        {
+          "path": "lib/stable4-opportunity-model.ts",
+          "git_sha256": "566e7b5aaf9f7eeeffccfd861015b6f961d08ee1c422d2cdb8bc6c88b6a577bc",
+          "size_bytes": 7079
+        },
+        {
+          "path": "lib/stable4-uni-final-admission.ts",
+          "git_sha256": "665bc53ce80001cce3a2914142e6d04fc61d08ef906ed15d8c5d2acad941138f",
+          "size_bytes": 1746
+        },
+        {
+          "path": "lib/stable4-v4-reservation-proof.ts",
+          "git_sha256": "bf9d69dd8321143bbca20649c492b431bdd61ebb717b3861744d59c4aa29baf6",
+          "size_bytes": 2801
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "60e34d4d0f3e3a462159e8ed8fdda429120080bb651f17f368539c3afe69abab",
+          "size_bytes": 16048
+        },
+        {
+          "path": "lib/v12-multilogic-v4-shadow.ts",
+          "git_sha256": "b3045118116422d7c950de54b05e751b0f62dbe542413889f9943e45c09e0105",
+          "size_bytes": 14256
+        },
+        {
+          "path": "lib/v12-v4-execution-store.ts",
+          "git_sha256": "df932d83a4bc53b28e5f6595763248b9e29e782f9c6735529f3a899e2fbdf291",
+          "size_bytes": 9396
+        },
+        {
+          "path": "lib/v12-v4-four-rule-policy.ts",
+          "git_sha256": "77f4b5c8fa9a9e5f2f7b6a670d9a16bf44d34fe19bddfae88a2446c57c80b19c",
+          "size_bytes": 8740
+        },
+        {
+          "path": "lib/v12-v4-production-lifecycle.ts",
+          "git_sha256": "c5855f5a2b2afcc99c26e2b349c345bf5a9fe9d0eaae001de2a09b35f9550068",
+          "size_bytes": 27282
+        },
+        {
+          "path": "lib/v12-v4-resident-stop-owners.ts",
+          "git_sha256": "739f42ef6077c5edc03342a352771af26a31038f765553263f55d251e097c160",
+          "size_bytes": 2532
+        },
+        {
+          "path": "lib/v12-v4-v2-shadow.ts",
+          "git_sha256": "3261c99372725beb2c27984eb6878bdba6189d49ddf53f6b2e009174ab1b8d05",
+          "size_bytes": 11116
+        },
+        {
+          "path": "lib/v12-x1-all.ts",
+          "git_sha256": "968d8cb98fe8327c3f39bad6291caaeda0d1eaef53e66c302d8d7bd1260bde14",
+          "size_bytes": 24115
+        },
+        {
+          "path": "scripts/disdex-hype-zec-long-live-runner.ts",
+          "git_sha256": "709e3585ac63acb5d8cff90547b768388c70a4855117d96c6077d7bd0daf8c98",
+          "size_bytes": 6878
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/disdexStable4Opportunity",
+        "@/config/integratedProductionRiskPolicy",
+        "@/config/v12X1AllRuntime",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-portfolio-dd-governor",
+        "@/lib/disdex-quality102-causal-v1-state",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:child_process",
+        "node:crypto",
+        "node:fs",
+        "node:fs/promises",
+        "node:net",
+        "node:path",
+        "node:util",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "SharedRisk": {
+      "git_commit": "2737c30e1f6d014d24a2c6d025e7f91332bf7962",
+      "entrypoint": "scripts/disdex-shared-crypto-risk-writer.ts",
+      "resolved_repo_files": 11,
+      "files": [
+        {
+          "path": "config/penguRecoveryV8.ts",
+          "git_sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+          "size_bytes": 2070
+        },
+        {
+          "path": "config/sharedCryptoRiskPolicy.ts",
+          "git_sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+          "size_bytes": 546
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "d06477018fd1ae94798c2ba065ccad284b4a98b4e0309384a3a6f013cb116a54",
+          "size_bytes": 25199
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "25bbe2f33e2a82aa0dd845701217ae20e8a81cf54aa271feee255cd4e787e7ec",
+          "size_bytes": 17965
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "7a49a1b1241f031b64c0abe6954031578f94b73348a66a51c3c32cc7e226710e",
+          "size_bytes": 1790
+        },
+        {
+          "path": "lib/disdex-shared-crypto-risk-refresh-loop.ts",
+          "git_sha256": "88ecf3d777262c82c7f2f405f17d485d3344ac28de6f4ce5c7704190945540b9",
+          "size_bytes": 2818
+        },
+        {
+          "path": "lib/disdex-shared-crypto-risk-writer.ts",
+          "git_sha256": "5e7798da51fda88a376bcbbda25dcb3284f99c71583e3c57537e419fab9c6912",
+          "size_bytes": 8309
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/resident-stop-observation.ts",
+          "git_sha256": "3710780cd38ae5473f1be2617912aceea7adae03be1244a07cab9f22340f0605",
+          "size_bytes": 18866
+        },
+        {
+          "path": "scripts/disdex-shared-crypto-risk-writer.ts",
+          "git_sha256": "8b2e67ba44a93dcfe3da1bba3074e4628051a5eeaf192ab0101665cc85511b2d",
+          "size_bytes": 4416
+        },
+        {
+          "path": "scripts/ops/root/disdex-runner-pin-manifest.mjs",
+          "git_sha256": "229fa0e131241c643941b2f85f6fd28c1c47ff2d7d19bbb92ca3e2a45f31fea2",
+          "size_bytes": 5290
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/disdexQuality102CausalV4Model",
+        "@/config/sharedCryptoRiskPolicy",
+        "@/lib/aster-v3-client",
+        "@/lib/disdex-portfolio-dd-governor",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "dotenv/config",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "node:url",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "FET": {
+      "git_commit": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "entrypoint": "scripts/disdex-fet-brk48-live-runner.ts",
+      "resolved_repo_files": 11,
+      "files": [
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+          "size_bytes": 23345
+        },
+        {
+          "path": "lib/disdex-account-lock-retry-scheduling.ts",
+          "git_sha256": "2b7203b14c6397c51fea1f86674c458f752877c7e3ad2b874888748f368255bc",
+          "size_bytes": 520
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "7b377a45e704ff27080c1a32ba28e444cccf267a308e5ef5ae375f2ea380ce1f",
+          "size_bytes": 14837
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-exit-overlay-contract.ts",
+          "git_sha256": "0404e6832f59fec37a8099f246341d45957d630533ed622809a90f0189627737",
+          "size_bytes": 8603
+        },
+        {
+          "path": "lib/fet-brk48-live-runner.ts",
+          "git_sha256": "3149db499dd7b7912569c89d347da652fb38e471b391f80208f4cd819b0e9394",
+          "size_bytes": 47486
+        },
+        {
+          "path": "lib/fet-brk48-state.ts",
+          "git_sha256": "a637db46e29f00ebcbe53b6b7ea7313f303533f0aeafe56399c6c800a6a4e688",
+          "size_bytes": 6357
+        },
+        {
+          "path": "lib/fet-brk48-trailing-stop.ts",
+          "git_sha256": "bc88196cb5dce8bf3955544c49d1873467e1db5065e0085aaf13dc4770d8dc06",
+          "size_bytes": 4088
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d",
+          "size_bytes": 15894
+        },
+        {
+          "path": "scripts/disdex-fet-brk48-live-runner.ts",
+          "git_sha256": "e9220ac426d46958dfdb12bf150d09456ef89159db0c1d208ff6fb49c6ac512e",
+          "size_bytes": 5817
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/fetBrk48Runtime",
+        "@/config/integratedProductionRiskPolicy",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-account-order-lock",
+        "@/lib/disdex-aster-portfolio-classifier",
+        "@/lib/disdex-exit-overlay-contract",
+        "@/lib/disdex-managed-protective-orders",
+        "@/lib/disdex-pending-exposure-registry",
+        "@/lib/disdex-quality102-causal-v1-ownership",
+        "@/lib/disdex-shared-crypto-daily-risk",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/disdex-strict-portfolio-planner",
+        "@/lib/fet-brk48-signal",
+        "@/lib/fet-brk48-state",
+        "@/lib/fet-brk48-trailing-stop",
+        "@/lib/hype-zec-priority-capacity",
+        "@/lib/idle-residual-long-preemption",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-aster-live-adapter",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    },
+    "IDLE": {
+      "git_commit": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "entrypoint": "scripts/disdex-idle-priority-short-live-runner.ts",
+      "resolved_repo_files": 35,
+      "files": [
+        {
+          "path": "config/idlePriorityShortPolicy.ts",
+          "git_sha256": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+          "size_bytes": 1617
+        },
+        {
+          "path": "config/idlePriorityShortRuntime.ts",
+          "git_sha256": "a04a47cc8d820d7f0f59e7c1f2c4fe39941a8f94e3ed6cd63cc10f860fa11380",
+          "size_bytes": 3430
+        },
+        {
+          "path": "config/idleResidualLongPolicy.ts",
+          "git_sha256": "0a1a8751fed10910c4b76ebf52aba1069537dd2ce3d9c1dc4d8984a77186f67a",
+          "size_bytes": 1054
+        },
+        {
+          "path": "config/idleResidualLongRuntime.ts",
+          "git_sha256": "c65b43e423a76f2fbfd1a2f339f2383a3efd877a176d33a14032e1403dbbdcbf",
+          "size_bytes": 1257
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "git_sha256": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+          "size_bytes": 23345
+        },
+        {
+          "path": "lib/direct-trade-executor.ts",
+          "git_sha256": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
+          "size_bytes": 35472
+        },
+        {
+          "path": "lib/disdex-account-lock-bounded-retry.ts",
+          "git_sha256": "f2d13947e0ee43873a61fe7a835129b381a9b59629092e591100767e8cc7a24b",
+          "size_bytes": 929
+        },
+        {
+          "path": "lib/disdex-account-lock-retry-scheduling.ts",
+          "git_sha256": "2b7203b14c6397c51fea1f86674c458f752877c7e3ad2b874888748f368255bc",
+          "size_bytes": 520
+        },
+        {
+          "path": "lib/disdex-account-order-lock.ts",
+          "git_sha256": "210818dec8806f20770c5047e8205a626a10218b9f158ba206857fe3da169135",
+          "size_bytes": 11255
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "git_sha256": "7b377a45e704ff27080c1a32ba28e444cccf267a308e5ef5ae375f2ea380ce1f",
+          "size_bytes": 14837
+        },
+        {
+          "path": "lib/disdex-aster-portfolio-classifier.ts",
+          "git_sha256": "07908d4b9ec649cc97cb3610facba3fbe917ca501b50a0e9f6c30292c13f7fdc",
+          "size_bytes": 3971
+        },
+        {
+          "path": "lib/disdex-aster-rate-budget-policy.ts",
+          "git_sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41",
+          "size_bytes": 1673
+        },
+        {
+          "path": "lib/disdex-exit-overlay-contract.ts",
+          "git_sha256": "0404e6832f59fec37a8099f246341d45957d630533ed622809a90f0189627737",
+          "size_bytes": 8603
+        },
+        {
+          "path": "lib/disdex-pending-exposure-registry.ts",
+          "git_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+          "size_bytes": 8981
+        },
+        {
+          "path": "lib/disdex-shared-crypto-daily-risk.ts",
+          "git_sha256": "c7c9d9ed59ba7e0952b17f65c84de23169bff3d2e961cc329cd8dba9fb7f8685",
+          "size_bytes": 6601
+        },
+        {
+          "path": "lib/disdex-shared-kill-switch.ts",
+          "git_sha256": "225b0ccebf4ddf57df9f2c059441d7e74919a3a1f260b9cb62e2506e8237b60e",
+          "size_bytes": 2703
+        },
+        {
+          "path": "lib/idle-lock-safe-market.ts",
+          "git_sha256": "afbc4113b673e7294936e93e08a5c03a6bbcf226bceb7ca0c0f9660fb864d025",
+          "size_bytes": 606
+        },
+        {
+          "path": "lib/idle-margin-age-policy.ts",
+          "git_sha256": "778888e5dbb97a32f55cbd3925f825554a1af697c788b0d160e0356a7182466c",
+          "size_bytes": 1235
+        },
+        {
+          "path": "lib/idle-priority-decision-diagnostics.ts",
+          "git_sha256": "c43eee73630028d104fb39bcd1b48443ea4402358c7da52ff1bc7f2a7cea2d29",
+          "size_bytes": 1887
+        },
+        {
+          "path": "lib/idle-priority-short-baseline-admission.ts",
+          "git_sha256": "0a3feedffa411dc1e0ea78931779a70dafb9493a0432f54dae88960a0e872d7e",
+          "size_bytes": 10095
+        },
+        {
+          "path": "lib/idle-priority-short-live.ts",
+          "git_sha256": "185e0991cb810bba903dfa299df70f5a1e805fe6d9b76242247e672bcd30889c",
+          "size_bytes": 7573
+        },
+        {
+          "path": "lib/idle-priority-short-market-data.ts",
+          "git_sha256": "68f9e8bacf1bac327328605b063e5187bfb0f673810a2f4c955cf1a764892f8d",
+          "size_bytes": 10056
+        },
+        {
+          "path": "lib/idle-priority-short-parity-cert.ts",
+          "git_sha256": "92d7717d234e39e9df2c4f066df1992d3c3c3a3d5c84e280bb3c7d5883b00b20",
+          "size_bytes": 4079
+        },
+        {
+          "path": "lib/idle-priority-short-runner.ts",
+          "git_sha256": "a6bb652dc93d2fd8fcff298ee806c11079c1ce15f6d97dd626fbe4391b8d9c8f",
+          "size_bytes": 66451
+        },
+        {
+          "path": "lib/idle-priority-short-signal.ts",
+          "git_sha256": "dbd1dd40aaed0620dc071b39d9535280950ee71624769c5493d4bf35eab4aae7",
+          "size_bytes": 6568
+        },
+        {
+          "path": "lib/idle-priority-short-state.ts",
+          "git_sha256": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+          "size_bytes": 8201
+        },
+        {
+          "path": "lib/idle-quantity-feasibility.ts",
+          "git_sha256": "4d87b6456f75077aabb1db2422c960d95386ae6ffbb924b878d40a8eeeef664d",
+          "size_bytes": 3059
+        },
+        {
+          "path": "lib/idle-residual-avax-policy.ts",
+          "git_sha256": "d3b5010dca9e70c3f92feafe12a4ee6f949d2b125ca1154e2c2686d465dabc91",
+          "size_bytes": 4108
+        },
+        {
+          "path": "lib/idle-residual-long-parity-cert.ts",
+          "git_sha256": "7fbc551c51b7d26fdd3222f172b12274f61a76eee355ba7915b5c967227d32fc",
+          "size_bytes": 2972
+        },
+        {
+          "path": "lib/idle-residual-long-runner.ts",
+          "git_sha256": "99d15158388e0d5befa557baf06603f6d606d91451f0e2c0ae4853480660f4b0",
+          "size_bytes": 32812
+        },
+        {
+          "path": "lib/idle-residual-long-signal.ts",
+          "git_sha256": "751090e01fcb4be8c434655a28748a688b538508cb6821afd6e0fedfaf22c1e8",
+          "size_bytes": 2044
+        },
+        {
+          "path": "lib/idle-residual-long-state.ts",
+          "git_sha256": "a7bb11a3c7f2cdca943c2e4f0eeae7f14a9545c7b0dca1220a0abda3b7cddfc0",
+          "size_bytes": 9673
+        },
+        {
+          "path": "lib/interruptible-delay.ts",
+          "git_sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c",
+          "size_bytes": 1145
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "git_sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d",
+          "size_bytes": 15894
+        },
+        {
+          "path": "scripts/disdex-idle-priority-short-live-runner.ts",
+          "git_sha256": "36aa987a8d8427f23ee57e94e5c5b6db838cf84d0daab9f7381a79570a617b6e",
+          "size_bytes": 9637
+        }
+      ],
+      "unresolved_relative_imports": [],
+      "external_imports": [
+        "@/config/v12X1AllRuntime",
+        "@/lib/aster-v3-client",
+        "@/lib/direct-trade-executor",
+        "@/lib/disdex-shared-kill-switch",
+        "@/lib/trade-fill-notification",
+        "@/lib/v12-resident-stop-lifecycle",
+        "dotenv/config",
+        "node:child_process",
+        "node:crypto",
+        "node:fs",
+        "node:fs/promises",
+        "node:path",
+        "node:util",
+        "viem/accounts"
+      ],
+      "python_dependency_closure_verified": true,
+      "runtime_dependency_bytes_verified": false,
+      "full_execution_parity_certified": false
+    }
+  }
+}
