@@ -712,17 +712,31 @@ def _validate_candidate_source(source_sha: str) -> bytes:
 
 
 def normalize_common_module_permissions(path: str | Path) -> None:
-    """Remove write bits without changing the candidate module bytes.
-
-    Release provisioning historically left this shared module at 0644 even
-    though the release directory and marker were root-owned.  The formal Root
-    path may normalize that metadata only after checking the caller supplied
-    the exact pinned release; the content is never rewritten here.
-    """
+    """Normalize ownership/mode without changing the candidate module bytes."""
     target = Path(path)
     st = target.lstat()
     require(stat.S_ISREG(st.st_mode) and not target.is_symlink(),
             "COMMON_MODULE_NOT_REGULAR")
+    if os.name != "nt" and (st.st_uid != 0 or st.st_gid != 0):
+        try:
+            os.chown(target, 0, 0)
+        except PermissionError:
+            require(os.geteuid() != 0, "COMMON_MODULE_CHOWN_FAILED")
+    if st.st_mode & 0o222:
+        os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
+
+
+def normalize_release_directory_permissions(path: str | Path) -> None:
+    """Normalize one pinned release directory's metadata without file changes."""
+    target = Path(path)
+    st = target.lstat()
+    require(stat.S_ISDIR(st.st_mode) and not target.is_symlink(),
+            "RELEASE_DIR_NOT_DIRECTORY")
+    if os.name != "nt" and (st.st_uid != 0 or st.st_gid != 0):
+        try:
+            os.chown(target, 0, 0)
+        except PermissionError:
+            require(os.geteuid() != 0, "RELEASE_DIR_CHOWN_FAILED")
     if st.st_mode & 0o222:
         os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
 
@@ -751,6 +765,8 @@ def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
             "RUNNER_SOURCE_NOT_AUDITED_PIN")
     release = RELEASE_ROOT / source_sha
     marker = release / ".disdex-release-sha"
+    trusted_dir(RELEASE_ROOT)
+    normalize_release_directory_permissions(release)
     trusted_dir(release)
     marker_st = marker.lstat()
     require(stat.S_ISREG(marker_st.st_mode) and not marker.is_symlink(),
@@ -762,9 +778,8 @@ def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
     trusted_dir(release)
     source = release / COMMON_MODULE
     st = source.lstat()
-    require(stat.S_ISREG(st.st_mode) and not source.is_symlink()
-            and st.st_uid == 0 and st.st_gid == 0,
-            "COMMON_MODULE_OWNER_INVALID")
+    require(stat.S_ISREG(st.st_mode) and not source.is_symlink(),
+            "COMMON_MODULE_NOT_REGULAR")
     before = sha256(source.read_bytes())
     normalize_common_module_permissions(source)
     root_immutable(source)
