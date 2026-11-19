@@ -195,6 +195,25 @@ export function refreshQ102StateAfterRiskBlock(
     return state;
 }
 
+/**
+ * Refresh the cross-runner state age only after fresh exchange account,
+ * positions and open orders have been reconciled under the shared lock.
+ * Never repair a stale document on an error path or while ownership is
+ * ambiguous; the V52 reader must continue to block on such states.
+ */
+export function refreshQ102FlatStateAfterVerifiedReconciliation(
+    state: Quality102CausalV1State,
+    now: number,
+): Quality102CausalV1State {
+    if (state.position || state.pending) {
+        throw new Error("Q102_FRESHNESS_REQUIRES_VERIFIED_FLAT_STATE");
+    }
+    const timestamp = positive(now, "Q102 verified flat reconciliation timestamp");
+    state.updatedAt = timestamp;
+    state.lastReconciledAt = timestamp;
+    return state;
+}
+
 function positive(value: unknown, name: string): number {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed <= 0) throw new Error(`${name} must be positive.`);
@@ -684,7 +703,7 @@ export class Quality102CausalV1Runner {
         const riskPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
         if (!killPath) return { reason: "QUALITY102_CAUSAL_V1_KILL_SWITCH_PATH_REQUIRED", flattenExisting: false };
         if (!riskPath) return { reason: "QUALITY102_CAUSAL_V1_DAILY_RISK_PATH_REQUIRED", flattenExisting: false };
-        const kill = await readDisDexV96KillSwitch(killPath);
+        const kill = await readDisDexV96KillSwitch(killPath, { acceptStable4GlobalHold: true });
         if (kill) {
             return {
                 reason: `SHARED_KILL_SWITCH:${kill.reason}`,
@@ -1646,6 +1665,13 @@ export class Quality102CausalV1Runner {
             const actual = live.actualQ102;
             if (state.position && !actual) return this.manualReview(state, "Q102 state expects a position but exchange returned none.");
             if (!state.position && actual) return this.manualReview(state, "Q102 exchange position is unmanaged.");
+            if (!sharedRisk && !state.position && !actual) {
+                // A healthy flat Q102 can go many ticks without a new signal.
+                // Keep its peer-owned state fresh ONLY after validateLiveAccount
+                // has verified the venue snapshots and shared-risk reads pass.
+                refreshQ102FlatStateAfterVerifiedReconciliation(state, this.now());
+                await this.dependencies.stateStore.save(state);
+            }
             if (state.position) {
                 const profitFloorReason = await this.updateProfitFloorState(state);
                 if (profitFloorReason === "manual_review") return { status: "manual-review", message: "Q102_PROFIT_FLOOR_MANUAL_REVIEW", ordersSent: 0 };
