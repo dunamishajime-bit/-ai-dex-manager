@@ -1,0 +1,50 @@
+{
+  "schema": "disdex-bt-hype-source-defined-gross-policy-drift/v1",
+  "created_at_utc": "2026-11-19T05:14:44.463823+00:00",
+  "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "live_service_snapshot_utc": "2026-11-18T22:07:32.844395+00:00",
+  "live_static_source_bytes_verified_from_vps": true,
+  "pinned_source_sha256": {
+    "config/disdexStable4Opportunity.ts": "3ebe944817303c5131b3f4280546f8eef07a9ccc591f05c1558834148f36e4fb",
+    "config/hypeZecLongRuntime.ts": "1d061773510f11214bde24d24a0b53a677536bcc683aaeb7c03251f0ff333f6a",
+    "lib/hype-zec-long-runner.ts": "25acd3a80384c683f780c5a6d604b170c2174e61a3fdb8d80507df69e0cf4056",
+    "lib/stable4-entry-gross-guard.ts": "1f51954e83593b3277d2f85659a71b11ee7c5995072c692730f25acc16bfe4fa"
+  },
+  "research_is_actual_venue_fills": false,
+  "comparison": {
+    "crypto_stock_total": {
+      "cryptoGrossCap": {
+        "historical_research": 3.0,
+        "pinned_hype_stable4": 3.0,
+        "delta_x": 0.0,
+        "same": true
+      },
+      "stockGrossCap": {
+        "historical_research": 1.5,
+        "pinned_hype_stable4": 4.0,
+        "delta_x": 2.5,
+        "same": false
+      },
+      "totalGrossCap": {
+        "historical_research": 3.5,
+        "pinned_hype_stable4": 4.25,
+        "delta_x": 0.75,
+        "same": false
+      }
+    },
+    "conditional_v4_total_cap_x": 4.75,
+    "conditional_v4_total_cap_runtime_trigger_verified": false
+  },
+  "code_path": {
+    "hype_runtime_chooses_stable4_total_cap_when_stable4_mode_live": true,
+    "hype_entry_planner_receives_runtime_total_cap": true,
+    "stable4_entry_gross_guard_references_source_defined_caps": true
+  },
+  "risk_reference": "HISTORICAL_RESEARCH_MANIFEST_NOT_SIGNED_CURRENT_OWNER_POLICY",
+  "effective_signed_global_risk_policy_verified": false,
+  "independent_restrictive_gates_excluded": false,
+  "actual_exchange_gross_limit_breach_verified": false,
+  "production_bt_parity_certified": false,
+  "research_vs_pinned_source_cap_drift": true,
+  "recommendation": "Read-only review shared risk/margin guard/current owner policy before treating either cap as final live account authority"
+}

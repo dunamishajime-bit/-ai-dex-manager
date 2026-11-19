@@ -117,3 +117,11 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - Entry scheduling, state ownership, signaled but globally filtered orders, risk source validity, temporary suppression and whether model exporter was exhaustive remain NOT VERIFIED. Do not invent BLOCK or FILL events for missing timestamps.
 - Report stores only study-derived aggregate model exposure, never venue credentials, actual orders or user account positions. No live mutations.
 - Six targeted unit tests PASS. Private original CSVs remain local and unchanged; only small derivative UNVERIFIED report committed.
+## Pinned HYPE STABLE4 Gross policy versus historical 10/30bps study divergence
+- Read-only audit: scripts/research/audit_bt_hype_gross_policy_drift.py; evidence docs/research-results/BT_HYPE_SOURCE_GROSS_CAP_DRIFT_20261119_UNCERTIFIED.json.
+- Study source C:\tmp\disdex-bt-20251001-20261001\STABLE4_OPPORTUNITY_PROD_CAPS_20261114\RUN_MANIFEST.json has identical 10bps and 30bps limits crypto 3.0x, stock 1.5x and total 3.5x.
+- Pinned actual LIVE HYPE static source config/disdexStable4Opportunity.ts at e0e4f1d8... defines crypto 3.0x, stock 4.0x, total 4.25x, and a V4 reservation conditional total 4.75x. All four source files (config, HYPE runtime, HYPE runner and STABLE4 gross guard) were included in the previously confirmed VPS static dependency-byte audit.
+- The pinned HYPE runtime selects the STABLE4 total cap when STABLE4 mode is LIVE. The HYPE entry planner passes the runtime cap to its admission checks. The STABLE4 gross guard uses the source-defined crypto/stock/total/v4 caps.
+- Differences from the historical research scenario: stock +2.5x, total +0.75x. However this audit DOES NOT prove any actual excess exchange exposure: global shared broker/risk/margin/owner policy may have stricter controls or reject all orders, and initial process environment is not signed end-to-end authorization evidence.
+- Require signed current owner cap policy and read-only effective guard precedence validation before any present-production BT parity claim. Do not silently change risk limits or perform trade operations.
+- Five offline source-policy parser/regression tests PASS.
