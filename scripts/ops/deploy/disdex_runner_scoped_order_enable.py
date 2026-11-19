@@ -726,6 +726,16 @@ def normalize_common_module_permissions(path: str | Path) -> None:
         os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
 
 
+def trusted_release_root(path: str | Path) -> None:
+    """Validate the deploy-owned release parent without broad ownership changes."""
+    target = Path(path)
+    require(target == RELEASE_ROOT, "RELEASE_ROOT_PATH_INVALID")
+    st = target.lstat()
+    require(stat.S_ISDIR(st.st_mode) and not target.is_symlink(),
+            "RELEASE_ROOT_INVALID")
+    require((st.st_mode & 0o022) == 0, "RELEASE_ROOT_WRITABLE")
+
+
 def normalize_release_directory_permissions(path: str | Path) -> None:
     """Normalize one pinned release directory's metadata without file changes."""
     target = Path(path)
@@ -765,7 +775,7 @@ def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
             "RUNNER_SOURCE_NOT_AUDITED_PIN")
     release = RELEASE_ROOT / source_sha
     marker = release / ".disdex-release-sha"
-    trusted_dir(RELEASE_ROOT)
+    trusted_release_root(RELEASE_ROOT)
     normalize_release_directory_permissions(release)
     trusted_dir(release)
     marker_st = marker.lstat()
