@@ -2,9 +2,11 @@
 import hashlib
 import json
 import os
+from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts.ops.deploy import disdex_runner_scoped_order_enable as gate
 
@@ -120,6 +122,24 @@ class RunnerScopedOrderEnableTests(unittest.TestCase):
             with open(path, "rb") as handle:
                 self.assertEqual(handle.read(), original)
             self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
+
+    def test_release_marker_normalization_chowns_non_root_marker(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = os.path.join(temp_dir, ".disdex-release-sha")
+            original = b"e0e4f1d8f22b62e9410188ef6e590a20e31f760f\\n"
+            with open(path, "wb") as handle:
+                handle.write(original)
+            os.chmod(path, 0o644)
+
+            fake_stat = mock.Mock(st_mode=stat.S_IFREG | 0o644, st_uid=1000, st_gid=1000)
+            with mock.patch.object(gate.Path, "lstat", return_value=fake_stat):
+                with mock.patch.object(gate.os, "chown") as chown:
+                    gate.normalize_release_marker_permissions(path)
+
+            if os.name != "nt":
+                chown.assert_called_once_with(Path(path), 0, 0)
+            with open(path, "rb") as handle:
+                self.assertEqual(handle.read(), original)
 
     def test_candidate_common_module_is_normalized_read_only_without_content_change(self):
         with tempfile.TemporaryDirectory() as temp_dir:
