@@ -21,6 +21,11 @@ import {
   isAllRunnerTaskStep,
   validateAllRunnerTaskClaim,
 } from "@/lib/deploy-all-runners-task";
+import {
+  STABLE4_RUNNER_BUNDLE_OPERATION,
+  STABLE4_RUNNER_BUNDLE_PLAN_SHA256,
+  STABLE4_RUNNER_BUNDLE_SOURCE_SHA,
+} from "@/lib/stable4-runner-bundle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -231,6 +236,10 @@ export async function POST(request: NextRequest) {
           targetSha, planSha256, h48Policy: body.h48_policy, actor,
         })) {
       return NextResponse.json({ ok: false, error: "STABLE4 H48 exact policy, SHA or plan mismatch" }, { status: 409 });
+    }
+    if (operation === STABLE4_RUNNER_BUNDLE_OPERATION &&
+        (targetSha !== STABLE4_RUNNER_BUNDLE_SOURCE_SHA || planSha256 !== STABLE4_RUNNER_BUNDLE_PLAN_SHA256)) {
+      return NextResponse.json({ ok: false, error: "STABLE4 runner bundle exact source or manifest mismatch" }, { status: 409 });
     }
     const requestedScope = body.scope == null ? policy.scope : String(body.scope).trim();
     if (body.orders_enabled != null && typeof body.orders_enabled !== "boolean") {

@@ -1,0 +1,85 @@
+"""Non-production contracts for the six-Runner Owner approval bundle."""
+import hashlib
+import json
+import unittest
+
+from scripts.ops.deploy import disdex_runner_scoped_order_enable as gate
+
+
+APPROVAL_ID = "5ad3c5a3-0833-4d27-bd05-f057ca434efa"
+RUN_ID = "44330000001"
+NOW = 1_800_000_000_000
+
+
+def bundle_approval(status="REDEEMED", run_id=RUN_ID):
+    return {
+        "id": APPROVAL_ID,
+        "operation": gate.BUNDLE_OPERATION,
+        "scope": gate.BUNDLE_SCOPE,
+        "targetSha": gate.BUNDLE_SOURCE_SHA,
+        "planSha256": gate.BUNDLE_PLAN_SHA256,
+        "requestActor": "dunamishajime-bit",
+        "ordersEnabled": True,
+        "status": status,
+        "redeemedByRunId": run_id,
+        "createdAt": NOW - 20_000,
+        "approvedAt": NOW - 10_000,
+        "redeemedAt": NOW - 5_000,
+        "requestExpiresAt": NOW + 1_000,
+    }
+
+
+def hold():
+    return {
+        "active": True,
+        "action": "HOLD_PROTECTED",
+        "scope": "GLOBAL",
+        "operator": "disdex-stable4-formal-owner-hold",
+        "strategyId": "STABLE4_H48_CUTOVER",
+        "reason": "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+    }
+
+
+class Stable4RunnerBundleTests(unittest.TestCase):
+    def test_manifest_is_exactly_six_and_excludes_hype(self):
+        self.assertEqual(len(gate.BUNDLE_ENTRIES), 6)
+        self.assertEqual(
+            [entry["runner"] for entry in gate.BUNDLE_ENTRIES],
+            ["FET_BRK48_RESIDUAL", "IDLE_PRIORITY_SHORT", "PENGU_V8",
+             "QUALITY102_CAUSAL_V1", "V12_V4", "V52"],
+        )
+        self.assertNotIn("HYPE_TREND_LONG", [entry["runner"] for entry in gate.BUNDLE_ENTRIES])
+        self.assertTrue(all(entry["operation"] == entry["runner"] + "_SCOPED_ORDER_ENABLE"
+                            for entry in gate.BUNDLE_ENTRIES))
+
+    def test_bundle_approval_is_single_exact_identity(self):
+        row = gate.validate_bundle_approval_record(
+            bundle_approval(), approval_id=APPROVAL_ID, run_id=RUN_ID, now_ms=NOW,
+        )
+        self.assertEqual(row["operation"], gate.BUNDLE_OPERATION)
+        for diff in ({"scope": "FULL_PROJECT"}, {"ordersEnabled": False}, {"status": "APPROVED"}):
+            bad = bundle_approval()
+            bad.update(diff)
+            with self.assertRaises(ValueError):
+                gate.validate_bundle_approval_record(
+                    bad, approval_id=APPROVAL_ID, run_id=RUN_ID, now_ms=NOW,
+                )
+
+    def test_child_permits_keep_runner_plan_and_zero_mutations(self):
+        row = bundle_approval()
+        entry = next(item for item in gate.BUNDLE_ENTRIES if item["runner"] == "PENGU_V8")
+        raw = json.dumps(hold(), sort_keys=True, separators=(",", ":")).encode()
+        digest = hashlib.sha256(raw).hexdigest()
+        permit = gate.build_runner_permit(
+            approval_record=row, runner=entry["runner"], source_sha=entry["sourceSha"],
+            plan_sha256=entry["planSha256"], scope=entry["scope"], operation=entry["operation"],
+            kill_switch=hold(), kill_switch_sha256=digest, nonce_sha256="c" * 64,
+            issued_at=NOW, expires_at=NOW + 86_400_000,
+        )
+        self.assertEqual(permit["approvalId"], APPROVAL_ID)
+        self.assertEqual(permit["planSha256"], entry["planSha256"])
+        self.assertEqual((permit["ordersSent"], permit["cancelsSent"], permit["positionChangesSent"]), (0, 0, 0))
+
+
+if __name__ == "__main__":
+    unittest.main()

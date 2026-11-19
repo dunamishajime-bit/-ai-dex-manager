@@ -46,6 +46,13 @@ EXECUTION_LOCK = Path("/var/lib/disdex/unified-deploy/deployment-execution.lock"
 RECEIPT_ROOT = Path("/var/lib/disdex/unified-deploy/receipts")
 ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 
+# One Owner approval may cover exactly these six Runner permits.  HYPE is
+# intentionally excluded because it has the independent H48 certificate path.
+BUNDLE_OPERATION = "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE"
+BUNDLE_SCOPE = "STABLE4_SCOPED_RUNNERS"
+BUNDLE_SOURCE_SHA = "e0e4f1d8f22b62e9410188ef6e590a20e31f760f"
+BUNDLE_PLAN_SHA256 = "595ab42294fe939d18e11fc9885dfb62856d6b0b22327b9d0a5e578fe448af1a"
+
 # These are the immutable Runner pins audited immediately before this
 # implementation.  A new release must update this map and its Owner-approved
 # plan hash; arbitrary SHA/plan combinations are rejected by preflight.
@@ -105,6 +112,33 @@ RUNNER_SPECS: dict[str, dict[str, str]] = {
         "unit_template": "disdex-idle-priority-short@{sha}.service",
     },
 }
+
+BUNDLE_ENTRIES: tuple[dict[str, str], ...] = (
+    {"runner": "FET_BRK48_RESIDUAL", "sourceSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+     "planSha256": "12272418221383c53382b98bcefdda7eaba20f2655e9489eebbbdd73713c4717",
+     "scope": "FET_BRK48_RESIDUAL", "operation": "FET_BRK48_RESIDUAL_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-fet-brk48@{sha}.service"},
+    {"runner": "IDLE_PRIORITY_SHORT", "sourceSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+     "planSha256": "ed6e7da737480349a6454868ed78bcbc4db5f3990a6f4cc2bbb6e111cc3346db",
+     "scope": "IDLE_PRIORITY_SHORT", "operation": "IDLE_PRIORITY_SHORT_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-idle-priority-short@{sha}.service"},
+    {"runner": "PENGU_V8", "sourceSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+     "planSha256": "8928520a2391d8190c2cdda8b6e3e36959a452ed151d36a820a2ce3f8ec01568",
+     "scope": "PENGU_V8", "operation": "PENGU_V8_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-pengu-dual-ls-v2@{sha}.service"},
+    {"runner": "QUALITY102_CAUSAL_V1", "sourceSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+     "planSha256": "01110a52b9ab740652cca48354e246edf71759916df476797b8e9753221ae4b6",
+     "scope": "QUALITY102_CAUSAL_V1", "operation": "QUALITY102_CAUSAL_V1_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-quality102-causal-v1@{sha}.service"},
+    {"runner": "V12_V4", "sourceSha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+     "planSha256": "9fc3cc72c9520a758f1b700ed648f0e1e11a54eb92c514b08992f22605d9e515",
+     "scope": "V12_V4", "operation": "V12_V4_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-v12-v4@{sha}.service"},
+    {"runner": "V52", "sourceSha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+     "planSha256": "a43d6e47acdc862953801a89e396f8819eeb9a580cc2aaadc901d926c23d011c",
+     "scope": "V52", "operation": "V52_SCOPED_ORDER_ENABLE",
+     "unitTemplate": "disdex-v52-aster-only@{sha}.service"},
+)
 
 
 def require(ok: object, reason: str) -> None:
@@ -177,6 +211,37 @@ def validate_approval_record(
         ("redeemedByRunId", run_id),
     ):
         require(row.get(key) == expected, "APPROVAL_" + key.upper() + "_MISMATCH")
+    created, approved, redeemed, expires = (row.get(k) for k in ("createdAt", "approvedAt", "redeemedAt", "requestExpiresAt"))
+    require(all(type(x) is int and x > 0 for x in (created, approved, redeemed, now_ms)),
+            "APPROVAL_TIMELINE_INVALID")
+    require(created <= approved <= redeemed <= now_ms + 30_000, "APPROVAL_TIMELINE_INVALID")
+    require(type(expires) is int and approved <= expires, "APPROVAL_TIMELINE_INVALID")
+    return row
+
+
+def validate_bundle_approval_record(
+    row: object,
+    *,
+    approval_id: str,
+    run_id: str,
+    now_ms: int,
+) -> dict[str, Any]:
+    """Validate the single Owner approval backing all six child permits."""
+    require(UUID_RE.fullmatch(approval_id) is not None, "APPROVAL_ID_INVALID")
+    require(RUN_ID_RE.fullmatch(run_id) is not None, "RUN_ID_INVALID")
+    require(isinstance(row, dict), "APPROVAL_RECORD_INVALID")
+    require(row.get("id") == approval_id, "APPROVAL_ID_MISMATCH")
+    for key, expected in (
+        ("operation", BUNDLE_OPERATION),
+        ("scope", BUNDLE_SCOPE),
+        ("targetSha", BUNDLE_SOURCE_SHA),
+        ("planSha256", BUNDLE_PLAN_SHA256),
+        ("requestActor", OWNER),
+        ("ordersEnabled", True),
+        ("status", "REDEEMED"),
+        ("redeemedByRunId", run_id),
+    ):
+        require(row.get(key) == expected, "BUNDLE_APPROVAL_" + key.upper() + "_MISMATCH")
     created, approved, redeemed, expires = (row.get(k) for k in ("createdAt", "approvedAt", "redeemedAt", "requestExpiresAt"))
     require(all(type(x) is int and x > 0 for x in (created, approved, redeemed, now_ms)),
             "APPROVAL_TIMELINE_INVALID")
@@ -569,6 +634,20 @@ def _read_approval_store(path: Path, approval_id: str, *, runner: str,
     )
 
 
+def _read_bundle_approval_store(path: Path, approval_id: str, *, run_id: str,
+                                now_ms: int) -> dict[str, Any]:
+    st = path.lstat()
+    require(stat.S_ISREG(st.st_mode) and not path.is_symlink() and st.st_size <= 4_000_000,
+            "APPROVAL_STORE_INVALID")
+    rows = json.loads(path.read_bytes())
+    require(isinstance(rows, list) and len(rows) <= 10_000, "APPROVAL_STORE_INVALID")
+    st = path.stat()
+    require(st.st_uid in (0, 1000) and (st.st_mode & 0o022) == 0, "APPROVAL_STORE_UNTRUSTED")
+    matches = [row for row in rows if isinstance(row, dict) and row.get("id") == approval_id]
+    require(len(matches) == 1, "APPROVAL_NOT_UNIQUE")
+    return validate_bundle_approval_record(matches[0], approval_id=approval_id, run_id=run_id, now_ms=now_ms)
+
+
 def _read_hold_for_source(source_sha: str) -> tuple[dict[str, Any], bytes, str]:
     value, raw = read_json(HOLD_PATH)
     validate_global_hold(value, source_sha=source_sha, now_ms=_now_ms())
@@ -786,6 +865,214 @@ def _preflight(*, approval_id: str, run_id: str, token: str, runner: str,
     }
 
 
+def _bundle_preflight_runner(*, approval: dict[str, Any], token_payload: dict[str, Any],
+                             runner: str, source_sha: str, plan_sha256: str,
+                             permit_module_path: Path) -> dict[str, Any]:
+    """Preflight one child Runner under the one bundle approval.
+
+    This deliberately does not turn the bundle into six approvals.  The
+    bundle record is validated once, while every child still gets its own
+    immutable SHA/plan/scope/operation checks and independent permit path.
+    """
+    require(os.geteuid() == 0, "ROOT_REQUIRED")
+    spec = _runner_spec(runner)
+    require(PINNED_SOURCE_BY_RUNNER.get(runner) == source_sha, "RUNNER_SOURCE_NOT_AUDITED_PIN")
+    require(PINNED_PLAN_BY_RUNNER.get(runner) == plan_sha256, "RUNNER_PLAN_NOT_AUDITED_PIN")
+    now_ms = _now_ms()
+    locations = _permit_locations(runner, source_sha)
+    unit = spec["unit_template"].format(sha=source_sha)
+    release_raw = _validate_candidate_source(source_sha)
+    root_immutable(permit_module_path)
+    hold, hold_raw, hold_digest = _read_hold_for_source(BUNDLE_SOURCE_SHA)
+    pid = _validate_service_before(unit, locations["release"])
+    _validate_common_wiring(unit, runner)
+    _validate_shared_safety()
+    venue = _safe_flat_get(locations["release"])
+    for key in ("overlay_source", "permit_module", "env", "dropin", "permit", "receipt"):
+        path = locations[key]
+        require(not path.exists() and not path.is_symlink(), "ORDER_ENABLE_ALREADY_INSTALLED:" + str(path))
+    runner_dir = PERMIT_ROOT / runner
+    if runner_dir.exists():
+        for existing in runner_dir.glob("*.order-enable.json"):
+            require(existing == locations["permit"], "RUNNER_PERMIT_ALREADY_PRESENT")
+    return {
+        "locations": locations,
+        "unit": unit,
+        "runner": runner,
+        "sourceSha": source_sha,
+        "planSha256": plan_sha256,
+        "operation": spec["operation"],
+        "scope": spec["scope"],
+        "approval": approval,
+        "tokenPayload": token_payload,
+        "releaseRaw": release_raw,
+        "permitModule": permit_module_path.read_bytes(),
+        "hold": hold,
+        "holdRaw": hold_raw,
+        "killSwitchSha256": hold_digest,
+        "pid": pid,
+        "venue": venue,
+        "tokenNonceSha256": sha256(str(token_payload["nonce"]).encode("ascii")),
+        "nowMs": now_ms,
+    }
+
+
+def _bundle_preflight(*, approval_id: str, run_id: str, token: str,
+                      permit_module_path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    require(os.geteuid() == 0, "ROOT_REQUIRED")
+    now_ms = _now_ms()
+    public_key = Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem")
+    if not public_key.exists():
+        public_key = Path("/var/lib/disdex/owner-approval-public.pem")
+    root_immutable(public_key)
+    from disdex_owner_approval import verify
+    payload = verify(
+        token, public_key, REPO, BUNDLE_SOURCE_SHA, BUNDLE_SCOPE, OWNER, BUNDLE_PLAN_SHA256,
+        now=now_ms // 1000, nonce_dir=None, route="GITHUB_ACTIONS",
+        deployment_target=DEPLOYMENT_TARGET, operator_target="DD1296_FINAL_ALLIN_10BPS",
+        orders_enabled=True,
+    )
+    approval_store = Path("/home/deploy/disdex-ui/shared/data/deploy-approvals.json")
+    approval = _read_bundle_approval_store(approval_store, approval_id, run_id=run_id, now_ms=now_ms)
+    rows: list[dict[str, Any]] = []
+    for entry in BUNDLE_ENTRIES:
+        rows.append(_bundle_preflight_runner(
+            approval=approval, token_payload=payload,
+            runner=entry["runner"], source_sha=entry["sourceSha"], plan_sha256=entry["planSha256"],
+            permit_module_path=permit_module_path,
+        ))
+    require(len(rows) == 6, "BUNDLE_RUNNER_COUNT_INVALID")
+    require({row["runner"] for row in rows} == {entry["runner"] for entry in BUNDLE_ENTRIES},
+            "BUNDLE_RUNNER_SET_INVALID")
+    hold_raw = rows[0]["holdRaw"]
+    require(all(row["holdRaw"] == hold_raw for row in rows), "GLOBAL_HOLD_INCONSISTENT")
+    return approval, rows
+
+
+def _bundle_execute(*, approval_id: str, run_id: str, token: str,
+                    permit_module_path: Path) -> dict[str, Any]:
+    import fcntl
+
+    approval, first_rows = _bundle_preflight(
+        approval_id=approval_id, run_id=run_id, token=token,
+        permit_module_path=permit_module_path,
+    )
+    lock_fd = os.open(EXECUTION_LOCK, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    installed: list[Path] = []
+    restarted: list[tuple[str, int]] = []
+    states: list[dict[str, Any]] = first_rows
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _, states = _bundle_preflight(
+            approval_id=approval_id, run_id=run_id, token=token,
+            permit_module_path=permit_module_path,
+        )
+        baseline_hold = states[0]["holdRaw"]
+        receipts: list[dict[str, Any]] = []
+        for state in states:
+            locations = state["locations"]
+            now_ms = _now_ms()
+            permit = build_runner_permit(
+                approval_record=approval, runner=state["runner"], source_sha=state["sourceSha"],
+                plan_sha256=state["planSha256"], scope=state["scope"], operation=state["operation"],
+                kill_switch=state["hold"], kill_switch_sha256=state["killSwitchSha256"],
+                nonce_sha256=state["tokenNonceSha256"], issued_at=now_ms,
+                expires_at=now_ms + 30 * 86_400_000,
+            )
+            overlay = build_common_kill_switch_overlay(
+                state["releaseRaw"], runner=state["runner"],
+                permit_module_path=str(locations["permit_module"]),
+            )
+            env = build_env(
+                runner=state["runner"], source_sha=state["sourceSha"],
+                plan_sha256=state["planSha256"], approval_id=approval_id,
+                permit=locations["permit"],
+            )
+            dropin = build_dropin(
+                unit=state["unit"], overlay_source=locations["overlay_source"],
+                base_target=locations["common"], env_file=locations["env"],
+            )
+            for directory in (locations["overlay_dir"], locations["dropin_dir"], locations["receipt"].parent):
+                if directory.exists():
+                    trusted_dir(directory)
+                else:
+                    directory.mkdir(parents=True, exist_ok=False)
+                    os.chown(directory, 0, 0)
+                    os.chmod(directory, 0o755)
+            install_exact(locations["overlay_source"], overlay); installed.append(locations["overlay_source"])
+            install_exact(locations["permit_module"], state["permitModule"]); installed.append(locations["permit_module"])
+            install_exact(locations["env"], env); installed.append(locations["env"])
+            install_exact(locations["dropin"], dropin); installed.append(locations["dropin"])
+            install_exact(locations["permit"], canonical(permit)); installed.append(locations["permit"])
+            systemctl("daemon-reload")
+            systemctl("restart", state["unit"])
+            pid = _wait_service_stable(state["unit"], int(state["pid"]))
+            restarted.append((state["unit"], pid))
+            require(_namespace_hash(pid, locations["overlay_source"]) == sha256(overlay),
+                    "RUNNER_OVERLAY_NOT_ACTIVE")
+            hold_after, hold_raw_after, hold_digest_after = _read_hold_for_source(BUNDLE_SOURCE_SHA)
+            validate_runner_permit(
+                json.loads(locations["permit"].read_bytes()), runner=state["runner"],
+                source_sha=state["sourceSha"], plan_sha256=state["planSha256"], scope=state["scope"],
+                operation=state["operation"], approval_id=approval_id, kill_switch=hold_after,
+                kill_switch_sha256=hold_digest_after, now_ms=_now_ms(),
+            )
+            require(hold_raw_after == baseline_hold, "GLOBAL_HOLD_CHANGED_DURING_BUNDLE_ENABLE")
+            receipt = {
+                "schema": "disdex-runner-scoped-order-enable/v1",
+                "bundleOperation": BUNDLE_OPERATION, "bundleSourceSha": BUNDLE_SOURCE_SHA,
+                "bundlePlanSha256": BUNDLE_PLAN_SHA256,
+                "runner": state["runner"], "scope": state["scope"], "operation": state["operation"],
+                "approvedSha": state["sourceSha"], "planSha256": state["planSha256"],
+                "approvalId": approval_id, "killSwitchSha256": state["killSwitchSha256"],
+                "permitSha256": sha256(canonical(permit)), "overlaySha256": sha256(overlay),
+                "moduleSha256": sha256(state["permitModule"]), "environmentSha256": sha256(env),
+                "dropinSha256": sha256(dropin), "pid": pid, "venueRead": state["venue"],
+                "status": "RUNNER_SCOPED_ORDER_ENABLE_INSTALLED_GLOBAL_HOLD_REMAINS_ACTIVE",
+                "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "issuedAt": now_ms,
+            }
+            install_exact(locations["receipt"], canonical(receipt)); installed.append(locations["receipt"])
+            receipts.append(receipt)
+        return {
+            "status": "STABLE4_RUNNER_BUNDLE_ORDER_ENABLE_INSTALLED_GLOBAL_HOLD_REMAINS_ACTIVE",
+            "operation": BUNDLE_OPERATION, "scope": BUNDLE_SCOPE,
+            "approvedSha": BUNDLE_SOURCE_SHA, "planSha256": BUNDLE_PLAN_SHA256,
+            "approvalId": approval_id, "runners": receipts,
+            "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0,
+        }
+    except Exception:
+        try:
+            for state in reversed(states):
+                dropin = state["locations"]["dropin"]
+                if dropin.exists():
+                    _remove_exact(dropin)
+            if states:
+                systemctl("daemon-reload")
+            for unit, previous_pid in reversed(restarted):
+                try:
+                    systemctl("restart", unit)
+                    _wait_service_stable(unit, previous_pid, timeout=75)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        for path in reversed(installed):
+            try:
+                _remove_exact(path)
+            except Exception:
+                pass
+        for state in states:
+            for directory in (state["locations"]["overlay_dir"], state["locations"]["dropin_dir"]):
+                try:
+                    if directory.exists() and not any(directory.iterdir()):
+                        directory.rmdir()
+                except Exception:
+                    pass
+        raise
+    finally:
+        os.close(lock_fd)
+
+
 def _remove_exact(path: Path) -> None:
     if not (path.exists() or path.is_symlink()):
         return
@@ -966,14 +1253,51 @@ def main() -> int:
     mode.add_argument("--execute", action="store_true")
     mode.add_argument("--rollback", action="store_true")
     mode.add_argument("--normalize-source", action="store_true")
+    mode.add_argument("--bundle-preflight-readonly", action="store_true")
+    mode.add_argument("--bundle-execute", action="store_true")
+    mode.add_argument("--bundle-normalize", action="store_true")
     args = parser.parse_args()
     try:
-        if args.normalize_source:
+        if args.bundle_normalize:
+            require(os.geteuid() == 0, "ROOT_REQUIRED")
+            normalized = []
+            for entry in BUNDLE_ENTRIES:
+                normalized.append(_normalize_candidate_source(entry["sourceSha"], entry["runner"]))
+            result = {"status": "STABLE4_RUNNER_BUNDLE_COMMON_MODULES_IMMUTABLE_NORMALIZED",
+                      "runners": normalized, "ordersSent": 0, "cancelsSent": 0,
+                      "positionChangesSent": 0}
+        elif args.normalize_source:
             require(args.runner and args.source_sha, "NORMALIZE_IDENTITY_REQUIRED")
             result = _normalize_candidate_source(args.source_sha, args.runner)
         elif args.rollback:
             require(args.runner and args.source_sha, "ROLLBACK_IDENTITY_REQUIRED")
             result = _rollback(runner=args.runner, source_sha=args.source_sha)
+        elif args.bundle_preflight_readonly or args.bundle_execute:
+            require(args.approval_id and args.run_id, "BUNDLE_APPROVAL_INPUT_REQUIRED")
+            require(args.read_approval_stdin, "BUNDLE_APPROVAL_INPUT_REQUIRED")
+            token = sys.stdin.read(16_385).strip()
+            require(token and len(token) <= 16_384, "APPROVAL_TOKEN_INVALID")
+            if args.bundle_execute:
+                result = _bundle_execute(
+                    approval_id=args.approval_id, run_id=args.run_id, token=token,
+                    permit_module_path=Path(args.permit_module),
+                )
+            else:
+                approval, rows = _bundle_preflight(
+                    approval_id=args.approval_id, run_id=args.run_id, token=token,
+                    permit_module_path=Path(args.permit_module),
+                )
+                result = {
+                    "status": "STABLE4_RUNNER_BUNDLE_ORDER_ENABLE_PREFLIGHT_PASS_NOT_LIVE",
+                    "operation": BUNDLE_OPERATION, "scope": BUNDLE_SCOPE,
+                    "approvedSha": BUNDLE_SOURCE_SHA, "planSha256": BUNDLE_PLAN_SHA256,
+                    "approvalId": approval["id"],
+                    "runners": [{"runner": row["runner"], "approvedSha": row["sourceSha"],
+                                 "planSha256": row["planSha256"], "ordersEnabled": False,
+                                 "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
+                                for row in rows],
+                    "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0,
+                }
         else:
             require(all((args.runner, args.source_sha, args.plan_sha256, args.scope,
                          args.operation, args.approval_id, args.run_id)),

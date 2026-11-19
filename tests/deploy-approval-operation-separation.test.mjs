@@ -18,6 +18,7 @@ test("approval operations separate monitoring, runner enablement, shared-risk wr
     "ALL_RUNNERS_LIVE_RESTORE",
     "ALL_RUNNERS_ORDER_ENABLE_PREP",
     "ALL_RUNNERS_ORDER_ENABLE",
+    "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE",
   ]) assert.ok(token.includes(operation), operation);
 
   assert.match(token, /ALL_RUNNERS_MONITOR_REFRESH:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*false/);
@@ -26,6 +27,7 @@ test("approval operations separate monitoring, runner enablement, shared-risk wr
   assert.match(token, /ALL_RUNNERS_LIVE_RESTORE:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*false/);
   assert.match(token, /ALL_RUNNERS_ORDER_ENABLE_PREP:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*false/);
   assert.match(token, /ALL_RUNNERS_ORDER_ENABLE:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*true/);
+  assert.match(token, /STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE:[\s\S]*?scope:\s*"STABLE4_SCOPED_RUNNERS"[\s\S]*?ordersEnabled:\s*true/);
 });
 
 test("all-runner restore task is monitor-only and cannot mint an order-enabled child claim", () => {
@@ -77,6 +79,7 @@ test("formal HP request workflow exposes each separated approval operation with 
     "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH ",
     "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE_PREP ",
     "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ",
+    "DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE ",
     "DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ",
   ]) assert.ok(source.includes(marker), marker);
   assert.match(source, /operation = "PENGU_V8_LIVE"[\s\S]*?scope = "PENGU_V8"[\s\S]*?orders_enabled = "true"/);
@@ -84,4 +87,5 @@ test("formal HP request workflow exposes each separated approval operation with 
   assert.match(source, /operation = "ALL_RUNNERS_MONITOR_REFRESH"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "false"/);
   assert.match(source, /operation = "ALL_RUNNERS_ORDER_ENABLE_PREP"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "false"/);
   assert.match(source, /operation = "ALL_RUNNERS_ORDER_ENABLE"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "true"/);
+  assert.match(source, /operation = "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE"[\s\S]*?scope = "STABLE4_SCOPED_RUNNERS"[\s\S]*?orders_enabled = "true"/);
 });

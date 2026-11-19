@@ -29,7 +29,8 @@ jobs:
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_STABLE4_H48_TIME_ONLY_LIVE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ') ||
-        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE ')
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE ')
       )
     environment:
       name: disdex-production
@@ -90,6 +91,10 @@ jobs:
           )
           runner_scoped = re.fullmatch(
               r"DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE RUNNER=(V12_V4|PENGU_V8|QUALITY102_CAUSAL_V1|V52|FET_BRK48_RESIDUAL|IDLE_PRIORITY_SHORT) SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          runner_bundle = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
               body,
           )
 
@@ -164,6 +169,13 @@ jobs:
               runner, target, plan = runner_scoped.groups()
               operation = runner + "_SCOPED_ORDER_ENABLE"
               scope = runner
+              orders_enabled = "true"
+          elif runner_bundle:
+              target, plan = runner_bundle.groups()
+              if target != "e0e4f1d8f22b62e9410188ef6e590a20e31f760f" or plan != "595ab42294fe939d18e11fc9885dfb62856d6b0b22327b9d0a5e578fe448af1a":
+                  raise SystemExit("STABLE4_RUNNER_BUNDLE_EXACT_SOURCE_AND_MANIFEST_REQUIRED")
+              operation = "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE"
+              scope = "STABLE4_SCOPED_RUNNERS"
               orders_enabled = "true"
           else:
               raise SystemExit("request comment does not match a protected production request grammar")
