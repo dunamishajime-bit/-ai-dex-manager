@@ -727,12 +727,30 @@ def normalize_common_module_permissions(path: str | Path) -> None:
         os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
 
 
+def normalize_release_marker_permissions(path: str | Path) -> None:
+    """Remove write bits from a release marker without changing its bytes."""
+    target = Path(path)
+    st = target.lstat()
+    require(stat.S_ISREG(st.st_mode) and not target.is_symlink(),
+            "RELEASE_MARKER_NOT_REGULAR")
+    before = sha256(target.read_bytes())
+    if st.st_mode & 0o222:
+        os.chmod(target, stat.S_IMODE(st.st_mode) & ~0o222)
+    require(before == sha256(target.read_bytes()),
+            "RELEASE_MARKER_CONTENT_CHANGED")
+
+
 def _normalize_candidate_source(source_sha: str, runner: str) -> dict[str, Any]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     require(PINNED_SOURCE_BY_RUNNER.get(runner) == source_sha,
             "RUNNER_SOURCE_NOT_AUDITED_PIN")
     release = RELEASE_ROOT / source_sha
     marker = release / ".disdex-release-sha"
+    marker_st = marker.lstat()
+    require(stat.S_ISREG(marker_st.st_mode) and not marker.is_symlink()
+            and marker_st.st_uid == 0 and marker_st.st_gid == 0,
+            "RELEASE_MARKER_OWNER_INVALID")
+    normalize_release_marker_permissions(marker)
     root_immutable(marker)
     require(marker.read_text(encoding="utf-8").strip() == source_sha,
             "RELEASE_MARKER_INVALID")
