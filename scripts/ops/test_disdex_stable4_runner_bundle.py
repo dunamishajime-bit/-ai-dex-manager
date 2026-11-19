@@ -4,6 +4,7 @@ import json
 import unittest
 
 from scripts.ops.deploy import disdex_runner_scoped_order_enable as gate
+from scripts.ops.deploy import disdex_deployment_contract as contract
 
 
 APPROVAL_ID = "5ad3c5a3-0833-4d27-bd05-f057ca434efa"
@@ -41,6 +42,10 @@ def hold():
 
 
 class Stable4RunnerBundleTests(unittest.TestCase):
+    def test_bundle_scope_is_allowed_by_owner_signature_contract(self):
+        self.assertIn(gate.BUNDLE_SCOPE, contract.SCOPES)
+        contract.validate_order_permission(gate.BUNDLE_SCOPE, True)
+
     def test_manifest_is_exactly_six_and_excludes_hype(self):
         self.assertEqual(len(gate.BUNDLE_ENTRIES), 6)
         self.assertEqual(
