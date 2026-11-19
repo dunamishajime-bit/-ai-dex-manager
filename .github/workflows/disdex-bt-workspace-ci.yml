@@ -32,6 +32,8 @@ on:
       - "tests/test_bt_hype_missing_candidate_exposure.py"
       - "scripts/research/audit_bt_hype_gross_policy_drift.py"
       - "tests/test_bt_hype_gross_policy_drift.py"
+      - "scripts/research/audit_bt_hype_pretarget_cohort.py"
+      - "tests/test_bt_hype_pretarget_cohort.py"
       - "docs/research-results/BT_HYPE_PINNED_PURE_SIGNAL_REPLAY_20261119_UNCERTIFIED.json"
       - "docs/research-results/BT_HYPE_PURE_SIGNAL_MODEL_DECISION_RECONCILE_20261119_UNCERTIFIED.json"
       - "package.json"
@@ -67,6 +69,8 @@ on:
       - "tests/test_bt_hype_missing_candidate_exposure.py"
       - "scripts/research/audit_bt_hype_gross_policy_drift.py"
       - "tests/test_bt_hype_gross_policy_drift.py"
+      - "scripts/research/audit_bt_hype_pretarget_cohort.py"
+      - "tests/test_bt_hype_pretarget_cohort.py"
       - "docs/research-results/BT_HYPE_PINNED_PURE_SIGNAL_REPLAY_20261119_UNCERTIFIED.json"
       - "docs/research-results/BT_HYPE_PURE_SIGNAL_MODEL_DECISION_RECONCILE_20261119_UNCERTIFIED.json"
       - "package.json"
@@ -131,6 +135,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_bt_hype_pure_signal_report.py' -v
           python -m unittest discover -s tests -p 'test_bt_hype_missing_candidate_exposure.py' -v
           python -m unittest discover -s tests -p 'test_bt_hype_gross_policy_drift.py' -v
+          python -m unittest discover -s tests -p 'test_bt_hype_pretarget_cohort.py' -v
       - name: BT replay and UI unit tests
         run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
       - name: Typecheck
