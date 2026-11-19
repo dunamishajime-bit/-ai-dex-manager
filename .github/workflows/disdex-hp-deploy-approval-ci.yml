@@ -22,6 +22,11 @@ on:
       - "scripts/ops/disdex-hp-ui-regression-guard.mjs"
       - "app/settings/page.tsx"
       - "app/api/system/deploy-approval/**"
+      - "lib/stable4-runner-bundle.ts"
+      - "tests/stable4-runner-bundle.test.ts"
+      - "tests/stable4-runner-bundle-approval.test.mjs"
+      - ".github/workflows/disdex-stable4-runner-bundle-order-enable.yml"
+      - "scripts/ops/test_disdex_stable4_runner_bundle.py"
       - "app/admin/page.tsx"
       - "scripts/disdex-hp-deploy-approval-selftest.ts"
       - "tests/deploy-approval-store-concurrency.test.ts"
@@ -70,6 +75,14 @@ jobs:
 
       - name: HP approval token interoperability
         run: npm run deploy:hp-approval:selftest
+
+      - name: STABLE4 six-Runner bundle approval contract
+        run: |
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest \
+            scripts/ops/test_disdex_stable4_runner_bundle.py \
+            scripts/ops/test_disdex_stable4_runner_bundle_workflow.py -v
+          npx tsx tests/stable4-runner-bundle.test.ts
+          npx tsx tests/stable4-runner-bundle-approval.test.mjs
 
       - name: Approval store concurrency and corruption
         run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts

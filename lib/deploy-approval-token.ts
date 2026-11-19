@@ -34,7 +34,7 @@ export function isExactStable4H48OwnerApprovalRequest(input: {
 export const DEPLOY_APPROVAL_SCOPES = [
   "V12_V4", "IDLE_PRIORITY_SHORT", "FULL_PROJECT", "V52",
   "HYPE_TREND_LONG", "QUALITY102_CAUSAL_V1", "PENGU_V8",
-  "FET_BRK48_RESIDUAL", "SHARED_CRYPTO_RISK_ONLY",
+  "FET_BRK48_RESIDUAL", "SHARED_CRYPTO_RISK_ONLY", "STABLE4_SCOPED_RUNNERS",
 ] as const;
 export type DeploymentApprovalScope = (typeof DEPLOY_APPROVAL_SCOPES)[number];
 
@@ -57,6 +57,7 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "ALL_RUNNERS_LIVE_RESTORE",
   "ALL_RUNNERS_ORDER_ENABLE_PREP",
   "ALL_RUNNERS_ORDER_ENABLE",
+  "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE",
 ] as const;
 export type DeploymentApprovalOperation = (typeof DEPLOY_APPROVAL_OPERATIONS)[number];
 
@@ -155,6 +156,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "FULL_PROJECT",
     ordersEnabled: true,
     label: "全Runner 注文有効化（復旧完了後の別承認）",
+  },
+  STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE: {
+    scope: "STABLE4_SCOPED_RUNNERS",
+    ordersEnabled: true,
+    label: "STABLE4 6 Runner 一括注文有効化（HYPE除外・各Runner固有permit）",
   },
 };
 
