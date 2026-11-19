@@ -1,5 +1,7 @@
 import sys
 import unittest
+import tempfile
+import json
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
@@ -91,6 +93,41 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
         self.assertTrue(classify("Shared Kill Switch is active but invalid"))
         self.assertTrue(classify("Shared Kill Switch action is invalid"))
         self.assertFalse(classify("Unrelated programming failure"))
+
+
+    def test_known_stable4_global_hold_is_preserved_without_reinterpreting_as_clear(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "shared-switch.json"
+            payload = {
+                "active": True,
+                "strategyId": "STABLE4_H48_CUTOVER",
+                "action": "HOLD_PROTECTED",
+                "scope": "GLOBAL",
+                "operator": "disdex-stable4-formal-owner-hold",
+                "reason": "STABLE4_RESEARCH_ROLLOUT:" + "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+                "activatedAt": "2026-11-17T10:48:29.132+00:00",
+                "recoverable": False,
+            }
+            engine = object.__new__(v52.V52AsterOnlyEngine)
+            engine.kill_switch_path = path
+            path.write_text(json.dumps(payload))
+            self.assertEqual(engine.kill_switch(), payload)
+            self.assertFalse(engine._own_recoverable_hold())
+            for key, unsafe_value in [
+                ("action", "FLATTEN_MANAGED"),
+                ("scope", "V52_REFERENCE_ONLY"),
+                ("operator", "unrecognized-operator"),
+                ("strategyId", "UNRECOGNIZED"),
+                ("reason", "unknown"),
+            ]:
+                invalid = {**payload, key: unsafe_value}
+                path.write_text(json.dumps(invalid))
+                with self.assertRaisesRegex(RuntimeError, "Shared Kill Switch is active but invalid"):
+                    engine.kill_switch()
+            path.write_text("{malformed")
+            with self.assertRaisesRegex(RuntimeError, "unreadable or malformed"):
+                engine.kill_switch()
+            self.assertTrue(engine._shared_kill_switch_integrity_error("Shared Kill Switch state unreadable or malformed"))
 
 
 if __name__ == "__main__":
