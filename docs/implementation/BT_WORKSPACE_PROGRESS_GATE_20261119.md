@@ -145,3 +145,8 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - Source-level V4 planner cap values alone do NOT prove final LIVE effective gross limits, actual excess positions or owner approval; other shared order gates may block/limit, and research manifest may not represent the latest owner-approved policy.
 - The old V4 historical 801/797 modeled exits may not be treated as current LIVE reexecution results. Before production-equivalent 8-runner BT, prove the active cross-runner shared cap authority and backtest the chosen actual cap path.
 - Four offline source-policy validation tests PASS; no Production Runner, orders, positions, STOP, risk settings or Kill Switch mutated.
+## BT UI model-vs-pinned-source gross policy difference card
+- Research-only UI BTRiskCapProvenance in components/bt-verification/BTRiskCapProvenance.tsx, pure safety gate lib/bt-verification/risk-cap-provenance.ts.
+- The saved HYPE/V4 pinned VPS source audit reports are rendered as OLD STUDY versus ARCHIVED PINNED SOURCE DIFFERENCES (V4 aggregate 2 to 3, V4 total 3.5 to 4.75; HYPE stock 1.5 to 4, HYPE total 3.5 to 4.25).
+- The card explicitly disclaims current signed final shared account limits, actual exchange gross exposure and production backtest parity; no network calls or live trading side effects. Malformed, inconsistent or falsely certified evidence fails closed, not silently accepted.
+- Four unit tests and TypeScript typecheck PASS. Card renders only for historical STABLE4 research mode.

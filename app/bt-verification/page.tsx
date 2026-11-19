@@ -8,6 +8,7 @@ import { ResearchSymbolCharts } from "@/components/bt-verification/ResearchSymbo
 import { BTMarketPackImport } from "@/components/bt-verification/BTMarketPackImport";
 import { BTStrategyResearchDiagnostics } from "@/components/bt-verification/BTStrategyResearchDiagnostics";
 import { BTResearchLivePinEvidence } from "@/components/bt-verification/BTResearchLivePinEvidence";
+import { BTRiskCapProvenance } from "@/components/bt-verification/BTRiskCapProvenance";
 import { BTStrategyRouteDiagnostics } from "@/components/bt-verification/BTStrategyRouteDiagnostics";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
@@ -286,6 +287,7 @@ export default function BTVerification() {
 
       {tab === "results" && display(<>
         <BTResearchLivePinEvidence replay={replay}/>
+        <BTRiskCapProvenance replay={replay}/>
         <BTStrategyResearchDiagnostics replay={replay}/>
         <BTStrategyRouteDiagnostics replay={replay}/>
         <section className={tile}><h2 className="text-lg font-bold text-white">再生区間の検証結果</h2>
