@@ -66,5 +66,32 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
         self.assertTrue(any(event == "v52-upstream-state-fail-closed" for event, _ in logs))
 
 
+    def test_invalid_shared_kill_switch_does_not_restart_v52_or_mutate_orders(self):
+        engine = object.__new__(v52.V52AsterOnlyEngine)
+        engine._upstream_fail_closed_hold = False
+        events = []
+        def bad_switch():
+            raise RuntimeError("Shared Kill Switch is active but invalid")
+        engine.kill_switch = bad_switch
+        engine.activate_kill_switch = lambda *_args, **_kwargs: self.fail("must not rewrite invalid shared switch")
+        engine.flatten_all = lambda *_args, **_kwargs: self.fail("must not flatten on invalid shared switch")
+        engine.log = lambda event, **kwargs: events.append((event, kwargs))
+
+        # The originally observed fault: stale Q102 plus invalid shared switch.
+        engine._hold_upstream_fail_closed(RuntimeError("QUALITY102_STATE_STALE"), "TICK")
+
+        self.assertTrue(engine._upstream_fail_closed_hold)
+        self.assertEqual(events[-1][0], "v52-shared-kill-switch-invalid-held")
+        self.assertFalse(events[-1][1]["newOrdersAllowed"])
+        self.assertFalse(events[-1][1]["positionChangesAllowed"])
+        self.assertTrue(events[-1][1]["operatorReviewRequired"])
+
+    def test_only_known_integrity_errors_are_handled_as_local_hold(self):
+        classify = v52.V52AsterOnlyEngine._shared_kill_switch_integrity_error
+        self.assertTrue(classify("Shared Kill Switch is active but invalid"))
+        self.assertTrue(classify("Shared Kill Switch action is invalid"))
+        self.assertFalse(classify("Unrelated programming failure"))
+
+
 if __name__ == "__main__":
     unittest.main()
