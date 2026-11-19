@@ -703,7 +703,7 @@ export class Quality102CausalV1Runner {
         const riskPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
         if (!killPath) return { reason: "QUALITY102_CAUSAL_V1_KILL_SWITCH_PATH_REQUIRED", flattenExisting: false };
         if (!riskPath) return { reason: "QUALITY102_CAUSAL_V1_DAILY_RISK_PATH_REQUIRED", flattenExisting: false };
-        const kill = await readDisDexV96KillSwitch(killPath);
+        const kill = await readDisDexV96KillSwitch(killPath, { acceptStable4GlobalHold: true });
         if (kill) {
             return {
                 reason: `SHARED_KILL_SWITCH:${kill.reason}`,
