@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+from pathlib import Path
 import stat
 import tempfile
 import unittest
@@ -130,11 +131,13 @@ class RunnerScopedOrderEnableTests(unittest.TestCase):
                 handle.write(original)
             os.chmod(path, 0o644)
 
-            with mock.patch.object(gate.os, "chown") as chown:
-                gate.normalize_release_marker_permissions(path)
+            fake_stat = mock.Mock(st_mode=stat.S_IFREG | 0o644, st_uid=1000, st_gid=1000)
+            with mock.patch.object(gate.Path, "lstat", return_value=fake_stat):
+                with mock.patch.object(gate.os, "chown") as chown:
+                    gate.normalize_release_marker_permissions(path)
 
             if os.name != "nt":
-                chown.assert_called_once_with(path, 0, 0)
+                chown.assert_called_once_with(Path(path), 0, 0)
             with open(path, "rb") as handle:
                 self.assertEqual(handle.read(), original)
 
