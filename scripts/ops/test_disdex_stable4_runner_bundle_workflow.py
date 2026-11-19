@@ -21,6 +21,15 @@ class Stable4RunnerBundleWorkflowTests(unittest.TestCase):
         self.assertNotIn("HYPE_TREND_LONG", WORKFLOW)
         self.assertNotIn("ALL_RUNNERS_ORDER_ENABLE", WORKFLOW)
 
+    def test_readiness_preflight_happens_before_approval_redeem(self):
+        """A failed Runner preflight must not consume a one-time Owner approval."""
+        preflight = WORKFLOW.index("--bundle-readiness-preflight")
+        redeem = WORKFLOW.index("Redeem one exact bundle Owner approval through official HP bridge")
+        self.assertLess(preflight, redeem)
+        self.assertIn("RUNNER_READINESS_PREFLIGHT", WORKFLOW)
+        self.assertIn("/usr/bin/python3 -B '$stage/disdex_runner_scoped_order_enable.py' --bundle-readiness-preflight", WORKFLOW)
+        self.assertLess(WORKFLOW.index("directly for this read-only check"), redeem)
+
 
 if __name__ == "__main__":
     unittest.main()

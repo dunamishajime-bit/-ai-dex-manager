@@ -917,6 +917,73 @@ def _bundle_preflight_runner(*, approval: dict[str, Any], token_payload: dict[st
     }
 
 
+def _bundle_readiness_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return a stable, non-secret readiness result for pre-redeem checks.
+
+    This function deliberately accepts only the six fixed bundle runners and
+    contains no approval, permit, or mutation fields.  The GitHub workflow can
+    run it before redeeming a one-time Owner approval, so a failed service
+    preflight does not consume that approval.
+    """
+    expected = [entry["runner"] for entry in BUNDLE_ENTRIES]
+    require([row.get("runner") for row in rows] == expected, "BUNDLE_READINESS_RUNNER_SET_INVALID")
+    blocked = [row for row in rows if row.get("status") != "READY"]
+    return {
+        "status": "RUNNER_READINESS_PREFLIGHT_PASS" if not blocked
+        else "RUNNER_READINESS_PREFLIGHT_BLOCKED",
+        "runners": rows,
+        "blockedRunners": [row["runner"] for row in blocked],
+        "ordersSent": 0,
+        "cancelsSent": 0,
+        "positionChangesSent": 0,
+    }
+
+
+def _bundle_readiness_preflight() -> dict[str, Any]:
+    """Check all six pinned Runner units without redeeming or mutating anything."""
+    require(os.geteuid() == 0, "ROOT_REQUIRED")
+    common_error = ""
+    try:
+        # These checks are read-only.  In particular, GLOBAL HOLD is required
+        # to remain active and the signed account diagnostic is GET-only.
+        _read_hold_for_source(BUNDLE_SOURCE_SHA)
+        _validate_shared_safety()
+        # The bundle approval SHA is the signed integration target, while the
+        # readiness GET must be executed from an actually installed candidate
+        # release.  Use the first pinned bundle Runner (V4) instead of assuming
+        # the integration SHA has a runtime directory on every VPS.
+        diagnostic_release = RELEASE_ROOT / BUNDLE_ENTRIES[0]["sourceSha"]
+        _safe_flat_get(diagnostic_release)
+    except Exception as error:
+        common_error = str(error)[:240]
+
+    rows: list[dict[str, Any]] = []
+    for entry in BUNDLE_ENTRIES:
+        runner = entry["runner"]
+        unit = entry["unitTemplate"].format(sha=entry["sourceSha"])
+        row: dict[str, Any] = {
+            "runner": runner,
+            "unit": unit,
+            "sourceSha": entry["sourceSha"],
+            "planSha256": entry["planSha256"],
+        }
+        try:
+            if common_error:
+                raise RuntimeError(common_error)
+            release = RELEASE_ROOT / entry["sourceSha"]
+            _validate_candidate_source(entry["sourceSha"])
+            pid = _validate_service_before(unit, release)
+            _validate_common_wiring(unit, runner)
+            locations = _permit_locations(runner, entry["sourceSha"])
+            require(not locations["permit"].exists() and not locations["permit"].is_symlink(),
+                    "ORDER_ENABLE_ALREADY_INSTALLED")
+            row.update(status="READY", pid=pid)
+        except Exception as error:
+            row.update(status="BLOCKED", reason=str(error)[:240])
+        rows.append(row)
+    return _bundle_readiness_summary(rows)
+
+
 def _bundle_preflight(*, approval_id: str, run_id: str, token: str,
                       permit_module_path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
@@ -1256,6 +1323,7 @@ def main() -> int:
     mode.add_argument("--bundle-preflight-readonly", action="store_true")
     mode.add_argument("--bundle-execute", action="store_true")
     mode.add_argument("--bundle-normalize", action="store_true")
+    mode.add_argument("--bundle-readiness-preflight", action="store_true")
     args = parser.parse_args()
     try:
         if args.bundle_normalize:
@@ -1266,6 +1334,10 @@ def main() -> int:
             result = {"status": "STABLE4_RUNNER_BUNDLE_COMMON_MODULES_IMMUTABLE_NORMALIZED",
                       "runners": normalized, "ordersSent": 0, "cancelsSent": 0,
                       "positionChangesSent": 0}
+        elif args.bundle_readiness_preflight:
+            result = _bundle_readiness_preflight()
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["status"] == "RUNNER_READINESS_PREFLIGHT_PASS" else 1
         elif args.normalize_source:
             require(args.runner and args.source_sha, "NORMALIZE_IDENTITY_REQUIRED")
             result = _normalize_candidate_source(args.source_sha, args.runner)

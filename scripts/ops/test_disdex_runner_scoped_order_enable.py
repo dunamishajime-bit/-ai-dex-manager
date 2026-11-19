@@ -115,11 +115,16 @@ class RunnerScopedOrderEnableTests(unittest.TestCase):
                 handle.write(original)
             os.chmod(path, 0o644)
 
-            gate.normalize_common_module_permissions(path)
+            try:
+                gate.normalize_common_module_permissions(path)
 
-            with open(path, "rb") as handle:
-                self.assertEqual(handle.read(), original)
-            self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
+                with open(path, "rb") as handle:
+                    self.assertEqual(handle.read(), original)
+                self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
+            finally:
+                # Windows cannot remove a read-only file during
+                # TemporaryDirectory cleanup; restore the test fixture mode.
+                os.chmod(path, 0o644)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import json
 import unittest
 
 from scripts.ops.deploy import disdex_runner_scoped_order_enable as gate
+from scripts.ops.deploy import disdex_deployment_contract as contract
 
 
 APPROVAL_ID = "5ad3c5a3-0833-4d27-bd05-f057ca434efa"
@@ -41,6 +42,10 @@ def hold():
 
 
 class Stable4RunnerBundleTests(unittest.TestCase):
+    def test_bundle_scope_is_allowed_by_owner_signature_contract(self):
+        self.assertIn(gate.BUNDLE_SCOPE, contract.SCOPES)
+        contract.validate_order_permission(gate.BUNDLE_SCOPE, True)
+
     def test_manifest_is_exactly_six_and_excludes_hype(self):
         self.assertEqual(len(gate.BUNDLE_ENTRIES), 6)
         self.assertEqual(
@@ -79,6 +84,20 @@ class Stable4RunnerBundleTests(unittest.TestCase):
         self.assertEqual(permit["approvalId"], APPROVAL_ID)
         self.assertEqual(permit["planSha256"], entry["planSha256"])
         self.assertEqual((permit["ordersSent"], permit["cancelsSent"], permit["positionChangesSent"]), (0, 0, 0))
+
+    def test_readiness_summary_blocks_without_approval_or_mutation_fields(self):
+        rows = [
+            {"runner": entry["runner"], "status": "READY"}
+            for entry in gate.BUNDLE_ENTRIES
+        ]
+        rows[0]["status"] = "BLOCKED"
+        rows[0]["reason"] = "RUNNER_UNIT_NOT_ACTIVE"
+        result = gate._bundle_readiness_summary(rows)
+        self.assertEqual(result["status"], "RUNNER_READINESS_PREFLIGHT_BLOCKED")
+        self.assertEqual(result["blockedRunners"], [gate.BUNDLE_ENTRIES[0]["runner"]])
+        self.assertEqual((result["ordersSent"], result["cancelsSent"], result["positionChangesSent"]), (0, 0, 0))
+        self.assertNotIn("approvalId", result)
+        self.assertNotIn("token", result)
 
 
 if __name__ == "__main__":
