@@ -9,6 +9,7 @@ import { BTMarketPackImport } from "@/components/bt-verification/BTMarketPackImp
 import { BTStrategyResearchDiagnostics } from "@/components/bt-verification/BTStrategyResearchDiagnostics";
 import { BTResearchLivePinEvidence } from "@/components/bt-verification/BTResearchLivePinEvidence";
 import { BTRiskCapProvenance } from "@/components/bt-verification/BTRiskCapProvenance";
+import { BTHypeH48ExitProvenance } from "@/components/bt-verification/BTHypeH48ExitProvenance";
 import { BTStrategyRouteDiagnostics } from "@/components/bt-verification/BTStrategyRouteDiagnostics";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
@@ -288,6 +289,7 @@ export default function BTVerification() {
       {tab === "results" && display(<>
         <BTResearchLivePinEvidence replay={replay}/>
         <BTRiskCapProvenance replay={replay}/>
+        <BTHypeH48ExitProvenance replay={replay}/>
         <BTStrategyResearchDiagnostics replay={replay}/>
         <BTStrategyRouteDiagnostics replay={replay}/>
         <section className={tile}><h2 className="text-lg font-bold text-white">再生区間の検証結果</h2>

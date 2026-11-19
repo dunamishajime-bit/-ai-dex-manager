@@ -164,3 +164,9 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - Independent 30bps model: win rate 59.2593% in both; worst candidate old -6.30% versus time-only -8.671228%.
 - These 27 standalone entries are NOT the 5 old integrated HYPE modeled admissions, and NOT the 35 newer pinned pure signals. No inference about full portfolio net PnL, actual fills, stop inventory, current safety protections, funding, slippage, formal preemption, DD or LIVE model performance is authorized.
 - This supports an exit-semantic risk difference rather than proving a strategy improvement. Five synthetic offline tests PASS, inputs SHA-verified, original files unchanged, no LIVE actions.
+## BT UI: HYPE H48 standalone time-only vs historical stop model exit risk
+- Implemented read-only component components/bt-verification/BTHypeH48ExitProvenance.tsx and pure consistency guard lib/bt-verification/hype-exit-provenance.ts.
+- The historical STABLE4 research viewer presents the 27-candidate HYPE independent baseline (6 modeled STOPs) and compares fixed 10bps/30bps historical and hypothetical 48h exits, including change in worst trade return.
+- Explicitly identifies outcomes as 27 independent simulated research entries, not FIVE integrated modeled admissions, not 35 pinned pure signals and not actual fills. No portfolio DD, stop inventory, funding, slippage or shared-risk equivalence claims.
+- Four tests verify validated 27-entry origin, uncetified source flags, audit arithmetic and fail-closed malformed inputs; TypeScript typecheck PASS.
+- No LIVE UI deployment yet: this is PR #500 source branch and still requires CI and authorized production change review.
