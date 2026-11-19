@@ -1,0 +1,1536 @@
+{
+  "schema": "disdex-bt-live-vps-dependency-bytes/v1",
+  "observed_utc": "2026-11-19T04:26:26.926199+00:00",
+  "scope": "STATIC_GIT_IMPORT_CLOSURE_ONLY",
+  "runtime_dynamic_imports_verified": false,
+  "python_imports_verified": false,
+  "external_package_dependencies_verified": false,
+  "production_bt_parity_certified": false,
+  "rows": [
+    {
+      "runner": "V4",
+      "path": "config/disdexStrictBt33404708902Runtime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/hypeZecLongPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/q102FamilySideGross.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/v12-v4-evidence-validity.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/v12V4AdoptionRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/v12X1AllRuntime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "config/v52V50Runtime.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "docs/implementation/v12-v4-v2-full-year-priority.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/dd1296-entry-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-account-lock-bounded-retry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-account-order-lock.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-aster-portfolio-classifier.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-integrated-gross-governor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-portfolio-dd-governor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-runner-tick-heartbeat.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-shared-crypto-daily-risk.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-shared-kill-switch.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-strict-portfolio-planner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-v4-rate-budget-proxy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/disdex-v96-order-quantity.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/market-pre-submit-entry-error.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/market-slippage-guard-error.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-multilogic-v4-shadow.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-account-freshness.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-canary-permit.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-certified-gates.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-core-candidate.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-durable-orders.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-entry-safety.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-execution-phase.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-execution-store.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-four-rule-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-funding-ledger.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-live-candidate-builder.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-live-exit-feed.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-local-entry-rejection.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-lock-contention-observer.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-monitor-only.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-native-core.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-native-source.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-order-cycle.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-peer-account-mark.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-peer-pending.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-peer-service-attestation.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-peer-state-owners.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-production-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-production-features.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-production-lifecycle.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-refresh-commit.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-resident-stop-owners.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-runner-engine.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-shared-reservations.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-signed-bootstrap.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-stop-retirement.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-time-emergency-stop-research.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-time-stop-approval.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-v2-shadow.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-venue-exit.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-v4-venue-fills.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "lib/v12-x1-all.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "scripts/v12-v4-monitor-only-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "V4",
+      "path": "scripts/v12-v4-production-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/disdexQuality102CausalV1Runtime.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/disdexQuality102CausalV4Model.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/disdexStrictBt33404708902Runtime.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/q102FamilySideGross.json",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/sharedCryptoRiskPolicy.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "config/v52V50Runtime.json",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/dd1296-entry-policy.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/direct-trade-executor.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-account-order-lock.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-aster-portfolio-classifier.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-exit-overlay-contract.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-managed-protective-orders.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-pipeline.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-selector.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v1-market-data.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v1-runner.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v1-signal.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v1-state.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v4-observability.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v4-ranking.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v4-s34.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/disdex-quality102-causal-v4-signal.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/pengu-recovery-v8-protective-orders.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/quality102-live-scheduling.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/resident-stop-ledger.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/signed-paper-direct-trade-executor.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "lib/venue-resident-stop.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "Q102",
+      "path": "scripts/disdex-quality102-causal-v1-live-runner.ts",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "V52",
+      "path": "scripts/disdex_v52_aster_only_live_engine.py",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/penguDualLsV2Runtime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/penguRecoveryV8.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/q102FamilySideGross.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/sharedCryptoRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "config/v52V50Runtime.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/direct-trade-executor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/disdex-account-order-lock.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-dual-ls-v2-market-data-provider.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-dual-ls-v2-runner-state.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-live-scheduling.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-quality102-integration-status.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/pengu-recovery-v8-protective-orders.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/resident-stop-ledger.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/signed-paper-direct-trade-executor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/v12-strict-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "lib/venue-resident-stop.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "PENGU",
+      "path": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/disdexQuality102CausalV4Model.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/disdexStable4Opportunity.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/disdexStrictBt33404708902Runtime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/hypeTrendLongPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/hypeZecLongPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/hypeZecLongRuntime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/q102FamilySideGross.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/v12X1AllRuntime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "config/v52V50Runtime.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "docs/implementation/v12-v4-v2-full-year-priority.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/dd1296-entry-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/direct-trade-executor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-account-lock-retry-scheduling.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-account-order-lock.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-aster-portfolio-classifier.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-exit-overlay-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-integrated-gross-governor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-managed-protective-orders.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-peer-decision-cycle.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-portfolio-dd-governor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-runner-mutation-telemetry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-runner-tick-heartbeat.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-shared-crypto-daily-risk.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-shared-kill-switch.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-strict-portfolio-planner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-v4-rate-budget-proxy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/disdex-v96-order-quantity.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-stable4-opportunity-signal.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-stable4-time-only-authority.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-stable4-time-only-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-trend-long-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-trend-long-signal.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-zec-long-market-data.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-zec-long-recovery-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-zec-long-runner-state.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-zec-long-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/hype-zec-long-sleeves.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/market-pre-submit-entry-error.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/market-slippage-guard-error.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-entry-gross-guard.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-entry-opportunity-book.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-entry-opportunity-publisher.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-entry-opportunity-runtime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-entry-opportunity-store.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-hype-entry-features.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-opportunity-corpus.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-opportunity-model.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-uni-final-admission.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/stable4-v4-reservation-proof.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-multilogic-v4-shadow.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-v4-execution-store.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-v4-four-rule-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-v4-production-lifecycle.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-v4-resident-stop-owners.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-v4-v2-shadow.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "lib/v12-x1-all.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "HYPE",
+      "path": "scripts/disdex-hype-zec-long-live-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "config/penguRecoveryV8.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "config/sharedCryptoRiskPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/disdex-shared-crypto-risk-refresh-loop.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/disdex-shared-crypto-risk-writer.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "lib/resident-stop-observation.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "scripts/disdex-shared-crypto-risk-writer.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "SharedRisk",
+      "path": "scripts/ops/root/disdex-runner-pin-manifest.mjs",
+      "match_type": "EXACT_BYTES",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/disdex-account-lock-retry-scheduling.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/disdex-exit-overlay-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/fet-brk48-live-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/fet-brk48-state.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/fet-brk48-trailing-stop.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "FET",
+      "path": "scripts/disdex-fet-brk48-live-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "config/idlePriorityShortPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "config/idlePriorityShortRuntime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "config/idleResidualLongPolicy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "config/idleResidualLongRuntime.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/aster-v3-client.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/direct-trade-executor.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-account-lock-bounded-retry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-account-lock-retry-scheduling.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-account-order-lock.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-aster-portfolio-classifier.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-exit-overlay-contract.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-shared-crypto-daily-risk.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/disdex-shared-kill-switch.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-lock-safe-market.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-margin-age-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-decision-diagnostics.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-baseline-admission.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-live.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-market-data.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-parity-cert.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-signal.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-priority-short-state.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-quantity-feasibility.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-residual-avax-policy.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-residual-long-parity-cert.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-residual-long-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-residual-long-signal.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/idle-residual-long-state.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/interruptible-delay.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "lib/v12-aster-live-adapter.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    },
+    {
+      "runner": "IDLE",
+      "path": "scripts/disdex-idle-priority-short-live-runner.ts",
+      "match_type": "NEWLINE_OR_BOM_ONLY",
+      "verified": true
+    }
+  ],
+  "all_files_match": true
+}

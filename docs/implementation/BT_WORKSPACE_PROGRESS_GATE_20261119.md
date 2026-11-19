@@ -56,3 +56,10 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - Source file closure counts: V4=69, Q102=36, V52=1, PENGU=25, HYPE=66, SharedRisk=11, FET=11, IDLE=35. No unresolved relative imports in the TypeScript graph. V52 Python import closure is explicitly NOT verified.
 - Evidence: docs/research-results/BT_LIVE_GIT_DEPENDENCY_CLOSURE_20261119_UNCERTIFIED.json, including SHA256 per pinned Git source file.
 - This is local Git source provenance ONLY. All runtime dependent file hashes on VPS, external npm/python modules, runtime dynamic imports, and exact replay economics are still blocked. No certification implied.
+## Read-only VPS static dependency parity checkpoint
+- Read-only verifier: scripts/research/verify_bt_live_vps_dependency_bytes.py, using owner-PC Desktop/DisDex.pem only and strict host-key validation. Never copies or logs private key.
+- Reconstructed pinned static TypeScript import closures from observed live Git SHA, then checked actual files in each immutable VPS release.
+- Result: 254/254 pinned static source files match Git bytes or differ in newline/BOM only; no content mismatches. Per-runner counts V4=69 Q102=36 V52=1 PENGU=25 HYPE=66 SharedRisk=11 FET=11 IDLE=35.
+- Evidence: docs/research-results/BT_LIVE_VPS_DEPENDENCY_BYTES_20261119_UNCERTIFIED.json.
+- This does NOT cover dynamic imports, Python module dependencies, external npm packages, process memory/runtime drift, current fill logic, or end-to-end BT equivalence. The report explicitly sets production_bt_parity_certified=false.
+- V52 restart instability remains separately unresolved; no VPS mutations performed.
