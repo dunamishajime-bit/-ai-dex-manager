@@ -18,6 +18,8 @@ on:
       - "tests/test_bt_live_dependency_closure.py"
       - "scripts/research/verify_bt_live_vps_dependency_bytes.py"
       - "tests/test_bt_live_vps_dependency_bytes.py"
+      - "scripts/research/audit_bt_stable4_v4_hype_git_diff.py"
+      - "tests/test_bt_stable4_v4_hype_git_diff.py"
       - "package.json"
       - "package-lock.json"
   push:
@@ -37,6 +39,8 @@ on:
       - "tests/test_bt_live_dependency_closure.py"
       - "scripts/research/verify_bt_live_vps_dependency_bytes.py"
       - "tests/test_bt_live_vps_dependency_bytes.py"
+      - "scripts/research/audit_bt_stable4_v4_hype_git_diff.py"
+      - "tests/test_bt_stable4_v4_hype_git_diff.py"
       - "package.json"
       - "package-lock.json"
 
@@ -83,6 +87,10 @@ jobs:
         run: python scripts/research/audit_bt_live_dependency_closure.py --output /tmp/disdex-bt-live-git-closure.json
       - name: VPS dependency byte comparison unit tests (offline)
         run: python -m unittest discover -s tests -p 'test_bt_live_vps_dependency_bytes.py' -v
+      - name: V4/HYPE research-to-live source diff tests
+        run: python -m unittest discover -s tests -p 'test_bt_stable4_v4_hype_git_diff.py' -v
+      - name: V4/HYPE research-to-live Git diff (no VPS)
+        run: python scripts/research/audit_bt_stable4_v4_hype_git_diff.py --output /tmp/disdex-bt-v4-hype-git-diff.json
       - name: BT replay and UI unit tests
         run: ./node_modules/.bin/tsx --test tests/bt-*.test.ts
       - name: Typecheck
