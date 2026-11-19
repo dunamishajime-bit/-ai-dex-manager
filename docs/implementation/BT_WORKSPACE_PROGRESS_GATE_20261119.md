@@ -69,3 +69,11 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - HYPE research 7688ed7c vs observed LIVE e0e4f1d8: 432 repository paths changed; 37 changed paths intersect the observed LIVE static dependency closure (66 files).
 - Git diff is NOT equivalent to 23 or 37 changed trading rules. Each changed path must be classified by execution semantics and tested against historical causal data before reusing the research replay.
 - Do not silently relabel historical STABLE4 trades as LIVE parity. Existing research 10bps DD -22.5951%, 30bps DD -23.2195% remains uncertified and above risk target.
+## STABLE4 versus LIVE static execution dependency graph (read-only)
+- Reusable audit: scripts/research/audit_bt_stable4_static_graph_delta.py
+- Report: docs/research-results/BT_RESEARCH_LIVE_STATIC_GRAPH_DELTA_20261119_UNCERTIFIED.json
+- V4 research closure=58, observed LIVE closure=69, modified=12, LIVE_ADDED=11, total delta in graph union=23.
+- HYPE research closure=32, observed LIVE closure=66, modified=14, LIVE_ADDED=34, total delta in graph union=48.
+- HYPE contains 11 heuristically named signal/entry-classified changed paths; the V4 delta contains no filename-based signal/entry classifications, but changes in authority, risk, order execution and exit protection.
+- Filename classification is a triage aid, NOT evidence that a module has changed economic behavior, that a signal stayed identical, or that any historical fill would pass current LIVE gates.
+- Research-to-current re-execution remains mandatory, with causal signal, exit, funding, STOP, priority, gross, account freshness, approval and Shared Risk evidence; no trading mutations authorized.
