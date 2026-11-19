@@ -259,10 +259,40 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         except ValueError:
             return 0
 
+    @staticmethod
+    def _verified_stable4_global_hold(payload: dict) -> bool:
+        # This is a blocking foreign-owner hold, NOT permission to trade.
+        # In particular, never accept STABLE4 FLATTEN_MANAGED or an unknown owner.
+        reason = payload.get("reason")
+        return (
+            payload.get("active") is True
+            and payload.get("strategyId") == "STABLE4_H48_CUTOVER"
+            and payload.get("action") == "HOLD_PROTECTED"
+            and payload.get("scope") == "GLOBAL"
+            and payload.get("operator") == "disdex-stable4-formal-owner-hold"
+            and isinstance(reason, str)
+            and reason.startswith("STABLE4_RESEARCH_ROLLOUT:")
+            and len(reason) == len("STABLE4_RESEARCH_ROLLOUT:") + 40
+            and all(char in "0123456789abcdef" for char in reason[-40:])
+            and isinstance(payload.get("activatedAt"), str)
+            and bool(payload["activatedAt"].strip())
+            and payload.get("recoverable") is False
+        )
+
     def kill_switch(self) -> Optional[dict]:
-        payload = base.read_json(self.kill_switch_path, None)
-        if not payload or payload.get("active") is not True:
+        try:
+            payload = json.loads(self.kill_switch_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            # Existing documented semantics: absent switch is not an activation.
             return None
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed") from error
+        if not isinstance(payload, dict) or type(payload.get("active")) is not bool:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed")
+        if payload["active"] is False:
+            return None
+        if self._verified_stable4_global_hold(payload):
+            return payload
         if payload.get("strategyId") != base.V96_KILL_SWITCH_STRATEGY_ID:
             raise RuntimeError("Shared Kill Switch is active but invalid")
         if payload.get("action") not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
@@ -409,6 +439,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return str(error) in {
             "Shared Kill Switch is active but invalid",
             "Shared Kill Switch action is invalid",
+            "Shared Kill Switch state unreadable or malformed",
         }
 
     def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
