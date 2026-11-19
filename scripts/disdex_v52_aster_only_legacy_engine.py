@@ -402,17 +402,43 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise RuntimeError("V52 positions state invalid")
         return value
 
+    @staticmethod
+    def _shared_kill_switch_integrity_error(error: BaseException | str) -> bool:
+        # Treat an invalid active shared switch as an entry-blocking condition.
+        # Never reinterpret an untrusted/mismatched switch as inactive.
+        return str(error) in {
+            "Shared Kill Switch is active but invalid",
+            "Shared Kill Switch action is invalid",
+        }
+
     def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
         self._upstream_fail_closed_hold = True
         message = str(error)
-        if self._require_manual_review_for_expired_hold(message, phase):
-            return
-        if not self.kill_switch():
-            self.activate_kill_switch(
-                f"V52 upstream state unavailable: {message}",
-                action="HOLD_PROTECTED",
-                recoverable=True,
+        try:
+            if self._require_manual_review_for_expired_hold(message, phase):
+                return
+            if not self.kill_switch():
+                self.activate_kill_switch(
+                    f"V52 upstream state unavailable: {message}",
+                    action="HOLD_PROTECTED",
+                    recoverable=True,
+                )
+        except RuntimeError as switch_error:
+            if not self._shared_kill_switch_integrity_error(switch_error):
+                raise
+            # A second failure while protecting a stale peer must not
+            # produce a systemd crash/restart storm. The caller's local hold
+            # remains active; no entry or order mutation is authorized.
+            self.log(
+                "v52-shared-kill-switch-invalid-held",
+                phase=phase,
+                upstreamError=message,
+                error=str(switch_error),
+                newOrdersAllowed=False,
+                positionChangesAllowed=False,
+                operatorReviewRequired=True,
             )
+            return
         self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
 
     def _defer_rate_budget(self, error: BaseException | str, phase: str) -> None:
@@ -1441,6 +1467,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     self.log("v52-tick-error", error=str(error))
                     if rate_budget_deferred_error(error):
                         self._defer_rate_budget(error, "TICK")
+                    elif self._shared_kill_switch_integrity_error(error):
+                        # No kill-switch repair or activation here: a malformed
+                        # active shared state must remain blocked for owner review.
+                        self._hold_upstream_fail_closed(error, "KILL_SWITCH_TICK")
                     elif upstream_fail_closed_error(error):
                         self._hold_upstream_fail_closed(error, "TICK")
                     elif self._local_quote_stale_retry(error, "TICK"):
