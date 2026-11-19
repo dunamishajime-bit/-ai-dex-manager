@@ -259,10 +259,40 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         except ValueError:
             return 0
 
+    @staticmethod
+    def _verified_stable4_global_hold(payload: dict) -> bool:
+        # This is a blocking foreign-owner hold, NOT permission to trade.
+        # In particular, never accept STABLE4 FLATTEN_MANAGED or an unknown owner.
+        reason = payload.get("reason")
+        return (
+            payload.get("active") is True
+            and payload.get("strategyId") == "STABLE4_H48_CUTOVER"
+            and payload.get("action") == "HOLD_PROTECTED"
+            and payload.get("scope") == "GLOBAL"
+            and payload.get("operator") == "disdex-stable4-formal-owner-hold"
+            and isinstance(reason, str)
+            and reason.startswith("STABLE4_RESEARCH_ROLLOUT:")
+            and len(reason) == len("STABLE4_RESEARCH_ROLLOUT:") + 40
+            and all(char in "0123456789abcdef" for char in reason[-40:])
+            and isinstance(payload.get("activatedAt"), str)
+            and bool(payload["activatedAt"].strip())
+            and payload.get("recoverable") is False
+        )
+
     def kill_switch(self) -> Optional[dict]:
-        payload = base.read_json(self.kill_switch_path, None)
-        if not payload or payload.get("active") is not True:
+        try:
+            payload = json.loads(self.kill_switch_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            # Existing documented semantics: absent switch is not an activation.
             return None
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed") from error
+        if not isinstance(payload, dict) or type(payload.get("active")) is not bool:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed")
+        if payload["active"] is False:
+            return None
+        if self._verified_stable4_global_hold(payload):
+            return payload
         if payload.get("strategyId") != base.V96_KILL_SWITCH_STRATEGY_ID:
             raise RuntimeError("Shared Kill Switch is active but invalid")
         if payload.get("action") not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
@@ -402,17 +432,44 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise RuntimeError("V52 positions state invalid")
         return value
 
+    @staticmethod
+    def _shared_kill_switch_integrity_error(error: BaseException | str) -> bool:
+        # Treat an invalid active shared switch as an entry-blocking condition.
+        # Never reinterpret an untrusted/mismatched switch as inactive.
+        return str(error) in {
+            "Shared Kill Switch is active but invalid",
+            "Shared Kill Switch action is invalid",
+            "Shared Kill Switch state unreadable or malformed",
+        }
+
     def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
         self._upstream_fail_closed_hold = True
         message = str(error)
-        if self._require_manual_review_for_expired_hold(message, phase):
-            return
-        if not self.kill_switch():
-            self.activate_kill_switch(
-                f"V52 upstream state unavailable: {message}",
-                action="HOLD_PROTECTED",
-                recoverable=True,
+        try:
+            if self._require_manual_review_for_expired_hold(message, phase):
+                return
+            if not self.kill_switch():
+                self.activate_kill_switch(
+                    f"V52 upstream state unavailable: {message}",
+                    action="HOLD_PROTECTED",
+                    recoverable=True,
+                )
+        except RuntimeError as switch_error:
+            if not self._shared_kill_switch_integrity_error(switch_error):
+                raise
+            # A second failure while protecting a stale peer must not
+            # produce a systemd crash/restart storm. The caller's local hold
+            # remains active; no entry or order mutation is authorized.
+            self.log(
+                "v52-shared-kill-switch-invalid-held",
+                phase=phase,
+                upstreamError=message,
+                error=str(switch_error),
+                newOrdersAllowed=False,
+                positionChangesAllowed=False,
+                operatorReviewRequired=True,
             )
+            return
         self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
 
     def _defer_rate_budget(self, error: BaseException | str, phase: str) -> None:
@@ -1441,6 +1498,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     self.log("v52-tick-error", error=str(error))
                     if rate_budget_deferred_error(error):
                         self._defer_rate_budget(error, "TICK")
+                    elif self._shared_kill_switch_integrity_error(error):
+                        # No kill-switch repair or activation here: a malformed
+                        # active shared state must remain blocked for owner review.
+                        self._hold_upstream_fail_closed(error, "KILL_SWITCH_TICK")
                     elif upstream_fail_closed_error(error):
                         self._hold_upstream_fail_closed(error, "TICK")
                     elif self._local_quote_stale_retry(error, "TICK"):

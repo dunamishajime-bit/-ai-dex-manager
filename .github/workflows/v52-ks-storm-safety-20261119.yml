@@ -1,0 +1,26 @@
+name: V52 Invalid Kill Switch Fail-Closed CI
+on:
+  push:
+    branches:
+      - fix/v52-q102-ks-loop-20261119
+  pull_request:
+    branches:
+      - v52-8495-safety-baseline-20261119
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v52-fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile V52 engine and planner
+        run: python -m py_compile scripts/disdex_v52_aster_only_legacy_engine.py scripts/disdex_strict_portfolio_planner.py
+      - name: Test upstream and shared Kill Switch holds
+        run: python -m unittest discover -s tests -p 'test_v52_upstream_fail_closed.py' -v
