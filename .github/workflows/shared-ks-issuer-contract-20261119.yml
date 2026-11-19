@@ -1,0 +1,24 @@
+name: Shared Kill Switch Issuer Compatibility CI
+on:
+  push:
+    branches:
+      - fix/shared-ks-issuer-contract-20261119
+  pull_request:
+    branches:
+      - v52-8495-safety-baseline-20261119
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kill-switch-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check shared issuer contract without live operations
+        run: python -m unittest discover -s tests -p 'test_shared_kill_switch_issuer_contract.py' -v
