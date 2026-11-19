@@ -1,0 +1,57 @@
+{
+  "schema": "disdex-bt-hype-h48-exit-policy-parity-audit/v1",
+  "generated_utc": "2026-11-19T08:35:22.244177+00:00",
+  "observed_hype_git_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "observed_snapshot_utc": "2026-11-18T22:07:32.844395+00:00",
+  "pinned_vps_source_byte_matching_verified": true,
+  "pinned_source_sha256": {
+    "lib/hype-stable4-time-only-contract.ts": "2c27fa29c54d467d31f6e8625fd6f93c24340b6fc7bd9a907ffe1eaa5cc09c25",
+    "lib/hype-stable4-time-only-authority.ts": "413d84c7d9e2fafb9025f5ea65468dc6e2ff775b5a811c569db8443de6a9749c",
+    "lib/hype-zec-long-runner.ts": "25acd3a80384c683f780c5a6d604b170c2174e61a3fdb8d80507df69e0cf4056"
+  },
+  "pinned_source_contract_markers": {
+    "logical_48h_exit": true,
+    "verified_next_open_exit": true,
+    "certificate_no_resident_stop": true,
+    "certificate_no_resident_take_profit": true,
+    "runner_persists_time_only_contract": true,
+    "runner_returns_before_legacy_protective_orders": true,
+    "runner_requires_signed_h48_before_entry": true,
+    "runner_h48_owner_early_exit_path": true
+  },
+  "pretarget_study_cohort_sha256": "5033df3e174211f5475f4eb69d83d446a806174e9d974f3c5a403d9c2c646a80",
+  "original_research_h48_independent_candidate_exit_count": 27,
+  "original_research_h48_independent_candidate_exit_reasons": {
+    "STOP": 6,
+    "TIME": 21
+  },
+  "original_research_h48_stop_pct": 6.0,
+  "pinned_h48_certificate_requires_resident_stop": false,
+  "pinned_h48_certificate_requires_resident_take_profit": false,
+  "pinned_h48_time_exit_hours": 48,
+  "pinned_h48_conditional_v4_preemption_possible": true,
+  "integrated_stable4_modeled_hype_exits": {
+    "10": {
+      "model_exits": 5,
+      "model_exit_reasons": {
+        "FORMAL_PRIORITY": 2,
+        "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+      },
+      "source_model_fills_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9"
+    },
+    "30": {
+      "model_exits": 5,
+      "model_exit_reasons": {
+        "FORMAL_PRIORITY": 2,
+        "HYPE_REDESIGN_TIME48_NEXTOPEN": 3
+      },
+      "source_model_fills_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84"
+    }
+  },
+  "exit_policy_difference_requires_reexecution": true,
+  "historical_exit_outcomes_mapped_to_current_h48": false,
+  "signed_certificate_runtime_activation_verified": false,
+  "live_stop_inventory_and_trade_fills_verified": false,
+  "current_live_exit_slippage_or_dd_computed": false,
+  "production_bt_parity_certified": false
+}
