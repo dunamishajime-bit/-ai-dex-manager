@@ -7,6 +7,7 @@ import { BTResearchConditions } from "@/components/bt-verification/BTResearchCon
 import { ResearchSymbolCharts } from "@/components/bt-verification/ResearchSymbolCharts";
 import { BTMarketPackImport } from "@/components/bt-verification/BTMarketPackImport";
 import { BTStrategyResearchDiagnostics } from "@/components/bt-verification/BTStrategyResearchDiagnostics";
+import { BTResearchLivePinEvidence } from "@/components/bt-verification/BTResearchLivePinEvidence";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
 import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocationPanel";
@@ -283,6 +284,7 @@ export default function BTVerification() {
       </>)}
 
       {tab === "results" && display(<>
+        <BTResearchLivePinEvidence replay={replay}/>
         <BTStrategyResearchDiagnostics replay={replay}/>
         <section className={tile}><h2 className="text-lg font-bold text-white">再生区間の検証結果</h2>
           <p className="mt-1 text-xs text-[#91aec4]">以下は{isDemo ? "人工市場の模擬結果" : "持込研究データの再生結果"}です。LIVE実績の証明ではありません。</p>

@@ -85,3 +85,9 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 - HYPE historical model: 5 exits, 3 winners, 2 losses in both independent fee scenarios; SOURCE SHA DOES NOT MATCH CURRENT LIVE.
 - Breakdown includes strategy, route, symbol, entry month, exit reasons, negative PnL and adverse-price exit counts. These are model outputs, not exchange fills, and gross PnL magnitudes are compounded path-dependent; adverse exit is NOT proof of incorrect causal entry.
 - Prioritize historical failure-mode test cases for current V4/HYPE reexecution, not overfit to largest historical money loss. Demand out-of-sample validation and complete gross/share-risk context.
+## BT Results UI: observed-source comparison (historical snapshot, not current production proof)
+- Client read-only component: components/bt-verification/BTResearchLivePinEvidence.tsx, helper lib/bt-verification/source-pin-compat.ts.
+- When historical STABLE4 research replay is loaded, show per-strategy model SHA versus the verified 2026-11-19 JST VPS snapshot SHA and mark mismatch explicitly.
+- A source SHA match is labeled SHA_MATCH_NOT_PARITY; no data from the UI grants trading authority or certifies historical modeled fills.
+- Tests/bt-source-pin-compat.test.ts covers mismatched, matching-but-uncertified, ambiguous/unverified evidence and unknown source; entire BT suite 41 PASS, TS typecheck PASS locally.
+- The comparison never claims the stored VPS snapshot represents real-time current process state; no outbound SSH/API call is made by the UI.
