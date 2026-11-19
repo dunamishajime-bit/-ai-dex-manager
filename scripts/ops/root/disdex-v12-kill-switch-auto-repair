@@ -6,6 +6,9 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 SUPERVISOR_EXIT_REASON='V96/V52 trading supervisor exited unexpectedly with status 1'
 MARGIN_FLATTEN_REASON_PREFIX='V52 margin-aware fatal tick error:'
+# Shared consumers (V52/Q102/V96) validate this canonical strategyId.
+# Keep the V12 origin separately as issuerStrategyId for audit provenance.
+SHARED_KILL_SWITCH_STRATEGY_ID='DISDEX_V35_STRONG_RESERVED_PENGU_V96'
 LOCK_FILE=/var/lib/disdex/v12-auto-repair.lock
 KILL_FILE_DEFAULT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
 STATE_FILE_DEFAULT=/var/lib/disdex/v12-x1-all/runner.json
@@ -131,7 +134,8 @@ write_fail_closed() {
   /usr/bin/install -d -o root -g root -m 0700 "$dir"
   tmp="$(mktemp "$dir/.disdex-auto-repair-kill.XXXXXX")"
   /usr/bin/jq -n --arg reason "$reason" --arg sourcePath "$KILL_SOURCE_PATH" --arg activatedAt "$(date -Is)" \
-    '{active:true, strategyId:"DISDEX_V12_X1_ALL", action:"FLATTEN_MANAGED", reason:$reason, sourcePath:$sourcePath, operator:"V12_KILL_SWITCH_AUTO_REPAIR_V2", activatedAt:$activatedAt, automaticRepair:"FAIL_CLOSED"}' > "$tmp"
+    --arg strategyId "$SHARED_KILL_SWITCH_STRATEGY_ID" \
+    '{active:true, strategyId:$strategyId, issuerStrategyId:"DISDEX_V12_X1_ALL", action:"FLATTEN_MANAGED", reason:$reason, sourcePath:$sourcePath, operator:"V12_KILL_SWITCH_AUTO_REPAIR_V2", activatedAt:$activatedAt, automaticRepair:"FAIL_CLOSED"}' > "$tmp"
   chmod 0600 "$tmp"
   mv -f "$tmp" "$KILL_SOURCE_PATH"
 }
