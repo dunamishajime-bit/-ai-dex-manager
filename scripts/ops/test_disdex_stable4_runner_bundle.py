@@ -85,6 +85,19 @@ class Stable4RunnerBundleTests(unittest.TestCase):
         self.assertEqual(permit["planSha256"], entry["planSha256"])
         self.assertEqual((permit["ordersSent"], permit["cancelsSent"], permit["positionChangesSent"]), (0, 0, 0))
 
+    def test_readiness_summary_blocks_without_approval_or_mutation_fields(self):
+        rows = [
+            {"runner": entry["runner"], "status": "READY"}
+            for entry in gate.BUNDLE_ENTRIES
+        ]
+        rows[0]["status"] = "BLOCKED"
+        rows[0]["reason"] = "RUNNER_UNIT_NOT_ACTIVE"
+        result = gate._bundle_readiness_summary(rows)
+        self.assertEqual(result["status"], "RUNNER_READINESS_PREFLIGHT_BLOCKED")
+        self.assertEqual(result["blockedRunners"], [gate.BUNDLE_ENTRIES[0]["runner"]])
+        self.assertEqual((result["ordersSent"], result["cancelsSent"], result["positionChangesSent"]), (0, 0, 0))
+        self.assertNotIn("approvalId", result)
+        self.assertNotIn("token", result)
 
 if __name__ == "__main__":
     unittest.main()
