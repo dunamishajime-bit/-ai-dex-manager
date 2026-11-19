@@ -123,6 +123,12 @@ class RunnerScopedOrderEnableTests(unittest.TestCase):
                 self.assertEqual(handle.read(), original)
             self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
 
+    def test_release_root_layout_allows_deploy_owned_non_group_writable_parent(self):
+        path = Path("/home/deploy/disdex-trading/releases")
+        fake_stat = mock.Mock(st_mode=stat.S_IFDIR | 0o755, st_uid=1000, st_gid=1000)
+        with mock.patch.object(gate.Path, "lstat", return_value=fake_stat):
+            gate.trusted_release_root(path)
+
     def test_release_directory_normalization_chowns_non_root_directory(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "release"
