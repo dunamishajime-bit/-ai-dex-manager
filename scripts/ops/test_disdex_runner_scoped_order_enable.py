@@ -123,6 +123,20 @@ class RunnerScopedOrderEnableTests(unittest.TestCase):
                 self.assertEqual(handle.read(), original)
             self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
 
+    def test_release_directory_normalization_chowns_non_root_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "release"
+            path.mkdir()
+            os.chmod(path, 0o755)
+            fake_stat = mock.Mock(st_mode=stat.S_IFDIR | 0o755, st_uid=1000, st_gid=1000)
+            with mock.patch.object(gate.Path, "lstat", return_value=fake_stat):
+                with mock.patch.object(gate.os, "chown") as chown:
+                    gate.normalize_release_directory_permissions(path)
+
+            if os.name != "nt":
+                chown.assert_called_once_with(path, 0, 0)
+            self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o222, 0)
+
     def test_release_marker_normalization_chowns_non_root_marker(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, ".disdex-release-sha")
