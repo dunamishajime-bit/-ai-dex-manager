@@ -66,6 +66,6 @@ NEXT BLOCKERS remain: exact imported/dependent runner code parity; reconcile Pin
 ## V4/HYPE STABLE4 research versus LIVE code-diff inventory
 - Reproducible Git diff: scripts/research/audit_bt_stable4_v4_hype_git_diff.py, report docs/research-results/BT_STABLE4_V4_HYPE_GIT_DIFF_20261119_UNCERTIFIED.json.
 - V4 research 53a0be39 vs observed LIVE e788abc8: 95 repository paths changed; 23 changed paths intersect the observed LIVE static dependency closure (69 files).
-- HYPE research 7688ed7c vs observed LIVE e0e4f1d8: 432 repository paths changed; 39 changed paths intersect the observed LIVE static dependency closure (66 files).
-- Git diff is NOT equivalent to 23 or 39 changed trading rules. Each changed path must be classified by execution semantics and tested against historical causal data before reusing the research replay.
+- HYPE research 7688ed7c vs observed LIVE e0e4f1d8: 432 repository paths changed; 37 changed paths intersect the observed LIVE static dependency closure (66 files).
+- Git diff is NOT equivalent to 23 or 37 changed trading rules. Each changed path must be classified by execution semantics and tested against historical causal data before reusing the research replay.
 - Do not silently relabel historical STABLE4 trades as LIVE parity. Existing research 10bps DD -22.5951%, 30bps DD -23.2195% remains uncertified and above risk target.
