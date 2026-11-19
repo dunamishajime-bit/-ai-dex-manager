@@ -73,6 +73,8 @@ const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST
 const USE_REDIS = Boolean(KV_URL && KV_TOKEN);
 const KEY_PREFIX = "disdex:deploy-approval:";
 const LATEST_KEY = "disdex:deploy-approval:latest";
+const HISTORY_KEY = "disdex:deploy-approval:history";
+const HISTORY_LIMIT = 50;
 const FILE_PATH =
   process.env.DISDEX_DEPLOY_APPROVAL_STORE_PATH ||
   path.join(process.cwd(), "data", "deploy-approvals.json");
@@ -152,6 +154,7 @@ export async function mutateDeploymentApprovalAtomic<T>(
       const cas = await redisApprovalCompareAndSwap(redis, {
         recordKey,
         latestKey: LATEST_KEY,
+        historyKey: HISTORY_KEY,
         current,
         next,
         touchLatest: false,
@@ -198,6 +201,72 @@ export async function getDeploymentApproval(id: string) {
   return loadFileRecords().find((item) => item.id === id) || null;
 }
 
+async function getDeploymentApprovalHistory(): Promise<DeploymentApprovalRecord[]> {
+  if (!USE_REDIS) {
+    return loadFileRecords()
+      .slice()
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, HISTORY_LIMIT);
+  }
+
+  const redis = await redisClient();
+  const rawHistory = await redis.get<unknown>(HISTORY_KEY);
+  const ids = Array.isArray(rawHistory)
+    ? rawHistory.filter((value): value is string => typeof value === "string").slice(0, HISTORY_LIMIT)
+    : [];
+  const records: DeploymentApprovalRecord[] = [];
+  for (const id of ids) {
+    const record = await redis.get<DeploymentApprovalRecord>(KEY_PREFIX + id);
+    if (record) records.push(record);
+  }
+
+  // Older Redis stores predate the history index. Keep the existing latest
+  // record visible until the next write seeds the index.
+  if (records.length === 0) {
+    const latestId = await redis.get<string>(LATEST_KEY);
+    if (latestId) {
+      const latest = await redis.get<DeploymentApprovalRecord>(KEY_PREFIX + latestId);
+      if (latest) records.push(latest);
+    }
+  }
+  return records.sort((a, b) => b.createdAt - a.createdAt).slice(0, HISTORY_LIMIT);
+}
+
+function classifyDeploymentApprovalForInbox(
+  record: DeploymentApprovalRecord,
+  now: number,
+): DeploymentApprovalSummary {
+  const summary = sanitizeDeploymentApproval(record)!;
+  if (
+    ["PENDING", "OTP_SENT"].includes(summary.status) &&
+    summary.requestExpiresAt <= now
+  ) {
+    return {
+      ...summary,
+      status: "EXPIRED",
+      lastError: summary.lastError || "request expired",
+    };
+  }
+  return summary;
+}
+
+export async function getDeploymentApprovalInbox(now = Date.now()): Promise<{
+  pending: DeploymentApprovalSummary[];
+  history: DeploymentApprovalSummary[];
+}> {
+  const pending: DeploymentApprovalSummary[] = [];
+  const history: DeploymentApprovalSummary[] = [];
+  for (const record of await getDeploymentApprovalHistory()) {
+    const summary = classifyDeploymentApprovalForInbox(record, now);
+    if (summary.status === "PENDING" || summary.status === "OTP_SENT") {
+      pending.push(summary);
+    } else {
+      history.push(summary);
+    }
+  }
+  return { pending, history };
+}
+
 export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
   const next = { ...record, updatedAt: Date.now() };
   if (USE_REDIS) {
@@ -214,6 +283,7 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
     const cas = await redisApprovalCompareAndSwap(redis, {
       recordKey,
       latestKey: LATEST_KEY,
+      historyKey: HISTORY_KEY,
       current,
       next: persisted,
       touchLatest: true,

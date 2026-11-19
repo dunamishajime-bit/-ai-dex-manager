@@ -1,6 +1,9 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
+import {
+  getDeploymentApprovalInbox,
+  type DeploymentApprovalSummary,
+} from "@/lib/server/deploy-approval-store";
 import { DEPLOY_APPROVAL_OPERATION_POLICY, STABLE4_H48_TIME_ONLY_APPROVAL, type DeploymentApprovalOperation } from "@/lib/deploy-approval-token";
 import { ALL_RUNNERS_LIVE_TASK } from "@/lib/deploy-all-runners-task";
 import { loadOwnerSessionKey, OWNER_SESSION_COOKIE, verifyOwnerSession } from "@/lib/server/owner-session";
@@ -18,6 +21,10 @@ function formatDateTime(value?: string | number) {
   if (!value) return "-";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "-" : date.toLocaleString("ja-JP");
+}
+
+function approvalOperation(record: DeploymentApprovalSummary) {
+  return record.operation ?? (record.scope === "V12_V4" ? "V12_V4_LIVE" : null);
 }
 
 export default async function ProductionApprovalPage(props: { searchParams?: SearchParams }) {
@@ -42,10 +49,10 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
   const searchParams = (await props.searchParams) || {};
   const message = firstValue(searchParams.message);
   const error = firstValue(searchParams.error);
-  const deployApproval = await getLatestDeploymentApprovalSummary();
-  const operation = deployApproval
-    ? (deployApproval.operation ?? (deployApproval.scope === "V12_V4" ? "V12_V4_LIVE" : null))
-    : null;
+  const view = firstValue(searchParams.view) === "history" ? "history" : "pending";
+  const inbox = await getDeploymentApprovalInbox();
+  const deployApproval = inbox.pending[0] ?? null;
+  const operation = deployApproval ? approvalOperation(deployApproval) : null;
   const operationPolicy =
     operation && operation in DEPLOY_APPROVAL_OPERATION_POLICY
       ? DEPLOY_APPROVAL_OPERATION_POLICY[operation as DeploymentApprovalOperation]
@@ -80,9 +87,74 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
           </div>
         ) : null}
 
-        {!deployApproval ? (
+        <nav className="mt-5 grid grid-cols-2 gap-2" aria-label="Production承認表示">
+          <a
+            href="/production-approval?view=pending"
+            aria-current={view === "pending" ? "page" : undefined}
+            className={`rounded-xl border px-3 py-3 text-center text-sm font-bold transition ${
+              view === "pending"
+                ? "border-amber-300/45 bg-amber-300/15 text-amber-50"
+                : "border-white/10 bg-white/[0.03] text-white/55"
+            }`}
+          >
+            承認待ち ({inbox.pending.length})
+          </a>
+          <a
+            href="/production-approval?view=history"
+            aria-current={view === "history" ? "page" : undefined}
+            className={`rounded-xl border px-3 py-3 text-center text-sm font-bold transition ${
+              view === "history"
+                ? "border-sky-300/45 bg-sky-300/15 text-sky-50"
+                : "border-white/10 bg-white/[0.03] text-white/55"
+            }`}
+          >
+            履歴 ({inbox.history.length})
+          </a>
+        </nav>
+
+        {view === "history" ? (
+          <div className="mt-5 space-y-3">
+            {inbox.history.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-white/60">
+                履歴はありません。
+              </div>
+            ) : (
+              inbox.history.map((record) => {
+                const recordOperation = approvalOperation(record);
+                return (
+                  <article key={record.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/80">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="rounded-full border border-white/15 px-2 py-1">Operation: {recordOperation || "UNKNOWN"}</span>
+                      <span className="rounded-full border border-white/15 px-2 py-1">Scope: {record.scope}</span>
+                      <span className="rounded-full border border-white/15 px-2 py-1">Orders: {(record.ordersEnabled ?? true) ? "ENABLED" : "DISABLED"}</span>
+                      <span className="rounded-full border border-white/15 px-2 py-1">Status: {record.status}</span>
+                    </div>
+                    <div className="mt-4 text-xs text-white/50">Target SHA</div>
+                    <div className="mt-1 break-all font-mono text-xs text-white">{record.targetSha}</div>
+                    <div className="mt-4 text-xs text-white/50">Plan / Context SHA-256</div>
+                    <div className="mt-1 break-all font-mono text-xs text-white">{record.planSha256}</div>
+                    <div className="mt-4 grid gap-2 text-xs text-white/55 md:grid-cols-2">
+                      <div>要求者: {record.requestActor}</div>
+                      <div>作成: {formatDateTime(record.createdAt)}</div>
+                      <div>要求期限: {formatDateTime(record.requestExpiresAt)}</div>
+                      <div>承認日時: {formatDateTime(record.approvedAt)}</div>
+                      <div>Redeem日時: {formatDateTime(record.redeemedAt)}</div>
+                      <div>完了日時: {formatDateTime(record.completedAt)}</div>
+                      <div>承認ID: <span className="font-mono">{record.id}</span></div>
+                    </div>
+                    {record.lastError ? (
+                      <div className="mt-3 rounded-lg border border-rose-400/25 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                        {record.lastError}
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })
+            )}
+          </div>
+        ) : !deployApproval ? (
           <div className="mt-5 rounded-2xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-white/60">
-            現在、承認待ちのProduction操作はありません。
+            現在、承認待ちのProduction操作はありません。履歴タブで期限切れ・承認済みの要求を確認できます。
           </div>
         ) : (
           <div className="mt-5 space-y-4">
