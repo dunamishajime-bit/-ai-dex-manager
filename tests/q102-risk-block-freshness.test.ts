@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { readDisDexV96KillSwitch } from "../lib/disdex-v96-live-risk-controls";
 import test from "node:test";
 
 import { refreshQ102StateAfterRiskBlock, refreshQ102FlatStateAfterVerifiedReconciliation } from "../lib/disdex-quality102-causal-v1-runner";
@@ -52,5 +56,47 @@ test("Q102 cannot claim verified flat freshness with unresolved exposure", () =>
             /Q102_FRESHNESS_REQUIRES_VERIFIED_FLAT_STATE/,
         );
         assert.equal(state.updatedAt, 1_000);
+    }
+});
+
+test("known STABLE4 global protected hold is accepted only with Q102 opt-in and blocks flatten", async () => {
+    const root = await mkdtemp(join(tmpdir(), "q102-stable4-hold-"));
+    const path = join(root, "shared-switch.json");
+    const payload = {
+        active: true,
+        strategyId: "STABLE4_H48_CUTOVER",
+        scope: "GLOBAL",
+        action: "HOLD_PROTECTED",
+        operator: "disdex-stable4-formal-owner-hold",
+        reason: "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+        activatedAt: "2026-11-17T10:48:29.132+00:00",
+        recoverable: false,
+    };
+    try {
+        await writeFile(path, JSON.stringify(payload));
+        await assert.rejects(readDisDexV96KillSwitch(path), /active but invalid/);
+        const hold = await readDisDexV96KillSwitch(path, { acceptStable4GlobalHold: true });
+        assert.equal(hold?.active, true);
+        assert.equal(hold?.action, "HOLD_PROTECTED");
+        for (const patch of [
+            { action: "FLATTEN_MANAGED" },
+            { scope: "V52_REFERENCE_ONLY" },
+            { operator: "other-owner" },
+            { reason: "UNKNOWN" },
+            { strategyId: "FOREIGN" },
+        ]) {
+            await writeFile(path, JSON.stringify({ ...payload, ...patch }));
+            await assert.rejects(
+                readDisDexV96KillSwitch(path, { acceptStable4GlobalHold: true }),
+                /active but invalid/,
+            );
+        }
+        await writeFile(path, JSON.stringify({ action: "HOLD_PROTECTED" }));
+        await assert.rejects(
+            readDisDexV96KillSwitch(path, { acceptStable4GlobalHold: true }),
+            /active but invalid/,
+        );
+    } finally {
+        await rm(root, { recursive: true, force: true });
     }
 });
