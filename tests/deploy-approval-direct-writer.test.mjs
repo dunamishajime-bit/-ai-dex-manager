@@ -41,7 +41,16 @@ test("redeem uses the atomic store mutation and does not do read-then-save", () 
   assert.match(redeem, /record\.redeemedByRunId !== runId/);
   assert.match(redeem, /approvalTokenExpiresAt \?\? 0/);
   assert.match(redeem, /const refreshed = issueTransportToken\(\)/);
-  assert.match(redeem, /A different run ID is still rejected above/);
+});
+
+test("only monitor-only approvals may be retried by a different run within the owner request window", () => {
+  const redeem = route.split('if (body?.action === "redeem")')[1] ?? "";
+  assert.match(redeem, /monitorOnlyRetry/);
+  assert.match(redeem, /requestedOperation === "ALL_RUNNERS_MONITOR_REFRESH"/);
+  assert.match(redeem, /record\.ordersEnabled === false/);
+  assert.match(redeem, /record\.requestExpiresAt > Date\.now\(\)/);
+  assert.match(redeem, /MONITOR_ONLY_APPROVAL_RETRY/);
+  assert.match(redeem, /redeemedByRunId: runId/);
 });
 
 test("retired DOGE handoff and staging code cannot read or write approval JSON directly",()=>{
