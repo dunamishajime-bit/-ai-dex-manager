@@ -127,6 +127,21 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             "CUTOVER_BLOCKED:ContractError:TARGET_RESTART_COUNT_CHANGED",
         )
 
+    def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
+        value = {
+            "stage": "DATA_UNAVAILABLE",
+            "ordersAllowed": False,
+            "checkedAt": 1_000,
+            "reason": "MARGIN_DATA_UNAVAILABLE",
+            "balance": "must not appear",
+        }
+        diagnostic = json.loads(module.margin_guard_diagnostic(value, now_ms=2_000))
+        self.assertEqual(diagnostic["stage"], "DATA_UNAVAILABLE")
+        self.assertFalse(diagnostic["ordersAllowed"])
+        self.assertEqual(diagnostic["checkedAtAgeMs"], 1_000)
+        self.assertEqual(diagnostic["reason"], "MARGIN_DATA_UNAVAILABLE")
+        self.assertNotIn("balance", diagnostic)
+
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('"clearGlobalHold": False', source)
