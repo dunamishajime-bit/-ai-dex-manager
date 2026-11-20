@@ -182,6 +182,11 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             message.index("status=ExecStartPre code=exited status=0/SUCCESS cmd=install"),
         )
 
+    def test_wait_stable_preserves_bounded_systemd_context(self):
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn('TARGET_RUNNER_NOT_STABLE:" + unit + suffix', source)
+        self.assertIn('context[:640]', source)
+
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
             "stage": "DATA_UNAVAILABLE",

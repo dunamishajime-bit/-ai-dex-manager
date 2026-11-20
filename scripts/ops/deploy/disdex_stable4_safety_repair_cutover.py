@@ -926,7 +926,12 @@ def wait_stable(unit: str, expected: str, timeout: int = 100) -> str:
                     require(unit_property(unit, "NRestarts") == restarts, "TARGET_RESTARTED_DURING_STABILIZE")
                     return str(pid)
         time.sleep(2)
-    raise ContractError("TARGET_RUNNER_NOT_STABLE:" + unit)
+    # Keep the failure fail-closed, but retain a bounded, redacted systemd
+    # diagnostic so a Root rollback does not erase the only evidence of why
+    # the monitor process failed to remain healthy.
+    context = _systemd_failure_context(unit)
+    suffix = ("|" + context[:640]) if context else ""
+    raise ContractError("TARGET_RUNNER_NOT_STABLE:" + unit + suffix)
 
 
 def execute(tar_path: Path, manifest_path: Path, approval_token: str,
