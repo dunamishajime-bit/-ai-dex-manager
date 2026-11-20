@@ -120,6 +120,13 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             with self.assertRaises(module.ContractError):
                 module.validate_hold_metadata(uid, mode)
 
+    def test_cutover_blocked_reason_preserves_the_fail_closed_detail(self):
+        error = module.ContractError("TARGET_RESTART_COUNT_CHANGED")
+        self.assertEqual(
+            module.cutover_blocked_reason(error),
+            "CUTOVER_BLOCKED:ContractError:TARGET_RESTART_COUNT_CHANGED",
+        )
+
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('"clearGlobalHold": False', source)

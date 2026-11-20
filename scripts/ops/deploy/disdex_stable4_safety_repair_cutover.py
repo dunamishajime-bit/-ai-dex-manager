@@ -66,6 +66,12 @@ class ContractError(RuntimeError):
     pass
 
 
+def cutover_blocked_reason(error: BaseException) -> str:
+    """Keep the fail-closed cutover error actionable without changing behavior."""
+    detail = str(error).strip() or type(error).__name__
+    return f"CUTOVER_BLOCKED:{type(error).__name__}:{detail[:240]}"
+
+
 def require(condition: bool, reason: str) -> None:
     if not condition:
         raise ContractError(reason)
@@ -634,7 +640,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
             print("ROLLBACK=SUCCESS", file=sys.stderr)
         except Exception as rollback_error:
             print("ROLLBACK=MANUAL_REVIEW_REQUIRED:" + type(rollback_error).__name__, file=sys.stderr)
-        raise ContractError("CUTOVER_BLOCKED:" + type(exc).__name__) from exc
+        raise ContractError(cutover_blocked_reason(exc)) from exc
 
 
 def main() -> int:
