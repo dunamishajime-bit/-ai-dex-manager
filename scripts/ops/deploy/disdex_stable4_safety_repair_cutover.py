@@ -945,11 +945,15 @@ def stage_candidate(tar_path: Path, manifest_path: Path) -> None:
 
 
 def poll_cycles(previous: dict[str, tuple[int, str]], timeout: int = 180) -> dict[str, tuple[int, str]]:
-    seen = {name: 0 for name in HEARTBEATS}
+    # The health supervisor owns HEARTBEATS and may overwrite them with its
+    # supervisor schema between monitor cycles.  HEARTBEAT_TICKS are the
+    # monitor-owned, read-only evidence consumed by that supervisor and remain
+    # stable across the cutover verification window.
+    seen = {name: 0 for name in HEARTBEAT_TICKS}
     last = dict(previous)
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline and min(seen.values()) < 3:
-        for name, path in HEARTBEATS.items():
+        for name, path in HEARTBEAT_TICKS.items():
             if not path.is_file() or path.is_symlink():
                 continue
             raw = path.read_bytes(); digest = hashlib.sha256(raw).hexdigest()
@@ -1066,7 +1070,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
         require(not active(Q102_UNIT_OLD) and not active(V52_UNIT_OLD), "DUAL_RUNNER_ACTIVE")
         pids = {"Q102": qpid, "V52": vpid}
         cycles_before = {}
-        for name, path in HEARTBEATS.items():
+        for name, path in HEARTBEAT_TICKS.items():
             raw = read_regular(path, 128_000); value = json.loads(raw.decode("utf-8"))
             cycles_before[name] = (path.stat().st_mtime_ns, str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or ""))
         restarts_before = {u: unit_property(u, "NRestarts") for u in (Q102_UNIT_NEW, V52_UNIT_NEW)}
