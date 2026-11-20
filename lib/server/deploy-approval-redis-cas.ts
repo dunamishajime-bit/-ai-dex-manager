@@ -46,7 +46,11 @@ export const REDIS_APPROVAL_CAS_SCRIPT = [
   '  while #nextHistory > 50 do table.remove(nextHistory) end',
   '  nextHistoryJson = cjson.encode(nextHistory)',
   'end',
-  'redis.call("SET", KEYS[1], ARGV[3], "EX", ARGV[4])',
+  'if ARGV[8] == "1" then',
+  '  redis.call("SET", KEYS[1], ARGV[3])',
+  'else',
+  '  redis.call("SET", KEYS[1], ARGV[3], "EX", ARGV[4])',
+  'end',
   'if ARGV[5] == "1" then',
   '  redis.call("SET", KEYS[2], cjson.encode(ARGV[6]), "EX", ARGV[4])',
   'end',
@@ -65,6 +69,7 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
     next: T;
     touchLatest: boolean;
     historyKey?: string;
+    persistentRecord?: boolean;
   },
 ): Promise<RedisApprovalCasResult> {
   const keys = [input.recordKey, input.latestKey];
@@ -80,6 +85,7 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
       input.touchLatest ? "1" : "0",
       input.next.id,
       input.historyKey ? "1" : "0",
+      input.persistentRecord ? "1" : "0",
     ],
   );
   const result = Number(raw);
