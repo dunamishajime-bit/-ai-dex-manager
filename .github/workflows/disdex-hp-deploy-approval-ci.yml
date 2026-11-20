@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "lib/deploy-approval-token.ts"
+      - "lib/owner-goal-approval.ts"
+      - "lib/server/owner-goal-attestation.ts"
+      - "tests/owner-goal-approval.test.ts"
+      - ".github/workflows/disdex-owner-goal-candidate-ci.yml"
       - "lib/server/deploy-approval-store.ts"
       - "lib/server/deploy-approval-redis-cas.ts"
       - "lib/server/owner-session.ts"
@@ -88,6 +92,9 @@ jobs:
 
       - name: Approval store concurrency and corruption
         run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts
+
+      - name: One goal approval across candidate SHA revisions, attested CI and fail closed
+        run: node --import tsx --test tests/owner-goal-approval.test.ts
 
       - name: Owner auth and password contracts
         run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
