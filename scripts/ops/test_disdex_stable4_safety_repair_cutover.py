@@ -159,7 +159,11 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         )
         status = SimpleNamespace(
             returncode=3,
-            stdout="Loaded: loaded (/etc/systemd/system/unit.service)\nProcess: 123 ExecStartPre=/usr/bin/test -f /safe (code=exited, status=1/FAILURE)\n",
+            stdout=(
+                "Loaded: loaded (/etc/systemd/system/unit.service)\n"
+                "Process: 122 ExecStartPre=/usr/bin/install -d /safe (code=exited, status=0/SUCCESS)\n"
+                "Process: 123 ExecStartPre=/usr/bin/test -f /safe (code=exited, status=1/FAILURE)\n"
+            ),
             stderr="",
         )
         journal = SimpleNamespace(returncode=0, stdout="", stderr="")
@@ -171,6 +175,10 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertIn("status=ExecStartPre code=exited status=1/FAILURE cmd=test", message)
         self.assertNotIn("status=Loaded:", message)
         self.assertIn("status=1/FAILURE", message)
+        self.assertLess(
+            message.index("status=ExecStartPre code=exited status=1/FAILURE cmd=test"),
+            message.index("status=ExecStartPre code=exited status=0/SUCCESS cmd=install"),
+        )
 
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
