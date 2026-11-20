@@ -96,6 +96,24 @@ def margin_guard_error_class(value: object) -> str | None:
     return "ERROR_PRESENT"
 
 
+def margin_guard_ownership_diagnostic(value: object) -> dict | None:
+    """Extract only the state filename and identity values from an ownership error."""
+    if not isinstance(value, str) or "ownership state identity mismatch:" not in value.lower():
+        return None
+    match = re.search(
+        r"identity mismatch:\s*(.+?):\s*expected=([^,]+),\s*got=(.*)$",
+        value,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return {"file": "UNKNOWN", "expected": "UNKNOWN", "got": "UNKNOWN"}
+    return {
+        "file": Path(match.group(1).strip()).name[:120],
+        "expected": match.group(2).strip()[:80],
+        "got": match.group(3).strip()[:80],
+    }
+
+
 def margin_guard_service_diagnostic() -> str:
     """Expose only non-sensitive systemd health fields for the canonical guard."""
     payload = {}
@@ -134,6 +152,7 @@ def margin_guard_diagnostic(value: dict, now_ms: int | None = None) -> str:
         "consecutiveFailures": value.get("consecutiveFailures") if isinstance(value.get("consecutiveFailures"), int) else None,
         "pollIntervalMs": value.get("pollIntervalMs") if isinstance(value.get("pollIntervalMs"), int) else None,
         "lastErrorClass": margin_guard_error_class(value.get("lastError")),
+        "ownership": margin_guard_ownership_diagnostic(value.get("lastError")),
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
