@@ -8,6 +8,7 @@ on:
       - "lib/server/owner-goal-attestation.ts"
       - "tests/owner-goal-approval.test.ts"
       - ".github/workflows/disdex-owner-goal-candidate-ci.yml"
+      - ".github/workflows/disdex-owner-goal-approval-request.yml"
       - "lib/server/deploy-approval-store.ts"
       - "lib/server/deploy-approval-redis-cas.ts"
       - "lib/server/owner-session.ts"
