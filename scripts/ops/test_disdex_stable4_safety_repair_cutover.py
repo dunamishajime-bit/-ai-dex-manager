@@ -168,8 +168,9 @@ class Stable4SafetyRepairTests(unittest.TestCase):
                 module.run("/usr/bin/systemctl", "start", "unit.service")
         message = str(ctx.exception)
         self.assertIn("show=ActiveState=failed", message)
-        self.assertIn("status=Process: 123", message)
+        self.assertIn("status=ExecStartPre=/usr/bin/test -f /safe", message)
         self.assertNotIn("status=Loaded:", message)
+        self.assertIn("status=1/FAILURE", message)
 
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
