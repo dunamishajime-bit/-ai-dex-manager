@@ -69,7 +69,7 @@ export const REDIS_APPROVAL_CAS_SCRIPT = [
   '  end',
   'end',
   'return 1',
-].join("\\n");
+].join("\n");
 
 export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
   redis: RedisApprovalCasClient,
