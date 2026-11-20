@@ -149,6 +149,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertEqual(
             diagnostic["ownership"],
             {
+                "directory": "quality102-causal-v1",
                 "file": "state.json",
                 "kind": "IDENTITY_MISMATCH",
                 "expected": "QUALITY102_CAUSAL_V1",
@@ -166,7 +167,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertEqual(diagnostic["lastErrorClass"], "OWNERSHIP_STATE")
         self.assertEqual(
             diagnostic["ownership"],
-            {"file": "state.json", "kind": "UNAVAILABLE"},
+            {"directory": "fet-brk48-residual", "file": "state.json", "kind": "UNAVAILABLE"},
         )
 
     def test_source_has_no_hold_clear_or_order_enable_path(self):

@@ -104,26 +104,31 @@ def margin_guard_ownership_diagnostic(value: object) -> dict | None:
         r"ownership state unavailable:\s*(.+?)(?::|$)", value, flags=re.IGNORECASE
     )
     if unavailable:
-        return {"file": Path(unavailable.group(1).strip()).name[:120], "kind": "UNAVAILABLE"}
+        path = Path(unavailable.group(1).strip())
+        return {"directory": path.parent.name[:120], "file": path.name[:120], "kind": "UNAVAILABLE"}
     not_object = re.search(
         r"ownership state is not an object:\s*(.+)$", value, flags=re.IGNORECASE
     )
     if not_object:
-        return {"file": Path(not_object.group(1).strip()).name[:120], "kind": "NOT_OBJECT"}
+        path = Path(not_object.group(1).strip())
+        return {"directory": path.parent.name[:120], "file": path.name[:120], "kind": "NOT_OBJECT"}
     invalid_entry = re.search(
         r"ownership state entry is invalid:\s*(.+?)(?::|$)", value, flags=re.IGNORECASE
     )
     if invalid_entry:
-        return {"file": Path(invalid_entry.group(1).strip()).name[:120], "kind": "INVALID_ENTRY"}
+        path = Path(invalid_entry.group(1).strip())
+        return {"directory": path.parent.name[:120], "file": path.name[:120], "kind": "INVALID_ENTRY"}
     match = re.search(
         r"identity mismatch:\s*(.+?):\s*expected=([^,]+),\s*got=(.*)$",
         value,
         flags=re.IGNORECASE,
     )
     if not match:
-        return {"file": "UNKNOWN", "kind": "UNCLASSIFIED"}
+        return {"directory": "UNKNOWN", "file": "UNKNOWN", "kind": "UNCLASSIFIED"}
+    path = Path(match.group(1).strip())
     return {
-        "file": Path(match.group(1).strip()).name[:120],
+        "directory": path.parent.name[:120],
+        "file": path.name[:120],
         "kind": "IDENTITY_MISMATCH",
         "expected": match.group(2).strip()[:80],
         "got": match.group(3).strip()[:80],
