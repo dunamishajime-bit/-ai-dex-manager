@@ -72,6 +72,34 @@ def cutover_blocked_reason(error: BaseException) -> str:
     return f"CUTOVER_BLOCKED:{type(error).__name__}:{detail[:240]}"
 
 
+def margin_guard_diagnostic(value: dict, now_ms: int | None = None) -> str:
+    """Return only non-sensitive Margin Guard fields needed for diagnosis.
+
+    The guard file may contain account or venue details.  Never dump that JSON
+    into an Action log; expose only the state, order flag, freshness age, and a
+    short structured reason code.
+    """
+    now = int(time.time() * 1000) if now_ms is None else int(now_ms)
+    checked = value.get("checkedAt")
+    age = None
+    if isinstance(checked, (int, float)) and not isinstance(checked, bool):
+        age = now - int(checked)
+    reason = value.get("reason")
+    if isinstance(reason, str):
+        reason = reason.strip()
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9_.:-]{0,119}", reason):
+            reason = "UNSAFE_OR_UNSTRUCTURED_REASON"
+    else:
+        reason = None
+    payload = {
+        "stage": str(value.get("stage") or "")[:80],
+        "ordersAllowed": value.get("ordersAllowed") if isinstance(value.get("ordersAllowed"), bool) else None,
+        "checkedAtAgeMs": age,
+        "reason": reason,
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
 def require(condition: bool, reason: str) -> None:
     if not condition:
         raise ContractError(reason)
@@ -342,6 +370,8 @@ def validate_shared_files() -> None:
     require(type(risk_updated) in (int, float) and -1000 <= now - float(risk_updated) <= 15 * 60_000,
             "SHARED_RISK_STALE")
     margin = read_json(MARGIN)
+    if margin.get("stage") != "HEALTHY":
+        print("MARGIN_GUARD_DIAGNOSTIC=" + margin_guard_diagnostic(margin), file=sys.stderr)
     require(margin.get("stage") == "HEALTHY", "MARGIN_GUARD_NOT_HEALTHY:" + str(margin.get("stage")))
     checked = margin.get("checkedAt")
     require(type(checked) in (int, float) and -1000 <= now - float(checked) <= 15 * 60_000,
