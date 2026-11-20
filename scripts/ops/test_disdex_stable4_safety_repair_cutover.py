@@ -233,6 +233,48 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertNotIn("cancelOrder", source)
         self.assertNotIn("createOrder", source)
 
+    def test_monitor_dropins_remove_order_capable_exec_paths(self):
+        v52 = module.monitor_dropin_text("V52")
+        q102 = module.monitor_dropin_text("Q102")
+        for text in (v52, q102):
+            self.assertIn("ExecStartPre=", text)
+            self.assertIn("ExecStart=", text)
+            self.assertIn("DISDEX_RUNTIME_COMMIT_SHA=%i", text)
+            self.assertIn("new_orders_allowed=false", text.lower())
+            self.assertNotIn("operator-activation-gate", text)
+            self.assertNotIn("pending-order-recovery", text)
+        self.assertIn("--monitor-only-daemon", v52)
+        self.assertIn("disdex-quality102-causal-v1-monitor.ts --daemon", q102)
+        self.assertIn("QUALITY102_CAUSAL_V1_MONITOR_ONLY=true", q102)
+        self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
+
+    def test_monitor_heartbeat_requires_fresh_observing_non_authority(self):
+        sha = "a" * 40
+        unit = f"disdex-quality102-causal-v1@{sha}.service"
+        value = {
+            "schema": "disdex-runner-tick/v1",
+            "runnerId": "QUALITY102_CAUSAL_V1",
+            "runtimeSha": sha,
+            "expectedSha": sha,
+            "serviceUnit": unit,
+            "status": "observing",
+            "mode": "MONITOR_ONLY",
+            "newOrdersAllowed": False,
+            "permissionEvaluation": "MONITOR_ONLY_NO_ORDER_PATH",
+            "ordersSent": 0,
+            "cancelsSent": 0,
+            "positionChangesSent": 0,
+            "stateChanged": False,
+            "updatedAt": "2026-11-21T00:00:00Z",
+        }
+        self.assertTrue(module.validate_monitor_heartbeat(value, sha, unit, "Q102"))
+        blocked = dict(value, status="blocked")
+        with self.assertRaises(module.ContractError):
+            module.validate_monitor_heartbeat(blocked, sha, unit, "Q102")
+        wrong = dict(value, newOrdersAllowed=True)
+        with self.assertRaises(module.ContractError):
+            module.validate_monitor_heartbeat(wrong, sha, unit, "Q102")
+
 
 if __name__ == "__main__":
     unittest.main()

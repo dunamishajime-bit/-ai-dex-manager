@@ -6,6 +6,9 @@ on:
       - "scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py"
       - "scripts/ops/deploy/disdex_order_disable_quiesce.py"
       - "scripts/ops/test_disdex_stable4_safety_repair*.py"
+      - "tests/stable4-monitor-dropin-contract.test.mjs"
+      - "scripts/disdex-quality102-causal-v1-monitor.ts"
+      - "tests/quality102-monitor-only.test.ts"
       - "tests/test_disdex_order_disable_quiesce.py"
       - "tests/test_disdex_stable4_order_disable_workflow.py"
       - ".github/workflows/disdex-stable4-safety-repair*.yml"
@@ -16,6 +19,9 @@ on:
     paths:
       - "scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py"
       - "scripts/ops/test_disdex_stable4_safety_repair*.py"
+      - "tests/stable4-monitor-dropin-contract.test.mjs"
+      - "scripts/disdex-quality102-causal-v1-monitor.ts"
+      - "tests/quality102-monitor-only.test.ts"
       - ".github/workflows/disdex-stable4-safety-repair*.yml"
 
 permissions:
@@ -37,6 +43,7 @@ jobs:
           python3 -m py_compile scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py
           python3 scripts/ops/test_disdex_stable4_safety_repair_cutover.py
           python3 scripts/ops/test_disdex_stable4_safety_repair_workflow.py
+          node --test tests/stable4-monitor-dropin-contract.test.mjs
           python3 -m unittest tests/test_disdex_order_disable_quiesce.py tests/test_disdex_stable4_order_disable_workflow.py -v
           echo 'STABLE4_SAFETY_REPAIR_CI=PASS'
 
