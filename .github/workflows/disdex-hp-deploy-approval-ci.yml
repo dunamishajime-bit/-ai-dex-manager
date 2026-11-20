@@ -109,7 +109,7 @@ jobs:
         run: node --test tests/auth-boundary-source.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
 
       - name: Legacy direct-writer and atomic redeem contract
-        run: node --test tests/deploy-approval-direct-writer.test.mjs tests/deploy-approval-redis-cas-source.test.mjs
+        run: node --import tsx --test tests/deploy-approval-direct-writer.test.mjs tests/deploy-approval-redis-cas-source.test.mjs
 
       - name: Protected Production workflow contracts
         run: node --test tests/production-workflow-protected-environment.test.mjs
