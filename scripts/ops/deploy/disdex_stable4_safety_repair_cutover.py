@@ -300,7 +300,7 @@ def _systemd_failure_context(unit: str) -> str:
         for raw in status.stdout.splitlines():
             line = _sanitize_failure_text(raw, 180)
             if line and line != "[redacted]" and re.search(
-                r"(?i)(?:process:|execstartpre|code=|status=|loaded:|active:|failed|error|not found|permission)",
+                r"(?i)(?:process:|execstartpre|code=|status=|failed|error|not found|permission)",
                 line,
             ):
                 parts.append("status=" + line)
