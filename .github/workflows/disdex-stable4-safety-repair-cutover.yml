@@ -248,8 +248,10 @@ jobs:
           esac
           before="$(sha256sum "$state" | awk '{print $1}')"
           owner_before="$(stat -c '%u:%g:%a' "$state")"
+          deploy_gid="${deploy_gid:-$(getent group deploy | awk -F: 'NR == 1 { print $3 }' || true)}"
           case "$owner_before" in
             0:0:600|0:0:640) ;;
+            0:${deploy_gid}:600|0:${deploy_gid}:640) ;;
             1000:1000:600|1000:1000:640) chown root:root "$state" ;;
             *) echo "Q102_STATE_OWNER_UNEXPECTED=$owner_before"; exit 1 ;;
           esac

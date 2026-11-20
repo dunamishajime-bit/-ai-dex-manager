@@ -20,6 +20,8 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
             "Repair Q102 state ownership without changing bytes",
             "/var/lib/disdex/quality102-causal-v1/state.json",
             "Q102_STATE_SHA256_UNCHANGED=",
+            '0:${deploy_gid}:640',
+            "0:${deploy_gid}:600|0:${deploy_gid}:640)",
             "setfacl -m u:deploy:--x",
             "setfacl -m u:deploy:r--",
             "Q102_STATE_DEPLOY_READ_ACL_PASS=",
