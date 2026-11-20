@@ -1,0 +1,97 @@
+name: STABLE4 V52 Q102 safety repair candidate CI
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/disdex_v52_aster_only_legacy_engine.py"
+      - "tests/test_v52_upstream_fail_closed.py"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "lib/disdex-v96-live-risk-controls.ts"
+      - "tests/q102-risk-block-freshness.test.ts"
+      - "docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json"
+      - ".github/workflows/disdex-stable4-safety-repair-candidate-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate immutable safety repair plan
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          path = pathlib.Path("docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json")
+          raw = path.read_bytes()
+          expected = "542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f"
+          actual = hashlib.sha256(raw).hexdigest()
+          if actual != expected:
+              raise SystemExit(f"PLAN_SHA256_MISMATCH expected={expected} actual={actual}")
+          value = json.loads(raw)
+          if value.get("candidateType") != "combined-v52-q102-safety-repair":
+              raise SystemExit("CANDIDATE_TYPE_INVALID")
+          hold = value.get("globalHold") or {}
+          required = {
+              "active": True,
+              "strategyId": "STABLE4_H48_CUTOVER",
+              "action": "HOLD_PROTECTED",
+              "scope": "GLOBAL",
+              "operator": "disdex-stable4-formal-owner-hold",
+              "mustRemainByteIdentical": True,
+          }
+          for key, expected_value in required.items():
+              if hold.get(key) != expected_value:
+                  raise SystemExit(f"GLOBAL_HOLD_CONTRACT_INVALID:{key}")
+          cutover = value.get("cutover") or {}
+          if cutover.get("clearGlobalHold") is not False or cutover.get("enableNewOrders") is not False:
+              raise SystemExit("UNSAFE_CUTOVER_FLAGS")
+          venue = value.get("venuePreflight") or {}
+          if any(venue.get(key) != 0 for key in ("ordersSent", "cancelsSent", "positionChangesSent")):
+              raise SystemExit("NONZERO_MUTATION_CONTRACT")
+          if venue.get("signedAsterGets") != 3:
+              raise SystemExit("SIGNED_GET_COUNT_INVALID")
+          print("STABLE4_SAFETY_PLAN_SHA256=" + actual)
+          print("GLOBAL_HOLD_MUST_REMAIN_ACTIVE=TRUE")
+          print("ORDERS_ENABLED=FALSE")
+          print("TRADING_MUTATIONS=0")
+          PY
+
+      - name: Run V52 fail-closed regression tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/disdex_v52_aster_only_legacy_engine.py scripts/disdex_strict_portfolio_planner.py
+          python3 -m unittest discover -s tests -p "test_v52_upstream_fail_closed.py" -v
+
+      - name: Run Q102 protected-hold and freshness regression tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx tsx --test tests/q102-risk-block-freshness.test.ts
+
+      - name: Publish candidate identity manifest
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$RUNNER_TEMP/stable4-safety-repair"
+          printf '{"candidateSha":"%s","planSha256":"%s","ordersEnabled":false,"tradingMutations":0}\n'             "$GITHUB_SHA"             "$(sha256sum docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json | awk '{print $1}')"             > "$RUNNER_TEMP/stable4-safety-repair/candidate-identity.json"
+
+      - name: Upload candidate identity artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable4-safety-repair-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/stable4-safety-repair/candidate-identity.json
+          if-no-files-found: error
