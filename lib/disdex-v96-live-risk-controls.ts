@@ -212,12 +212,33 @@ export function updateDisDexV96DailyRisk(input: {
     };
 }
 
-export async function readDisDexV96KillSwitch(path?: string): Promise<DisDexV96KillSwitchCommand | undefined> {
+/**
+ * A Q102 peer may encounter a STABLE4 owner-issued GLOBAL protection hold
+ * during a separate cutover. Recognize that exact hold only when opted in.
+ * This never authorizes an entry, a flatten or clearing the shared switch.
+ */
+export async function readDisDexV96KillSwitch(
+    path?: string,
+    options: { acceptStable4GlobalHold?: boolean } = {},
+): Promise<DisDexV96KillSwitchCommand | undefined> {
     if (!path) return undefined;
     try {
-        const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<DisDexV96KillSwitchCommand>;
-        if (parsed.active !== true) return undefined;
-        if (parsed.strategyId !== DISDEX_V96_STRATEGY_ID
+        const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<DisDexV96KillSwitchCommand> & {
+            scope?: unknown;
+        };
+        if (parsed?.active === false) return undefined;
+        if (parsed?.active !== true) throw new Error("V96 Kill Switch file is active but invalid.");
+        const reason = String(parsed.reason || "");
+        const verifiedStable4Hold = Boolean(
+            options.acceptStable4GlobalHold
+            && parsed.strategyId === "STABLE4_H48_CUTOVER"
+            && parsed.action === "HOLD_PROTECTED"
+            && parsed.scope === "GLOBAL"
+            && parsed.operator === "disdex-stable4-formal-owner-hold"
+            && /^STABLE4_RESEARCH_ROLLOUT:[0-9a-f]{40}$/.test(reason)
+            && parsed.recoverable === false
+        );
+        if ((!verifiedStable4Hold && parsed.strategyId !== DISDEX_V96_STRATEGY_ID)
             || !["HOLD_PROTECTED", "FLATTEN_MANAGED"].includes(String(parsed.action || ""))
             || !nonEmpty(parsed.reason)
             || !nonEmpty(parsed.operator)
