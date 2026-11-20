@@ -275,6 +275,14 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         with self.assertRaises(module.ContractError):
             module.validate_monitor_heartbeat(wrong, sha, unit, "Q102")
 
+        v52_unit = f"disdex-v52-aster-only@{sha}.service"
+        v52_value = dict(value,
+            schema="disdex-v52-monitor-heartbeat/v1",
+            runnerId="V52_MONITOR",
+            serviceUnit=v52_unit,
+        )
+        self.assertTrue(module.validate_monitor_heartbeat(v52_value, sha, v52_unit, "V52"))
+
 
 if __name__ == "__main__":
     unittest.main()

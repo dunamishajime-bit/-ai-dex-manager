@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$TARGET_SHA" == '5f28ec8e42e25f3cf0e1aa3f74ea451fa8b005c1' ]]
+          [[ "$TARGET_SHA" == 'c7310d34ba1b6de07071d8883a2ed0de8dcce2a7' ]]
           [[ "$PLAN_SHA256" == '542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f' ]]
           [[ "$MODE" == 'preflight' || "$MODE" == 'execute' ]]
           [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]

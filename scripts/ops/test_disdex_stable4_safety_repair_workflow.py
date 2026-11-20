@@ -9,7 +9,7 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
     def test_workflow_is_exact_sha_monitor_only_and_formal(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         for value in (
-            "5f28ec8e42e25f3cf0e1aa3f74ea451fa8b005c1",
+            "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
             "542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f",
             "ALL_RUNNERS_MONITOR_REFRESH",
             "FULL_PROJECT",

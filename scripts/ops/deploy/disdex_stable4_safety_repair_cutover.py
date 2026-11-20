@@ -27,7 +27,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 from disdex_owner_approval import verify as verify_owner_token
 
-TARGET = "5f28ec8e42e25f3cf0e1aa3f74ea451fa8b005c1"
+TARGET = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
 PLAN_SHA256 = "542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f"
 V52_OLD = "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
 Q102_OLD = "ef1ab178e26a7bf5bddb6473467765edba242e1d"
@@ -742,7 +742,10 @@ def validate_monitor_heartbeat(value: dict, expected_sha: str, expected_unit: st
     """Validate a monitor record before counting it as a healthy cycle."""
     require(isinstance(value, dict), "MONITOR_HEARTBEAT_OBJECT_REQUIRED")
     expected_runner = "V52_MONITOR" if runner == "V52" else "QUALITY102_CAUSAL_V1"
-    require(value.get("schema") == "disdex-runner-tick/v1", "MONITOR_HEARTBEAT_SCHEMA_INVALID")
+    allowed_schemas = {"disdex-runner-tick/v1"}
+    if runner == "V52":
+        allowed_schemas.add("disdex-v52-monitor-heartbeat/v1")
+    require(value.get("schema") in allowed_schemas, "MONITOR_HEARTBEAT_SCHEMA_INVALID")
     require(value.get("runnerId") == expected_runner, "MONITOR_HEARTBEAT_RUNNER_INVALID")
     require(value.get("runtimeSha") == expected_sha and value.get("expectedSha") == expected_sha,
             "MONITOR_HEARTBEAT_SHA_MISMATCH")
