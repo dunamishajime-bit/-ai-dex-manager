@@ -103,6 +103,13 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             with self.assertRaises(module.ContractError):
                 module.old_runner_runtime_mode(*states)
 
+    def test_global_hold_metadata_matches_runtime_owner_contract(self):
+        self.assertIsNone(module.validate_hold_metadata(0, 0o600))
+        self.assertIsNone(module.validate_hold_metadata(1000, 0o600))
+        for uid, mode in ((1001, 0o600), (1000, 0o640), (0, 0o644)):
+            with self.assertRaises(module.ContractError):
+                module.validate_hold_metadata(uid, mode)
+
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('"clearGlobalHold": False', source)

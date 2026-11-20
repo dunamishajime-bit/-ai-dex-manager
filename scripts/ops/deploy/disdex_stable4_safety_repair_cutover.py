@@ -147,6 +147,13 @@ def read_regular(path: Path, max_bytes: int = 1_000_000, require_root: bool = Fa
     return path.read_bytes()
 
 
+def validate_hold_metadata(uid: int, mode: int) -> None:
+    # The shared runtime HOLD is intentionally readable by the deploy-owned
+    # Runner.  Match the existing order-enable contract while requiring the
+    # private 0600 mode and rejecting every other owner.
+    require(uid in (0, 1000) and mode == 0o600, "GLOBAL_HOLD_METADATA_INVALID")
+
+
 def read_json(path: Path) -> dict:
     try:
         value = json.loads(read_regular(path).decode("utf-8"))
@@ -257,7 +264,9 @@ def validate_target_units() -> None:
 
 
 def hold_snapshot() -> tuple[bytes, dict, str]:
-    raw = read_regular(HOLD, 32_768, require_root=True)
+    raw = read_regular(HOLD, 32_768)
+    st = HOLD.stat()
+    validate_hold_metadata(st.st_uid, stat.S_IMODE(st.st_mode))
     digest = hashlib.sha256(raw).hexdigest()
     require(digest == HOLD_DIGEST, "GLOBAL_HOLD_DIGEST_MISMATCH")
     value = json.loads(raw.decode("utf-8"))
