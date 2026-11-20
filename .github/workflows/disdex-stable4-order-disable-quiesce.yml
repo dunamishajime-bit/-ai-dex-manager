@@ -169,6 +169,35 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/order-disable-ssh/known_hosts" -p "$PORT" \
             "root@$HOST" "chown -R root:root '$remote'; chmod 0700 '$remote'; chmod 0600 '$remote'/*"
 
+      - name: Ensure Root-owned nonce directory for replay protection
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/order-disable-ssh/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/order-disable-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          parent=/var/lib/unified-deploy
+          nonce_dir="$parent/nonces"
+          test -d "$parent"
+          test ! -L "$parent"
+          test "$(stat -c '%u:%g' "$parent")" = '0:0'
+          if [[ -e "$nonce_dir" || -L "$nonce_dir" ]]; then
+            test -d "$nonce_dir"
+            test ! -L "$nonce_dir"
+          else
+            install -d -o root -g root -m 0700 "$nonce_dir"
+          fi
+          test "$(stat -c '%u:%g:%a' "$nonce_dir")" = '0:0:700'
+          echo NONCE_DIR_METADATA_PASS
+          REMOTE
+
       - name: Root read-only quiesce preflight
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
