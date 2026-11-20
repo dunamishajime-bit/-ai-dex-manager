@@ -131,13 +131,18 @@ export async function POST(request: NextRequest) {
     const runId = String(body.run_id || "").trim();
     const candidateSha = String(body.target_sha || "").trim();
     const planSha256 = String(body.plan_sha256 || "").trim();
+    const executionPlanSha256 = body.execution_plan_sha256 == null
+      ? undefined : String(body.execution_plan_sha256).trim();
     const ciRunId = String(body.ci_run_id || "").trim();
     // Explicit child permission: false is valid under a parent that permits
     // orders; true is NOT valid under a monitor-only parent.
     const ordersEnabled = body.orders_enabled;
     if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) ||
         !RUN_ID_RE.test(ciRunId) || !SHA_RE.test(candidateSha) ||
-        !PLAN_RE.test(planSha256) || typeof ordersEnabled !== "boolean") {
+        !PLAN_RE.test(planSha256) ||
+        (executionPlanSha256 !== undefined && !PLAN_RE.test(executionPlanSha256)) ||
+        (ordersEnabled === true && !executionPlanSha256) ||
+        typeof ordersEnabled !== "boolean") {
       return NextResponse.json({ ok: false, error: "GOAL_CLAIM_INVALID" }, { status: 400 });
     }
     try {
@@ -151,7 +156,7 @@ export async function POST(request: NextRequest) {
       // query GitHub's authenticated API and verify the plan at this SHA.
       await verifyOwnerGoalRelease({
         approvalId: id, goal: snapshot.goal, candidateSha,
-        planSha256, ordersEnabled, ciRunId,
+        planSha256, executionPlanSha256, ordersEnabled, ciRunId,
       });
       const answer = await mutateDeploymentApprovalAtomic(id, (record) => {
         if (!record?.goal || !record.approvedAt ||
@@ -176,7 +181,9 @@ export async function POST(request: NextRequest) {
           }
         }
         const issued = issueDeploymentApprovalToken({
-          targetSha: candidateSha, planSha256, scope: record.goal.scope,
+          targetSha: candidateSha,
+          planSha256: executionPlanSha256 ?? planSha256,
+          scope: record.goal.scope,
           ordersEnabled, operator: "dunamishajime-bit",
           privateKey: loadDeploymentApprovalPrivateKey(), ttlSeconds: 300,
         });
@@ -195,8 +202,9 @@ export async function POST(request: NextRequest) {
             ok: true, token: issued.token,
             tokenExpiresAt: issued.payload.expiresAt,
             goalId: record.id, goalFingerprint: record.goal.fingerprint,
-            candidateSha, planSha256, ordersEnabled,
-            runId, ciRunId,
+            candidateSha, planSha256,
+            signedPlanSha256: executionPlanSha256 ?? planSha256,
+            ordersEnabled, runId, ciRunId,
           },
         };
       });
