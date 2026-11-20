@@ -290,6 +290,11 @@ def _systemd_failure_context(unit: str) -> str:
         # reports only a successful ExecStartPre or a generic process exit.
         # Put them first so the bounded outer error retains that cause.
         journal_parts = [p for p in parts if p.startswith("journal=")]
+        exception_journal = [
+            p for p in journal_parts
+            if re.search(r"(?i)journal=(?:runtimeerror|valueerror|typeerror|assertionerror|contracterror|fatal|error:)", p)
+        ]
+        journal_parts = exception_journal + [p for p in journal_parts if p not in exception_journal]
         ranked = journal_parts + failed_status + successful_status
         ranked += [
             p for p in parts
@@ -373,7 +378,7 @@ def _systemd_failure_context(unit: str) -> str:
             # or process exit.  Credential-bearing lines are discarded above.
             for raw in journal.stdout.splitlines():
                 line = _sanitize_failure_text(raw, 180)
-                if line and line != "[redacted]" and re.search(
+                if line and line != "[redacted]" and not line.lstrip().startswith(("File ", "raise ")) and re.search(
                     r"(?i)(?:error|failed|failure|cannot|denied|not found|missing|invalid|exit|preflight|readiness|permission|result)",
                     line,
                 ):
