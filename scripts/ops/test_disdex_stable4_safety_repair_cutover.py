@@ -284,6 +284,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
                     text,
                 )
                 self.assertIn("DISDEX_V52_STOCK_GROSS_CAP=4.0", text)
+                self.assertIn("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json", text)
+                self.assertIn("DISDEX_V52_MONITOR_BUDGET_BROKER_SHA=25d4a86f541a33564c8060bc71633fd810ac9370", text)
                 self.assertIn("STRICT_PORTFOLIO_PLANNER_ACTIVE=true", text)
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
