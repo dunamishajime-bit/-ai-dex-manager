@@ -158,7 +158,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             stderr="",
         )
         status = SimpleNamespace(
-            returncode=0,
+            returncode=3,
             stdout="Process: 123 ExecStartPre=/usr/bin/test -f /safe (code=exited, status=1/FAILURE)\n",
             stderr="",
         )

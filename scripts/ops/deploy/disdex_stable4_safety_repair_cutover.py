@@ -267,6 +267,15 @@ def _sanitize_failure_text(value: object, limit: int = 180) -> str:
 def _systemd_failure_context(unit: str) -> str:
     """Return a bounded, non-secret status summary for a failed start."""
     parts: list[str] = []
+
+    def ordered() -> str:
+        # ``systemctl status`` commonly exits 3 for a failed unit.  Put its
+        # Process/ExecStartPre lines before the generic ``show`` summary so the
+        # outer fail-closed 240-character message retains the useful cause.
+        ranked = [p for p in parts if p.startswith("status=")]
+        ranked += [p for p in parts if not p.startswith("status=")]
+        return "|".join(ranked)[:640]
+
     try:
         status = subprocess.run(
             [
@@ -286,14 +295,15 @@ def _systemd_failure_context(unit: str) -> str:
             ["/usr/bin/systemctl", "status", unit, "--no-pager", "--full"],
             capture_output=True, text=True, timeout=10,
         )
-        if status.returncode == 0:
-            for raw in status.stdout.splitlines():
-                line = _sanitize_failure_text(raw, 180)
-                if line and line != "[redacted]" and re.search(
-                    r"(?i)(?:process:|execstartpre|code=|status=|loaded:|active:|failed|error|not found|permission)",
-                    line,
-                ):
-                    parts.append("status=" + line)
+        # A non-zero status code is expected for a failed unit; the stdout
+        # summary is still the authoritative diagnostic we need.
+        for raw in status.stdout.splitlines():
+            line = _sanitize_failure_text(raw, 180)
+            if line and line != "[redacted]" and re.search(
+                r"(?i)(?:process:|execstartpre|code=|status=|loaded:|active:|failed|error|not found|permission)",
+                line,
+            ):
+                parts.append("status=" + line)
     except (OSError, subprocess.SubprocessError):
         pass
     try:
@@ -312,10 +322,10 @@ def _systemd_failure_context(unit: str) -> str:
                 ):
                     parts.append("journal=" + line)
             if parts:
-                return "|".join(parts)[:640]
+                return ordered()
     except (OSError, subprocess.SubprocessError):
         pass
-    return "|".join(parts)[:640]
+    return ordered()
 
 
 def run(*argv: str, timeout: int = 60, check: bool = True, input_text: str | None = None) -> str:
