@@ -176,14 +176,28 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
                   <span className="rounded-full border border-white/15 px-2 py-1">Scope: {deployApproval.scope}</span>
                   <span className="rounded-full border border-white/15 px-2 py-1">Status: {deployApproval.status}</span>
                 </div>
-                <div className="mt-3 text-xs text-white/60">Target SHA</div>
-                <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.targetSha}</div>
-                <div className="mt-3 text-xs text-white/60">Plan SHA-256</div>
-                <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.planSha256}</div>
+                {deployApproval.goal ? (
+                  <div className="mt-3 space-y-2 rounded-lg border border-emerald-300/20 bg-emerald-400/[0.05] p-3">
+                    <div className="font-bold text-emerald-100">目的単位のOwner承認（再承認不要）</div>
+                    <div>目的: {deployApproval.goal.kind === "RESTORE_RUNNER_LIVE" ? "停止RunnerのLIVE復旧" : "新ロジックへの切替"}</div>
+                    <div>対象: {deployApproval.goal.subject}</div>
+                    {deployApproval.goal.strategyId ? <div>対象ロジック: {deployApproval.goal.strategyId}</div> : null}
+                    <div>新規注文の許可上限: {deployApproval.goal.ordersEnabled ? "許可（独立した安全ゲート必須）" : "禁止（監視専用）"}</div>
+                    <div className="break-all font-mono text-[11px]">目的識別: {deployApproval.goal.fingerprint}</div>
+                    <div className="text-xs text-white/65">作業が完了するかOwnerが取り消すまで、この目的の候補SHAや実行計画を変更してもHP再承認は不要です。毎回CIと短期署名を検証します。</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-3 text-xs text-white/60">Target SHA</div>
+                    <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.targetSha}</div>
+                    <div className="mt-3 text-xs text-white/60">Plan SHA-256</div>
+                    <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.planSha256}</div>
+                  </>
+                )}
                 <div className="mt-3 grid gap-1 text-xs text-white/60 md:grid-cols-2">
                   <div>要求者: {deployApproval.requestActor}</div>
                   <div>要求作成: {formatDateTime(deployApproval.createdAt)}</div>
-                  <div>要求期限: {formatDateTime(deployApproval.requestExpiresAt)}</div>
+                  <div>{deployApproval.goal && deployApproval.approvedAt ? "本人認証完了" : "要求期限"}: {formatDateTime(deployApproval.goal && deployApproval.approvedAt ? deployApproval.approvedAt : deployApproval.requestExpiresAt)}</div>
                   <div>承認ID: <span className="font-mono">{deployApproval.id}</span></div>
                 </div>
                 {deployApproval.lastError ? (
@@ -198,7 +212,7 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
                   <input type="hidden" name="intent" value="request-otp" />
                   <input type="hidden" name="requestId" value={deployApproval.id} />
                   <button className="w-full rounded-xl border border-amber-300/35 bg-amber-300/15 px-4 py-3 text-sm font-black text-amber-50">
-                    メール認証してLIVE切替を承認
+                    {deployApproval.goal ? "作業目的を一度だけ承認する" : "メール認証してLIVE切替を承認"}
                   </button>
                 </form>
               ) : null}
@@ -221,14 +235,16 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
                     placeholder="000000"
                   />
                   <button className="w-full rounded-xl border border-emerald-300/35 bg-emerald-400/15 px-4 py-3 text-sm font-black text-emerald-50">
-                    正式承認して署名済み承認証明を発行
+                    {deployApproval.goal ? "この目的の作業全体を正式承認" : "正式承認して署名済み承認証明を発行"}
                   </button>
                 </form>
               ) : null}
 
               {deployApproval.status === "APPROVED" ? (
                 <div className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-                  本人認証済み。exact SHA / plan hash に固定した署名済み承認証明を発行済みです。
+                  {deployApproval.goal
+                    ? "目的の本人認証完了。SHA変更時は同じ承認IDを維持し、候補ごとにCI照合・短期署名します。"
+                    : "本人認証済み。exact SHA / plan hash に固定した署名済み承認証明を発行済みです。"}
                 </div>
               ) : null}
 
@@ -244,9 +260,26 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
                 </div>
               ) : null}
 
-              <div className="rounded-xl border border-rose-400/20 bg-rose-500/[0.06] px-4 py-3 text-xs leading-relaxed text-rose-100/85">
-                この承認は表示中の exact SHA / plan hash / V12_V4 にのみ有効です。内容が変わった場合は再承認が必要です。
-              </div>
+              {deployApproval.goal ? (
+                <>
+                  <div className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-xs leading-relaxed text-white/75">
+                    目的・対象・注文権限が変わらない限りHP再承認は不要です。変更後SHAのCI、プランの目的一致、短期署名、GitHub保護と本番Fail Closedは必須です。
+                  </div>
+                  {["APPROVED", "DISPATCHED", "REDEEMED"].includes(deployApproval.status) ? (
+                    <form method="post" action="/api/admin/deploy-approval">
+                      <input type="hidden" name="intent" value="revoke-goal" />
+                      <input type="hidden" name="requestId" value={deployApproval.id} />
+                      <button className="w-full rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-100">
+                        この目的の承認を取り消す
+                      </button>
+                    </form>
+                  ) : null}
+                </>
+              ) : (
+                <div className="rounded-xl border border-rose-400/20 bg-rose-500/[0.06] px-4 py-3 text-xs leading-relaxed text-rose-100/85">
+                  従来方式の承認は表示中の exact SHA / plan hash にのみ有効です。SHA変更を伴う一連の作業では目的単位の承認を利用してください。
+                </div>
+              )}
             </div>
           )}
         </>,

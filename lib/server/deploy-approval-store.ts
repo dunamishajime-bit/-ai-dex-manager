@@ -7,6 +7,9 @@ import {
   type DeploymentApprovalScope,
 } from "@/lib/deploy-approval-token";
 import { redisApprovalCompareAndSwap } from "@/lib/server/deploy-approval-redis-cas";
+import {
+  type GoalApproval, assertSameOwnerGoal, isReusableOwnerGoal,
+} from "@/lib/owner-goal-approval";
 
 export type DeploymentApprovalStatus =
   | "PENDING"
@@ -61,6 +64,27 @@ export type DeploymentApprovalRecord = {
     finishedAt?: number;
     outcome?: "success" | "failure";
   }>;
+  /** One Owner OTP for this stable goal, not for any particular code SHA. */
+  goal?: GoalApproval;
+  goalClaimCount?: number;
+  goalActiveClaim?: {
+    runId: string;
+    candidateSha: string;
+    planSha256: string;
+    ciRunId: string;
+    ordersEnabled: boolean;
+    claimedAt: number;
+  };
+  goalClaimHistory?: Array<{
+    runId: string;
+    candidateSha: string;
+    planSha256: string;
+    ciRunId: string;
+    ordersEnabled: boolean;
+    claimedAt: number;
+    finishedAt?: number;
+    outcome?: "success" | "failure";
+  }>;
 };
 
 export type DeploymentApprovalSummary = Omit<
@@ -74,6 +98,7 @@ const USE_REDIS = Boolean(KV_URL && KV_TOKEN);
 const KEY_PREFIX = "disdex:deploy-approval:";
 const LATEST_KEY = "disdex:deploy-approval:latest";
 const HISTORY_KEY = "disdex:deploy-approval:history";
+const GOAL_INDEX_PREFIX = "disdex:deploy-goal:";
 const HISTORY_LIMIT = 50;
 const MONITOR_ONLY_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const MONITOR_ONLY_RETENTION_LIMIT = 100;
@@ -116,6 +141,14 @@ function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const retained = new Map<string, DeploymentApprovalRecord>();
   for (const record of sorted.slice(0, HISTORY_LIMIT)) retained.set(record.id, record);
   for (const record of retryableMonitor) retained.set(record.id, record);
+  // Goal approvals remain durable until the requested objective completes or
+  // the Owner revokes it. The signed child tokens remain 300-second one-use.
+  const activeGoals = sorted.filter((record) =>
+    record.goal &&
+    (["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status) ||
+     (["PENDING", "OTP_SENT"].includes(record.status) &&
+      record.requestExpiresAt > Date.now())));
+  for (const record of activeGoals) retained.set(record.id, record);
   const persisted = Array.from(retained.values()).sort((a, b) => b.createdAt - a.createdAt);
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${crypto.randomUUID()}`;
   fs.writeFileSync(tmp, JSON.stringify(persisted, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
@@ -177,6 +210,11 @@ export async function mutateDeploymentApprovalAtomic<T>(
         current,
         next,
         touchLatest: false,
+        persistentRecord: Boolean(next.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(next.status)),
+        ...(next.goal ? {
+          goalIndexKey: GOAL_INDEX_PREFIX + next.goal.fingerprint,
+          goalActive: !["COMPLETED", "EXPIRED", "FAILED"].includes(next.status),
+        } : {}),
       });
       if (cas === "SWAPPED") return result.result;
       if (cas === "INVALID_STORED_VALUE") {
@@ -306,6 +344,11 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
       current,
       next: persisted,
       touchLatest: true,
+      persistentRecord: Boolean(persisted.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(persisted.status)),
+      ...(persisted.goal ? {
+        goalIndexKey: GOAL_INDEX_PREFIX + persisted.goal.fingerprint,
+        goalActive: !["COMPLETED", "EXPIRED", "FAILED"].includes(persisted.status),
+      } : {}),
     });
     if (cas === "INVALID_STORED_VALUE") {
       throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE");
@@ -384,6 +427,23 @@ export async function createPendingDeploymentApproval(input: {
     return current;
   }
 
+  // A failed orders-disabled monitor cutover may redeem an approval before a
+  // later preflight fails. Republishing the *same* immutable identity must
+  // reuse that approval ID instead of sending the Owner another OTP.
+  // Redeem has an identical 24-hour, monitor-only cross-run retry allowance.
+  // Never extend this to LIVE/order-enabled approvals or a changed SHA/plan.
+  if (
+    current &&
+    sameIdentity &&
+    current.status === "REDEEMED" &&
+    current.operation === "ALL_RUNNERS_MONITOR_REFRESH" &&
+    current.ordersEnabled === false &&
+    Number.isFinite(current.approvedAt) &&
+    now < Number(current.approvedAt) + 24 * 60 * 60 * 1000
+  ) {
+    return current;
+  }
+
   if (
     current &&
     sameIdentity &&
@@ -416,4 +476,118 @@ export async function createPendingDeploymentApproval(input: {
     status: "PENDING",
   };
   return saveDeploymentApproval(record);
+}
+
+
+/** Publish one immutable Owner objective; subsequent candidate SHA/plan
+ * revisions are claimed against this approved record, not via a new OTP. */
+export async function createPendingOwnerGoal(input: {
+  goal: GoalApproval;
+  actor: string;
+  existingGoalId?: string;
+}) {
+  assertSameOwnerGoal(input.goal);
+  if (!/^[A-Za-z0-9-]{1,39}$/.test(input.actor)) {
+    throw new Error("GOAL_ACTOR_INVALID");
+  }
+  if (input.existingGoalId) {
+    const record = await getDeploymentApproval(input.existingGoalId);
+    if (!record?.goal || record.requestActor !== input.actor ||
+        record.goal.fingerprint !== input.goal.fingerprint) {
+      throw new Error("GOAL_IDENTITY_MISMATCH");
+    }
+    if (isReusableOwnerGoal({
+      status: record.status, approvedAt: record.approvedAt,
+      goal: record.goal, requested: input.goal,
+    })) return record;
+    if (["PENDING", "OTP_SENT"].includes(record.status) &&
+        record.requestExpiresAt > Date.now()) return record;
+    throw new Error("GOAL_NOT_REUSABLE");
+  }
+  const reusable = (row: DeploymentApprovalRecord) =>
+    row.requestActor === input.actor &&
+    row.goal?.fingerprint === input.goal.fingerprint &&
+    (isReusableOwnerGoal({
+      status: row.status, approvedAt: row.approvedAt,
+      goal: row.goal, requested: input.goal,
+    }) ||
+    (["PENDING", "OTP_SENT"].includes(row.status) &&
+      row.requestExpiresAt > Date.now()));
+
+  const buildRecord = (): DeploymentApprovalRecord => {
+    const now = Date.now();
+    return {
+      id: crypto.randomUUID(),
+      goal: input.goal,
+      scope: input.goal.scope,
+      operation: input.goal.operation,
+      ordersEnabled: input.goal.ordersEnabled,
+      targetSha: "0".repeat(40), // goal charter, not executable source
+      planSha256: input.goal.fingerprint,
+      requestActor: input.actor,
+      createdAt: now,
+      requestExpiresAt: now + 30 * 60 * 1000,
+      updatedAt: now,
+      status: "PENDING",
+      goalClaimCount: 0,
+      goalClaimHistory: [],
+    };
+  };
+
+  if (!USE_REDIS) {
+    // Resolve and write under *one* lock. Concurrent requests for the same
+    // purpose must result in one Owner OTP, even on the file-backed HP.
+    return withFileLock(() => {
+      const records = loadFileRecords();
+      const active = records.find(reusable);
+      if (active) return active;
+      const next = { ...buildRecord(), storeRevision: crypto.randomUUID() };
+      saveFileRecords([...records, next]);
+      return next;
+    });
+  }
+
+  // Durable Redis goal index is independent of the last-50 UI history.
+  // The Redis CAS also refuses another ID for an active same-goal index.
+  const redis = await redisClient();
+  const index = GOAL_INDEX_PREFIX + input.goal.fingerprint;
+  // On expiry only a still-unapproved request can be retired. Never
+  // expire a signed, active goal merely because its OTP request window passed.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const id = await redis.get<string>(index);
+    if (!id) break;
+    const row = await getDeploymentApproval(id);
+    if (!row) throw new Error("GOAL_INDEX_RECORD_MISSING_FAIL_CLOSED");
+    if (reusable(row)) return row;
+    if (row.goal?.fingerprint !== input.goal.fingerprint) {
+      throw new Error("GOAL_INDEX_IDENTITY_MISMATCH");
+    }
+    if (["PENDING", "OTP_SENT"].includes(row.status) &&
+        row.requestExpiresAt <= Date.now()) {
+      try {
+        await saveDeploymentApproval({
+          ...row, status: "EXPIRED", lastError: "goal OTP request expired",
+        });
+      } catch (error) {
+        if (attempt === 2) throw error;
+        continue;
+      }
+      continue;
+    }
+    // Stale/revoked/unknown indexed state cannot auto-authorize a release.
+    throw new Error("GOAL_INDEX_STATE_REQUIRES_MANUAL_REVIEW");
+  }
+  const active = (await getDeploymentApprovalHistory()).find(reusable);
+  if (active) return active;
+
+  try {
+    return await saveDeploymentApproval(buildRecord());
+  } catch (error) {
+    // A competing request may have just created this exact goal. In that
+    // case reuse its ID, not a second OTP; all other conflicts fail closed.
+    const concurrentId = await redis.get<string>(index);
+    const concurrent = concurrentId ? await getDeploymentApproval(concurrentId) : null;
+    if (concurrent && reusable(concurrent)) return concurrent;
+    throw error;
+  }
 }

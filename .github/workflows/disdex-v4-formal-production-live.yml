@@ -11,6 +11,18 @@ on:
         description: Root-owned canonical V4 deployment plan SHA-256
         type: string
         required: true
+      goal_id:
+        description: Owner-approved V4 recovery or named strategy switch goal UUID (no repeat OTP)
+        type: string
+        required: false
+      ci_run_id:
+        description: Successful trusted candidate CI run for target_sha
+        type: string
+        required: false
+      goal_plan_sha256:
+        description: Goal charter plan digest in the exact candidate commit
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -32,6 +44,64 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
 
+      - name: Resolve one goal Owner approval to a fresh exact V4 release signature
+        if: ${{ inputs.goal_id != '' }}
+        id: goal_claim
+        shell: bash
+        env:
+          GOAL_ID: ${{ inputs.goal_id }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          GOAL_PLAN: ${{ inputs.goal_plan_sha256 }}
+          SHA: ${{ inputs.target_sha }}
+          ROOT_PLAN: ${{ inputs.plan_sha256 }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$GOAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ "$CI_RUN_ID" =~ ^[0-9]{1,20}$ && "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ && "$ROOT_PLAN" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$GOAL_PLAN" =~ ^[0-9a-f]{64}$ && -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          root="https://professional-dismanager.net/api/system/deploy-approval"
+          def call(body):
+              req=urllib.request.Request(root,data=json.dumps(body,separators=(",",":")).encode(),
+                method="POST",headers={"Authorization":"Bearer "+os.environ["BRIDGE"],
+                                       "Content-Type":"application/json"})
+              with urllib.request.urlopen(req,timeout=15) as response:
+                  obj=json.load(response)
+              if obj.get("ok") is not True: raise ValueError("GOAL_BRIDGE_REJECTED")
+              return obj
+          state=call({"action":"get_goal_status","goal_id":os.environ["GOAL_ID"]})
+          approval=state["approval"]
+          goal=approval["goal"]
+          assert approval["status"] in ("APPROVED","DISPATCHED","REDEEMED")
+          assert goal["kind"] in ("RESTORE_RUNNER_LIVE","SWITCH_STRATEGY_LOGIC")
+          assert goal["operation"]=="V12_V4_LIVE"
+          assert goal["scope"]=="V12_V4"
+          assert goal["ordersEnabled"] is True
+          signed=call({"action":"claim_goal_release",
+             "goal_id":os.environ["GOAL_ID"],"run_id":os.environ["RUN_ID"],
+             "ci_run_id":os.environ["CI_RUN_ID"],"target_sha":os.environ["SHA"],
+             "plan_sha256":os.environ["GOAL_PLAN"],
+             "execution_plan_sha256":os.environ["ROOT_PLAN"],
+             "orders_enabled":True})
+          assert signed["goalFingerprint"]==goal["fingerprint"]
+          assert signed["candidateSha"]==os.environ["SHA"]
+          assert signed["signedPlanSha256"]==os.environ["ROOT_PLAN"]
+          assert signed["ordersEnabled"] is True
+          token=str(signed.get("token") or "")
+          assert token
+          dest=pathlib.Path(os.environ["RUNNER_TEMP"])/"disdex-owner-token"
+          dest.write_text(token,encoding="ascii")
+          print("::add-mask::"+token)
+          print("OWNER_APPROVED_GOAL_V4_RELEASE=TRUE")
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-goal-owner.pub"
+
       - name: Verify owner policy and short-lived V4 LIVE signature
         shell: bash
         env:
@@ -43,6 +113,10 @@ jobs:
           PLAN: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
           PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+          GOAL_PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+          GOAL_ID: ${{ inputs.goal_id }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          GOAL_PLAN: ${{ inputs.goal_plan_sha256 }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
@@ -52,10 +126,20 @@ jobs:
           [[ ",$ALLOWED," == *",$ACTOR,"* ]]
           [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$PLAN" =~ ^[a-f0-9]{64}$ ]]
-          [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
           umask 077
-          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
-          printf '%s' "$TOKEN" |
+          if [[ -z "$GOAL_ID" ]]; then
+            [[ -z "$CI_RUN_ID" && -z "$GOAL_PLAN" ]]
+            [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
+            printf '%s' "$TOKEN" > "$RUNNER_TEMP/disdex-owner-token"
+            printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
+          else
+            [[ -n "$CI_RUN_ID" && -n "$GOAL_PLAN" && -n "$GOAL_PUBLIC_KEY" ]]
+            [[ -s "$RUNNER_TEMP/disdex-owner-token" ]]
+            [[ -s "$RUNNER_TEMP/disdex-goal-owner.pub" ]]
+            cp "$RUNNER_TEMP/disdex-goal-owner.pub" "$RUNNER_TEMP/disdex-owner.pub"
+          fi
+          chmod 600 "$RUNNER_TEMP/disdex-owner-token" "$RUNNER_TEMP/disdex-owner.pub"
+          cat "$RUNNER_TEMP/disdex-owner-token" |
             python3 scripts/ops/deploy/disdex_owner_approval.py verify               --public-key "$RUNNER_TEMP/disdex-owner.pub"               --repository "$GITHUB_REPOSITORY"               --sha "$SHA" --scope V12_V4               --operator "$OWNER" --plan-sha256 "$PLAN"               --deployment-target professional-dismanager.net               --operator-target DD1296_FINAL_ALLIN_10BPS               --route GITHUB_ACTIONS --orders-enabled true
 
       - name: Prepare restricted SSH identity
@@ -80,7 +164,6 @@ jobs:
           PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
           SHA: ${{ inputs.target_sha }}
           PLAN: ${{ inputs.plan_sha256 }}
-          TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
           OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
         run: |
           set -euo pipefail
@@ -88,24 +171,100 @@ jobs:
           [[ "$OWNER" == "dunamishajime-bit" ]]
           if [[ -z "$PORT" ]]; then PORT=22; fi
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
-          printf '%s' "$TOKEN" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --preflight-readonly --read-approval-stdin"
+          cat "$RUNNER_TEMP/disdex-owner-token" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --preflight-readonly --read-approval-stdin"
+
+      - name: Refresh signed goal token immediately before V4 LIVE execution
+        if: ${{ inputs.goal_id != '' }}
+        shell: bash
+        env:
+          GOAL_ID: ${{ inputs.goal_id }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          GOAL_PLAN: ${{ inputs.goal_plan_sha256 }}
+          SHA: ${{ inputs.target_sha }}
+          ROOT_PLAN: ${{ inputs.plan_sha256 }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        run: |
+          set -euo pipefail
+          # A previous read-only Root preflight may take longer than the
+          # 300-second token TTL. Refresh the same approved goal without OTP.
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          body=json.dumps({
+             "action":"claim_goal_release","goal_id":os.environ["GOAL_ID"],
+             "ci_run_id":os.environ["CI_RUN_ID"],"target_sha":os.environ["SHA"],
+             "plan_sha256":os.environ["GOAL_PLAN"],
+             "execution_plan_sha256":os.environ["ROOT_PLAN"],
+             "run_id":os.environ["RUN_ID"],"orders_enabled":True,
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE"],
+                     "Content-Type":"application/json"})
+          with urllib.request.urlopen(req,timeout=15) as response:
+              result=json.load(response)
+          assert result.get("ok") is True
+          assert result["signedPlanSha256"]==os.environ["ROOT_PLAN"]
+          assert result["candidateSha"]==os.environ["SHA"]
+          token=str(result["token"])
+          pathlib.Path(os.environ["RUNNER_TEMP"],"disdex-owner-token").write_text(token,encoding="ascii")
+          print("::add-mask::"+token)
+          PY
+          cat "$RUNNER_TEMP/disdex-owner-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/disdex-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha "$SHA" --scope V12_V4 --operator dunamishajime-bit \
+              --plan-sha256 "$ROOT_PLAN" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled true
 
       - name: Execute exact V4 LIVE cutover
+        id: execute
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
           PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
           SHA: ${{ inputs.target_sha }}
           PLAN: ${{ inputs.plan_sha256 }}
-          TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
           OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
         run: |
           set -euo pipefail
           [[ "$HOST" == "professional-dismanager.net" ]]
           if [[ -z "$PORT" ]]; then PORT=22; fi
-          printf '%s' "$TOKEN" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --execute --read-approval-stdin"
+          cat "$RUNNER_TEMP/disdex-owner-token" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --execute --read-approval-stdin"
+
+      - name: Finish goal campaign only after signed Root cutover
+        if: ${{ always() && inputs.goal_id != '' && steps.goal_claim.outcome == 'success' }}
+        shell: bash
+        env:
+          GOAL_ID: ${{ inputs.goal_id }}
+          RUN_ID: ${{ github.run_id }}
+          EXECUTION: ${{ steps.execute.outcome }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          passed=os.environ["EXECUTION"]=="success"
+          body=json.dumps({"action":"finish_goal_release",
+            "goal_id":os.environ["GOAL_ID"],"run_id":os.environ["RUN_ID"],
+            "outcome":"success" if passed else "failure",
+            "final":passed}).encode()
+          req=urllib.request.Request("https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE"],
+              "Content-Type":"application/json"})
+          with urllib.request.urlopen(req,timeout=15) as response:
+              result=json.load(response)
+          assert result.get("ok") is True
+          assert result["status"]==("COMPLETED" if passed else "APPROVED")
+          print("OWNER_GOAL_V4="+("COMPLETED" if passed else "RETRYABLE"))
+          PY
 
       - name: Destroy ephemeral SSH material
         if: always()
         shell: bash
-        run: rm -rf "$RUNNER_TEMP/disdex-ssh" "$RUNNER_TEMP/disdex-owner.pub"
+        run: rm -rf "$RUNNER_TEMP/disdex-ssh" "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-goal-owner.pub" "$RUNNER_TEMP/disdex-owner-token"

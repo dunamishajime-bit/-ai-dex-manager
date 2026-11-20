@@ -54,6 +54,10 @@ test("monitor-only approvals may be retried by a different run within the bounde
   assert.doesNotMatch(redeem, /record\.requestExpiresAt > Date\.now\(\)/);
   assert.match(redeem, /MONITOR_ONLY_APPROVAL_RETRY/);
   assert.match(redeem, /redeemedByRunId: runId/);
+  // Cross-run monitor retries must not replay the old still-unexpired nonce.
+  assert.match(redeem, /const sameRun = record\.redeemedByRunId === runId/);
+  assert.match(redeem, /if \(sameRun && record\.approvalToken/);
+  assert.match(redeem, /const refreshed = issueTransportToken\(\)/);
 });
 
 test("retired DOGE handoff and staging code cannot read or write approval JSON directly",()=>{

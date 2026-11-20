@@ -46,15 +46,30 @@ export const REDIS_APPROVAL_CAS_SCRIPT = [
   '  while #nextHistory > 50 do table.remove(nextHistory) end',
   '  nextHistoryJson = cjson.encode(nextHistory)',
   'end',
-  'redis.call("SET", KEYS[1], ARGV[3], "EX", ARGV[4])',
+  'if ARGV[8] == "1" then',
+  '  redis.call("SET", KEYS[1], ARGV[3])',
+  'else',
+  '  redis.call("SET", KEYS[1], ARGV[3], "EX", ARGV[4])',
+  'end',
   'if ARGV[5] == "1" then',
   '  redis.call("SET", KEYS[2], cjson.encode(ARGV[6]), "EX", ARGV[4])',
   'end',
   'if ARGV[7] == "1" then',
   '  redis.call("SET", KEYS[3], nextHistoryJson, "EX", ARGV[4])',
   'end',
+  'if ARGV[9] == "1" then',
+  '  if ARGV[10] == "1" then',
+  // A simultaneous publish for the same goal must never replace the
+  // authoritative Owner OTP/approval with a second record.
+  '    local indexed = redis.call("GET", KEYS[4])',
+  '    if indexed and indexed ~= ARGV[6] then return 0 end',
+  '    redis.call("SET", KEYS[4], ARGV[6])',
+  '  elseif redis.call("GET", KEYS[4]) == ARGV[6] then',
+  '    redis.call("DEL", KEYS[4])',
+  '  end',
+  'end',
   'return 1',
-].join("\\n");
+].join("\n");
 
 export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
   redis: RedisApprovalCasClient,
@@ -65,10 +80,17 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
     next: T;
     touchLatest: boolean;
     historyKey?: string;
+    persistentRecord?: boolean;
+    goalIndexKey?: string;
+    goalActive?: boolean;
   },
 ): Promise<RedisApprovalCasResult> {
   const keys = [input.recordKey, input.latestKey];
   if (input.historyKey) keys.push(input.historyKey);
+  if (input.goalIndexKey) {
+    if (!input.historyKey) throw new Error("GOAL_INDEX_REQUIRES_HISTORY_KEY");
+    keys.push(input.goalIndexKey);
+  }
   const raw = await redis.eval<number>(
     REDIS_APPROVAL_CAS_SCRIPT,
     keys,
@@ -80,6 +102,9 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
       input.touchLatest ? "1" : "0",
       input.next.id,
       input.historyKey ? "1" : "0",
+      input.persistentRecord ? "1" : "0",
+      input.goalIndexKey ? "1" : "0",
+      input.goalActive ? "1" : "0",
     ],
   );
   const result = Number(raw);

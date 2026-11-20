@@ -1,0 +1,40 @@
+name: DisDex Owner Goal Candidate CI
+
+# Runs on the candidate's own ref. GitHub's run.head_sha becomes the exact
+# candidate SHA, which HP verifies before issuing a short-lived release token.
+# This is a read-only CI: no VPS secrets, production Environment or deploy.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-goal-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify candidate is the exact checked-out SHA
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -f lib/owner-goal-approval.ts
+          test -f lib/server/owner-goal-attestation.ts
+      - name: Install dependencies without untrusted lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Compile candidate
+        run: npx tsc --noEmit
+      - name: Validate goal authorization and independent safety contracts
+        run: |
+          node --import tsx --test tests/owner-goal-approval.test.ts
+          node --test tests/deploy-approval-direct-writer.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
+          node --test tests/production-workflow-protected-environment.test.mjs
+      - name: Verify risk controls cannot be disabled in this CI
+        run: |
+          test -z "${DISDEX_HP_APPROVER_PRIVATE_KEY_PEM:-}"
+          test -z "${DISDEX_VPS_SSH_KEY:-}"
+          echo "GOAL_CANDIDATE_CI=PASS"
