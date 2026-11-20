@@ -172,3 +172,13 @@ test("Legacy redeem rejects goal charter, and only admin OTP can approve the cha
   assert.match(admin, /consumeOtpChallenge/);
   assert.match(admin, /GOAL_REVOKED_BY_OWNER/);
 });
+
+
+test("Goal request Action only publishes a charter and cannot deploy or redeem production authority", () => {
+  const workflow = fs.readFileSync(".github/workflows/disdex-owner-goal-approval-request.yml", "utf8");
+  assert.match(workflow, /"action": "publish_goal"/);
+  assert.match(workflow, /body\["goal_id"\] = os\.environ\["GOAL_ID"\]/);
+  assert.doesNotMatch(workflow, /\bssh\b|systemctl|disdex_owner_approval\.py verify/);
+  assert.doesNotMatch(workflow, /"action": "redeem"/);
+  assert.match(workflow, /GOAL_APPROVAL_ID=/);
+});
