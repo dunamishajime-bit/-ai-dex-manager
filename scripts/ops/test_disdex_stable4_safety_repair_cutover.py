@@ -68,6 +68,13 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         value["openOrders"].append({"symbol": "DOGEUSDT", "orderId": "1"})
         self.assertNotEqual(digest, module.inventory_digest(value))
 
+    def test_old_runner_mode_allows_symmetric_stopped_repair_baseline(self):
+        self.assertEqual(module.old_runner_mode(True, True), "active")
+        self.assertEqual(module.old_runner_mode(False, False), "inactive")
+        with self.assertRaises(module.ContractError) as ctx:
+            module.old_runner_mode(True, False)
+        self.assertIn("OLD_RUNNERS_PARTIAL_ACTIVE", str(ctx.exception))
+
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('"clearGlobalHold": False', source)
