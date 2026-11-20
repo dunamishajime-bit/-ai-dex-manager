@@ -148,9 +148,26 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertEqual(diagnostic["lastErrorClass"], "OWNERSHIP_STATE")
         self.assertEqual(
             diagnostic["ownership"],
-            {"file": "state.json", "expected": "QUALITY102_CAUSAL_V1", "got": "WRONG_STATE"},
+            {
+                "file": "state.json",
+                "kind": "IDENTITY_MISMATCH",
+                "expected": "QUALITY102_CAUSAL_V1",
+                "got": "WRONG_STATE",
+            },
         )
         self.assertNotIn("balance", diagnostic)
+
+    def test_margin_guard_ownership_diagnostic_handles_unavailable_state(self):
+        value = {
+            "stage": "DATA_UNAVAILABLE",
+            "lastError": "Margin Guard ownership state unavailable: /var/lib/disdex/fet-brk48-residual/state.json: permission denied",
+        }
+        diagnostic = json.loads(module.margin_guard_diagnostic(value, now_ms=2_000))
+        self.assertEqual(diagnostic["lastErrorClass"], "OWNERSHIP_STATE")
+        self.assertEqual(
+            diagnostic["ownership"],
+            {"file": "state.json", "kind": "UNAVAILABLE"},
+        )
 
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
