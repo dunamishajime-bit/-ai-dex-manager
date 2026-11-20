@@ -145,7 +145,9 @@ function saveFileRecords(records: DeploymentApprovalRecord[]) {
   // the Owner revokes it. The signed child tokens remain 300-second one-use.
   const activeGoals = sorted.filter((record) =>
     record.goal &&
-    ["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status));
+    (["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status) ||
+     (["PENDING", "OTP_SENT"].includes(record.status) &&
+      record.requestExpiresAt > Date.now())));
   for (const record of activeGoals) retained.set(record.id, record);
   const persisted = Array.from(retained.values()).sort((a, b) => b.createdAt - a.createdAt);
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${crypto.randomUUID()}`;
@@ -549,10 +551,31 @@ export async function createPendingOwnerGoal(input: {
   // The Redis CAS also refuses another ID for an active same-goal index.
   const redis = await redisClient();
   const index = GOAL_INDEX_PREFIX + input.goal.fingerprint;
-  const id = await redis.get<string>(index);
-  if (id) {
+  // On expiry only a still-unapproved request can be retired. Never
+  // expire a signed, active goal merely because its OTP request window passed.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const id = await redis.get<string>(index);
+    if (!id) break;
     const row = await getDeploymentApproval(id);
-    if (row && reusable(row)) return row;
+    if (!row) throw new Error("GOAL_INDEX_RECORD_MISSING_FAIL_CLOSED");
+    if (reusable(row)) return row;
+    if (row.goal?.fingerprint !== input.goal.fingerprint) {
+      throw new Error("GOAL_INDEX_IDENTITY_MISMATCH");
+    }
+    if (["PENDING", "OTP_SENT"].includes(row.status) &&
+        row.requestExpiresAt <= Date.now()) {
+      try {
+        await saveDeploymentApproval({
+          ...row, status: "EXPIRED", lastError: "goal OTP request expired",
+        });
+      } catch (error) {
+        if (attempt === 2) throw error;
+        continue;
+      }
+      continue;
+    }
+    // Stale/revoked/unknown indexed state cannot auto-authorize a release.
+    throw new Error("GOAL_INDEX_STATE_REQUIRES_MANUAL_REVIEW");
   }
   const active = (await getDeploymentApprovalHistory()).find(reusable);
   if (active) return active;
