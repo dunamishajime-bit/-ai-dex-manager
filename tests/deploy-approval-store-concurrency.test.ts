@@ -109,6 +109,76 @@ test("file-backed approvals serialize concurrent writers and reject corrupt data
     assert.equal(reused.status, "APPROVED");
     assert.equal((await store.getDeploymentApproval(durableApproved.id))?.status, "APPROVED");
 
+    const base = Date.now();
+    const redeemedMonitor = await store.saveDeploymentApproval({
+      ...record("monitor-redeemed"),
+      scope: "FULL_PROJECT",
+      operation: "ALL_RUNNERS_MONITOR_REFRESH",
+      ordersEnabled: false,
+      status: "REDEEMED",
+      approvedAt: base - 5 * 60_000,
+      requestExpiresAt: base - 60_000,
+      redeemedByRunId: "12345678",
+      createdAt: base + 10_000,
+      updatedAt: base,
+    });
+    const retry = (targetSha: string, planSha256: string) =>
+      store.createPendingDeploymentApproval({
+        targetSha,
+        planSha256,
+        scope: "FULL_PROJECT",
+        operation: "ALL_RUNNERS_MONITOR_REFRESH",
+        ordersEnabled: false,
+        requestActor: "synthetic-test",
+        requestCommentId: "post-failure-republish",
+      });
+    const reusedRedeemed = await retry(redeemedMonitor.targetSha, redeemedMonitor.planSha256);
+    assert.equal(reusedRedeemed.id, redeemedMonitor.id);
+    assert.equal(reusedRedeemed.status, "REDEEMED");
+    assert.equal((await store.getDeploymentApproval(redeemedMonitor.id))?.status, "REDEEMED");
+
+    // A changed SHA or plan is a different immutable approval identity.
+    const changedSha = await retry("c".repeat(40), redeemedMonitor.planSha256);
+    assert.notEqual(changedSha.id, redeemedMonitor.id);
+    assert.equal(changedSha.status, "PENDING");
+    const changedPlan = await retry(redeemedMonitor.targetSha, "d".repeat(64));
+    assert.notEqual(changedPlan.id, redeemedMonitor.id);
+    assert.equal(changedPlan.status, "PENDING");
+
+    // Order-enabled operations can never republish a REDEEMED approval.
+    const redeemedLive = await store.saveDeploymentApproval({
+      ...record("live-redeemed"),
+      operation: "V12_V4_LIVE",
+      ordersEnabled: true,
+      status: "REDEEMED",
+      approvedAt: base,
+      redeemedByRunId: "12345679",
+      createdAt: base + 20_000,
+      updatedAt: base,
+    });
+    const liveRetry = await store.createPendingDeploymentApproval({
+      targetSha: redeemedLive.targetSha,
+      planSha256: redeemedLive.planSha256,
+      scope: redeemedLive.scope,
+      operation: "V12_V4_LIVE",
+      ordersEnabled: true,
+      requestActor: "synthetic-test",
+    });
+    assert.notEqual(liveRetry.id, redeemedLive.id);
+    assert.equal(liveRetry.status, "PENDING");
+
+    // Do not silently extend monitor approval beyond the 24-hour retry window.
+    const expiredMonitor = await store.saveDeploymentApproval({
+      ...redeemedMonitor,
+      id: "monitor-expired",
+      approvedAt: base - 25 * 60 * 60_000,
+      createdAt: base + 30_000,
+      updatedAt: base,
+    });
+    const expiredRetry = await retry(expiredMonitor.targetSha, expiredMonitor.planSha256);
+    assert.notEqual(expiredRetry.id, expiredMonitor.id);
+    assert.equal(expiredRetry.status, "PENDING");
+
     await fs.writeFile(storePath, "{corrupt");
     await assert.rejects(store.saveDeploymentApproval(record("must-not-overwrite")));
     assert.equal(await fs.readFile(storePath, "utf8"), "{corrupt");
