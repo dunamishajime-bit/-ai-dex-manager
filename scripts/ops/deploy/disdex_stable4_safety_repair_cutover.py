@@ -58,8 +58,8 @@ SCOPE = "FULL_PROJECT"
 OPERATOR = "dunamishajime-bit"
 DEPLOYMENT_TARGET = "professional-dismanager.net"
 ROUTE = "GITHUB_ACTIONS"
-DEFAULT_PUBLIC_KEY = Path("/var/lib/unified-deploy/owner-approval-public.pem")
-DEFAULT_NONCE_DIR = Path("/var/lib/unified-deploy/nonces")
+DEFAULT_PUBLIC_KEY = Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem")
+DEFAULT_NONCE_DIR = Path("/var/lib/disdex/unified-deploy/nonces")
 
 
 class ContractError(RuntimeError):

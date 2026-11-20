@@ -60,7 +60,7 @@ jobs:
           [[ "$MODE" == 'preflight' || "$MODE" == 'execute' ]]
           python3 -m py_compile scripts/ops/deploy/disdex_order_disable_quiesce.py
           actual_helper="$(sha256sum scripts/ops/deploy/disdex_order_disable_quiesce.py | awk '{print $1}')"
-          [[ "$actual_helper" == '79dcef626620030644f8191208886c3182cfe7f60795f6d7be1c6629e4d86dd1' ]]
+          [[ "$actual_helper" == 'bfe811fe68d29193840fa32e91d7796c58d8188a23a7be7a572a7e3a3391c1c6' ]]
           python3 -m unittest tests/test_disdex_order_disable_quiesce.py -v
           echo ORDER_DISABLE_QUIESCE_CONTRACT=PASS
           echo ORDERS_SENT=0
@@ -183,7 +183,7 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/order-disable-ssh/known_hosts" \
             -o ConnectTimeout=12 -p "$PORT" "root@$HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
-          parent=/var/lib/unified-deploy
+          parent=/var/lib/disdex/unified-deploy
           nonce_dir="$parent/nonces"
           test -d "$parent"
           test ! -L "$parent"

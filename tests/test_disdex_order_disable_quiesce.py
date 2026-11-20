@@ -31,6 +31,16 @@ def plan_bytes(orders_enabled=True):
 
 
 class OrderDisableQuiesceTests(unittest.TestCase):
+    def test_default_operator_paths_use_disdex_unified_deploy_root(self):
+        self.assertEqual(
+            module.DEFAULT_PUBLIC_KEY,
+            Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem"),
+        )
+        self.assertEqual(
+            module.DEFAULT_NONCE_DIR,
+            Path("/var/lib/disdex/unified-deploy/nonces"),
+        )
+
     def test_build_quiesced_plan_changes_only_orders_flag(self):
         original = json.loads(plan_bytes())
         changed = json.loads(module.build_quiesced_plan(plan_bytes()))

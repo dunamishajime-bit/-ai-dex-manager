@@ -24,7 +24,7 @@ class Stable4OrderDisableWorkflowTests(unittest.TestCase):
         self.assertIn("disdex_order_disable_quiesce.py", source)
         self.assertIn("--preflight-readonly", source)
         self.assertIn("--execute-approved", source)
-        self.assertIn("parent=/var/lib/unified-deploy", source)
+        self.assertIn("parent=/var/lib/disdex/unified-deploy", source)
         self.assertIn('nonce_dir="$parent/nonces"', source)
         self.assertIn("install -d -o root -g root -m 0700", source)
         self.assertIn("NONCE_DIR_METADATA_PASS", source)
