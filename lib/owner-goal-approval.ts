@@ -129,7 +129,10 @@ export function assertOwnerGoalCandidate(input: {
     plan.scope !== input.goal.scope ||
     plan.subject !== input.goal.subject ||
     (plan.strategyId ?? undefined) !== input.goal.strategyId ||
-    plan.targetSha !== input.sha ||
+    // A plan committed *inside* its own release cannot contain that final
+    // commit SHA without a circular hash dependency. GitHub run.head_sha and
+    // the SHA-addressed contents API independently bind it to the candidate.
+    plan.sourceBinding !== "GITHUB_RUN_HEAD_SHA" ||
     plan.ordersEnabled !== input.ordersEnabled ||
     plan.target !== input.goal.target
   ) {
