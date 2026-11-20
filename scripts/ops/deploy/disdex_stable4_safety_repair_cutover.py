@@ -27,7 +27,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 from disdex_owner_approval import verify as verify_owner_token
 
-TARGET = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
+TARGET = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
 PLAN_SHA256 = "542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f"
 V52_OLD = "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
 Q102_OLD = "ef1ab178e26a7bf5bddb6473467765edba242e1d"
@@ -46,6 +46,10 @@ PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 HEARTBEATS = {
     "V52": Path("/var/lib/disdex/runner-health/heartbeats/v52.json"),
     "Q102": Path("/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json"),
+}
+HEARTBEAT_TICKS = {
+    "V52": Path("/var/lib/disdex/runner-health/ticks/v52.json"),
+    "Q102": Path("/var/lib/disdex/runner-health/ticks/quality102-causal-v1.json"),
 }
 V52_UNIT_OLD = f"disdex-v52-aster-only@{V52_OLD}.service"
 V52_UNIT_NEW = f"disdex-v52-aster-only@{TARGET}.service"
@@ -484,7 +488,7 @@ def validate_old_quiesce_unit(unit: str, expected: str, state: tuple[str, str]) 
         require(pid == 0, "OLD_RUNNER_TRANSITION_PID_INVALID:" + unit)
 
 
-def validate_target_units() -> None:
+def validate_target_units(require_monitor: bool = False) -> None:
     """Use the installed template units; never fabricate a systemd unit file."""
     for old, new, expected in (
         (V52_UNIT_OLD, V52_UNIT_NEW, "V52"),
@@ -503,6 +507,16 @@ def validate_target_units() -> None:
                 "TARGET_UNIT_RELEASE_NOT_BOUND:" + expected)
         require(V52_OLD not in effective and Q102_OLD not in effective,
                 "TARGET_UNIT_OLD_SHA_REMAINS:" + expected)
+        if require_monitor:
+            require("DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false" in text,
+                    "TARGET_MONITOR_ORDER_FLAG_MISSING:" + expected)
+            require("ExecStartPre=\n" in text and "ExecStart=\n" in text,
+                    "TARGET_MONITOR_EXEC_RESET_MISSING:" + expected)
+            if expected == "V52":
+                require("--monitor-only-daemon" in text, "TARGET_V52_MONITOR_COMMAND_MISSING")
+            else:
+                require("scripts/disdex-quality102-causal-v1-monitor.ts --daemon" in text,
+                        "TARGET_Q102_MONITOR_COMMAND_MISSING")
         require(not active(new), "TARGET_RUNNER_ALREADY_ACTIVE:" + expected)
 
 
@@ -650,6 +664,161 @@ def write_atomic(path: Path, data: bytes, meta: tuple[int, int, int] | None = No
         if os.path.exists(name): os.unlink(name)
 
 
+MONITOR_DROPIN_ROOT = Path("/etc/systemd/system")
+
+
+def monitor_dropin_paths(target: str = TARGET) -> dict[str, Path]:
+    require(SHA_RE.fullmatch(target) is not None, "MONITOR_DROPIN_TARGET_INVALID")
+    return {
+        "V52": MONITOR_DROPIN_ROOT / f"disdex-v52-aster-only@{target}.service.d" / "95-stable4-monitor-only.conf",
+        "Q102": MONITOR_DROPIN_ROOT / f"disdex-quality102-causal-v1@{target}.service.d" / "95-stable4-monitor-only.conf",
+    }
+
+
+def monitor_dropin_text(runner: str) -> str:
+    """Return an instance-scoped systemd override for a read-only monitor."""
+    if runner == "V52":
+        return (
+            "[Service]\n"
+            "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
+            "Environment=DISDEX_RELEASE_SHA=%i\n"
+            "Environment=DISDEX_RUNTIME_COMMIT_SHA=%i\n"
+            "Environment=DISDEX_RUNTIME_SHA=%i\n"
+            "Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i\n"
+            "Environment=DISDEX_V52_MONITOR_ONLY=true\n"
+            "Environment=DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false\n"
+            "Environment=DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-aster-only@%i.service\n"
+            "Environment=DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json\n"
+            "Environment=DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52.json\n"
+            "ExecStartPre=\n"
+            "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
+            "ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
+            "ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/.venv2/bin/python\n"
+            "ExecStartPre=/usr/bin/test -d /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages\n"
+            "ExecStartPre=/usr/bin/test ! -L /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages\n"
+            "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/heartbeats\n"
+            "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/ticks\n"
+            "ExecStart=\n"
+            "ExecStart=/bin/sh -ec 'export DISDEX_RELEASE_SHA=%i DISDEX_RUNTIME_COMMIT_SHA=%i DISDEX_RUNTIME_SHA=%i DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-aster-only@%i.service DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52.json; exec /home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon'\n"
+            "ReadOnlyPaths=\n"
+            "ReadOnlyPaths=/home/deploy/disdex-trading/releases /etc/disdex /var/lib/disdex/shared /var/lib/disdex/v52-monitor\n"
+            "ReadWritePaths=\n"
+            "ReadWritePaths=/var/lib/disdex/runner-health/heartbeats /var/lib/disdex/runner-health/ticks\n"
+        )
+    if runner == "Q102":
+        return (
+            "[Service]\n"
+            "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
+            "Environment=DISDEX_RELEASE_SHA=%i\n"
+            "Environment=DISDEX_RUNTIME_COMMIT_SHA=%i\n"
+            "Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i\n"
+            "Environment=QUALITY102_CAUSAL_V1_MODE=LIVE\n"
+            "Environment=QUALITY102_CAUSAL_V1_MONITOR_ONLY=true\n"
+            "Environment=QUALITY102_CAUSAL_V1_ENABLED=false\n"
+            "Environment=QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=false\n"
+            "Environment=QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false\n"
+            "Environment=QUALITY102_CAUSAL_V1_OPERATOR_ARMED=false\n"
+            "Environment=QUALITY102_LIVE_SELECTOR_PARITY=false\n"
+            "Environment=QUALITY102_LIVE_ENABLED=false\n"
+            "Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=%i\n"
+            "Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false\n"
+            "Environment=QUALITY102_CAUSAL_V1_MONITOR_SERVICE_UNIT=disdex-quality102-causal-v1@%i.service\n"
+            "Environment=QUALITY102_CAUSAL_V1_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json\n"
+            "Environment=QUALITY102_CAUSAL_V1_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/quality102-causal-v1.json\n"
+            "ExecStartPre=\n"
+            "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
+            "ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
+            "ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx\n"
+            "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/scripts/disdex-quality102-causal-v1-monitor.ts\n"
+            "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/heartbeats\n"
+            "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/ticks\n"
+            "ExecStart=\n"
+            "ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-monitor.ts --daemon\n"
+            "ReadOnlyPaths=\n"
+            "ReadOnlyPaths=/home/deploy/disdex-trading/releases /etc/disdex /var/lib/disdex/quality102-causal-v1 /var/lib/disdex/shared\n"
+            "ReadWritePaths=\n"
+            "ReadWritePaths=/var/lib/disdex/runner-health/heartbeats /var/lib/disdex/runner-health/ticks\n"
+        )
+    raise ContractError("MONITOR_DROPIN_RUNNER_INVALID:" + runner)
+
+
+def validate_monitor_heartbeat(value: dict, expected_sha: str, expected_unit: str, runner: str) -> bool:
+    """Validate a monitor record before counting it as a healthy cycle."""
+    require(isinstance(value, dict), "MONITOR_HEARTBEAT_OBJECT_REQUIRED")
+    expected_runner = "V52_MONITOR" if runner == "V52" else "QUALITY102_CAUSAL_V1"
+    allowed_schemas = {"disdex-runner-tick/v1"}
+    if runner == "V52":
+        allowed_schemas.add("disdex-v52-monitor-heartbeat/v1")
+    require(value.get("schema") in allowed_schemas, "MONITOR_HEARTBEAT_SCHEMA_INVALID")
+    require(value.get("runnerId") == expected_runner, "MONITOR_HEARTBEAT_RUNNER_INVALID")
+    require(value.get("runtimeSha") == expected_sha and value.get("expectedSha") == expected_sha,
+            "MONITOR_HEARTBEAT_SHA_MISMATCH")
+    require(value.get("serviceUnit") == expected_unit, "MONITOR_HEARTBEAT_UNIT_MISMATCH")
+    require(value.get("status") == "observing", "MONITOR_HEARTBEAT_STATUS_INVALID")
+    require(value.get("mode") == "MONITOR_ONLY", "MONITOR_HEARTBEAT_MODE_INVALID")
+    require(value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID")
+    require(value.get("permissionEvaluation") == "MONITOR_ONLY_NO_ORDER_PATH",
+            "MONITOR_HEARTBEAT_PERMISSION_INVALID")
+    for key in ("ordersSent", "cancelsSent", "positionChangesSent"):
+        require(value.get(key) == 0, "MONITOR_HEARTBEAT_MUTATION_NONZERO:" + key)
+    require(value.get("stateChanged") is False, "MONITOR_HEARTBEAT_STATE_CHANGED")
+    require(timestamp_ms(value.get("updatedAt") or value.get("observedAt")) > 0,
+            "MONITOR_HEARTBEAT_TIMESTAMP_INVALID")
+    return True
+
+
+def snapshot_monitor_dropins(target: str = TARGET) -> dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]]:
+    snapshot: dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]] = {}
+    for path in monitor_dropin_paths(target).values():
+        if path.is_symlink():
+            raise ContractError("MONITOR_DROPIN_SYMLINK:" + str(path))
+        if path.exists():
+            require(path.is_file(), "MONITOR_DROPIN_NOT_REGULAR:" + str(path))
+            snapshot[path] = (True, path.read_bytes(), file_meta(path))
+        else:
+            snapshot[path] = (False, None, None)
+    return snapshot
+
+
+def install_monitor_dropins(
+    snapshot: dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]],
+    target: str = TARGET,
+) -> list[Path]:
+    created_dirs: list[Path] = []
+    for runner, path in monitor_dropin_paths(target).items():
+        if path.parent.is_symlink():
+            raise ContractError("MONITOR_DROPIN_PARENT_SYMLINK:" + str(path.parent))
+        if not path.parent.exists():
+            path.parent.mkdir(mode=0o755, parents=True)
+            os.chown(path.parent, 0, 0)
+            os.chmod(path.parent, 0o755)
+            created_dirs.append(path.parent)
+        expected = monitor_dropin_text(runner).encode("utf-8")
+        existed, previous, _meta = snapshot[path]
+        if existed and previous != expected:
+            raise ContractError("MONITOR_DROPIN_UNEXPECTED_EXISTING:" + str(path))
+        write_atomic(path, expected, (0, 0, 0o644))
+    return created_dirs
+
+
+def restore_monitor_dropins(
+    snapshot: dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]],
+    created_dirs: list[Path] | None = None,
+) -> None:
+    for path, (existed, previous, meta) in snapshot.items():
+        if existed:
+            require(previous is not None and meta is not None, "MONITOR_DROPIN_SNAPSHOT_INVALID")
+            write_atomic(path, previous, meta)
+        elif path.exists() or path.is_symlink():
+            require(not path.is_symlink(), "MONITOR_DROPIN_ROLLBACK_SYMLINK")
+            path.unlink()
+    for directory in reversed(created_dirs or []):
+        try:
+            directory.rmdir()
+        except OSError:
+            pass
+
+
 def target_pins(raw: bytes) -> bytes:
     value = json.loads(raw.decode("utf-8"))
     for key, prefix, old in (("V52", "disdex-v52-aster-only", V52_OLD),
@@ -725,6 +894,10 @@ def poll_cycles(previous: dict[str, tuple[int, str]], timeout: int = 180) -> dic
                 continue
             raw = path.read_bytes(); digest = hashlib.sha256(raw).hexdigest()
             value = json.loads(raw.decode("utf-8"))
+            expected_unit, expected_runner = (
+                (V52_UNIT_NEW, "V52") if name == "V52" else (Q102_UNIT_NEW, "Q102")
+            )
+            validate_monitor_heartbeat(value, TARGET, expected_unit, expected_runner)
             stamp = str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or digest)
             current = (path.stat().st_mtime_ns, stamp)
             if current != last[name]:
@@ -775,11 +948,15 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
     baseline_state = read_regular(Q102_STATE, require_root=True)
     baseline_v52_pin = read_regular(V52_PIN, require_root=True)
     metadata = {p: file_meta(p) for p in (Q102_STATE, V52_PIN, PINS, CURRENT_PLAN)}
+    monitor_dropin_snapshot = snapshot_monitor_dropins()
+    monitor_dropin_created_dirs: list[Path] = []
     old_v52_enabled = run("/usr/bin/systemctl", "is-enabled", V52_UNIT_OLD, check=False) == "enabled"
     old_q102_enabled = run("/usr/bin/systemctl", "is-enabled", Q102_UNIT_OLD, check=False) == "enabled"
     try:
         stage_candidate(tar_path, manifest_path)
-        validate_target_units()
+        monitor_dropin_created_dirs = install_monitor_dropins(monitor_dropin_snapshot)
+        run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        validate_target_units(require_monitor=True)
         # Recheck everything immediately before stopping either old runner.
         now_hold, _value, now_digest = hold_snapshot()
         require(now_hold == baseline_hold and now_digest == HOLD_DIGEST, "GLOBAL_HOLD_CHANGED_PRECUTOVER")
@@ -808,6 +985,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
         write_atomic(PINS, target_pins(baseline_pins), metadata[PINS])
         write_atomic(CURRENT_PLAN, target_plan(baseline_plan), metadata[CURRENT_PLAN])
         run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        validate_target_units(require_monitor=True)
         run("/usr/bin/systemctl", "start", Q102_UNIT_NEW, timeout=100)
         run("/usr/bin/systemctl", "start", V52_UNIT_NEW, timeout=100)
         qpid = wait_stable(Q102_UNIT_NEW, TARGET)
@@ -819,16 +997,15 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
             raw = read_regular(path, 128_000); value = json.loads(raw.decode("utf-8"))
             cycles_before[name] = (path.stat().st_mtime_ns, str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or ""))
         restarts_before = {u: unit_property(u, "NRestarts") for u in (Q102_UNIT_NEW, V52_UNIT_NEW)}
-        poll_cycles(cycles_before)
+        cycle_state = poll_cycles(cycles_before)
         time.sleep(10)
         require(all(active(u) for u in (Q102_UNIT_NEW, V52_UNIT_NEW)), "TARGET_RUNNER_LOST_ACTIVE")
         require(all(unit_property(u, "NRestarts") == restarts_before[u] for u in restarts_before), "TARGET_RESTART_COUNT_CHANGED")
         state_after = read_json(Q102_STATE)
         require(state_after.get("runtimeCommitSha") == TARGET, "Q102_FRESHNESS_SHA_MISMATCH")
-        updated = timestamp_ms(state_after.get("updatedAt"))
-        baseline_updated = timestamp_ms(json.loads(baseline_state.decode("utf-8")).get("updatedAt"))
-        require(updated > baseline_updated and abs(int(time.time() * 1000) - updated) < 10 * 60_000,
-                "Q102_FRESHNESS_STALE")
+        q102_observed = timestamp_ms(cycle_state["Q102"][1])
+        require(q102_observed > 0 and abs(int(time.time() * 1000) - q102_observed) < 10 * 60_000,
+                "Q102_MONITOR_HEARTBEAT_STALE")
         final_reads = [signed_get() for _ in range(3)]
         require(len({x[0] for x in final_reads}) == 3, "POST_SIGNED_GET_TIMESTAMPS_NOT_UNIQUE")
         require(all(x[2] == baseline_digest for x in final_reads), "VENUE_INVENTORY_CHANGED_POSTCUTOVER")
@@ -855,6 +1032,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
             write_atomic(V52_PIN, baseline_v52_pin, metadata[V52_PIN])
             write_atomic(PINS, baseline_pins, metadata[PINS])
             write_atomic(CURRENT_PLAN, baseline_plan, metadata[CURRENT_PLAN])
+            restore_monitor_dropins(monitor_dropin_snapshot, monitor_dropin_created_dirs)
             run("/usr/bin/systemctl", "daemon-reload", timeout=30)
             if old_q102_enabled: run("/usr/bin/systemctl", "enable", Q102_UNIT_OLD, check=False)
             if old_v52_enabled: run("/usr/bin/systemctl", "enable", V52_UNIT_OLD, check=False)

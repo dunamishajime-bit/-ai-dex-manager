@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$TARGET_SHA" == 'b8d681f048b087f07e0dcfb743cc14ec3a796b27' ]]
+          [[ "$TARGET_SHA" == 'c7310d34ba1b6de07071d8883a2ed0de8dcce2a7' ]]
           [[ "$PLAN_SHA256" == '542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f' ]]
           [[ "$MODE" == 'preflight' || "$MODE" == 'execute' ]]
           [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
@@ -101,7 +101,9 @@ jobs:
           sha = os.environ['TARGET_SHA']
           files = [
               'scripts/disdex_v52_aster_only_legacy_engine.py',
+              'scripts/disdex-quality102-causal-v1-monitor.ts',
               'tests/test_v52_upstream_fail_closed.py',
+              'tests/quality102-monitor-only.test.ts',
               'lib/disdex-quality102-causal-v1-runner.ts',
               'lib/disdex-v96-live-risk-controls.ts',
               'tests/q102-risk-block-freshness.test.ts',
