@@ -196,3 +196,32 @@ test("Goal request Action only publishes a charter and cannot deploy or redeem p
   assert.doesNotMatch(workflow, /"action": "redeem"/);
   assert.match(workflow, /GOAL_APPROVAL_ID=/);
 });
+
+
+test("Official protected V4 cutover consumes goal once but verifies every new SHA and Root plan", () => {
+  const source = fs.readFileSync(".github/workflows/disdex-v4-formal-production-live.yml","utf8");
+  assert.match(source, /goal_id:/);
+  assert.match(source, /environment:\s*\n\s+name:\s*disdex-production/);
+  assert.match(source, /"action":"get_goal_status"/);
+  assert.match(source, /"action":"claim_goal_release"/);
+  assert.match(source, /"execution_plan_sha256":os\.environ\["ROOT_PLAN"\]/);
+  assert.match(source, /"orders_enabled":True/);
+  assert.match(source, /goal\["operation"\]=="V12_V4_LIVE"/);
+  assert.match(source, /signed\["signedPlanSha256"\]==os\.environ\["ROOT_PLAN"\]/);
+  assert.match(source, /"action":"finish_goal_release"/);
+  assert.match(source, /--preflight-readonly --read-approval-stdin/);
+  assert.match(source, /--execute --read-approval-stdin/);
+  assert.match(source, /cat "\$RUNNER_TEMP\/disdex-owner-token" \| ssh/);
+  assert.doesNotMatch(source, /echo ["']\$TOKEN["']/);
+});
+
+test("Existing certified Runner resume accepts a goal charter without sacrificing scoped restoration", () => {
+  const source = fs.readFileSync(".github/workflows/disdex-allrunner-v4-idle-live-resume.yml", "utf8");
+  assert.match(source, /goal_id:/);
+  assert.match(source, /"action":"claim_goal_release"/);
+  assert.match(source, /goal\["operation"\]=="ALL_RUNNERS_LIVE_RESTORE"/);
+  assert.match(source, /goal\["ordersEnabled"\] is False/);
+  assert.match(source, /"final":False/);
+  assert.match(source, /--orders-enabled false/);
+  assert.match(source, /environment:\s*\n\s+name:\s*disdex-production/);
+});
