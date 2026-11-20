@@ -1,0 +1,214 @@
+{
+  "schema": "disdex-bt-hype-pinned-pure-signal-replay/v1",
+  "source": "EXACT_GIT_BLOB_ISOLATED_PURE_FUNCTION",
+  "observed_live_git_commit": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "source_sha256": {
+    "lib/hype-stable4-opportunity-signal.ts": "ff9ba19429dd4c4f933d1b8a28c4726f474afd77cbfe216baf07e814ddd68063",
+    "config/disdexStable4Opportunity.ts": "3ebe944817303c5131b3f4280546f8eef07a9ccc591f05c1558834148f36e4fb"
+  },
+  "market_h1_files": {
+    "hype_sha256": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc",
+    "btc_sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+    "hype_rows": 8928,
+    "btc_rows": 8928
+  },
+  "period_start_inclusive": "2025-10-01T00:00:00Z",
+  "period_end_exclusive": "2026-10-01T00:00:00Z",
+  "six_hour_boundaries_tested": 1460,
+  "accepted_pure_signal_count": 35,
+  "accepted_pure_signals": [
+    {
+      "utc": "2025-10-02T00:00:00Z",
+      "entryPrice": 47.2235,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-10-05T12:00:00Z",
+      "entryPrice": 49.29,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-10-24T12:00:00Z",
+      "entryPrice": 39.6425,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-11-16T00:00:00Z",
+      "entryPrice": 38.5805,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-11-18T18:00:00Z",
+      "entryPrice": 38.5655,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-11-27T12:00:00Z",
+      "entryPrice": 34.785,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-12-03T12:00:00Z",
+      "entryPrice": 33.7715,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2025-12-27T18:00:00Z",
+      "entryPrice": 25.5495,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-01-04T12:00:00Z",
+      "entryPrice": 25.2365,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-01-05T12:00:00Z",
+      "entryPrice": 26.335,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-02-14T06:00:00Z",
+      "entryPrice": 31.308,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-02-21T12:00:00Z",
+      "entryPrice": 30.127,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-02-25T06:00:00Z",
+      "entryPrice": 26.91,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-02-25T12:00:00Z",
+      "entryPrice": 27.182,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-02-26T06:00:00Z",
+      "entryPrice": 28.208,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-03-05T00:00:00Z",
+      "entryPrice": 32.147,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-03-13T00:00:00Z",
+      "entryPrice": 37.242,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-04-06T18:00:00Z",
+      "entryPrice": 36.926,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-04-08T18:00:00Z",
+      "entryPrice": 38.616,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-04-11T06:00:00Z",
+      "entryPrice": 41.775,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-04-23T00:00:00Z",
+      "entryPrice": 41.148,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-05-06T06:00:00Z",
+      "entryPrice": 44.01,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-06-07T18:00:00Z",
+      "entryPrice": 58.997,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-06-27T12:00:00Z",
+      "entryPrice": 63.447,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-07-27T12:00:00Z",
+      "entryPrice": 59.822,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-04T06:00:00Z",
+      "entryPrice": 54.467,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-06T00:00:00Z",
+      "entryPrice": 56.964,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-18T00:00:00Z",
+      "entryPrice": 59.42,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-21T06:00:00Z",
+      "entryPrice": 73.12,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-24T06:00:00Z",
+      "entryPrice": 79.612,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-08-30T12:00:00Z",
+      "entryPrice": 83.58,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-09-04T12:00:00Z",
+      "entryPrice": 87.181,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-09-07T00:00:00Z",
+      "entryPrice": 87.971,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-09-15T00:00:00Z",
+      "entryPrice": 80.328,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    },
+    {
+      "utc": "2026-09-19T12:00:00Z",
+      "entryPrice": 92.49,
+      "reason": "STABLE4_HYPE_H48R4_WSIG"
+    }
+  ],
+  "research_modeled_hype_exits": 5,
+  "modeled_research_entry_overlap": 5,
+  "modeled_research_entries_not_in_pure_signal": [],
+  "rejects_by_reason": {
+    "STABLE4_HYPE_GATE_WAIT": 1425,
+    "STABLE4_HYPE_H48R4_WSIG": 35
+  },
+  "pinned_code_config_only": {
+    "hypeGross": 1,
+    "stockGrossCap": 4,
+    "totalGrossCap": 4.25,
+    "v4TotalGrossCap": 4.75
+  },
+  "runtime_active_signal_mode_verified": false,
+  "order_admission_and_portfolio_priority_reexecuted": false,
+  "stop_exit_funding_and_fills_reexecuted": false,
+  "actual_exchange_fills_verified": false,
+  "production_bt_parity_certified": false
+}

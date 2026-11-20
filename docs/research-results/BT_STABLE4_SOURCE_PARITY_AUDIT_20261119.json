@@ -1,0 +1,288 @@
+{
+  "schema": "disdex-bt-stable4-research-source-audit/v1",
+  "scope": "LOCAL_RESEARCH_EVIDENCE_ONLY_NOT_PRODUCTION",
+  "production_runner_sha_from_venue_verified": false,
+  "research_to_live_code_parity_verified": false,
+  "full_8_runner_causal_evidence_verified": false,
+  "study_case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+  "scenarios": {
+    "10": {
+      "fills_file_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+      "summary_file_sha256": "25a8996c7cdafcae8b6fd400d34c9681a17287ed92cab9a918e1a78756059cc3",
+      "research_source_status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+      "modeled_exits": 1027,
+      "admitted_by_runner": {
+        "Q102": 107,
+        "PENGU": 45,
+        "V52": 52,
+        "V4": 801,
+        "IDLE": 10,
+        "HYPE": 5,
+        "FET": 8
+      },
+      "remaining_terminal_open_by_runner": {
+        "Q102": 1,
+        "PENGU": 0,
+        "V52": 0,
+        "V4": 0,
+        "IDLE": 0,
+        "HYPE": 0,
+        "FET": 0
+      },
+      "source_models": {
+        "V4": {
+          "modeled_exits": 801,
+          "source_identifiers": [
+            {
+              "sha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+              "trades": 801,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 801
+          },
+          "distinct_routes": 31,
+          "production_parity_verified": false
+        },
+        "PENGU": {
+          "modeled_exits": 45,
+          "source_identifiers": [
+            {
+              "sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+              "trades": 45,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 45
+          },
+          "distinct_routes": 3,
+          "production_parity_verified": false
+        },
+        "Q102": {
+          "modeled_exits": 106,
+          "source_identifiers": [
+            {
+              "sha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+              "trades": 106,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 106
+          },
+          "distinct_routes": 16,
+          "production_parity_verified": false
+        },
+        "V52": {
+          "modeled_exits": 52,
+          "source_identifiers": [
+            {
+              "sha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+              "trades": 52,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        },
+        "HYPE": {
+          "modeled_exits": 5,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 5,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        },
+        "IDLE": {
+          "modeled_exits": 10,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 10,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 10
+          },
+          "distinct_routes": 3,
+          "production_parity_verified": false
+        },
+        "FET": {
+          "modeled_exits": 8,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 8,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 8
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        }
+      },
+      "reported_max_dd_pct": -22.5950788661174,
+      "drawdown_20pct_limit_satisfied": false,
+      "actual_exchange_fills_verified": 0
+    },
+    "30": {
+      "fills_file_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+      "summary_file_sha256": "08ae7b53098938fe73f3f66b4a0889ed27e9290046d53679b3aab272bd7a9dd2",
+      "research_source_status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+      "modeled_exits": 1023,
+      "admitted_by_runner": {
+        "Q102": 107,
+        "PENGU": 44,
+        "V52": 52,
+        "V4": 797,
+        "IDLE": 11,
+        "HYPE": 5,
+        "FET": 8
+      },
+      "remaining_terminal_open_by_runner": {
+        "Q102": 1,
+        "PENGU": 0,
+        "V52": 0,
+        "V4": 0,
+        "IDLE": 0,
+        "HYPE": 0,
+        "FET": 0
+      },
+      "source_models": {
+        "V4": {
+          "modeled_exits": 797,
+          "source_identifiers": [
+            {
+              "sha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+              "trades": 797,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 797
+          },
+          "distinct_routes": 31,
+          "production_parity_verified": false
+        },
+        "PENGU": {
+          "modeled_exits": 44,
+          "source_identifiers": [
+            {
+              "sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+              "trades": 44,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 44
+          },
+          "distinct_routes": 3,
+          "production_parity_verified": false
+        },
+        "Q102": {
+          "modeled_exits": 106,
+          "source_identifiers": [
+            {
+              "sha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+              "trades": 106,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_H1_APPROX_EXIT": 106
+          },
+          "distinct_routes": 16,
+          "production_parity_verified": false
+        },
+        "V52": {
+          "modeled_exits": 52,
+          "source_identifiers": [
+            {
+              "sha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+              "trades": 52,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        },
+        "HYPE": {
+          "modeled_exits": 5,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 5,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 3,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        },
+        "IDLE": {
+          "modeled_exits": 11,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 11,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 11
+          },
+          "distinct_routes": 3,
+          "production_parity_verified": false
+        },
+        "FET": {
+          "modeled_exits": 8,
+          "source_identifiers": [
+            {
+              "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "trades": 8,
+              "local_git_object_type": "commit"
+            }
+          ],
+          "model_classes": {
+            "PINNED_ENTRY_M5_PRICE_EXIT": 8
+          },
+          "distinct_routes": 1,
+          "production_parity_verified": false
+        }
+      },
+      "reported_max_dd_pct": -23.219482096692147,
+      "drawdown_20pct_limit_satisfied": false,
+      "actual_exchange_fills_verified": 0
+    }
+  },
+  "blockers": [
+    "STABLE4 research has seven named runner categories, not a certified current eight-runner runtime reconstruction",
+    "Runner source SHA references in historic fills are not proof of currently deployed production SHA",
+    "No signed actual exchange execution evidence; fills are model scenarios",
+    "Some modeled route exits rely on H1 approximation or price-only proxies",
+    "Both 10bps and 30bps reported max drawdown exceed -20%",
+    "No permitted variable-capital/regular-contribution portfolio re-execution evidence"
+  ]
+}

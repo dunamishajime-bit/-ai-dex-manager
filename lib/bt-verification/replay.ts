@@ -59,6 +59,8 @@ export type ReplayFrame = {
   btc: number | null;
   equity: number;
   realized: number;
+  netDepositsJpy?: number;
+  tradingPnlJpy?: number;
   positions: Position[];
   events: string[];
   gross?: GrossSnapshot;
@@ -102,7 +104,10 @@ export type StrategyStat = {
   netPnlJpy: number;
   maxLossJpy: number | null;
   winRatePct: number | null;
+  adverseExitCount?: number;
+  netLossCount?: number;
 };
+export type StrategyRouteStat = StrategyStat & {route:string};
 export type TerminalModelPosition = {
   logic:string;
   symbol:string;
@@ -121,11 +126,14 @@ export type Replay = {
   seed: number;
   frames: ReplayFrame[];
   btcCandles?: BtcCandle[];
+  /** Optional source-labeled per-symbol candles for read-only chart review. */
+  symbolCandles?: Record<string, BtcCandle[]>;
   strategyCatalog?: StrategyCatalogEntry[];
   researchSummary?: ResearchSummary | null;
   /** Sourced model positions still open at period end and absent from completed FILLS. */
   terminalModelPositions?: TerminalModelPosition[];
   strategyStats?: StrategyStat[];
+  strategyRouteStats?: StrategyRouteStat[];
   limits: { total: number; crypto: number; stock: number };
   source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; positionSnapshotsSha256?: string | null; positionGrossSnapshotsSha256?: string | null; modelEntriesSha256?: string | null; positionExposureEvidence?: "SOURCE_ENGINE_TIMEPOINT_RECONCILED" | "SOURCE_MODEL_GROSS_ONLY_NO_QUANTITY_FX" | "MISSING_SOURCE_POSITION_MARKS"; grossCapEvidence?: string; note?: string };
 };
@@ -248,7 +256,30 @@ export function validateReplay(value:unknown):value is Replay {
          !number(x.closedCount)||x.closedCount<0||x.closedCount>x.tradeCount||
          !number(x.wins)||x.wins<0||x.wins>x.closedCount||
          !number(x.netPnlJpy)||!(x.maxLossJpy===null||number(x.maxLossJpy))||
-         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100)))return false;
+         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100))||
+         (x.adverseExitCount!==undefined&&(!number(x.adverseExitCount)||!Number.isInteger(x.adverseExitCount)||
+           x.adverseExitCount<0||x.adverseExitCount>x.closedCount))||
+         (x.netLossCount!==undefined&&(!number(x.netLossCount)||!Number.isInteger(x.netLossCount)||
+           x.netLossCount<0||x.netLossCount>x.closedCount)))return false;
+    }
+  }
+  if(value.strategyRouteStats!==undefined){
+    if(!Array.isArray(value.strategyRouteStats)||value.strategyRouteStats.length>4000)return false;
+    const seen=new Set<string>();
+    for(const x of value.strategyRouteStats){
+      if(!isObj(x)||typeof x.route!=="string"||!x.route||x.route.length>200||
+         typeof x.logic!=="string"||!x.logic||x.logic.length>100||
+         typeof x.symbol!=="string"||!x.symbol||x.symbol.length>100||
+         (!number(x.tradeCount)||!Number.isInteger(x.tradeCount))||x.tradeCount<0||
+         (!number(x.closedCount)||!Number.isInteger(x.closedCount))||x.closedCount<0||x.closedCount>x.tradeCount||
+         (!number(x.wins)||!Number.isInteger(x.wins))||x.wins<0||x.wins>x.closedCount||
+         !number(x.netPnlJpy)||!(x.maxLossJpy===null||number(x.maxLossJpy))||
+         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100))||
+         (!number(x.adverseExitCount)||!Number.isInteger(x.adverseExitCount))||x.adverseExitCount<0||x.adverseExitCount>x.closedCount||
+         (!number(x.netLossCount)||!Number.isInteger(x.netLossCount))||x.netLossCount<0||x.netLossCount>x.closedCount)return false;
+      const key=JSON.stringify([x.logic,x.route,x.symbol]);
+      if(seen.has(key))return false;
+      seen.add(key);
     }
   }
   if(value.strategyCatalog!==undefined){
@@ -265,7 +296,19 @@ export function validateReplay(value:unknown):value is Replay {
       }
     }
   }
-  if(value.btcCandles!==undefined){
+  if(value.symbolCandles!==undefined){
+    if(!isObj(value.symbolCandles)||Object.keys(value.symbolCandles).length>48)return false;
+    for(const [symbol,bars] of Object.entries(value.symbolCandles)){
+      if(!/^[A-Z0-9]{2,30}$/.test(symbol)||!Array.isArray(bars)||bars.length>20000)return false;
+      let previous="";
+      for(const bar of bars){
+        if(!isObj(bar)||!date(bar.time)||!date(bar.closedAt)||bar.time<=previous||bar.closedAt<=bar.time)return false;
+        if(!number(bar.open)||!number(bar.high)||!number(bar.low)||!number(bar.close)||
+           bar.low<=0||bar.low>Math.min(bar.open,bar.close)||bar.high<Math.max(bar.open,bar.close))return false;
+        previous=bar.time;
+      }
+    }
+  }  if(value.btcCandles!==undefined){
     if(!Array.isArray(value.btcCandles)||value.btcCandles.length>20000)return false;
     let previousClose="";
     for(const c of value.btcCandles){
@@ -282,6 +325,8 @@ export function validateReplay(value:unknown):value is Replay {
     last=frame.timestamp;
     if(!nullableNumber(frame.btc) || (frame.btc!==null && frame.btc<0))return false;
     if(!number(frame.equity)||!number(frame.realized)||!Array.isArray(frame.positions)||frame.positions.length>300)return false;
+    if(frame.netDepositsJpy!==undefined&&(!number(frame.netDepositsJpy)||frame.netDepositsJpy<0))return false;
+    if(frame.tradingPnlJpy!==undefined&&!number(frame.tradingPnlJpy))return false;
     if(!Array.isArray(frame.events)||frame.events.length>500||frame.events.some((e:unknown)=>typeof e!=="string"||e.length>600))return false;
     if(frame.gross!==undefined && !validGross(frame.gross))return false;
     if(frame.sourceOpenCount!==undefined){

@@ -1,0 +1,119 @@
+{
+  "schema": "disdex-bt-hype-early-cooldown-source-reproduction/v1",
+  "created_utc": "2026-11-19T05:22:38.912446+00:00",
+  "scope": "HISTORICAL_RESEARCH_ENTRY_COHORT_ONLY",
+  "original_generator_sha256": "7546e16eb387b07e137dd9f996a66f11278376b43a88840cede07c7fbcc937b1",
+  "original_cohort_sha256": "5033df3e174211f5475f4eb69d83d446a806174e9d974f3c5a403d9c2c646a80",
+  "hype_h1_sha256": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc",
+  "btc_h1_sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+  "source_thresholds": {
+    "h12Max": 0.004297852251518686,
+    "h24Min": 0.02047426596091347,
+    "rel24Max": 0.026202553353817715
+  },
+  "raw_h12_h24_candidates": 84,
+  "raw_after_early_48h_cooldown": 62,
+  "historical_after_rel24_gate": 27,
+  "pinned_pure_signature_qualified": 35,
+  "pure_candidate_gaps_explained_by_early_cooldown": 8,
+  "gaps_with_earlier_base_failing_final_signature": 5,
+  "counterfactual_signature_first_48h_count": 31,
+  "counterfactual_is_admitted_trade_count": false,
+  "historical_selected_dates": [
+    "2025-10-02T00:00:00Z",
+    "2025-10-05T12:00:00Z",
+    "2025-10-24T12:00:00Z",
+    "2025-11-16T00:00:00Z",
+    "2025-11-18T18:00:00Z",
+    "2025-11-27T12:00:00Z",
+    "2025-12-03T12:00:00Z",
+    "2025-12-27T18:00:00Z",
+    "2026-01-04T12:00:00Z",
+    "2026-02-21T12:00:00Z",
+    "2026-02-25T06:00:00Z",
+    "2026-03-13T00:00:00Z",
+    "2026-04-06T18:00:00Z",
+    "2026-04-08T18:00:00Z",
+    "2026-04-11T06:00:00Z",
+    "2026-04-23T00:00:00Z",
+    "2026-06-07T18:00:00Z",
+    "2026-07-27T12:00:00Z",
+    "2026-08-06T00:00:00Z",
+    "2026-08-18T00:00:00Z",
+    "2026-08-21T06:00:00Z",
+    "2026-08-24T06:00:00Z",
+    "2026-08-30T12:00:00Z",
+    "2026-09-04T12:00:00Z",
+    "2026-09-07T00:00:00Z",
+    "2026-09-15T00:00:00Z",
+    "2026-09-19T12:00:00Z"
+  ],
+  "unrepresented_pure_candidate_details": [
+    {
+      "candidate_utc": "2026-01-05T12:00:00Z",
+      "prior_base_candidate_utc": "2026-01-04T12:00:00Z",
+      "prior_base_signal_rel24_gate_passed": true,
+      "hours_after_earlier_base_candidate": 24.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-02-14T06:00:00Z",
+      "prior_base_candidate_utc": "2026-02-13T00:00:00Z",
+      "prior_base_signal_rel24_gate_passed": false,
+      "hours_after_earlier_base_candidate": 30.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-02-25T12:00:00Z",
+      "prior_base_candidate_utc": "2026-02-25T06:00:00Z",
+      "prior_base_signal_rel24_gate_passed": true,
+      "hours_after_earlier_base_candidate": 6.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-02-26T06:00:00Z",
+      "prior_base_candidate_utc": "2026-02-25T06:00:00Z",
+      "prior_base_signal_rel24_gate_passed": true,
+      "hours_after_earlier_base_candidate": 24.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-03-05T00:00:00Z",
+      "prior_base_candidate_utc": "2026-03-03T12:00:00Z",
+      "prior_base_signal_rel24_gate_passed": false,
+      "hours_after_earlier_base_candidate": 36.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-05-06T06:00:00Z",
+      "prior_base_candidate_utc": "2026-05-06T00:00:00Z",
+      "prior_base_signal_rel24_gate_passed": false,
+      "hours_after_earlier_base_candidate": 6.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-06-27T12:00:00Z",
+      "prior_base_candidate_utc": "2026-06-25T18:00:00Z",
+      "prior_base_signal_rel24_gate_passed": false,
+      "hours_after_earlier_base_candidate": 42.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    },
+    {
+      "candidate_utc": "2026-08-04T06:00:00Z",
+      "prior_base_candidate_utc": "2026-08-03T12:00:00Z",
+      "prior_base_signal_rel24_gate_passed": false,
+      "hours_after_earlier_base_candidate": 18.0,
+      "reason_in_original_generator": "48_HOUR_PRE_SIGNATURE_COOLDOWN",
+      "real_venue_order_block_confirmed": false
+    }
+  ],
+  "alternative_exit_funding_risk_and_dd_reexecuted": false,
+  "production_bt_parity_certified": false
+}

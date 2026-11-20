@@ -1,0 +1,77 @@
+{
+  "schema": "disdex-bt-hype-pretarget-cohort-source-coverage/v1",
+  "created_utc": "2026-11-19T05:17:25.665677+00:00",
+  "study_source_sha256": "5033df3e174211f5475f4eb69d83d446a806174e9d974f3c5a403d9c2c646a80",
+  "study_source_status": "RESEARCH_ONLY_HYPE_WSIG_FIXED_ENTRY_M5_EXIT_PRETARGET_SELECTION",
+  "selectionUsesTarget": false,
+  "source_cohort_entry_rule": [
+    [
+      "h12",
+      "<=",
+      0.004297852251518686
+    ],
+    [
+      "h24",
+      ">=",
+      0.02047426596091347
+    ],
+    [
+      "rel24",
+      "<=",
+      0.026202553353817715
+    ]
+  ],
+  "source_selected_params": {
+    "holdHours": 48,
+    "hardStop": 0.06,
+    "takeProfit": null,
+    "softLoss": null,
+    "watchHours": 0
+  },
+  "pinned_live_hype_pure_source_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "causal_selection_exclusion_logic_reproduced": false,
+  "all_live_portfolio_gates_reproduced": false,
+  "research_vs_current_economic_parity_certified": false,
+  "scenarios": {
+    "10": {
+      "pretarget_h48r4_source_candidates": 27,
+      "study_portfolio_decision_rows": 27,
+      "pinned_pure_signal_candidates": 35,
+      "pure_signals_missing_from_pretarget_cohort": 8,
+      "missing_candidate_timestamps": [
+        "2026-01-05T12:00:00Z",
+        "2026-02-14T06:00:00Z",
+        "2026-02-25T12:00:00Z",
+        "2026-02-26T06:00:00Z",
+        "2026-03-05T00:00:00Z",
+        "2026-05-06T06:00:00Z",
+        "2026-06-27T12:00:00Z",
+        "2026-08-04T06:00:00Z"
+      ],
+      "pretarget_cohort_equals_study_hype_decision_dates": true,
+      "research_cohort_selection_exclusion_reason_verified": false,
+      "HYPE_venue_execution_count_verified": false,
+      "original_decisions_sha256": "731bd729cb219d9e2aae9a2afd0df6ec4eaa5f85bac1a2b7840a2712788969f1"
+    },
+    "30": {
+      "pretarget_h48r4_source_candidates": 27,
+      "study_portfolio_decision_rows": 27,
+      "pinned_pure_signal_candidates": 35,
+      "pure_signals_missing_from_pretarget_cohort": 8,
+      "missing_candidate_timestamps": [
+        "2026-01-05T12:00:00Z",
+        "2026-02-14T06:00:00Z",
+        "2026-02-25T12:00:00Z",
+        "2026-02-26T06:00:00Z",
+        "2026-03-05T00:00:00Z",
+        "2026-05-06T06:00:00Z",
+        "2026-06-27T12:00:00Z",
+        "2026-08-04T06:00:00Z"
+      ],
+      "pretarget_cohort_equals_study_hype_decision_dates": true,
+      "research_cohort_selection_exclusion_reason_verified": false,
+      "HYPE_venue_execution_count_verified": false,
+      "original_decisions_sha256": "2e4d771b85493baeded1506399aa3859e497059d734d4171bde4ef3b1296352e"
+    }
+  }
+}

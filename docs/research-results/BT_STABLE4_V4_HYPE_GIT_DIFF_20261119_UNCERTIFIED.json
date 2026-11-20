@@ -1,0 +1,2406 @@
+{
+  "schema": "disdex-bt-stable4-v4-hype-git-diff/v1",
+  "generated_utc": "2026-11-19T04:37:37.473063+00:00",
+  "scope": "FULL_REPO_GIT_DIFF_NOT_SEMANTIC_LOGIC_PROOF",
+  "full_causal_backtest_reexecuted": false,
+  "production_bt_parity_certified": false,
+  "models": {
+    "V4": {
+      "research_sha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+      "observed_live_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+      "all_repo_changed_files": 95,
+      "changed_paths_by_top_directory": {
+        ".github": 3,
+        "config": 1,
+        "deploy": 3,
+        "docs": 4,
+        "lib": 29,
+        "ops": 3,
+        "scripts": 15,
+        "tests": 36,
+        "tsconfig.v4-release-candidate.json": 1
+      },
+      "changed_paths": [
+        {
+          "status": "M",
+          "path": ".github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/disdex-v4-release-candidate-ci.yml"
+        },
+        {
+          "status": "M",
+          "path": ".github/workflows/disdex-vps-ops-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": "config/v12-v4-evidence-validity.json"
+        },
+        {
+          "status": "A",
+          "path": "deploy/systemd/disdex-v12-v4-monitor@.service"
+        },
+        {
+          "status": "A",
+          "path": "deploy/systemd/disdex-v12-v4-monitor@.service.d/60-same-pid-loader.conf"
+        },
+        {
+          "status": "M",
+          "path": "deploy/systemd/disdex-v12-v4@.service"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-04-current-runtime-atomic-publications.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-05-v4-account-ledger-freshness.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/production/pending-root-reconciliation.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/production/v4-bounded-evidence-refresh.md"
+        },
+        {
+          "status": "M",
+          "path": "lib/direct-trade-executor.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-aster-global-rate-budget.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-tick-heartbeat.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-crypto-daily-risk.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-kill-switch.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-proxy.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-server.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-runner-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-priority-short-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-residual-long-state.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-pre-submit-entry-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-slippage-guard-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-account-freshness.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-certified-gates.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-durable-orders.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-execution-phase.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-flat-lineage-migration.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-local-entry-rejection.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-migration-readonly.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-monitor-only.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-peer-account-mark.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-production-lifecycle.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-refresh-commit.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-runner-engine.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-shared-reservations.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-state-publication.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-stop-retirement.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-venue-exit.ts"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.service"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-rate-budget-broker@.service"
+        },
+        {
+          "status": "M",
+          "path": "scripts/aster-direct-trade-executor-selftest.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex_v96_v52_margin_guard_runtime.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/deploy/disdex_pending_refresh.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-evidence-refresh-activate"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_nonflat_ownership.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/install-disdex-v4-evidence-refresh"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_v4_nonflat_ownership.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-external-flat-close.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/v12-v4-flat-lineage-migration.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-monitor-only-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/v12-v4-production-runner.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/current-runtime-atomic-publications.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/direct-executor-margin-preparation.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/fixtures/disdex-runner-health-snapshot-v2.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/pending-exposure-readonly-reconcile.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/pending-refresh-root-grant.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/runner-tick-heartbeat.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_pending_refresh_executor.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v4_refresh_installer_contract.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v4_release_candidate_source.py"
+        },
+        {
+          "status": "M",
+          "path": "tests/test_vps_ops_ci_contract.py"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-certified-gates.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-completed-exit-stop.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-entry-clock.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-execution-foundation.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-flat-lineage-migration.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-idle-baseline-snapshot.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-migration-readonly.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-monitor-coherence.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-monitor-only.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-monitor-systemd.test.mjs"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-production-lifecycle.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-rate-budget-resilience.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-recoverable-safety.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-runner-engine.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-shared-reservations.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-state-publication.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-budget-broker-systemd.test.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-budget-shared-lock.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-dynamic-evidence-auth-boundary.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-monitor-pending-proof-read.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-monitor-read-scheduling.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-production-monitor-phase.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-rate-budget-proxy-integration.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-rate-budget-proxy.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-refresh-commit.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-refresh-publication.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tsconfig.v4-release-candidate.json"
+        }
+      ],
+      "production_execution_parity_certified": false,
+      "changed_pinned_live_static_dependency_count": 23,
+      "changed_pinned_live_static_dependency_paths": [
+        {
+          "status": "A",
+          "path": "config/v12-v4-evidence-validity.json"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-aster-global-rate-budget.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-tick-heartbeat.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-crypto-daily-risk.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-kill-switch.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-proxy.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-pre-submit-entry-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-slippage-guard-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-account-freshness.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-certified-gates.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-durable-orders.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-execution-phase.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-local-entry-rejection.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-monitor-only.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-peer-account-mark.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-production-lifecycle.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-refresh-commit.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-runner-engine.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-shared-reservations.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-stop-retirement.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-venue-exit.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-monitor-only-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/v12-v4-production-runner.ts"
+        }
+      ],
+      "unchanged_pinned_live_static_dependency_count": 46
+    },
+    "HYPE": {
+      "research_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "observed_live_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+      "all_repo_changed_files": 432,
+      "changed_paths_by_top_directory": {
+        ".gitattributes": 1,
+        ".github": 14,
+        ".superpowers": 1,
+        "apps": 5,
+        "config": 13,
+        "deploy": 3,
+        "docs": 49,
+        "lib": 101,
+        "ops": 5,
+        "scripts": 125,
+        "tests": 114,
+        "tsconfig.v4-release-candidate.json": 1
+      },
+      "changed_paths": [
+        {
+          "status": "M",
+          "path": ".gitattributes"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/current-runtime-atomic-publication-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/disdex-crypto-gross-existing-exposure-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/disdex-seven-runner-readonly-audit-ci.yml"
+        },
+        {
+          "status": "M",
+          "path": ".github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/disdex-v4-release-candidate-ci.yml"
+        },
+        {
+          "status": "M",
+          "path": ".github/workflows/disdex-v96-v52-margin-risk-ci.yml"
+        },
+        {
+          "status": "M",
+          "path": ".github/workflows/disdex-vps-ops-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/q102-ui-decision-observability-ci.yml"
+        },
+        {
+          "status": "M",
+          "path": ".github/workflows/quality102-causal-v1-live-connection.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/stable4-hype-livebase-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/stable4-idle-livebase-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/stable4-pengu-livebase-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/stable4-production-integration-ci.yml"
+        },
+        {
+          "status": "A",
+          "path": ".github/workflows/v4-time37-sha-bound-guard-20261025.yml"
+        },
+        {
+          "status": "A",
+          "path": ".superpowers/sdd/2026-10-25-v4-live-recovery/task-1-report.md"
+        },
+        {
+          "status": "M",
+          "path": "apps/production-ui/app/api/system/fet-status/route.ts"
+        },
+        {
+          "status": "M",
+          "path": "apps/production-ui/components/features/DecisionStatusPanel.tsx"
+        },
+        {
+          "status": "M",
+          "path": "apps/production-ui/lib/server/current-production-runtime.ts"
+        },
+        {
+          "status": "M",
+          "path": "apps/production-ui/lib/server/quality102-runtime-observability.ts"
+        },
+        {
+          "status": "M",
+          "path": "apps/production-ui/tests/hp-a09-runtime-sync-20260927.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/disdexQuality102CausalV1Runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "config/disdexStable4Opportunity.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/hypeZecLongRuntime.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/idlePriorityShortRuntime.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/integratedProductionRiskPolicy.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/penguDualLsV2Runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "config/research/render-dual-production-approved-handoff-20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "config/research/render-legacy-adverse-independent-highwr-adoption-20261025.json"
+        },
+        {
+          "status": "A",
+          "path": "config/stable4/opportunity-corpus-seed-20261115.json"
+        },
+        {
+          "status": "A",
+          "path": "config/stable4/q102-avax-knn-seed-20261114.json"
+        },
+        {
+          "status": "A",
+          "path": "config/stable4/q102-online-recovery-seed-20261114.json"
+        },
+        {
+          "status": "A",
+          "path": "config/stable4/root-observed-snapshot-pins-20261116.json"
+        },
+        {
+          "status": "A",
+          "path": "config/v12-v4-evidence-validity.json"
+        },
+        {
+          "status": "A",
+          "path": "deploy/systemd/disdex-v12-v4-monitor@.service"
+        },
+        {
+          "status": "A",
+          "path": "deploy/systemd/disdex-v12-v4-monitor@.service.d/60-same-pid-loader.conf"
+        },
+        {
+          "status": "M",
+          "path": "deploy/systemd/disdex-v12-v4@.service"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/CODEX_RENDER_DUAL_LIVE_CUTOVER_REQUEST_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_DUAL_CODEX_FINAL_ACTIVATION_REQUEST_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_DUAL_LIVE_PREP_STATUS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_DUAL_PRELIVE_AUDIT_20261025.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_DUAL_PRELIVE_CODEX_FINAL_HANDOFF_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_GROSS075_PRIORITY_TP25_H6_RESEARCH_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_LEGACY_INITIAL_STOP_AND_INDEPENDENT_SHORT_CODEX_HANDOFF_20261025.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/RENDER_NOSHADOW_EXIT_BT_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_CODEX_CUTOVER_BLOCKER_HANDOFF_20261116.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_EXTERNAL_ROOT_PIN_AUDIT_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_INTEGRATION_CONTINUATION_20261116.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_LIVE_VPS_PRECUTOVER_READONLY_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_OWNER_DD_CUTOVER_DEFERRAL_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_PENDING_SOURCE_INTEGRATION_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_POST_CUTOVER_DD_RECOVERY_AND_BT_REVALIDATION_20261116.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_Q102_H1_CAUSAL_CATCHUP_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_Q102_OFFLINE_NATIVE_PARSER_AUDIT_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_Q102_PUBLIC_EVIDENCE_PLAN_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_Q102_PUBLIC_OUTCOMES_REPLAY_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_ROOT_PENDING_OVERLAY_PROVENANCE_GAP_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/STABLE4_SIGNED_FLAT_AND_Q102_LEGACY_AUDIT_20261117.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_C_D_GROSS_PRELIVE_STATUS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_C_D_GROSS_PRODUCTION_CUTOVER_CODEX_HANDOFF_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_C_RECOVERY_GROSS025_CODEX_HANDOFF_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_D_005_TIER_REAL_CONTRIBUTION_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_D_TIER_37_CASE_INTEGRATED_GROSS_REPORT_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_D_TIER_PRIORITY_YIELD_BT_REPORT_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_D_TIER_YIELD_ONLY_IF_GROSS_ZERO_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/implementation/V12_V4_RECOVERY_GROSS_025_BT_RECOMMENDATION_20261026.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-04-7688-atomic-safety.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-04-current-runtime-atomic-publications.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-04-q102-atomic-safety.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/2026-11-05-v4-account-ledger-freshness.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/ops/V4_TIME37_SHA_BOUND_UPTIME_REPAIR_20261025.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/production/pending-root-reconciliation.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/production/v4-bounded-evidence-refresh.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261025/RENDER_INDEPENDENT_EXACT_CAUSAL_M5_55M_10_30_RESEARCH_20261025.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261026/RENDER_CORE_FLAT_PARITY_NATIVE8_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261026/RENDER_GROSS075_TP25_H6_PRIORITY_NATIVE8_COMPARISON_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261026/RENDER_GROSS075_TP25_PRIORITY_RESEARCH_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261026/RENDER_NOSHADOW_NATIVE8_COMPARISON_SUMMARY_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/render-dual-20261026/RENDER_NO_SHADOW_EXIT_HOLD_COMPARISON_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/v12-v4-d-tier-gross-20261026/V12_V4_D_005_CONTRIBUTION_AND_ABLATION_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/v12-v4-d-tier-gross-20261026/V12_V4_D_TIER_GROSS_37_CASES_10_30BPS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/v12-v4-d-tier-preemption-20261026/V12_V4_D_TIER_CAPACITY_YIELD_10_30BPS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/v12-v4-d-tier-preemption-20261026/V12_V4_D_TIER_NO_FREE_GROSS_ONLY_10_30BPS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/research/results/v12-v4-recovery-gross-20261026/V12_V4_RECOVERY_018_TO_025_INTEGRATED_10_30_BPS_20261026.json"
+        },
+        {
+          "status": "A",
+          "path": "docs/superpowers/plans/2026-11-04-legacy-peer-ticks.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/superpowers/plans/2026-11-17-stable4-production-integration.md"
+        },
+        {
+          "status": "A",
+          "path": "lib/aster-readonly-evidence-fetch.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/aster-v3-client.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/causal-history-memo.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/direct-trade-executor.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-aster-global-rate-budget.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-peer-decision-cycle.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-pending-h48-composite.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-pending-owned-venue.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-pending-owned-witness.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-pending-owner-evidence.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-pending-protected-hold.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-q102-health-gate.mjs"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v1-ownership.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v1-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v1-signal.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v1-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v4-s34.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v4-signal.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-quality102-stable4-online.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-mutation-telemetry.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-tick-heartbeat.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-crypto-daily-risk.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-kill-switch.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-stable4-idle.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-strict-portfolio-planner.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-proxy.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-server.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/fet-brk48-live-reduction.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/fet-brk48-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/fet-brk48-state.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/fet-preempt-owner-pins.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-opportunity-signal.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-time-only-authority.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-time-only-contract.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-v4-priority-authority.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-market-data.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-runner-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-sleeves.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-priority-short-live.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-priority-short-market-data.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-priority-short-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-priority-short-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-quantity-feasibility.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-residual-long-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/idle-residual-long-state.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-pre-submit-entry-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-slippage-guard-error.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/pengu-dual-ls-v2-runner-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/pengu-dual-ls-v2.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/pengu-stable4-opportunity.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/quality102-live-scheduling.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/render-highwr-and-legacy-stop.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/render-independent-execution-contract.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/render-independent-six-hour-journal.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/render-legacy-adverse-cert.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/resident-stop-observation.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-active-entry-owners.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-gross-guard.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-book.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-publisher.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-store.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-hype-entry-features.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-native-shadow-ledger.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-native-shadow-observer.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-native-shadow-runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-opportunity-corpus.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-opportunity-expected-hold.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-opportunity-model.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-q102-bootstrap-history.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-q102-entry-capture.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-q102-shadow-evidence.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-q102-shadow-outcome.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-uni-final-admission.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-uni-owner-evidence.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-v4-reservation-proof.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-aster-live-adapter.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-account-freshness.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-certified-gates.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-d-tier-zero-gross-yield.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-durable-orders.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-entry-safety.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-execution-phase.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-flat-lineage-migration.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-live-exit-feed.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-local-entry-rejection.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-migration-readonly.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-monitor-only.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-peer-account-mark.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-production-lifecycle.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-refresh-commit.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-runner-engine.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-shared-reservations.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/v12-v4-state-publication.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-stop-retirement.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-time-stop-approval.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-v2-shadow.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-venue-exit.ts"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-seven-runner-readonly-audit.service"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-seven-runner-readonly-audit.timer"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.service"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer"
+        },
+        {
+          "status": "A",
+          "path": "ops/systemd/disdex-v4-rate-budget-broker@.service"
+        },
+        {
+          "status": "M",
+          "path": "scripts/aster-direct-trade-executor-selftest.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-fet-brk48-live-runner.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex-hype-owner-sha-recovery.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex-hype-stable4-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-hype-zec-long-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-idle-priority-short-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-quality102-causal-v1-live-runner-selftest.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-quality102-causal-v1-live-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-quality102-causal-v1-runner-selftest.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-quality102-causal-v4-signal-selftest.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-strict-bt-gross-selftest.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex-v52-stale-reference-operator-recovery.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex_stable4_entry_gross_guard.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex_stable4_entry_gross_guard_selftest.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex_stable4_entry_gross_integration_selftest.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/disdex_stable4_v52_entry_provenance_selftest.py"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex_strict_portfolio_planner.py"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex_v52_aster_only_legacy_engine.py"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex_v96_v52_margin_guard_runtime.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/build_stable4_runtime_source_manifest.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/deploy/disdex_pending_maintenance.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/deploy/disdex_pending_refresh.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/apply_pending_composite_worker_patch.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/disdex-pending-h48-composite.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/disdex-pending-h48-composite.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/disdex-pending-owned-witness.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/disdex-pending-protected-hold.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/disdex-pending-protected-hold.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/patches/test_apply_pending_composite_worker_patch.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-seven-runner-readonly-audit.py"
+        },
+        {
+          "status": "M",
+          "path": "scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-evidence-refresh-activate"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex-v52-reference-scope-migrate.mjs"
+        },
+        {
+          "status": "M",
+          "path": "scripts/ops/root/disdex-v96-v52-release-readiness"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_composite_owner_witness.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_pending_composite_recover.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_pending_composite_upgrade.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_pending_owner_readonly_upgrade_20261115.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_composite_root_bridge.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_external_root_pin_audit.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_flat_peer_cutover.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_h48_policy.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_h48_root_patch.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_q102_bootstrap_seal.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_q102_writer_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_root_dependency_graph_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_stable4_root_preimage_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_admission_clock_compatibility.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_authorized_timeout_resume.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_durable_owner_probe.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_nonflat_ownership.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/disdex_v4_startup_wait_budget.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/install-disdex-v4-evidence-refresh"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/prepare_stable4_root_sources.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_composite_owner_witness.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_pending_composite_recover.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_pending_composite_upgrade.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_composite_root_bridge.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_external_root_pin_audit.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_flat_peer_cutover.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_h48_policy.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_h48_root_patch.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_q102_bootstrap_seal.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_q102_writer_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_root_dependency_graph_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_stable4_root_preimage_readonly.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_v4_admission_clock_compatibility.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_v4_authorized_timeout_resume.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_v4_nonflat_ownership.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_disdex_v4_startup_wait_budget.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/root/test_prepare_stable4_root_sources.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/stable4_gross_policy_parity_gate.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/stable4_q102_public_request_plan.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/stable4_research_dd_independent_audit.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/stable4_route_direction_audit.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_build_stable4_runtime_source_manifest.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_stable4_gross_policy_parity_gate.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_stable4_pending_frozen_source_closure.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_stable4_q102_public_request_plan.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_stable4_research_dd_independent_audit.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/ops/test_stable4_route_direction_audit.py"
+        },
+        {
+          "status": "M",
+          "path": "scripts/pengu-dual-ls-v2-parity.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/render-highwr-shadow-review.mjs"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-dual-native8-model-replay-20261025.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-independent-core-flat-parity-20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-independent-exact-public-m5-20261025.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-no-shadow-exit-grid-bt-20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-no-shadow-native8-integrated-bt-20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-priority-gross075-model-bt-20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/render-top-priority-gross075-model-bt-20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_ablation_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_gross_combinations_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_gross_sweep_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_preemption_cap_study_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_preemption_material_study_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_d_tier_preemption_no_free_gross_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/research/v12_v4_recovery_gross_018_025_native8_20261026.py"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-build-opportunity-corpus-seed.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-hype-livebase-selftest.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-idle-livebase-selftest.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-opportunity-model-parity.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-pengu-livebase-selftest.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-publish-native-entry.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-advance-offline-h1.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-avax-parity.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-bootstrap-observations.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-bootstrap-outcomes.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-capture-bootstrap-public.mjs"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-capture-h1-public.mjs"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-correct-terminal-seed.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-forward-uni-scan.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-native-outcome-parity.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-offline-native-parser-check.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/stable4-q102-selftest.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-external-flat-close.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/v12-v4-flat-lineage-migration.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-monitor-only-runner.ts"
+        },
+        {
+          "status": "A",
+          "path": "scripts/v12-v4-operator-exit.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/v12-v4-production-runner.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/causal-history-memo.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/crypto-gross-existing-exposure.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/current-runtime-atomic-publications.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/direct-executor-margin-preparation.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/fet-brk48-live-runner.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/fet-deferred-mutation-telemetry.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/fet-preempt-owner-pins.test.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/fixtures/disdex-runner-health-snapshot-v2.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-h48-exit-entry-data-independence.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/hype-live-zec-scope.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-owner-sha-recovery.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-runner-mutation-telemetry.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-stable4-time-only-authority.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-stable4-time-only-contract.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-stable4-v4-priority-authority.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/hype-v4-review-journal-replay.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/hype-zec-runner-gate.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/idle-priority-short-state.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/idle-quantity-feasibility.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/integrated_gross_governor.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/peer-decision-cycle-observation.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/pending-exposure-readonly-reconcile.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/pending-refresh-root-grant.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/q102-fatal-mutation-telemetry.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/q102-health-gate.test.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/render-highwr-and-legacy-stop.test.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/render-independent-execution-contract.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/render-independent-route-gross-admission.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/render-independent-six-hour-journal.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/render-legacy-adverse-cert.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/runner-tick-heartbeat.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-active-entry-owners.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-direct-executor-admission.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-entry-gross-guard.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-entry-opportunity-book.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-entry-opportunity-publisher.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-entry-opportunity-runtime.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-entry-opportunity-store.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-fet-idle-entry-provenance.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-funding-client.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-hype-causal-window.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-hype-entry-features.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-idle-jup-gate.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-native-shadow-ledger.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-native-shadow-observer.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-native-shadow-runtime.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-opportunity-corpus.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-opportunity-expected-hold.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-opportunity-model.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-pending-stop-owner-compat.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-pengu-hype-entry-provenance.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-pengu-recovery-gate.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-python-entry-publisher.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-active-baseline-admission.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-avax-continuation.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-bootstrap-history.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-entry-cap-hold.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-entry-capture.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-entry-score-provenance.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-fet-gate.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-hourly-coverage.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-observation-population.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-observer.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-offline-native-parser-check.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-online-continuation.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-shadow-evidence.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-shadow-outcome.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-q102-terminal-seed.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-research-gross-contract.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-uni-final-admission.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-uni-owner-evidence.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-v4-entry-opportunity-provenance.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-v4-gateway-admission.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/stable4-v4-reservation-proof.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_crypto_gross_existing_exposure_20261027.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_pending_refresh_executor.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v4_refresh_installer_contract.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v4_release_candidate_source.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v52_reference_scoped_hold.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/test_v52_stock_quote_local_hold_20261027.py"
+        },
+        {
+          "status": "M",
+          "path": "tests/test_vps_ops_ci_contract.py"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-certified-gates.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-completed-exit-stop.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-d-tier-zero-gross-yield.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-entry-clock.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-entry-safety.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-evidence-preflight.test.mjs"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-execution-foundation.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-exit-feed-availability-fence.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-flat-lineage-migration.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-idle-baseline-snapshot.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-migration-readonly.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-monitor-coherence.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-monitor-only.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-monitor-systemd.test.mjs"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-production-lifecycle.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-rate-budget-resilience.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-recoverable-exit-feed-gap.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-recoverable-safety.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-runner-engine.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-shared-reservations.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v12-v4-state-publication.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-time-stop-approval.test.ts"
+        },
+        {
+          "status": "M",
+          "path": "tests/v12-v4-v2-shadow.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-budget-broker-systemd.test.mjs"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-budget-shared-lock.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-dynamic-evidence-auth-boundary.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-monitor-pending-proof-read.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-monitor-read-scheduling.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-production-monitor-phase.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-rate-budget-proxy-integration.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-rate-budget-proxy.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-refresh-commit.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tests/v4-refresh-publication.test.ts"
+        },
+        {
+          "status": "A",
+          "path": "tsconfig.v4-release-candidate.json"
+        }
+      ],
+      "production_execution_parity_certified": false,
+      "changed_pinned_live_static_dependency_count": 37,
+      "changed_pinned_live_static_dependency_paths": [
+        {
+          "status": "A",
+          "path": "config/disdexStable4Opportunity.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/hypeZecLongRuntime.ts"
+        },
+        {
+          "status": "M",
+          "path": "config/integratedProductionRiskPolicy.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/aster-v3-client.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/direct-trade-executor.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-aster-global-rate-budget.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-peer-decision-cycle.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-quality102-causal-v1-ownership.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-mutation-telemetry.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-runner-tick-heartbeat.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-crypto-daily-risk.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-shared-kill-switch.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/disdex-strict-portfolio-planner.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/disdex-v4-rate-budget-proxy.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-opportunity-signal.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-time-only-authority.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/hype-stable4-time-only-contract.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-market-data.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-runner-state.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-runner.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/hype-zec-long-sleeves.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-pre-submit-entry-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/market-slippage-guard-error.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-gross-guard.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-book.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-publisher.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-runtime.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-entry-opportunity-store.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-hype-entry-features.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-opportunity-corpus.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-opportunity-model.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-uni-final-admission.ts"
+        },
+        {
+          "status": "A",
+          "path": "lib/stable4-v4-reservation-proof.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-aster-live-adapter.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-production-lifecycle.ts"
+        },
+        {
+          "status": "M",
+          "path": "lib/v12-v4-v2-shadow.ts"
+        },
+        {
+          "status": "M",
+          "path": "scripts/disdex-hype-zec-long-live-runner.ts"
+        }
+      ],
+      "unchanged_pinned_live_static_dependency_count": 29
+    }
+  }
+}

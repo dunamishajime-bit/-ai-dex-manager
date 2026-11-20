@@ -1,0 +1,243 @@
+{
+  "schema": "disdex-bt-hype-model-only-missing-candidate-exposure/v1",
+  "created_utc": "2026-11-19T05:11:49.151506+00:00",
+  "scope": "STABLE4_MODELED_EXPOSURE_CONTEXT_NOT_PRODUCTION",
+  "research_gross_not_live_gross": true,
+  "unresolved_signal_scheduling_reason_verified": false,
+  "model_portfolio_arbitration_reexecuted": false,
+  "production_bt_parity_certified": false,
+  "scenarios": {
+    "10": {
+      "original_model_fills_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+      "original_model_decisions_sha256": "731bd729cb219d9e2aae9a2afd0df6ec4eaa5f85bac1a2b7840a2712788969f1",
+      "original_model_equity_sha256": "9d5105d45f22f9412af725b00615501bf74955e72230874bfe3cf74e3125fcdd",
+      "unresolved_pure_candidates": 8,
+      "zero_exposure_candidates": 1,
+      "model_hype_open_at_candidate_count": 0,
+      "candidates": [
+        {
+          "candidate_utc": "2026-01-05T12:00:00Z",
+          "research_snapshot_open_count": 9,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 2.2060419465117898,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 2.2060419465117898,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-14T06:00:00Z",
+          "research_snapshot_open_count": 0,
+          "research_modeled_open_owner_groups": [],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.0,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.0,
+          "no_research_open_exposure": true,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-25T12:00:00Z",
+          "research_snapshot_open_count": 5,
+          "research_modeled_open_owner_groups": [
+            "Q102",
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 3.0972729240213086,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 3.0972729240213086,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-26T06:00:00Z",
+          "research_snapshot_open_count": 3,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.8064818240523508,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.8064818240523508,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-03-05T00:00:00Z",
+          "research_snapshot_open_count": 7,
+          "research_modeled_open_owner_groups": [
+            "V4",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 1.9527449622210953,
+          "research_snapshot_stock_gross_x": 1.4658777776232759,
+          "research_snapshot_total_gross_x": 3.418622739844371,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-05-06T06:00:00Z",
+          "research_snapshot_open_count": 2,
+          "research_modeled_open_owner_groups": [
+            "PENGU",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.9888339729890439,
+          "research_snapshot_stock_gross_x": 0.6354957772533273,
+          "research_snapshot_total_gross_x": 1.6243297502423713,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-06-27T12:00:00Z",
+          "research_snapshot_open_count": 4,
+          "research_modeled_open_owner_groups": [
+            "V4",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.8923409446983257,
+          "research_snapshot_stock_gross_x": 0.13105131875891973,
+          "research_snapshot_total_gross_x": 1.0233922634572454,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-08-04T06:00:00Z",
+          "research_snapshot_open_count": 2,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.6050830920957517,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.6050830920957517,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        }
+      ]
+    },
+    "30": {
+      "original_model_fills_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+      "original_model_decisions_sha256": "2e4d771b85493baeded1506399aa3859e497059d734d4171bde4ef3b1296352e",
+      "original_model_equity_sha256": "ac01b7058ef506bb3c2076d6b3edbaba88403ccbf1e78e088bd39e3828cad168",
+      "unresolved_pure_candidates": 8,
+      "zero_exposure_candidates": 1,
+      "model_hype_open_at_candidate_count": 0,
+      "candidates": [
+        {
+          "candidate_utc": "2026-01-05T12:00:00Z",
+          "research_snapshot_open_count": 9,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 2.2121980878535243,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 2.2121980878535243,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-14T06:00:00Z",
+          "research_snapshot_open_count": 0,
+          "research_modeled_open_owner_groups": [],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.0,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.0,
+          "no_research_open_exposure": true,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-25T12:00:00Z",
+          "research_snapshot_open_count": 5,
+          "research_modeled_open_owner_groups": [
+            "Q102",
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 3.1037984026102534,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 3.1037984026102534,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-02-26T06:00:00Z",
+          "research_snapshot_open_count": 3,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.809354525215158,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.809354525215158,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-03-05T00:00:00Z",
+          "research_snapshot_open_count": 7,
+          "research_modeled_open_owner_groups": [
+            "V4",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 1.9552181364202903,
+          "research_snapshot_stock_gross_x": 1.4816204385598981,
+          "research_snapshot_total_gross_x": 3.4368385749801886,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-05-06T06:00:00Z",
+          "research_snapshot_open_count": 2,
+          "research_modeled_open_owner_groups": [
+            "PENGU",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.989764227514274,
+          "research_snapshot_stock_gross_x": 0.6572904118907886,
+          "research_snapshot_total_gross_x": 1.6470546394050625,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-06-27T12:00:00Z",
+          "research_snapshot_open_count": 4,
+          "research_modeled_open_owner_groups": [
+            "V4",
+            "V52"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.8949630014873016,
+          "research_snapshot_stock_gross_x": 0.15558491703542154,
+          "research_snapshot_total_gross_x": 1.0505479185227231,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        },
+        {
+          "candidate_utc": "2026-08-04T06:00:00Z",
+          "research_snapshot_open_count": 2,
+          "research_modeled_open_owner_groups": [
+            "V4"
+          ],
+          "research_hype_model_open": false,
+          "research_snapshot_crypto_gross_x": 0.6053567170124259,
+          "research_snapshot_stock_gross_x": 0.0,
+          "research_snapshot_total_gross_x": 0.6053567170124259,
+          "no_research_open_exposure": false,
+          "reason_for_missing_hype_decision_proven": false
+        }
+      ]
+    }
+  }
+}

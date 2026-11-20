@@ -57,12 +57,13 @@ export function BtcCandlestickChart({replay,cursor,onEventSelect}:{
    (Date.parse(forming.closedAt)-Date.parse(forming.time)))):1;
  const chartGradientId="bt-chart-bg",glowId="bt-chart-glow";
  const isSynthetic=replay.mode==="DEMO";
+ const isAnchoredDaily=replay.source?.kind==="SYNTHETIC_ANCHORED_DAILY_NO_STRATEGY";
  return <div className="min-w-0 space-y-2">
   <div className="flex flex-wrap items-start justify-between gap-3 px-1">
    <div className="flex items-center gap-2.5">
      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e39c2d]/15 text-[14px] text-[#f6af3c]">₿</span>
      <div><strong className="block text-[13px] font-bold text-white">BTC / USDT</strong>
-       <span className="text-[10px] text-[#7799b1]">1時間足 · {isSynthetic?"形成中の足を5分刻みで更新":"確定足の履歴再生"}</span></div>
+       <span className="text-[10px] text-[#7799b1]">{isAnchoredDaily?"人工日足 · 確定足のみ":("1時間足 · "+(isSynthetic?"形成中の足を5分刻みで更新":"確定足の履歴再生"))}</span></div>
      {forming&&<span className="rounded-full border border-cyan-500/35 bg-[#114755] px-2 py-1 text-[10px] font-semibold text-cyan-200">● 形成中 {Math.round(activeRatio*100)}%</span>}
    </div>
    <div className="text-right"><div className="font-mono text-[17px] font-bold tabular-nums tracking-tight text-[#d3f4f3] sm:text-[20px]">{fmt(price)} <span className="text-[10px] font-semibold text-[#86a7bc]">USDT</span></div>

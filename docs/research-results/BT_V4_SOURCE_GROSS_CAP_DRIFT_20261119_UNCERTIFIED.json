@@ -1,0 +1,38 @@
+{
+  "schema": "disdex-bt-v4-source-gross-cap-drift/v1",
+  "created_at_utc": "2026-11-19T05:26:19.626523+00:00",
+  "pinned_live_v4_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "vps_static_lifecycle_source_verified": true,
+  "pinned_source_sha256": "e895fdc89e493c4340c45fc90f9852c4b387603897151fa9701eb5b168eead61",
+  "caps": {
+    "v4AggregateGrossCap": {
+      "historical_model": 2.0,
+      "pinned_v4_lifecycle": 3.0,
+      "delta_x": 1.0
+    },
+    "totalGrossCap": {
+      "historical_model": 3.5,
+      "pinned_v4_lifecycle": 4.75,
+      "delta_x": 1.25
+    },
+    "perPositionGrossCap": {
+      "historical_model": 1.0,
+      "pinned_v4_lifecycle": 1.0,
+      "delta_x": 0.0
+    },
+    "cryptoRequestedCap": {
+      "historical_model": 3.0,
+      "pinned_v4_lifecycle": 3.0,
+      "delta_x": 0.0
+    }
+  },
+  "historical_study_stock_gross_cap_x": 1.5,
+  "v4_lifecycle_stock_cap_explicitly_present": false,
+  "final_shared_policy_stricter_than_lifecycle_verified": false,
+  "crypto_effective_cap_may_be_lowered_by_control": true,
+  "other_risk_guards_and_owner_policy_evaluated": false,
+  "actual_orders_created_or_modified": false,
+  "actual_exchange_gross_excess_verified": false,
+  "economic_reexecution_with_current_v4_risk_caps_complete": false,
+  "production_bt_parity_certified": false
+}

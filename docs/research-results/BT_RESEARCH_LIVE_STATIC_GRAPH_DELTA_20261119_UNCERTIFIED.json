@@ -1,0 +1,749 @@
+{
+  "schema": "disdex-bt-research-live-static-import-delta/v1",
+  "generated_utc": "2026-11-19T04:44:44.712836+00:00",
+  "scope": "PINNED_LOCAL_GIT_STATIC_IMPORT_GRAPH",
+  "file_categories_are_heuristic_not_economic_causality_proof": true,
+  "runtime_feature_flags_verified": false,
+  "historical_trades_reexecuted": false,
+  "production_bt_parity_certified": false,
+  "runners": {
+    "V4": {
+      "research_git_commit": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+      "observed_live_git_commit": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+      "entrypoint": "scripts/v12-v4-production-runner.ts",
+      "research_uses_same_entrypoint_assumed_not_independently_verified": true,
+      "research_static_files": 58,
+      "live_static_files": 69,
+      "identical_static_files": 46,
+      "changed_files_in_static_graph_union": 23,
+      "has_unreviewed_semantic_changes": true,
+      "source_graph_change_requires_trade_reexecution": true,
+      "changed": [
+        {
+          "path": "config/v12-v4-evidence-validity.json",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-runner-tick-heartbeat.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "authority_readiness"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-shared-crypto-daily-risk.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-shared-kill-switch.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-v4-rate-budget-proxy.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/market-pre-submit-entry-error.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/market-slippage-guard-error.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-account-freshness.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "authority_readiness"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-certified-gates.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "authority_readiness"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-durable-orders.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "order_execution"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-execution-phase.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "order_execution"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-local-entry-rejection.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-monitor-only.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-peer-account-mark.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-production-lifecycle.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "exit_protection"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-refresh-commit.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-runner-engine.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-shared-reservations.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-stop-retirement.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "exit_protection"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-venue-exit.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "exit_protection"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "scripts/v12-v4-monitor-only-runner.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "scripts/v12-v4-production-runner.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        }
+      ]
+    },
+    "HYPE": {
+      "research_git_commit": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "observed_live_git_commit": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+      "entrypoint": "scripts/disdex-hype-zec-long-live-runner.ts",
+      "research_uses_same_entrypoint_assumed_not_independently_verified": true,
+      "research_static_files": 32,
+      "live_static_files": 66,
+      "identical_static_files": 18,
+      "changed_files_in_static_graph_union": 48,
+      "has_unreviewed_semantic_changes": true,
+      "source_graph_change_requires_trade_reexecution": true,
+      "changed": [
+        {
+          "path": "config/disdexQuality102CausalV4Model.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "config/disdexStable4Opportunity.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "config/hypeZecLongRuntime.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "config/integratedProductionRiskPolicy.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "config/v12X1AllRuntime.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "docs/implementation/v12-v4-v2-full-year-priority.json",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/aster-v3-client.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/dd1296-entry-policy.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/direct-trade-executor.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "order_execution"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-aster-global-rate-budget.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-peer-decision-cycle.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-runner-mutation-telemetry.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-runner-tick-heartbeat.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "authority_readiness"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-shared-crypto-daily-risk.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-shared-kill-switch.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-strict-portfolio-planner.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-v4-rate-budget-proxy.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/disdex-v96-order-quantity.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-stable4-opportunity-signal.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-stable4-time-only-authority.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "authority_readiness"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-stable4-time-only-contract.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-zec-long-market-data.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-zec-long-runner-state.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-zec-long-runner.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/hype-zec-long-sleeves.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/market-pre-submit-entry-error.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/market-slippage-guard-error.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-entry-gross-guard.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-book.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-publisher.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-runtime.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-entry-opportunity-store.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-hype-entry-features.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-opportunity-corpus.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-opportunity-model.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "signal_entry"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-uni-final-admission.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/stable4-v4-reservation-proof.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "risk_gross_priority"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-aster-live-adapter.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "order_execution"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-multilogic-v4-shadow.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-execution-store.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "order_execution"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-four-rule-policy.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-production-lifecycle.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "exit_protection"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-resident-stop-owners.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "exit_protection"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-v4-v2-shadow.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "lib/v12-x1-all.ts",
+          "research": "ABSENT",
+          "live": "PRESENT",
+          "operation": "LIVE_ADDED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        },
+        {
+          "path": "scripts/disdex-hype-zec-long-live-runner.ts",
+          "research": "PRESENT",
+          "live": "PRESENT",
+          "operation": "MODIFIED",
+          "review_categories": [
+            "requires_manual_review"
+          ],
+          "economic_effect_proven": false
+        }
+      ]
+    }
+  }
+}

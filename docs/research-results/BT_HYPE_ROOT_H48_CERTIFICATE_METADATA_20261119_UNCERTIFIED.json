@@ -1,0 +1,30 @@
+{
+    "schema":  "disdex-bt-hype-root-h48-certificate-snapshot/v1",
+    "observed_utc":  "2026-11-19T08:44:41.695474+00:00",
+    "source":  "READ_ONLY_OWNER_PC_TO_ROOT_VPS",
+    "observed_hype_sha":  "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+    "root_certificate_sha256":  "ffcd71bb1d296118fb3538bc03fae536f06050932ffd2fcecdfd6fd70fa2a623",
+    "root_owned_regular_read_only":  true,
+    "certificate_not_expired_at_observation":  true,
+    "route":  "HYPE_REDESIGN_CAUSAL_H48R4_WSIG",
+    "policy":  "H48_TIME_ONLY",
+    "hold_hours":  48,
+    "resident_stop_required":  false,
+    "resident_take_profit_required":  false,
+    "certificate_approved_gross_x":  {
+                                         "crypto":  3,
+                                         "stock":  4,
+                                         "total":  4.25,
+                                         "hype":  1
+                                     },
+    "service_active_at_observation":  true,
+    "service_has_main_pid_at_observation":  true,
+    "actual_live_positions_and_stops_checked":  false,
+    "actual_exchange_orders_checked":  false,
+    "owner_global_35_cap_policy_certified":  false,
+    "effective_final_account_gross_cap_certified":  false,
+    "actual_production_bt_parity_certified":  false,
+    "private_ssh_key_content_copied":  false,
+    "root_certificate_content_copied":  false,
+    "live_mutations":  0
+}
