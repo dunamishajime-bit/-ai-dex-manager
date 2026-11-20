@@ -250,6 +250,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         for text in (v52, q102):
             self.assertIn("[Unit]", text)
             self.assertIn("Requires=\n", text)
+            self.assertIn("WorkingDirectory=/home/deploy/disdex-trading/releases/%i", text)
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
             self.assertIn("DISDEX_RUNTIME_COMMIT_SHA=%i", text)
@@ -257,10 +258,20 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             self.assertNotIn("operator-activation-gate", text)
             self.assertNotIn("pending-order-recovery", text)
         self.assertIn("--monitor-only-daemon", v52)
+        self.assertIn("scripts/disdex_v52_aster_only_live_engine.py", v52)
         self.assertNotIn("vendor-stock-site-packages", v52)
         self.assertIn("disdex-quality102-causal-v1-monitor.ts --daemon", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_MONITOR_ONLY=true", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
+
+    def test_v52_launcher_is_manifested_by_formal_workflow(self):
+        workflow = (
+            Path(__file__).parents[2]
+            / ".github"
+            / "workflows"
+            / "disdex-stable4-safety-repair-cutover.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("'scripts/disdex_v52_aster_only_live_engine.py'", workflow)
 
     def test_monitor_heartbeat_requires_fresh_observing_non_authority(self):
         sha = "a" * 40

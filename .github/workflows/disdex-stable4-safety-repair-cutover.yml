@@ -101,6 +101,7 @@ jobs:
           sha = os.environ['TARGET_SHA']
           files = [
               'scripts/disdex_v52_aster_only_legacy_engine.py',
+              'scripts/disdex_v52_aster_only_live_engine.py',
               'scripts/disdex-quality102-causal-v1-monitor.ts',
               'tests/test_v52_upstream_fail_closed.py',
               'tests/quality102-monitor-only.test.ts',
