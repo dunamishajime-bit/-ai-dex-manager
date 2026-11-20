@@ -14,6 +14,8 @@ on:
       - "lib/disdex-quality102-causal-v1-runner.ts"
       - "lib/disdex-v96-live-risk-controls.ts"
       - "tests/q102-risk-block-freshness.test.ts"
+      - "scripts/disdex-quality102-causal-v1-monitor.ts"
+      - "tests/quality102-monitor-only.test.ts"
       - "docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json"
       - ".github/workflows/disdex-stable4-safety-repair-candidate-ci.yml"
   workflow_dispatch:
@@ -85,6 +87,12 @@ jobs:
           set -Eeuo pipefail
           npm ci --ignore-scripts --no-audit --no-fund
           npx tsx --test tests/q102-risk-block-freshness.test.ts
+
+      - name: Run Q102 monitor-only contract tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npx tsx --test tests/quality102-monitor-only.test.ts
 
       - name: Publish candidate identity manifest
         shell: bash
