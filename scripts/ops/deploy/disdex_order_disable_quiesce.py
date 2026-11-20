@@ -31,8 +31,8 @@ from disdex_owner_approval import verify as verify_owner_token
 CURRENT_PLAN = Path("/var/lib/disdex/unified-deploy/current-plan.json")
 HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
 CURRENT_RELEASE = Path("/home/deploy/disdex-trading/current")
-DEFAULT_PUBLIC_KEY = Path("/var/lib/unified-deploy/owner-approval-public.pem")
-DEFAULT_NONCE_DIR = Path("/var/lib/unified-deploy/nonces")
+DEFAULT_PUBLIC_KEY = Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem")
+DEFAULT_NONCE_DIR = Path("/var/lib/disdex/unified-deploy/nonces")
 BACKUP_ROOT = Path("/var/backups/disdex-order-disable-quiesce")
 
 REPO = "dunamishajime-bit/-ai-dex-manager"

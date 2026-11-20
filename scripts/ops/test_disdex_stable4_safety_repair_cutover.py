@@ -50,6 +50,16 @@ def valid_plan():
 
 
 class Stable4SafetyRepairTests(unittest.TestCase):
+    def test_default_operator_paths_use_disdex_unified_deploy_root(self):
+        self.assertEqual(
+            module.DEFAULT_PUBLIC_KEY,
+            Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem"),
+        )
+        self.assertEqual(
+            module.DEFAULT_NONCE_DIR,
+            Path("/var/lib/disdex/unified-deploy/nonces"),
+        )
+
     def test_plan_is_monitor_only_and_fail_closed(self):
         self.assertTrue(module.validate_plan(valid_plan()))
         bad = valid_plan()
