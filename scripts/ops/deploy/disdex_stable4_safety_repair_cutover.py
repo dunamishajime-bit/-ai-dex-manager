@@ -164,6 +164,18 @@ def active(unit: str) -> bool:
     return unit_property(unit, "ActiveState") == "active"
 
 
+def old_runner_mode(v52_active: bool, q102_active: bool) -> str:
+    """Classify the pre-cutover generation without assuming it is running.
+
+    A safety repair may be needed precisely because both old instances are
+    already stopped. Treat that symmetric, flat state as a valid baseline,
+    but fail closed on a partial stop so that we never start a new generation
+    while one old instance is still serving.
+    """
+    require(v52_active == q102_active, "OLD_RUNNERS_PARTIAL_ACTIVE")
+    return "active" if v52_active else "inactive"
+
+
 def unit_release_matches(unit: str, expected: str) -> None:
     pid = int(unit_property(unit, "MainPID") or "0")
     require(pid > 100, "RUNNER_PID_INVALID:" + unit)
@@ -274,11 +286,18 @@ def validate_shared_files() -> None:
             "PENDING_EXPOSURE_ACTIVE")
 
 
-def validate_baseline() -> tuple[bytes, bytes, bytes, dict, dict, str]:
+def validate_baseline() -> tuple[bytes, bytes, bytes, dict, dict, str, str]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
-    require(active(V52_UNIT_OLD) and active(Q102_UNIT_OLD), "OLD_RUNNERS_NOT_ACTIVE")
-    unit_release_matches(V52_UNIT_OLD, V52_OLD)
-    unit_release_matches(Q102_UNIT_OLD, Q102_OLD)
+    old_mode = old_runner_mode(active(V52_UNIT_OLD), active(Q102_UNIT_OLD))
+    if old_mode == "active":
+        unit_release_matches(V52_UNIT_OLD, V52_OLD)
+        unit_release_matches(Q102_UNIT_OLD, Q102_OLD)
+    else:
+        # The stopped baseline is intentional for a safety repair. Still
+        # require both reviewed instances to resolve from systemd so a typo or
+        # missing unit cannot be mistaken for a recoverable stop.
+        require(unit_property(V52_UNIT_OLD, "LoadState") == "loaded", "OLD_UNIT_NOT_LOADED:V52")
+        require(unit_property(Q102_UNIT_OLD, "LoadState") == "loaded", "OLD_UNIT_NOT_LOADED:Q102")
     validate_target_units()
     require(not active(V52_UNIT_NEW) and not active(Q102_UNIT_NEW), "TARGET_RUNNER_ALREADY_ACTIVE")
     require((CURRENT / ".disdex-release-sha").read_text().strip() != TARGET, "CURRENT_RELEASE_CANDIDATE_UNEXPECTED")
@@ -298,7 +317,7 @@ def validate_baseline() -> tuple[bytes, bytes, bytes, dict, dict, str]:
     observations = [signed_get() for _ in range(3)]
     require(len({x[0] for x in observations}) == 3, "SIGNED_GET_TIMESTAMPS_NOT_UNIQUE")
     require(len({x[2] for x in observations}) == 1, "VENUE_INVENTORY_CHANGED_PRECUTOVER")
-    return pins_raw, plan_raw, hold_raw, pins, plan, observations[-1][2]
+    return pins_raw, plan_raw, hold_raw, pins, plan, observations[-1][2], old_mode
 
 
 def file_meta(path: Path) -> tuple[int, int, int]:
@@ -441,7 +460,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
     verify_owner_token(approval_token, public_key, REPO, TARGET, SCOPE, OPERATOR, PLAN_SHA256,
                        nonce_dir=str(nonce_dir), route=ROUTE, deployment_target=DEPLOYMENT_TARGET,
                        operator_target="DD1296_FINAL_ALLIN_10BPS", orders_enabled=False)
-    baseline_pins, baseline_plan, baseline_hold, _pins, _plan, baseline_digest = validate_baseline()
+    baseline_pins, baseline_plan, baseline_hold, _pins, _plan, baseline_digest, old_mode = validate_baseline()
     baseline_state = read_regular(Q102_STATE, require_root=True)
     baseline_v52_pin = read_regular(V52_PIN, require_root=True)
     metadata = {p: file_meta(p) for p in (Q102_STATE, V52_PIN, PINS, CURRENT_PLAN)}
@@ -455,9 +474,11 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
         require(now_hold == baseline_hold and now_digest == HOLD_DIGEST, "GLOBAL_HOLD_CHANGED_PRECUTOVER")
         _stamp, _inventory, digest = signed_get()
         require(digest == baseline_digest, "VENUE_CHANGED_PRECUTOVER")
-        require(active(V52_UNIT_OLD) and active(Q102_UNIT_OLD), "OLD_RUNNER_CHANGED_PRECUTOVER")
-        run("/usr/bin/systemctl", "stop", Q102_UNIT_OLD, timeout=90)
-        run("/usr/bin/systemctl", "stop", V52_UNIT_OLD, timeout=90)
+        require(old_runner_mode(active(V52_UNIT_OLD), active(Q102_UNIT_OLD)) == old_mode,
+                "OLD_RUNNER_CHANGED_PRECUTOVER")
+        if old_mode == "active":
+            run("/usr/bin/systemctl", "stop", Q102_UNIT_OLD, timeout=90)
+            run("/usr/bin/systemctl", "stop", V52_UNIT_OLD, timeout=90)
         require(not active(V52_UNIT_OLD) and not active(Q102_UNIT_OLD), "OLD_RUNNER_STILL_ACTIVE")
         stopped_state = read_json(Q102_STATE)
         require(stopped_state.get("runtimeCommitSha") == Q102_OLD
@@ -523,11 +544,15 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
             run("/usr/bin/systemctl", "daemon-reload", timeout=30)
             if old_q102_enabled: run("/usr/bin/systemctl", "enable", Q102_UNIT_OLD, check=False)
             if old_v52_enabled: run("/usr/bin/systemctl", "enable", V52_UNIT_OLD, check=False)
-            run("/usr/bin/systemctl", "start", Q102_UNIT_OLD, timeout=100)
-            run("/usr/bin/systemctl", "start", V52_UNIT_OLD, timeout=100)
-            wait_stable(Q102_UNIT_OLD, Q102_OLD, timeout=100)
-            wait_stable(V52_UNIT_OLD, V52_OLD, timeout=100)
-            require(active(Q102_UNIT_OLD) and active(V52_UNIT_OLD), "ROLLBACK_OLD_RUNNERS_NOT_ACTIVE")
+            if old_mode == "active":
+                run("/usr/bin/systemctl", "start", Q102_UNIT_OLD, timeout=100)
+                run("/usr/bin/systemctl", "start", V52_UNIT_OLD, timeout=100)
+                wait_stable(Q102_UNIT_OLD, Q102_OLD, timeout=100)
+                wait_stable(V52_UNIT_OLD, V52_OLD, timeout=100)
+                require(active(Q102_UNIT_OLD) and active(V52_UNIT_OLD), "ROLLBACK_OLD_RUNNERS_NOT_ACTIVE")
+            else:
+                require(not active(Q102_UNIT_OLD) and not active(V52_UNIT_OLD),
+                        "ROLLBACK_OLD_RUNNERS_UNEXPECTEDLY_ACTIVE")
             _r, _v, rollback_hold_digest = hold_snapshot()
             require(rollback_hold_digest == HOLD_DIGEST, "ROLLBACK_HOLD_CHANGED")
             release = BASE / TARGET
@@ -567,10 +592,10 @@ def main() -> int:
             verify_owner_token(token, args.public_key, REPO, TARGET, SCOPE, OPERATOR, PLAN_SHA256,
                                route=ROUTE, deployment_target=DEPLOYMENT_TARGET,
                                operator_target="DD1296_FINAL_ALLIN_10BPS", orders_enabled=False)
-            _pins, _plan, _hold, _p, _cp, digest = validate_baseline()
+            _pins, _plan, _hold, _p, _cp, digest, old_mode = validate_baseline()
             print(json.dumps({"status": "STABLE4_SAFETY_REPAIR_PREFLIGHT_PASS", "signedGets": 3,
                               "inventoryDigest": digest, "globalHoldDigest": HOLD_DIGEST,
-                              "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0,
+                              "oldRunnerMode": old_mode, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0,
                               "positionChangesSent": 0}, sort_keys=True))
         else:
             require(args.tar is not None and args.manifest is not None, "CANDIDATE_ARCHIVE_REQUIRED")
