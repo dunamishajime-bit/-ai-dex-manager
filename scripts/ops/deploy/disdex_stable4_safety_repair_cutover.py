@@ -276,6 +276,21 @@ def _systemd_failure_context(unit: str) -> str:
     except (OSError, subprocess.SubprocessError):
         pass
     try:
+        status = subprocess.run(
+            ["/usr/bin/systemctl", "status", unit, "--no-pager", "--full"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if status.returncode == 0:
+            for raw in status.stdout.splitlines():
+                line = _sanitize_failure_text(raw, 180)
+                if line and line != "[redacted]" and re.search(
+                    r"(?i)(?:process:|execstartpre|code=|status=|loaded:|active:|failed|error|not found|permission)",
+                    line,
+                ):
+                    parts.append("status=" + line)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    try:
         journal = subprocess.run(
             ["/usr/bin/journalctl", "-u", unit, "-n", "8", "--no-pager", "-o", "cat"],
             capture_output=True, text=True, timeout=10,
