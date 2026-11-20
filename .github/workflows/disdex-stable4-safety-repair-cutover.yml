@@ -238,6 +238,9 @@ jobs:
           test -f "$state"
           test ! -L "$state"
           command -v runuser >/dev/null
+          setfacl_path="$(command -v setfacl || true)"
+          deploy_gid="$(getent passwd deploy | awk -F: 'NR == 1 { print $4 }' || true)"
+          echo "Q102_ACCESS_DIAGNOSTIC=parent:$(stat -c '%u:%g:%a' "$parent") state:$(stat -c '%u:%g:%a' "$state") setfacl:$([[ -n "$setfacl_path" ]] && echo FOUND || echo MISSING) deploy_gid:${deploy_gid:-MISSING}"
           mode_before="$(stat -c '%a' "$state")"
           case "$mode_before" in
             600|640) ;;
