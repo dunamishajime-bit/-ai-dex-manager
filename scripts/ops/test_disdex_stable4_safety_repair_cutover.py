@@ -304,6 +304,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertIn("disdex-quality102-causal-v1-monitor.ts --daemon", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_MONITOR_ONLY=true", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
+        self.assertIn("ExecStart=/bin/sh -ec 'export DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false", q102)
+        self.assertIn("QUALITY102_CAUSAL_V1_ENABLED=false", q102)
 
     def test_v52_launcher_is_manifested_by_formal_workflow(self):
         workflow = (
