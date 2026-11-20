@@ -237,19 +237,32 @@ jobs:
           test ! -L "$parent"
           test -f "$state"
           test ! -L "$state"
-          test "$(stat -c '%a' "$state")" = '600'
+          command -v setfacl >/dev/null
+          command -v runuser >/dev/null
+          mode_before="$(stat -c '%a' "$state")"
+          case "$mode_before" in
+            600|640) ;;
+            *) echo "Q102_STATE_MODE_UNEXPECTED=$mode_before"; exit 1 ;;
+          esac
           before="$(sha256sum "$state" | awk '{print $1}')"
           owner_before="$(stat -c '%u:%g:%a' "$state")"
           case "$owner_before" in
-            0:0:600) ;;
-            1000:1000:600) chown root:root "$state" ;;
+            0:0:600|0:0:640) ;;
+            1000:1000:600|1000:1000:640) chown root:root "$state" ;;
             *) echo "Q102_STATE_OWNER_UNEXPECTED=$owner_before"; exit 1 ;;
           esac
+          # Keep the state root-owned while granting only the canonical Margin
+          # Guard deploy user traversal/read access.  ACL application changes
+          # metadata, never the state bytes, and is verified as deploy.
+          setfacl -m u:deploy:--x "$parent"
+          setfacl -m u:deploy:r-- "$state"
+          runuser -u deploy -- /usr/bin/test -r "$state"
           after="$(sha256sum "$state" | awk '{print $1}')"
           test "$before" = "$after"
-          test "$(stat -c '%u:%g:%a' "$state")" = '0:0:600'
-          echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:0:600"
+          test "$(stat -c '%u:%g:%a' "$state")" = '0:0:640'
+          echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:0:640"
           echo "Q102_STATE_SHA256_UNCHANGED=$after"
+          echo "Q102_STATE_DEPLOY_READ_ACL_PASS=TRUE"
           REMOTE
 
       - name: Repair shared Margin Guard metadata without changing bytes
