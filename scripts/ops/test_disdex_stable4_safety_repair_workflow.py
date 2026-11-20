@@ -17,6 +17,9 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
             "--preflight-readonly",
             "--execute-approved",
             "three signed GETs",
+            "Repair Q102 state ownership without changing bytes",
+            "/var/lib/disdex/quality102-causal-v1/state.json",
+            "Q102_STATE_SHA256_UNCHANGED=",
         ):
             self.assertIn(value, text)
         self.assertNotIn("ALL_RUNNERS_ORDER_ENABLE", text)

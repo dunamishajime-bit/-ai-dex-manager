@@ -218,6 +218,40 @@ jobs:
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" -P "$PORT" \
             "root@$HOST" "chown -R root:root '$remote'; chmod 0700 '$remote'; chmod 0600 '$remote'/*"
 
+      - name: Repair Q102 state ownership without changing bytes
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          state=/var/lib/disdex/quality102-causal-v1/state.json
+          parent=/var/lib/disdex/quality102-causal-v1
+          test -d "$parent"
+          test ! -L "$parent"
+          test -f "$state"
+          test ! -L "$state"
+          test "$(stat -c '%a' "$state")" = '600'
+          before="$(sha256sum "$state" | awk '{print $1}')"
+          owner_before="$(stat -c '%u:%g:%a' "$state")"
+          case "$owner_before" in
+            0:0:600) ;;
+            1000:1000:600) chown root:root "$state" ;;
+            *) echo "Q102_STATE_OWNER_UNEXPECTED=$owner_before"; exit 1 ;;
+          esac
+          after="$(sha256sum "$state" | awk '{print $1}')"
+          test "$before" = "$after"
+          test "$(stat -c '%u:%g:%a' "$state")" = '0:0:600'
+          echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:0:600"
+          echo "Q102_STATE_SHA256_UNCHANGED=$after"
+          REMOTE
+
       - name: Root read-only preflight (three signed GETs)
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
