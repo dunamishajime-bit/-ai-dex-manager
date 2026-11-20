@@ -98,6 +98,7 @@ const USE_REDIS = Boolean(KV_URL && KV_TOKEN);
 const KEY_PREFIX = "disdex:deploy-approval:";
 const LATEST_KEY = "disdex:deploy-approval:latest";
 const HISTORY_KEY = "disdex:deploy-approval:history";
+const GOAL_INDEX_PREFIX = "disdex:deploy-goal:";
 const HISTORY_LIMIT = 50;
 const MONITOR_ONLY_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const MONITOR_ONLY_RETENTION_LIMIT = 100;
@@ -208,6 +209,10 @@ export async function mutateDeploymentApprovalAtomic<T>(
         next,
         touchLatest: false,
         persistentRecord: Boolean(next.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(next.status)),
+        ...(next.goal ? {
+          goalIndexKey: GOAL_INDEX_PREFIX + next.goal.fingerprint,
+          goalActive: !["COMPLETED", "EXPIRED", "FAILED"].includes(next.status),
+        } : {}),
       });
       if (cas === "SWAPPED") return result.result;
       if (cas === "INVALID_STORED_VALUE") {
@@ -338,6 +343,10 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
       next: persisted,
       touchLatest: true,
       persistentRecord: Boolean(persisted.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(persisted.status)),
+      ...(persisted.goal ? {
+        goalIndexKey: GOAL_INDEX_PREFIX + persisted.goal.fingerprint,
+        goalActive: !["COMPLETED", "EXPIRED", "FAILED"].includes(persisted.status),
+      } : {}),
     });
     if (cas === "INVALID_STORED_VALUE") {
       throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE");
@@ -493,8 +502,34 @@ export async function createPendingOwnerGoal(input: {
         record.requestExpiresAt > Date.now()) return record;
     throw new Error("GOAL_NOT_REUSABLE");
   }
-  // Avoid a duplicate OTP after a source revision. The explicit goalId remains
-  // authoritative if the goal has fallen out of the bounded UI history.
+  // Durable index prevents duplicate OTP even if unrelated HP approvals
+  // displaced the goal from the last-50 approval history display.
+  if (USE_REDIS) {
+    const redis = await redisClient();
+    const id = await redis.get<string>(GOAL_INDEX_PREFIX + input.goal.fingerprint);
+    if (id) {
+      const row = await getDeploymentApproval(id);
+      if (row?.goal && row.requestActor === input.actor) {
+        if (isReusableOwnerGoal({
+          status: row.status, approvedAt: row.approvedAt,
+          goal: row.goal, requested: input.goal,
+        })) return row;
+        if (["PENDING", "OTP_SENT"].includes(row.status) &&
+            row.requestExpiresAt > Date.now()) return row;
+      }
+    }
+  } else {
+    const existing = loadFileRecords().find((row) =>
+      row.goal?.fingerprint === input.goal.fingerprint &&
+      row.requestActor === input.actor &&
+      (isReusableOwnerGoal({
+        status: row.status, approvedAt: row.approvedAt,
+        goal: row.goal, requested: input.goal,
+      }) ||
+       (["PENDING", "OTP_SENT"].includes(row.status) &&
+        row.requestExpiresAt > Date.now())));
+    if (existing) return existing;
+  }
   const history = await getDeploymentApprovalHistory();
   const active = history.find((row) =>
     row.requestActor === input.actor &&
