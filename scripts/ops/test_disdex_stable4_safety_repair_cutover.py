@@ -346,6 +346,57 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         )
         self.assertTrue(module.validate_monitor_heartbeat(v52_value, sha, v52_unit, "V52"))
 
+    def test_poll_cycles_identifies_blocked_runner_and_reason(self):
+        sha = module.TARGET
+        q102_unit = f"disdex-quality102-causal-v1@{sha}.service"
+        q102 = {
+            "schema": "disdex-runner-tick/v1",
+            "runnerId": "QUALITY102_CAUSAL_V1",
+            "runtimeSha": sha,
+            "expectedSha": sha,
+            "serviceUnit": q102_unit,
+            "status": "blocked",
+            "reason": "QUALITY102_MONITOR_READ_FAILED:state stale",
+            "mode": "MONITOR_ONLY",
+            "newOrdersAllowed": False,
+            "permissionEvaluation": "MONITOR_ONLY_NO_ORDER_PATH",
+            "ordersSent": 0,
+            "cancelsSent": 0,
+            "positionChangesSent": 0,
+            "stateChanged": False,
+            "updatedAt": "2026-11-21T00:00:00Z",
+        }
+        v52 = dict(q102,
+            schema="disdex-v52-monitor-heartbeat/v1",
+            runnerId="V52_MONITOR",
+            serviceUnit=f"disdex-v52-aster-only@{sha}.service",
+            status="observing",
+            reason="ok",
+        )
+
+        class FakePath:
+            def __init__(self, value):
+                self.value = value
+
+            def is_file(self):
+                return True
+
+            def is_symlink(self):
+                return False
+
+            def read_bytes(self):
+                return json.dumps(self.value).encode("utf-8")
+
+            def stat(self):
+                return SimpleNamespace(st_mtime_ns=1)
+
+        with patch.object(module, "HEARTBEATS", {"Q102": FakePath(q102), "V52": FakePath(v52)}):
+            with self.assertRaisesRegex(
+                module.ContractError,
+                r"MONITOR_HEARTBEAT_STATUS_INVALID:runner=Q102:status=blocked:reason=QUALITY102_MONITOR_READ_FAILED:state stale",
+            ):
+                module.poll_cycles({"Q102": (0, ""), "V52": (0, "")}, timeout=1)
+
 
 if __name__ == "__main__":
     unittest.main()
