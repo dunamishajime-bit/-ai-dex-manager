@@ -7,6 +7,9 @@ import {
   type DeploymentApprovalScope,
 } from "@/lib/deploy-approval-token";
 import { redisApprovalCompareAndSwap } from "@/lib/server/deploy-approval-redis-cas";
+import {
+  type GoalApproval, assertSameOwnerGoal, isReusableOwnerGoal,
+} from "@/lib/owner-goal-approval";
 
 export type DeploymentApprovalStatus =
   | "PENDING"
@@ -57,6 +60,27 @@ export type DeploymentApprovalRecord = {
   taskClaimHistory?: Array<{
     step: string;
     runId: string;
+    claimedAt: number;
+    finishedAt?: number;
+    outcome?: "success" | "failure";
+  }>;
+  /** One Owner OTP for this stable goal, not for any particular code SHA. */
+  goal?: GoalApproval;
+  goalClaimCount?: number;
+  goalActiveClaim?: {
+    runId: string;
+    candidateSha: string;
+    planSha256: string;
+    ciRunId: string;
+    ordersEnabled: boolean;
+    claimedAt: number;
+  };
+  goalClaimHistory?: Array<{
+    runId: string;
+    candidateSha: string;
+    planSha256: string;
+    ciRunId: string;
+    ordersEnabled: boolean;
     claimedAt: number;
     finishedAt?: number;
     outcome?: "success" | "failure";
@@ -116,6 +140,12 @@ function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const retained = new Map<string, DeploymentApprovalRecord>();
   for (const record of sorted.slice(0, HISTORY_LIMIT)) retained.set(record.id, record);
   for (const record of retryableMonitor) retained.set(record.id, record);
+  // Goal approvals remain durable until the requested objective completes or
+  // the Owner revokes it. The signed child tokens remain 300-second one-use.
+  const activeGoals = sorted.filter((record) =>
+    record.goal &&
+    ["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status));
+  for (const record of activeGoals) retained.set(record.id, record);
   const persisted = Array.from(retained.values()).sort((a, b) => b.createdAt - a.createdAt);
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${crypto.randomUUID()}`;
   fs.writeFileSync(tmp, JSON.stringify(persisted, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
@@ -177,6 +207,7 @@ export async function mutateDeploymentApprovalAtomic<T>(
         current,
         next,
         touchLatest: false,
+        persistentRecord: Boolean(next.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(next.status)),
       });
       if (cas === "SWAPPED") return result.result;
       if (cas === "INVALID_STORED_VALUE") {
@@ -306,6 +337,7 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
       current,
       next: persisted,
       touchLatest: true,
+      persistentRecord: Boolean(persisted.goal && !["COMPLETED", "EXPIRED", "FAILED"].includes(persisted.status)),
     });
     if (cas === "INVALID_STORED_VALUE") {
       throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE");
@@ -433,4 +465,59 @@ export async function createPendingDeploymentApproval(input: {
     status: "PENDING",
   };
   return saveDeploymentApproval(record);
+}
+
+
+/** Publish one immutable Owner objective; subsequent candidate SHA/plan
+ * revisions are claimed against this approved record, not via a new OTP. */
+export async function createPendingOwnerGoal(input: {
+  goal: GoalApproval;
+  actor: string;
+  existingGoalId?: string;
+}) {
+  assertSameOwnerGoal(input.goal);
+  if (!/^[A-Za-z0-9-]{1,39}$/.test(input.actor)) {
+    throw new Error("GOAL_ACTOR_INVALID");
+  }
+  if (input.existingGoalId) {
+    const record = await getDeploymentApproval(input.existingGoalId);
+    if (!record?.goal || record.requestActor !== input.actor ||
+        record.goal.fingerprint !== input.goal.fingerprint) {
+      throw new Error("GOAL_IDENTITY_MISMATCH");
+    }
+    if (isReusableOwnerGoal({
+      status: record.status, approvedAt: record.approvedAt,
+      goal: record.goal, requested: input.goal,
+    })) return record;
+    if (["PENDING", "OTP_SENT"].includes(record.status) &&
+        record.requestExpiresAt > Date.now()) return record;
+    throw new Error("GOAL_NOT_REUSABLE");
+  }
+  // Avoid a duplicate OTP after a source revision. The explicit goalId remains
+  // authoritative if the goal has fallen out of the bounded UI history.
+  const history = await getDeploymentApprovalHistory();
+  const active = history.find((row) =>
+    row.requestActor === input.actor &&
+    isReusableOwnerGoal({
+      status: row.status, approvedAt: row.approvedAt,
+      goal: row.goal, requested: input.goal,
+    }));
+  if (active) return active;
+  const now = Date.now();
+  return saveDeploymentApproval({
+    id: crypto.randomUUID(),
+    goal: input.goal,
+    scope: input.goal.scope,
+    operation: input.goal.operation,
+    ordersEnabled: input.goal.ordersEnabled,
+    targetSha: "0".repeat(40), // goal charter, not a deployable candidate
+    planSha256: input.goal.fingerprint,
+    requestActor: input.actor,
+    createdAt: now,
+    requestExpiresAt: now + 30 * 60 * 1000,
+    updatedAt: now,
+    status: "PENDING",
+    goalClaimCount: 0,
+    goalClaimHistory: [],
+  });
 }
