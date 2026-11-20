@@ -53,17 +53,21 @@ jobs:
         shell: bash
         env:
           RUNNER: ${{ inputs.runner }}
+          GOAL_ID_INPUT: ${{ inputs.goal_id }}
+          TASK_ID_INPUT: ${{ inputs.task_id }}
+          CI_RUN_ID_INPUT: ${{ inputs.ci_run_id }}
+          GOAL_PLAN_INPUT: ${{ inputs.goal_plan_sha256 }}
         run: |
           set -euo pipefail
           # Select exactly one legacy task or a purpose-scoped Owner campaign.
-          if [[ -n "${{ inputs.goal_id }}" ]]; then
-            [[ -z "${{ inputs.task_id }}" ]]
-            [[ "${{ inputs.goal_id }}" =~ ^[0-9a-fA-F-]{36}$ ]]
-            [[ "${{ inputs.ci_run_id }}" =~ ^[0-9]{1,20}$ ]]
-            [[ "${{ inputs.goal_plan_sha256 }}" =~ ^[0-9a-f]{64}$ ]]
+          if [[ -n "$GOAL_ID_INPUT" ]]; then
+            [[ -z "$TASK_ID_INPUT" ]]
+            [[ "$GOAL_ID_INPUT" =~ ^[0-9a-fA-F-]{36}$ ]]
+            [[ "$CI_RUN_ID_INPUT" =~ ^[0-9]{1,20}$ ]]
+            [[ "$GOAL_PLAN_INPUT" =~ ^[0-9a-f]{64}$ ]]
           else
-            [[ "${{ inputs.task_id }}" =~ ^[0-9a-fA-F-]{36}$ ]]
-            [[ -z "${{ inputs.ci_run_id }}" && -z "${{ inputs.goal_plan_sha256 }}" ]]
+            [[ "$TASK_ID_INPUT" =~ ^[0-9a-fA-F-]{36}$ ]]
+            [[ -z "$CI_RUN_ID_INPUT" && -z "$GOAL_PLAN_INPUT" ]]
           fi
           if [[ "$RUNNER" == "V4" ]]; then
             echo "step=V4_LIVE_RECOVER" >> "$GITHUB_OUTPUT"
