@@ -272,12 +272,18 @@ jobs:
           if [[ "$access_method" == posix ]]; then
             deploy_gid="$(getent group deploy | awk -F: 'NR == 1 { print $3 }')"
             [[ "$deploy_gid" =~ ^[0-9]+$ ]]
+            deploy_uid="$(getent passwd deploy | awk -F: 'NR == 1 { print $3 }')"
+            [[ "$deploy_uid" =~ ^[0-9]+$ ]]
             parent_uid="$(stat -c '%u' "$parent")"
-            [[ "$parent_uid" == 0 ]]
-            chown root:deploy "$parent"
-            chmod g+x "$parent"
+            parent_gid="$(stat -c '%g' "$parent")"
+            if [[ "$parent_uid" != 0 && ( "$parent_uid" != "$deploy_uid" || "$parent_gid" != "$deploy_gid" ) ]]; then
+              echo "Q102_STATE_PARENT_OWNER_UNEXPECTED=${parent_uid}:${parent_gid}"
+              exit 1
+            fi
+            runuser -u deploy -- /usr/bin/test -x "$parent"
             chown root:deploy "$state"
             chmod g+r "$state"
+            echo "Q102_STATE_PARENT_TRAVERSAL_PASS=TRUE"
           fi
           runuser -u deploy -- /usr/bin/test -r "$state"
           after="$(sha256sum "$state" | awk '{print $1}')"

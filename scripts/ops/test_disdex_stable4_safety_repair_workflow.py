@@ -26,7 +26,7 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
             "getent group deploy",
             "chown root:deploy",
             "chmod g+r",
-            "chmod g+x",
+            "test -x \"$parent\"",
             "Q102_STATE_DEPLOY_READ_POSIX_PASS=",
             "Repair shared Margin Guard metadata without changing bytes",
             "/var/lib/disdex/shared/margin-risk/guard-live.json",
