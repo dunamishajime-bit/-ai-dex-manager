@@ -75,6 +75,8 @@ const KEY_PREFIX = "disdex:deploy-approval:";
 const LATEST_KEY = "disdex:deploy-approval:latest";
 const HISTORY_KEY = "disdex:deploy-approval:history";
 const HISTORY_LIMIT = 50;
+const MONITOR_ONLY_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000;
+const MONITOR_ONLY_RETENTION_LIMIT = 100;
 const FILE_PATH =
   process.env.DISDEX_DEPLOY_APPROVAL_STORE_PATH ||
   path.join(process.cwd(), "data", "deploy-approvals.json");
@@ -98,8 +100,25 @@ function loadFileRecords(): DeploymentApprovalRecord[] {
 function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const dir = path.dirname(FILE_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const sorted = records.slice().sort((a, b) => b.createdAt - a.createdAt);
+  // The UI history remains bounded, but an exact orders-disabled monitor
+  // approval must survive that display bound until its retry window ends.
+  // Otherwise a later bounded GitHub Actions retry would incorrectly return
+  // APPROVAL_NOT_FOUND and force the Owner through OTP again.
+  const retryableMonitor = sorted
+    .filter((record) =>
+      record.operation === "ALL_RUNNERS_MONITOR_REFRESH" &&
+      record.ordersEnabled === false &&
+      Number.isFinite(record.approvedAt) &&
+      Number(record.approvedAt) + MONITOR_ONLY_RETRY_WINDOW_MS > Date.now(),
+    )
+    .slice(0, MONITOR_ONLY_RETENTION_LIMIT);
+  const retained = new Map<string, DeploymentApprovalRecord>();
+  for (const record of sorted.slice(0, HISTORY_LIMIT)) retained.set(record.id, record);
+  for (const record of retryableMonitor) retained.set(record.id, record);
+  const persisted = Array.from(retained.values()).sort((a, b) => b.createdAt - a.createdAt);
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${crypto.randomUUID()}`;
-  fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
+  fs.writeFileSync(tmp, JSON.stringify(persisted, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
   try {
     fs.renameSync(tmp, FILE_PATH);
   } finally {
@@ -178,7 +197,7 @@ export async function mutateDeploymentApprovalAtomic<T>(
       const updated = records.filter((record) => record.id !== id);
       updated.push(next);
       updated.sort((a, b) => b.createdAt - a.createdAt);
-      saveFileRecords(updated.slice(0, 50));
+      saveFileRecords(updated);
     }
     return result.result;
   });
@@ -307,7 +326,7 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
     const records = existing.filter((item) => item.id !== next.id);
     records.push(persisted);
     records.sort((a, b) => b.createdAt - a.createdAt);
-    saveFileRecords(records.slice(0, 50));
+    saveFileRecords(records);
     return persisted;
   });
 }
