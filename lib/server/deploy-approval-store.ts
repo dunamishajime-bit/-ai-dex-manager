@@ -502,57 +502,69 @@ export async function createPendingOwnerGoal(input: {
         record.requestExpiresAt > Date.now()) return record;
     throw new Error("GOAL_NOT_REUSABLE");
   }
-  // Durable index prevents duplicate OTP even if unrelated HP approvals
-  // displaced the goal from the last-50 approval history display.
-  if (USE_REDIS) {
-    const redis = await redisClient();
-    const id = await redis.get<string>(GOAL_INDEX_PREFIX + input.goal.fingerprint);
-    if (id) {
-      const row = await getDeploymentApproval(id);
-      if (row?.goal && row.requestActor === input.actor) {
-        if (isReusableOwnerGoal({
-          status: row.status, approvedAt: row.approvedAt,
-          goal: row.goal, requested: input.goal,
-        })) return row;
-        if (["PENDING", "OTP_SENT"].includes(row.status) &&
-            row.requestExpiresAt > Date.now()) return row;
-      }
-    }
-  } else {
-    const existing = loadFileRecords().find((row) =>
-      row.goal?.fingerprint === input.goal.fingerprint &&
-      row.requestActor === input.actor &&
-      (isReusableOwnerGoal({
-        status: row.status, approvedAt: row.approvedAt,
-        goal: row.goal, requested: input.goal,
-      }) ||
-       (["PENDING", "OTP_SENT"].includes(row.status) &&
-        row.requestExpiresAt > Date.now())));
-    if (existing) return existing;
-  }
-  const history = await getDeploymentApprovalHistory();
-  const active = history.find((row) =>
+  const reusable = (row: DeploymentApprovalRecord) =>
     row.requestActor === input.actor &&
-    isReusableOwnerGoal({
+    row.goal?.fingerprint === input.goal.fingerprint &&
+    (isReusableOwnerGoal({
       status: row.status, approvedAt: row.approvedAt,
       goal: row.goal, requested: input.goal,
-    }));
+    }) ||
+    (["PENDING", "OTP_SENT"].includes(row.status) &&
+      row.requestExpiresAt > Date.now()));
+
+  const buildRecord = (): DeploymentApprovalRecord => {
+    const now = Date.now();
+    return {
+      id: crypto.randomUUID(),
+      goal: input.goal,
+      scope: input.goal.scope,
+      operation: input.goal.operation,
+      ordersEnabled: input.goal.ordersEnabled,
+      targetSha: "0".repeat(40), // goal charter, not executable source
+      planSha256: input.goal.fingerprint,
+      requestActor: input.actor,
+      createdAt: now,
+      requestExpiresAt: now + 30 * 60 * 1000,
+      updatedAt: now,
+      status: "PENDING",
+      goalClaimCount: 0,
+      goalClaimHistory: [],
+    };
+  };
+
+  if (!USE_REDIS) {
+    // Resolve and write under *one* lock. Concurrent requests for the same
+    // purpose must result in one Owner OTP, even on the file-backed HP.
+    return withFileLock(() => {
+      const records = loadFileRecords();
+      const active = records.find(reusable);
+      if (active) return active;
+      const next = { ...buildRecord(), storeRevision: crypto.randomUUID() };
+      saveFileRecords([...records, next]);
+      return next;
+    });
+  }
+
+  // Durable Redis goal index is independent of the last-50 UI history.
+  // The Redis CAS also refuses another ID for an active same-goal index.
+  const redis = await redisClient();
+  const index = GOAL_INDEX_PREFIX + input.goal.fingerprint;
+  const id = await redis.get<string>(index);
+  if (id) {
+    const row = await getDeploymentApproval(id);
+    if (row && reusable(row)) return row;
+  }
+  const active = (await getDeploymentApprovalHistory()).find(reusable);
   if (active) return active;
-  const now = Date.now();
-  return saveDeploymentApproval({
-    id: crypto.randomUUID(),
-    goal: input.goal,
-    scope: input.goal.scope,
-    operation: input.goal.operation,
-    ordersEnabled: input.goal.ordersEnabled,
-    targetSha: "0".repeat(40), // goal charter, not a deployable candidate
-    planSha256: input.goal.fingerprint,
-    requestActor: input.actor,
-    createdAt: now,
-    requestExpiresAt: now + 30 * 60 * 1000,
-    updatedAt: now,
-    status: "PENDING",
-    goalClaimCount: 0,
-    goalClaimHistory: [],
-  });
+
+  try {
+    return await saveDeploymentApproval(buildRecord());
+  } catch (error) {
+    // A competing request may have just created this exact goal. In that
+    // case reuse its ID, not a second OTP; all other conflicts fail closed.
+    const concurrentId = await redis.get<string>(index);
+    const concurrent = concurrentId ? await getDeploymentApproval(concurrentId) : null;
+    if (concurrent && reusable(concurrent)) return concurrent;
+    throw error;
+  }
 }
