@@ -9,6 +9,8 @@ on:
       - "tests/owner-goal-approval.test.ts"
       - ".github/workflows/disdex-owner-goal-candidate-ci.yml"
       - ".github/workflows/disdex-owner-goal-approval-request.yml"
+      - ".github/workflows/disdex-v4-formal-production-live.yml"
+      - ".github/workflows/disdex-allrunner-v4-idle-live-resume.yml"
       - "lib/server/deploy-approval-store.ts"
       - "lib/server/deploy-approval-redis-cas.ts"
       - "lib/server/owner-session.ts"
