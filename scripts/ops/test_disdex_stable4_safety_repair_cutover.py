@@ -129,6 +129,11 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             "CUTOVER_BLOCKED:ContractError:TARGET_RESTART_COUNT_CHANGED",
         )
 
+    def test_cutover_blocked_reason_keeps_systemd_context_before_truncation(self):
+        detail = "COMMAND_FAILED:systemctl start unit.service:" + ("generic " * 80) + "|show=ActiveState=failed"
+        blocked = module.cutover_blocked_reason(module.ContractError(detail))
+        self.assertIn("show=ActiveState=failed", blocked)
+
     def test_run_failure_identifies_the_systemd_operation(self):
         result = SimpleNamespace(returncode=1, stdout="", stderr="systemd failure")
         with patch.object(module.subprocess, "run", return_value=result):
