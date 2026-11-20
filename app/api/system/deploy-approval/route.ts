@@ -165,9 +165,15 @@ export async function POST(request: NextRequest) {
         }
         const now = Date.now();
         if (record.goalActiveClaim &&
-            record.goalActiveClaim.runId !== runId &&
             now - record.goalActiveClaim.claimedAt < 30 * 60 * 1000) {
-          throw new Error("GOAL_DIFFERENT_RUN_IN_PROGRESS");
+          if (record.goalActiveClaim.runId !== runId) {
+            throw new Error("GOAL_DIFFERENT_RUN_IN_PROGRESS");
+          }
+          if (record.goalActiveClaim.candidateSha !== candidateSha ||
+              record.goalActiveClaim.planSha256 !== planSha256 ||
+              record.goalActiveClaim.ordersEnabled !== ordersEnabled) {
+            throw new Error("GOAL_ACTIVE_CANDIDATE_MISMATCH");
+          }
         }
         const issued = issueDeploymentApprovalToken({
           targetSha: candidateSha, planSha256, scope: record.goal.scope,
