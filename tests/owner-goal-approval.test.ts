@@ -38,7 +38,7 @@ function planFor(goal = baseGoal, sha = SHA, ordersEnabled = false) {
     subject: goal.subject,
     ...(goal.strategyId ? { strategyId: goal.strategyId } : {}),
     target: goal.target,
-    targetSha: sha,
+    sourceBinding: "GITHUB_RUN_HEAD_SHA",
     ordersEnabled,
     safeguards: {
       failClosed: true,
@@ -99,10 +99,12 @@ test("Revised SHA is accepted only when the new plan still matches approved purp
     goal: switches, sha: FINGERPRINT_SHA, planSha256: "f".repeat(64),
     ordersEnabled: false, plan,
   }), /GOAL_PLAN_OUTSIDE_APPROVED_PURPOSE/);
-  assert.throws(() => assertOwnerGoalCandidate({
+  // The same plan can be used with another candidate commit only after that
+  // new run's head_sha / source tree / plan bytes are independently attested.
+  assert.doesNotThrow(() => assertOwnerGoalCandidate({
     goal: switches, sha: SHA, planSha256: "f".repeat(64),
     ordersEnabled: true, plan,
-  }), /GOAL_PLAN_OUTSIDE_APPROVED_PURPOSE/);
+  }));
   assert.throws(() => assertOwnerGoalCandidate({
     goal: switches, sha: FINGERPRINT_SHA, planSha256: "f".repeat(64),
     ordersEnabled: true, plan: { ...plan, safeguards: { ...plan.safeguards, protectExistingStops: false } },
