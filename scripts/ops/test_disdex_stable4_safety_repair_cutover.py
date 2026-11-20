@@ -310,6 +310,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             "QUALITY102_CAUSAL_V1_SYMBOLS=SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT",
             q102,
         )
+        self.assertIn("QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5", q102)
 
     def test_v52_launcher_is_manifested_by_formal_workflow(self):
         workflow = (
