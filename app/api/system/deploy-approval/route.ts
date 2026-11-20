@@ -313,8 +313,19 @@ export async function POST(request: NextRequest) {
         });
 
         if (record.status === "REDEEMED") {
-          if (record.redeemedByRunId !== runId) throw new Error("APPROVAL_ALREADY_REDEEMED");
           if (!record.approvedAt) throw new Error("APPROVAL_NOT_REDEEMABLE");
+          // MONITOR_ONLY_APPROVAL_RETRY: an exact, orders-disabled monitor
+          // refresh may retry after a failed Root preflight without asking the
+          // Owner to repeat OTP approval. Order-enable and LIVE operations
+          // remain bound to their original one-time GitHub run ID.
+          const monitorOnlyRetry =
+            requestedOperation === "ALL_RUNNERS_MONITOR_REFRESH" &&
+            operation === "ALL_RUNNERS_MONITOR_REFRESH" &&
+            record.ordersEnabled === false &&
+            record.requestExpiresAt > Date.now();
+          if (record.redeemedByRunId !== runId && !monitorOnlyRetry) {
+            throw new Error("APPROVAL_ALREADY_REDEEMED");
+          }
           const nowSeconds = Math.floor(Date.now() / 1000);
           if (record.approvalToken && (record.approvalTokenExpiresAt ?? 0) > nowSeconds + 10) {
             return {
@@ -336,6 +347,7 @@ export async function POST(request: NextRequest) {
             approvalToken: refreshed.token,
             approvalTokenExpiresAt: refreshed.payload.expiresAt,
             redeemedAt: Date.now(),
+            redeemedByRunId: runId,
           };
           return {
             next,
