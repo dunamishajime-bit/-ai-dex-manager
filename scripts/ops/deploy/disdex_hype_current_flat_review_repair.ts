@@ -46,11 +46,14 @@ async function assertProductionGuards(){
 function assertState(value:any){
   if(value.schema!=="disdex-hype-zec-long/v1"||value.runtimeCommitSha!==HYPE_SHA||value.mode!=="LIVE")
     fail("STATE_LINEAGE");
-  if(value.manualReview!==REVIEW)fail("REVIEW_NOT_EXACT");
   if(value.pending!=null)fail("LOCAL_PENDING");
   if(value.positions!=null&&(!Array.isArray(value.positions)||value.positions.length!==0))fail("LOCAL_POSITION");
   if(!Array.isArray(value.failures))fail("FAILURES_INVALID");
   if(!Number.isSafeInteger(value.updatedAt)||value.updatedAt<=0||value.updatedAt>Date.now()+60_000)fail("UPDATED_AT_INVALID");
+  if(value.manualReview===REVIEW)return "NEEDS_REPAIR";
+  if(value.manualReview==null&&value.lastDecision?.reason==="HYPE_CURRENT_FLAT_REVIEW_REPAIRED_AFTER_SIGNED_SCOPED_FLAT")
+    return "ALREADY_REPAIRED";
+  fail("REVIEW_NOT_EXACT_OR_REPAIRED");
 }
 function assertV4(value:any){
   if(value.releaseSha!==V4_SHA)fail("V4_SHA");
@@ -94,7 +97,7 @@ async function main(){
   if(process.getuid?.()===0)fail("DEPLOY_USER_REQUIRED");
   if(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH!=="/var/lib/disdex/shared/aster-rate-budget.json")fail("RATE_BUDGET_BINDING");
   await assertProductionGuards();
-  const stateBefore=await json(STATE); assertState(stateBefore.value);
+  const stateBefore=await json(STATE); const repairMode=assertState(stateBefore.value);
   assertV4((await json(V4)).value);
   const gate=new FileAccountOrderLock(LOCK,120000,PENDING);
   let lease;
@@ -120,6 +123,12 @@ async function main(){
     if(proof1!==proof2)fail("SCOPED_PROOF_CHANGED");
     assertV4((await json(V4)).value);
     await assertProductionGuards();
+    if(repairMode==="ALREADY_REPAIRED"){
+      console.log(JSON.stringify({status:"HYPE_CURRENT_FLAT_REVIEW_REPAIR_ALREADY_COMPLETE",
+        signedScopedReads:2,hypeZecPositions:0,hypeZecOpenOrders:0,
+        stateWrites:0,ordersSent:0,cancelsSent:0,positionChangesSent:0}));
+      return;
+    }
     const current=await readFile(STATE);
     if(digest(current)!==digest(stateBefore.raw))fail("STATE_CAS_PRECONDITION");
     const now=Date.now();
