@@ -304,7 +304,19 @@ def _systemd_failure_context(unit: str) -> str:
         # A non-zero status code is expected for a failed unit; the stdout
         # summary is still the authoritative diagnostic we need.
         for raw in status.stdout.splitlines():
-            line = _sanitize_failure_text(raw, 360)
+            raw_flat = " ".join(raw.split())
+            pre_match = re.search(
+                r"(?i)execstartpre=(.*?)(?:\s+\(code=([^,)]*),\s*status=([^)]*)\))",
+                raw_flat,
+            )
+            if pre_match:
+                executable = pre_match.group(1).strip().split(None, 1)[0]
+                executable = executable.rsplit("/", 1)[-1].lstrip("+")
+                code = _sanitize_failure_text(pre_match.group(2), 40)
+                result = _sanitize_failure_text(pre_match.group(3), 80)
+                line = "ExecStartPre code=" + code + " status=" + result + " cmd=" + executable[:80]
+            else:
+                line = _sanitize_failure_text(raw, 360)
             if "execstartpre=" in line.lower():
                 match = re.search(
                     r"(?i)execstartpre=(.*?)(?:\s+\(code=([^,)]*),\s*status=([^)]*)\))",
