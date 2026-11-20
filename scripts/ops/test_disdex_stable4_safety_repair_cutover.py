@@ -283,6 +283,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
                     "DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY",
                     text,
                 )
+                self.assertIn("DISDEX_V52_STOCK_GROSS_CAP=4.0", text)
+                self.assertIn("STRICT_PORTFOLIO_PLANNER_ACTIVE=true", text)
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
             self.assertIn("DISDEX_RUNTIME_COMMIT_SHA=%i", text)
