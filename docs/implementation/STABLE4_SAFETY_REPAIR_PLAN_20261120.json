@@ -1,0 +1,69 @@
+{
+  "schema": "disdex-stable4-safety-repair-plan/v1",
+  "target": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+  "candidateType": "combined-v52-q102-safety-repair",
+  "components": {
+    "v52": {
+      "fixCommit": "5ba7bb9d1eadd94c46d2f01e568273565d8b1097",
+      "baseRuntimeSha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+      "files": [
+        "scripts/disdex_v52_aster_only_legacy_engine.py",
+        "tests/test_v52_upstream_fail_closed.py"
+      ],
+      "ciRun": "44526419994",
+      "ordersEnabled": false
+    },
+    "q102": {
+      "fixCommit": "e0a1e066d68371af9585c9f290e9921e60f2fc3c",
+      "baseRuntimeSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "files": [
+        "lib/disdex-quality102-causal-v1-runner.ts",
+        "lib/disdex-v96-live-risk-controls.ts",
+        "tests/q102-risk-block-freshness.test.ts"
+      ],
+      "ciRun": "44526602049",
+      "ordersEnabled": false
+    }
+  },
+  "globalHold": {
+    "active": true,
+    "strategyId": "STABLE4_H48_CUTOVER",
+    "action": "HOLD_PROTECTED",
+    "scope": "GLOBAL",
+    "operator": "disdex-stable4-formal-owner-hold",
+    "reasonPrefix": "STABLE4_RESEARCH_ROLLOUT:",
+    "digestSha256": "928a1c83b08c6445211639631ed69ccf7ea935741cb21786c41fc63e294322cf",
+    "mustRemainByteIdentical": true
+  },
+  "venuePreflight": {
+    "signedAsterGets": 3,
+    "requireFlatPositions": true,
+    "requireNoOpenOrders": true,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "cutover": {
+    "v52TargetMustDifferFrom": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+    "q102TargetMustDifferFrom": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+    "dualRunnerForbidden": true,
+    "clearGlobalHold": false,
+    "enableNewOrders": false,
+    "rootOwnedImmutableRelease": true,
+    "formalGithubActionsOnly": true
+  },
+  "rollback": {
+    "automaticOnFailure": true,
+    "restoreV52": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+    "restoreQ102": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+    "requireFreshVenueReconciliationBeforeRestart": true
+  },
+  "verification": {
+    "postCutoverCycles": 3,
+    "requireV52RestartCountStable": true,
+    "requireQ102Freshness": true,
+    "requireGlobalHoldDigestUnchanged": true,
+    "requireTradingMutationZero": true
+  }
+}
