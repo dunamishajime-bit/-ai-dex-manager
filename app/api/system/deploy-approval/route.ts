@@ -113,6 +113,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Codex/Actions checks this first instead of publishing duplicate requests.
+  if (body?.action === "get_goal_status") {
+    const id = String(body.goal_id || "").trim();
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ ok: false, error: "GOAL_ID_INVALID" }, { status: 400 });
+    }
+    const record = await getDeploymentApproval(id);
+    if (!record?.goal) {
+      return NextResponse.json({ ok: false, error: "GOAL_NOT_FOUND" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true, approval: sanitizeDeploymentApproval(record) });
+  }
+
   if (body?.action === "claim_goal_release") {
     const id = String(body.goal_id || "").trim();
     const runId = String(body.run_id || "").trim();
