@@ -15,7 +15,7 @@
 
 1. 操作者は `publish_goal` で kind、operation、subject、切替対象の strategy_id を宣言し、Ownerに目的を表示する。すでに同一 `goalId` が承認されていれば新しいOTPを送らない。`get_goal_status` で状態を照合する。
 2. HPでOwnerがOTPを**一度だけ**認証する。これはコード実行トークンではない。認証IDと `fingerprint` をチェックポイントに保存し、秘密情報は保存しない。
-3. 開発中の修正は任意の回数行える。毎回新候補SHAのCIを実施。目的一致のJSON計画を `docs/implementation/goal-campaigns/<goalId>.json` に置き、GitHubにPushする。
+3. 開発中の修正は任意の回数行える。目的・権限・安全条件を明記し、`sourceBinding: "GITHUB_RUN_HEAD_SHA"` を持つJSON計画を `docs/implementation/goal-campaigns/<goalId>.json` にコミットする。計画にそのコミット自身のSHAを書き込んではならない（自己参照ハッシュになる）。Push後に候補SHAのCIを実施し、HP側でGitHub Run head_shaと計画が置かれたcommitを一致検証する。
 4. 保護されている正式Workflowで `claim_goal_release` を呼び出す。引数: `goal_id`, `run_id`, `ci_run_id`, `target_sha`, `plan_sha256`, `orders_enabled`。
 5. HPはGitHub APIを読み取り、該当CIのhead SHAとsuccess、信頼できる不変Workflow、実際の計画ファイルのSHA-256と目的・権限・安全条件を確認した後にのみ、該当候補SHAと計画に有効な**最大300秒の署名トークン**を発行する。
 6. 正式Workflowはこのトークンを既存の署名検証・Root gateへ渡す。Runner／建玉／STOP／Shared Risk／HOLD／手数料・Gross等、対象運用に必要な安全条件を全て検査する。
