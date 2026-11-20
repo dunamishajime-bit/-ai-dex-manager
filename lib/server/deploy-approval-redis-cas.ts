@@ -57,6 +57,13 @@ export const REDIS_APPROVAL_CAS_SCRIPT = [
   'if ARGV[7] == "1" then',
   '  redis.call("SET", KEYS[3], nextHistoryJson, "EX", ARGV[4])',
   'end',
+  'if ARGV[9] == "1" then',
+  '  if ARGV[10] == "1" then',
+  '    redis.call("SET", KEYS[4], ARGV[6])',
+  '  elseif redis.call("GET", KEYS[4]) == ARGV[6] then',
+  '    redis.call("DEL", KEYS[4])',
+  '  end',
+  'end',
   'return 1',
 ].join("\\n");
 
@@ -70,10 +77,16 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
     touchLatest: boolean;
     historyKey?: string;
     persistentRecord?: boolean;
+    goalIndexKey?: string;
+    goalActive?: boolean;
   },
 ): Promise<RedisApprovalCasResult> {
   const keys = [input.recordKey, input.latestKey];
   if (input.historyKey) keys.push(input.historyKey);
+  if (input.goalIndexKey) {
+    if (!input.historyKey) throw new Error("GOAL_INDEX_REQUIRES_HISTORY_KEY");
+    keys.push(input.goalIndexKey);
+  }
   const raw = await redis.eval<number>(
     REDIS_APPROVAL_CAS_SCRIPT,
     keys,
@@ -86,6 +99,8 @@ export async function redisApprovalCompareAndSwap<T extends VersionedApproval>(
       input.next.id,
       input.historyKey ? "1" : "0",
       input.persistentRecord ? "1" : "0",
+      input.goalIndexKey ? "1" : "0",
+      input.goalActive ? "1" : "0",
     ],
   );
   const result = Number(raw);
