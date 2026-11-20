@@ -78,6 +78,27 @@ test("one Owner OTP survives concurrent publish, source SHA revisions, and unrel
     const freshTask = await store.createPendingOwnerGoal({ goal, actor });
     assert.notEqual(freshTask.id, first.id);
     assert.equal(freshTask.status, "PENDING");
+    // A request may remain pending while other tasks fill the visible history.
+    for (let i = 100; i < 155; i++) {
+      const now = Date.now() + i;
+      await store.saveDeploymentApproval({
+        id: "other-" + i, scope: "V12_V4", operation: "V12_V4_LIVE",
+        ordersEnabled: true, targetSha: "d".repeat(40),
+        planSha256: "c".repeat(64), requestActor: actor,
+        createdAt: now, requestExpiresAt: now + 1800000,
+        updatedAt: now, status: "PENDING",
+      });
+    }
+    assert.equal((await store.createPendingOwnerGoal({ goal, actor })).id, freshTask.id);
+
+    const expired = await store.getDeploymentApproval(freshTask.id);
+    assert.ok(expired);
+    await store.saveDeploymentApproval({
+      ...expired, requestExpiresAt: Date.now() - 1000,
+    });
+    const renewed = await store.createPendingOwnerGoal({ goal, actor });
+    assert.notEqual(renewed.id, freshTask.id);
+    assert.equal(renewed.status, "PENDING");
     assert.equal(ownerApproved.id, first.id);
   } finally {
     await fs.rm(dir, { recursive: true, force: true });
