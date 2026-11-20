@@ -162,6 +162,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             stdout=(
                 "Loaded: loaded (/etc/systemd/system/unit.service)\n"
                 "Process: 122 ExecStartPre=/usr/bin/install -d /safe (code=exited, status=0/SUCCESS)\n"
+                "Process: 124 ExecStartPre=/usr/bin/node " + ("x" * 500) + " (code=exited, status=2/FAILURE)\n"
                 "Process: 123 ExecStartPre=/usr/bin/test -f /safe (code=exited, status=1/FAILURE)\n"
             ),
             stderr="",
@@ -173,6 +174,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         message = str(ctx.exception)
         self.assertIn("show=ActiveState=failed", message)
         self.assertIn("status=ExecStartPre code=exited status=1/FAILURE cmd=test", message)
+        self.assertIn("status=ExecStartPre code=exited status=2/FAILURE cmd=node", message)
         self.assertNotIn("status=Loaded:", message)
         self.assertIn("status=1/FAILURE", message)
         self.assertLess(
