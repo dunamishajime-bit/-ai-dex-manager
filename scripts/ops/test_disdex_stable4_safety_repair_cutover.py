@@ -392,12 +392,72 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             def stat(self):
                 return SimpleNamespace(st_mtime_ns=1)
 
-        with patch.object(module, "HEARTBEATS", {"Q102": FakePath(q102), "V52": FakePath(v52)}):
+        with patch.object(module, "HEARTBEAT_TICKS", {"Q102": FakePath(q102), "V52": FakePath(v52)}):
             with self.assertRaisesRegex(
                 module.ContractError,
                 r"MONITOR_HEARTBEAT_STATUS_INVALID:runner=Q102:status=blocked:reason=QUALITY102_MONITOR_READ_FAILED:state stale",
             ):
                 module.poll_cycles({"Q102": (0, ""), "V52": (0, "")}, timeout=1)
+
+    def test_poll_cycles_uses_monitor_ticks_not_supervisor_heartbeats(self):
+        sha = module.TARGET
+
+        def tick(runner: str, unit: str) -> dict:
+            return {
+                "schema": "disdex-runner-tick/v1",
+                "runnerId": runner,
+                "runtimeSha": sha,
+                "expectedSha": sha,
+                "serviceUnit": unit,
+                "status": "observing",
+                "mode": "MONITOR_ONLY",
+                "newOrdersAllowed": False,
+                "permissionEvaluation": "MONITOR_ONLY_NO_ORDER_PATH",
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+                "stateChanged": False,
+                "updatedAt": "2026-11-21T00:00:00Z",
+            }
+
+        class AdvancingPath:
+            def __init__(self, value):
+                self.value = value
+                self.reads = 0
+
+            def is_file(self):
+                return True
+
+            def is_symlink(self):
+                return False
+
+            def read_bytes(self):
+                return json.dumps(self.value).encode("utf-8")
+
+            def stat(self):
+                self.reads += 1
+                return SimpleNamespace(st_mtime_ns=self.reads)
+
+        ticks = {
+            "Q102": AdvancingPath(tick(
+                "QUALITY102_CAUSAL_V1",
+                f"disdex-quality102-causal-v1@{sha}.service",
+            )),
+            "V52": AdvancingPath(tick(
+                "V52_MONITOR",
+                f"disdex-v52-aster-only@{sha}.service",
+            )),
+        }
+        supervisor_heartbeats = {
+            name: AdvancingPath({"schema": "disdex-runner-heartbeat/v1"})
+            for name in ticks
+        }
+        with patch.object(module, "HEARTBEAT_TICKS", ticks), \
+             patch.object(module, "HEARTBEATS", supervisor_heartbeats), \
+             patch.object(module.time, "sleep", lambda _seconds: None):
+            result = module.poll_cycles({"Q102": (0, ""), "V52": (0, "")}, timeout=1)
+        self.assertGreaterEqual(result["Q102"][0], 3)
+        self.assertGreaterEqual(result["V52"][0], 3)
 
 
 if __name__ == "__main__":
