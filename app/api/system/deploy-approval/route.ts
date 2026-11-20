@@ -330,8 +330,12 @@ export async function POST(request: NextRequest) {
           if (record.redeemedByRunId !== runId && !monitorOnlyRetry) {
             throw new Error("APPROVAL_ALREADY_REDEEMED");
           }
+          const sameRun = record.redeemedByRunId === runId;
           const nowSeconds = Math.floor(Date.now() / 1000);
-          if (record.approvalToken && (record.approvalTokenExpiresAt ?? 0) > nowSeconds + 10) {
+          // A different allowed monitor-only run requires a fresh signed
+          // transport token even when the old token has not yet expired.
+          // Reusing its nonce can fail the Root one-time replay guard.
+          if (sameRun && record.approvalToken && (record.approvalTokenExpiresAt ?? 0) > nowSeconds + 10) {
             return {
               result: {
                 ok: true,
