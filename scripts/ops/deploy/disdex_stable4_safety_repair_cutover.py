@@ -954,7 +954,15 @@ def poll_cycles(previous: dict[str, tuple[int, str]], timeout: int = 180) -> dic
             expected_unit, expected_runner = (
                 (V52_UNIT_NEW, "V52") if name == "V52" else (Q102_UNIT_NEW, "Q102")
             )
-            validate_monitor_heartbeat(value, TARGET, expected_unit, expected_runner)
+            try:
+                validate_monitor_heartbeat(value, TARGET, expected_unit, expected_runner)
+            except ContractError as error:
+                status = _sanitize_failure_text(value.get("status"), 48)
+                reason = _sanitize_failure_text(value.get("reason"), 180)
+                detail = f"{error}:runner={name}:status={status or '<missing>'}"
+                if reason:
+                    detail += f":reason={reason}"
+                raise ContractError(detail) from error
             stamp = str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or digest)
             current = (path.stat().st_mtime_ns, stamp)
             if current != last[name]:
