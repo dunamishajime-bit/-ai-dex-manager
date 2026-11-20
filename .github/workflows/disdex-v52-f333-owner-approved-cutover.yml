@@ -6,6 +6,8 @@ on:
       - 'scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py'
       - 'tests/test_disdex_v52_owner_approved_f333_cutover.py'
       - 'tests/test_disdex_v52_f333_workflow.py'
+      - 'scripts/ops/deploy/disdex_v52_scoped_root_cutover.py'
+      - 'tests/test_v52_scoped_root_contract.py'
       - '.github/workflows/disdex-v52-f333-owner-approved-cutover.yml'
   workflow_dispatch:
     inputs:
@@ -19,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: disdex-unified-production
+  group: ${{ github.event_name == 'workflow_dispatch' && 'disdex-unified-production' || format('disdex-v52-source-{0}', github.ref) }}
   cancel-in-progress: false
 
 jobs:
@@ -36,6 +38,7 @@ jobs:
           set -euo pipefail
           python3 -m py_compile scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py
           python3 -m unittest tests.test_disdex_v52_owner_approved_f333_cutover tests.test_disdex_v52_f333_workflow -v
+          python3 -m unittest tests.test_v52_scoped_root_contract -v
 
   production:
     if: >-

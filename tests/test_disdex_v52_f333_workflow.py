@@ -4,6 +4,12 @@ ROOT=Path(__file__).resolve().parents[1]
 WF=(ROOT/".github/workflows/disdex-v52-f333-owner-approved-cutover.yml").read_text()
 HELPER=(ROOT/"scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py").read_text()
 class WorkflowContractTest(unittest.TestCase):
+    def test_source_ci_does_not_wait_for_the_production_mutex(self):
+        block=WF.split('concurrency:',1)[1].split('jobs:',1)[0]
+        self.assertIn("github.event_name == 'workflow_dispatch'",block)
+        self.assertIn("'disdex-unified-production'",block)
+        self.assertIn("format('disdex-v52-source-{0}', github.ref)",block)
+        self.assertIn('cancel-in-progress: false',block)
     def test_production_is_master_owner_environment_gated(self):
         self.assertIn("github.ref == 'refs/heads/master'",WF)
         self.assertIn("github.actor == 'dunamishajime-bit'",WF)
