@@ -43,12 +43,15 @@ test("redeem uses the atomic store mutation and does not do read-then-save", () 
   assert.match(redeem, /const refreshed = issueTransportToken\(\)/);
 });
 
-test("only monitor-only approvals may be retried by a different run within the owner request window", () => {
+test("monitor-only approvals may be retried by a different run within the bounded post-approval window", () => {
   const redeem = route.split('if (body?.action === "redeem")')[1] ?? "";
   assert.match(redeem, /monitorOnlyRetry/);
   assert.match(redeem, /requestedOperation === "ALL_RUNNERS_MONITOR_REFRESH"/);
   assert.match(redeem, /record\.ordersEnabled === false/);
-  assert.match(redeem, /record\.requestExpiresAt > Date\.now\(\)/);
+  assert.match(redeem, /MONITOR_ONLY_RETRY_WINDOW_MS/);
+  assert.match(redeem, /record\.approvedAt/);
+  assert.match(redeem, /record\.approvedAt \+ MONITOR_ONLY_RETRY_WINDOW_MS/);
+  assert.doesNotMatch(redeem, /record\.requestExpiresAt > Date\.now\(\)/);
   assert.match(redeem, /MONITOR_ONLY_APPROVAL_RETRY/);
   assert.match(redeem, /redeemedByRunId: runId/);
 });

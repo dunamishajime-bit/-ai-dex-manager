@@ -34,6 +34,10 @@ const SHA_RE = /^[0-9a-f]{40}$/;
 const PLAN_RE = /^[0-9a-f]{64}$/;
 const RUN_ID_RE = /^[0-9]{1,20}$/;
 const UUID_RE = /^[0-9a-f-]{36}$/i;
+// Monitor-only repairs can require several bounded GitHub Actions attempts.
+// Keep the Owner's exact immutable approval reusable for one day after it was
+// approved, while leaving every order-enabled operation one-run-only.
+const MONITOR_ONLY_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function safeEqual(a: string, b: string) {
   const left = Buffer.from(a);
@@ -322,7 +326,7 @@ export async function POST(request: NextRequest) {
             requestedOperation === "ALL_RUNNERS_MONITOR_REFRESH" &&
             operation === "ALL_RUNNERS_MONITOR_REFRESH" &&
             record.ordersEnabled === false &&
-            record.requestExpiresAt > Date.now();
+            Date.now() < record.approvedAt + MONITOR_ONLY_RETRY_WINDOW_MS;
           if (record.redeemedByRunId !== runId && !monitorOnlyRetry) {
             throw new Error("APPROVAL_ALREADY_REDEEMED");
           }
