@@ -588,9 +588,10 @@ def build_v52_monitor_tick(result: dict, *, started_at: int, completed_at: int) 
         "mainPid":os.getpid(),"workingDirectory":release_root,
         "tickStartedAt":started_at,"tickCompletedAt":completed_at,
         "status":"observing","outcome":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS",
-        "reason":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS","newOrdersAllowed":False,
-        "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
-        "positionCount":len(result.get("positions") or {}),
+        "reason":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS","mode":"MONITOR_ONLY",
+        "newOrdersAllowed":False,"permissionEvaluation":"MONITOR_ONLY_NO_ORDER_PATH",
+        "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,"stateChanged":False,
+        "positionCount":len(result.get("positions") or {}),"openOrderCount":len(result.get("openOrders") or {}),
     }
 
 
@@ -622,10 +623,14 @@ def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
             _atomic_monitor_json(health_path,{
                 "schema":"disdex-v52-monitor-heartbeat/v1","runnerId":"V52_MONITOR",
                 "runtimeSha":sha,"expectedSha":sha,"mainPid":os.getpid(),
+                "serviceUnit":os.getenv("DISDEX_V52_MONITOR_SERVICE_UNIT") or f"disdex-v52-monitor@{sha}.service",
                 "workingDirectory":os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd(),
-                "heartbeatAt":completed,"lastTickAt":last_completed_tick_at,"status":"blocked",
+                "tickStartedAt":started,"tickCompletedAt":completed,"updatedAt":completed,"observedAt":completed,
+                "heartbeatAt":completed,"lastTickAt":last_completed_tick_at,"status":"blocked","mode":"MONITOR_ONLY",
                 "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
-                "newOrdersAllowed":False,"ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
+                "newOrdersAllowed":False,"permissionEvaluation":"MONITOR_ONLY_NO_ORDER_PATH",
+                "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,"positionCount":0,"openOrderCount":0,
+                "stateChanged":False,
             })
             print(json.dumps({"mode":"MONITOR_ONLY","status":"blocked","eventTs":completed,
                               "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
