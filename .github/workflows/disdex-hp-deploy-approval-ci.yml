@@ -5,6 +5,7 @@ on:
     paths:
       - "lib/deploy-approval-token.ts"
       - "lib/server/deploy-approval-store.ts"
+      - "lib/server/deploy-approval-redis-cas.ts"
       - "lib/server/owner-session.ts"
       - "lib/server/password-hash.ts"
       - "lib/server/otp-challenge-store.ts"
@@ -32,6 +33,7 @@ on:
       - "tests/deploy-approval-store-concurrency.test.ts"
       - "tests/fixtures/approval-store-writer.ts"
       - "tests/deploy-approval-direct-writer.test.mjs"
+      - "tests/deploy-approval-redis-cas-source.test.mjs"
       - "tests/password-hash-hardening.test.ts"
       - "tests/owner-session-hardening.test.ts"
       - "tests/otp-challenge-store.test.ts"
@@ -94,7 +96,7 @@ jobs:
         run: node --test tests/auth-boundary-source.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
 
       - name: Legacy direct-writer and atomic redeem contract
-        run: node --test tests/deploy-approval-direct-writer.test.mjs
+        run: node --test tests/deploy-approval-direct-writer.test.mjs tests/deploy-approval-redis-cas-source.test.mjs
 
       - name: Protected Production workflow contracts
         run: node --test tests/production-workflow-protected-environment.test.mjs
