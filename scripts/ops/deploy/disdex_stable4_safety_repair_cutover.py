@@ -245,7 +245,10 @@ def validate_plan(plan: dict) -> bool:
 def run(*argv: str, timeout: int = 60, check: bool = True, input_text: str | None = None) -> str:
     p = subprocess.run(argv, input=input_text, capture_output=True, text=True, timeout=timeout)
     if check and p.returncode:
-        raise ContractError("COMMAND_FAILED:" + argv[0].split("/")[-1])
+        command = argv[0].split("/")[-1]
+        if command == "systemctl":
+            command += " " + " ".join(argv[1:4])
+        raise ContractError("COMMAND_FAILED:" + command[:240])
     return p.stdout.strip()
 
 

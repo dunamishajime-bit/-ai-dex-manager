@@ -1,7 +1,9 @@
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).with_name("deploy") / "disdex_stable4_safety_repair_cutover.py"
@@ -126,6 +128,12 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             module.cutover_blocked_reason(error),
             "CUTOVER_BLOCKED:ContractError:TARGET_RESTART_COUNT_CHANGED",
         )
+
+    def test_run_failure_identifies_the_systemd_operation(self):
+        result = SimpleNamespace(returncode=1, stdout="", stderr="systemd failure")
+        with patch.object(module.subprocess, "run", return_value=result):
+            with self.assertRaisesRegex(module.ContractError, r"COMMAND_FAILED:systemctl stop unit\.service"):
+                module.run("/usr/bin/systemctl", "stop", "unit.service")
 
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
