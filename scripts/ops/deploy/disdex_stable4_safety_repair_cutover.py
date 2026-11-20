@@ -70,6 +70,12 @@ class ContractError(RuntimeError):
 def cutover_blocked_reason(error: BaseException) -> str:
     """Keep the fail-closed cutover error actionable without changing behavior."""
     detail = str(error).strip() or type(error).__name__
+    # Keep the bounded systemd context ahead of the generic ``Job failed``
+    # sentence, otherwise the outer 240-character contract message would hide
+    # the exact Result/status fields needed to diagnose the failed preflight.
+    if detail.startswith("COMMAND_FAILED:systemctl start") and "|show=" in detail:
+        command, context = detail.split("|show=", 1)
+        detail = "show=" + context + "|" + command
     return f"CUTOVER_BLOCKED:{type(error).__name__}:{detail[:240]}"
 
 
@@ -322,7 +328,7 @@ def run(*argv: str, timeout: int = 60, check: bool = True, input_text: str | Non
         if command.startswith("systemctl start") and len(argv) >= 3:
             context = _systemd_failure_context(argv[2])
             if context:
-                detail = "|".join(part for part in (detail, context) if part)
+                detail = "|".join(part for part in (context, detail) if part)
         suffix = ":" + detail[:640] if detail else ""
         raise ContractError("COMMAND_FAILED:" + command[:240] + suffix)
     return p.stdout.strip()
