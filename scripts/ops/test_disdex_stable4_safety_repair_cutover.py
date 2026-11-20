@@ -145,6 +145,26 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertIn("Job failed", message)
         self.assertNotIn("/secret/token", message)
 
+    def test_systemd_failure_context_includes_safe_status_summary(self):
+        failed_start = SimpleNamespace(returncode=1, stdout="", stderr="Job failed")
+        show = SimpleNamespace(
+            returncode=0,
+            stdout="ActiveState=failed\nSubState=failed\nResult=exit-code\nExecMainStatus=1\n",
+            stderr="",
+        )
+        status = SimpleNamespace(
+            returncode=0,
+            stdout="Process: 123 ExecStartPre=/usr/bin/test -f /safe (code=exited, status=1/FAILURE)\n",
+            stderr="",
+        )
+        journal = SimpleNamespace(returncode=0, stdout="", stderr="")
+        with patch.object(module.subprocess, "run", side_effect=[failed_start, show, status, journal]):
+            with self.assertRaises(module.ContractError) as ctx:
+                module.run("/usr/bin/systemctl", "start", "unit.service")
+        message = str(ctx.exception)
+        self.assertIn("show=ActiveState=failed", message)
+        self.assertIn("status=Process: 123", message)
+
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
             "stage": "DATA_UNAVAILABLE",
