@@ -313,7 +313,17 @@ def _systemd_failure_context(unit: str) -> str:
                 r"(?i)execstartpre=(.*?)(?:\s+\(code=([^,)]*),\s*status=([^)]*)\))",
                 raw_flat,
             )
-            if pre_match:
+            process_match = re.search(
+                r"(?i)process:\s*(\d+)\s+execstart=.*?\(code=([^,)]*),\s*status=([^)]*)\)",
+                raw_flat,
+            )
+            if process_match:
+                line = (
+                    "Process pid=" + process_match.group(1)
+                    + " code=" + _sanitize_failure_text(process_match.group(2), 40)
+                    + " status=" + _sanitize_failure_text(process_match.group(3), 80)
+                )
+            elif pre_match:
                 executable = pre_match.group(1).strip().split(None, 1)[0]
                 executable = executable.rsplit("/", 1)[-1].lstrip("+")
                 code = _sanitize_failure_text(pre_match.group(2), 40)
@@ -686,6 +696,7 @@ def monitor_dropin_text(runner: str) -> str:
             "Wants=network-online.target\n"
             "After=network-online.target\n"
             "[Service]\n"
+            "WorkingDirectory=/home/deploy/disdex-trading/releases/%i\n"
             "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
             "Environment=DISDEX_RELEASE_SHA=%i\n"
             "Environment=DISDEX_RUNTIME_COMMIT_SHA=%i\n"
@@ -699,6 +710,7 @@ def monitor_dropin_text(runner: str) -> str:
             "ExecStartPre=\n"
             "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
             "ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
+            "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/scripts/disdex_v52_aster_only_live_engine.py\n"
             "ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/.venv2/bin/python\n"
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/heartbeats\n"
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/ticks\n"
@@ -716,6 +728,7 @@ def monitor_dropin_text(runner: str) -> str:
             "Wants=network-online.target\n"
             "After=network-online.target\n"
             "[Service]\n"
+            "WorkingDirectory=/home/deploy/disdex-trading/releases/%i\n"
             "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
             "Environment=DISDEX_RELEASE_SHA=%i\n"
             "Environment=DISDEX_RUNTIME_COMMIT_SHA=%i\n"
