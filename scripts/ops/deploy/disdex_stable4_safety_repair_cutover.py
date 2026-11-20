@@ -305,10 +305,13 @@ def _systemd_failure_context(unit: str) -> str:
                     line,
                 )
                 if match:
+                    executable = match.group(1).strip().split(None, 1)[0]
+                    executable = executable.rsplit("/", 1)[-1].lstrip("+")
                     line = (
-                        "ExecStartPre=" + match.group(1).strip()
+                        "ExecStartPre"
                         + " code=" + match.group(2).strip()
                         + " status=" + match.group(3).strip()
+                        + " cmd=" + executable[:80]
                     )
             if line and line != "[redacted]" and re.search(
                 r"(?i)(?:process:|execstartpre|code=|status=|failed|error|not found|permission)",
