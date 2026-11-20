@@ -272,7 +272,13 @@ def _systemd_failure_context(unit: str) -> str:
         # ``systemctl status`` commonly exits 3 for a failed unit.  Put its
         # Process/ExecStartPre lines before the generic ``show`` summary so the
         # outer fail-closed 240-character message retains the useful cause.
-        ranked = [p for p in parts if p.startswith("status=")]
+        status_parts = [p for p in parts if p.startswith("status=")]
+        failed_status = [
+            p for p in status_parts
+            if not re.search(r"(?i)\bstatus=0/(?:success|ok)\b", p)
+        ]
+        successful_status = [p for p in status_parts if p not in failed_status]
+        ranked = failed_status + successful_status
         ranked += [p for p in parts if not p.startswith("status=")]
         return "|".join(ranked)[:640]
 
