@@ -710,6 +710,7 @@ def monitor_dropin_text(runner: str) -> str:
             "Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i\n"
             "Environment=DISDEX_V52_MONITOR_ONLY=true\n"
             "Environment=DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false\n"
+            "Environment=DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY\n"
             "Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true\n"
             "Environment=V12_BASE_GROSS_CAP=2.0\n"
             "Environment=V12_DYNAMIC_GROSS_CAP=2.0\n"

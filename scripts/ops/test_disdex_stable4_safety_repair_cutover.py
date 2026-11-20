@@ -253,6 +253,11 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             self.assertIn("Wants=\n", text)
             self.assertIn("After=\n", text)
             self.assertIn("WorkingDirectory=/home/deploy/disdex-trading/releases/%i", text)
+            if text is v52:
+                self.assertIn(
+                    "DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY",
+                    text,
+                )
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
             self.assertIn("DISDEX_RUNTIME_COMMIT_SHA=%i", text)
