@@ -133,6 +133,9 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             "ordersAllowed": False,
             "checkedAt": 1_000,
             "reason": "MARGIN_DATA_UNAVAILABLE",
+            "consecutiveFailures": 4,
+            "pollIntervalMs": 60_000,
+            "lastError": "HTTP 401 signature rejected",
             "balance": "must not appear",
         }
         diagnostic = json.loads(module.margin_guard_diagnostic(value, now_ms=2_000))
@@ -140,6 +143,9 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertFalse(diagnostic["ordersAllowed"])
         self.assertEqual(diagnostic["checkedAtAgeMs"], 1_000)
         self.assertEqual(diagnostic["reason"], "MARGIN_DATA_UNAVAILABLE")
+        self.assertEqual(diagnostic["consecutiveFailures"], 4)
+        self.assertEqual(diagnostic["pollIntervalMs"], 60_000)
+        self.assertEqual(diagnostic["lastErrorClass"], "AUTH_OR_SIGNATURE")
         self.assertNotIn("balance", diagnostic)
 
     def test_source_has_no_hold_clear_or_order_enable_path(self):

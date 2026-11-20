@@ -41,6 +41,7 @@ Q102_STATE = Path("/var/lib/disdex/quality102-causal-v1/state.json")
 HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
 RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
+MARGIN_GUARD_UNIT = "disdex-v12-v52-margin-guard@7688ed7c93a1918d8b44837339b7da5584a868f5.service"
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 HEARTBEATS = {
     "V52": Path("/var/lib/disdex/runner-health/heartbeats/v52.json"),
@@ -72,6 +73,40 @@ def cutover_blocked_reason(error: BaseException) -> str:
     return f"CUTOVER_BLOCKED:{type(error).__name__}:{detail[:240]}"
 
 
+def margin_guard_error_class(value: object) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    error = value.lower()
+    if "aster_global_rate_budget" in error or "rate budget" in error:
+        return "RATE_BUDGET"
+    if any(token in error for token in ("401", "403", "unauthor", "signature", "credential")):
+        return "AUTH_OR_SIGNATURE"
+    if any(token in error for token in ("timeout", "timed out")):
+        return "TIMEOUT"
+    if any(token in error for token in ("position-risk row missing", "leverage mismatch", "margin type mismatch")):
+        return "POSITION_RISK_SCHEMA"
+    if any(token in error for token in ("ownership state", "identity mismatch")):
+        return "OWNERSHIP_STATE"
+    if any(token in error for token in ("json", "decode", "schema")):
+        return "STATE_SCHEMA"
+    if any(token in error for token in ("enospc", "no space left")):
+        return "STORAGE"
+    if any(token in error for token in ("connection", "connect", "dns", "network", "ssl")):
+        return "NETWORK"
+    return "ERROR_PRESENT"
+
+
+def margin_guard_service_diagnostic() -> str:
+    """Expose only non-sensitive systemd health fields for the canonical guard."""
+    payload = {}
+    for key in ("ActiveState", "SubState", "Result", "NRestarts", "MainPID", "ExecMainStatus"):
+        try:
+            payload[key] = unit_property(MARGIN_GUARD_UNIT, key)
+        except Exception:
+            payload[key] = "UNAVAILABLE"
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
 def margin_guard_diagnostic(value: dict, now_ms: int | None = None) -> str:
     """Return only non-sensitive Margin Guard fields needed for diagnosis.
 
@@ -96,6 +131,9 @@ def margin_guard_diagnostic(value: dict, now_ms: int | None = None) -> str:
         "ordersAllowed": value.get("ordersAllowed") if isinstance(value.get("ordersAllowed"), bool) else None,
         "checkedAtAgeMs": age,
         "reason": reason,
+        "consecutiveFailures": value.get("consecutiveFailures") if isinstance(value.get("consecutiveFailures"), int) else None,
+        "pollIntervalMs": value.get("pollIntervalMs") if isinstance(value.get("pollIntervalMs"), int) else None,
+        "lastErrorClass": margin_guard_error_class(value.get("lastError")),
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
@@ -372,6 +410,7 @@ def validate_shared_files() -> None:
     margin = read_json(MARGIN)
     if margin.get("stage") != "HEALTHY":
         print("MARGIN_GUARD_DIAGNOSTIC=" + margin_guard_diagnostic(margin), file=sys.stderr)
+        print("MARGIN_GUARD_SERVICE=" + margin_guard_service_diagnostic(), file=sys.stderr)
     require(margin.get("stage") == "HEALTHY", "MARGIN_GUARD_NOT_HEALTHY:" + str(margin.get("stage")))
     checked = margin.get("checkedAt")
     require(type(checked) in (int, float) and -1000 <= now - float(checked) <= 15 * 60_000,
