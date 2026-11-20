@@ -694,8 +694,6 @@ def monitor_dropin_text(runner: str) -> str:
             "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
             "ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
             "ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/.venv2/bin/python\n"
-            "ExecStartPre=/usr/bin/test -d /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages\n"
-            "ExecStartPre=/usr/bin/test ! -L /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages\n"
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/heartbeats\n"
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/ticks\n"
             "ExecStart=\n"

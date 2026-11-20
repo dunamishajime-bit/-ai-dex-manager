@@ -250,6 +250,7 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             self.assertNotIn("operator-activation-gate", text)
             self.assertNotIn("pending-order-recovery", text)
         self.assertIn("--monitor-only-daemon", v52)
+        self.assertNotIn("vendor-stock-site-packages", v52)
         self.assertIn("disdex-quality102-causal-v1-monitor.ts --daemon", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_MONITOR_ONLY=true", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
