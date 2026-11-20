@@ -666,8 +666,10 @@ MONITOR_DROPIN_ROOT = Path("/etc/systemd/system")
 def monitor_dropin_paths(target: str = TARGET) -> dict[str, Path]:
     require(SHA_RE.fullmatch(target) is not None, "MONITOR_DROPIN_TARGET_INVALID")
     return {
-        "V52": MONITOR_DROPIN_ROOT / f"disdex-v52-aster-only@{target}.service.d" / "95-stable4-monitor-only.conf",
-        "Q102": MONITOR_DROPIN_ROOT / f"disdex-quality102-causal-v1@{target}.service.d" / "95-stable4-monitor-only.conf",
+        # Use the final lexical drop-in name so a legacy operator/order gate
+        # cannot be re-added by a later fragment after our ExecStartPre reset.
+        "V52": MONITOR_DROPIN_ROOT / f"disdex-v52-aster-only@{target}.service.d" / "zz-stable4-monitor-only.conf",
+        "Q102": MONITOR_DROPIN_ROOT / f"disdex-quality102-causal-v1@{target}.service.d" / "zz-stable4-monitor-only.conf",
     }
 
 
