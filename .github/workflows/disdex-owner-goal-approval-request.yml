@@ -1,0 +1,84 @@
+name: DisDex Owner Goal Approval Request
+
+# A single Owner OTP approves the *purpose*; changing source SHA or plan later
+# does not need to publish a new request. This workflow never deploys or signs.
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "RESTORE_RUNNER_LIVE or SWITCH_STRATEGY_LOGIC"
+        type: choice
+        required: true
+        options: [RESTORE_RUNNER_LIVE, SWITCH_STRATEGY_LOGIC]
+      operation:
+        description: "Existing whitelisted deployment operation / authority envelope"
+        type: string
+        required: true
+      subject:
+        description: "Exact Runner scope, e.g. FULL_PROJECT or V12_V4"
+        type: string
+        required: true
+      strategy_id:
+        description: "Existing named strategy for a logic switch; leave empty for recovery"
+        type: string
+        required: false
+      goal_id:
+        description: "Existing goal UUID when retrying; reuses the original Owner OTP"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-goal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Publish purpose, without signing a candidate or changing Production
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          KIND: ${{ inputs.kind }}
+          OPERATION: ${{ inputs.operation }}
+          SUBJECT: ${{ inputs.subject }}
+          STRATEGY_ID: ${{ inputs.strategy_id }}
+          GOAL_ID: ${{ inputs.goal_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          if not os.environ.get("BRIDGE"):
+              raise SystemExit("GOAL_BRIDGE_UNAVAILABLE")
+          body = {
+              "action": "publish_goal",
+              "actor": "dunamishajime-bit",
+              "kind": os.environ["KIND"],
+              "operation": os.environ["OPERATION"],
+              "subject": os.environ["SUBJECT"],
+              "strategy_id": os.environ.get("STRATEGY_ID", ""),
+          }
+          if os.environ.get("GOAL_ID"):
+              body["goal_id"] = os.environ["GOAL_ID"]
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=json.dumps(body, separators=(",", ":")).encode("utf8"),
+              headers={"Authorization": "Bearer " + os.environ["BRIDGE"],
+                       "Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          if result.get("ok") is not True:
+              raise SystemExit("GOAL_PUBLISH_REJECTED")
+          approval = result.get("approval") or {}
+          goal = approval.get("goal") or {}
+          assert approval.get("id") and goal.get("fingerprint")
+          assert goal.get("kind") == os.environ["KIND"]
+          assert goal.get("operation") == os.environ["OPERATION"]
+          assert goal.get("subject") == os.environ["SUBJECT"]
+          print("GOAL_APPROVAL_ID=" + str(approval["id"]))
+          print("GOAL_FINGERPRINT=" + str(goal["fingerprint"]))
+          print("GOAL_STATUS=" + str(approval["status"]))
+          print("GOAL_SAME_OBJECTIVE_NO_NEW_OTP_REQUIRED_WHEN_APPROVED=TRUE")
+          PY
