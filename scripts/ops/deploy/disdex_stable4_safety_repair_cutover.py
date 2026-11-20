@@ -164,6 +164,46 @@ def active(unit: str) -> bool:
     return unit_property(unit, "ActiveState") == "active"
 
 
+TERMINAL_OLD_ACTIVE_STATES = frozenset(("inactive", "failed"))
+TRANSITIONAL_OLD_ACTIVE_STATES = frozenset(("activating", "deactivating", "reloading"))
+
+
+def unit_runtime_state(unit: str) -> tuple[str, str]:
+    return unit_property(unit, "ActiveState"), unit_property(unit, "SubState")
+
+
+def _runner_state_kind(state: tuple[str, str]) -> str:
+    active_state, sub_state = state
+    if active_state == "active":
+        return "active"
+    if active_state in TERMINAL_OLD_ACTIVE_STATES:
+        return "inactive"
+    if active_state in TRANSITIONAL_OLD_ACTIVE_STATES or sub_state == "auto-restart":
+        return "transitional"
+    return "unknown"
+
+
+def old_runner_runtime_mode(v52_state: tuple[str, str], q102_state: tuple[str, str]) -> str:
+    """Classify old-generation systemd states without treating a restart loop as stopped.
+
+    A single active old Runner paired with the other exact old unit in a known
+    transitional state is a controlled quiesce baseline: the cutover may stop
+    both exact old units, but it must never start the candidate while either
+    old unit remains active.  Every other asymmetric or unknown state fails
+    closed.
+    """
+    kinds = (_runner_state_kind(v52_state), _runner_state_kind(q102_state))
+    if kinds == ("active", "active"):
+        return "active"
+    if kinds == ("inactive", "inactive"):
+        return "inactive"
+    if set(kinds) == {"active", "transitional"}:
+        return "quiesce"
+    if "active" in kinds and "inactive" in kinds:
+        raise ContractError("OLD_RUNNERS_PARTIAL_ACTIVE")
+    raise ContractError("OLD_RUNNERS_TRANSITIONAL_STATE")
+
+
 def old_runner_mode(v52_active: bool, q102_active: bool) -> str:
     """Classify the pre-cutover generation without assuming it is running.
 
@@ -181,6 +221,17 @@ def unit_release_matches(unit: str, expected: str) -> None:
     require(pid > 100, "RUNNER_PID_INVALID:" + unit)
     cwd = os.path.realpath(f"/proc/{pid}/cwd")
     require(cwd == str(BASE / expected), "RUNNER_CWD_MISMATCH:" + unit)
+
+
+def validate_old_quiesce_unit(unit: str, expected: str, state: tuple[str, str]) -> None:
+    require(unit_property(unit, "LoadState") == "loaded", "OLD_UNIT_NOT_LOADED:" + expected)
+    kind = _runner_state_kind(state)
+    require(kind in ("active", "transitional"), "OLD_RUNNER_TRANSITIONAL_STATE:" + unit)
+    pid = int(unit_property(unit, "MainPID") or "0")
+    if pid > 100:
+        unit_release_matches(unit, expected)
+    else:
+        require(pid == 0, "OLD_RUNNER_TRANSITION_PID_INVALID:" + unit)
 
 
 def validate_target_units() -> None:
@@ -288,10 +339,15 @@ def validate_shared_files() -> None:
 
 def validate_baseline() -> tuple[bytes, bytes, bytes, dict, dict, str, str]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
-    old_mode = old_runner_mode(active(V52_UNIT_OLD), active(Q102_UNIT_OLD))
+    v52_state = unit_runtime_state(V52_UNIT_OLD)
+    q102_state = unit_runtime_state(Q102_UNIT_OLD)
+    old_mode = old_runner_runtime_mode(v52_state, q102_state)
     if old_mode == "active":
         unit_release_matches(V52_UNIT_OLD, V52_OLD)
         unit_release_matches(Q102_UNIT_OLD, Q102_OLD)
+    elif old_mode == "quiesce":
+        validate_old_quiesce_unit(V52_UNIT_OLD, V52_OLD, v52_state)
+        validate_old_quiesce_unit(Q102_UNIT_OLD, Q102_OLD, q102_state)
     else:
         # The stopped baseline is intentional for a safety repair. Still
         # require both reviewed instances to resolve from systemd so a typo or
@@ -474,12 +530,15 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
         require(now_hold == baseline_hold and now_digest == HOLD_DIGEST, "GLOBAL_HOLD_CHANGED_PRECUTOVER")
         _stamp, _inventory, digest = signed_get()
         require(digest == baseline_digest, "VENUE_CHANGED_PRECUTOVER")
-        require(old_runner_mode(active(V52_UNIT_OLD), active(Q102_UNIT_OLD)) == old_mode,
+        require(old_runner_runtime_mode(unit_runtime_state(V52_UNIT_OLD), unit_runtime_state(Q102_UNIT_OLD)) == old_mode,
                 "OLD_RUNNER_CHANGED_PRECUTOVER")
-        if old_mode == "active":
+        if old_mode in ("active", "quiesce"):
             run("/usr/bin/systemctl", "stop", Q102_UNIT_OLD, timeout=90)
             run("/usr/bin/systemctl", "stop", V52_UNIT_OLD, timeout=90)
-        require(not active(V52_UNIT_OLD) and not active(Q102_UNIT_OLD), "OLD_RUNNER_STILL_ACTIVE")
+        for unit in (V52_UNIT_OLD, Q102_UNIT_OLD):
+            state = unit_runtime_state(unit)
+            require(state[0] in TERMINAL_OLD_ACTIVE_STATES, "OLD_RUNNER_NOT_TERMINAL:" + unit)
+            require(int(unit_property(unit, "MainPID") or "0") == 0, "OLD_RUNNER_PID_REMAINS:" + unit)
         stopped_state = read_json(Q102_STATE)
         require(stopped_state.get("runtimeCommitSha") == Q102_OLD
                 and not stopped_state.get("position") and not stopped_state.get("pending"),
@@ -551,8 +610,12 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
                 wait_stable(V52_UNIT_OLD, V52_OLD, timeout=100)
                 require(active(Q102_UNIT_OLD) and active(V52_UNIT_OLD), "ROLLBACK_OLD_RUNNERS_NOT_ACTIVE")
             else:
-                require(not active(Q102_UNIT_OLD) and not active(V52_UNIT_OLD),
-                        "ROLLBACK_OLD_RUNNERS_UNEXPECTEDLY_ACTIVE")
+                for unit in (Q102_UNIT_OLD, V52_UNIT_OLD):
+                    state = unit_runtime_state(unit)
+                    require(state[0] in TERMINAL_OLD_ACTIVE_STATES,
+                            "ROLLBACK_OLD_RUNNER_NOT_TERMINAL:" + unit)
+                    require(int(unit_property(unit, "MainPID") or "0") == 0,
+                            "ROLLBACK_OLD_RUNNER_PID_REMAINS:" + unit)
             _r, _v, rollback_hold_digest = hold_snapshot()
             require(rollback_hold_digest == HOLD_DIGEST, "ROLLBACK_HOLD_CHANGED")
             release = BASE / TARGET

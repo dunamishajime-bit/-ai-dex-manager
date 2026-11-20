@@ -75,6 +75,34 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             module.old_runner_mode(True, False)
         self.assertIn("OLD_RUNNERS_PARTIAL_ACTIVE", str(ctx.exception))
 
+    def test_old_runner_runtime_mode_allows_controlled_quiesce(self):
+        self.assertEqual(
+            module.old_runner_runtime_mode(("active", "running"), ("active", "running")),
+            "active",
+        )
+        self.assertEqual(
+            module.old_runner_runtime_mode(("inactive", "dead"), ("failed", "failed")),
+            "inactive",
+        )
+        self.assertEqual(
+            module.old_runner_runtime_mode(("active", "running"), ("activating", "auto-restart")),
+            "quiesce",
+        )
+        self.assertEqual(
+            module.old_runner_runtime_mode(("activating", "auto-restart"), ("active", "running")),
+            "quiesce",
+        )
+
+    def test_old_runner_runtime_mode_rejects_unsafe_mixed_states(self):
+        for states in (
+            (("active", "running"), ("inactive", "dead")),
+            (("activating", "auto-restart"), ("inactive", "dead")),
+            (("activating", "auto-restart"), ("activating", "auto-restart")),
+            (("unknown", "unknown"), ("inactive", "dead")),
+        ):
+            with self.assertRaises(module.ContractError):
+                module.old_runner_runtime_mode(*states)
+
     def test_source_has_no_hold_clear_or_order_enable_path(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('"clearGlobalHold": False', source)
