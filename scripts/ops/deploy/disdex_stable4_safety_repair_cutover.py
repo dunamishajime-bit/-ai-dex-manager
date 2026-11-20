@@ -242,13 +242,74 @@ def validate_plan(plan: dict) -> bool:
     return True
 
 
+def _sanitize_failure_text(value: object, limit: int = 180) -> str:
+    """Keep service diagnostics useful without copying credentials into logs."""
+    text = " ".join(str(value or "").split())
+    if not text:
+        return ""
+    # Redact the value after common credential-bearing words while retaining
+    # the surrounding error text (for example, ``Job failed``) for diagnosis.
+    text = re.sub(
+        r"(?i)(token|secret|password|passwd|authorization|bearer|api[_-]?key|credential|signature)[^\s]*",
+        r"\1=<redacted>",
+        text,
+    )
+    text = re.sub(r"[^A-Za-z0-9_@%+.,:;/=()\- ]", "?", text)
+    return text[:limit]
+
+
+def _systemd_failure_context(unit: str) -> str:
+    """Return a bounded, non-secret status summary for a failed start."""
+    parts: list[str] = []
+    try:
+        status = subprocess.run(
+            [
+                "/usr/bin/systemctl", "show", unit,
+                "--property=ActiveState,SubState,Result,ExecMainCode,ExecMainStatus,StatusText,ExecConditionResult",
+                "--no-pager",
+            ], capture_output=True, text=True, timeout=10,
+        )
+        if status.returncode == 0:
+            summary = _sanitize_failure_text(status.stdout, 320)
+            if summary and summary != "[redacted]":
+                parts.append("show=" + summary)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    try:
+        journal = subprocess.run(
+            ["/usr/bin/journalctl", "-u", unit, "-n", "8", "--no-pager", "-o", "cat"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if journal.returncode == 0:
+            # Only include lines that are likely to identify a failed preflight
+            # or process exit.  Credential-bearing lines are discarded above.
+            for raw in journal.stdout.splitlines():
+                line = _sanitize_failure_text(raw, 180)
+                if line and line != "[redacted]" and re.search(
+                    r"(?i)(?:error|failed|failure|cannot|denied|not found|missing|invalid|exit|preflight|readiness|permission|result)",
+                    line,
+                ):
+                    parts.append("journal=" + line)
+            if parts:
+                return "|".join(parts)[:640]
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return "|".join(parts)[:640]
+
+
 def run(*argv: str, timeout: int = 60, check: bool = True, input_text: str | None = None) -> str:
     p = subprocess.run(argv, input=input_text, capture_output=True, text=True, timeout=timeout)
     if check and p.returncode:
         command = argv[0].split("/")[-1]
         if command == "systemctl":
             command += " " + " ".join(argv[1:4])
-        raise ContractError("COMMAND_FAILED:" + command[:240])
+        detail = _sanitize_failure_text(p.stderr)
+        if command.startswith("systemctl start") and len(argv) >= 3:
+            context = _systemd_failure_context(argv[2])
+            if context:
+                detail = "|".join(part for part in (detail, context) if part)
+        suffix = ":" + detail[:640] if detail else ""
+        raise ContractError("COMMAND_FAILED:" + command[:240] + suffix)
     return p.stdout.strip()
 
 

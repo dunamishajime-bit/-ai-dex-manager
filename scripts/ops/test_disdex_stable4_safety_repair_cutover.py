@@ -135,6 +135,16 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             with self.assertRaisesRegex(module.ContractError, r"COMMAND_FAILED:systemctl stop unit\.service"):
                 module.run("/usr/bin/systemctl", "stop", "unit.service")
 
+    def test_run_failure_includes_sanitized_systemd_start_context(self):
+        result = SimpleNamespace(returncode=1, stdout="", stderr="Job failed: /secret/token? not emitted")
+        with patch.object(module.subprocess, "run", return_value=result):
+            with self.assertRaises(module.ContractError) as ctx:
+                module.run("/usr/bin/systemctl", "start", "unit.service")
+        message = str(ctx.exception)
+        self.assertIn("COMMAND_FAILED:systemctl start unit.service", message)
+        self.assertIn("Job failed", message)
+        self.assertNotIn("/secret/token", message)
+
     def test_margin_guard_diagnostic_is_sanitized_and_reports_freshness(self):
         value = {
             "stage": "DATA_UNAVAILABLE",
