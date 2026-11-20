@@ -102,6 +102,29 @@ jobs:
           node --import tsx --test tests/owner-goal-approval.test.ts
           node --import tsx --test tests/owner-goal-store-concurrency.test.ts
 
+      - name: Redis actual Lua CAS - one goal ID, conflict rejection, owner revocation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx -e 'import fs from "node:fs"; import {REDIS_APPROVAL_CAS_SCRIPT} from "./lib/server/deploy-approval-redis-cas.ts"; fs.writeFileSync("/tmp/disdex-goal-cas.lua", REDIS_APPROVAL_CAS_SCRIPT)'
+          docker run --rm -d --name disdex-goal-redis redis:7-alpine >/dev/null
+          trap 'docker rm -f disdex-goal-redis >/dev/null 2>&1 || true' EXIT
+          for i in {1..25}; do
+            if docker exec disdex-goal-redis redis-cli ping | grep -q PONG; then break; fi
+            sleep 1
+          done
+          docker cp /tmp/disdex-goal-cas.lua disdex-goal-redis:/tmp/disdex-goal-cas.lua
+          args=(approval:goal1 approval:latest approval:history approval:goal-index)
+          first="$(docker exec disdex-goal-redis redis-cli --eval /tmp/disdex-goal-cas.lua "${args[@]}" , 0 '' '{"id":"goal1","storeRevision":"r1"}' 3600 1 goal1 1 1 1 1)"
+          test "$first" = 1
+          test "$(docker exec disdex-goal-redis redis-cli GET approval:goal-index)" = goal1
+          duplicate="$(docker exec disdex-goal-redis redis-cli --eval /tmp/disdex-goal-cas.lua approval:goal2 approval:latest approval:history approval:goal-index , 0 '' '{"id":"goal2","storeRevision":"r1"}' 3600 1 goal2 1 1 1 1)"
+          test "$duplicate" = 0
+          revoked="$(docker exec disdex-goal-redis redis-cli --eval /tmp/disdex-goal-cas.lua "${args[@]}" , 1 r1 '{"id":"goal1","storeRevision":"r2"}' 3600 1 goal1 1 0 1 0)"
+          test "$revoked" = 1
+          test "$(docker exec disdex-goal-redis redis-cli EXISTS approval:goal-index)" = 0
+          echo REDIS_GOAL_ONCE_ATOMIC=PASS
+
       - name: Owner auth and password contracts
         run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
 
