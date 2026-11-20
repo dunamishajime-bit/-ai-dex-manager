@@ -27,3 +27,12 @@ test("goal approval index persists independently of the 50-item UI history and i
   assert.match(store, /createPendingOwnerGoal/);
   assert.match(store, /goalActive:/);
 });
+
+
+test("Redis CAS script contains real Lua newlines and atomically rejects a duplicate active goal index", async () => {
+  const { REDIS_APPROVAL_CAS_SCRIPT } = await import("../lib/server/deploy-approval-redis-cas.ts");
+  assert.ok(REDIS_APPROVAL_CAS_SCRIPT.includes("\n"), "Lua statements must use real line breaks");
+  assert.ok(!REDIS_APPROVAL_CAS_SCRIPT.includes("\\n"), "literal backslash-n breaks Lua");
+  assert.match(REDIS_APPROVAL_CAS_SCRIPT, /indexed and indexed ~= ARGV\[6\] then return 0/);
+  assert.match(REDIS_APPROVAL_CAS_SCRIPT, /redis\.call\("SET", KEYS\[4\], ARGV\[6\]\)/);
+});
