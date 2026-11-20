@@ -192,14 +192,19 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         )
         journal = SimpleNamespace(
             returncode=0,
-            stdout="RuntimeError: monitor preflight failed: ACKNOWLEDGEMENT_MISSING\n",
+            stdout=(
+                'File "engine.py", line 1, in run\n'
+                '    raise RuntimeError(f"STRICT_PORTFOLIO_CONFIG_MISMATCH")\n'
+                "RuntimeError: STRICT_PORTFOLIO_CONFIG_MISMATCH:V12_GROSS_CAP:2.5:EXPECTED_2.0\n"
+            ),
             stderr="",
         )
         with patch.object(module.subprocess, "run", side_effect=[failed_start, show, status, journal]):
             with self.assertRaises(module.ContractError) as ctx:
                 module.run("/usr/bin/systemctl", "start", "unit.service")
         message = str(ctx.exception)
-        self.assertIn("journal=RuntimeError: monitor preflight failed: ACKNOWLEDGEMENT_MISSING", message)
+        self.assertIn("journal=RuntimeError: STRICT_PORTFOLIO_CONFIG_MISMATCH:V12_GROSS_CAP:2.5:EXPECTED_2.0", message)
+        self.assertNotIn("journal=raise RuntimeError", message)
         self.assertLess(message.index("journal="), message.index("status=Process pid="))
 
     def test_wait_stable_preserves_bounded_systemd_context(self):
