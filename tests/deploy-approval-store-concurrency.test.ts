@@ -170,6 +170,7 @@ test("file-backed approvals serialize concurrent writers and reject corrupt data
     // Do not silently extend monitor approval beyond the 24-hour retry window.
     const expiredMonitor = await store.saveDeploymentApproval({
       ...redeemedMonitor,
+      storeRevision: undefined,
       id: "monitor-expired",
       approvedAt: base - 25 * 60 * 60_000,
       createdAt: base + 30_000,
