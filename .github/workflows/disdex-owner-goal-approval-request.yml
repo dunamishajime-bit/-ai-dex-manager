@@ -34,6 +34,9 @@ jobs:
   publish-goal:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    # Bridge credentials can be protected by the official Environment.
+    environment:
+      name: disdex-production
     steps:
       - name: Publish purpose, without signing a candidate or changing Production
         env:
