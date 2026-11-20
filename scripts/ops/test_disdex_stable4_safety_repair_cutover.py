@@ -348,6 +348,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             serviceUnit=v52_unit,
         )
         self.assertTrue(module.validate_monitor_heartbeat(v52_value, sha, v52_unit, "V52"))
+        tick_only = dict(v52_value, schema="disdex-runner-tick/v1", updatedAt=None, tickCompletedAt=1_763_688_000_000)
+        self.assertTrue(module.validate_monitor_heartbeat(tick_only, sha, v52_unit, "V52"))
 
     def test_poll_cycles_identifies_blocked_runner_and_reason(self):
         sha = module.TARGET

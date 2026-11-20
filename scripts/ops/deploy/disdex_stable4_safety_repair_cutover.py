@@ -822,7 +822,7 @@ def validate_monitor_heartbeat(value: dict, expected_sha: str, expected_unit: st
     for key in ("ordersSent", "cancelsSent", "positionChangesSent"):
         require(value.get(key) == 0, "MONITOR_HEARTBEAT_MUTATION_NONZERO:" + key)
     require(value.get("stateChanged") is False, "MONITOR_HEARTBEAT_STATE_CHANGED")
-    require(timestamp_ms(value.get("updatedAt") or value.get("observedAt")) > 0,
+    require(timestamp_ms(value.get("updatedAt") or value.get("observedAt") or value.get("tickCompletedAt")) > 0,
             "MONITOR_HEARTBEAT_TIMESTAMP_INVALID")
     return True
 
@@ -972,7 +972,7 @@ def poll_cycles(previous: dict[str, tuple[int, str]], timeout: int = 180) -> dic
                 if reason:
                     detail += f":reason={reason}"
                 raise ContractError(detail) from error
-            stamp = str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or digest)
+            stamp = str(value.get("updatedAt") or value.get("observedAt") or value.get("tickCompletedAt") or value.get("timestamp") or digest)
             current = (path.stat().st_mtime_ns, stamp)
             if current != last[name]:
                 seen[name] += 1; last[name] = current
@@ -1074,7 +1074,7 @@ def execute(tar_path: Path, manifest_path: Path, approval_token: str,
         cycles_before = {}
         for name, path in HEARTBEAT_TICKS.items():
             raw = read_regular(path, 128_000); value = json.loads(raw.decode("utf-8"))
-            cycles_before[name] = (path.stat().st_mtime_ns, str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or ""))
+            cycles_before[name] = (path.stat().st_mtime_ns, str(value.get("updatedAt") or value.get("observedAt") or value.get("tickCompletedAt") or value.get("timestamp") or ""))
         restarts_before = {u: unit_property(u, "NRestarts") for u in (Q102_UNIT_NEW, V52_UNIT_NEW)}
         cycle_state = poll_cycles(cycles_before)
         time.sleep(10)
