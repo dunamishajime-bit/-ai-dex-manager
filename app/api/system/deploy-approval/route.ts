@@ -2,6 +2,8 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createPendingDeploymentApproval,
+  createPendingOwnerGoal,
+  getDeploymentApproval,
   sanitizeDeploymentApproval,
   mutateDeploymentApprovalAtomic,
 } from "@/lib/server/deploy-approval-store";
@@ -26,6 +28,11 @@ import {
   STABLE4_RUNNER_BUNDLE_PLAN_SHA256,
   STABLE4_RUNNER_BUNDLE_SOURCE_SHA,
 } from "@/lib/stable4-runner-bundle";
+
+import {
+  makeOwnerGoal, assertSameOwnerGoal,
+} from "@/lib/owner-goal-approval";
+import { verifyOwnerGoalRelease } from "@/lib/server/owner-goal-attestation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,6 +85,149 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "invalid JSON" }, { status: 400 });
+  }
+
+
+  // Goal-level Owner consent is independent of source SHA. A changed SHA or
+  // plan requires independently verified CI and a fresh *exact* signed child
+  // token, not a new HP OTP if the approved purpose/envelope is unchanged.
+  if (body?.action === "publish_goal") {
+    try {
+      const actor = String(body.actor || "").trim();
+      if (actor !== "dunamishajime-bit") throw new Error("GOAL_OWNER_INVALID");
+      const goal = makeOwnerGoal({
+        kind: String(body.kind || ""),
+        operation: String(body.operation || ""),
+        subject: String(body.subject || ""),
+        strategyId: String(body.strategy_id || ""),
+      });
+      const record = await createPendingOwnerGoal({
+        goal, actor,
+        existingGoalId: body.goal_id ? String(body.goal_id) : undefined,
+      });
+      return NextResponse.json({ ok: true, approval: sanitizeDeploymentApproval(record) }, { status: 201 });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false, error: error instanceof Error ? error.message : "GOAL_PUBLISH_FAILED",
+      }, { status: 409 });
+    }
+  }
+
+  if (body?.action === "claim_goal_release") {
+    const id = String(body.goal_id || "").trim();
+    const runId = String(body.run_id || "").trim();
+    const candidateSha = String(body.target_sha || "").trim();
+    const planSha256 = String(body.plan_sha256 || "").trim();
+    const ciRunId = String(body.ci_run_id || "").trim();
+    // Explicit child permission: false is valid under a parent that permits
+    // orders; true is NOT valid under a monitor-only parent.
+    const ordersEnabled = body.orders_enabled;
+    if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) ||
+        !RUN_ID_RE.test(ciRunId) || !SHA_RE.test(candidateSha) ||
+        !PLAN_RE.test(planSha256) || typeof ordersEnabled !== "boolean") {
+      return NextResponse.json({ ok: false, error: "GOAL_CLAIM_INVALID" }, { status: 400 });
+    }
+    try {
+      const snapshot = await getDeploymentApproval(id);
+      if (!snapshot?.goal || !snapshot.approvedAt ||
+          !["APPROVED", "DISPATCHED", "REDEEMED"].includes(snapshot.status)) {
+        throw new Error("GOAL_NOT_APPROVED");
+      }
+      assertSameOwnerGoal(snapshot.goal);
+      // No request-controlled exception or self-reported 'ci_passed' flag:
+      // query GitHub's authenticated API and verify the plan at this SHA.
+      await verifyOwnerGoalRelease({
+        approvalId: id, goal: snapshot.goal, candidateSha,
+        planSha256, ordersEnabled, ciRunId,
+      });
+      const answer = await mutateDeploymentApprovalAtomic(id, (record) => {
+        if (!record?.goal || !record.approvedAt ||
+            !["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status) ||
+            record.goal.fingerprint !== snapshot.goal!.fingerprint) {
+          throw new Error("GOAL_CHANGED_SINCE_CI_CHECK");
+        }
+        assertSameOwnerGoal(record.goal);
+        if (ordersEnabled && !record.goal.ordersEnabled) {
+          throw new Error("GOAL_ORDER_PERMISSION_ESCALATION");
+        }
+        const now = Date.now();
+        if (record.goalActiveClaim &&
+            record.goalActiveClaim.runId !== runId &&
+            now - record.goalActiveClaim.claimedAt < 30 * 60 * 1000) {
+          throw new Error("GOAL_DIFFERENT_RUN_IN_PROGRESS");
+        }
+        const issued = issueDeploymentApprovalToken({
+          targetSha: candidateSha, planSha256, scope: record.goal.scope,
+          ordersEnabled, operator: "dunamishajime-bit",
+          privateKey: loadDeploymentApprovalPrivateKey(), ttlSeconds: 300,
+        });
+        const claim = {
+          runId, candidateSha, planSha256, ordersEnabled,
+          ciRunId, claimedAt: now,
+        };
+        return {
+          next: {
+            ...record, status: "DISPATCHED" as const,
+            goalActiveClaim: claim,
+            goalClaimCount: (record.goalClaimCount ?? 0) + 1,
+            goalClaimHistory: [...(record.goalClaimHistory ?? []), claim].slice(-50),
+          },
+          result: {
+            ok: true, token: issued.token,
+            tokenExpiresAt: issued.payload.expiresAt,
+            goalId: record.id, goalFingerprint: record.goal.fingerprint,
+            candidateSha, planSha256, ordersEnabled,
+            runId, ciRunId,
+          },
+        };
+      });
+      return NextResponse.json(answer);
+    } catch (error) {
+      return NextResponse.json({
+        ok: false, error: error instanceof Error ? error.message : "GOAL_CLAIM_BLOCKED",
+      }, { status: 409 });
+    }
+  }
+
+  if (body?.action === "finish_goal_release") {
+    const id = String(body.goal_id || "").trim();
+    const runId = String(body.run_id || "").trim();
+    const outcome = String(body.outcome || "").trim();
+    const final = body.final === true;
+    if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) ||
+        !["success", "failure"].includes(outcome) ||
+        (final && outcome !== "success")) {
+      return NextResponse.json({ ok: false, error: "GOAL_FINISH_INVALID" }, { status: 400 });
+    }
+    try {
+      const answer = await mutateDeploymentApprovalAtomic(id, (record) => {
+        if (!record?.goal || record.status !== "DISPATCHED" ||
+            record.goalActiveClaim?.runId !== runId) {
+          throw new Error("GOAL_RUN_NOT_OWNER");
+        }
+        const now = Date.now();
+        const history = (record.goalClaimHistory ?? []).map((claim) =>
+          claim.runId === runId && !claim.finishedAt
+            ? { ...claim, finishedAt: now, outcome: outcome as "success" | "failure" }
+            : claim);
+        return {
+          next: {
+            ...record,
+            status: final ? "COMPLETED" as const : "APPROVED" as const,
+            completedAt: final ? now : record.completedAt,
+            goalActiveClaim: undefined,
+            goalClaimHistory: history,
+            lastError: outcome === "failure" ? "candidate failed; goal remains approved" : undefined,
+          },
+          result: { ok: true, goalId: record.id, status: final ? "COMPLETED" : "APPROVED" },
+        };
+      });
+      return NextResponse.json(answer);
+    } catch (error) {
+      return NextResponse.json({
+        ok: false, error: error instanceof Error ? error.message : "GOAL_FINISH_BLOCKED",
+      }, { status: 409 });
+    }
   }
 
   if (body?.action === "publish_task") {
@@ -290,6 +440,9 @@ export async function POST(request: NextRequest) {
     try {
       const response = await mutateDeploymentApprovalAtomic(approvalId, (record) => {
         if (!record) throw new Error("APPROVAL_NOT_FOUND");
+        if (record.goal) {
+          throw new Error("GOAL_MUST_USE_CI_ATTESTED_RELEASE_CLAIM");
+        }
         if (record.operation === "ALL_RUNNERS_LIVE_RESTORE") {
           throw new Error("TASK_APPROVAL_MUST_USE_SCOPED_STAGE_CLAIMS");
         }
