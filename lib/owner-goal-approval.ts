@@ -63,7 +63,7 @@ export function makeOwnerGoal(input: {
   if (!Object.prototype.hasOwnProperty.call(DEPLOY_APPROVAL_OPERATION_POLICY, input.operation)) {
     throw new Error("GOAL_OPERATION_UNSUPPORTED");
   }
-  const kind = input.kind;
+  const kind = input.kind as GoalKind;
   const operation = input.operation as DeploymentApprovalOperation;
   const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
   const allowed = kind === "RESTORE_RUNNER_LIVE" ? RESTORE_OPERATIONS : SWITCH_OPERATIONS;
