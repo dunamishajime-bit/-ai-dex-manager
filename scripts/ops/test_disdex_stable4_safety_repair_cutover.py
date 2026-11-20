@@ -134,6 +134,12 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         blocked = module.cutover_blocked_reason(module.ContractError(detail))
         self.assertIn("show=ActiveState=failed", blocked)
 
+    def test_cutover_blocked_reason_does_not_reorder_existing_status_first_context(self):
+        detail = "COMMAND_FAILED:systemctl start unit.service:status=ExecStartPre code=exited status=2/FAILURE cmd=node|show=Result=exit-code"
+        blocked = module.cutover_blocked_reason(module.ContractError(detail))
+        self.assertIn("status=ExecStartPre code=exited status=2/FAILURE cmd=node", blocked)
+        self.assertNotIn("CUTOVER_BLOCKED:ContractError:show=", blocked)
+
     def test_run_failure_identifies_the_systemd_operation(self):
         result = SimpleNamespace(returncode=1, stdout="", stderr="systemd failure")
         with patch.object(module.subprocess, "run", return_value=result):
