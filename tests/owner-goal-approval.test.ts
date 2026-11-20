@@ -28,7 +28,9 @@ const switches = makeOwnerGoal({
   subject: "V12_V4",
   strategyId: "STABLE4",
 });
-function planFor(goal = baseGoal, sha = SHA, ordersEnabled = false) {
+const ROOT_PLAN = "e".repeat(64);
+function planFor(goal = baseGoal, sha = SHA, ordersEnabled = false,
+                 executionPlanSha256?: string) {
   return {
     schema: GOAL_RELEASE_PLAN_SCHEMA,
     goalFingerprint: goal.fingerprint,
@@ -39,6 +41,7 @@ function planFor(goal = baseGoal, sha = SHA, ordersEnabled = false) {
     ...(goal.strategyId ? { strategyId: goal.strategyId } : {}),
     target: goal.target,
     sourceBinding: "GITHUB_RUN_HEAD_SHA",
+    ...(executionPlanSha256 ? { executionPlanSha256 } : {}),
     ordersEnabled,
     safeguards: {
       failClosed: true,
@@ -85,30 +88,38 @@ test("Goal cannot silently expand the Runner, order authority, strategy, or exce
   });
   assert.throws(() => assertOwnerGoalCandidate({
     goal: monitorOnly, sha: SHA, planSha256: "f".repeat(64),
-    ordersEnabled: true, plan: planFor(monitorOnly, SHA, true),
+    executionPlanSha256: ROOT_PLAN, ordersEnabled: true, plan: planFor(monitorOnly, SHA, true),
   }), /GOAL_ORDER_PERMISSION_ESCALATION/);
 });
 
 test("Revised SHA is accepted only when the new plan still matches approved purpose and safeguards", () => {
-  const plan = planFor(switches, FINGERPRINT_SHA, true);
+  const plan = planFor(switches, FINGERPRINT_SHA, true, ROOT_PLAN);
   assert.doesNotThrow(() => assertOwnerGoalCandidate({
     goal: switches, sha: FINGERPRINT_SHA, planSha256: "f".repeat(64),
-    ordersEnabled: true, plan,
+    executionPlanSha256: ROOT_PLAN, ordersEnabled: true, plan,
   }));
   assert.throws(() => assertOwnerGoalCandidate({
     goal: switches, sha: FINGERPRINT_SHA, planSha256: "f".repeat(64),
-    ordersEnabled: false, plan,
+    executionPlanSha256: ROOT_PLAN, ordersEnabled: false, plan,
   }), /GOAL_PLAN_OUTSIDE_APPROVED_PURPOSE/);
   // The same plan can be used with another candidate commit only after that
   // new run's head_sha / source tree / plan bytes are independently attested.
   assert.doesNotThrow(() => assertOwnerGoalCandidate({
     goal: switches, sha: SHA, planSha256: "f".repeat(64),
-    ordersEnabled: true, plan,
+    executionPlanSha256: ROOT_PLAN, ordersEnabled: true, plan,
   }));
   assert.throws(() => assertOwnerGoalCandidate({
     goal: switches, sha: FINGERPRINT_SHA, planSha256: "f".repeat(64),
-    ordersEnabled: true, plan: { ...plan, safeguards: { ...plan.safeguards, protectExistingStops: false } },
+    executionPlanSha256: ROOT_PLAN, ordersEnabled: true, plan: { ...plan, safeguards: { ...plan.safeguards, protectExistingStops: false } },
   }), /GOAL_REQUIRED_SAFEGUARDS_MISSING/);
+  assert.throws(() => assertOwnerGoalCandidate({
+    goal: switches, sha: SHA, planSha256: "f".repeat(64),
+    ordersEnabled: true, plan,
+  }), /GOAL_ROOT_PLAN_REQUIRED_FOR_TRADING/);
+  assert.throws(() => assertOwnerGoalCandidate({
+    goal: switches, sha: SHA, planSha256: "f".repeat(64),
+    executionPlanSha256: "d".repeat(64), ordersEnabled: true, plan,
+  }), /GOAL_PLAN_OUTSIDE_APPROVED_PURPOSE/);
 });
 
 type StubConfig = { good?: boolean; candidate?: string; masterBlob?: string; candidateBlob?: string; corrupted?: boolean; changedPlan?: boolean };
