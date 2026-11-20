@@ -384,6 +384,23 @@ export async function createPendingDeploymentApproval(input: {
     return current;
   }
 
+  // A failed orders-disabled monitor cutover may redeem an approval before a
+  // later preflight fails. Republishing the *same* immutable identity must
+  // reuse that approval ID instead of sending the Owner another OTP.
+  // Redeem has an identical 24-hour, monitor-only cross-run retry allowance.
+  // Never extend this to LIVE/order-enabled approvals or a changed SHA/plan.
+  if (
+    current &&
+    sameIdentity &&
+    current.status === "REDEEMED" &&
+    current.operation === "ALL_RUNNERS_MONITOR_REFRESH" &&
+    current.ordersEnabled === false &&
+    Number.isFinite(current.approvedAt) &&
+    now < Number(current.approvedAt) + 24 * 60 * 60 * 1000
+  ) {
+    return current;
+  }
+
   if (
     current &&
     sameIdentity &&
