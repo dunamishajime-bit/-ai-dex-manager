@@ -59,6 +59,10 @@ export const REDIS_APPROVAL_CAS_SCRIPT = [
   'end',
   'if ARGV[9] == "1" then',
   '  if ARGV[10] == "1" then',
+  // A simultaneous publish for the same goal must never replace the
+  // authoritative Owner OTP/approval with a second record.
+  '    local indexed = redis.call("GET", KEYS[4])',
+  '    if indexed and indexed ~= ARGV[6] then return 0 end',
   '    redis.call("SET", KEYS[4], ARGV[6])',
   '  elseif redis.call("GET", KEYS[4]) == ARGV[6] then',
   '    redis.call("DEL", KEYS[4])',
