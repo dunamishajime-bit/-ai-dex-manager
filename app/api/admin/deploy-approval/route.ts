@@ -12,6 +12,7 @@ import {
   type DeploymentApprovalOperation,
 } from "@/lib/deploy-approval-token";
 import { verifyRequestSession } from "@/lib/server/owner-session";
+import { assertSameOwnerGoal } from "@/lib/owner-goal-approval";
 import { createOtpChallenge, consumeOtpChallenge } from "@/lib/server/otp-challenge-store";
 import { requireSameOriginMutation } from "@/lib/server/request-security";
 
@@ -86,12 +87,25 @@ export async function POST(request: NextRequest) {
 
   const record = await getDeploymentApproval(requestId);
   if (!record) return redirectToAdmin(request, { error: "承認リクエストが見つかりません" });
-  if (record.requestExpiresAt < Date.now() && !["DISPATCHED", "REDEEMED"].includes(record.status)) {
+  if (record.requestExpiresAt < Date.now() && ["PENDING", "OTP_SENT"].includes(record.status)) {
     await mutateDeploymentApprovalAtomic(record.id, (current) => {
       if (!current) throw new Error("APPROVAL_NOT_FOUND");
       return { next: { ...current, status: "EXPIRED", lastError: "request expired" }, result: null };
     });
     return redirectToAdmin(request, { error: "承認リクエストの有効期限が切れています" });
+  }
+
+  if (intent === "revoke-goal") {
+    if (!record.goal || !["APPROVED", "DISPATCHED", "REDEEMED"].includes(record.status)) {
+      return redirectToAdmin(request, { error: "取消可能な目的承認がありません" });
+    }
+    await mutateDeploymentApprovalAtomic(record.id, (current) => {
+      if (!current?.goal || !["APPROVED", "DISPATCHED", "REDEEMED"].includes(current.status)) {
+        throw new Error("GOAL_NOT_REVOCABLE");
+      }
+      return { next: { ...current, status: "FAILED", lastError: "GOAL_REVOKED_BY_OWNER" }, result: null };
+    });
+    return redirectToAdmin(request, { message: "目的単位の承認を取り消しました" });
   }
 
   if (intent === "request-otp") {
@@ -110,7 +124,14 @@ export async function POST(request: NextRequest) {
     const sent = await sendEmail(
       ADMIN_2FA_RECEIVER,
       "DisDex Production LIVE 承認コード",
-      "承認コード: " + code + "\n有効期限: 5分\n\nSHA: " + record.targetSha + "\nPlan SHA-256: " + record.planSha256,
+      "承認コード: " + code + "\n有効期限: 5分\n\n" +
+        (record.goal
+          ? "目的: " + record.goal.kind + "\n対象: " + record.goal.subject +
+            "\n対象ロジック: " + (record.goal.strategyId ?? "変更なし") +
+            "\n注文許可上限: " + String(record.goal.ordersEnabled) +
+            "\n目的Fingerprint: " + record.goal.fingerprint +
+            "\n対象コードのSHA変更は別途CI照合・署名後に実行"
+          : "SHA: " + record.targetSha + "\nPlan SHA-256: " + record.planSha256),
     );
     if (!sent.success || sent.simulated) {
       return redirectToAdmin(request, { error: "実メールによる承認コード送信を確認できませんでした" });
@@ -184,7 +205,10 @@ export async function POST(request: NextRequest) {
         if (current.scope !== policy.scope || current.ordersEnabled !== policy.ordersEnabled) {
           throw new Error("APPROVAL_OPERATION_POLICY_MISMATCH");
         }
-        const issued = issueDeploymentApprovalToken({
+        // The charter is not an executable release. Sign only CI-attested
+        // exact candidates through claim_goal_release.
+        if (current.goal) assertSameOwnerGoal(current.goal);
+        const issued = current.goal ? null : issueDeploymentApprovalToken({
           targetSha: current.targetSha,
           planSha256: current.planSha256,
           operator: OPERATOR,
@@ -198,8 +222,8 @@ export async function POST(request: NextRequest) {
             ...current,
             status: "APPROVED",
             approvedAt: Date.now(),
-            approvalToken: issued.token,
-            approvalTokenExpiresAt: issued.payload.expiresAt,
+            approvalToken: issued?.token,
+            approvalTokenExpiresAt: issued?.payload.expiresAt,
             approverIpHash: ipFingerprint(request),
             otpHash: undefined,
             otpExpiresAt: undefined,
@@ -209,7 +233,9 @@ export async function POST(request: NextRequest) {
           result: null,
         };
       });
-      const response = redirectToAdmin(request, { message: "本人認証が完了しました。署名済み承認証明を発行しました" });
+      const response = redirectToAdmin(request, { message: record.goal
+        ? "目的を承認しました。候補SHAの実行にはCI・短期署名が必要です"
+        : "本人認証が完了しました。署名済み承認証明を発行しました" });
       response.cookies.delete(DEPLOY_OTP_COOKIE);
       return response;
     } catch {
