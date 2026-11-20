@@ -1,6 +1,9 @@
 name: STABLE4 V52 Q102 safety repair candidate CI
 
 on:
+  push:
+    branches:
+      - fix/stable4-v52-q102-safety-repair-20261120-candidate
   pull_request:
     branches:
       - master
