@@ -44,6 +44,7 @@ export async function verifyOwnerGoalRelease(input: {
   goal: GoalApproval;
   candidateSha: string;
   planSha256: string;
+  executionPlanSha256?: string;
   ordersEnabled: boolean;
   ciRunId: string;
   fetcher?: GitHubFetch;
@@ -95,6 +96,8 @@ export async function verifyOwnerGoalRelease(input: {
   try { plan = JSON.parse(raw.toString("utf8")); }
   catch { throw new Error("GOAL_PLAN_INVALID_JSON"); }
   assertOwnerGoalCandidate({
-    goal, sha: candidateSha, planSha256, ordersEnabled: input.ordersEnabled, plan,
+    goal, sha: candidateSha, planSha256,
+    executionPlanSha256: input.executionPlanSha256,
+    ordersEnabled: input.ordersEnabled, plan,
   });
 }
