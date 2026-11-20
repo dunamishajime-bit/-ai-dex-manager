@@ -48,7 +48,7 @@ HEARTBEATS = {
     "Q102": Path("/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json"),
 }
 HEARTBEAT_TICKS = {
-    "V52": Path("/var/lib/disdex/runner-health/ticks/v52.json"),
+    "V52": Path("/var/lib/disdex/runner-health/ticks/v52-monitor.json"),
     "Q102": Path("/var/lib/disdex/runner-health/ticks/quality102-causal-v1.json"),
 }
 V52_UNIT_OLD = f"disdex-v52-aster-only@{V52_OLD}.service"
@@ -743,7 +743,7 @@ def monitor_dropin_text(runner: str) -> str:
             "Environment=QUALITY102_LIVE_SELECTOR_PARITY=false\n"
             "Environment=DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-aster-only@%i.service\n"
             "Environment=DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json\n"
-            "Environment=DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52.json\n"
+            "Environment=DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52-monitor.json\n"
             "ExecStartPre=\n"
             "ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
             "ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha\n"
@@ -752,7 +752,7 @@ def monitor_dropin_text(runner: str) -> str:
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/heartbeats\n"
             "ExecStartPre=/usr/bin/test -d /var/lib/disdex/runner-health/ticks\n"
             "ExecStart=\n"
-            "ExecStart=/bin/sh -ec 'export DISDEX_RELEASE_SHA=%i DISDEX_RUNTIME_COMMIT_SHA=%i DISDEX_RUNTIME_SHA=%i DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json DISDEX_V52_MONITOR_BUDGET_BROKER_SHA=25d4a86f541a33564c8060bc71633fd810ac9370 DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-25d4a86f541a33564c8060bc71633fd810ac9370/budget.sock STRICT_PORTFOLIO_PLANNER_ACTIVE=true V12_BASE_GROSS_CAP=2.0 V12_DYNAMIC_GROSS_CAP=2.0 V12_GROSS_CAP=2.0 PENGU_GROSS_CAP=1.0 STOCK_GROSS_CAP=4.0 CRYPTO_GROSS_CAP=3.0 TOTAL_GROSS_CAP=4.25 DISDEX_V52_STOCK_GROSS_CAP=4.0 DISDEX_V52_V11_GROSS_CAP=2.0 DISDEX_V52_V50_GROSS_CAP=2.0 DISDEX_V52_CRYPTO_GROSS_CAP=3.0 DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25 QUALITY102_LIVE_ENABLED=false QUALITY102_LIVE_SELECTOR_PARITY=false DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-aster-only@%i.service DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52.json; exec /home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon'\n"
+            "ExecStart=/bin/sh -ec 'export DISDEX_RELEASE_SHA=%i DISDEX_RUNTIME_COMMIT_SHA=%i DISDEX_RUNTIME_SHA=%i DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json DISDEX_V52_MONITOR_BUDGET_BROKER_SHA=25d4a86f541a33564c8060bc71633fd810ac9370 DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-25d4a86f541a33564c8060bc71633fd810ac9370/budget.sock STRICT_PORTFOLIO_PLANNER_ACTIVE=true V12_BASE_GROSS_CAP=2.0 V12_DYNAMIC_GROSS_CAP=2.0 V12_GROSS_CAP=2.0 PENGU_GROSS_CAP=1.0 STOCK_GROSS_CAP=4.0 CRYPTO_GROSS_CAP=3.0 TOTAL_GROSS_CAP=4.25 DISDEX_V52_STOCK_GROSS_CAP=4.0 DISDEX_V52_V11_GROSS_CAP=2.0 DISDEX_V52_V50_GROSS_CAP=2.0 DISDEX_V52_CRYPTO_GROSS_CAP=3.0 DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25 QUALITY102_LIVE_ENABLED=false QUALITY102_LIVE_SELECTOR_PARITY=false DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-aster-only@%i.service DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52-monitor.json; exec /home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon'\n"
             "ReadOnlyPaths=\n"
             "ReadOnlyPaths=/home/deploy/disdex-trading/releases /etc/disdex /var/lib/disdex/shared /var/lib/disdex/v52-monitor\n"
             "ReadWritePaths=\n"
@@ -886,6 +886,8 @@ def target_pins(raw: bytes) -> bytes:
         row = value["runners"][key]
         require(row.get("sha") == old, "PIN_CHANGED_BEFORE_CUTOVER:" + key)
         row["sha"] = TARGET; row["serviceUnit"] = f"{prefix}@{TARGET}.service"; row["releaseRoot"] = str(BASE / TARGET)
+        if key == "V52":
+            row["tickPath"] = str(HEARTBEAT_TICKS["V52"])
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
