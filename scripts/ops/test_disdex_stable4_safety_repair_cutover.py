@@ -188,6 +188,26 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             message.index("status=ExecStartPre code=exited status=0/SUCCESS cmd=install"),
         )
 
+    def test_systemd_failure_context_prioritizes_safe_journal_cause(self):
+        failed_start = SimpleNamespace(returncode=1, stdout="", stderr="Job failed")
+        show = SimpleNamespace(returncode=0, stdout="ActiveState=activating\n", stderr="")
+        status = SimpleNamespace(
+            returncode=3,
+            stdout="Process: 124 ExecStart=/usr/bin/python (code=exited, status=1/FAILURE)\n",
+            stderr="",
+        )
+        journal = SimpleNamespace(
+            returncode=0,
+            stdout="RuntimeError: monitor preflight failed: ACKNOWLEDGEMENT_MISSING\n",
+            stderr="",
+        )
+        with patch.object(module.subprocess, "run", side_effect=[failed_start, show, status, journal]):
+            with self.assertRaises(module.ContractError) as ctx:
+                module.run("/usr/bin/systemctl", "start", "unit.service")
+        message = str(ctx.exception)
+        self.assertIn("journal=RuntimeError: monitor preflight failed: ACKNOWLEDGEMENT_MISSING", message)
+        self.assertLess(message.index("journal="), message.index("status=Process pid="))
+
     def test_wait_stable_preserves_bounded_systemd_context(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('TARGET_RUNNER_NOT_STABLE:" + unit + suffix', source)
