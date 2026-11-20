@@ -1,0 +1,589 @@
+#!/usr/bin/env python3
+"""Fail-closed, monitor-only V52/Q102 safety repair cutover.
+
+This file is intentionally parameterized only by the exact candidate and plan
+below.  It never clears the GLOBAL HOLD, enables orders, or calls an exchange
+mutation endpoint.  All changes are reversible root-owned pin/unit/state
+transactions; a failed postcondition restores the captured files and starts
+the previous generation only after a fresh unchanged venue reconciliation.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+from disdex_owner_approval import verify as verify_owner_token
+
+TARGET = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
+PLAN_SHA256 = "542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f"
+V52_OLD = "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+Q102_OLD = "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+HOLD_DIGEST = "928a1c83b08c6445211639631ed69ccf7ea935741cb21786c41fc63e294322cf"
+BASE = Path("/home/deploy/disdex-trading/releases")
+CURRENT = Path("/home/deploy/disdex-trading/current")
+PINS = Path("/etc/disdex/runner-pins.json")
+CURRENT_PLAN = Path("/var/lib/disdex/unified-deploy/current-plan.json")
+V52_PIN = Path("/etc/disdex/current-runtime/v52-current.env")
+Q102_STATE = Path("/var/lib/disdex/quality102-causal-v1/state.json")
+HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
+RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
+MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
+PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
+HEARTBEATS = {
+    "V52": Path("/var/lib/disdex/runner-health/heartbeats/v52.json"),
+    "Q102": Path("/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json"),
+}
+V52_UNIT_OLD = f"disdex-v52-aster-only@{V52_OLD}.service"
+V52_UNIT_NEW = f"disdex-v52-aster-only@{TARGET}.service"
+Q102_UNIT_OLD = f"disdex-quality102-causal-v1@{Q102_OLD}.service"
+Q102_UNIT_NEW = f"disdex-quality102-causal-v1@{TARGET}.service"
+BACKUP_ROOT = Path("/var/backups/disdex-stable4-safety-repair")
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+PLAN_RE = re.compile(r"^[0-9a-f]{64}$")
+REPO = "dunamishajime-bit/-ai-dex-manager"
+SCOPE = "FULL_PROJECT"
+OPERATOR = "dunamishajime-bit"
+DEPLOYMENT_TARGET = "professional-dismanager.net"
+ROUTE = "GITHUB_ACTIONS"
+DEFAULT_PUBLIC_KEY = Path("/var/lib/unified-deploy/owner-approval-public.pem")
+DEFAULT_NONCE_DIR = Path("/var/lib/unified-deploy/nonces")
+
+
+class ContractError(RuntimeError):
+    pass
+
+
+def require(condition: bool, reason: str) -> None:
+    if not condition:
+        raise ContractError(reason)
+
+
+def canonical(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+
+
+def inventory_digest(value: dict) -> str:
+    return hashlib.sha256(canonical(value)).hexdigest()
+
+
+def validate_plan(plan: dict) -> bool:
+    require(plan.get("schema") == "disdex-stable4-safety-repair-plan/v1", "PLAN_SCHEMA_INVALID")
+    require(plan.get("target") == DEPLOYMENT_TARGET, "PLAN_TARGET_INVALID")
+    require(plan.get("operatorTarget") == "DD1296_FINAL_ALLIN_10BPS", "PLAN_OPERATOR_TARGET_INVALID")
+    require(plan.get("candidateType") == "combined-v52-q102-safety-repair", "PLAN_TYPE_INVALID")
+    components = plan.get("components") or {}
+    require(components.get("v52", {}).get("baseRuntimeSha") == V52_OLD, "PLAN_V52_BASE_INVALID")
+    require(components.get("q102", {}).get("baseRuntimeSha") == Q102_OLD, "PLAN_Q102_BASE_INVALID")
+    require(components.get("v52", {}).get("ordersEnabled") is False, "PLAN_V52_ORDER_FLAG_INVALID")
+    require(components.get("q102", {}).get("ordersEnabled") is False, "PLAN_Q102_ORDER_FLAG_INVALID")
+    hold = plan.get("globalHold") or {}
+    for key, expected in {
+        "active": True, "strategyId": "STABLE4_H48_CUTOVER", "action": "HOLD_PROTECTED",
+        "scope": "GLOBAL", "operator": "disdex-stable4-formal-owner-hold",
+        "mustRemainByteIdentical": True,
+        "digestSha256": HOLD_DIGEST,
+    }.items():
+        require(hold.get(key) == expected, "GLOBAL_HOLD_CONTRACT_INVALID:" + key)
+    venue = plan.get("venuePreflight") or {}
+    require(venue.get("signedAsterGets") == 3, "SIGNED_GET_COUNT_INVALID")
+    require(venue.get("requireFlatPositions") is True and venue.get("requireNoOpenOrders") is True,
+            "VENUE_FLAT_CONTRACT_INVALID")
+    for key in ("ordersSent", "cancelsSent", "positionChangesSent"):
+        require(venue.get(key) == 0, "NONZERO_MUTATION_CONTRACT:" + key)
+    cutover = plan.get("cutover") or {}
+    for key, expected in {
+        "v52TargetMustDifferFrom": V52_OLD,
+        "q102TargetMustDifferFrom": Q102_OLD,
+        "dualRunnerForbidden": True,
+        "clearGlobalHold": False,
+        "enableNewOrders": False,
+        "rootOwnedImmutableRelease": True,
+        "formalGithubActionsOnly": True,
+    }.items():
+        require(cutover.get(key) == expected, "CUTOVER_CONTRACT_INVALID:" + key)
+    rollback = plan.get("rollback") or {}
+    require(rollback.get("automaticOnFailure") is True
+            and rollback.get("restoreV52") == V52_OLD
+            and rollback.get("restoreQ102") == Q102_OLD
+            and rollback.get("requireFreshVenueReconciliationBeforeRestart") is True,
+            "ROLLBACK_CONTRACT_INVALID")
+    verification = plan.get("verification") or {}
+    require(verification.get("postCutoverCycles") == 3
+            and verification.get("requireV52RestartCountStable") is True
+            and verification.get("requireQ102Freshness") is True
+            and verification.get("requireGlobalHoldDigestUnchanged") is True
+            and verification.get("requireTradingMutationZero") is True,
+            "VERIFICATION_CONTRACT_INVALID")
+    return True
+
+
+def run(*argv: str, timeout: int = 60, check: bool = True, input_text: str | None = None) -> str:
+    p = subprocess.run(argv, input=input_text, capture_output=True, text=True, timeout=timeout)
+    if check and p.returncode:
+        raise ContractError("COMMAND_FAILED:" + argv[0].split("/")[-1])
+    return p.stdout.strip()
+
+
+def read_regular(path: Path, max_bytes: int = 1_000_000, require_root: bool = False) -> bytes:
+    require(path.is_file() and not path.is_symlink(), "REGULAR_FILE_REQUIRED:" + str(path))
+    st = path.stat()
+    require(stat.S_ISREG(st.st_mode) and st.st_size <= max_bytes and not (st.st_mode & 0o022),
+            "UNSAFE_FILE:" + str(path))
+    if require_root:
+        require(st.st_uid == 0, "ROOT_OWNER_REQUIRED:" + str(path))
+    return path.read_bytes()
+
+
+def read_json(path: Path) -> dict:
+    try:
+        value = json.loads(read_regular(path).decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ContractError("JSON_INVALID:" + str(path)) from exc
+    require(isinstance(value, dict), "JSON_OBJECT_REQUIRED:" + str(path))
+    return value
+
+
+def unit_property(unit: str, key: str) -> str:
+    return run("/usr/bin/systemctl", "show", unit, "--property=" + key, "--value", timeout=20)
+
+
+def active(unit: str) -> bool:
+    return unit_property(unit, "ActiveState") == "active"
+
+
+def unit_release_matches(unit: str, expected: str) -> None:
+    pid = int(unit_property(unit, "MainPID") or "0")
+    require(pid > 100, "RUNNER_PID_INVALID:" + unit)
+    cwd = os.path.realpath(f"/proc/{pid}/cwd")
+    require(cwd == str(BASE / expected), "RUNNER_CWD_MISMATCH:" + unit)
+
+
+def validate_target_units() -> None:
+    """Use the installed template units; never fabricate a systemd unit file."""
+    for old, new, expected in (
+        (V52_UNIT_OLD, V52_UNIT_NEW, "V52"),
+        (Q102_UNIT_OLD, Q102_UNIT_NEW, "Q102"),
+    ):
+        # The target instance must resolve from the reviewed template/drop-ins.
+        require(unit_property(new, "LoadState") == "loaded", "TARGET_UNIT_NOT_LOADED:" + expected)
+        fragment = unit_property(new, "FragmentPath")
+        require(fragment and not Path(fragment).is_symlink(), "TARGET_UNIT_FRAGMENT_INVALID:" + expected)
+        text = run("/usr/bin/systemctl", "cat", new, timeout=30)
+        require("[Service]" in text, "TARGET_UNIT_SERVICE_SECTION_MISSING:" + expected)
+        working = unit_property(new, "WorkingDirectory")
+        exec_start = unit_property(new, "ExecStart")
+        effective = "\n".join((text, working, exec_start))
+        require(str(BASE / TARGET) in effective or "%i" in effective,
+                "TARGET_UNIT_RELEASE_NOT_BOUND:" + expected)
+        require(V52_OLD not in effective and Q102_OLD not in effective,
+                "TARGET_UNIT_OLD_SHA_REMAINS:" + expected)
+        require(not active(new), "TARGET_RUNNER_ALREADY_ACTIVE:" + expected)
+
+
+def hold_snapshot() -> tuple[bytes, dict, str]:
+    raw = read_regular(HOLD, 32_768, require_root=True)
+    digest = hashlib.sha256(raw).hexdigest()
+    require(digest == HOLD_DIGEST, "GLOBAL_HOLD_DIGEST_MISMATCH")
+    value = json.loads(raw.decode("utf-8"))
+    require(
+        value.get("active") is True and value.get("strategyId") == "STABLE4_H48_CUTOVER"
+        and value.get("action") == "HOLD_PROTECTED" and value.get("scope") == "GLOBAL"
+        and value.get("operator") == "disdex-stable4-formal-owner-hold"
+        and str(value.get("reason") or "").startswith("STABLE4_RESEARCH_ROLLOUT:")
+        and value.get("recoverable") is False,
+        "GLOBAL_HOLD_NOT_PROTECTED",
+    )
+    return raw, value, digest
+
+
+def normalize_inventory(value: dict) -> dict:
+    positions = []
+    raw_positions = value.get("positions")
+    raw_orders = value.get("openOrders")
+    require(isinstance(raw_positions, list) and isinstance(raw_orders, list), "SIGNED_GET_ARRAYS_INVALID")
+    for row in raw_positions:
+        require(isinstance(row, dict), "POSITION_NOT_OBJECT")
+        amount = float(row.get("positionAmt") or 0)
+        if abs(amount) > 1e-15:
+            positions.append({k: str(row.get(k) or "") for k in ("symbol", "positionAmt", "positionSide", "entryPrice")})
+    orders = []
+    for row in raw_orders:
+        require(isinstance(row, dict), "ORDER_NOT_OBJECT")
+        orders.append({k: row.get(k) for k in (
+            "symbol", "orderId", "clientOrderId", "status", "side", "positionSide", "type",
+            "reduceOnly", "closePosition", "origQty", "executedQty", "stopPrice")})
+    positions.sort(key=lambda x: (x["symbol"], x["positionSide"], x["positionAmt"]))
+    orders.sort(key=lambda x: (x["symbol"], str(x["orderId"]), str(x["clientOrderId"])))
+    require(not positions and not orders, "VENUE_NOT_FLAT_OR_HAS_OPEN_ORDERS")
+    return {"positions": positions, "openOrders": orders}
+
+
+def signed_get() -> tuple[str, dict, str]:
+    release = CURRENT.resolve()
+    require(release.is_dir(), "CURRENT_RELEASE_MISSING")
+    command = (
+        "set -ae; for f in /etc/disdex/disdex-v13d-v11eq-v96.env "
+        "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; do . \"$f\"; done; "
+        "set +a; exec /usr/bin/node " + str(release / "node_modules/tsx/dist/cli.mjs") +
+        " scripts/disdex-aster-readonly-account-diagnostic.ts"
+    )
+    p = subprocess.run(["/bin/bash", "-c", command], cwd=release, capture_output=True, text=True, timeout=65)
+    require(p.returncode == 0, "SIGNED_ASTER_GET_FAILED")
+    rows = [line for line in p.stdout.splitlines() if line.startswith("{")]
+    require(rows, "SIGNED_ASTER_GET_EMPTY")
+    value = json.loads(rows[-1])
+    require(value.get("status") == "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS", "SIGNED_ASTER_GET_NOT_PASS")
+    for key in ("ordersSent", "cancelsSent", "positionChangesSent"):
+        require(value.get(key) == 0, "SIGNED_GET_MUTATION:" + key)
+    inventory = normalize_inventory(value)
+    stamp = str(value.get("observedAt") or value.get("venueTime") or "")
+    require(bool(stamp), "SIGNED_GET_TIMESTAMP_MISSING")
+    return stamp, inventory, inventory_digest(inventory)
+
+
+def validate_shared_files() -> None:
+    _raw, _hold, _digest = hold_snapshot()
+    risk = read_json(RISK)
+    require(risk.get("sourceComplete") is True and risk.get("tripped") is False, "SHARED_RISK_NOT_HEALTHY")
+    require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_LIMIT_MISMATCH")
+    risk_updated = risk.get("updatedAt")
+    now = int(time.time() * 1000)
+    require(type(risk_updated) in (int, float) and -1000 <= now - float(risk_updated) <= 15 * 60_000,
+            "SHARED_RISK_STALE")
+    margin = read_json(MARGIN)
+    require(margin.get("stage") == "HEALTHY", "MARGIN_GUARD_NOT_HEALTHY")
+    checked = margin.get("checkedAt")
+    require(type(checked) in (int, float) and -1000 <= now - float(checked) <= 15 * 60_000,
+            "MARGIN_GUARD_STALE")
+    pending = read_json(PENDING)
+    require(isinstance(pending.get("entries"), list)
+            and not any(str(row.get("status", "")).upper() != "RELEASED" for row in pending["entries"]),
+            "PENDING_EXPOSURE_ACTIVE")
+
+
+def validate_baseline() -> tuple[bytes, bytes, bytes, dict, dict, str]:
+    require(os.geteuid() == 0, "ROOT_REQUIRED")
+    require(active(V52_UNIT_OLD) and active(Q102_UNIT_OLD), "OLD_RUNNERS_NOT_ACTIVE")
+    unit_release_matches(V52_UNIT_OLD, V52_OLD)
+    unit_release_matches(Q102_UNIT_OLD, Q102_OLD)
+    validate_target_units()
+    require(not active(V52_UNIT_NEW) and not active(Q102_UNIT_NEW), "TARGET_RUNNER_ALREADY_ACTIVE")
+    require((CURRENT / ".disdex-release-sha").read_text().strip() != TARGET, "CURRENT_RELEASE_CANDIDATE_UNEXPECTED")
+    hold_raw, _hold, hold_digest = hold_snapshot()
+    pins_raw = read_regular(PINS, 131_072, require_root=True)
+    plan_raw = read_regular(CURRENT_PLAN, 131_072, require_root=True)
+    pins = json.loads(pins_raw.decode("utf-8")); plan = json.loads(plan_raw.decode("utf-8"))
+    require(pins.get("runners", {}).get("V52", {}).get("sha") == V52_OLD, "V52_BASELINE_PIN_MISMATCH")
+    require(pins.get("runners", {}).get("QUALITY102_CAUSAL_V1", {}).get("sha") == Q102_OLD,
+            "Q102_BASELINE_PIN_MISMATCH")
+    require(plan.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
+    state = read_json(Q102_STATE)
+    require(Q102_STATE.stat().st_uid == 0, "Q102_STATE_NOT_ROOT_OWNED")
+    require(state.get("runtimeCommitSha") == Q102_OLD and not state.get("position") and not state.get("pending"),
+            "Q102_BASELINE_NOT_FLAT")
+    validate_shared_files()
+    observations = [signed_get() for _ in range(3)]
+    require(len({x[0] for x in observations}) == 3, "SIGNED_GET_TIMESTAMPS_NOT_UNIQUE")
+    require(len({x[2] for x in observations}) == 1, "VENUE_INVENTORY_CHANGED_PRECUTOVER")
+    return pins_raw, plan_raw, hold_raw, pins, plan, observations[-1][2]
+
+
+def file_meta(path: Path) -> tuple[int, int, int]:
+    st = path.stat()
+    return st.st_uid, st.st_gid, stat.S_IMODE(st.st_mode)
+
+
+def write_atomic(path: Path, data: bytes, meta: tuple[int, int, int] | None = None,
+                 mode: int | None = None) -> None:
+    fd, name = tempfile.mkstemp(dir=str(path.parent), prefix=".stable4-safety-")
+    try:
+        with os.fdopen(fd, "wb") as fh:
+            os.fchmod(fh.fileno(), mode if mode is not None else (meta[2] if meta else 0o600))
+            fh.write(data); fh.flush(); os.fsync(fh.fileno())
+        uid, gid = (meta[0], meta[1]) if meta else (0, 0)
+        os.chown(name, uid, gid)
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name): os.unlink(name)
+
+
+def target_pins(raw: bytes) -> bytes:
+    value = json.loads(raw.decode("utf-8"))
+    for key, prefix, old in (("V52", "disdex-v52-aster-only", V52_OLD),
+                             ("QUALITY102_CAUSAL_V1", "disdex-quality102-causal-v1", Q102_OLD)):
+        row = value["runners"][key]
+        require(row.get("sha") == old, "PIN_CHANGED_BEFORE_CUTOVER:" + key)
+        row["sha"] = TARGET; row["serviceUnit"] = f"{prefix}@{TARGET}.service"; row["releaseRoot"] = str(BASE / TARGET)
+    return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+
+
+def target_plan(raw: bytes) -> bytes:
+    value = json.loads(raw.decode("utf-8"))
+    require(value.get("ordersEnabled") is False, "PLAN_ORDERS_CHANGED")
+    for key in ("V52", "QUALITY102_CAUSAL_V1"):
+        require(value.get("runners", {}).get(key) in (V52_OLD, Q102_OLD), "PLAN_BASELINE_INVALID:" + key)
+        value["runners"][key] = TARGET
+    return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+
+
+def stage_candidate(tar_path: Path, manifest_path: Path) -> None:
+    release = BASE / TARGET
+    require(not release.exists() and not release.is_symlink(), "TARGET_RELEASE_ALREADY_EXISTS")
+    stage = BASE / ("." + TARGET + ".stage")
+    require(not stage.exists() and not stage.is_symlink(), "TARGET_STAGE_ALREADY_EXISTS")
+    require(tar_path.is_file() and not tar_path.is_symlink(), "CANDIDATE_ARCHIVE_INVALID")
+    require(manifest_path.is_file() and not manifest_path.is_symlink(), "CANDIDATE_MANIFEST_INVALID")
+    listing = run("/usr/bin/tar", "-tzf", str(tar_path), timeout=120)
+    for name in listing.splitlines():
+        require(name and not name.startswith("/") and ".." not in Path(name).parts,
+                "CANDIDATE_ARCHIVE_PATH_INVALID")
+    stage.mkdir(mode=0o755)
+    try:
+        run("/usr/bin/tar", "--extract", "--gzip", "--file", str(tar_path),
+            "--directory", str(stage), "--no-same-owner", "--no-same-permissions", timeout=180)
+        # The repository archive must not smuggle executable symlinks into the
+        # immutable release. Dependency links are created below and are the only
+        # links allowed in this transaction.
+        for link in stage.rglob("*"):
+            require(not link.is_symlink(), "CANDIDATE_ARCHIVE_SYMLINK_FORBIDDEN")
+        marker = stage / ".disdex-release-sha"; marker.write_text(TARGET + "\n", encoding="ascii")
+        current = CURRENT.resolve()
+        for dep in ("node_modules", ".venv2"):
+            source = current / dep
+            require(source.exists(), "CURRENT_DEPENDENCY_MISSING:" + dep)
+            (stage / dep).symlink_to(source, target_is_directory=True)
+        manifest = read_json(manifest_path)
+        require(manifest.get("targetSha") == TARGET, "CANDIDATE_MANIFEST_TARGET_INVALID")
+        for rel, digest in (manifest.get("files") or {}).items():
+            rel_path = Path(rel)
+            require(not rel_path.is_absolute() and ".." not in rel_path.parts, "CANDIDATE_MANIFEST_PATH_INVALID")
+            path = stage / rel
+            require(path.is_file() and not path.is_symlink()
+                    and isinstance(digest, str) and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
+                    "CANDIDATE_SOURCE_HASH_MISMATCH:" + rel)
+        # Archive extraction runs as root. Make regular files non-writable by
+        # group/other without following any future dependency symlink.
+        for path in stage.rglob("*"):
+            if path.is_file() and not path.is_symlink():
+                os.chmod(path, stat.S_IMODE(path.stat().st_mode) & ~0o022)
+        os.replace(stage, release)
+    except Exception:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+
+
+def poll_cycles(previous: dict[str, tuple[int, str]], timeout: int = 180) -> dict[str, tuple[int, str]]:
+    seen = {name: 0 for name in HEARTBEATS}
+    last = dict(previous)
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline and min(seen.values()) < 3:
+        for name, path in HEARTBEATS.items():
+            if not path.is_file() or path.is_symlink():
+                continue
+            raw = path.read_bytes(); digest = hashlib.sha256(raw).hexdigest()
+            value = json.loads(raw.decode("utf-8"))
+            stamp = str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or digest)
+            current = (path.stat().st_mtime_ns, stamp)
+            if current != last[name]:
+                seen[name] += 1; last[name] = current
+        time.sleep(3)
+    require(min(seen.values()) >= 3, "THREE_HEARTBEAT_CYCLES_NOT_OBSERVED")
+    return last
+
+
+def timestamp_ms(value: object) -> int:
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        number = int(value)
+        return number * 1000 if number < 10**12 else number
+    if isinstance(value, str):
+        try:
+            from datetime import datetime
+            return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+        except (ValueError, TypeError, OverflowError):
+            return 0
+    return 0
+
+
+def wait_stable(unit: str, expected: str, timeout: int = 100) -> str:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if active(unit):
+            pid = int(unit_property(unit, "MainPID") or "0")
+            if pid > 100 and os.path.realpath(f"/proc/{pid}/cwd") == str(BASE / expected):
+                restarts = unit_property(unit, "NRestarts")
+                time.sleep(5)
+                if active(unit) and unit_property(unit, "MainPID") == str(pid):
+                    require(unit_property(unit, "NRestarts") == restarts, "TARGET_RESTARTED_DURING_STABILIZE")
+                    return str(pid)
+        time.sleep(2)
+    raise ContractError("TARGET_RUNNER_NOT_STABLE:" + unit)
+
+
+def execute(tar_path: Path, manifest_path: Path, approval_token: str,
+            public_key: Path, nonce_dir: Path, approval_id: str, run_id: str) -> None:
+    require(re.fullmatch(r"[0-9a-fA-F-]{36}", approval_id) is not None, "APPROVAL_ID_INVALID")
+    require(re.fullmatch(r"[0-9]{1,20}", run_id) is not None, "RUN_ID_INVALID")
+    require(approval_token and len(approval_token) <= 16_384, "APPROVAL_TOKEN_MISSING")
+    require(public_key.is_file() and not public_key.is_symlink(), "OWNER_PUBLIC_KEY_MISSING")
+    verify_owner_token(approval_token, public_key, REPO, TARGET, SCOPE, OPERATOR, PLAN_SHA256,
+                       nonce_dir=str(nonce_dir), route=ROUTE, deployment_target=DEPLOYMENT_TARGET,
+                       operator_target="DD1296_FINAL_ALLIN_10BPS", orders_enabled=False)
+    baseline_pins, baseline_plan, baseline_hold, _pins, _plan, baseline_digest = validate_baseline()
+    baseline_state = read_regular(Q102_STATE, require_root=True)
+    baseline_v52_pin = read_regular(V52_PIN, require_root=True)
+    metadata = {p: file_meta(p) for p in (Q102_STATE, V52_PIN, PINS, CURRENT_PLAN)}
+    old_v52_enabled = run("/usr/bin/systemctl", "is-enabled", V52_UNIT_OLD, check=False) == "enabled"
+    old_q102_enabled = run("/usr/bin/systemctl", "is-enabled", Q102_UNIT_OLD, check=False) == "enabled"
+    try:
+        stage_candidate(tar_path, manifest_path)
+        validate_target_units()
+        # Recheck everything immediately before stopping either old runner.
+        now_hold, _value, now_digest = hold_snapshot()
+        require(now_hold == baseline_hold and now_digest == HOLD_DIGEST, "GLOBAL_HOLD_CHANGED_PRECUTOVER")
+        _stamp, _inventory, digest = signed_get()
+        require(digest == baseline_digest, "VENUE_CHANGED_PRECUTOVER")
+        require(active(V52_UNIT_OLD) and active(Q102_UNIT_OLD), "OLD_RUNNER_CHANGED_PRECUTOVER")
+        run("/usr/bin/systemctl", "stop", Q102_UNIT_OLD, timeout=90)
+        run("/usr/bin/systemctl", "stop", V52_UNIT_OLD, timeout=90)
+        require(not active(V52_UNIT_OLD) and not active(Q102_UNIT_OLD), "OLD_RUNNER_STILL_ACTIVE")
+        stopped_state = read_json(Q102_STATE)
+        require(stopped_state.get("runtimeCommitSha") == Q102_OLD
+                and not stopped_state.get("position") and not stopped_state.get("pending"),
+                "Q102_STATE_NOT_FLAT_AFTER_STOP")
+        state = dict(stopped_state); state["runtimeCommitSha"] = TARGET
+        write_atomic(Q102_STATE, (json.dumps(state, separators=(",", ":")) + "\n").encode(), metadata[Q102_STATE])
+        pin_text = baseline_v52_pin.decode("utf-8")
+        pin_text = pin_text.replace("DISDEX_V52_RUNTIME_SHA=" + V52_OLD, "DISDEX_V52_RUNTIME_SHA=" + TARGET)
+        pin_text = pin_text.replace("DISDEX_V52_RUNTIME_ROOT=" + str(BASE / V52_OLD), "DISDEX_V52_RUNTIME_ROOT=" + str(BASE / TARGET))
+        require(V52_OLD not in pin_text, "V52_PIN_REPLACE_FAILED")
+        write_atomic(V52_PIN, pin_text.encode(), metadata[V52_PIN])
+        write_atomic(PINS, target_pins(baseline_pins), metadata[PINS])
+        write_atomic(CURRENT_PLAN, target_plan(baseline_plan), metadata[CURRENT_PLAN])
+        run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        run("/usr/bin/systemctl", "start", Q102_UNIT_NEW, timeout=100)
+        run("/usr/bin/systemctl", "start", V52_UNIT_NEW, timeout=100)
+        qpid = wait_stable(Q102_UNIT_NEW, TARGET)
+        vpid = wait_stable(V52_UNIT_NEW, TARGET)
+        require(not active(Q102_UNIT_OLD) and not active(V52_UNIT_OLD), "DUAL_RUNNER_ACTIVE")
+        pids = {"Q102": qpid, "V52": vpid}
+        cycles_before = {}
+        for name, path in HEARTBEATS.items():
+            raw = read_regular(path, 128_000); value = json.loads(raw.decode("utf-8"))
+            cycles_before[name] = (path.stat().st_mtime_ns, str(value.get("updatedAt") or value.get("observedAt") or value.get("timestamp") or ""))
+        restarts_before = {u: unit_property(u, "NRestarts") for u in (Q102_UNIT_NEW, V52_UNIT_NEW)}
+        poll_cycles(cycles_before)
+        time.sleep(10)
+        require(all(active(u) for u in (Q102_UNIT_NEW, V52_UNIT_NEW)), "TARGET_RUNNER_LOST_ACTIVE")
+        require(all(unit_property(u, "NRestarts") == restarts_before[u] for u in restarts_before), "TARGET_RESTART_COUNT_CHANGED")
+        state_after = read_json(Q102_STATE)
+        require(state_after.get("runtimeCommitSha") == TARGET, "Q102_FRESHNESS_SHA_MISMATCH")
+        updated = timestamp_ms(state_after.get("updatedAt"))
+        baseline_updated = timestamp_ms(json.loads(baseline_state.decode("utf-8")).get("updatedAt"))
+        require(updated > baseline_updated and abs(int(time.time() * 1000) - updated) < 10 * 60_000,
+                "Q102_FRESHNESS_STALE")
+        final_reads = [signed_get() for _ in range(3)]
+        require(len({x[0] for x in final_reads}) == 3, "POST_SIGNED_GET_TIMESTAMPS_NOT_UNIQUE")
+        require(all(x[2] == baseline_digest for x in final_reads), "VENUE_INVENTORY_CHANGED_POSTCUTOVER")
+        after_hold, _after_value, after_digest = hold_snapshot()
+        require(after_hold == baseline_hold and after_digest == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
+        if old_q102_enabled: run("/usr/bin/systemctl", "disable", Q102_UNIT_OLD, check=False)
+        if old_v52_enabled: run("/usr/bin/systemctl", "disable", V52_UNIT_OLD, check=False)
+        if old_q102_enabled: run("/usr/bin/systemctl", "enable", Q102_UNIT_NEW, check=False)
+        if old_v52_enabled: run("/usr/bin/systemctl", "enable", V52_UNIT_NEW, check=False)
+        print(json.dumps({"status": "STABLE4_SAFETY_REPAIR_CUTOVER_PASS", "targetSha": TARGET,
+                          "previousV52": V52_OLD, "previousQ102": Q102_OLD,
+                          "signedGetsBefore": 3, "signedGetsAfter": 3, "heartbeatCycles": 3,
+                          "globalHoldDigest": after_digest, "ordersEnabled": False,
+                          "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0,
+                          "oldGenerationActive": False, "pids": pids}, sort_keys=True))
+    except Exception as exc:
+        # Never attempt rollback without a fresh, unchanged venue snapshot.
+        try:
+            _stamp, _inventory, digest = signed_get()
+            require(digest == baseline_digest, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
+            if active(V52_UNIT_NEW): run("/usr/bin/systemctl", "stop", V52_UNIT_NEW, timeout=90)
+            if active(Q102_UNIT_NEW): run("/usr/bin/systemctl", "stop", Q102_UNIT_NEW, timeout=90)
+            write_atomic(Q102_STATE, baseline_state, metadata[Q102_STATE])
+            write_atomic(V52_PIN, baseline_v52_pin, metadata[V52_PIN])
+            write_atomic(PINS, baseline_pins, metadata[PINS])
+            write_atomic(CURRENT_PLAN, baseline_plan, metadata[CURRENT_PLAN])
+            run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+            if old_q102_enabled: run("/usr/bin/systemctl", "enable", Q102_UNIT_OLD, check=False)
+            if old_v52_enabled: run("/usr/bin/systemctl", "enable", V52_UNIT_OLD, check=False)
+            run("/usr/bin/systemctl", "start", Q102_UNIT_OLD, timeout=100)
+            run("/usr/bin/systemctl", "start", V52_UNIT_OLD, timeout=100)
+            wait_stable(Q102_UNIT_OLD, Q102_OLD, timeout=100)
+            wait_stable(V52_UNIT_OLD, V52_OLD, timeout=100)
+            require(active(Q102_UNIT_OLD) and active(V52_UNIT_OLD), "ROLLBACK_OLD_RUNNERS_NOT_ACTIVE")
+            _r, _v, rollback_hold_digest = hold_snapshot()
+            require(rollback_hold_digest == HOLD_DIGEST, "ROLLBACK_HOLD_CHANGED")
+            release = BASE / TARGET
+            if release.is_dir() and not release.is_symlink():
+                require((release / ".disdex-release-sha").read_text().strip() == TARGET, "ROLLBACK_RELEASE_MARKER_INVALID")
+                shutil.rmtree(release)
+            print("ROLLBACK=SUCCESS", file=sys.stderr)
+        except Exception as rollback_error:
+            print("ROLLBACK=MANUAL_REVIEW_REQUIRED:" + type(rollback_error).__name__, file=sys.stderr)
+        raise ContractError("CUTOVER_BLOCKED:" + type(exc).__name__) from exc
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--preflight-readonly", action="store_true")
+    group.add_argument("--execute-approved", action="store_true")
+    parser.add_argument("--tar", type=Path)
+    parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--plan", type=Path, required=True)
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--approval-id", required=True)
+    parser.add_argument("--public-key", type=Path, default=DEFAULT_PUBLIC_KEY)
+    parser.add_argument("--nonce-dir", type=Path, default=DEFAULT_NONCE_DIR)
+    args = parser.parse_args()
+    try:
+        require(os.geteuid() == 0, "ROOT_REQUIRED")
+        require(re.fullmatch(r"[0-9]{1,20}", args.run_id or "") is not None, "RUN_ID_INVALID")
+        require(args.approval_id and re.fullmatch(r"[0-9a-fA-F-]{36}", args.approval_id), "APPROVAL_ID_INVALID")
+        plan_bytes = read_regular(args.plan, 131_072)
+        plan = json.loads(plan_bytes.decode("utf-8")); validate_plan(plan)
+        require(hashlib.sha256(plan_bytes).hexdigest() == PLAN_SHA256, "PLAN_SHA256_MISMATCH")
+        token = sys.stdin.read(16_385).strip()
+        require(token and args.public_key.is_file() and not args.public_key.is_symlink(),
+                "OWNER_TOKEN_INPUT_REQUIRED")
+        if args.preflight_readonly:
+            verify_owner_token(token, args.public_key, REPO, TARGET, SCOPE, OPERATOR, PLAN_SHA256,
+                               route=ROUTE, deployment_target=DEPLOYMENT_TARGET,
+                               operator_target="DD1296_FINAL_ALLIN_10BPS", orders_enabled=False)
+            _pins, _plan, _hold, _p, _cp, digest = validate_baseline()
+            print(json.dumps({"status": "STABLE4_SAFETY_REPAIR_PREFLIGHT_PASS", "signedGets": 3,
+                              "inventoryDigest": digest, "globalHoldDigest": HOLD_DIGEST,
+                              "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0,
+                              "positionChangesSent": 0}, sort_keys=True))
+        else:
+            require(args.tar is not None and args.manifest is not None, "CANDIDATE_ARCHIVE_REQUIRED")
+            execute(args.tar, args.manifest, token, args.public_key, args.nonce_dir,
+                    args.approval_id, args.run_id)
+        return 0
+    except Exception as exc:
+        print("STABLE4_SAFETY_REPAIR_BLOCKED:" + type(exc).__name__ + ":" + str(exc)[:240], file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+
