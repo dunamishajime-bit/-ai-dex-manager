@@ -13,7 +13,9 @@ export type RedisApprovalCasResult =
   | "CONFLICT"
   | "INVALID_STORED_VALUE";
 
-const REDIS_APPROVAL_TTL_SECONDS = 2 * 60 * 60;
+// Keep the record longer than the 24-hour monitor-only retry window, including
+// the original request/OTP window and a small deployment/retry margin.
+const REDIS_APPROVAL_TTL_SECONDS = 26 * 60 * 60;
 
 export const REDIS_APPROVAL_CAS_SCRIPT = [
   'local raw = redis.call("GET", KEYS[1])',
