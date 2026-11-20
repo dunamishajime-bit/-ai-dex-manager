@@ -342,7 +342,7 @@ def validate_shared_files() -> None:
     require(type(risk_updated) in (int, float) and -1000 <= now - float(risk_updated) <= 15 * 60_000,
             "SHARED_RISK_STALE")
     margin = read_json(MARGIN)
-    require(margin.get("stage") == "HEALTHY", "MARGIN_GUARD_NOT_HEALTHY")
+    require(margin.get("stage") == "HEALTHY", "MARGIN_GUARD_NOT_HEALTHY:" + str(margin.get("stage")))
     checked = margin.get("checkedAt")
     require(type(checked) in (int, float) and -1000 <= now - float(checked) <= 15 * 60_000,
             "MARGIN_GUARD_STALE")
