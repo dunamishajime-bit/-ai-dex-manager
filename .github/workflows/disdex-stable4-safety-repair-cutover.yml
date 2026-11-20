@@ -237,7 +237,6 @@ jobs:
           test ! -L "$parent"
           test -f "$state"
           test ! -L "$state"
-          command -v setfacl >/dev/null
           command -v runuser >/dev/null
           mode_before="$(stat -c '%a' "$state")"
           case "$mode_before" in
@@ -252,17 +251,44 @@ jobs:
             *) echo "Q102_STATE_OWNER_UNEXPECTED=$owner_before"; exit 1 ;;
           esac
           # Keep the state root-owned while granting only the canonical Margin
-          # Guard deploy user traversal/read access.  ACL application changes
-          # metadata, never the state bytes, and is verified as deploy.
-          setfacl -m u:deploy:--x "$parent"
-          setfacl -m u:deploy:r-- "$state"
+          # Guard deploy user traversal/read access. ACLs are preferred when
+          # available; the VPS may not have the acl package, so use the
+          # existing root:deploy 0640 convention as a least-privilege fallback.
+          access_method=acl
+          if command -v setfacl >/dev/null 2>&1; then
+            if setfacl -m u:deploy:--x "$parent" && setfacl -m u:deploy:r-- "$state"; then
+              access_method=acl
+            else
+              setfacl -x u:deploy "$parent" >/dev/null 2>&1 || true
+              setfacl -x u:deploy "$state" >/dev/null 2>&1 || true
+              access_method=posix
+            fi
+          else
+            access_method=posix
+          fi
+          if [[ "$access_method" == posix ]]; then
+            deploy_gid="$(getent group deploy | awk -F: 'NR == 1 { print $3 }')"
+            [[ "$deploy_gid" =~ ^[0-9]+$ ]]
+            parent_uid="$(stat -c '%u' "$parent")"
+            [[ "$parent_uid" == 0 ]]
+            chown root:deploy "$parent"
+            chmod g+x "$parent"
+            chown root:deploy "$state"
+            chmod g+r "$state"
+          fi
           runuser -u deploy -- /usr/bin/test -r "$state"
           after="$(sha256sum "$state" | awk '{print $1}')"
           test "$before" = "$after"
-          test "$(stat -c '%u:%g:%a' "$state")" = '0:0:640'
-          echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:0:640"
+          if [[ "$access_method" == acl ]]; then
+            test "$(stat -c '%u:%g:%a' "$state")" = '0:0:640'
+            echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:0:640"
+            echo "Q102_STATE_DEPLOY_READ_ACL_PASS=TRUE"
+          else
+            test "$(stat -c '%u:%g:%a' "$state")" = "0:${deploy_gid}:640"
+            echo "Q102_STATE_OWNER_REPAIR_PASS=$owner_before->0:${deploy_gid}:640"
+            echo "Q102_STATE_DEPLOY_READ_POSIX_PASS=TRUE"
+          fi
           echo "Q102_STATE_SHA256_UNCHANGED=$after"
-          echo "Q102_STATE_DEPLOY_READ_ACL_PASS=TRUE"
           REMOTE
 
       - name: Repair shared Margin Guard metadata without changing bytes
