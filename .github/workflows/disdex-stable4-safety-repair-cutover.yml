@@ -1,0 +1,280 @@
+name: DisDex STABLE4 Safety Repair Cutover
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Exact HP Owner approval UUID for ALL_RUNNERS_MONITOR_REFRESH
+        required: true
+        type: string
+      target_sha:
+        description: Exact candidate commit approved by HP
+        required: true
+        type: string
+      plan_sha256:
+        description: Exact SHA-256 of the safety repair plan
+        required: true
+        type: string
+      mode:
+        description: Run the read-only gate only or perform the guarded cutover
+        required: true
+        type: choice
+        options:
+          - preflight
+          - execute
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  safety-repair:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    environment:
+      name: disdex-production
+    steps:
+      - name: Checkout the formal workflow source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+
+      - name: Validate exact candidate, plan, and monitor-only contract
+        id: bind
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+          MODE: ${{ inputs.mode }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" == 'b8d681f048b087f07e0dcfb743cc14ec3a796b27' ]]
+          [[ "$PLAN_SHA256" == '542b30ea87fa0e6ea9d27dd63fecc00181e95d4040a544aa9004fed579f4d68f' ]]
+          [[ "$MODE" == 'preflight' || "$MODE" == 'execute' ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          git fetch --no-tags origin "$TARGET_SHA" --depth=1
+          git cat-file -e "$TARGET_SHA^{commit}"
+          git show "$TARGET_SHA:docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json" > "$RUNNER_TEMP/stable4-safety-plan.json"
+          actual="$(sha256sum "$RUNNER_TEMP/stable4-safety-plan.json" | awk '{print $1}')"
+          [[ "$actual" == "$PLAN_SHA256" ]]
+          python3 - <<'PY'
+          import json, pathlib, os
+          p = json.loads(pathlib.Path(os.environ['RUNNER_TEMP'], 'stable4-safety-plan.json').read_text())
+          assert p['schema'] == 'disdex-stable4-safety-repair-plan/v1'
+          assert p['target'] == 'professional-dismanager.net'
+          assert p['candidateType'] == 'combined-v52-q102-safety-repair'
+          assert p['globalHold']['active'] is True
+          assert p['globalHold']['action'] == 'HOLD_PROTECTED'
+          assert p['globalHold']['scope'] == 'GLOBAL'
+          assert p['globalHold']['digestSha256'] == '928a1c83b08c6445211639631ed69ccf7ea935741cb21786c41fc63e294322cf'
+          assert p['cutover']['clearGlobalHold'] is False
+          assert p['cutover']['enableNewOrders'] is False
+          assert p['venuePreflight']['signedAsterGets'] == 3
+          assert p['venuePreflight']['ordersSent'] == 0
+          assert p['venuePreflight']['cancelsSent'] == 0
+          assert p['venuePreflight']['positionChangesSent'] == 0
+          print('SAFETY_REPAIR_PLAN_VALIDATED=TRUE')
+          PY
+          python3 -m py_compile scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py
+          python3 scripts/ops/test_disdex_stable4_safety_repair_cutover.py
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "plan_sha=$PLAN_SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Build immutable candidate archive and source manifest
+        env:
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=tar "$TARGET_SHA" | gzip -n > "$RUNNER_TEMP/stable4-candidate.tar.gz"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          sha = os.environ['TARGET_SHA']
+          files = [
+              'scripts/disdex_v52_aster_only_legacy_engine.py',
+              'tests/test_v52_upstream_fail_closed.py',
+              'lib/disdex-quality102-causal-v1-runner.ts',
+              'lib/disdex-v96-live-risk-controls.ts',
+              'tests/q102-risk-block-freshness.test.ts',
+              'docs/implementation/STABLE4_SAFETY_REPAIR_PLAN_20261120.json',
+          ]
+          manifest = {'schema': 'disdex-stable4-safety-repair-manifest/v1', 'targetSha': sha, 'files': {}}
+          for rel in files:
+              data = __import__('subprocess').check_output(['git', 'show', f'{sha}:{rel}'])
+              manifest['files'][rel] = hashlib.sha256(data).hexdigest()
+          (root / 'stable4-candidate-manifest.json').write_text(json.dumps(manifest, sort_keys=True, indent=2) + '\n')
+          print('CANDIDATE_ARCHIVE_AND_MANIFEST_READY=TRUE')
+          PY
+          sha256sum "$RUNNER_TEMP/stable4-candidate.tar.gz" "$RUNNER_TEMP/stable4-candidate-manifest.json"
+
+      - name: Redeem the exact HP Owner approval (orders disabled)
+        id: redeem
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+          PLAN_SHA256: ${{ steps.bind.outputs.plan_sha }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ && "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          body = json.dumps({
+              'action': 'redeem',
+              'approval_id': os.environ['APPROVAL_ID'],
+              'target_sha': os.environ['TARGET_SHA'],
+              'plan_sha256': os.environ['PLAN_SHA256'],
+              'run_id': os.environ['RUN_ID'],
+              'operation': 'ALL_RUNNERS_MONITOR_REFRESH',
+              'scope': 'FULL_PROJECT',
+          }).encode()
+          req = urllib.request.Request(
+              'https://professional-dismanager.net/api/system/deploy-approval', data=body,
+              method='POST', headers={'Authorization': 'Bearer ' + os.environ['BRIDGE'],
+                                      'Content-Type': 'application/json'})
+          with urllib.request.urlopen(req, timeout=15) as response:
+              result = json.load(response)
+          approval = result.get('approval') or {}
+          assert result.get('ok') is True
+          assert approval.get('id') == os.environ['APPROVAL_ID']
+          assert approval.get('operation') == 'ALL_RUNNERS_MONITOR_REFRESH'
+          assert approval.get('scope') == 'FULL_PROJECT'
+          assert approval.get('targetSha') == os.environ['TARGET_SHA']
+          assert approval.get('planSha256') == os.environ['PLAN_SHA256']
+          assert approval.get('ordersEnabled') is False
+          token = str(result.get('token') or '')
+          assert token
+          out = pathlib.Path(os.environ['RUNNER_TEMP'])
+          (out / 'stable4-approval-token').write_text(token, encoding='ascii')
+          print('::add-mask::' + token)
+          print('HP_OWNER_APPROVAL_REDEEMED=TRUE')
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/stable4-owner.pub"
+          cat "$RUNNER_TEMP/stable4-approval-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/stable4-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" --sha "$TARGET_SHA" \
+              --scope FULL_PROJECT --operator dunamishajime-bit \
+              --plan-sha256 "$PLAN_SHA256" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled false
+
+      - name: Configure reviewed Production root SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == 'professional-dismanager.net' && -n "$ROOT_KEY" && -n "$KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/stable4-safety-ssh"
+          printf '%s\n' "$ROOT_KEY" > "$RUNNER_TEMP/stable4-safety-ssh/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/stable4-safety-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/stable4-safety-ssh/key" "$RUNNER_TEMP/stable4-safety-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/stable4-safety-ssh/key" >/dev/null
+
+      - name: Upload exact helper, plan, and candidate release to root staging
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          remote="/tmp/disdex-stable4-safety-repair-$RUN_ID"
+          ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "install -d -o root -g root -m 0700 '$remote'"
+          scp -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" -P "$PORT" \
+            scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py \
+            scripts/ops/deploy/disdex_owner_approval.py \
+            scripts/ops/deploy/disdex_deployment_contract.py \
+            "$RUNNER_TEMP/stable4-safety-plan.json" \
+            "$RUNNER_TEMP/stable4-candidate-manifest.json" \
+            "$RUNNER_TEMP/stable4-candidate.tar.gz" \
+            "$RUNNER_TEMP/stable4-owner.pub" "root@$HOST:$remote/"
+          ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" -P "$PORT" \
+            "root@$HOST" "chown -R root:root '$remote'; chmod 0700 '$remote'; chmod 0600 '$remote'/*"
+
+      - name: Root read-only preflight (three signed GETs)
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          remote="/tmp/disdex-stable4-safety-repair-$RUN_ID"
+          cat "$RUNNER_TEMP/stable4-approval-token" |
+            ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" \
+              -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 -p "$PORT" "root@$HOST" \
+              "python3 '$remote/disdex_stable4_safety_repair_cutover.py' --preflight-readonly \
+                --plan '$remote/stable4-safety-plan.json' --run-id '$RUN_ID' --approval-id '$APPROVAL_ID' \
+                --public-key '$remote/stable4-owner.pub'"
+
+      - name: Execute approved monitor-only Root cutover
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          remote="/tmp/disdex-stable4-safety-repair-$RUN_ID"
+          cat "$RUNNER_TEMP/stable4-approval-token" |
+            ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" \
+              -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=12 -p "$PORT" "root@$HOST" \
+              "python3 '$remote/disdex_stable4_safety_repair_cutover.py' --execute-approved \
+                --plan '$remote/stable4-safety-plan.json' --tar '$remote/stable4-candidate.tar.gz' \
+                --manifest '$remote/stable4-candidate-manifest.json' --run-id '$RUN_ID' \
+                --approval-id '$APPROVAL_ID' --public-key '$remote/stable4-owner.pub'"
+
+      - name: Remove ephemeral approval and root staging material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/stable4-safety-ssh/key" && -n "$HOST" ]]; then
+            remote="/tmp/disdex-stable4-safety-repair-$RUN_ID"
+            ssh -T -i "$RUNNER_TEMP/stable4-safety-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-safety-ssh/known_hosts" \
+              -o ConnectTimeout=6 -p "$PORT" "root@$HOST" "rm -rf -- '$remote'" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/stable4-safety-ssh" "$RUNNER_TEMP/stable4-approval-token" \
+            "$RUNNER_TEMP/stable4-owner.pub" "$RUNNER_TEMP/stable4-safety-plan.json" \
+            "$RUNNER_TEMP/stable4-candidate.tar.gz" "$RUNNER_TEMP/stable4-candidate-manifest.json"
+
