@@ -73,7 +73,11 @@ def cutover_blocked_reason(error: BaseException) -> str:
     # Keep the bounded systemd context ahead of the generic ``Job failed``
     # sentence, otherwise the outer 240-character contract message would hide
     # the exact Result/status fields needed to diagnose the failed preflight.
-    if detail.startswith("COMMAND_FAILED:systemctl start") and "|show=" in detail:
+    if (
+        detail.startswith("COMMAND_FAILED:systemctl start")
+        and "|show=" in detail
+        and ":status=" not in detail.split("|show=", 1)[0]
+    ):
         command, context = detail.split("|show=", 1)
         detail = "show=" + context + "|" + command
     return f"CUTOVER_BLOCKED:{type(error).__name__}:{detail[:240]}"
