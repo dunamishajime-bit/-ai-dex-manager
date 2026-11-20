@@ -1,0 +1,26 @@
+name: Q102 Verified Freshness CI
+on:
+  push:
+    branches:
+      - fix/q102-freshness-verified-20261119
+  pull_request:
+    branches:
+      - q102-ef1-safety-baseline-20261119
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  q102-freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Q102 risk-block and verified-flat freshness
+        run: npx tsx --test tests/q102-risk-block-freshness.test.ts
