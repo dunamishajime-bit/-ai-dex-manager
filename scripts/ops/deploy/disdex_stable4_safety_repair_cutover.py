@@ -693,7 +693,9 @@ def monitor_dropin_text(runner: str) -> str:
             # those files/read-only endpoints, while the no-order flags and
             # GLOBAL HOLD remain independently enforced.
             "Requires=\n"
+            "Wants=\n"
             "Wants=network-online.target\n"
+            "After=\n"
             "After=network-online.target\n"
             "[Service]\n"
             "WorkingDirectory=/home/deploy/disdex-trading/releases/%i\n"
@@ -740,7 +742,9 @@ def monitor_dropin_text(runner: str) -> str:
         return (
             "[Unit]\n"
             "Requires=\n"
+            "Wants=\n"
             "Wants=network-online.target\n"
+            "After=\n"
             "After=network-online.target\n"
             "[Service]\n"
             "WorkingDirectory=/home/deploy/disdex-trading/releases/%i\n"

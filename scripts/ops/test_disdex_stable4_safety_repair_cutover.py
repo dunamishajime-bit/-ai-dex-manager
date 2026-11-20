@@ -244,6 +244,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         for text in (v52, q102):
             self.assertIn("[Unit]", text)
             self.assertIn("Requires=\n", text)
+            self.assertIn("Wants=\n", text)
+            self.assertIn("After=\n", text)
             self.assertIn("WorkingDirectory=/home/deploy/disdex-trading/releases/%i", text)
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
