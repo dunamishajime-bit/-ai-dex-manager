@@ -20,6 +20,9 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
             "Repair Q102 state ownership without changing bytes",
             "/var/lib/disdex/quality102-causal-v1/state.json",
             "Q102_STATE_SHA256_UNCHANGED=",
+            "Repair shared Margin Guard metadata without changing bytes",
+            "/var/lib/disdex/shared/margin-risk/guard-live.json",
+            "MARGIN_GUARD_SHA256_UNCHANGED=",
         ):
             self.assertIn(value, text)
         self.assertNotIn("ALL_RUNNERS_ORDER_ENABLE", text)
