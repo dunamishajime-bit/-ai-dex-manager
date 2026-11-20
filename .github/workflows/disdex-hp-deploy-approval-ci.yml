@@ -8,6 +8,7 @@ on:
       - "lib/server/owner-goal-attestation.ts"
       - "tests/owner-goal-approval.test.ts"
       - "tests/owner-goal-store-concurrency.test.ts"
+      - "tests/owner-goal-positive-http-e2e.test.ts"
       - ".github/workflows/disdex-owner-goal-candidate-ci.yml"
       - ".github/workflows/disdex-owner-goal-approval-request.yml"
       - ".github/workflows/disdex-v4-formal-production-live.yml"
@@ -101,6 +102,7 @@ jobs:
         run: |
           node --import tsx --test tests/owner-goal-approval.test.ts
           node --import tsx --test tests/owner-goal-store-concurrency.test.ts
+          node --import tsx --test tests/owner-goal-positive-http-e2e.test.ts
 
       - name: Redis actual Lua CAS - one goal ID, conflict rejection, owner revocation
         shell: bash
