@@ -681,6 +681,14 @@ def monitor_dropin_text(runner: str) -> str:
     """Return an instance-scoped systemd override for a read-only monitor."""
     if runner == "V52":
         return (
+            "[Unit]\n"
+            # Monitor-only instances must not wait on the order-capable stock
+            # reference or Margin Guard services.  Their process observes
+            # those files/read-only endpoints, while the no-order flags and
+            # GLOBAL HOLD remain independently enforced.
+            "Requires=\n"
+            "Wants=network-online.target\n"
+            "After=network-online.target\n"
             "[Service]\n"
             "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
             "Environment=DISDEX_RELEASE_SHA=%i\n"
@@ -707,6 +715,10 @@ def monitor_dropin_text(runner: str) -> str:
         )
     if runner == "Q102":
         return (
+            "[Unit]\n"
+            "Requires=\n"
+            "Wants=network-online.target\n"
+            "After=network-online.target\n"
             "[Service]\n"
             "Environment=DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false\n"
             "Environment=DISDEX_RELEASE_SHA=%i\n"

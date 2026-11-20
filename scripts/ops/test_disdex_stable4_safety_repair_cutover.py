@@ -248,6 +248,8 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         v52 = module.monitor_dropin_text("V52")
         q102 = module.monitor_dropin_text("Q102")
         for text in (v52, q102):
+            self.assertIn("[Unit]", text)
+            self.assertIn("Requires=\n", text)
             self.assertIn("ExecStartPre=", text)
             self.assertIn("ExecStart=", text)
             self.assertIn("DISDEX_RUNTIME_COMMIT_SHA=%i", text)
