@@ -106,12 +106,21 @@ export function assertOwnerGoalCandidate(input: {
   goal: GoalApproval;
   sha: string;
   planSha256: string;
+  /** Optional canonical Root deployment plan digest. Must be present for trade-capable releases. */
+  executionPlanSha256?: string;
   ordersEnabled: boolean;
   plan: unknown;
 }): void {
   assertSameOwnerGoal(input.goal);
   if (!SHA_RE.test(input.sha) || !HASH_RE.test(input.planSha256)) {
     throw new Error("GOAL_CANDIDATE_DIGEST_INVALID");
+  }
+  if (input.executionPlanSha256 !== undefined &&
+      !HASH_RE.test(input.executionPlanSha256)) {
+    throw new Error("GOAL_EXECUTION_PLAN_DIGEST_INVALID");
+  }
+  if (input.ordersEnabled && !input.executionPlanSha256) {
+    throw new Error("GOAL_ROOT_PLAN_REQUIRED_FOR_TRADING");
   }
   if (typeof input.ordersEnabled !== "boolean" ||
       (input.ordersEnabled && !input.goal.ordersEnabled)) {
@@ -133,6 +142,7 @@ export function assertOwnerGoalCandidate(input: {
     // commit SHA without a circular hash dependency. GitHub run.head_sha and
     // the SHA-addressed contents API independently bind it to the candidate.
     plan.sourceBinding !== "GITHUB_RUN_HEAD_SHA" ||
+    (plan.executionPlanSha256 ?? undefined) !== input.executionPlanSha256 ||
     plan.ordersEnabled !== input.ordersEnabled ||
     plan.target !== input.goal.target
   ) {
