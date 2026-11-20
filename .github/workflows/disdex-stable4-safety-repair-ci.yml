@@ -1,0 +1,37 @@
+name: STABLE4 Safety Repair CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py"
+      - "scripts/ops/test_disdex_stable4_safety_repair*.py"
+      - ".github/workflows/disdex-stable4-safety-repair*.yml"
+  push:
+    branches:
+      - "ops/stable4-safety-repair-cutover-20261120"
+    paths:
+      - "scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py"
+      - "scripts/ops/test_disdex_stable4_safety_repair*.py"
+      - ".github/workflows/disdex-stable4-safety-repair*.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Compile and run safety contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py
+          python3 scripts/ops/test_disdex_stable4_safety_repair_cutover.py
+          python3 scripts/ops/test_disdex_stable4_safety_repair_workflow.py
+          echo 'STABLE4_SAFETY_REPAIR_CI=PASS'
+
