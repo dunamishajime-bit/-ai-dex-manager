@@ -4,8 +4,12 @@ on:
   pull_request:
     paths:
       - "scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py"
+      - "scripts/ops/deploy/disdex_order_disable_quiesce.py"
       - "scripts/ops/test_disdex_stable4_safety_repair*.py"
+      - "tests/test_disdex_order_disable_quiesce.py"
+      - "tests/test_disdex_stable4_order_disable_workflow.py"
       - ".github/workflows/disdex-stable4-safety-repair*.yml"
+      - ".github/workflows/disdex-stable4-order-disable-quiesce.yml"
   push:
     branches:
       - "ops/stable4-safety-repair-cutover-20261120"
@@ -33,5 +37,6 @@ jobs:
           python3 -m py_compile scripts/ops/deploy/disdex_stable4_safety_repair_cutover.py
           python3 scripts/ops/test_disdex_stable4_safety_repair_cutover.py
           python3 scripts/ops/test_disdex_stable4_safety_repair_workflow.py
+          python3 -m unittest tests/test_disdex_order_disable_quiesce.py tests/test_disdex_stable4_order_disable_workflow.py -v
           echo 'STABLE4_SAFETY_REPAIR_CI=PASS'
 
