@@ -1,0 +1,57 @@
+{
+  "schema": "prism7-p15-july26-july31-new-calendar-native-source-H1/v1",
+  "pinnedSourceSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "sourceP": {
+    "symbol": "PENGUUSDT",
+    "fullBarCount": 1620,
+    "outOfScopeMalformedCandles": 0,
+    "sourceBegin": "2025-07-18T12:00:00.000Z",
+    "sourceEnd": "2025-09-24T00:00:00.000Z",
+    "zeroVolumeSourceH1": 348,
+    "sha256": "1b7f8467db39df935c14c8a1ada1e9d72040cac2efc7b9a7ecd39437ac21adc4"
+  },
+  "sourceB": {
+    "symbol": "BTCUSDT",
+    "fullBarCount": 4968,
+    "outOfScopeMalformedCandles": 1,
+    "sourceBegin": "2025-03-01T00:00:00.000Z",
+    "sourceEnd": "2025-09-24T00:00:00.000Z",
+    "zeroVolumeSourceH1": 18,
+    "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+  },
+  "studyDataStartUtc": "2025-07-18T12:00:00.000Z",
+  "entryStartUtc": "2025-07-26T00:00:00.000Z",
+  "entryEndUtc": "2025-08-01T00:00:00.000Z",
+  "nativeExitObservationEndUtc": "2025-08-08T00:00:00.000Z",
+  "sourceQualityAmendment": "P15A_2025_09_13_BTC_H1_MALFORMED_OUTSIDE_2025_08_08_OBSERVATION_END",
+  "warmupHoursBeforeEntryStart": 180,
+  "sourceNaturalSignals": 1,
+  "entryHourNoPositiveVolume": 0,
+  "outcomes": {
+    "fee10": {
+      "sourceNaturalIntentCount": 1,
+      "completedNativePriceExits": 1,
+      "rightCensored": 0,
+      "modeledWins": 0,
+      "modeledWinRatePct": 0,
+      "modeledMeanNetPct": -8.100000000000007,
+      "modeledPricePf": 0
+    },
+    "fee30": {
+      "sourceNaturalIntentCount": 1,
+      "completedNativePriceExits": 1,
+      "rightCensored": 0,
+      "modeledWins": 0,
+      "modeledWinRatePct": 0,
+      "modeledMeanNetPct": -8.300000000000008,
+      "modeledPricePf": 0
+    }
+  },
+  "limitations": [
+    "H1 public price model only, PENGU M5 July source not archived; signed venue fills not proven.",
+    "This archive was collected previously and cannot be certified blind untouched OOS.",
+    "Early H1 PENGU starts July18 despite March01 archive filename; long pre-Aug holdout unavailable.",
+    "All source natural signal candidates retained even if no completed exit or no entry print.",
+    "No cross-runner gross, risk gates, funding, realistic slippage, execution book or account DD."
+  ]
+}
