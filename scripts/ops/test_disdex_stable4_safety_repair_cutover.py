@@ -311,6 +311,12 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             q102,
         )
         self.assertIn("QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5", q102)
+        # Legacy EnvironmentFile still contains MAX_GROSS=0.50. Both the
+        # drop-in's static environment and ExecStart export must select the
+        # immutable Q102 policy contract (3.0) in *monitor-only* mode.
+        self.assertEqual(q102.count("QUALITY102_CAUSAL_V1_MAX_GROSS=3.0"), 2)
+        self.assertIn("DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false", q102)
+        self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
 
     def test_v52_launcher_is_manifested_by_formal_workflow(self):
         workflow = (
