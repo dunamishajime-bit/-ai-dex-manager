@@ -1,0 +1,1167 @@
+[
+  {
+    "cohort": "PRE_2025_AUG_SEP",
+    "entryBarHigh": 0.026946,
+    "entryPrice": 0.026946,
+    "entryTs": 1758875700000,
+    "entryUtc": "2025-09-26T08:35:00+00:00",
+    "exitPrice": 0.029101680000000005,
+    "exitReason": "REFERENCE_HARD_STOP",
+    "exitTs": 1759099200000,
+    "exitUtc": "2025-09-28T22:40:00+00:00",
+    "finalEquityOrCensoredMark": 9170.0,
+    "id": "S3_01348",
+    "initialEquityAtEntry": 10000,
+    "m5MarksIncludedBeforeExit": 745,
+    "maxStaleConsecutiveNoPrint": 7,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 2.4010984932828716,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -8.312922140577438,
+    "portfolioPeakAtTradeStart": {
+      "equity": 10000,
+      "id": null,
+      "kind": "REALIZED_START",
+      "price": null,
+      "time": null
+    },
+    "positiveM5Bars": 523,
+    "referenceNetReturn30BpsPctIfClosed": -8.300000000000008,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 10210.109849328288,
+      "price": 0.026299,
+      "time": 1758885000000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 9171.736806947227,
+      "price": 0.029097,
+      "time": 1759098900000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 10210.109849328288,
+        "id": "S3_01348",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1758875700000,
+        "price": 0.026299,
+        "time": 1758885000000
+      },
+      "pct": 10.170047704720576,
+      "time": 1759098900000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.031475,
+    "entryPrice": 0.03135,
+    "entryTs": 1759913400000,
+    "entryUtc": "2025-10-08T08:50:00+00:00",
+    "exitPrice": 0.025795119999999998,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1760130000000,
+    "exitUtc": "2025-10-10T21:00:00+00:00",
+    "finalEquityOrCensoredMark": 10767.314548644339,
+    "id": "S3_01634",
+    "initialEquityAtEntry": 9170.0,
+    "m5MarksIncludedBeforeExit": 722,
+    "maxStaleConsecutiveNoPrint": 2,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 20.883572567783105,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -6.159489633173831,
+    "portfolioPeakAtTradeStart": {
+      "equity": 10210.109849328288,
+      "id": "S3_01348",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1758875700000,
+      "price": 0.026299,
+      "time": 1758885000000
+    },
+    "positiveM5Bars": 703,
+    "referenceNetReturn30BpsPctIfClosed": 17.418915470494433,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 10877.03864433812,
+      "price": 0.02542,
+      "time": 1760129700000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 8580.589840510367,
+      "price": 0.033271,
+      "time": 1759962000000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 10210.109849328288,
+        "id": "S3_01348",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1758875700000,
+        "price": 0.026299,
+        "time": 1758885000000
+      },
+      "pct": 15.959867551524187,
+      "time": 1759962000000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.023038,
+    "entryPrice": 0.022617,
+    "entryTs": 1760130900000,
+    "entryUtc": "2025-10-10T21:15:00+00:00",
+    "exitPrice": 0.020007,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1760133600000,
+    "exitUtc": "2025-10-10T22:00:00+00:00",
+    "finalEquityOrCensoredMark": 11977.559846982833,
+    "id": "S3_01700",
+    "initialEquityAtEntry": 10767.314548644339,
+    "m5MarksIncludedBeforeExit": 9,
+    "maxStaleConsecutiveNoPrint": 0,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 72.40571251713313,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -1.8614316664455899,
+    "portfolioPeakAtTradeStart": {
+      "equity": 10877.03864433812,
+      "id": "S3_01634",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1759913400000,
+      "price": 0.02542,
+      "time": 1760129700000
+    },
+    "positiveM5Bars": 10,
+    "referenceNetReturn30BpsPctIfClosed": 11.239992041384806,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 16937.751308375828,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 10767.314548644339,
+      "price": 0.022617,
+      "time": 1760130900000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 30.032478643000783,
+      "time": 1760133000000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.0211,
+    "entryPrice": 0.021097,
+    "entryTs": 1760746200000,
+    "entryUtc": "2025-10-18T00:10:00+00:00",
+    "exitPrice": 0.02278476,
+    "exitReason": "REFERENCE_HARD_STOP",
+    "exitTs": 1760882100000,
+    "exitUtc": "2025-10-19T13:55:00+00:00",
+    "finalEquityOrCensoredMark": 10983.422379683258,
+    "id": "S3_01864",
+    "initialEquityAtEntry": 11977.559846982833,
+    "m5MarksIncludedBeforeExit": 453,
+    "maxStaleConsecutiveNoPrint": 8,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 0.6067213347869305,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -8.257098165615972,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 263,
+    "referenceNetReturn30BpsPctIfClosed": -8.300000000000008,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 12014.297578420405,
+      "price": 0.020969,
+      "time": 1760805000000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 11105.917441188923,
+      "price": 0.022569,
+      "time": 1760881800000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 34.43098060073078,
+      "time": 1760881800000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.01898,
+    "entryPrice": 0.018925,
+    "entryTs": 1761837000000,
+    "entryUtc": "2025-10-30T15:10:00+00:00",
+    "exitPrice": 0.017493,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1762096200000,
+    "exitUtc": "2025-11-02T15:10:00+00:00",
+    "finalEquityOrCensoredMark": 11781.555908988405,
+    "id": "S3_02173",
+    "initialEquityAtEntry": 10983.422379683258,
+    "m5MarksIncludedBeforeExit": 864,
+    "maxStaleConsecutiveNoPrint": 6,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 8.58652575957729,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -1.0039630118890308,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 600,
+    "referenceNetReturn30BpsPctIfClosed": 7.266710700132095,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 11868.030410154737,
+      "price": 0.017344,
+      "time": 1762095300000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 10850.068832666522,
+      "price": 0.019098,
+      "time": 1761873900000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 35.94150347867552,
+      "time": 1761873900000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.016564,
+    "entryPrice": 0.016533,
+    "entryTs": 1762162200000,
+    "entryUtc": "2025-11-03T09:30:00+00:00",
+    "exitPrice": 0.0139,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1762290000000,
+    "exitUtc": "2025-11-04T21:00:00+00:00",
+    "finalEquityOrCensoredMark": 13622.509354632666,
+    "id": "S3_02261",
+    "initialEquityAtEntry": 11781.555908988405,
+    "m5MarksIncludedBeforeExit": 426,
+    "maxStaleConsecutiveNoPrint": 15,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 19.33103489989717,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.1875037803181545,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 282,
+    "referenceNetReturn30BpsPctIfClosed": 15.625724308957844,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 13992.353152900674,
+      "price": 0.013381,
+      "time": 1762287300000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 11773.290363292623,
+      "price": 0.016495,
+      "time": 1762162200000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 30.490829928110617,
+      "time": 1762162200000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.012406,
+    "entryPrice": 0.012394,
+    "entryTs": 1763323500000,
+    "entryUtc": "2025-11-16T20:05:00+00:00",
+    "exitPrice": 0.011192,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1763582700000,
+    "exitUtc": "2025-11-19T20:05:00+00:00",
+    "finalEquityOrCensoredMark": 14902.7856255254,
+    "id": "S3_02586",
+    "initialEquityAtEntry": 13622.509354632666,
+    "m5MarksIncludedBeforeExit": 864,
+    "maxStaleConsecutiveNoPrint": 37,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 9.908020009682106,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -5.075036307890901,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 301,
+    "referenceNetReturn30BpsPctIfClosed": 9.398241084395675,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 14929.164536652652,
+      "price": 0.011168,
+      "time": 1763580900000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 12890.294530775323,
+      "price": 0.013023,
+      "time": 1763390100000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 23.89606922377595,
+      "time": 1763390100000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.010302,
+    "entryPrice": 0.010291,
+    "entryTs": 1763731800000,
+    "entryUtc": "2025-11-21T13:30:00+00:00",
+    "exitPrice": 0.01029,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1763991000000,
+    "exitUtc": "2025-11-24T13:30:00+00:00",
+    "finalEquityOrCensoredMark": 14859.525406402734,
+    "id": "S3_02699",
+    "initialEquityAtEntry": 14902.7856255254,
+    "m5MarksIncludedBeforeExit": 864,
+    "maxStaleConsecutiveNoPrint": 13,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 3.401030026236518,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -4.946069381012541,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 440,
+    "referenceNetReturn30BpsPctIfClosed": -0.2902827713536224,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 15364.925482518602,
+      "price": 0.009941,
+      "time": 1763818500000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 14120.975151906772,
+      "price": 0.0108,
+      "time": 1763746500000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 16.63016598358096,
+      "time": 1763746500000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.009985,
+    "entryPrice": 0.009985,
+    "entryTs": 1765821900000,
+    "entryUtc": "2025-12-15T18:05:00+00:00",
+    "exitPrice": 0.008888,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1766081400000,
+    "exitUtc": "2025-12-18T18:10:00+00:00",
+    "finalEquityOrCensoredMark": 16447.485575383707,
+    "id": "S3_03280",
+    "initialEquityAtEntry": 14859.525406402734,
+    "m5MarksIncludedBeforeExit": 865,
+    "maxStaleConsecutiveNoPrint": 13,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 12.899349023535311,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -7.270906359539309,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 469,
+    "referenceNetReturn30BpsPctIfClosed": 10.686479719579378,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 16682.618776606705,
+      "price": 0.00873,
+      "time": 1766078400000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 13865.484916384332,
+      "price": 0.010623,
+      "time": 1765984500000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 18.138573037568683,
+      "time": 1765984500000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.008428,
+    "entryPrice": 0.008428,
+    "entryTs": 1769854500000,
+    "entryUtc": "2026-01-31T10:15:00+00:00",
+    "exitPrice": 0.007341,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1769886000000,
+    "exitUtc": "2026-01-31T19:00:00+00:00",
+    "finalEquityOrCensoredMark": 18519.4550337551,
+    "id": "S3_04401",
+    "initialEquityAtEntry": 16447.485575383707,
+    "m5MarksIncludedBeforeExit": 105,
+    "maxStaleConsecutiveNoPrint": 1,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 17.501186521120072,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.8186995728523883,
+    "portfolioPeakAtTradeStart": {
+      "equity": 16937.751308375828,
+      "id": "S3_01700",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1760130900000,
+      "price": 0.009588,
+      "time": 1760131200000
+    },
+    "positiveM5Bars": 102,
+    "referenceNetReturn30BpsPctIfClosed": 12.597484575225437,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 18779.008377552684,
+      "price": 0.007208,
+      "time": 1769884800000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 16263.487624506932,
+      "price": 0.008497,
+      "time": 1769855400000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 16937.751308375828,
+        "id": "S3_01700",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1760130900000,
+        "price": 0.009588,
+        "time": 1760131200000
+      },
+      "pct": 3.9808335332888523,
+      "time": 1769855400000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.006161,
+    "entryPrice": 0.006161,
+    "entryTs": 1770330600000,
+    "entryUtc": "2026-02-05T22:30:00+00:00",
+    "exitPrice": 0.005971,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1770339600000,
+    "exitUtc": "2026-02-06T01:00:00+00:00",
+    "finalEquityOrCensoredMark": 19035.02091088943,
+    "id": "S3_04533",
+    "initialEquityAtEntry": 18519.4550337551,
+    "m5MarksIncludedBeforeExit": 30,
+    "maxStaleConsecutiveNoPrint": 1,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 14.429475734458697,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.5843207271546857,
+    "portfolioPeakAtTradeStart": {
+      "equity": 18779.008377552684,
+      "id": "S3_04401",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1769854500000,
+      "price": 0.007208,
+      "time": 1769884800000
+    },
+    "positiveM5Bars": 24,
+    "referenceNetReturn30BpsPctIfClosed": 2.7839149488719355,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 20982.85516861923,
+      "price": 0.005323,
+      "time": 1770336900000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 18355.683654335513,
+      "price": 0.006197,
+      "time": 1770332700000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 20982.85516861923,
+        "id": "S3_04533",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1770330600000,
+        "price": 0.005323,
+        "time": 1770336900000
+      },
+      "pct": 10.185491991495766,
+      "time": 1770339000000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.007474,
+    "entryPrice": 0.007474,
+    "entryTs": 1773872400000,
+    "entryUtc": "2026-03-18T22:20:00+00:00",
+    "exitPrice": 0.007074,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1774131600000,
+    "exitUtc": "2026-03-21T22:20:00+00:00",
+    "finalEquityOrCensoredMark": 19996.648570173857,
+    "id": "S3_05514",
+    "initialEquityAtEntry": 19035.02091088943,
+    "m5MarksIncludedBeforeExit": 864,
+    "maxStaleConsecutiveNoPrint": 30,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 7.345464276157343,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.5218089376505253,
+    "portfolioPeakAtTradeStart": {
+      "equity": 20982.85516861923,
+      "id": "S3_04533",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1770330600000,
+      "price": 0.005323,
+      "time": 1770336900000
+    },
+    "positiveM5Bars": 422,
+    "referenceNetReturn30BpsPctIfClosed": 5.051886540005346,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 20376.126509125228,
+      "price": 0.006925,
+      "time": 1773939900000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 18878.589407760093,
+      "price": 0.007513,
+      "time": 1773875100000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 20982.85516861923,
+        "id": "S3_04533",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1770330600000,
+        "price": 0.005323,
+        "time": 1770336900000
+      },
+      "pct": 10.028500620860015,
+      "time": 1773875100000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.007024,
+    "entryPrice": 0.007024,
+    "entryTs": 1774510500000,
+    "entryUtc": "2026-03-26T07:35:00+00:00",
+    "exitPrice": 0.00636,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1774771800000,
+    "exitUtc": "2026-03-29T08:10:00+00:00",
+    "finalEquityOrCensoredMark": 21827.002395903462,
+    "id": "S3_05693",
+    "initialEquityAtEntry": 19996.648570173857,
+    "m5MarksIncludedBeforeExit": 871,
+    "maxStaleConsecutiveNoPrint": 23,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 10.037015945330296,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.3559225512528519,
+    "portfolioPeakAtTradeStart": {
+      "equity": 20982.85516861923,
+      "id": "S3_04533",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1770330600000,
+      "price": 0.005323,
+      "time": 1770336900000
+    },
+    "positiveM5Bars": 478,
+    "referenceNetReturn30BpsPctIfClosed": 9.153302961275621,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 21943.725429983348,
+      "price": 0.006319,
+      "time": 1774743600000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 19865.486042707307,
+      "price": 0.007049,
+      "time": 1774511400000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 20982.85516861923,
+        "id": "S3_04533",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1770330600000,
+        "price": 0.005323,
+        "time": 1770336900000
+      },
+      "pct": 5.325152925722887,
+      "time": 1774511400000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.00763,
+    "entryPrice": 0.007601,
+    "entryTs": 1780302600000,
+    "entryUtc": "2026-06-01T08:30:00+00:00",
+    "exitPrice": 0.006963,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1780542300000,
+    "exitUtc": "2026-06-04T03:05:00+00:00",
+    "finalEquityOrCensoredMark": 23593.599737431243,
+    "id": "S3_07302",
+    "initialEquityAtEntry": 21827.002395903462,
+    "m5MarksIncludedBeforeExit": 799,
+    "maxStaleConsecutiveNoPrint": 12,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 15.458492303644256,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.8946191290619687,
+    "portfolioPeakAtTradeStart": {
+      "equity": 21943.725429983348,
+      "id": "S3_05693",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1774510500000,
+      "price": 0.006319,
+      "time": 1774743600000
+    },
+    "positiveM5Bars": 432,
+    "referenceNetReturn30BpsPctIfClosed": 8.093632416787266,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 25135.64687420274,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 21566.25284998119,
+      "price": 0.007669,
+      "time": 1780307400000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 24285.654411475807,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006722,
+        "time": 1780442700000
+      },
+      "pct": 6.314148765838146,
+      "time": 1780485600000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.005714,
+    "entryPrice": 0.005714,
+    "entryTs": 1782322200000,
+    "entryUtc": "2026-06-24T17:30:00+00:00",
+    "exitPrice": 0.006183,
+    "exitReason": "REFERENCE_HARD_STOP",
+    "exitTs": 1782365700000,
+    "exitUtc": "2026-06-25T05:35:00+00:00",
+    "finalEquityOrCensoredMark": 21586.277412693005,
+    "id": "S3_07864",
+    "initialEquityAtEntry": 23593.599737431243,
+    "m5MarksIncludedBeforeExit": 145,
+    "maxStaleConsecutiveNoPrint": 15,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 0.08750437521877208,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -8.207910395519779,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 25,
+    "referenceNetReturn30BpsPctIfClosed": -8.50791039551978,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 23593.599737431243,
+      "price": 0.005714,
+      "time": 1782322200000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 21672.988227268794,
+      "price": 0.006162,
+      "time": 1782365100000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 13.775888340028153,
+      "time": 1782365100000
+    }
+  },
+  {
+    "cohort": "BASE_2025_2026",
+    "entryBarHigh": 0.009608,
+    "entryPrice": 0.009577,
+    "entryTs": 1790596500000,
+    "entryUtc": "2026-09-28T11:55:00+00:00",
+    "exitPrice": 0.01034316,
+    "exitReason": "REFERENCE_HARD_STOP",
+    "exitTs": 1790772600000,
+    "exitUtc": "2026-09-30T12:50:00+00:00",
+    "finalEquityOrCensoredMark": 19794.616387439488,
+    "id": "S3_10161",
+    "initialEquityAtEntry": 21586.277412693005,
+    "m5MarksIncludedBeforeExit": 587,
+    "maxStaleConsecutiveNoPrint": 3,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 6.150151404406401,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -8.113187845880754,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 571,
+    "referenceNetReturn30BpsPctIfClosed": -8.300000000000008,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 22840.091441102875,
+      "price": 0.008992,
+      "time": 1790649000000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 19882.88188012833,
+      "price": 0.010304,
+      "time": 1790765700000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 20.89767182186759,
+      "time": 1790765700000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.00798,
+    "entryPrice": 0.00798,
+    "entryTs": 1791814800000,
+    "entryUtc": "2026-10-12T14:20:00+00:00",
+    "exitPrice": 0.00743,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1792074000000,
+    "exitUtc": "2026-10-15T14:20:00+00:00",
+    "finalEquityOrCensoredMark": 21099.523141421494,
+    "id": "S3_10500",
+    "initialEquityAtEntry": 19794.616387439488,
+    "m5MarksIncludedBeforeExit": 864,
+    "maxStaleConsecutiveNoPrint": 8,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 11.090225563909772,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -0.601503759398514,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 611,
+    "referenceNetReturn30BpsPctIfClosed": 6.592230576441094,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 21741.979989084004,
+      "price": 0.007171,
+      "time": 1792030800000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 19616.167176548206,
+      "price": 0.008028,
+      "time": 1791873000000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 21.958773232604944,
+      "time": 1791873000000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.007841,
+    "entryPrice": 0.007836,
+    "entryTs": 1792648500000,
+    "entryUtc": "2026-10-22T05:55:00+00:00",
+    "exitPrice": 0.007476,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1792908000000,
+    "exitUtc": "2026-10-25T06:00:00+00:00",
+    "finalEquityOrCensoredMark": 22005.57479288949,
+    "id": "S3_10732",
+    "initialEquityAtEntry": 21099.523141421494,
+    "m5MarksIncludedBeforeExit": 865,
+    "maxStaleConsecutiveNoPrint": 18,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 6.2021439509953975,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -4.441041347626351,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 404,
+    "referenceNetReturn30BpsPctIfClosed": 4.294180704441032,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 22312.535696172035,
+      "price": 0.007362,
+      "time": 1792859100000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 20131.49769916445,
+      "price": 0.008172,
+      "time": 1792764000000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 19.908575259999196,
+      "time": 1792764000000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.007214,
+    "entryPrice": 0.007172,
+    "entryTs": 1793336400000,
+    "entryUtc": "2026-10-30T05:00:00+00:00",
+    "exitPrice": 0.007291,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1793595900000,
+    "exitUtc": "2026-11-02T05:05:00+00:00",
+    "finalEquityOrCensoredMark": 21574.43489500917,
+    "id": "S3_10918",
+    "initialEquityAtEntry": 22005.57479288949,
+    "m5MarksIncludedBeforeExit": 865,
+    "maxStaleConsecutiveNoPrint": 13,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 1.5058561070831034,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -5.242610150585603,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 422,
+    "referenceNetReturn30BpsPctIfClosed": -1.9592303402119147,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 22270.93036042829,
+      "price": 0.007064,
+      "time": 1793354400000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 20785.89157072409,
+      "price": 0.007548,
+      "time": 1793403300000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 17.305125765205187,
+      "time": 1793403300000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.006612,
+    "entryPrice": 0.006612,
+    "entryTs": 1793937000000,
+    "entryUtc": "2026-11-06T03:50:00+00:00",
+    "exitPrice": 0.006228,
+    "exitReason": "REFERENCE_MAX_HOLD_72H",
+    "exitTs": 1794196500000,
+    "exitUtc": "2026-11-09T03:55:00+00:00",
+    "finalEquityOrCensoredMark": 22762.67332651342,
+    "id": "S3_11084",
+    "initialEquityAtEntry": 21574.43489500917,
+    "m5MarksIncludedBeforeExit": 865,
+    "maxStaleConsecutiveNoPrint": 19,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 10.420447670901389,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -2.692075015124029,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 326,
+    "referenceNetReturn30BpsPctIfClosed": 5.507622504537202,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 23529.45980569176,
+      "price": 0.005993,
+      "time": 1794174900000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 20928.911618861403,
+      "price": 0.00679,
+      "time": 1793976300000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 16.736132857033414,
+      "time": 1793976300000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.006,
+    "entryPrice": 0.006,
+    "entryTs": 1794497100000,
+    "entryUtc": "2026-11-12T15:25:00+00:00",
+    "exitPrice": 0.0051687999999999994,
+    "exitReason": "REFERENCE_TRAILING_STOP",
+    "exitTs": 1794676800000,
+    "exitUtc": "2026-11-14T17:20:00+00:00",
+    "finalEquityOrCensoredMark": 25847.774318033542,
+    "id": "S3_11246",
+    "initialEquityAtEntry": 22762.67332651342,
+    "m5MarksIncludedBeforeExit": 599,
+    "maxStaleConsecutiveNoPrint": 6,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 17.166666666666675,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -4.0000000000000036,
+    "portfolioPeakAtTradeStart": {
+      "equity": 25135.64687420274,
+      "id": "S3_07302",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1780302600000,
+      "price": 0.006426,
+      "time": 1780538400000
+    },
+    "positiveM5Bars": 424,
+    "referenceNetReturn30BpsPctIfClosed": 13.553333333333338,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "PRICE_PROXY_CLOSED",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 26150.51787327617,
+      "price": 0.005089,
+      "time": 1794673800000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 21783.878373473344,
+      "price": 0.00624,
+      "time": 1794576900000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 25135.64687420274,
+        "id": "S3_07302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1780302600000,
+        "price": 0.006426,
+        "time": 1780538400000
+      },
+      "pct": 13.334721471478773,
+      "time": 1794576900000
+    }
+  },
+  {
+    "cohort": "POST_2026_OCT_NOV",
+    "entryBarHigh": 0.00488,
+    "entryPrice": 0.004856,
+    "entryTs": 1794703200000,
+    "entryUtc": "2026-11-15T00:40:00+00:00",
+    "exitPrice": null,
+    "exitReason": null,
+    "exitTs": null,
+    "exitUtc": null,
+    "finalEquityOrCensoredMark": 25557.31687384358,
+    "id": "S3_11302",
+    "initialEquityAtEntry": 25847.774318033542,
+    "m5MarksIncludedBeforeExit": 856,
+    "maxStaleConsecutiveNoPrint": 7,
+    "maximumPositivePrintGrossMFEFromM5LowPct": 8.381383855024716,
+    "minimumPositivePrintGrossMAEFromM5HighPct": -4.448105436573302,
+    "portfolioPeakAtTradeStart": {
+      "equity": 26150.51787327617,
+      "id": "S3_11246",
+      "kind": "UNREALIZED_M5_CLOSE",
+      "originalTradeEntryTs": 1794497100000,
+      "price": 0.005089,
+      "time": 1794673800000
+    },
+    "positiveM5Bars": 699,
+    "referenceNetReturn30BpsPctIfClosed": null,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signedOwnerFillProven": false,
+    "sourceStatus": "RIGHT_CENSORED_DATA_END",
+    "tradeLocalBestM5CloseEquity": {
+      "equity": 27899.372207438053,
+      "price": 0.004456,
+      "time": 1794930300000
+    },
+    "tradeLocalWorstM5CloseEquity": {
+      "equity": 24689.691829807445,
+      "price": 0.005059,
+      "time": 1794944700000
+    },
+    "worstPortfolioMarkDDWithinTrade": {
+      "beforePeak": {
+        "equity": 27899.372207438053,
+        "id": "S3_11302",
+        "kind": "UNREALIZED_M5_CLOSE",
+        "originalTradeEntryTs": 1794703200000,
+        "price": 0.004456,
+        "time": 1794930300000
+      },
+      "pct": 11.504489612762313,
+      "time": 1794944700000
+    }
+  }
+]
