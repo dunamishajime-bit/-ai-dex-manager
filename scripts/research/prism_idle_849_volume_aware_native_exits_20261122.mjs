@@ -166,6 +166,7 @@ for(let i=0;i<rows.length;i++){
   }else if(base[key]!==oldrow[key]){
    throw Error("BASE_849_REASON_CHANGED:"+i+":"+key);
   }
+ }
  const r=withVolume(c);r.id="IDLEP_"+String(i+1).padStart(5,"0");
  audit.push({id:r.id,symbol:r.symbol,route:r.route,
   originalSignalEntryTs:c.entryTs,firstTradedEntryTs:r.firstTraded5mTs,
