@@ -95,6 +95,8 @@ for period,file in FILES:
        "hardStopPrice":hard,
        "post_touch_completed_M5_low_excluding_ambiguous_touch_bar":after_fill_low,
        "source_m5_positive_volume_at_touch":z[4],
+       "first_touch_m5_high_above_limit_pct":100*(z[1]/limit-1),
+       "first_touch_m5_open_vs_limit_pct":100*(z[0]/limit-1),
        "same_touch_M5_crosses_hard_stop":any(t==touch for t,v in dangerous),
        "stop_cross_before_first_completed_H1":bool(dangerous),
        "first_intrahour_stop_M5":dangerous[0][0] if dangerous else None,
