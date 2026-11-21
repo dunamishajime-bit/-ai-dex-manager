@@ -22,7 +22,7 @@ P22 Route Aの58setup内訳：初回買い上昇リテストなし18、買いリ
 
 P22 Route Bは58setup中、M5 SELLER確認なし41、次の正印字なく2、枠占有4、ENTRY/EXIT価格proxy11（**10勝、平均+7.06849%、PF10.13895**）。ルートB 10/11のWilson95%勝率区間は**約62.3〜98.4%**、source BASE45 setupからの取引9件/7勝、POST13 setupから3件/3勝など、少標本と既見市場の楽観バイアスに留意。P22 Route Cは元4setupのうち売り確認なし4、代理約定0。
 
-P22期間別：PRE9setup→決済1/0勝/平均−8.3%；BASE85setup→決済15/11勝/平均+5.59454%、PF4.30410；POST26setup→決済5/4勝/平均+5.59763%、PF15.285（出力はPOSTの見かけの強いPFであり未見OOSではない）。SOURCE original base47? ではなく別reference overlayの比較であり、本番の近未来再現を保証しない。
+P22期間別：PRE9setup→決済1/0勝/平均−8.3%；BASE85setup→決済15/11勝/平均+5.59454%、PF4.30410；POST26setup→決済5/4勝/平均+5.59763%、PF15.285（出力はPOSTの見かけの強いPFであり未見OOSではない）。すべて同一reference STOP72の比較であり、従来V20の本来のnative出口や本番の近未来再現を保証しない。
 
 30bps +追加出口slippage 10bps/25bpsでP22の21完了はなお15勝、平均+4.83363%/+4.68363%、PF3.79960/3.64701。費用感度を隠さない。
 
