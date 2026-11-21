@@ -88,7 +88,7 @@ orig=orig.replace(anchor,gate+"\n"+anchor,1)
 compile(orig,str(SRC)+"::PRISM3_DUAL_EXECUTION_COMPILE","exec")
 print("PRISM3_DUAL_NATIVE_GENERATED_SHA",hashlib.sha256(orig.encode("utf8")).hexdigest(),flush=True)
 '''
-patch=patch.replace("__IDLE_PATH__",str(IDLE_REPLAY))
+patch=patch.replace("__IDLE_PATH__",IDLE_REPLAY.as_posix())
 TXT=TXT.replace(a,patch+"\n"+a,1)
 print("START_PRISM3_FULL_DUAL_VOLUME_COMPOUND",new_name,flush=True)
 exec(compile(TXT,str(WRAPPER)+"::PRISM3_FULL_DUAL","exec"),
