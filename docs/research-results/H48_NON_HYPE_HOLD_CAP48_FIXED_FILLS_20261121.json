@@ -1,0 +1,301 @@
+{
+  "final_compounded_equity_recomputed": false,
+  "h48_policy": "Retain original earlier exit (including STOP); only cap later modeled exits at first H1-open >= entry+48h",
+  "hype_modified": false,
+  "limitations": [
+    "Research-only modeled historical fills; no guarantee of current production pin parity",
+    "Not a complete replay: shortened exits can change future signal eligibility, slot availability and risk gates",
+    "No funding or cost recomputation; fixed-notional JPY deltas are NOT final wallet balance",
+    "Some original PENGU realized PnL includes partial events not represented by simple full-notional price return",
+    "A 48-hour CAP is different from the HYPE H48 time-only 48-hour exit replacement"
+  ],
+  "orders_sent": 0,
+  "period": "2025-10-01 UTC to 2026-10-01 UTC",
+  "portfolio_dd_recomputed": false,
+  "production_changes": false,
+  "results": {
+    "10bps": {
+      "fills_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+      "h1_quote_sha256_for_affected_symbols": {
+        "AAVEUSDT": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+        "ADAUSDT": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29",
+        "AMZNUSDT": "374141d594fcd482f1ab7c997c0ee3300b6194f67f1afbe7fc4aae5c84c078f8",
+        "ATOMUSDT": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e",
+        "AVAXUSDT": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+        "BNBUSDT": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc",
+        "BTCUSDT": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+        "DOGEUSDT": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+        "ETHUSDT": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13",
+        "INJUSDT": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42",
+        "LINKUSDT": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb",
+        "LTCUSDT": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53",
+        "NEARUSDT": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+        "NVDAUSDT": "710d12c72a9e802e2d40da146631ec38b63aecafa0c3e7851db987dabb18f37f",
+        "ONDOUSDT": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263",
+        "PENGUUSDT": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+        "SOLUSDT": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+        "SUIUSDT": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c",
+        "TSLAUSDT": "bc304b9c736e6a1c2786437603f20d9cac4d9e31f276f07791559ae081560abe",
+        "XRPUSDT": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03"
+      },
+      "runners": {
+        "FET": {
+          "baseline_gross_win_pct": 50.0,
+          "baseline_gross_wins": 4,
+          "cap48_gross_win_pct": 50.0,
+          "cap48_gross_wins": 4,
+          "fills": 8,
+          "gross_return_delta_pct_points_total": 0.0,
+          "mean_price_return_delta_pct_points": 0.0,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 8,
+          "outside_period": 0,
+          "priced": 8,
+          "shortened_at_48h": 0,
+          "source_runtime_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 0.0
+        },
+        "IDLE": {
+          "baseline_gross_win_pct": 70.0,
+          "baseline_gross_wins": 7,
+          "cap48_gross_win_pct": 70.0,
+          "cap48_gross_wins": 7,
+          "fills": 10,
+          "gross_return_delta_pct_points_total": 0.0,
+          "mean_price_return_delta_pct_points": 0.0,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 10,
+          "outside_period": 0,
+          "priced": 10,
+          "shortened_at_48h": 0,
+          "source_runtime_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 0.0
+        },
+        "PENGU": {
+          "baseline_gross_win_pct": 75.56,
+          "baseline_gross_wins": 34,
+          "cap48_gross_win_pct": 75.56,
+          "cap48_gross_wins": 34,
+          "fills": 45,
+          "gross_return_delta_pct_points_total": -39.07699,
+          "mean_price_return_delta_pct_points": -0.86838,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 3,
+          "original_within_48h": 27,
+          "outside_period": 0,
+          "priced": 45,
+          "shortened_at_48h": 18,
+          "source_runtime_shas": [
+            "1657e173d250ad58f53e62f7bb0a3428fb405496"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": -1033900.0
+        },
+        "Q102": {
+          "baseline_gross_win_pct": 60.38,
+          "baseline_gross_wins": 64,
+          "cap48_gross_win_pct": 60.38,
+          "cap48_gross_wins": 64,
+          "fills": 106,
+          "gross_return_delta_pct_points_total": -12.70096,
+          "mean_price_return_delta_pct_points": -0.11982,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 102,
+          "outside_period": 0,
+          "priced": 106,
+          "shortened_at_48h": 4,
+          "source_runtime_shas": [
+            "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": -894623.57
+        },
+        "V4": {
+          "baseline_gross_win_pct": 62.8,
+          "baseline_gross_wins": 503,
+          "cap48_gross_win_pct": 62.3,
+          "cap48_gross_wins": 499,
+          "fills": 801,
+          "gross_return_delta_pct_points_total": -28.449,
+          "mean_price_return_delta_pct_points": -0.03552,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 692,
+          "outside_period": 0,
+          "priced": 801,
+          "shortened_at_48h": 109,
+          "source_runtime_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 174715.54
+        },
+        "V52": {
+          "baseline_gross_win_pct": 84.62,
+          "baseline_gross_wins": 44,
+          "cap48_gross_win_pct": 84.62,
+          "cap48_gross_wins": 44,
+          "fills": 52,
+          "gross_return_delta_pct_points_total": 5.40597,
+          "mean_price_return_delta_pct_points": 0.10396,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 48,
+          "outside_period": 0,
+          "priced": 52,
+          "shortened_at_48h": 4,
+          "source_runtime_shas": [
+            "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 49879.47
+        }
+      }
+    },
+    "30bps": {
+      "fills_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+      "h1_quote_sha256_for_affected_symbols": {
+        "AAVEUSDT": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+        "ADAUSDT": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29",
+        "AMZNUSDT": "374141d594fcd482f1ab7c997c0ee3300b6194f67f1afbe7fc4aae5c84c078f8",
+        "ATOMUSDT": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e",
+        "AVAXUSDT": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+        "BNBUSDT": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc",
+        "BTCUSDT": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+        "DOGEUSDT": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+        "ETHUSDT": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13",
+        "INJUSDT": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42",
+        "LINKUSDT": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb",
+        "LTCUSDT": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53",
+        "NEARUSDT": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+        "NVDAUSDT": "710d12c72a9e802e2d40da146631ec38b63aecafa0c3e7851db987dabb18f37f",
+        "ONDOUSDT": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263",
+        "PENGUUSDT": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+        "SOLUSDT": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+        "SUIUSDT": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c",
+        "TSLAUSDT": "bc304b9c736e6a1c2786437603f20d9cac4d9e31f276f07791559ae081560abe",
+        "XRPUSDT": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03"
+      },
+      "runners": {
+        "FET": {
+          "baseline_gross_win_pct": 50.0,
+          "baseline_gross_wins": 4,
+          "cap48_gross_win_pct": 50.0,
+          "cap48_gross_wins": 4,
+          "fills": 8,
+          "gross_return_delta_pct_points_total": 0.0,
+          "mean_price_return_delta_pct_points": 0.0,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 8,
+          "outside_period": 0,
+          "priced": 8,
+          "shortened_at_48h": 0,
+          "source_runtime_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 0.0
+        },
+        "IDLE": {
+          "baseline_gross_win_pct": 63.64,
+          "baseline_gross_wins": 7,
+          "cap48_gross_win_pct": 63.64,
+          "cap48_gross_wins": 7,
+          "fills": 11,
+          "gross_return_delta_pct_points_total": 0.0,
+          "mean_price_return_delta_pct_points": 0.0,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 11,
+          "outside_period": 0,
+          "priced": 11,
+          "shortened_at_48h": 0,
+          "source_runtime_shas": [
+            "7688ed7c93a1918d8b44837339b7da5584a868f5"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 0.0
+        },
+        "PENGU": {
+          "baseline_gross_win_pct": 77.27,
+          "baseline_gross_wins": 34,
+          "cap48_gross_win_pct": 77.27,
+          "cap48_gross_wins": 34,
+          "fills": 44,
+          "gross_return_delta_pct_points_total": -39.07699,
+          "mean_price_return_delta_pct_points": -0.88811,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 3,
+          "original_within_48h": 26,
+          "outside_period": 0,
+          "priced": 44,
+          "shortened_at_48h": 18,
+          "source_runtime_shas": [
+            "1657e173d250ad58f53e62f7bb0a3428fb405496"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": -468972.72
+        },
+        "Q102": {
+          "baseline_gross_win_pct": 60.38,
+          "baseline_gross_wins": 64,
+          "cap48_gross_win_pct": 60.38,
+          "cap48_gross_wins": 64,
+          "fills": 106,
+          "gross_return_delta_pct_points_total": -12.70096,
+          "mean_price_return_delta_pct_points": -0.11982,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 102,
+          "outside_period": 0,
+          "priced": 106,
+          "shortened_at_48h": 4,
+          "source_runtime_shas": [
+            "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": -405526.17
+        },
+        "V4": {
+          "baseline_gross_win_pct": 63.11,
+          "baseline_gross_wins": 503,
+          "cap48_gross_win_pct": 62.61,
+          "cap48_gross_wins": 499,
+          "fills": 797,
+          "gross_return_delta_pct_points_total": -30.39799,
+          "mean_price_return_delta_pct_points": -0.03814,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 690,
+          "outside_period": 0,
+          "priced": 797,
+          "shortened_at_48h": 107,
+          "source_runtime_shas": [
+            "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 54739.21
+        },
+        "V52": {
+          "baseline_gross_win_pct": 84.62,
+          "baseline_gross_wins": 44,
+          "cap48_gross_win_pct": 84.62,
+          "cap48_gross_wins": 44,
+          "fills": 52,
+          "gross_return_delta_pct_points_total": 5.40597,
+          "mean_price_return_delta_pct_points": 0.10396,
+          "missing_price": 0,
+          "original_model_price_pnl_mismatch": 0,
+          "original_within_48h": 48,
+          "outside_period": 0,
+          "priced": 52,
+          "shortened_at_48h": 4,
+          "source_runtime_shas": [
+            "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+          ],
+          "sum_fixed_notional_gross_delta_jpy": 24935.23
+        }
+      }
+    }
+  },
+  "schema": "disdex-nonhype-h48-hold-cap-research/v1"
+}
