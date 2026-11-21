@@ -62,6 +62,24 @@ async function load(symbol:string):Promise<{base:DisDexV35Candle[],full:DisDexV3
 }
 async function main():Promise<void>{
 const [p,b]=await Promise.all([load("PENGUUSDT"),load("BTCUSDT")]);
+const aggregatedMode=process.env.PRISM_H1_REAGGREGATED_M5==="1";
+if (aggregatedMode){
+ const fn=path.join(output,"PENGU_H1_PUBLIC_M5_REAGGREGATED_READONLY.jsonl");
+ if(!fs.existsSync(fn))throw Error("REAGGREGATED_RESEARCH_SOURCE_MISSING");
+ const stored=fs.readFileSync(fn,"utf8").trim().split(/\r?\n/).map(z=>JSON.parse(z));
+ const derived=new Map<number,number[]>(stored.map(x=>[Number(x[0]),x.map(Number)]));
+ if(derived.size!==p.full.length)throw Error("AGGREGATED_H1_COUNT_MISMATCH");
+ const transform=(bars:DisDexV35Candle[])=>bars.map(bar=>{
+  const a=derived.get(bar.openTime);
+  if(!a)throw Error("AGGREGATED_MISSING_TIMESTAMP");
+  if(Math.abs(a[4]-bar.close)>1e-12 || Math.abs(a[5]-bar.volume)>Math.max(1e-6,bar.volume*1e-7))
+   throw Error("AGGREGATED_CLOSE_VOLUME_CONFLICT");
+  return {...bar,open:a[1],high:a[2],low:a[3]};
+ });
+ p.base=transform(p.base);p.full=transform(p.full);
+ p.srcHashes["research_reaggregated_sha256"]=crypto.createHash("sha256").update(fs.readFileSync(fn)).digest("hex");
+}
+
 function getCandidates(pengu:DisDexV35Candle[],btc:DisDexV35Candle[],now:number){
  const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:[]};
  const rows=buildPenguDualLsV2EvaluationSeries(history,now);
@@ -118,18 +136,18 @@ const audit={schema:"disdex-prism-pengu-native-pinned-replay/v1",source_runtime_
  price_mismatch:priceBad.slice(0,20),features_mismatch:featuresBad.slice(0,20),
  data:{PENGUUSDT:p.srcHashes,BTCUSDT:b.srcHashes},
  eligible_for_forward:missingOld.length===0&&extraOld.length===0&&priceBad.length===0&&featuresBad.length===0};
-fs.writeFileSync(path.join(output,"PENGU_PINNED_SIGNAL_PARITY.json"),JSON.stringify(audit,null,2)+"\n");
+fs.writeFileSync(path.join(output,aggregatedMode?"PENGU_H1_M5AGG_SIGNAL_SENSITIVITY.json":"PENGU_PINNED_SIGNAL_PARITY.json"),JSON.stringify({...audit,price_source:aggregatedMode?"M5_AGGREGATED_RESEARCH":"NATIVE_H1_PINNED"},null,2)+"\n");
 console.log("PINNED_PARITY",JSON.stringify({old:raw.length,replayed:historic.length,missing:missingOld.length,extra:extraOld.length,priceBad:priceBad.length,featuresBad:featuresBad.length,sampleMissing:missingOld.slice(0,5),sampleExtra:extraOld.slice(0,5)}));
-if(!audit.eligible_for_forward){
+if(!audit.eligible_for_forward && !aggregatedMode){
  console.error("FAIL_CLOSED_PINNED_PENGU_ORIGINAL_116_PARITY_MISMATCH");
  process.exitCode=2;
 }else{
  const all=getCandidates(p.full,b.full,END);
  const forwardOnly=all.filter(x=>x.entryTs>=CUT&&x.entryTs<END);
- fs.writeFileSync(path.join(output,"PENGU_PINNED_FORWARD_SIGNALS.json"),JSON.stringify({
+ fs.writeFileSync(path.join(output,aggregatedMode?"PENGU_FORWARD_SIGNALS_M5AGG_SENSITIVITY.json":"PENGU_PINNED_FORWARD_SIGNALS.json"),JSON.stringify({
   schema:"disdex-prism-pengu-pinned-forward-raw-signals/v1",
   interval:["2026-10-01T00:00:00Z","2026-11-18T00:00:00Z"],
-  original_parity_pass:true,source_runtime_sha:audit.source_runtime_sha,
+  original_parity_pass:audit.eligible_for_forward,price_source:aggregatedMode?"M5_AGGREGATED_RESEARCH":"NATIVE_H1_PINNED",source_runtime_sha:audit.source_runtime_sha,
   unsigned_public_research_only:true,signals:forwardOnly},null,2)+"\n");
  console.log("FORWARD_NATIVE_SIGNALS",JSON.stringify({total:forwardOnly.length,by_route:forwardOnly.reduce((a,x)=>(a[x.route]=(a[x.route]||0)+1,a),{} as Record<string,number>),first:forwardOnly.slice(0,3)}));
 }
