@@ -1,6 +1,7 @@
 // PRISM II native lifecycle forward replay, adapted from historical pure-function generator.
 // Only unsigned public H1 data, pinned 116/116 entry source-parity proof, no LIVE operations.
 if (!process.env.PRISM_FORWARD_DIR || !process.env.PRISM_PUBLIC_DIR) throw Error('FORWARD_DIR_REQUIRED');
+const originalMode=process.env.PRISM_REPLAY_MODE==='ORIGINAL';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
@@ -14,17 +15,17 @@ import {createPenguShortV20State} from '../lib/pengu-short-v20.ts';
 import {evaluateRecoveryV8PositionBar} from '../lib/pengu-recovery-v8.ts';
 
 const ROOT='C:/tmp/disdex-bt-20251001-20261001';
-const INPUT=process.env.PRISM_FORWARD_DIR+'/PENGU_PINNED_FORWARD_SIGNALS.json';
-const OUT=process.env.PRISM_FORWARD_DIR+'/native_lifecycle_forward';
+const INPUT=originalMode?ROOT+'/native-new-signal-20251001-20261001/native-PENGU-raw-intentions.jsonl':process.env.PRISM_FORWARD_DIR+'/PENGU_PINNED_FORWARD_SIGNALS.json';
+const OUT=process.env.PRISM_FORWARD_DIR+'/'+(originalMode?'native_lifecycle_original_recheck':'native_lifecycle_forward');
 fs.mkdirSync(OUT,{recursive:true});
-const HOUR=3600000, BEGIN=Date.parse('2026-10-01T00:00:00Z'), END=Date.parse('2026-11-18T00:00:00Z');
+const HOUR=3600000, BEGIN=Date.parse(originalMode?'2025-10-01T00:00:00Z':'2026-10-01T00:00:00Z'), END=Date.parse(originalMode?'2026-10-01T00:00:00Z':'2026-11-18T00:00:00Z');
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const assert=(c,m)=>{if(!c)throw Error(m)};
 function loadH1(sym){
   const original=ROOT+'/aster-public-v3-h1/'+sym+'-1h-20250924-20261001.jsonl.gz';
   const added=process.env.PRISM_PUBLIC_DIR+'/'+sym+'-1h-20261001-20261118.jsonl.gz';
-  const gz=fs.readFileSync(original), additional=fs.readFileSync(added);
-  const both=zlib.gunzipSync(gz).toString('utf8').trim()+'\n'+zlib.gunzipSync(additional).toString('utf8').trim();
+  const gz=fs.readFileSync(original), additional=originalMode?Buffer.alloc(0):fs.readFileSync(added);
+  const both=zlib.gunzipSync(gz).toString('utf8').trim()+(originalMode?'':'\n'+zlib.gunzipSync(additional).toString('utf8').trim());
   const raw=both.split('\n').filter(Boolean).map(JSON.parse);
   const rows=raw.map(v=>({openTime:+v[0],closeTime:+v[6],open:+v[1],high:+v[2],low:+v[3],close:+v[4],volume:+v[5]}));
   for(let i=1;i<rows.length;i++)assert(rows[i].openTime-rows[i-1].openTime===HOUR,'H1_GAP_'+sym+'_'+i);
@@ -40,10 +41,10 @@ assert(evalRows.length===P.rows.length,'EVAL_LENGTH');
 const evalByTs=new Map();
 for(let i=0;i<evalRows.length;i++)if(evalRows[i].features)evalByTs.set(evalRows[i].features.referenceTs,{row:evalRows[i],index:i});
 const penguByTs=new Map(P.rows.map(x=>[x.openTime,x]));
-const forwardPayload=JSON.parse(fs.readFileSync(INPUT,'utf8'));
-if(forwardPayload.original_parity_pass!==true)throw Error('ORIGINAL_116_NATIVE_ENTRY_PARITY_NOT_PASSED');
-const candidates=forwardPayload.signals.map(x=>({...x,requestedGross:1,source_runtime_sha:'1657e173d250ad58f53e62f7bb0a3428fb405496'}));
-assert(candidates.length===11,'CANDIDATE_COUNT');
+const forwardPayload=originalMode?null:JSON.parse(fs.readFileSync(INPUT,'utf8'));
+if(!originalMode && forwardPayload.original_parity_pass!==true)throw Error('ORIGINAL_116_NATIVE_ENTRY_PARITY_NOT_PASSED');
+const candidates=originalMode?fs.readFileSync(INPUT,'utf8').trim().split('\n').filter(Boolean).map(JSON.parse):forwardPayload.signals.map(x=>({...x,requestedGross:1,source_runtime_sha:'1657e173d250ad58f53e62f7bb0a3428fb405496'}));
+assert(candidates.length===(originalMode?116:11),'CANDIDATE_COUNT');
 
 function selectedRouteAt(index){
   const row=evalRows[index], f=row.features;
