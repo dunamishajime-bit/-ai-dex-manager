@@ -37,16 +37,26 @@ for symbol in ("PENGUUSDT","BTCUSDT"):
  mp=OUT/f"{symbol}-5m-20250801-20250924.jsonl.gz"
  h=load(hp);m=load(mp)
  if len(h)!=1296 or len(m)!=15552:raise ValueError("HISTORY_INCOMPLETE:"+symbol)
- allout=[];fixes=[];price_diffs=0;totalhours=0;zeroH=0;invalid_m5=0
+ allout=[];fixes=[];price_diffs=0;totalhours=0;zeroH=0;invalid_m5=0;quarantined_m5=[]
  for t in sorted(h):
   if not START<=t<END or t%3600000:raise ValueError("BAD_H1_ALIGNMENT")
   z=h[t];p=[m.get(t+j*300000) for j in range(12)]
   if any(x is None for x in p):raise ValueError("INCOMPLETE_HOUR_M5")
+  qa_bars=[]
   for k in p:
-   if float(k[5])>0:
-    try:assertbar(k)
-    except ValueError as exc: invalid_m5+=1;raise ValueError("M5_UNREPAIRABLE:"+symbol+":"+str(t)+":"+str(exc))
-  active=[x for x in p if float(x[5])>0]
+   v=list(k)
+   if float(v[5])>0:
+    try:assertbar(v)
+    except ValueError as exc:
+     if symbol!="BTCUSDT" or int(v[0])!=1757771400000 or t!=1757768400000:
+      raise ValueError("M5_UNREPAIRABLE:"+symbol+":"+str(t)+":"+str(exc))
+     invalid_m5+=1
+     quarantined_m5.append({"ts":int(v[0]),"raw_OHLCV":[float(v[i]) for i in (1,2,3,4,5)],"status":"M5_HIGH_BELOW_ITS_OWN_OPEN_SOURCE_AMBIGUOUS"})
+     v[2]=str(max(float(v[1]),float(v[2]),float(v[3]),float(v[4])))
+     v[3]=str(min(float(v[1]),float(v[2]),float(v[3]),float(v[4])))
+     assertbar(v)
+   qa_bars.append(v)
+  active=[x for x in qa_bars if float(x[5])>0]
   old=[float(z[i]) for i in (1,2,3,4,5)]
   if active:
    new=[float(active[0][1]),max(float(x[2]) for x in active),
@@ -78,7 +88,10 @@ for symbol in ("PENGUUSDT","BTCUSDT"):
   if f.read()!=payload:raise ValueError("RESEARCH_REPAIR_OUTPUT_CORRUPT")
  report["symbol"][symbol]={"checked":totalhours,"raw_H1_OHLCV_malformed":len(fixes),
   "fixed_bars":fixes,"hours_m5_vs_native_any_field_different":price_diffs,
-  "fully_zero_volume_hours":zeroH,"qa_file":name,
+  "fully_zero_volume_hours":zeroH,"m5_unverifiable_intrabar_extremes":invalid_m5,
+  "quarantined_M5_raw":quarantined_m5,
+  "source_ohlc_quality":"AMBIGUOUS_ONE_M5_EXTREME_BOUNDED_IN_RESEARCH" if invalid_m5 else "ALL_M5_VALID",
+  "qa_file":name,
   "raw_sha256":hashlib.sha256(hp.read_bytes()).hexdigest(),
   "m5_sha256":hashlib.sha256(mp.read_bytes()).hexdigest(),
   "research_qa_sha256":hashlib.sha256(payload).hexdigest()}
