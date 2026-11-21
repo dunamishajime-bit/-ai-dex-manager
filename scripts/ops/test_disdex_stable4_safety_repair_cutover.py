@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import stat
 from pathlib import Path
@@ -309,6 +310,36 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertNotIn("order.create", source)
         self.assertNotIn("cancelOrder", source)
         self.assertNotIn("createOrder", source)
+
+    def test_v52_monitor_instance_clones_exact_template_and_rebinds_only_guard(self):
+        source = (
+            "[Unit]\\n"
+            "After=network-online.target disdex-stock-reference-free.service disdex-v12-v52-margin-guard@%i.service\\n"
+            "Requires=disdex-stock-reference-free.service disdex-v12-v52-margin-guard@%i.service\\n"
+            "[Service]\\n"
+            "NoNewPrivileges=true\\n"
+            "ProtectSystem=strict\\n"
+            "PrivateTmp=true\\n"
+        ).encode()
+        digest = hashlib.sha256(source).hexdigest()
+        with patch.object(module, "V52_MONITOR_TEMPLATE_SHA256", digest):
+            effective = module.v52_monitor_instance_unit_text(source).decode()
+            self.assertIn("Requires=disdex-stock-reference-free.service " + module.MARGIN_GUARD_UNIT, effective)
+            self.assertIn("After=network-online.target disdex-stock-reference-free.service " + module.MARGIN_GUARD_UNIT, effective)
+            self.assertNotIn("disdex-v12-v52-margin-guard@%i.service", effective)
+            self.assertIn("NoNewPrivileges=true", effective)
+            self.assertIn("ProtectSystem=strict", effective)
+            with self.assertRaises(module.ContractError):
+                module.v52_monitor_instance_unit_text(source + b"# unexpected template mutation\\n")
+
+    def test_v52_monitor_dependency_replacement_is_exact_and_rollback_protected(self):
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn("V52_MONITOR_INSTANCE_UNIT", source)
+        self.assertIn("TARGET_V52_MONITOR_INACTIVE_CANDIDATE_GUARD_DEPENDENCY", source)
+        self.assertIn("TARGET_V52_MONITOR_SHARED_GUARD_NOT_BOUND", source)
+        self.assertIn("snapshot[V52_MONITOR_INSTANCE_UNIT]", source)
+        self.assertIn("write_atomic(V52_MONITOR_INSTANCE_UNIT, instance_data, (0, 0, 0o644))", source)
+        self.assertIn("for path, (existed, previous, meta) in snapshot.items():", source)
 
     def test_monitor_dropins_remove_order_capable_exec_paths(self):
         v52 = module.monitor_dropin_text("V52")

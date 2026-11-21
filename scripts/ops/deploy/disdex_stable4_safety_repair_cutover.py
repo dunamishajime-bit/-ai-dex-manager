@@ -44,6 +44,9 @@ HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
 RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 MARGIN_GUARD_UNIT = "disdex-v12-v52-margin-guard@7688ed7c93a1918d8b44837339b7da5584a868f5.service"
+# Pinned hash of root-owned VPS V52 systemd template, inspected on 2026-11-21.
+V52_MONITOR_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
+V52_MONITOR_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 HEARTBEATS = {
     "V52": Path("/var/lib/disdex/runner-health/heartbeats/v52.json"),
@@ -55,6 +58,7 @@ HEARTBEAT_TICKS = {
 }
 V52_UNIT_OLD = f"disdex-v52-aster-only@{V52_OLD}.service"
 V52_UNIT_NEW = f"disdex-v52-aster-only@{TARGET}.service"
+V52_MONITOR_INSTANCE_UNIT = Path("/etc/systemd/system") / V52_UNIT_NEW
 Q102_UNIT_OLD = f"disdex-quality102-causal-v1@{Q102_OLD}.service"
 Q102_UNIT_NEW = f"disdex-quality102-causal-v1@{TARGET}.service"
 BACKUP_ROOT = Path("/var/backups/disdex-stable4-safety-repair")
@@ -589,6 +593,14 @@ def validate_target_units(require_monitor: bool = False) -> None:
                     "TARGET_MONITOR_EXEC_RESET_MISSING:" + expected)
             if expected == "V52":
                 require("--monitor-only-daemon" in text, "TARGET_V52_MONITOR_COMMAND_MISSING")
+                require(unit_property(new, "FragmentPath") == str(V52_MONITOR_INSTANCE_UNIT),
+                        "TARGET_V52_MONITOR_INSTANCE_UNIT_NOT_LOADED")
+                requirements = set(unit_property(new, "Requires").split())
+                ordering = set(unit_property(new, "After").split())
+                require(MARGIN_GUARD_UNIT in requirements and MARGIN_GUARD_UNIT in ordering,
+                        "TARGET_V52_MONITOR_SHARED_GUARD_NOT_BOUND")
+                require("disdex-v12-v52-margin-guard@" + TARGET + ".service" not in requirements,
+                        "TARGET_V52_MONITOR_INACTIVE_CANDIDATE_GUARD_DEPENDENCY")
             else:
                 require("scripts/disdex-quality102-causal-v1-monitor.ts --daemon" in text,
                         "TARGET_Q102_MONITOR_COMMAND_MISSING")
@@ -885,9 +897,31 @@ def validate_monitor_heartbeat(value: dict, expected_sha: str, expected_unit: st
     return True
 
 
+def v52_monitor_instance_unit_text(template: bytes) -> bytes:
+    """Clone the verified template for ONLY the approved monitor instance.
+
+    systemd dependencies in [Unit] cannot be removed with a drop-in empty
+    Requires=/After=. The order-capable template requires a SAME-SHA Margin
+    Guard, which is not a component of this monitor-only candidate.
+    Replace ONLY the dependency on that non-active candidate guard with the
+    existing healthy production Margin Guard; preserve the original service
+    settings, sandbox, and all other dependencies byte-for-byte.
+    """
+    require(hashlib.sha256(template).hexdigest() == V52_MONITOR_TEMPLATE_SHA256,
+            "V52_MONITOR_TEMPLATE_SHA_MISMATCH")
+    text = template.decode("utf-8")
+    old_after = "After=network-online.target disdex-stock-reference-free.service disdex-v12-v52-margin-guard@%i.service"
+    old_requires = "Requires=disdex-stock-reference-free.service disdex-v12-v52-margin-guard@%i.service"
+    require(text.count(old_after) == 1 and text.count(old_requires) == 1,
+            "V52_MONITOR_TEMPLATE_DEPENDENCIES_UNEXPECTED")
+    text = text.replace(old_after, "After=network-online.target disdex-stock-reference-free.service " + MARGIN_GUARD_UNIT)
+    text = text.replace(old_requires, "Requires=disdex-stock-reference-free.service " + MARGIN_GUARD_UNIT)
+    return text.encode("utf-8")
+
+
 def snapshot_monitor_dropins(target: str = TARGET) -> dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]]:
     snapshot: dict[Path, tuple[bool, bytes | None, tuple[int, int, int] | None]] = {}
-    for path in monitor_dropin_paths(target).values():
+    for path in (*monitor_dropin_paths(target).values(), V52_MONITOR_INSTANCE_UNIT):
         if path.is_symlink():
             raise ContractError("MONITOR_DROPIN_SYMLINK:" + str(path))
         if path.exists():
@@ -903,6 +937,16 @@ def install_monitor_dropins(
     target: str = TARGET,
 ) -> list[Path]:
     created_dirs: list[Path] = []
+    require(not V52_MONITOR_TEMPLATE.is_symlink(), "V52_MONITOR_TEMPLATE_SYMLINK")
+    source = read_regular(V52_MONITOR_TEMPLATE, 256_000, require_root=True)
+    template_meta = V52_MONITOR_TEMPLATE.stat()
+    require(stat.S_IMODE(template_meta.st_mode) == 0o644, "V52_MONITOR_TEMPLATE_MODE_UNEXPECTED")
+    instance_data = v52_monitor_instance_unit_text(source)
+    require(not V52_MONITOR_INSTANCE_UNIT.is_symlink(), "V52_MONITOR_INSTANCE_SYMLINK")
+    existed, prior, _old_meta = snapshot[V52_MONITOR_INSTANCE_UNIT]
+    if existed and prior != instance_data:
+        raise ContractError("V52_MONITOR_INSTANCE_UNEXPECTED_EXISTING")
+    write_atomic(V52_MONITOR_INSTANCE_UNIT, instance_data, (0, 0, 0o644))
     for runner, path in monitor_dropin_paths(target).items():
         if path.parent.is_symlink():
             raise ContractError("MONITOR_DROPIN_PARENT_SYMLINK:" + str(path.parent))
