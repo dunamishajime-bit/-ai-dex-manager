@@ -1,0 +1,35 @@
+{
+  "schema": "disdex-pengu-current-pin-lifecycle-exit-replay/v1",
+  "status": "RESEARCH_PRICE_MODEL_NOT_VENUE_FILL",
+  "sourceCandidates": 11,
+  "modeled": 11,
+  "unresolved": 0,
+  "byRoute": {
+    "SHORT_V20": 7,
+    "RECOVERY_V8": 4
+  },
+  "byExitReason": {
+    "SHORT_MAX_HOLD": 7,
+    "RECOVERY_V8_HARD_STOP": 1,
+    "RECOVERY_V8_TRAILING_STOP": 2,
+    "RECOVERY_V8_MAX_HOLD": 1
+  },
+  "partialDefenseEvents": 1,
+  "v20SourceVsCausalComparisons": 0,
+  "v20MeanAbsPriceDiffPct": null,
+  "inputTapeSHA256": "b8aa23d718c29ef91cfff590913d3a9f264922c01584e22cf18d1bcd90288011",
+  "outputSHA256": "f4bae44aee5c6f61587f230840f1dfe992e7cf77cdc43bd6025ee92d82e1d57e",
+  "h1Sources": {
+    "PENGU": "0c3f294c3c1eecf69f263c4e972cefaa3874136cf14b18fab8460dde523b5c70",
+    "BTC": "db53bb970646e434f805384aa747de0778c23fcb233e8f4980f99fd564e85193"
+  },
+  "fundingSourceSHA256": "f73938b734b6a4864287e1ae361aed6c81ca9e00eb218f1e661b96b49041ca5f",
+  "timed3h8hImplementationAudit": "FIELDS_AND_REASON_TYPES_PRESENT_BUT_NO_EXECUTABLE_REFERENCE_IN_CURRENT_PIN",
+  "limitations": [
+    "No historical signed venue market fills; non-resident exits use causal next-H1-open price model",
+    "Hard/trailing and Recovery partial protection are modeled at configured resident stop prices, not L2 execution",
+    "Recovery partial defense assumes successful protective partial fill and updates remaining quantity/gross",
+    "Raw entries are natural candidates before historical owned-position/cooldown/shared-gross admission",
+    "No 3h/8h timed-negative rule was added because current pinned executable source does not reference those fields"
+  ]
+}
