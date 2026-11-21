@@ -277,7 +277,7 @@ with (OUT/"pengu_m5_entry_retiming_trace.json").open("w",encoding="utf8") as f:
  "No winner-based threshold is selected using post-validation data"]},f,ensure_ascii=False,separators=(",",":"),allow_nan=False)
 def writecsv(name,rows):
  if not rows:return
- with (OUT/name).open("w",encoding="utf8-sig",newline="") as f:
+ with (OUT/name).open("w",encoding="utf-8-sig",newline="") as f:
   keys=list(dict.fromkeys(k for d in rows for k in d))
   w=csv.DictWriter(f,keys);w.writeheader();w.writerows(rows)
 writecsv("pengu_m5_all_strategies_winrate.csv",agg)
