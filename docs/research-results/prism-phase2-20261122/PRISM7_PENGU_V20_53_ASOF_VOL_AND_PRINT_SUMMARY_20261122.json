@@ -1,0 +1,187 @@
+{
+  "all": {
+    "atr24_hourly_ratio_pct": {
+      "median": 1.46848,
+      "p10": 0.88602,
+      "p90": 1.899108
+    },
+    "exit_reasons": {
+      "SHORT_HARD_STOP": 14,
+      "SHORT_MAX_HOLD": 28,
+      "SHORT_TRAILING_STOP": 9,
+      "SHORT_V20_DEADLINE_EXIT": 2
+    },
+    "mean_native_net30_pct": 1.000655,
+    "n": 53,
+    "prior_24h_return_pct": {
+      "median": -5.792321,
+      "p10": -8.499782,
+      "p90": -3.344871
+    },
+    "prior_3h_return_pct": {
+      "median": -0.509413,
+      "p10": -2.557196,
+      "p90": 0.987255
+    },
+    "prior_6h_return_pct": {
+      "median": -0.177246,
+      "p10": -3.335024,
+      "p90": 1.806146
+    },
+    "wins": 29
+  },
+  "candidate_intents": 53,
+  "files_sha256": {
+    "PRISM5_PENGU_V20_STRUCTURE_53_CLASSIFICATION.csv": "26292b73421583c552f49fed6d2065aa22af7867bdf7c89085d04348984bb902",
+    "PRISM6_PENGU_V20_M5_53_EARLY_CAUSAL_FORENSICS.csv": "9069209a707604d1dfd63d6cf43141c9e0cb8443fa42a3f4de0257bf5ec61ce0"
+  },
+  "future_paths_are_never_entry_features": true,
+  "limitations": [
+    "All three windows are previously observed, not untouched OOS.",
+    "Loss family counts 11/7/6 are externally verified aggregates; not assigned per-ID here.",
+    "Maximum favorable excursion is hindsight and not executable profit.",
+    "H1/M5 source price disagreement, actual fills and order book unresolved.",
+    "No Production parity, funding, portfolio Gross or max DD asserted."
+  ],
+  "lose30": 24,
+  "losers": {
+    "atr24_hourly_ratio_pct": {
+      "median": 1.45491,
+      "p10": 1.098587,
+      "p90": 1.873128
+    },
+    "exit_reasons": {
+      "SHORT_HARD_STOP": 14,
+      "SHORT_MAX_HOLD": 10
+    },
+    "mean_native_net30_pct": -5.856176,
+    "n": 24,
+    "prior_24h_return_pct": {
+      "median": -5.793357,
+      "p10": -8.76015,
+      "p90": -3.25263
+    },
+    "prior_3h_return_pct": {
+      "median": -0.492845,
+      "p10": -2.851435,
+      "p90": 1.174884
+    },
+    "prior_6h_return_pct": {
+      "median": 0.0122,
+      "p10": -4.116864,
+      "p90": 3.368134
+    },
+    "wins": 0
+  },
+  "m5_post_entry_observation_not_executable_profit": {
+    "1": {
+      "all_recorded_m5_bars": 624,
+      "censored_or_no_print_only_count": 1,
+      "completed_count": 52,
+      "maximum_adverse_pct_completed_only": {
+        "median": 0.256614,
+        "p10": 0.0,
+        "p90": 1.067286
+      },
+      "maximum_favorable_pct_completed_only": {
+        "median": 0.269775,
+        "p10": 0.0,
+        "p90": 1.999046
+      },
+      "missing_print_count_rows": 1,
+      "zero_print_fraction": 0.509615,
+      "zero_print_m5_bars": 318
+    },
+    "12": {
+      "all_recorded_m5_bars": 7056,
+      "censored_or_no_print_only_count": 4,
+      "completed_count": 49,
+      "maximum_adverse_pct_completed_only": {
+        "median": 1.7004,
+        "p10": 0.10833,
+        "p90": 4.747357
+      },
+      "maximum_favorable_pct_completed_only": {
+        "median": 2.19577,
+        "p10": 0.224125,
+        "p90": 6.546494
+      },
+      "missing_print_count_rows": 4,
+      "zero_print_fraction": 0.506378,
+      "zero_print_m5_bars": 3573
+    },
+    "3": {
+      "all_recorded_m5_bars": 1908,
+      "censored_or_no_print_only_count": 0,
+      "completed_count": 53,
+      "maximum_adverse_pct_completed_only": {
+        "median": 0.924382,
+        "p10": 0.012805,
+        "p90": 2.849447
+      },
+      "maximum_favorable_pct_completed_only": {
+        "median": 0.664207,
+        "p10": 0.0,
+        "p90": 4.327926
+      },
+      "missing_print_count_rows": 0,
+      "zero_print_fraction": 0.529874,
+      "zero_print_m5_bars": 1011
+    },
+    "6": {
+      "all_recorded_m5_bars": 3744,
+      "censored_or_no_print_only_count": 1,
+      "completed_count": 52,
+      "maximum_adverse_pct_completed_only": {
+        "median": 1.339938,
+        "p10": 0.146354,
+        "p90": 4.451796
+      },
+      "maximum_favorable_pct_completed_only": {
+        "median": 1.139125,
+        "p10": 0.02269,
+        "p90": 5.651229
+      },
+      "missing_print_count_rows": 1,
+      "zero_print_fraction": 0.517361,
+      "zero_print_m5_bars": 1937
+    }
+  },
+  "minimum_loser_to_winner_conversions_if_no_winner_damaged": 14,
+  "per_trade_inventory_local_only_count": 53,
+  "research_only": true,
+  "schema": "prism7-pengu-native53-immutable-opportunity-inventory/v1",
+  "source_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "target_80_wins_at_53_intents": 43,
+  "win30": 29,
+  "winners": {
+    "atr24_hourly_ratio_pct": {
+      "median": 1.46848,
+      "p10": 0.864555,
+      "p90": 1.879084
+    },
+    "exit_reasons": {
+      "SHORT_MAX_HOLD": 18,
+      "SHORT_TRAILING_STOP": 9,
+      "SHORT_V20_DEADLINE_EXIT": 2
+    },
+    "mean_native_net30_pct": 6.675274,
+    "n": 29,
+    "prior_24h_return_pct": {
+      "median": -5.785198,
+      "p10": -8.277797,
+      "p90": -3.356257
+    },
+    "prior_3h_return_pct": {
+      "median": -0.509413,
+      "p10": -2.080734,
+      "p90": 0.81313
+    },
+    "prior_6h_return_pct": {
+      "median": -0.418647,
+      "p10": -2.409855,
+      "p90": 1.288102
+    },
+    "wins": 29
+  }
+}
