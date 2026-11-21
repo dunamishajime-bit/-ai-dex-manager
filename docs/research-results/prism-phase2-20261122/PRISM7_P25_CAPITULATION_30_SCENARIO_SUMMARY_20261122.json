@@ -1,0 +1,3732 @@
+{
+  "all120PerCandidateDetectionEvents": {
+    "S3_00273": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_00338": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01088": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01257": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01259": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01270": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01342": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01348": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_01350": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_01634": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_01700": {
+      "btc5mDropPct": -6.636875752984528,
+      "btcM5Close": 104694.7,
+      "btcPreviousPositivePrintClose": 112137.1,
+      "entryPrice": 0.022617,
+      "entryTs": 1760130900000,
+      "eventCloseTs": 1760131200000,
+      "eventM5OpenTs": 1760130900000,
+      "first3AfterSignalPositiveM5OpenProxies": [
+        {
+          "positiveVolumeNotionalUSDT": 1320.633046,
+          "positiveVolumeUnits": 211606.0,
+          "px": 0.006241,
+          "ts": 1760131200000
+        },
+        {
+          "positiveVolumeNotionalUSDT": 1705.4253999999999,
+          "positiveVolumeUnits": 168854.0,
+          "px": 0.0101,
+          "ts": 1760131500000
+        },
+        {
+          "positiveVolumeNotionalUSDT": 3790.4200000000005,
+          "positiveVolumeUnits": 239900.0,
+          "px": 0.0158,
+          "ts": 1760131800000
+        }
+      ],
+      "pengu5mDropPct": -55.695361304328564,
+      "penguM5Close": 0.01,
+      "penguPreviousPositivePrintClose": 0.022571,
+      "penguTakerBuyVolumeRatio": 0.09308675257928534,
+      "penguTradeGrossShortGainAtSignalPct": 55.785471105805364,
+      "signalUsesFutureM5Bars": false,
+      "sourceBaselineExitPrice": 0.020007,
+      "sourceBaselineExitReason": "REFERENCE_TRAILING_STOP",
+      "sourceBaselineExitTs": 1760133600000,
+      "state": "CROSS_ASSET_CAPITULATION_CONFIRMED",
+      "venueSignedFillProven": false
+    },
+    "S3_01713": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01719": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01792": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01798": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01860": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01864": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_01948": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01950": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01957": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01968": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_01983": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02173": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02261": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02266": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02291": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02365": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02456": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02457": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02520": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02586": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02656": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02658": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02699": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_02701": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02707": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02930": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_02941": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03049": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03052": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03178": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03182": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03184": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03187": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03280": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_03330": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03462": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03527": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03528": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_03848": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04116": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04145": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04267": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04361": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04381": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04400": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04401": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_04404": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_04406": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04533": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_04661": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04665": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_04980": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05222": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05514": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_05693": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_05697": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05707": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05722": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05726": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_05744": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_06830": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07174": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07302": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_07304": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07307": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07309": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07341": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07398": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07417": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07831": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_07864": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_07961": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_08187": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_08664": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_08665": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_08703": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_08704": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_09429": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_09589": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_09844": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_09847": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10161": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10173": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10370": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10381": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10382": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10384": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10500": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10602": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10732": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10734": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10791": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_10918": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10925": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_10936": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11012": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11084": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_11090": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11096": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_11100": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11200": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11245": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11246": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_11298": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11300": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11302": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_11315": {
+      "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+    },
+    "S3_11317": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    },
+    "S3_11367": {
+      "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+    }
+  },
+  "costAndExitDelayScenarios": [
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 147.78381207598474,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 140.81907205770057,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 8.03199756,
+        "netProfitPctPoints": 168.67194885,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.895083,
+        "referenceSequentialEquityEndYen": 41605.584,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 41221.26391,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 31340.097391913896,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 144.78381207598474,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 138.61907205770055,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.83199756,
+        "netProfitPctPoints": 164.47194885,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.612558,
+        "referenceSequentialEquityEndYen": 39990.56,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 39541.17714,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 30349.286860062242,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 147.7148263572776,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 140.7500863389934,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 8.02871253,
+        "netProfitPctPoints": 168.60296314,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.893081,
+        "referenceSequentialEquityEndYen": 41588.927,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 41204.76023,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 31327.549815218103,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 144.7148263572776,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 138.5500863389934,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.82871253,
+        "netProfitPctPoints": 164.40296314,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.610624,
+        "referenceSequentialEquityEndYen": 39974.531,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 39525.32772,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 30337.121852081567,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 147.5078692011561,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 140.5431291828719,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 8.01885743,
+        "netProfitPctPoints": 168.39600598,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.887075,
+        "referenceSequentialEquityEndYen": 41538.954,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 41155.24918,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 31289.90708513069,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 144.50786920115607,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 138.34312918287188,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.81885743,
+        "netProfitPctPoints": 164.19600598,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.60482,
+        "referenceSequentialEquityEndYen": 39926.442,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 39477.77944,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 30300.626828139528,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 146.4040977018414,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 139.43935768355723,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.96629688,
+        "netProfitPctPoints": 167.29223448,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.855042,
+        "referenceSequentialEquityEndYen": 41272.433,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 40891.19029,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 31089.145857997835,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 143.4040977018414,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 137.23935768355722,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.76629688,
+        "netProfitPctPoints": 163.09223448,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.573865,
+        "referenceSequentialEquityEndYen": 39669.969,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 39224.18865,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 30105.98670044866,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 145.02438332769808,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 138.05964330941387,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.9005962,
+        "netProfitPctPoints": 165.91252011,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.815001,
+        "referenceSequentialEquityEndYen": 40939.282,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 40561.11667,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 30838.194324081756,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 142.02438332769805,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 135.85964330941385,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 1,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.7005962,
+        "netProfitPctPoints": 161.71252011,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.535171,
+        "referenceSequentialEquityEndYen": 39349.378,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 38907.20016,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14140,
+        "totalPositivePrintBarsDuringHold": 8523,
+        "worstM5CloseDDRecord": {
+          "equity": 29862.686540835075,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 130.72142537571506,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 123.75668535743085,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.21950296,
+        "netProfitPctPoints": 151.60956215,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.39991,
+        "referenceSequentialEquityEndYen": 37485.636,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 37139.37286,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 28236.678166206122,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 127.72142537571504,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 121.55668535743085,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.01950296,
+        "netProfitPctPoints": 147.40956215,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.13405,
+        "referenceSequentialEquityEndYen": 36025.937,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 35621.10473,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 27340.4891803673,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 130.60978369025722,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 123.64504367197301,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.21418669,
+        "netProfitPctPoints": 151.49792047,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.39667,
+        "referenceSequentialEquityEndYen": 37458.679,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 37112.66445,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 28216.372041446055,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 127.6097836902572,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 121.44504367197301,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.01418669,
+        "netProfitPctPoints": 147.29792047,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.130919,
+        "referenceSequentialEquityEndYen": 35999.995,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 35595.45513,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 27320.802178187383,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 130.2748586338837,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 123.31011861559949,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.19823788,
+        "netProfitPctPoints": 151.16299541,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.38695,
+        "referenceSequentialEquityEndYen": 37377.807,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 37032.53923,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 28155.453667165824,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 127.27485863388368,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 121.11011861559949,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 6.99823788,
+        "netProfitPctPoints": 146.96299541,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.121526,
+        "referenceSequentialEquityEndYen": 35922.172,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 35518.50631,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 27261.74117164763,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 128.48859166655822,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 121.52385164827402,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.11317755,
+        "netProfitPctPoints": 149.37672845,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.33511,
+        "referenceSequentialEquityEndYen": 36946.488,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 36605.20469,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 27830.555671004662,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 125.48859166655821,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 119.32385164827402,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 6.91317755,
+        "netProfitPctPoints": 145.17672845,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.071431,
+        "referenceSequentialEquityEndYen": 35507.114,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 35108.11262,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 26946.74913676897,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 126.25575795740139,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 119.29101793911718,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 7.00685213,
+        "netProfitPctPoints": 147.14389474,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.27031,
+        "referenceSequentialEquityEndYen": 36407.34,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.45050396,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 36071.03652,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 27424.433175803195,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 123.25575795740137,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 117.09101793911718,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 2,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 6.80685213,
+        "netProfitPctPoints": 142.94389474,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 5.008812,
+        "referenceSequentialEquityEndYen": 34988.292,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 34595.12051,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14141,
+        "totalPositivePrintBarsDuringHold": 8524,
+        "worstM5CloseDDRecord": {
+          "equity": 26553.009093170633,
+          "id": "S3_10500",
+          "priceMark": 0.008028,
+          "time": 1791873000000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 105.5191439060241,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 98.5544038877399,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 6.01939432,
+        "netProfitPctPoints": 126.40728068,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.668506,
+        "referenceSequentialEquityEndYen": 31400.199,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 24.89497733,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 31110.14794,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12786.798624918029,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 0,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 102.51914390602408,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 96.35440388773989,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.81939432,
+        "netProfitPctPoints": 122.20728068,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.427261,
+        "referenceSequentialEquityEndYen": 30169.923,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.22992914,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29830.89672,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12664.36865572604,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 105.34449651689204,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 98.37975649860785,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 6.01107778,
+        "netProfitPctPoints": 126.2326333,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.663438,
+        "referenceSequentialEquityEndYen": 31358.028,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 24.99584468,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 31068.36647,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12769.625731494956,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 25,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 102.34449651689204,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 96.17975649860783,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.81107778,
+        "netProfitPctPoints": 122.0326333,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.422363,
+        "referenceSequentialEquityEndYen": 30129.342,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.33050132,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29790.77159,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12647.333988977562,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 104.82055434949581,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 97.85581433121162,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.98612815,
+        "netProfitPctPoints": 125.70869113,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.648232,
+        "referenceSequentialEquityEndYen": 31231.515,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.29844674,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 30943.02206,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12718.107051225725,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 100,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 101.82055434949581,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 95.6558143312116,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.78612815,
+        "netProfitPctPoints": 121.50869113,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.407669,
+        "referenceSequentialEquityEndYen": 30007.599,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.63221788,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29670.39622,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12596.229988732124,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 102.0261961233827,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 95.06145610509851,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.85306347,
+        "netProfitPctPoints": 122.9143329,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.567136,
+        "referenceSequentialEquityEndYen": 30556.779,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 26.91232442,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 30274.51853,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12443.340756456513,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 500,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 99.0261961233827,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 92.8614561050985,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.65306347,
+        "netProfitPctPoints": 118.7143329,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.329302,
+        "referenceSequentialEquityEndYen": 29358.3,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 27.24137286,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29028.3942,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12323.675320756458,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 98.53324834074134,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 28.988136778540753,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.100000000000007,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 91.56850832245715,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 27.852876796824944,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 10,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.68673262,
+        "netProfitPctPoints": 119.42138512,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.465767,
+        "referenceSequentialEquityEndYen": 29713.358,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.92967151,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29438.88911,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12099.882887994996,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    },
+    {
+      "additionalEntryIndependentExitSlipBps": 1000,
+      "byOriginalCohort": {
+        "BASE_2025_2026": {
+          "referenceCandidates": 85,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 15,
+          "referencePerSetupNetPctPoints": 95.53324834074134,
+          "referenceWins": 11
+        },
+        "POST_2026_OCT_NOV": {
+          "referenceCandidates": 26,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 5,
+          "referencePerSetupNetPctPoints": 27.98813677854075,
+          "referenceWins": 4
+        },
+        "PRE_2025_AUG_SEP": {
+          "referenceCandidates": 9,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 1,
+          "referencePerSetupNetPctPoints": -8.300000000000008,
+          "referenceWins": 0
+        }
+      },
+      "byPrimaryRoute": {
+        "BREAKDOWN_RETEST_FAILURE": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 1,
+          "referenceExited": 11,
+          "referencePerSetupNetPctPoints": 89.36850832245713,
+          "referenceWins": 10
+        },
+        "RELATIVE_WEAKNESS_DOWNSHIFT": {
+          "referenceCandidates": 4,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 0,
+          "referencePerSetupNetPctPoints": 0,
+          "referenceWins": 0
+        },
+        "SELLER_PULLBACK_REJECTION": {
+          "referenceCandidates": 58,
+          "referenceEarlyCapitulationExitCount": 0,
+          "referenceExited": 10,
+          "referencePerSetupNetPctPoints": 25.85287679682494,
+          "referenceWins": 5
+        }
+      },
+      "confirmedCapitulationSourceCandidates": 1,
+      "delayPositiveM5PrintsAfterSignal": 3,
+      "feeBps": 30,
+      "originalSourceH1StructuralSetups": 120,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+        },
+        "meanNetPctConditional": 5.48673262,
+        "netProfitPctPoints": 115.22138512,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.231344,
+        "referenceSequentialEquityEndYen": 28546.677,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5MarkRisk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 29.25281658,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 28225.89169,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 11982.98198578688,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "selectedSingleSlotExitOverrides": 1,
+      "slotOwnerRouteCount": {
+        "BREAKDOWN_RETEST_FAILURE": 1
+      },
+      "source120CandidateExitOverrides": 1
+    }
+  ],
+  "frozenDetection": {
+    "btcCloseMaxRatioToPreviousPrintClose": 0.97,
+    "exitOnlyAfterSignalM5Complete": true,
+    "penguCloseMaxRatioToEntry": 0.75,
+    "penguCloseMaxRatioToPreviousPrintClose": 0.8,
+    "penguM5TakerBuyMaxRatio": 0.45,
+    "requireSameClockPositiveM5BTCAndPengu": true
+  },
+  "inputSHA256": {
+    "BTC_M5": {
+      "BTCUSDT-5m-20250801-20250924.jsonl.gz": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "BTCUSDT-5m-20250924-20260803.jsonl.gz": "5e08252032828062d7047daceddad1ab69e4343174bf7163e5242085b92d1e07",
+      "BTCUSDT-5m-20260803-20261001.jsonl.gz": "9e12516a68ff1058c42982001fb7f86c74e606f27f86db201570362d567f48f5",
+      "BTCUSDT-5m-20261001-20261118.jsonl.gz": "e9795e2ea033f7373baf12442ad9f6614149baa5c31a0c0e0a55f65525161b38"
+    },
+    "PENGU_M5": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    },
+    "p22events": "a2792d43277729834f5d658b039ca0299f2084c5ec018e9cffc53cc5d51263ea",
+    "p23source": "36651dd5579ec84da5db4d7b2d80abe4520f62faa34fff7d7e63710c21764b70"
+  },
+  "limitations": [
+    "Main flash-crash event used to design the rule was ALREADY observed on 2025-10-10; entire historical period is in-sample and not predictive validation.",
+    "Public positive M5 bar open not signed fill and not guaranteed executable at size or bid/ask quote.",
+    "Buyer panic and orderbook shortages may exceed 1000bps slip despite USD notional volume; bar volume is not accessible L2 depth.",
+    "Reference stop72 differs from original pinned SHORT V20 exits, source authorizations unchanged.",
+    "Synthetic look-back future label leakage prohibited; all entry and exit events delayed after completed M5.",
+    "P23 mark DD accounts for one open source right censored position; not multi-runner portfolio/cross gross/funding.",
+    "Even if DD below 20, source daily shared loss7.5 and independent true OOS and synthetic dislocations remain unverified."
+  ],
+  "mainCase30bpsDelay2ExtraSlip0": {
+    "additionalEntryIndependentExitSlipBps": 0,
+    "byOriginalCohort": {
+      "BASE_2025_2026": {
+        "referenceCandidates": 85,
+        "referenceEarlyCapitulationExitCount": 1,
+        "referenceExited": 15,
+        "referencePerSetupNetPctPoints": 127.72142537571504,
+        "referenceWins": 11
+      },
+      "POST_2026_OCT_NOV": {
+        "referenceCandidates": 26,
+        "referenceEarlyCapitulationExitCount": 0,
+        "referenceExited": 5,
+        "referencePerSetupNetPctPoints": 27.98813677854075,
+        "referenceWins": 4
+      },
+      "PRE_2025_AUG_SEP": {
+        "referenceCandidates": 9,
+        "referenceEarlyCapitulationExitCount": 0,
+        "referenceExited": 1,
+        "referencePerSetupNetPctPoints": -8.300000000000008,
+        "referenceWins": 0
+      }
+    },
+    "byPrimaryRoute": {
+      "BREAKDOWN_RETEST_FAILURE": {
+        "referenceCandidates": 58,
+        "referenceEarlyCapitulationExitCount": 1,
+        "referenceExited": 11,
+        "referencePerSetupNetPctPoints": 121.55668535743085,
+        "referenceWins": 10
+      },
+      "RELATIVE_WEAKNESS_DOWNSHIFT": {
+        "referenceCandidates": 4,
+        "referenceEarlyCapitulationExitCount": 0,
+        "referenceExited": 0,
+        "referencePerSetupNetPctPoints": 0,
+        "referenceWins": 0
+      },
+      "SELLER_PULLBACK_REJECTION": {
+        "referenceCandidates": 58,
+        "referenceEarlyCapitulationExitCount": 0,
+        "referenceExited": 10,
+        "referencePerSetupNetPctPoints": 25.85287679682494,
+        "referenceWins": 5
+      }
+    },
+    "confirmedCapitulationSourceCandidates": 1,
+    "delayPositiveM5PrintsAfterSignal": 2,
+    "feeBps": 30,
+    "originalSourceH1StructuralSetups": 120,
+    "referenceEconomics": {
+      "ambiguousSameEntryM5Stop": 0,
+      "candidateIntents": 120,
+      "entryPriceNoPrint": 0,
+      "exitReasons": {
+        "REFERENCE_HARD_STOP": 4,
+        "REFERENCE_MAX_HOLD_72H": 10,
+        "REFERENCE_TRAILING_STOP": 6,
+        "RESEARCH_P25_CAPITULATION_CAPTURE": 1
+      },
+      "meanNetPctConditional": 7.01950296,
+      "netProfitPctPoints": 147.40956215,
+      "notProductionAccountDD": true,
+      "occupiedSlot": 9,
+      "priceProxyClosed": 21,
+      "profitFactorConditional": 5.13405,
+      "referenceSequentialEquityEndYen": 36025.937,
+      "referenceSequentialEquityStartYen": 10000,
+      "referenceSequentialRealizedDDPct": 16.101754,
+      "rightCensored": 1,
+      "winratePctConditional": 71.428571,
+      "wins": 15
+    },
+    "referenceM5MarkRisk": {
+      "initialCapitalYen": 10000.0,
+      "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+      "maximumM5CloseMarkToMarketDDPct": 21.95877323,
+      "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+      "priceProxyClosed": 21,
+      "referenceFinalEquityIncludingUnrealizedYen": 35621.10473,
+      "rightCensoredOpenPositions": 1,
+      "sourceIntents": 120,
+      "totalHoldingBarsChecked": 14141,
+      "totalPositivePrintBarsDuringHold": 8524,
+      "worstM5CloseDDRecord": {
+        "equity": 27340.4891803673,
+        "id": "S3_10500",
+        "priceMark": 0.008028,
+        "time": 1791873000000
+      },
+      "worstM5HighEnvelopeDDRecord": {
+        "equity": 10534.586402364139,
+        "id": "S3_01700",
+        "stressHigh": 0.023038,
+        "time": 1760130900000
+      }
+    },
+    "selectedSingleSlotExitOverrides": 1,
+    "slotOwnerRouteCount": {
+      "BREAKDOWN_RETEST_FAILURE": 1
+    },
+    "source120CandidateExitOverrides": 1
+  },
+  "name": "PENGU_S4_CAPITULATION_CAPTURE_V1",
+  "pinnedV20Sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "schema": "prism7-p25-s4-capitulation-capture-source120-synthetic-execution-delay-cost/v1",
+  "source120P22AllSetupParity": "PASS",
+  "sourceBTCM5QuarantinedOffPosition": [
+    {
+      "overlappingS4CandidatePositions": 0,
+      "priceNotModified": true,
+      "rawGzipFile": "BTCUSDT-5m-20250801-20250924.jsonl.gz",
+      "rawGzipSHA256": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "timestamp": 1757771400000
+    }
+  ],
+  "sourceS4P23BaselineM5DD": {
+    "exitSlippageBps": 0,
+    "feeBps": 30,
+    "group": "S4_SINGLE_SLOT",
+    "initialCapitalYen": 10000.0,
+    "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+    "maximumM5CloseMarkToMarketDDPct": 35.94150348,
+    "maximumM5HighAdverseEnvelopeDDPct": 37.64670276,
+    "priceProxyClosed": 21,
+    "referenceFinalEquityIncludingUnrealizedYen": 25557.31687,
+    "rightCensoredOpenPositions": 1,
+    "sourceIntents": 120,
+    "totalHoldingBarsChecked": 14148,
+    "totalPositivePrintBarsDuringHold": 8531,
+    "worstM5CloseDDRecord": {
+      "equity": 10850.068832666522,
+      "id": "S3_02173",
+      "priceMark": 0.019098,
+      "time": 1761873900000
+    },
+    "worstM5HighEnvelopeDDRecord": {
+      "equity": 10561.246419816678,
+      "id": "S3_01700",
+      "stressHigh": 0.022982,
+      "time": 1760132100000
+    }
+  },
+  "sourceS4SingleSlot120BaselineReplay": "PASS"
+}
