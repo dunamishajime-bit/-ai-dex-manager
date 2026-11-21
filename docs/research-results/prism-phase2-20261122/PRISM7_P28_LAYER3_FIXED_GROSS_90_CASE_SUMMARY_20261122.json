@@ -1,0 +1,3476 @@
+{
+  "allNinetyResults": [
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.02399817,
+        "conditionalProfitFactor": 5.89508302,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 30109.203944,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 126.50396164,
+        "worstChronologicalHighEvent": {
+          "equity": 24455.77585960614,
+          "id": "S3_10500",
+          "priorCompletedPeak": 29307.094515805347,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 24455.77585960614,
+          "id": "S3_10500",
+          "priorPeak": 29307.094515805347,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.03199756,
+        "conditionalProfitFactor": 5.89508302,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 41221.263909,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 168.67194885,
+        "worstChronologicalHighEvent": {
+          "equity": 31340.097391913834,
+          "id": "S3_10500",
+          "priorCompletedPeak": 39898.53400767713,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 31340.097391913834,
+          "id": "S3_10500",
+          "priorPeak": 39898.53400767713,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 10.03999696,
+        "conditionalProfitFactor": 5.89508302,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 55299.205512,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 210.83993607,
+        "worstChronologicalHighEvent": {
+          "equity": 39413.10376966393,
+          "id": "S3_10500",
+          "priorCompletedPeak": 53318.2035666649,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 39413.10376966393,
+          "id": "S3_10500",
+          "priorPeak": 53318.2035666649,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.87399817,
+        "conditionalProfitFactor": 5.61255841,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29173.817201,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 123.35396164,
+        "worstChronologicalHighEvent": {
+          "equity": 23867.351539015057,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28738.859412947728,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 23867.351539015057,
+          "id": "S3_10500",
+          "priorPeak": 28738.859412947728,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.83199756,
+        "conditionalProfitFactor": 5.61255841,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39541.177142,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 164.47194885,
+        "worstChronologicalHighEvent": {
+          "equity": 30349.286860062202,
+          "id": "S3_10500",
+          "priorCompletedPeak": 38888.78752575155,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 30349.286860062202,
+          "id": "S3_10500",
+          "priorPeak": 38888.78752575155,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.78999696,
+        "conditionalProfitFactor": 5.61255841,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 52523.095189,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 205.58993607,
+        "worstChronologicalHighEvent": {
+          "equity": 37875.633787602135,
+          "id": "S3_10500",
+          "priorCompletedPeak": 51663.94085991494,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 37875.633787602135,
+          "id": "S3_10500",
+          "priorPeak": 51663.94085991494,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.0215344,
+        "conditionalProfitFactor": 5.89308097,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 30099.103212,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 126.45222235,
+        "worstChronologicalHighEvent": {
+          "equity": 24447.57168190613,
+          "id": "S3_10500",
+          "priorCompletedPeak": 29297.262866518944,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 24447.57168190613,
+          "id": "S3_10500",
+          "priorPeak": 29297.262866518944,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.02871253,
+        "conditionalProfitFactor": 5.89308097,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 41204.760228,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 168.60296314,
+        "worstChronologicalHighEvent": {
+          "equity": 31327.54981521803,
+          "id": "S3_10500",
+          "priorCompletedPeak": 39882.559905578746,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 31327.54981521803,
+          "id": "S3_10500",
+          "priorPeak": 39882.559905578746,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 10.03589066,
+        "conditionalProfitFactor": 5.89308097,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 55274.158155,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 210.75370392,
+        "worstChronologicalHighEvent": {
+          "equity": 39395.25190288166,
+          "id": "S3_10500",
+          "priorCompletedPeak": 53294.05349026635,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 39395.25190288166,
+          "id": "S3_10500",
+          "priorPeak": 53294.05349026635,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.8715344,
+        "conditionalProfitFactor": 5.61062373,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29164.020735,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 123.30222235,
+        "worstChronologicalHighEvent": {
+          "equity": 23859.336965189807,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28729.20900368292,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 23859.336965189807,
+          "id": "S3_10500",
+          "priorPeak": 28729.20900368292,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.82871253,
+        "conditionalProfitFactor": 5.61062373,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39525.327717,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 164.40296314,
+        "worstChronologicalHighEvent": {
+          "equity": 30337.12185208152,
+          "id": "S3_10500",
+          "priorCompletedPeak": 38873.199600645064,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 30337.12185208152,
+          "id": "S3_10500",
+          "priorPeak": 38873.199600645064,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.78589066,
+        "conditionalProfitFactor": 5.61062373,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 52499.273971,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 205.50370392,
+        "worstChronologicalHighEvent": {
+          "equity": 37858.45574888757,
+          "id": "S3_10500",
+          "priorCompletedPeak": 51640.509300162936,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 37858.45574888757,
+          "id": "S3_10500",
+          "priorPeak": 51640.509300162936,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.01414307,
+        "conditionalProfitFactor": 5.8870748,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 30068.801013,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 126.29700448,
+        "worstChronologicalHighEvent": {
+          "equity": 24422.959148806123,
+          "id": "S3_10500",
+          "priorCompletedPeak": 29267.76791865974,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 24422.959148806123,
+          "id": "S3_10500",
+          "priorPeak": 29267.76791865974,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.01885743,
+        "conditionalProfitFactor": 5.8870748,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 41155.249185,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 168.39600598,
+        "worstChronologicalHighEvent": {
+          "equity": 31289.907085130635,
+          "id": "S3_10500",
+          "priorCompletedPeak": 39834.63759928365,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 31289.907085130635,
+          "id": "S3_10500",
+          "priorPeak": 39834.63759928365,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 10.02357178,
+        "conditionalProfitFactor": 5.8870748,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 55199.016087,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 210.49500747,
+        "worstChronologicalHighEvent": {
+          "equity": 39341.69630253494,
+          "id": "S3_10500",
+          "priorCompletedPeak": 53221.60326107077,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 39341.69630253494,
+          "id": "S3_10500",
+          "priorPeak": 53221.60326107077,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.86414307,
+        "conditionalProfitFactor": 5.60481969,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29134.631335,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 123.14700448,
+        "worstChronologicalHighEvent": {
+          "equity": 23835.293243714088,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28700.257775888535,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 23835.293243714088,
+          "id": "S3_10500",
+          "priorPeak": 28700.257775888535,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.81885743,
+        "conditionalProfitFactor": 5.60481969,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39477.779444,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 164.19600598,
+        "worstChronologicalHighEvent": {
+          "equity": 30300.62682813949,
+          "id": "S3_10500",
+          "priorCompletedPeak": 38826.43582532563,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 30300.62682813949,
+          "id": "S3_10500",
+          "priorPeak": 38826.43582532563,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.77357178,
+        "conditionalProfitFactor": 5.60481969,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 52427.810314,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 205.24500747,
+        "worstChronologicalHighEvent": {
+          "equity": 37806.92163274383,
+          "id": "S3_10500",
+          "priorCompletedPeak": 51570.214620906925,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 37806.92163274383,
+          "id": "S3_10500",
+          "priorPeak": 51570.214620906925,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.97472266,
+        "conditionalProfitFactor": 5.85504189,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29907.189287,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 125.46917586,
+        "worstChronologicalHighEvent": {
+          "equity": 24291.692305606084,
+          "id": "S3_10500",
+          "priorCompletedPeak": 29110.46153007735,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 24291.692305606084,
+          "id": "S3_10500",
+          "priorPeak": 29110.46153007735,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.96629688,
+        "conditionalProfitFactor": 5.85504189,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 40891.190288,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 167.29223448,
+        "worstChronologicalHighEvent": {
+          "equity": 31089.145857997773,
+          "id": "S3_10500",
+          "priorCompletedPeak": 39579.051965709645,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 31089.145857997773,
+          "id": "S3_10500",
+          "priorPeak": 39579.051965709645,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.9578711,
+        "conditionalProfitFactor": 5.85504189,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 54798.258387,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 209.1152931,
+        "worstChronologicalHighEvent": {
+          "equity": 39056.06643401906,
+          "id": "S3_10500",
+          "priorCompletedPeak": 52835.202038694275,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 39056.06643401906,
+          "id": "S3_10500",
+          "priorPeak": 52835.202038694275,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.82472266,
+        "conditionalProfitFactor": 5.57386481,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 28977.88787,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 122.31917586,
+        "worstChronologicalHighEvent": {
+          "equity": 23707.060062510245,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28545.851227651783,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 23707.060062510245,
+          "id": "S3_10500",
+          "priorPeak": 28545.851227651783,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.76629688,
+        "conditionalProfitFactor": 5.57386481,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39224.188649,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 163.09223448,
+        "worstChronologicalHighEvent": {
+          "equity": 30105.98670044861,
+          "id": "S3_10500",
+          "priorCompletedPeak": 38577.02902362196,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 30105.98670044861,
+          "id": "S3_10500",
+          "priorPeak": 38577.02902362196,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.7078711,
+        "conditionalProfitFactor": 5.57386481,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 52046.670812,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 203.8652931,
+        "worstChronologicalHighEvent": {
+          "equity": 37532.07301331066,
+          "id": "S3_10500",
+          "priorCompletedPeak": 51195.30966487493,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 37532.07301331066,
+          "id": "S3_10500",
+          "priorPeak": 51195.30966487493,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.92544715,
+        "conditionalProfitFactor": 5.81500075,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29705.174629,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 124.43439008,
+        "worstChronologicalHighEvent": {
+          "equity": 24127.608751606007,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28913.828544349337,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 24127.608751606007,
+          "id": "S3_10500",
+          "priorPeak": 28913.828544349337,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.9005962,
+        "conditionalProfitFactor": 5.81500075,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 40561.116668,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 165.91252011,
+        "worstChronologicalHighEvent": {
+          "equity": 30838.19432408171,
+          "id": "S3_10500",
+          "priorCompletedPeak": 39259.569923742136,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 30838.19432408171,
+          "id": "S3_10500",
+          "priorPeak": 39259.569923742136,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.87574524,
+        "conditionalProfitFactor": 5.81500075,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 54297.311263,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 207.39065013,
+        "worstChronologicalHighEvent": {
+          "equity": 38699.02909837421,
+          "id": "S3_10500",
+          "priorCompletedPeak": 52352.20051072367,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 38699.02909837421,
+          "id": "S3_10500",
+          "priorPeak": 52352.20051072367,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.77544715,
+        "conditionalProfitFactor": 5.5351712,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 28781.958538,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 121.28439008,
+        "worstChronologicalHighEvent": {
+          "equity": 23546.768586005423,
+          "id": "S3_10500",
+          "priorCompletedPeak": 28352.84304235583,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 23546.768586005423,
+          "id": "S3_10500",
+          "priorPeak": 28352.84304235583,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.7005962,
+        "conditionalProfitFactor": 5.5351712,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 38907.200156,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 161.71252011,
+        "worstChronologicalHighEvent": {
+          "equity": 29862.686540835028,
+          "id": "S3_10500",
+          "priorCompletedPeak": 38265.27052149237,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 29862.686540835028,
+          "id": "S3_10500",
+          "priorPeak": 38265.27052149237,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.62574524,
+        "conditionalProfitFactor": 5.5351712,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 51570.246434,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 202.14065013,
+        "worstChronologicalHighEvent": {
+          "equity": 37188.51223901916,
+          "id": "S3_10500",
+          "priorCompletedPeak": 50726.6784698349,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 37188.51223901916,
+          "id": "S3_10500",
+          "priorPeak": 50726.6784698349,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 1,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.41462722,
+        "conditionalProfitFactor": 5.39991,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 27610.967878,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 113.70717162,
+        "worstChronologicalHighEvent": {
+          "equity": 22426.618881922303,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26875.411478073092,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 22426.618881922303,
+          "id": "S3_10500",
+          "priorPeak": 26875.411478073092,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.21950296,
+        "conditionalProfitFactor": 5.39991,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37139.372863,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 151.60956215,
+        "worstChronologicalHighEvent": {
+          "equity": 28236.678166206068,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35947.62485865425,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 28236.678166206068,
+          "id": "S3_10500",
+          "priorPeak": 35947.62485865425,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.0243787,
+        "conditionalProfitFactor": 5.39991,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 49104.188837,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 189.51195269,
+        "worstChronologicalHighEvent": {
+          "equity": 34997.76302858558,
+          "id": "S3_10500",
+          "priorCompletedPeak": 47345.11304771408,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 34997.76302858558,
+          "id": "S3_10500",
+          "priorPeak": 47345.11304771408,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.26462722,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26750.835978,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 110.55717162,
+        "worstChronologicalHighEvent": {
+          "equity": 21885.089696899773,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26352.002860930268,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21885.089696899773,
+          "id": "S3_10500",
+          "priorPeak": 26352.002860930268,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.01950296,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35621.104734,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 147.40956215,
+        "worstChronologicalHighEvent": {
+          "equity": 27340.489180367258,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35033.392365623185,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27340.489180367258,
+          "id": "S3_10500",
+          "priorPeak": 35033.392365623185,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.7743787,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 46631.341711,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 184.26195269,
+        "worstChronologicalHighEvent": {
+          "equity": 33626.95239682877,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45868.56261393066,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33626.95239682877,
+          "id": "S3_10500",
+          "priorPeak": 45868.56261393066,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.41064002,
+        "conditionalProfitFactor": 5.39667001,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 27594.621555,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 113.62344035,
+        "worstChronologicalHighEvent": {
+          "equity": 22413.341811778082,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26859.500621192357,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 22413.341811778082,
+          "id": "S3_10500",
+          "priorPeak": 26859.500621192357,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.21418669,
+        "conditionalProfitFactor": 5.39667001,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37112.664454,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 151.49792047,
+        "worstChronologicalHighEvent": {
+          "equity": 28216.372041445997,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35921.77348368332,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 28216.372041445997,
+          "id": "S3_10500",
+          "priorPeak": 35921.77348368332,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 9.01773336,
+        "conditionalProfitFactor": 5.39667001,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 49063.653939,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 189.37240059,
+        "worstChronologicalHighEvent": {
+          "equity": 34968.87280995063,
+          "id": "S3_10500",
+          "priorCompletedPeak": 47306.03024501817,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 34968.87280995063,
+          "id": "S3_10500",
+          "priorPeak": 47306.03024501817,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.26064002,
+        "conditionalProfitFactor": 5.13091878,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26734.982058,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 110.47344035,
+        "worstChronologicalHighEvent": {
+          "equity": 21872.11946846924,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26336.385310285426,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21872.11946846924,
+          "id": "S3_10500",
+          "priorPeak": 26336.385310285426,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.01418669,
+        "conditionalProfitFactor": 5.13091878,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35595.455128,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 147.29792047,
+        "worstChronologicalHighEvent": {
+          "equity": 27320.802178187336,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35008.165952616386,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27320.802178187336,
+          "id": "S3_10500",
+          "priorPeak": 35008.165952616386,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.76773336,
+        "conditionalProfitFactor": 5.13091878,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 46592.791108,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 184.12240059,
+        "worstChronologicalHighEvent": {
+          "equity": 33599.15265463725,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45830.64260856368,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33599.15265463725,
+          "id": "S3_10500",
+          "priorPeak": 45830.64260856368,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.39867841,
+        "conditionalProfitFactor": 5.38695004,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 27545.582586,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 113.37224656,
+        "worstChronologicalHighEvent": {
+          "equity": 22373.51060134545,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26811.768050550174,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 22373.51060134545,
+          "id": "S3_10500",
+          "priorPeak": 26811.768050550174,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.19823788,
+        "conditionalProfitFactor": 5.38695004,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37032.539228,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 151.16299541,
+        "worstChronologicalHighEvent": {
+          "equity": 28155.453667165788,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35844.21935877053,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 28155.453667165788,
+          "id": "S3_10500",
+          "priorPeak": 35844.21935877053,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.99779735,
+        "conditionalProfitFactor": 5.38695004,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 48942.049245,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 188.95374427,
+        "worstChronologicalHighEvent": {
+          "equity": 34882.20215404583,
+          "id": "S3_10500",
+          "priorCompletedPeak": 47188.781836930466,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 34882.20215404583,
+          "id": "S3_10500",
+          "priorPeak": 47188.781836930466,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.24867841,
+        "conditionalProfitFactor": 5.12152593,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26687.420299,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 110.22224656,
+        "worstChronologicalHighEvent": {
+          "equity": 21833.208783177655,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26289.53265835091,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21833.208783177655,
+          "id": "S3_10500",
+          "priorPeak": 26289.53265835091,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.99823788,
+        "conditionalProfitFactor": 5.12152593,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35518.506311,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 146.96299541,
+        "worstChronologicalHighEvent": {
+          "equity": 27261.741171647587,
+          "id": "S3_10500",
+          "priorCompletedPeak": 34932.48671359599,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27261.741171647587,
+          "id": "S3_10500",
+          "priorPeak": 34932.48671359599,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.74779735,
+        "conditionalProfitFactor": 5.12152593,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 46477.139301,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 183.70374427,
+        "worstChronologicalHighEvent": {
+          "equity": 33515.75342806272,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45716.8825924628,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33515.75342806272,
+          "id": "S3_10500",
+          "priorPeak": 45716.8825924628,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.33488316,
+        "conditionalProfitFactor": 5.33511021,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 27284.041417,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 112.03254633,
+        "worstChronologicalHighEvent": {
+          "equity": 22161.077479038046,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26557.194340458478,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 22161.077479038046,
+          "id": "S3_10500",
+          "priorPeak": 26557.194340458478,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.11317755,
+        "conditionalProfitFactor": 5.33511021,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 36605.20469,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 149.37672845,
+        "worstChronologicalHighEvent": {
+          "equity": 27830.555671004608,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35430.5973592356,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27830.555671004608,
+          "id": "S3_10500",
+          "priorPeak": 35430.5973592356,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.89147193,
+        "conditionalProfitFactor": 5.33511021,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 48293.490879,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 186.72091056,
+        "worstChronologicalHighEvent": {
+          "equity": 34419.95865588681,
+          "id": "S3_10500",
+          "priorCompletedPeak": 46563.45699379594,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 34419.95865588681,
+          "id": "S3_10500",
+          "priorPeak": 46563.45699379594,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.18488316,
+        "conditionalProfitFactor": 5.07143069,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26433.757585,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 108.88254633,
+        "worstChronologicalHighEvent": {
+          "equity": 21625.685128289195,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26039.651848033456,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21625.685128289195,
+          "id": "S3_10500",
+          "priorPeak": 26039.651848033456,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.91317755,
+        "conditionalProfitFactor": 5.07143069,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35108.11262,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 145.17672845,
+        "worstChronologicalHighEvent": {
+          "equity": 26946.749136768925,
+          "id": "S3_10500",
+          "priorCompletedPeak": 34528.864105487184,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 26946.749136768925,
+          "id": "S3_10500",
+          "priorPeak": 34528.864105487184,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.64147193,
+        "conditionalProfitFactor": 5.07143069,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 45860.32966,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 181.47091056,
+        "worstChronologicalHighEvent": {
+          "equity": 33070.95755299861,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45110.16250659143,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33070.95755299861,
+          "id": "S3_10500",
+          "priorPeak": 45110.16250659143,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.2551391,
+        "conditionalProfitFactor": 5.27031042,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.55339342,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.55339342,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26957.114956,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 110.35792105,
+        "worstChronologicalHighEvent": {
+          "equity": 21895.536076153778,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26238.977202843853,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21895.536076153778,
+          "id": "S3_10500",
+          "priorPeak": 26238.977202843853,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.00685213,
+        "conditionalProfitFactor": 5.27031042,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.45050396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.45050396,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 36071.036518,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 147.14389474,
+        "worstChronologicalHighEvent": {
+          "equity": 27424.43317580315,
+          "id": "S3_10500",
+          "priorCompletedPeak": 34913.569859816955,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27424.43317580315,
+          "id": "S3_10500",
+          "priorPeak": 34913.569859816955,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.75856516,
+        "conditionalProfitFactor": 5.27031042,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.07946042,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.07946042,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 47482.792921,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 183.92986842,
+        "worstChronologicalHighEvent": {
+          "equity": 33842.154283188036,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45781.80093987777,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33842.154283188036,
+          "id": "S3_10500",
+          "priorPeak": 45781.80093987777,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.1051391,
+        "conditionalProfitFactor": 5.00881165,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26116.679192,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 107.20792105,
+        "worstChronologicalHighEvent": {
+          "equity": 21366.28055967861,
+          "id": "S3_10500",
+          "priorCompletedPeak": 25727.30083513663,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21366.28055967861,
+          "id": "S3_10500",
+          "priorPeak": 25727.30083513663,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.80685213,
+        "conditionalProfitFactor": 5.00881165,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 34595.120506,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 142.94389474,
+        "worstChronologicalHighEvent": {
+          "equity": 26553.0090931706,
+          "id": "S3_10500",
+          "priorCompletedPeak": 34024.33584535119,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 26553.0090931706,
+          "id": "S3_10500",
+          "priorPeak": 34024.33584535119,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.50856516,
+        "conditionalProfitFactor": 5.00881165,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 45089.317608,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 178.67986842,
+        "worstChronologicalHighEvent": {
+          "equity": 32514.962709168452,
+          "id": "S3_10500",
+          "priorCompletedPeak": 44351.76239925219,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 32514.962709168452,
+          "id": "S3_10500",
+          "priorPeak": 44351.76239925219,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.51454574,
+        "conditionalProfitFactor": 4.66850646,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.2044157,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.25858697,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23920.906832,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.80546051,
+        "worstChronologicalHighEvent": {
+          "equity": 12136.617393923963,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15219.967809500577,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12144.862244029846,
+          "id": "S3_02173",
+          "priorPeak": 15219.967809500577,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.01939432,
+        "conditionalProfitFactor": 4.66850646,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 24.89497733,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 24.96313407,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 31110.147944,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 126.40728068,
+        "worstChronologicalHighEvent": {
+          "equity": 12775.194786433229,
+          "id": "S3_02173",
+          "priorCompletedPeak": 17025.224372234134,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12786.798624918025,
+          "id": "S3_02173",
+          "priorPeak": 17025.224372234134,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.5242429,
+        "conditionalProfitFactor": 4.66850646,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 28.98863739,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.06939649,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39953.736636,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 158.00910086,
+        "worstChronologicalHighEvent": {
+          "equity": 13370.625243740025,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18850.29110559271,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13385.848570201353,
+          "id": "S3_02173",
+          "priorPeak": 18850.29110559271,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.36454574,
+        "conditionalProfitFactor": 4.42726054,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.4662988,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.52037402,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23171.931347,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.65546051,
+        "worstChronologicalHighEvent": {
+          "equity": 12048.812670791656,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15159.624271769726,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12057.010270984165,
+          "id": "S3_02173",
+          "priorPeak": 15159.624271769726,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.81939432,
+        "conditionalProfitFactor": 4.42726054,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 25.22992914,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 25.29791929,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29830.896719,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 122.20728068,
+        "worstChronologicalHighEvent": {
+          "equity": 12652.852652728086,
+          "id": "S3_02173",
+          "priorCompletedPeak": 16937.751308375824,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12664.368655726035,
+          "id": "S3_02173",
+          "priorPeak": 16937.751308375824,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.2742429,
+        "conditionalProfitFactor": 4.42726054,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 29.39115317,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.47165836,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37928.829447,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 152.75910086,
+        "worstChronologicalHighEvent": {
+          "equity": 13211.410370080697,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18732.058719176755,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13226.49064828044,
+          "id": "S3_02173",
+          "priorPeak": 18732.058719176755,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.50830833,
+        "conditionalProfitFactor": 4.66343796,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.28971727,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.34383063,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23895.335357,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.67447497,
+        "worstChronologicalHighEvent": {
+          "equity": 12123.64333660337,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15219.967809500577,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12131.879372955435,
+          "id": "S3_02173",
+          "priorPeak": 15219.967809500577,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.01107778,
+        "conditionalProfitFactor": 4.66343796,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 24.99584468,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 25.06390989,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 31068.366473,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 126.2326333,
+        "worstChronologicalHighEvent": {
+          "equity": 12758.03747716749,
+          "id": "S3_02173",
+          "priorCompletedPeak": 17025.224372234134,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12769.625731494953,
+          "id": "S3_02173",
+          "priorPeak": 17025.224372234134,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.51384722,
+        "conditionalProfitFactor": 4.66343796,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 29.10134033,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.18197126,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39890.325608,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 157.79079162,
+        "worstChronologicalHighEvent": {
+          "equity": 13349.404572819136,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18850.29110559271,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13364.603738166434,
+          "id": "S3_02173",
+          "priorPeak": 18850.29110559271,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.35830833,
+        "conditionalProfitFactor": 4.42236262,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.55142463,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.60544197,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23147.130165,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.52447497,
+        "worstChronologicalHighEvent": {
+          "equity": 12035.916689786505,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15159.624271769726,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12044.10551599445,
+          "id": "S3_02173",
+          "priorPeak": 15159.624271769726,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.81107778,
+        "conditionalProfitFactor": 4.42236262,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 25.33050132,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 25.39840002,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29790.771593,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 122.0326333,
+        "worstChronologicalHighEvent": {
+          "equity": 12635.833475995627,
+          "id": "S3_02173",
+          "priorCompletedPeak": 16937.751308375824,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12647.333988977558,
+          "id": "S3_02173",
+          "priorPeak": 16937.751308375824,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.26384722,
+        "conditionalProfitFactor": 4.42236262,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 29.50342132,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.5837985,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37868.522564,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 152.54079162,
+        "worstChronologicalHighEvent": {
+          "equity": 13190.404212122165,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18732.058719176755,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13205.460512661912,
+          "id": "S3_02173",
+          "priorPeak": 18732.058719176755,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 25,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.48959611,
+        "conditionalProfitFactor": 4.64823247,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.54562197,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.5995616,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23818.62093,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.28151835,
+        "worstChronologicalHighEvent": {
+          "equity": 12084.721164641578,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15219.967809500577,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12092.930759732195,
+          "id": "S3_02173",
+          "priorPeak": 15219.967809500577,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.98612815,
+        "conditionalProfitFactor": 4.64823247,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 25.29844674,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 25.36623735,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 30943.02206,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 125.70869113,
+        "worstChronologicalHighEvent": {
+          "equity": 12706.565549370269,
+          "id": "S3_02173",
+          "priorCompletedPeak": 17025.224372234134,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12718.107051225721,
+          "id": "S3_02173",
+          "priorPeak": 17025.224372234134,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.48266019,
+        "conditionalProfitFactor": 4.64823247,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 29.43944914,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.51969555,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 39700.092522,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 157.13586391,
+        "worstChronologicalHighEvent": {
+          "equity": 13285.74256005646,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18850.29110559271,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13300.86924206167,
+          "id": "S3_02173",
+          "priorPeak": 18850.29110559271,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.33959611,
+        "conditionalProfitFactor": 4.40766884,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.8068021,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.86064581,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23072.726622,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.13151835,
+        "worstChronologicalHighEvent": {
+          "equity": 11997.22874677105,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15159.624271769726,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12005.391251025307,
+          "id": "S3_02173",
+          "priorPeak": 15159.624271769726,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.78612815,
+        "conditionalProfitFactor": 4.40766884,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 25.63221788,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 25.69984222,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29670.396216,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 121.50869113,
+        "worstChronologicalHighEvent": {
+          "equity": 12584.775945798245,
+          "id": "S3_02173",
+          "priorCompletedPeak": 16937.751308375824,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12596.229988732119,
+          "id": "S3_02173",
+          "priorPeak": 16937.751308375824,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.23266019,
+        "conditionalProfitFactor": 4.40766884,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 29.84022577,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.92021894,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37687.601914,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 151.88586391,
+        "worstChronologicalHighEvent": {
+          "equity": 13127.385738246565,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18732.058719176755,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 13142.370105806323,
+          "id": "S3_02173",
+          "priorPeak": 18732.058719176755,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.3897976,
+        "conditionalProfitFactor": 4.56713649,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 21.91044704,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.96346013,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23409.477319,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 92.18574968,
+        "worstChronologicalHighEvent": {
+          "equity": 11877.136247512031,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15219.967809500577,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11885.204822541586,
+          "id": "S3_02173",
+          "priorPeak": 15219.967809500577,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.85306347,
+        "conditionalProfitFactor": 4.56713649,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 26.91232442,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.97865045,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 30274.518525,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 122.9143329,
+        "worstChronologicalHighEvent": {
+          "equity": 12432.048601118437,
+          "id": "S3_02173",
+          "priorCompletedPeak": 17025.224372234134,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12443.34075645651,
+          "id": "S3_02173",
+          "priorPeak": 17025.224372234134,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.31632934,
+        "conditionalProfitFactor": 4.56713649,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 31.24269616,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.3208918,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 38685.516068,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 153.64291613,
+        "worstChronologicalHighEvent": {
+          "equity": 12946.211825322202,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18850.29110559271,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12960.951929502944,
+          "id": "S3_02173",
+          "priorPeak": 18850.29110559271,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.2397976,
+        "conditionalProfitFactor": 4.32930204,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 22.16881527,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 22.22173294,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22675.907722,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 89.03574968,
+        "worstChronologicalHighEvent": {
+          "equity": 11790.893050688632,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15159.624271769726,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11798.915171189888,
+          "id": "S3_02173",
+          "priorPeak": 15159.624271769726,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.65306347,
+        "conditionalProfitFactor": 4.32930204,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 27.24137286,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 27.30753396,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29028.394205,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 118.7143329,
+        "worstChronologicalHighEvent": {
+          "equity": 12312.469118078883,
+          "id": "S3_02173",
+          "priorCompletedPeak": 16937.751308375824,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12323.675320756456,
+          "id": "S3_02173",
+          "priorPeak": 16937.751308375824,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.06632934,
+        "conditionalProfitFactor": 4.32930204,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 31.63651616,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.71446127,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 36722.691782,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 148.39291613,
+        "worstChronologicalHighEvent": {
+          "equity": 12791.287210910035,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18732.058719176755,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12805.887935909857,
+          "id": "S3_02173",
+          "priorPeak": 18732.058719176755,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 500,
+      "feeBps": 30,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.26504947,
+        "conditionalProfitFactor": 4.46576653,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 23.61647839,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 23.66833329,
+        "sourceRealizedOnlyDDPct": 11.92740363,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22898.047806,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 89.56603884,
+        "worstChronologicalHighEvent": {
+          "equity": 11617.655101100101,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15219.967809500577,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11625.547401053329,
+          "id": "S3_02173",
+          "priorPeak": 15219.967809500577,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.68673262,
+        "conditionalProfitFactor": 4.46576653,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 28.92967151,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 28.99416682,
+        "sourceRealizedOnlyDDPct": 15.73496965,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 29438.889107,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 119.42138512,
+        "worstChronologicalHighEvent": {
+          "equity": 12088.902415803648,
+          "id": "S3_02173",
+          "priorCompletedPeak": 17025.224372234134,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12099.882887994994,
+          "id": "S3_02173",
+          "priorPeak": 17025.224372234134,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.10841578,
+        "conditionalProfitFactor": 4.46576653,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 33.49675494,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 33.5723871,
+        "sourceRealizedOnlyDDPct": 19.45841808,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 37417.295499,
+        "sourceRoundtripFeeBps": 10,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 149.2767314,
+        "worstChronologicalHighEvent": {
+          "equity": 12521.798406904383,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18850.29110559271,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12536.055288804537,
+          "id": "S3_02173",
+          "priorPeak": 18850.29110559271,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 10,
+      "gross": 1.25
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 4.11504947,
+        "conditionalProfitFactor": 4.23134354,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 23.87133174,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 23.92309187,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22179.884098,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 86.41603884,
+        "worstChronologicalHighEvent": {
+          "equity": 11532.973430585613,
+          "id": "S3_02173",
+          "priorCompletedPeak": 15159.624271769726,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11540.820071395618,
+          "id": "S3_02173",
+          "priorPeak": 15159.624271769726,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.48673262,
+        "conditionalProfitFactor": 4.23134354,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 29.25281658,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 29.31714863,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 28225.89169,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 115.22138512,
+        "worstChronologicalHighEvent": {
+          "equity": 11972.085583429678,
+          "id": "S3_02173",
+          "priorCompletedPeak": 16937.751308375824,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11982.981985786879,
+          "id": "S3_02173",
+          "priorPeak": 16937.751308375824,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 6.85841578,
+        "conditionalProfitFactor": 4.23134354,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 33.88187914,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 33.95726419,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35516.554118,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 144.0267314,
+        "worstChronologicalHighEvent": {
+          "equity": 12371.164051739375,
+          "id": "S3_02173",
+          "priorCompletedPeak": 18732.058719176755,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 12385.285223539277,
+          "id": "S3_02173",
+          "priorPeak": 18732.058719176755,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "delayPositivePrints": 3,
+      "extraExitSlipBps": 1000,
+      "feeBps": 30,
+      "gross": 1.25
+    }
+  ],
+  "fixedGrossMultipliers": [
+    0.75,
+    1.0,
+    1.25
+  ],
+  "inputSHA256": {
+    "PENGU_M5": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    },
+    "p22Events": "a2792d43277729834f5d658b039ca0299f2084c5ec018e9cffc53cc5d51263ea",
+    "p25Source": "2796066f00f1c0fe16c134e924eb5dc8d0fc525d545481d56879f86694615a3e",
+    "p26Source": "b1abd11dd05138d5a7123d10f32860b4f5fb54efaca0f12ee236c5ca9d786528"
+  },
+  "limitations": [
+    "This gross-only allocation changes position sizing and capital path, not signal alpha, wins, entry timing or source stop logic.",
+    "P25 single flash crash rule was built from known 2025Oct historical outcome: not unseen OOS or generically verified risk.",
+    "SOURCE position market price and bid/ask signed fills missing, 10/30bps simplified, no funding/other runners/Shared Risk/Gross correlation.",
+    "Gross=1.25x requires exchange margin, liquidation rules and gross caps not modelled.",
+    "M5 close DD under 20 on one asset alone is not overall multi-Runner DD <=20 compliance."
+  ],
+  "main30Bps2PositivePrintZeroSlipGrossComparison": [
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 5.26462722,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 16.95094368,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 16.95094368,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 26750.835978,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 110.55717162,
+        "worstChronologicalHighEvent": {
+          "equity": 21885.089696899773,
+          "id": "S3_10500",
+          "priorCompletedPeak": 26352.002860930268,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 21885.089696899773,
+          "id": "S3_10500",
+          "priorPeak": 26352.002860930268,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.75
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 7.01950296,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.0,
+        "sourceM5CloseMarkedDDPct": 21.95877323,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 21.95877323,
+        "sourceRealizedOnlyDDPct": 16.10175383,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 35621.104734,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 147.40956215,
+        "worstChronologicalHighEvent": {
+          "equity": 27340.489180367258,
+          "id": "S3_10500",
+          "priorCompletedPeak": 35033.392365623185,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 27340.489180367258,
+          "id": "S3_10500",
+          "priorPeak": 35033.392365623185,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.0
+    },
+    {
+      "capitalAndRisk": {
+        "conditionalMeanNetReturnPctOnEquity": 8.7743787,
+        "conditionalProfitFactor": 5.13404973,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 1.25,
+        "sourceM5CloseMarkedDDPct": 26.68845396,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 26.68845396,
+        "sourceRealizedOnlyDDPct": 19.90651836,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 46631.341711,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 184.26195269,
+        "worstChronologicalHighEvent": {
+          "equity": 33626.95239682877,
+          "id": "S3_10500",
+          "priorCompletedPeak": 45868.56261393066,
+          "sourceHigh": 0.008028,
+          "time": 1791873000000
+        },
+        "worstMarkEvent": {
+          "equity": 33626.95239682877,
+          "id": "S3_10500",
+          "priorPeak": 45868.56261393066,
+          "sourceCloseMark": 0.008028,
+          "time": 1791873000000
+        }
+      },
+      "delayPositivePrints": 2,
+      "extraExitSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.25
+    }
+  ],
+  "originalClosed": 21,
+  "originalWins": 15,
+  "schema": "prism7-p28-layer3-fixed-0p75-1p00-1p25-gross-S4-capture-source120-90cases/v1",
+  "sourceCensoredOpenCount": 1,
+  "sourceNaturalPinnedRuntimeSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "sourceOriginalH1SetupsPreserved": 120
+}
