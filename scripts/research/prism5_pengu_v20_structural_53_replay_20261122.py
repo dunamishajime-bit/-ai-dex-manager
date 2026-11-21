@@ -174,6 +174,12 @@ def writecsv(path,records):
   for x in records:
    writer.writerow({k:json.dumps(v,ensure_ascii=False) if isinstance(v,(list,dict)) else v for k,v in x.items()})
 writecsv(OUT/"PRISM5_PENGU_V20_STRUCTURE_53_CLASSIFICATION.csv",ledger)
+direct_queue=[{"period":x["period"],"source_original_id":x["original_signal_id"],
+ "entryTs":x["original_entryTs"],"source_native_runtime_sha":SOURCE_PIN}
+ for x in ledger if x["source_exit_retained_for_direct"]]
+(OUT/"PRISM5_PENGU_V20_STRUCTURE_DIRECT_NATIVE_QUEUE.json").write_text(
+ json.dumps({"schema":"prism5-v20-native-unchanged-direct-entries/v1",
+ "events":direct_queue},indent=2,ensure_ascii=False)+"\n",encoding="utf8")
 (OUT/"PRISM5_PENGU_V20_STRUCTURE_DEFERRED_NATIVE_QUEUE.json").write_text(
  json.dumps({"schema":"prism5-v20-native-deferred-entries/v1","events":queued,
  "notice":"A deferred entry is not yet priced by the native exit source. Do not reuse source exit prices."},indent=2,ensure_ascii=False)+"\n",encoding="utf8")
