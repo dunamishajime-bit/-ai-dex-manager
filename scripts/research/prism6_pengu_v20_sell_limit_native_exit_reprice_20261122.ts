@@ -143,7 +143,7 @@ for(const period of group){
   }
   if(!final){unresolved.push({...event,failure:"DEFERRED_NATIVE_EXIT_NOT_FOUND_BEFORE_HORIZON"});continue}
   const out={schema:"prism5-pin-short-v20-native-replay/v1",
-   sourceOriginalId:event.source_original_id,entryVersion:"SHORT_V20",
+   sourceOriginalId:event.sourceOriginalId,entryVersion:"SHORT_V20",
    period,limitPremium:event.limitPremium,limitTTLHours:event.limitTTLHours,
    sourceNativeRuntimeSha:PIN,sourceOriginalEntryTs:source.entryTs,
    sourceOriginalExitTs:source.exitTs,
