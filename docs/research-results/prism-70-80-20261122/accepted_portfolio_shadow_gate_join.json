@@ -1,0 +1,636 @@
+{
+  "10": {
+    "FET": {
+      "baseline": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 16.0955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 8,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 4,
+        "rejected_winners": 4
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 4,
+        "rejected_winners": 4
+      },
+      "original_fills": 8,
+      "three_of_four_confirmation": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 16.0955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "triple_countertrend_veto": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 16.0955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "HYPE": {
+      "baseline": {
+        "kept": 8,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 26.9448,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 8,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 2,
+        "rejected_winners": 6
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 2,
+        "rejected_winners": 6
+      },
+      "original_fills": 8,
+      "three_of_four_confirmation": {
+        "kept": 6,
+        "model_net_win_pct": 66.67,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 22.4638,
+        "rejected_losers": 0,
+        "rejected_winners": 2
+      },
+      "triple_countertrend_veto": {
+        "kept": 8,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 26.9448,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "IDLE": {
+      "baseline": {
+        "kept": 35,
+        "model_net_win_pct": 51.43,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 21.8368,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 35,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 17,
+        "rejected_winners": 18
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 17,
+        "rejected_winners": 18
+      },
+      "original_fills": 35,
+      "three_of_four_confirmation": {
+        "kept": 28,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 9.7995,
+        "rejected_losers": 3,
+        "rejected_winners": 4
+      },
+      "triple_countertrend_veto": {
+        "kept": 35,
+        "model_net_win_pct": 51.43,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 21.8368,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "PENGU": {
+      "baseline": {
+        "kept": 47,
+        "model_net_win_pct": 74.47,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 202.8344,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 47,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 12,
+        "rejected_winners": 35
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 12,
+        "rejected_winners": 35
+      },
+      "original_fills": 47,
+      "three_of_four_confirmation": {
+        "kept": 24,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 141.1434,
+        "rejected_losers": 6,
+        "rejected_winners": 17
+      },
+      "triple_countertrend_veto": {
+        "kept": 47,
+        "model_net_win_pct": 74.47,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 202.8344,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "Q102": {
+      "baseline": {
+        "kept": 117,
+        "model_net_win_pct": 60.68,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 90.0593,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 117,
+      "online_route_similarity_70_80": {
+        "kept": 2,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": -1.1852,
+        "rejected_losers": 45,
+        "rejected_winners": 70
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 46,
+        "rejected_winners": 71
+      },
+      "original_fills": 117,
+      "three_of_four_confirmation": {
+        "kept": 18,
+        "model_net_win_pct": 61.11,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 15.7954,
+        "rejected_losers": 39,
+        "rejected_winners": 60
+      },
+      "triple_countertrend_veto": {
+        "kept": 76,
+        "model_net_win_pct": 63.16,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 116.3161,
+        "rejected_losers": 18,
+        "rejected_winners": 23
+      },
+      "unmatched": {}
+    },
+    "V4": {
+      "baseline": {
+        "kept": 496,
+        "model_net_win_pct": 61.09,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 706.1866,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 496,
+      "online_route_similarity_70_80": {
+        "kept": 95,
+        "model_net_win_pct": 62.11,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 161.9351,
+        "rejected_losers": 157,
+        "rejected_winners": 244
+      },
+      "online_similarity_plus_regime": {
+        "kept": 51,
+        "model_net_win_pct": 60.78,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 57.7007,
+        "rejected_losers": 173,
+        "rejected_winners": 272
+      },
+      "original_fills": 496,
+      "three_of_four_confirmation": {
+        "kept": 241,
+        "model_net_win_pct": 55.6,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 199.534,
+        "rejected_losers": 86,
+        "rejected_winners": 169
+      },
+      "triple_countertrend_veto": {
+        "kept": 432,
+        "model_net_win_pct": 59.95,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 554.6246,
+        "rejected_losers": 20,
+        "rejected_winners": 44
+      },
+      "unmatched": {}
+    },
+    "V52": {
+      "baseline": {
+        "kept": 84,
+        "model_net_win_pct": 84.52,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 78.4783,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 84,
+      "online_route_similarity_70_80": {
+        "kept": 64,
+        "model_net_win_pct": 84.38,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 51.1866,
+        "rejected_losers": 3,
+        "rejected_winners": 17
+      },
+      "online_similarity_plus_regime": {
+        "kept": 48,
+        "model_net_win_pct": 85.42,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 38.9244,
+        "rejected_losers": 6,
+        "rejected_winners": 30
+      },
+      "original_fills": 84,
+      "three_of_four_confirmation": {
+        "kept": 12,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 11.6795,
+        "rejected_losers": 10,
+        "rejected_winners": 62
+      },
+      "triple_countertrend_veto": {
+        "kept": 61,
+        "model_net_win_pct": 86.89,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 58.8815,
+        "rejected_losers": 5,
+        "rejected_winners": 18
+      },
+      "unmatched": {}
+    }
+  },
+  "30": {
+    "FET": {
+      "baseline": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 14.4955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 8,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 4,
+        "rejected_winners": 4
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 4,
+        "rejected_winners": 4
+      },
+      "original_fills": 8,
+      "three_of_four_confirmation": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 14.4955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "triple_countertrend_veto": {
+        "kept": 8,
+        "model_net_win_pct": 50.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 14.4955,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "HYPE": {
+      "baseline": {
+        "kept": 8,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 25.3448,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 8,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 2,
+        "rejected_winners": 6
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 2,
+        "rejected_winners": 6
+      },
+      "original_fills": 8,
+      "three_of_four_confirmation": {
+        "kept": 6,
+        "model_net_win_pct": 66.67,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 21.2638,
+        "rejected_losers": 0,
+        "rejected_winners": 2
+      },
+      "triple_countertrend_veto": {
+        "kept": 8,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 25.3448,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "IDLE": {
+      "baseline": {
+        "kept": 34,
+        "model_net_win_pct": 52.94,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 17.0405,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 34,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 16,
+        "rejected_winners": 18
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 16,
+        "rejected_winners": 18
+      },
+      "original_fills": 34,
+      "three_of_four_confirmation": {
+        "kept": 27,
+        "model_net_win_pct": 51.85,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 6.4031,
+        "rejected_losers": 3,
+        "rejected_winners": 4
+      },
+      "triple_countertrend_veto": {
+        "kept": 34,
+        "model_net_win_pct": 52.94,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 17.0405,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "PENGU": {
+      "baseline": {
+        "kept": 46,
+        "model_net_win_pct": 76.09,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 194.5787,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 46,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 11,
+        "rejected_winners": 35
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 11,
+        "rejected_winners": 35
+      },
+      "original_fills": 46,
+      "three_of_four_confirmation": {
+        "kept": 23,
+        "model_net_win_pct": 78.26,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 137.4876,
+        "rejected_losers": 6,
+        "rejected_winners": 17
+      },
+      "triple_countertrend_veto": {
+        "kept": 46,
+        "model_net_win_pct": 76.09,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 194.5787,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "unmatched": {}
+    },
+    "Q102": {
+      "baseline": {
+        "kept": 117,
+        "model_net_win_pct": 58.12,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 66.6593,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 117,
+      "online_route_similarity_70_80": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 49,
+        "rejected_winners": 68
+      },
+      "online_similarity_plus_regime": {
+        "kept": 0,
+        "model_net_win_pct": null,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 0,
+        "rejected_losers": 49,
+        "rejected_winners": 68
+      },
+      "original_fills": 117,
+      "three_of_four_confirmation": {
+        "kept": 18,
+        "model_net_win_pct": 61.11,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 12.1954,
+        "rejected_losers": 42,
+        "rejected_winners": 57
+      },
+      "triple_countertrend_veto": {
+        "kept": 76,
+        "model_net_win_pct": 61.84,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 101.1161,
+        "rejected_losers": 20,
+        "rejected_winners": 21
+      },
+      "unmatched": {}
+    },
+    "V4": {
+      "baseline": {
+        "kept": 494,
+        "model_net_win_pct": 58.3,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 600.11,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 494,
+      "online_route_similarity_70_80": {
+        "kept": 64,
+        "model_net_win_pct": 67.19,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 137.9334,
+        "rejected_losers": 185,
+        "rejected_winners": 245
+      },
+      "online_similarity_plus_regime": {
+        "kept": 25,
+        "model_net_win_pct": 64.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 43.1022,
+        "rejected_losers": 197,
+        "rejected_winners": 272
+      },
+      "original_fills": 494,
+      "three_of_four_confirmation": {
+        "kept": 241,
+        "model_net_win_pct": 53.11,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 151.334,
+        "rejected_losers": 93,
+        "rejected_winners": 160
+      },
+      "triple_countertrend_veto": {
+        "kept": 429,
+        "model_net_win_pct": 56.64,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 453.9359,
+        "rejected_losers": 20,
+        "rejected_winners": 45
+      },
+      "unmatched": {}
+    },
+    "V52": {
+      "baseline": {
+        "kept": 84,
+        "model_net_win_pct": 83.33,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 61.6783,
+        "rejected_losers": 0,
+        "rejected_winners": 0
+      },
+      "matched": 84,
+      "online_route_similarity_70_80": {
+        "kept": 64,
+        "model_net_win_pct": 82.81,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 38.3866,
+        "rejected_losers": 3,
+        "rejected_winners": 17
+      },
+      "online_similarity_plus_regime": {
+        "kept": 48,
+        "model_net_win_pct": 83.33,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 29.3244,
+        "rejected_losers": 6,
+        "rejected_winners": 30
+      },
+      "original_fills": 84,
+      "three_of_four_confirmation": {
+        "kept": 12,
+        "model_net_win_pct": 75.0,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 9.2795,
+        "rejected_losers": 11,
+        "rejected_winners": 61
+      },
+      "triple_countertrend_veto": {
+        "kept": 61,
+        "model_net_win_pct": 85.25,
+        "portfolio_reexecuted": false,
+        "raw_net_return_on_notional_sum_pct": 46.6815,
+        "rejected_losers": 5,
+        "rejected_winners": 18
+      },
+      "unmatched": {}
+    }
+  }
+}
