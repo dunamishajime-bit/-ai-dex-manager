@@ -13,6 +13,8 @@ import argparse
 import hashlib
 import json
 import os
+import grp
+import pwd
 from pathlib import Path
 import re
 import shutil
@@ -416,6 +418,57 @@ def read_regular(path: Path, max_bytes: int = 1_000_000, require_root: bool = Fa
     return path.read_bytes()
 
 
+def trusted_margin_guard_snapshot_metadata(parent: os.stat_result, state: os.stat_result,
+                                           deploy_uid: int, deploy_gid: int) -> bool:
+    """Allow the audited live writer's shared 0660 file ONLY inside its 0700 directory.
+
+    Although the state file has a group-write bit, the parent directory is
+    owner-only; no group member can traverse it. No other file gets this
+    exception, and an altered directory owner/mode or different writer fails.
+    """
+    private_parent = (
+        stat.S_ISDIR(parent.st_mode) and parent.st_uid == deploy_uid
+        and parent.st_gid == deploy_gid and stat.S_IMODE(parent.st_mode) == 0o700
+    )
+    if not private_parent or not stat.S_ISREG(state.st_mode) or state.st_size > 1_000_000:
+        return False
+    mode = stat.S_IMODE(state.st_mode)
+    return (
+        (state.st_uid == deploy_uid and state.st_gid == deploy_gid and mode == 0o660)
+        or (state.st_uid == 0 and state.st_gid == 0 and mode == 0o600)
+    )
+
+
+def read_margin_guard_json() -> dict:
+    """Read the real Margin Guard publisher atomically without changing its file.
+
+    The old cutover raced its 0660 shared-state writer by chown/chmod'ing a
+    continuously replaced file. Treat only this exact private-directory
+    publisher contract as trusted; all other shared state retains read_regular.
+    """
+    path = MARGIN
+    parent = path.parent
+    require(not path.is_symlink() and not parent.is_symlink(),
+            "MARGIN_GUARD_PATH_SYMLINK")
+    try:
+        trusted_uid = pwd.getpwnam("deploy").pw_uid
+        trusted_gid = grp.getgrnam("deploy").gr_gid
+        parent_meta = parent.lstat()
+        descriptor = os.open(str(path), os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(descriptor, "rb") as reader:
+            file_meta = os.fstat(reader.fileno())
+            require(trusted_margin_guard_snapshot_metadata(
+                parent_meta, file_meta, trusted_uid, trusted_gid,
+            ), "MARGIN_GUARD_WRITER_METADATA_UNSAFE")
+            raw = reader.read(1_000_001)
+            require(len(raw) <= 1_000_000, "MARGIN_GUARD_STATE_TOO_LARGE")
+        value = json.loads(raw.decode("utf-8"))
+    except (KeyError, OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ContractError("MARGIN_GUARD_STATE_UNREADABLE") from exc
+    require(isinstance(value, dict), "MARGIN_GUARD_STATE_NOT_OBJECT")
+    return value
+
+
 def validate_hold_metadata(uid: int, mode: int) -> None:
     # The shared runtime HOLD is intentionally readable by the deploy-owned
     # Runner.  Match the existing order-enable contract while requiring the
@@ -614,7 +667,7 @@ def validate_shared_files() -> None:
     now = int(time.time() * 1000)
     require(type(risk_updated) in (int, float) and -1000 <= now - float(risk_updated) <= 15 * 60_000,
             "SHARED_RISK_STALE")
-    margin = read_json(MARGIN)
+    margin = read_margin_guard_json()
     if margin.get("stage") != "HEALTHY":
         print("MARGIN_GUARD_DIAGNOSTIC=" + margin_guard_diagnostic(margin), file=sys.stderr)
         print("MARGIN_GUARD_SERVICE=" + margin_guard_service_diagnostic(), file=sys.stderr)
