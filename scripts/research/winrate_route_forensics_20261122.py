@@ -216,7 +216,7 @@ exportcsv(OUT/"exit_reason_10bps.csv",[{k:json.dumps(v) if isinstance(v,list) el
 
 # Canonical candidate layer includes many signals never admitted to the portfolio:
 # Use a separate counterfactual label. Never mix it with portfolio fill win rate.
-candidate_by_group=defaultdict(lambda: {"n":0,"wins_10bps":0,"wins_30bps":0,"missing_price":0,"sha":set()})
+candidate_by_group=defaultdict(lambda: {"n":0,"wins_10bps":0,"wins_30bps":0,"missing_price":0,"outside_period":0,"sha":set()})
 candidates=0
 with CANDIDATE_SOURCE.open(encoding="utf8") as f:
  for line in f:
@@ -226,6 +226,8 @@ with CANDIDATE_SOURCE.open(encoding="utf8") as f:
   a=candidate_by_group[key];a["n"]+=1
   a["sha"].add(str(d.get("v",{}).get("source_runtime_sha","unknown")))
   m=d.get("model") or {};ep=m.get("entryPrice");xp=m.get("exitPrice")
+  if nt(m.get("exitTs")) and m["exitTs"]>=int(END.timestamp()*1000):
+   a["outside_period"]+=1;continue
   if not nt(ep) or not nt(xp) or min(ep,xp)<=0:
    a["missing_price"]+=1;continue
   ret=(xp/ep-1)*(1 if d["side"]=="LONG" else -1)
@@ -234,9 +236,10 @@ with CANDIDATE_SOURCE.open(encoding="utf8") as f:
 cand_res=[]
 for (s,route,side,symbol),v in candidate_by_group.items():
  cand_res.append({"strategy":s,"route":route,"side":side,"symbol":symbol,
- "candidates":v["n"],"modeled_price_10bps_win_pct":round(100*v["wins_10bps"]/v["n"],2),
- "modeled_price_30bps_win_pct":round(100*v["wins_30bps"]/v["n"],2),
- "missing_price":v["missing_price"],"source_shas":";".join(sorted(v["sha"]))})
+ "candidates":v["n"],"priced":v["n"]-v["outside_period"]-v["missing_price"],
+ "modeled_price_10bps_win_pct":round(100*v["wins_10bps"]/(v["n"]-v["outside_period"]-v["missing_price"]),2) if v["n"]>v["outside_period"]+v["missing_price"] else None,
+ "modeled_price_30bps_win_pct":round(100*v["wins_30bps"]/(v["n"]-v["outside_period"]-v["missing_price"]),2) if v["n"]>v["outside_period"]+v["missing_price"] else None,
+ "outside_period_exits":v["outside_period"],"missing_price":v["missing_price"],"source_shas":";".join(sorted(v["sha"]))})
 cand_res.sort(key=lambda x:(x["strategy"],-x["candidates"],x["route"]))
 exportcsv(OUT/"all_candidates_price_only_counterfactual.csv",cand_res)
 
