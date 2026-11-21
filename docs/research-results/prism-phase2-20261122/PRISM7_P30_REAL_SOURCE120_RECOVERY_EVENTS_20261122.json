@@ -1,0 +1,385 @@
+{
+  "S3_00273": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_00338": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01088": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01257": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01259": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01270": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01342": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01348": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01350": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01634": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01700": {
+    "btcConfirmedClose": 109076.5,
+    "confirmPENGUGreenClose": true,
+    "confirmationM5CloseTs": 1760131800000,
+    "confirmationM5StartTs": 1760131500000,
+    "lastCapitulationCloseTs": 1760131200000,
+    "newInformationOnlyAfterShock": true,
+    "noFutureM5PriceUsedToDecideConfirmation": true,
+    "penguConfirmedClose": 0.013801,
+    "positiveM5BuyProxyAfterConfirmation": [
+      {
+        "positiveM5NotionalAtOpenUSDT": 3790.4200000000005,
+        "positiveM5Volume": 239900.0,
+        "px": 0.0158,
+        "ts": 1760131800000
+      },
+      {
+        "positiveM5NotionalAtOpenUSDT": 4592.41198,
+        "positiveM5Volume": 269666.0,
+        "px": 0.01703,
+        "ts": 1760132100000
+      }
+    ],
+    "signedVenueFillProven": false,
+    "status": "RECOVERY_CONFIRMED_COMPLETED_SOURCE_M5"
+  },
+  "S3_01713": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01719": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01792": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01798": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01860": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01864": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01948": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01950": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01957": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01968": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_01983": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02173": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02261": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02266": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02291": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02365": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02456": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02457": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02520": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02586": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02656": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02658": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02699": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02701": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02707": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02930": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_02941": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03049": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03052": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03178": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03182": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03184": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03187": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03280": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03330": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03462": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03527": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03528": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_03848": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04116": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04145": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04267": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04361": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04381": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04400": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04401": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04404": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04406": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04533": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04661": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04665": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_04980": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05222": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05514": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05693": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05697": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05707": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05722": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05726": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_05744": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_06830": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07174": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07302": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07304": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07307": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07309": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07341": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07398": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07417": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07831": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07864": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_07961": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_08187": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_08664": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_08665": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_08703": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_08704": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_09429": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_09589": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_09844": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_09847": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10161": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10173": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10370": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10381": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10382": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10384": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10500": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10602": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10732": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10734": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10791": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10918": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10925": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_10936": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11012": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11084": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11090": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11096": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11100": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11200": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11245": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11246": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11298": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11300": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11302": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11315": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11317": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  },
+  "S3_11367": {
+    "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+  }
+}
