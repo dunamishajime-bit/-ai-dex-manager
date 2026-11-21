@@ -125,8 +125,12 @@ def inventory(entry_path: Path, early_path: Path, *, expected_n: int = 53) -> di
             "completed": completed,
             "max_favorable_pct": float(row["max_favorable_pct"]) if completed else None,
             "max_adverse_pct": float(row["max_adverse_pct"]) if completed else None,
-            "positive_print_m5": int(row["positive_print_M5"]),
-            "no_print_m5": int(row["no_print_m5"]),
+            "positive_print_m5": (
+                int(row["positive_print_M5"]) if row["positive_print_M5"] else None
+            ),
+            "no_print_m5": (
+                int(row["no_print_m5"]) if row["no_print_m5"] else None
+            ),
             "observed_future_only": True,
         }
     if len(seen) != expected_n * len(CHECKPOINTS):
@@ -142,9 +146,16 @@ def inventory(entry_path: Path, early_path: Path, *, expected_n: int = 53) -> di
         eligible = [r["early_checkpoints"][h] for r in trades
                     if r["early_checkpoints"][h]["completed"]]
         all_window = [r["early_checkpoints"][h] for r in trades]
-        total_bars = sum(x["positive_print_m5"] + x["no_print_m5"] for x in all_window)
-        zero_bars = sum(x["no_print_m5"] for x in all_window)
+        known_print_counts = [
+            x for x in all_window
+            if x["positive_print_m5"] is not None and x["no_print_m5"] is not None
+        ]
+        total_bars = sum(
+            x["positive_print_m5"] + x["no_print_m5"] for x in known_print_counts
+        )
+        zero_bars = sum(x["no_print_m5"] for x in known_print_counts)
         windows[str(h)] = {
+            "missing_print_count_rows": expected_n - len(known_print_counts),
             "completed_count": len(eligible),
             "censored_or_no_print_only_count": expected_n - len(eligible),
             "all_recorded_m5_bars": total_bars,
