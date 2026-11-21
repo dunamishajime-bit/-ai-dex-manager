@@ -1,0 +1,40 @@
+{
+  "cannot_claim": [
+    "All PENGU 80% achieved",
+    "Full portfolio drawdown 20% achieved",
+    "The 2/2 retained cohort estimates a true 100% win probability",
+    "Pre/source/post periods are untouched blind test datasets",
+    "Derived per-trade exits are historical signed exchange fills"
+  ],
+  "marketwide_12h": {
+    "candidate_total": 53,
+    "market_prediction_scored": 41,
+    "monthly_prediction_auc_median": 0.51893,
+    "monthly_training_label_embargo_hours": 24,
+    "score_is_not_native_trade_win_probability": true,
+    "score_threshold_0_60_retained_n": 2,
+    "score_threshold_0_70_retained_n": 0
+  },
+  "no_live_change": true,
+  "schema": "disdex-prism5-pengu-v20-regime-redesign-independent-evidence/v1",
+  "source_native_short_53": {
+    "n": 53,
+    "wins_30bps": 29,
+    "wr30_pct": 54.72
+  },
+  "status": "VERIFIED_RESEARCH_REJECTED_AS_LIVE_CANDIDATE",
+  "structural_reprice_19": {
+    "deferred_n": 9,
+    "deferred_native_source_replay": 9,
+    "direct_n": 10,
+    "direct_native_source_exact_parity": 10,
+    "mean_return30_pct": 1.0592,
+    "n": 19,
+    "wins_30bps": 9,
+    "wr30_pct": 47.37
+  },
+  "test_status": {
+    "native_direct_pure_function_parity_pass": 10,
+    "structural_asof_and_quality_unit_pass": 12
+  }
+}

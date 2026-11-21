@@ -1,0 +1,435 @@
+{
+  "checkpoint_hours": [
+    1,
+    3,
+    6,
+    12
+  ],
+  "limitations": [
+    "Future profit labels are diagnostic only, never asof features",
+    "Native source exits may preempt checkpoint; these are censored (NOT labeled zeros)",
+    "Positive volume print is not a signed fill/price certainty",
+    "Per-transaction results cannot infer portfolio DD or Profit Factor",
+    "All data have been observed previously, not untouched OOS"
+  ],
+  "schema": "prism6-pengu-v20-m5-early-causal-risk-attribution/v1",
+  "source_trade_count": 53,
+  "study": [
+    {
+      "available_after_native_exit": 6,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 1,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00076,
+        "median_last_close_vs_entry_pct": 0.0,
+        "median_max_adverse_pct": 0.0,
+        "median_max_favorable_pct": 0.0,
+        "median_taker_buy_fraction": 0.00126,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "PRE_2025_AUG_SEP",
+      "total_original": 6,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 5e-05,
+        "median_last_close_vs_entry_pct": 0.29423,
+        "median_max_adverse_pct": 0.29423,
+        "median_max_favorable_pct": 0.0,
+        "median_taker_buy_fraction": 0.50335,
+        "n": 2,
+        "wins": 2
+      }
+    },
+    {
+      "available_after_native_exit": 6,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 3,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00295,
+        "median_last_close_vs_entry_pct": 0.75268,
+        "median_max_adverse_pct": 1.38398,
+        "median_max_favorable_pct": 0.04917,
+        "median_taker_buy_fraction": 0.57543,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "PRE_2025_AUG_SEP",
+      "total_original": 6,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 0.00339,
+        "median_last_close_vs_entry_pct": 0.91493,
+        "median_max_adverse_pct": 1.36983,
+        "median_max_favorable_pct": 0.55581,
+        "median_taker_buy_fraction": 0.7235,
+        "n": 2,
+        "wins": 2
+      }
+    },
+    {
+      "available_after_native_exit": 6,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 6,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00356,
+        "median_last_close_vs_entry_pct": 1.10923,
+        "median_max_adverse_pct": 2.64406,
+        "median_max_favorable_pct": 0.04917,
+        "median_taker_buy_fraction": 0.71337,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "PRE_2025_AUG_SEP",
+      "total_original": 6,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00792,
+        "median_last_close_vs_entry_pct": -0.70095,
+        "median_max_adverse_pct": 2.35609,
+        "median_max_favorable_pct": 0.9954,
+        "median_taker_buy_fraction": 0.38328,
+        "n": 2,
+        "wins": 2
+      }
+    },
+    {
+      "available_after_native_exit": 5,
+      "before_checkpoint_native_exited": 1,
+      "checkpointH": 12,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00181,
+        "median_last_close_vs_entry_pct": -0.52027,
+        "median_max_adverse_pct": 1.7004,
+        "median_max_favorable_pct": 0.8153,
+        "median_taker_buy_fraction": 0.50436,
+        "n": 3,
+        "wins": 0
+      },
+      "period": "PRE_2025_AUG_SEP",
+      "total_original": 6,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.0137,
+        "median_last_close_vs_entry_pct": -1.20095,
+        "median_max_adverse_pct": 3.18319,
+        "median_max_favorable_pct": 2.23231,
+        "median_taker_buy_fraction": 0.27789,
+        "n": 2,
+        "wins": 2
+      }
+    },
+    {
+      "available_after_native_exit": 39,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 1,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00165,
+        "median_last_close_vs_entry_pct": -0.00606,
+        "median_max_adverse_pct": 0.28037,
+        "median_max_favorable_pct": 0.26978,
+        "median_taker_buy_fraction": 0.56589,
+        "n": 16,
+        "wins": 0
+      },
+      "period": "BASE_2025_2026",
+      "total_original": 40,
+      "unscored_no_volume": 1,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00015,
+        "median_last_close_vs_entry_pct": -0.07437,
+        "median_max_adverse_pct": 0.10143,
+        "median_max_favorable_pct": 0.55225,
+        "median_taker_buy_fraction": 0.52923,
+        "n": 23,
+        "wins": 23
+      }
+    },
+    {
+      "available_after_native_exit": 40,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 3,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00107,
+        "median_last_close_vs_entry_pct": 0.04776,
+        "median_max_adverse_pct": 0.987,
+        "median_max_favorable_pct": 0.78576,
+        "median_taker_buy_fraction": 0.46658,
+        "n": 16,
+        "wins": 0
+      },
+      "period": "BASE_2025_2026",
+      "total_original": 40,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 0.00034,
+        "median_last_close_vs_entry_pct": 0.20479,
+        "median_max_adverse_pct": 0.54727,
+        "median_max_favorable_pct": 1.0338,
+        "median_taker_buy_fraction": 0.44063,
+        "n": 24,
+        "wins": 24
+      }
+    },
+    {
+      "available_after_native_exit": 39,
+      "before_checkpoint_native_exited": 1,
+      "checkpointH": 6,
+      "losing_later": {
+        "median_btc_return_checkpoint": -0.00056,
+        "median_last_close_vs_entry_pct": 1.07052,
+        "median_max_adverse_pct": 1.53952,
+        "median_max_favorable_pct": 1.02439,
+        "median_taker_buy_fraction": 0.47005,
+        "n": 15,
+        "wins": 0
+      },
+      "period": "BASE_2025_2026",
+      "total_original": 40,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 0.00033,
+        "median_last_close_vs_entry_pct": -0.35408,
+        "median_max_adverse_pct": 0.70661,
+        "median_max_favorable_pct": 2.11907,
+        "median_taker_buy_fraction": 0.48178,
+        "n": 24,
+        "wins": 24
+      }
+    },
+    {
+      "available_after_native_exit": 37,
+      "before_checkpoint_native_exited": 3,
+      "checkpointH": 12,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00714,
+        "median_last_close_vs_entry_pct": 1.20876,
+        "median_max_adverse_pct": 2.30488,
+        "median_max_favorable_pct": 1.41517,
+        "median_taker_buy_fraction": 0.48156,
+        "n": 13,
+        "wins": 0
+      },
+      "period": "BASE_2025_2026",
+      "total_original": 40,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.0031,
+        "median_last_close_vs_entry_pct": -1.69285,
+        "median_max_adverse_pct": 0.8047,
+        "median_max_favorable_pct": 3.27877,
+        "median_taker_buy_fraction": 0.47416,
+        "n": 24,
+        "wins": 24
+      }
+    },
+    {
+      "available_after_native_exit": 7,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 1,
+      "losing_later": {
+        "median_btc_return_checkpoint": -0.00011,
+        "median_last_close_vs_entry_pct": -0.05834,
+        "median_max_adverse_pct": 0.339,
+        "median_max_favorable_pct": 0.33869,
+        "median_taker_buy_fraction": 0.35465,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "POST_2026_OCT_NOV",
+      "total_original": 7,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00192,
+        "median_last_close_vs_entry_pct": 0.30324,
+        "median_max_adverse_pct": 0.92438,
+        "median_max_favorable_pct": 0,
+        "median_taker_buy_fraction": 0.66301,
+        "n": 3,
+        "wins": 3
+      }
+    },
+    {
+      "available_after_native_exit": 7,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 3,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00474,
+        "median_last_close_vs_entry_pct": 1.41155,
+        "median_max_adverse_pct": 1.77418,
+        "median_max_favorable_pct": 0.41924,
+        "median_taker_buy_fraction": 0.77591,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "POST_2026_OCT_NOV",
+      "total_original": 7,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00278,
+        "median_last_close_vs_entry_pct": 0.86307,
+        "median_max_adverse_pct": 1.65837,
+        "median_max_favorable_pct": 0.54554,
+        "median_taker_buy_fraction": 0.42706,
+        "n": 3,
+        "wins": 3
+      }
+    },
+    {
+      "available_after_native_exit": 7,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 6,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00438,
+        "median_last_close_vs_entry_pct": 0.81123,
+        "median_max_adverse_pct": 2.08257,
+        "median_max_favorable_pct": 0.83049,
+        "median_taker_buy_fraction": 0.75012,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "POST_2026_OCT_NOV",
+      "total_original": 7,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 0.00209,
+        "median_last_close_vs_entry_pct": 0.75769,
+        "median_max_adverse_pct": 1.91276,
+        "median_max_favorable_pct": 0.54554,
+        "median_taker_buy_fraction": 0.74235,
+        "n": 3,
+        "wins": 3
+      }
+    },
+    {
+      "available_after_native_exit": 7,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 12,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.0024,
+        "median_last_close_vs_entry_pct": 0.82611,
+        "median_max_adverse_pct": 2.65343,
+        "median_max_favorable_pct": 1.41883,
+        "median_taker_buy_fraction": 0.73014,
+        "n": 4,
+        "wins": 0
+      },
+      "period": "POST_2026_OCT_NOV",
+      "total_original": 7,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00079,
+        "median_last_close_vs_entry_pct": 0.60807,
+        "median_max_adverse_pct": 2.89438,
+        "median_max_favorable_pct": 1.16086,
+        "median_taker_buy_fraction": 0.48463,
+        "n": 3,
+        "wins": 3
+      }
+    },
+    {
+      "available_after_native_exit": 52,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 1,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00123,
+        "median_last_close_vs_entry_pct": 0.0,
+        "median_max_adverse_pct": 0.24396,
+        "median_max_favorable_pct": 0.24813,
+        "median_taker_buy_fraction": 0.51746,
+        "n": 24,
+        "wins": 0
+      },
+      "period": "ALL_SEEN",
+      "total_original": 53,
+      "unscored_no_volume": 1,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00022,
+        "median_last_close_vs_entry_pct": -0.01833,
+        "median_max_adverse_pct": 0.28825,
+        "median_max_favorable_pct": 0.38385,
+        "median_taker_buy_fraction": 0.53484,
+        "n": 28,
+        "wins": 28
+      }
+    },
+    {
+      "available_after_native_exit": 53,
+      "before_checkpoint_native_exited": 0,
+      "checkpointH": 3,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00175,
+        "median_last_close_vs_entry_pct": 0.19482,
+        "median_max_adverse_pct": 1.21259,
+        "median_max_favorable_pct": 0.53668,
+        "median_taker_buy_fraction": 0.5303,
+        "n": 24,
+        "wins": 0
+      },
+      "period": "ALL_SEEN",
+      "total_original": 53,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 6e-05,
+        "median_last_close_vs_entry_pct": 0.30864,
+        "median_max_adverse_pct": 0.68443,
+        "median_max_favorable_pct": 0.93644,
+        "median_taker_buy_fraction": 0.44793,
+        "n": 29,
+        "wins": 29
+      }
+    },
+    {
+      "available_after_native_exit": 52,
+      "before_checkpoint_native_exited": 1,
+      "checkpointH": 6,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00211,
+        "median_last_close_vs_entry_pct": 1.07052,
+        "median_max_adverse_pct": 1.78218,
+        "median_max_favorable_pct": 0.97097,
+        "median_taker_buy_fraction": 0.52458,
+        "n": 23,
+        "wins": 0
+      },
+      "period": "ALL_SEEN",
+      "total_original": 53,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": 0.0004,
+        "median_last_close_vs_entry_pct": -0.33467,
+        "median_max_adverse_pct": 0.76518,
+        "median_max_favorable_pct": 1.3531,
+        "median_taker_buy_fraction": 0.48633,
+        "n": 29,
+        "wins": 29
+      }
+    },
+    {
+      "available_after_native_exit": 49,
+      "before_checkpoint_native_exited": 4,
+      "checkpointH": 12,
+      "losing_later": {
+        "median_btc_return_checkpoint": 0.00439,
+        "median_last_close_vs_entry_pct": 1.18121,
+        "median_max_adverse_pct": 2.14816,
+        "median_max_favorable_pct": 1.34082,
+        "median_taker_buy_fraction": 0.49651,
+        "n": 20,
+        "wins": 0
+      },
+      "period": "ALL_SEEN",
+      "total_original": 53,
+      "unscored_no_volume": 0,
+      "winning_later": {
+        "median_btc_return_checkpoint": -0.00469,
+        "median_last_close_vs_entry_pct": -1.43158,
+        "median_max_adverse_pct": 1.00644,
+        "median_max_favorable_pct": 3.08472,
+        "median_taker_buy_fraction": 0.47345,
+        "n": 29,
+        "wins": 29
+      }
+    }
+  ]
+}

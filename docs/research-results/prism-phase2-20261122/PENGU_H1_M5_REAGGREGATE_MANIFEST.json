@@ -1,0 +1,24 @@
+{
+  "h1_close_and_volume_exactly_coherent": true,
+  "h1_open_delta_gt_5bps": 3533,
+  "limitations": [
+    "This intentionally changes the native H1 signal data. A different signal population is an economic-model sensitivity, not the original pinned Runner.",
+    "No actual venue fills, shared risk, Gross, or STOP executions are represented.",
+    "Do not mix reaggregated M5 bar entry candidates with the original portfolio modeled fills."
+  ],
+  "m5_aggregated_sha256": "df0b7b50f259dfcb7ba3e39589453230f0b261a19aef2959259155dada0bc826",
+  "no_live": true,
+  "output_file": "PENGU_H1_PUBLIC_M5_REAGGREGATED_READONLY.jsonl",
+  "rebuilt_complete_M5_H1_hours": 9912,
+  "retained_original_H1_warmup": 168,
+  "schema": "disdex-pengu-m5-aggregated-h1-source-perturbation/v1",
+  "source_m5_sha256": [
+    "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+    "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+    "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+  ],
+  "source_original_h1_sha256": [
+    "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+    "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+  ]
+}

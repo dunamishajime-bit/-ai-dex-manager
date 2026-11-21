@@ -1,0 +1,325 @@
+{
+  "candidate_count": 142,
+  "claims_not_supported": [
+    "Post-entry MFE/MAE must NEVER be used as pre-entry knowledge",
+    "Positive volume historical M5 is not a guaranteed execution fill",
+    "Native stop values are research model and not exchange signed fills",
+    "No choice of new threshold made from the independent 2025 Aug-Sep or Oct-Nov period",
+    "Small route denominators cannot certify 70/80% true win probabilities",
+    "Full portfolio DD / gross / fee/funding not modeled in this per-trade decomposition"
+  ],
+  "groups": [
+    {
+      "exit_reason_loss": {
+        "SHORT_HARD_STOP": 3,
+        "SHORT_MAX_HOLD": 1
+      },
+      "fail_types": {
+        "NO_FAVORABLE_ONE_PERCENT": 2,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 2
+      },
+      "mean_net30_pct": -3.8933,
+      "median_asof_BTC24_losses": -0.01493,
+      "median_asof_BTC24_wins": 0.00953,
+      "median_asof_RSI_losses": 37.22493,
+      "median_asof_RSI_wins": 46.20402,
+      "median_asof_VOLratio_losses": 1.44687,
+      "median_asof_VOLratio_wins": 0.62191,
+      "median_post_MAE_pct_losses": 8.25234,
+      "median_post_MAE_pct_wins": 3.18319,
+      "median_post_MFE_pct_losses": 1.76132,
+      "median_post_MFE_pct_wins": 2.60616,
+      "n": 6,
+      "period": "PRE_AUG_SEP_2025",
+      "route": "SHORT_V20",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 33.33,
+      "wins": 2
+    },
+    {
+      "exit_reason_loss": {
+        "RECOVERY_V8_HARD_STOP": 2
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 1,
+        "NO_FAVORABLE_ONE_PERCENT": 1
+      },
+      "mean_net30_pct": 0.5277,
+      "median_asof_BTC24_losses": -0.01763,
+      "median_asof_BTC24_wins": 0.00652,
+      "median_asof_RSI_losses": 52.99365,
+      "median_asof_RSI_wins": 45.8066,
+      "median_asof_VOLratio_losses": 1.33201,
+      "median_asof_VOLratio_wins": 0.93679,
+      "median_post_MAE_pct_losses": 6.24015,
+      "median_post_MAE_pct_wins": 2.52397,
+      "median_post_MFE_pct_losses": 0.97581,
+      "median_post_MFE_pct_wins": 6.66667,
+      "n": 7,
+      "period": "PRE_AUG_SEP_2025",
+      "route": "RECOVERY_V8",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 1,
+      "winrate30_pct": 71.43,
+      "wins": 5
+    },
+    {
+      "exit_reason_loss": {},
+      "fail_types": {},
+      "mean_net30_pct": 5.1282,
+      "median_asof_BTC24_losses": null,
+      "median_asof_BTC24_wins": 0.01136,
+      "median_asof_RSI_losses": null,
+      "median_asof_RSI_wins": 72.87963,
+      "median_asof_VOLratio_losses": null,
+      "median_asof_VOLratio_wins": 1.0299,
+      "median_post_MAE_pct_losses": null,
+      "median_post_MAE_pct_wins": 3.92215,
+      "median_post_MFE_pct_losses": null,
+      "median_post_MFE_pct_wins": 10.84246,
+      "n": 2,
+      "period": "PRE_AUG_SEP_2025",
+      "route": "LONG_V64",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 100.0,
+      "wins": 2
+    },
+    {
+      "exit_reason_loss": {
+        "RECOVERY_V8_HARD_STOP": 2,
+        "SHORT_HARD_STOP": 3,
+        "SHORT_MAX_HOLD": 1
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 1,
+        "NO_FAVORABLE_ONE_PERCENT": 3,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 2
+      },
+      "mean_net30_pct": -0.6273,
+      "median_asof_BTC24_losses": -0.01493,
+      "median_asof_BTC24_wins": 0.01053,
+      "median_asof_RSI_losses": 43.24741,
+      "median_asof_RSI_wins": 48.98169,
+      "median_asof_VOLratio_losses": 1.44687,
+      "median_asof_VOLratio_wins": 0.93679,
+      "median_post_MAE_pct_losses": 7.21678,
+      "median_post_MAE_pct_wins": 2.52397,
+      "median_post_MFE_pct_losses": 0.97581,
+      "median_post_MFE_pct_wins": 6.66667,
+      "n": 15,
+      "period": "PRE_AUG_SEP_2025",
+      "route": "ALL",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 1,
+      "winrate30_pct": 60.0,
+      "wins": 9
+    },
+    {
+      "exit_reason_loss": {
+        "SHORT_HARD_STOP": 11,
+        "SHORT_MAX_HOLD": 5
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 5,
+        "NO_FAVORABLE_ONE_PERCENT": 7,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 4
+      },
+      "mean_net30_pct": 1.9025,
+      "median_asof_BTC24_losses": -0.01382,
+      "median_asof_BTC24_wins": -0.01472,
+      "median_asof_RSI_losses": 38.12541,
+      "median_asof_RSI_wins": 35.84154,
+      "median_asof_VOLratio_losses": 1.15474,
+      "median_asof_VOLratio_wins": 0.62452,
+      "median_post_MAE_pct_losses": 8.36841,
+      "median_post_MAE_pct_wins": 2.73058,
+      "median_post_MFE_pct_losses": 1.21978,
+      "median_post_MFE_pct_wins": 11.17691,
+      "n": 40,
+      "period": "BASE_2025_2026",
+      "route": "SHORT_V20",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 1,
+      "winrate30_pct": 60.0,
+      "wins": 24
+    },
+    {
+      "exit_reason_loss": {
+        "RECOVERY_V8_HARD_STOP": 15,
+        "RECOVERY_V8_MAX_HOLD": 5
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 6,
+        "NO_FAVORABLE_ONE_PERCENT": 9,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 5
+      },
+      "mean_net30_pct": 1.0228,
+      "median_asof_BTC24_losses": 0.0089,
+      "median_asof_BTC24_wins": -0.00235,
+      "median_asof_RSI_losses": 57.70018,
+      "median_asof_RSI_wins": 56.62812,
+      "median_asof_VOLratio_losses": 0.59683,
+      "median_asof_VOLratio_wins": 0.60518,
+      "median_post_MAE_pct_losses": 6.77747,
+      "median_post_MAE_pct_wins": 1.59689,
+      "median_post_MFE_pct_losses": 1.11519,
+      "median_post_MFE_pct_wins": 7.67528,
+      "n": 51,
+      "period": "BASE_2025_2026",
+      "route": "RECOVERY_V8",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 3,
+      "winrate30_pct": 60.78,
+      "wins": 31
+    },
+    {
+      "exit_reason_loss": {
+        "LONG_HARD_STOP": 7
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 2,
+        "NO_FAVORABLE_ONE_PERCENT": 1,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 4
+      },
+      "mean_net30_pct": 5.2766,
+      "median_asof_BTC24_losses": 0.04428,
+      "median_asof_BTC24_wins": 0.03044,
+      "median_asof_RSI_losses": 73.56704,
+      "median_asof_RSI_wins": 73.85061,
+      "median_asof_VOLratio_losses": 1.32446,
+      "median_asof_VOLratio_wins": 1.63402,
+      "median_post_MAE_pct_losses": 8.72327,
+      "median_post_MAE_pct_wins": 2.16194,
+      "median_post_MFE_pct_losses": 3.72335,
+      "median_post_MFE_pct_wins": 14.11542,
+      "n": 25,
+      "period": "BASE_2025_2026",
+      "route": "LONG_V64",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 72.0,
+      "wins": 18
+    },
+    {
+      "exit_reason_loss": {
+        "LONG_HARD_STOP": 7,
+        "RECOVERY_V8_HARD_STOP": 15,
+        "RECOVERY_V8_MAX_HOLD": 5,
+        "SHORT_HARD_STOP": 11,
+        "SHORT_MAX_HOLD": 5
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 13,
+        "NO_FAVORABLE_ONE_PERCENT": 17,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 13
+      },
+      "mean_net30_pct": 2.2429,
+      "median_asof_BTC24_losses": 0.00059,
+      "median_asof_BTC24_wins": -0.00235,
+      "median_asof_RSI_losses": 54.54687,
+      "median_asof_RSI_wins": 55.19811,
+      "median_asof_VOLratio_losses": 0.96347,
+      "median_asof_VOLratio_wins": 0.781,
+      "median_post_MAE_pct_losses": 7.39655,
+      "median_post_MAE_pct_wins": 1.93144,
+      "median_post_MFE_pct_losses": 1.13872,
+      "median_post_MFE_pct_wins": 10.35093,
+      "n": 116,
+      "period": "BASE_2025_2026",
+      "route": "ALL",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 4,
+      "winrate30_pct": 62.93,
+      "wins": 73
+    },
+    {
+      "exit_reason_loss": {
+        "SHORT_MAX_HOLD": 4
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 1,
+        "NO_FAVORABLE_ONE_PERCENT": 2,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 1
+      },
+      "mean_net30_pct": 0.0422,
+      "median_asof_BTC24_losses": -0.01495,
+      "median_asof_BTC24_wins": -0.04577,
+      "median_asof_RSI_losses": 40.65481,
+      "median_asof_RSI_wins": 39.61581,
+      "median_asof_VOLratio_losses": 0.71067,
+      "median_asof_VOLratio_wins": 1.05909,
+      "median_post_MAE_pct_losses": 5.06744,
+      "median_post_MAE_pct_wins": 2.89438,
+      "median_post_MFE_pct_losses": 1.41883,
+      "median_post_MFE_pct_wins": 10.24398,
+      "n": 7,
+      "period": "POST_OCT_NOV_2026",
+      "route": "SHORT_V20",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 42.86,
+      "wins": 3
+    },
+    {
+      "exit_reason_loss": {
+        "RECOVERY_V8_HARD_STOP": 1,
+        "RECOVERY_V8_MAX_HOLD": 1
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 1,
+        "NO_FAVORABLE_ONE_PERCENT": 1
+      },
+      "mean_net30_pct": 0.4565,
+      "median_asof_BTC24_losses": -0.00244,
+      "median_asof_BTC24_wins": 3e-05,
+      "median_asof_RSI_losses": 51.30294,
+      "median_asof_RSI_wins": 57.64349,
+      "median_asof_VOLratio_losses": 0.36515,
+      "median_asof_VOLratio_wins": 0.6756,
+      "median_post_MAE_pct_losses": 7.83153,
+      "median_post_MAE_pct_wins": 2.39584,
+      "median_post_MFE_pct_losses": 0.90935,
+      "median_post_MFE_pct_wins": 8.43568,
+      "n": 4,
+      "period": "POST_OCT_NOV_2026",
+      "route": "RECOVERY_V8",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 50.0,
+      "wins": 2
+    },
+    {
+      "exit_reason_loss": {
+        "RECOVERY_V8_HARD_STOP": 1,
+        "RECOVERY_V8_MAX_HOLD": 1,
+        "SHORT_MAX_HOLD": 4
+      },
+      "fail_types": {
+        "MODEST_FAVORABLE_BUT_NET_LOSS": 2,
+        "NO_FAVORABLE_ONE_PERCENT": 3,
+        "PROFIT_GIVEBACK_AFTER_MFE3": 1
+      },
+      "mean_net30_pct": 0.1929,
+      "median_asof_BTC24_losses": -0.00955,
+      "median_asof_BTC24_wins": -0.01727,
+      "median_asof_RSI_losses": 41.78574,
+      "median_asof_RSI_wins": 47.02466,
+      "median_asof_VOLratio_losses": 0.60476,
+      "median_asof_VOLratio_wins": 1.05883,
+      "median_post_MAE_pct_losses": 5.16481,
+      "median_post_MAE_pct_wins": 2.89438,
+      "median_post_MFE_pct_losses": 1.35403,
+      "median_post_MFE_pct_wins": 10.11537,
+      "n": 11,
+      "period": "POST_OCT_NOV_2026",
+      "route": "ALL",
+      "source_entry_gt5bps": 0,
+      "source_fill_noprint": 0,
+      "winrate30_pct": 45.45,
+      "wins": 5
+    }
+  ],
+  "schema": "disdex-prism4-pengu-route-direction-error-attribution/v1"
+}

@@ -1,0 +1,304 @@
+{
+  "aggregate": [
+    {
+      "deferred_n": 0,
+      "direct_only": {
+        "mean_net_pct": -4.17296,
+        "n": 2,
+        "price_pf": 0.0,
+        "wins": 0,
+        "wr_pct": 0.0
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 10,
+      "original": {
+        "mean_net_pct": -3.69334,
+        "n": 6,
+        "price_pf": 0.0972,
+        "wins": 2,
+        "wr_pct": 33.33
+      },
+      "original_losers_rejected_or_deferred": 2,
+      "original_winners_rejected_or_deferred": 2,
+      "period": "PRE_2025_AUG_SEP",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 3,
+        "SELLER_CONTROLLED_CONTINUATION": 2,
+        "TRANSITION_OR_AMBIGUOUS": 1
+      },
+      "stage_counts": {
+        "ENTER_SHORT_CANDIDATE": 2,
+        "NO_ENTRY_AFTER_2H_WAIT": 1,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 3
+      }
+    },
+    {
+      "deferred_n": 0,
+      "direct_only": {
+        "mean_net_pct": -4.37297,
+        "n": 2,
+        "price_pf": 0.0,
+        "wins": 0,
+        "wr_pct": 0.0
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 30,
+      "original": {
+        "mean_net_pct": -3.89334,
+        "n": 6,
+        "price_pf": 0.0784,
+        "wins": 2,
+        "wr_pct": 33.33
+      },
+      "original_losers_rejected_or_deferred": 2,
+      "original_winners_rejected_or_deferred": 2,
+      "period": "PRE_2025_AUG_SEP",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 3,
+        "SELLER_CONTROLLED_CONTINUATION": 2,
+        "TRANSITION_OR_AMBIGUOUS": 1
+      },
+      "stage_counts": {
+        "ENTER_SHORT_CANDIDATE": 2,
+        "NO_ENTRY_AFTER_2H_WAIT": 1,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 3
+      }
+    },
+    {
+      "deferred_n": 9,
+      "direct_only": {
+        "mean_net_pct": 2.91378,
+        "n": 8,
+        "price_pf": 1.9593,
+        "wins": 5,
+        "wr_pct": 62.5
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 10,
+      "original": {
+        "mean_net_pct": 2.10248,
+        "n": 40,
+        "price_pf": 1.832,
+        "wins": 24,
+        "wr_pct": 60.0
+      },
+      "original_losers_rejected_or_deferred": 13,
+      "original_winners_rejected_or_deferred": 19,
+      "period": "BASE_2025_2026",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 7,
+        "LIQUIDITY_UNVERIFIED": 2,
+        "SELLER_CONTROLLED_CONTINUATION": 8,
+        "TRANSITION_OR_AMBIGUOUS": 23
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 5,
+        "DEFERRED_SHORT_NATIVE_EXIT_REQUIRED": 9,
+        "ENTER_SHORT_CANDIDATE": 8,
+        "NO_ENTRY_AFTER_2H_WAIT": 9,
+        "NO_NEW_ENTRY_FEED_UNCERTAIN": 2,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 7
+      }
+    },
+    {
+      "deferred_n": 9,
+      "direct_only": {
+        "mean_net_pct": 2.71378,
+        "n": 8,
+        "price_pf": 1.8719,
+        "wins": 5,
+        "wr_pct": 62.5
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 30,
+      "original": {
+        "mean_net_pct": 1.90248,
+        "n": 40,
+        "price_pf": 1.7298,
+        "wins": 24,
+        "wr_pct": 60.0
+      },
+      "original_losers_rejected_or_deferred": 13,
+      "original_winners_rejected_or_deferred": 19,
+      "period": "BASE_2025_2026",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 7,
+        "LIQUIDITY_UNVERIFIED": 2,
+        "SELLER_CONTROLLED_CONTINUATION": 8,
+        "TRANSITION_OR_AMBIGUOUS": 23
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 5,
+        "DEFERRED_SHORT_NATIVE_EXIT_REQUIRED": 9,
+        "ENTER_SHORT_CANDIDATE": 8,
+        "NO_ENTRY_AFTER_2H_WAIT": 9,
+        "NO_NEW_ENTRY_FEED_UNCERTAIN": 2,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 7
+      }
+    },
+    {
+      "deferred_n": 0,
+      "direct_only": {
+        "mean_net_pct": null,
+        "n": 0,
+        "price_pf": null,
+        "wins": 0,
+        "wr_pct": null
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 10,
+      "original": {
+        "mean_net_pct": 0.24223,
+        "n": 7,
+        "price_pf": 1.1675,
+        "wins": 3,
+        "wr_pct": 42.86
+      },
+      "original_losers_rejected_or_deferred": 4,
+      "original_winners_rejected_or_deferred": 3,
+      "period": "POST_2026_OCT_NOV",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 2,
+        "TRANSITION_OR_AMBIGUOUS": 5
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 2,
+        "NO_ENTRY_AFTER_2H_WAIT": 3,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 2
+      }
+    },
+    {
+      "deferred_n": 0,
+      "direct_only": {
+        "mean_net_pct": null,
+        "n": 0,
+        "price_pf": null,
+        "wins": 0,
+        "wr_pct": null
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 30,
+      "original": {
+        "mean_net_pct": 0.04223,
+        "n": 7,
+        "price_pf": 1.0271,
+        "wins": 3,
+        "wr_pct": 42.86
+      },
+      "original_losers_rejected_or_deferred": 4,
+      "original_winners_rejected_or_deferred": 3,
+      "period": "POST_2026_OCT_NOV",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 2,
+        "TRANSITION_OR_AMBIGUOUS": 5
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 2,
+        "NO_ENTRY_AFTER_2H_WAIT": 3,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 2
+      }
+    },
+    {
+      "deferred_n": 9,
+      "direct_only": {
+        "mean_net_pct": 1.49643,
+        "n": 10,
+        "price_pf": 1.4584,
+        "wins": 5,
+        "wr_pct": 50.0
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 10,
+      "original": {
+        "mean_net_pct": 1.20066,
+        "n": 53,
+        "price_pf": 1.4688,
+        "wins": 29,
+        "wr_pct": 54.72
+      },
+      "original_losers_rejected_or_deferred": 19,
+      "original_winners_rejected_or_deferred": 24,
+      "period": "ALL_ALREADY_SEEN",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 12,
+        "LIQUIDITY_UNVERIFIED": 2,
+        "SELLER_CONTROLLED_CONTINUATION": 10,
+        "TRANSITION_OR_AMBIGUOUS": 29
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 7,
+        "DEFERRED_SHORT_NATIVE_EXIT_REQUIRED": 9,
+        "ENTER_SHORT_CANDIDATE": 10,
+        "NO_ENTRY_AFTER_2H_WAIT": 13,
+        "NO_NEW_ENTRY_FEED_UNCERTAIN": 2,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 12
+      }
+    },
+    {
+      "deferred_n": 9,
+      "direct_only": {
+        "mean_net_pct": 1.29643,
+        "n": 10,
+        "price_pf": 1.3853,
+        "wins": 5,
+        "wr_pct": 50.0
+      },
+      "disclaimer": "Direct only reuses native exit because entry is unchanged. Deferred entries are excluded from both numerator and denominator until native exit rerun.",
+      "fee_bps": 30,
+      "original": {
+        "mean_net_pct": 1.00066,
+        "n": 53,
+        "price_pf": 1.3773,
+        "wins": 29,
+        "wr_pct": 54.72
+      },
+      "original_losers_rejected_or_deferred": 19,
+      "original_winners_rejected_or_deferred": 24,
+      "period": "ALL_ALREADY_SEEN",
+      "regime_counts": {
+        "BOUNCE_OR_SHORT_SQUEEZE": 12,
+        "LIQUIDITY_UNVERIFIED": 2,
+        "SELLER_CONTROLLED_CONTINUATION": 10,
+        "TRANSITION_OR_AMBIGUOUS": 29
+      },
+      "stage_counts": {
+        "ABORTED_WAIT_REVERSAL": 7,
+        "DEFERRED_SHORT_NATIVE_EXIT_REQUIRED": 9,
+        "ENTER_SHORT_CANDIDATE": 10,
+        "NO_ENTRY_AFTER_2H_WAIT": 13,
+        "NO_NEW_ENTRY_FEED_UNCERTAIN": 2,
+        "REJECT_ORIGINAL_SHORT_REVERSAL_RISK": 12
+      }
+    }
+  ],
+  "all_native_source_exits_preserved": true,
+  "limitations": [
+    "All three periods have already been observed by the researcher; not blind out-of-sample",
+    "A direction-vote threshold is an economic heuristic, not a calibrated win probability",
+    "New deferred entries require fresh pinned native stop/exit replay and cannot reuse old PnL",
+    "No venue order book, signed fills, fee funding or portfolio shared Gross / DD parity",
+    "No change to Recovery V8/LONG V64/HYPE or any LIVE runner; this is research only"
+  ],
+  "native_blob": "06476fed9985a165cf73971e790322ef3d03bd90",
+  "native_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "policy": "PRISM_V20_STRUCTURAL_DIRECTION_V1_FROZEN_20261122",
+  "policy_type": "structure-state entry engine, not trained outcome-selected threshold",
+  "population_counts": {
+    "BASE_2025_2026": 40,
+    "POST_2026_OCT_NOV": 7,
+    "PRE_2025_AUG_SEP": 6
+  },
+  "schema": "prism5-pengu-v20-structural-direction-v1",
+  "source_H1_sha256": {
+    "BTCUSDT": {
+      "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+      "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+    },
+    "PENGUUSDT": {
+      "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+    }
+  }
+}

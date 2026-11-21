@@ -1,0 +1,76 @@
+{
+  "intervals": {
+    "BTCUSDT:1h": {
+      "begin": 1754006400000,
+      "endExclusive": 1758672000000,
+      "file": "BTCUSDT-1h-20250801-20250924.jsonl.gz",
+      "interval": "1h",
+      "malformed_BTC_OHLCV_bars": [
+        {
+          "close": 115707.3,
+          "high": 115916.1,
+          "low": 115580.7,
+          "open": 115941.8,
+          "ts": 1757768400000
+        }
+      ],
+      "requests": 2,
+      "rows": 1296,
+      "sha256_gzip": "0faa79680bd25c44cb1766b655747e9e05a0eab9264649a69440fab6291b5ee8",
+      "sha256_uncompressed": "2ef5a40d75235f028905e4403bac2a7feb7296b60d3bcc2ea6a5a8ebbf6c879e",
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "BTCUSDT"
+    },
+    "BTCUSDT:5m": {
+      "begin": 1754006400000,
+      "endExclusive": 1758672000000,
+      "file": "BTCUSDT-5m-20250801-20250924.jsonl.gz",
+      "interval": "5m",
+      "malformed_BTC_OHLCV_bars": [
+        {
+          "close": 115693.4,
+          "high": 115774.3,
+          "low": 115580.7,
+          "open": 115777.0,
+          "ts": 1757771400000
+        }
+      ],
+      "requests": 16,
+      "rows": 15552,
+      "sha256_gzip": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "sha256_uncompressed": "bd0ca5739e6ab9e3f565bb2b17fe8e7fd4fa7878636c288007aa75544b0f2724",
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "BTCUSDT"
+    },
+    "PENGUUSDT:1h": {
+      "begin": 1754006400000,
+      "endExclusive": 1758672000000,
+      "file": "PENGUUSDT-1h-20250801-20250924.jsonl.gz",
+      "interval": "1h",
+      "malformed_BTC_OHLCV_bars": [],
+      "requests": 2,
+      "rows": 1296,
+      "sha256_gzip": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "sha256_uncompressed": "4b7d13c4693856663fcdf5aee262728f2bc4c657ea3079021443a7bd41ef36a2",
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "PENGUUSDT"
+    },
+    "PENGUUSDT:5m": {
+      "begin": 1754006400000,
+      "endExclusive": 1758672000000,
+      "file": "PENGUUSDT-5m-20250801-20250924.jsonl.gz",
+      "interval": "5m",
+      "malformed_BTC_OHLCV_bars": [],
+      "requests": 16,
+      "rows": 15552,
+      "sha256_gzip": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "sha256_uncompressed": "f49068c89d6af9d14da6a80186d9227abf57d4dad709449ac72a7fd62b2f9193",
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "PENGUUSDT"
+    }
+  },
+  "provider": "Aster /fapi/v3/klines, unsigned public GET",
+  "research_only": true,
+  "schema": "disdex-prism-prebaseline-public-20250801-20250924/v1",
+  "source_does_not_include_private_fills": true
+}

@@ -1,0 +1,1924 @@
+{
+  "guardrails": [
+    "Never classify an all-zero-print hour as inherently unfillable",
+    "Never use same confirming M5 OHLCV to claim its OPEN was already known",
+    "Do not recalculate native exits, PF, DD, or select the best scenario using these prices alone",
+    "No venue order book, signed fills or actual liquidity proof",
+    "Current Production Gross cap and native SHA mismatch the STABLE3 Gross425 research baseline",
+    "All 2025/10-2026/09 periods have been used in research, NOT untouched OOS"
+  ],
+  "record_count": 5379,
+  "scenario_descriptions": {
+    "CONFIRMED_NEXT_PRINT": "first traded M5 AFTER the prior positive-volume M5 closes; order could be considered after confirmation but price is an uncertain proxy",
+    "FIRST_PRINT_UPPER_INFORMATION_BOUND": "ex-post first M5 with positive volume; not causal as a decision model",
+    "NATIVE_H1_PRICE": "H1 opening price optimistic reference; hypothetical order may create its own print"
+  },
+  "scenario_record_count": 16101,
+  "schema": "disdex-prism4-asof-all-runner-entry-5379/v1",
+  "source": "original PRISM4 5379 non-V52 modeled fills, own M5 source reconstructed by 1h window",
+  "source_files": {
+    "AAVEUSDT": [
+      "AAVEUSDT-5m-20250924-20260803.jsonl.gz",
+      "AAVEUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "ADAUSDT": [
+      "ADAUSDT-5m-20250924-20260803.jsonl.gz",
+      "ADAUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "APTUSDT": [
+      "APTUSDT-5m-20250924-20260803.jsonl.gz",
+      "APTUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "ARBUSDT": [
+      "ARBUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "ATOMUSDT": [
+      "ATOMUSDT-5m-20250924-20260803.jsonl.gz",
+      "ATOMUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "AVAXUSDT": [
+      "AVAXUSDT-5m-20250924-20260803.jsonl.gz",
+      "AVAXUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "BNBUSDT": [
+      "BNBUSDT-5m-20250924-20260803.jsonl.gz",
+      "BNBUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "BTCUSDT": [
+      "BTCUSDT-5m-20250924-20260803.jsonl.gz",
+      "BTCUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "DOGEUSDT": [
+      "DOGEUSDT-5m-20250924-20260803.jsonl.gz",
+      "DOGEUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "DOTUSDT": [
+      "DOTUSDT-5m-20250924-20260803.jsonl.gz",
+      "DOTUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "ETHUSDT": [
+      "ETHUSDT-5m-20250924-20260803.jsonl.gz",
+      "ETHUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "FETUSDT": [
+      "FETUSDT-5m-20250924-20260803.jsonl.gz",
+      "FETUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "HYPEUSDT": [
+      "HYPEUSDT-5m-20250924-20260803.jsonl.gz",
+      "HYPEUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "INJUSDT": [
+      "INJUSDT-5m-20250924-20260803.jsonl.gz",
+      "INJUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "JUPUSDT": [
+      "JUPUSDT-5m-20250924-20260803.jsonl.gz",
+      "JUPUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "LINKUSDT": [
+      "LINKUSDT-5m-20250924-20260803.jsonl.gz",
+      "LINKUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "LTCUSDT": [
+      "LTCUSDT-5m-20250924-20260803.jsonl.gz",
+      "LTCUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "NEARUSDT": [
+      "NEARUSDT-5m-20250924-20260803.jsonl.gz",
+      "NEARUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "ONDOUSDT": [
+      "ONDOUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "PENGUUSDT": [
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "RENDERUSDT": [
+      "RENDERUSDT-5m-20250924-20260803.jsonl.gz",
+      "RENDERUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "SOLUSDT": [
+      "SOLUSDT-5m-20250924-20260803.jsonl.gz",
+      "SOLUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "SUIUSDT": [
+      "SUIUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "TIAUSDT": [
+      "TIAUSDT-5m-20250924-20260803.jsonl.gz",
+      "TIAUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "UNIUSDT": [
+      "UNIUSDT-5m-20250924-20260803.jsonl.gz",
+      "UNIUSDT-5m-20260803-20261001.jsonl.gz"
+    ],
+    "XRPUSDT": [
+      "XRPUSDT-5m-20250924-20260803.jsonl.gz",
+      "XRPUSDT-5m-20260803-20261001.jsonl.gz"
+    ]
+  },
+  "summary": [
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 6,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 6,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 6
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 6,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 6,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 6
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 4,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 6,
+      "nonimmediate_proxy_fills": 6,
+      "price_drift_pct_q50": 0.1219,
+      "proxy_n": 6,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 6
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 17,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 17,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 17
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 17,
+      "nonimmediate_proxy_fills": 6,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 16,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 16,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 12,
+      "fee_bps": 10,
+      "missing_price_n": 2,
+      "n": 17,
+      "nonimmediate_proxy_fills": 15,
+      "price_drift_pct_q50": 0.2972,
+      "proxy_n": 15,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 1,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 15
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 3,
+      "n": 46,
+      "nonimmediate_proxy_fills": 17,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 43,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 43,
+        "NO_OBSERVED_PRINT": 3
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 36,
+      "fee_bps": 10,
+      "missing_price_n": 6,
+      "n": 46,
+      "nonimmediate_proxy_fills": 40,
+      "price_drift_pct_q50": 0.2943,
+      "proxy_n": 40,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 40
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 101,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 101,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 101
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 8,
+      "n": 101,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 93,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 93,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 83,
+      "fee_bps": 10,
+      "missing_price_n": 10,
+      "n": 101,
+      "nonimmediate_proxy_fills": 91,
+      "price_drift_pct_q50": 0.2109,
+      "proxy_n": 91,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 91
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 806,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 806,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 806
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 13,
+      "n": 806,
+      "nonimmediate_proxy_fills": 123,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 793,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 793,
+        "NO_OBSERVED_PRINT": 13
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 646,
+      "fee_bps": 10,
+      "missing_price_n": 33,
+      "n": 806,
+      "nonimmediate_proxy_fills": 773,
+      "price_drift_pct_q50": 0.1796,
+      "proxy_n": 773,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 20,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 13,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 773
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 5,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 8,
+      "price_drift_pct_q50": 0.0928,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 17,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 37,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0476,
+      "proxy_n": 37,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 37
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 17,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 37,
+      "nonimmediate_proxy_fills": 21,
+      "price_drift_pct_q50": 0.0476,
+      "proxy_n": 36,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 36,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 27,
+      "fee_bps": 30,
+      "missing_price_n": 5,
+      "n": 37,
+      "nonimmediate_proxy_fills": 32,
+      "price_drift_pct_q50": 0.3633,
+      "proxy_n": 32,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 4,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 32
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 47,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 47,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 47
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 3,
+      "n": 47,
+      "nonimmediate_proxy_fills": 16,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 44,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 44,
+        "NO_OBSERVED_PRINT": 3
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 37,
+      "fee_bps": 30,
+      "missing_price_n": 6,
+      "n": 47,
+      "nonimmediate_proxy_fills": 41,
+      "price_drift_pct_q50": 0.2804,
+      "proxy_n": 41,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 41
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 116,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 116,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 116
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 8,
+      "n": 116,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 108,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 108,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 96,
+      "fee_bps": 30,
+      "missing_price_n": 10,
+      "n": 116,
+      "nonimmediate_proxy_fills": 106,
+      "price_drift_pct_q50": 0.205,
+      "proxy_n": 106,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 106
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 498,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 498,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 498
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 5,
+      "n": 498,
+      "nonimmediate_proxy_fills": 70,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 493,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 493,
+        "NO_OBSERVED_PRINT": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_price_diff_gt5bps": 404,
+      "fee_bps": 30,
+      "missing_price_n": 14,
+      "n": 498,
+      "nonimmediate_proxy_fills": 484,
+      "price_drift_pct_q50": 0.1899,
+      "proxy_n": 484,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 9,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 5,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 484
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 3,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 5,
+      "price_drift_pct_q50": 0.0646,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 17,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 17,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 17
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 17,
+      "nonimmediate_proxy_fills": 6,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 17,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 17
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 12,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 17,
+      "nonimmediate_proxy_fills": 16,
+      "price_drift_pct_q50": 0.1944,
+      "proxy_n": 16,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 16
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 19,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 38,
+      "fee_bps": 10,
+      "missing_price_n": 3,
+      "n": 46,
+      "nonimmediate_proxy_fills": 43,
+      "price_drift_pct_q50": 0.2804,
+      "proxy_n": 43,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 43
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 104,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 104,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 104
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 8,
+      "n": 104,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 96,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 96,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 84,
+      "fee_bps": 10,
+      "missing_price_n": 10,
+      "n": 104,
+      "nonimmediate_proxy_fills": 94,
+      "price_drift_pct_q50": 0.207,
+      "proxy_n": 94,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 94
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 804,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 804,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 804
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 13,
+      "n": 804,
+      "nonimmediate_proxy_fills": 123,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 791,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 791,
+        "NO_OBSERVED_PRINT": 13
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 644,
+      "fee_bps": 10,
+      "missing_price_n": 33,
+      "n": 804,
+      "nonimmediate_proxy_fills": 771,
+      "price_drift_pct_q50": 0.1789,
+      "proxy_n": 771,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 20,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 13,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 771
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 3,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 5,
+      "price_drift_pct_q50": 0.0646,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 18,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 18,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 18
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 18,
+      "nonimmediate_proxy_fills": 6,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 18,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 18
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 12,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 18,
+      "nonimmediate_proxy_fills": 17,
+      "price_drift_pct_q50": 0.1907,
+      "proxy_n": 17,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 17
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 45,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 45,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 45
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 45,
+      "nonimmediate_proxy_fills": 18,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 45,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 45
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 37,
+      "fee_bps": 30,
+      "missing_price_n": 3,
+      "n": 45,
+      "nonimmediate_proxy_fills": 42,
+      "price_drift_pct_q50": 0.2799,
+      "proxy_n": 42,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 42
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 105,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 105,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 105
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 8,
+      "n": 105,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 97,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 97,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 85,
+      "fee_bps": 30,
+      "missing_price_n": 10,
+      "n": 105,
+      "nonimmediate_proxy_fills": 95,
+      "price_drift_pct_q50": 0.2027,
+      "proxy_n": 95,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 95
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 799,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 799,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 799
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 13,
+      "n": 799,
+      "nonimmediate_proxy_fills": 123,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 786,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 786,
+        "NO_OBSERVED_PRINT": 13
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_price_diff_gt5bps": 641,
+      "fee_bps": 30,
+      "missing_price_n": 33,
+      "n": 799,
+      "nonimmediate_proxy_fills": 766,
+      "price_drift_pct_q50": 0.1788,
+      "proxy_n": 766,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 20,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 13,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 766
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 3,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 5,
+      "nonimmediate_proxy_fills": 5,
+      "price_drift_pct_q50": 0.0646,
+      "proxy_n": 5,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 18,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 18,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 18
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 10,
+      "missing_price_n": 1,
+      "n": 18,
+      "nonimmediate_proxy_fills": 6,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 17,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 17,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 13,
+      "fee_bps": 10,
+      "missing_price_n": 2,
+      "n": 18,
+      "nonimmediate_proxy_fills": 16,
+      "price_drift_pct_q50": 0.2762,
+      "proxy_n": 16,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 1,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 16
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 19,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 38,
+      "fee_bps": 10,
+      "missing_price_n": 3,
+      "n": 46,
+      "nonimmediate_proxy_fills": 43,
+      "price_drift_pct_q50": 0.2804,
+      "proxy_n": 43,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 43
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 104,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 104,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 104
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 10,
+      "missing_price_n": 8,
+      "n": 104,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 96,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 96,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 84,
+      "fee_bps": 10,
+      "missing_price_n": 10,
+      "n": 104,
+      "nonimmediate_proxy_fills": 94,
+      "price_drift_pct_q50": 0.207,
+      "proxy_n": 94,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 94
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 0,
+      "n": 804,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 804,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 804
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 10,
+      "missing_price_n": 13,
+      "n": 804,
+      "nonimmediate_proxy_fills": 123,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 791,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 791,
+        "NO_OBSERVED_PRINT": 13
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 644,
+      "fee_bps": 10,
+      "missing_price_n": 33,
+      "n": 804,
+      "nonimmediate_proxy_fills": 771,
+      "price_drift_pct_q50": 0.1789,
+      "proxy_n": 771,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 20,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 13,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 771
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "FET",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 1,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 1,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 7,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 6,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 8,
+      "nonimmediate_proxy_fills": 7,
+      "price_drift_pct_q50": 0.6221,
+      "proxy_n": 7,
+      "runner": "FET",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 7
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 5,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 8,
+      "nonimmediate_proxy_fills": 8,
+      "price_drift_pct_q50": 0.0928,
+      "proxy_n": 8,
+      "runner": "HYPE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "POST_CONFIRMATION_EXECUTION_PROXY": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 17,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 38,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0238,
+      "proxy_n": 38,
+      "runner": "IDLE",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 38
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 17,
+      "fee_bps": 30,
+      "missing_price_n": 1,
+      "n": 38,
+      "nonimmediate_proxy_fills": 21,
+      "price_drift_pct_q50": 0.0476,
+      "proxy_n": 37,
+      "runner": "IDLE",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 37,
+        "NO_OBSERVED_PRINT": 1
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 28,
+      "fee_bps": 30,
+      "missing_price_n": 5,
+      "n": 38,
+      "nonimmediate_proxy_fills": 33,
+      "price_drift_pct_q50": 0.3599,
+      "proxy_n": 33,
+      "runner": "IDLE",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 4,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 1,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 33
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 46,
+      "nonimmediate_proxy_fills": 18,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 46,
+      "runner": "PENGU",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 46
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 38,
+      "fee_bps": 30,
+      "missing_price_n": 3,
+      "n": 46,
+      "nonimmediate_proxy_fills": 43,
+      "price_drift_pct_q50": 0.2794,
+      "proxy_n": 43,
+      "runner": "PENGU",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 3,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 43
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 116,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 116,
+      "runner": "Q102",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 116
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 8,
+      "fee_bps": 30,
+      "missing_price_n": 8,
+      "n": 116,
+      "nonimmediate_proxy_fills": 12,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 108,
+      "runner": "Q102",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 108,
+        "NO_OBSERVED_PRINT": 8
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 96,
+      "fee_bps": 30,
+      "missing_price_n": 10,
+      "n": 116,
+      "nonimmediate_proxy_fills": 106,
+      "price_drift_pct_q50": 0.205,
+      "proxy_n": 106,
+      "runner": "Q102",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 2,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 8,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 106
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 0,
+      "n": 498,
+      "nonimmediate_proxy_fills": 0,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 498,
+      "runner": "V4",
+      "scenario": "NATIVE_H1_PRICE",
+      "scenario_state": {
+        "HYPOTHETICAL_PRICE_REFERENCE": 498
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 0,
+      "fee_bps": 30,
+      "missing_price_n": 5,
+      "n": 498,
+      "nonimmediate_proxy_fills": 70,
+      "price_drift_pct_q50": 0.0,
+      "proxy_n": 493,
+      "runner": "V4",
+      "scenario": "FIRST_PRINT_UPPER_INFORMATION_BOUND",
+      "scenario_state": {
+        "EX_POST_PRINT_PRICE_ONLY": 493,
+        "NO_OBSERVED_PRINT": 5
+      },
+      "unresolved_source_n": 0
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_price_diff_gt5bps": 404,
+      "fee_bps": 30,
+      "missing_price_n": 14,
+      "n": 498,
+      "nonimmediate_proxy_fills": 484,
+      "price_drift_pct_q50": 0.1899,
+      "proxy_n": 484,
+      "runner": "V4",
+      "scenario": "CONFIRMED_NEXT_PRINT",
+      "scenario_state": {
+        "EXPIRED_AFTER_CONFIRMATION_WITHOUT_LATER_PRINT": 9,
+        "EXPIRED_WITHOUT_CONFIRMED_PRINT": 5,
+        "POST_CONFIRMATION_EXECUTION_PROXY": 484
+      },
+      "unresolved_source_n": 0
+    }
+  ]
+}

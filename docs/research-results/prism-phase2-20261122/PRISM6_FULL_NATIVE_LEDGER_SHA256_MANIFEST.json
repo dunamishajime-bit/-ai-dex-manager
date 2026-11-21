@@ -1,0 +1,59 @@
+{
+  "archive": "PRISM6_FULL_NATIVE_LEDGER_20261122.zip",
+  "archive_bytes": 97257,
+  "archive_roundtrip_verified": true,
+  "archive_sha256": "6d4785bad908f8aec778825b23e2f2c4afbff05a3ffe363271a52b1c012aba60",
+  "individual_files": [
+    {
+      "bytes": 271769,
+      "file": "PRISM6_PENGU_V20_ALL53_DELAY_NATIVE_REPLAY.json",
+      "source_sha256": "cd190fcbf1a1135d5ecfaf08e5b47ac67737959feee39195cef4dc086b148c9d"
+    },
+    {
+      "bytes": 52590,
+      "file": "PRISM6_PENGU_V20_M5_53_EARLY_CAUSAL_FORENSICS.csv",
+      "source_sha256": "9069209a707604d1dfd63d6cf43141c9e0cb8443fa42a3f4de0257bf5ec61ce0"
+    },
+    {
+      "bytes": 193576,
+      "file": "PRISM6_PENGU_V20_STAGED_ENTRY_53_COMPLETE.csv",
+      "source_sha256": "0fb9fb62abbc69aaccdd40886ee51f8be5e55f266632e37175994ed4344850d9"
+    },
+    {
+      "bytes": 46092,
+      "file": "PRISM6_PENGU_V20_STAGED_ENTRY_53_SUMMARY.json",
+      "source_sha256": "244b7c0a6bc89d54c19ec0a6e042a2cc9dcc87cc369c075141cfb7ad5ee06cbb"
+    },
+    {
+      "bytes": 9518,
+      "file": "PRISM6_PENGU_V20_STAGED_ENTRY_53_ABLATION.csv",
+      "source_sha256": "a13faf0b8eeea18be04282d0253ccffe2f73ff256957ea72870ffca54d27d62d"
+    },
+    {
+      "bytes": 460698,
+      "file": "PRISM6_PENGU_V20_SELL_LIMIT_53X9_PRINT_TOUCH_QUEUE.json",
+      "source_sha256": "4277a50a75f6b800af7e15f372204e50dcb62a3f517a1dd09db811393e4c24c9"
+    },
+    {
+      "bytes": 495079,
+      "file": "PRISM6_PENGU_V20_SELL_LIMIT_53X9_NATIVE_PRICE_REPLAY.json",
+      "source_sha256": "c1ac7f88ade6e77ec22bb793b09391b38b5c8e5ce30a5e47ac5b23c97d506236"
+    },
+    {
+      "bytes": 970408,
+      "file": "PRISM6_PENGU_V20_LIMIT_ADVERSE_FILL_STRESS_SUMMARY.json",
+      "source_sha256": "37dd6e018662b596fae0950d1e6852ab3f2c299ea26d1f9a9ff9026377c3d162"
+    },
+    {
+      "bytes": 2430,
+      "file": "PRISM6_INDEPENDENT_ALL_METHODS_VALIDATION.json",
+      "source_sha256": "ed3fb4b241c3806cdcdd064254b270110e5f61fdf906ee96168c70044a80d891"
+    }
+  ],
+  "production_changed": false,
+  "research_branch": "research/prism-70-80-entry-redesign-phase2-20261122",
+  "research_only": true,
+  "schema": "disdex-prism6-full-ledger-v1",
+  "signed_venue_fills": false,
+  "source_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+}
