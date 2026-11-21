@@ -1,0 +1,146 @@
+{
+  "schema": "prism7-p17-source53-online-prequential-H1-24h-direction-logistic/v1",
+  "pinnedRuntimeSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "naturalSourceTradeIntentsUnchanged": 53,
+  "nativeOriginalWinsUnchanged": 29,
+  "fixedLearningRate": 0.03,
+  "fixedL2": 0.001,
+  "fixedTargetMaturityHours": 24,
+  "fixedFeatureCount": 9,
+  "fixedFeatureNormalization": [
+    "PENGU_RET24H/.10",
+    "PENGU_RET72H/.25",
+    "BTC_RET24H/.06",
+    "REL_RET24H/.10",
+    "PENGU_CLOSE_OVER_EMA72/.12",
+    "BTC_EMA168_DISTANCE/.08",
+    "VOLUME_RATIO_MINUS1/2",
+    "ATR_RATIO_MINUS_0.025/.025",
+    "RSI_MINUS50/25"
+  ],
+  "targetLabel": "FUTURE_24H_PENGU_H1_SHORT_NET_OF_30BPS_POSITIVE_NOT_NATIVE_STOP_PNL",
+  "cohortAudit": {
+    "PRE_2025_AUG_SEP": {
+      "sourceRecords": 1464,
+      "maturedTrainingExamples": 992,
+      "maturedTrainingWins": 531,
+      "skippedMaturedSamplesBadFeatures": 0,
+      "nativeShortSignals": 6,
+      "pinnedPrefixInvarianceChecks": 3,
+      "mktSourceHashes": {
+        "PENGU": {
+          "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        },
+        "BTC": {
+          "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      }
+    },
+    "BASE_2025_2026": {
+      "sourceRecords": 8928,
+      "maturedTrainingExamples": 7545,
+      "maturedTrainingWins": 3919,
+      "skippedMaturedSamplesBadFeatures": 0,
+      "nativeShortSignals": 40,
+      "pinnedPrefixInvarianceChecks": 3,
+      "mktSourceHashes": {
+        "PENGU": {
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        },
+        "BTC": {
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      }
+    },
+    "POST_2026_OCT_NOV": {
+      "sourceRecords": 10080,
+      "maturedTrainingExamples": 8687,
+      "maturedTrainingWins": 4603,
+      "skippedMaturedSamplesBadFeatures": 0,
+      "nativeShortSignals": 7,
+      "pinnedPrefixInvarianceChecks": 3,
+      "mktSourceHashes": {
+        "PENGU": {
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+          "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+        },
+        "BTC": {
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+          "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "ALL": {
+      "sourceNaturalIntentCount": 53,
+      "sourceNativeWins": 29,
+      "modelPredictedIntentCount": 53,
+      "nativeOutcomeAuc": 0.4267241379310345,
+      "nativeWinProbAboveHalf": 8,
+      "nativeWinProbBelowHalf": 21,
+      "nativeLossProbAboveHalf": 10,
+      "nativeLossProbBelowHalf": 14,
+      "future24hProxyOutcomeAvailable": 53,
+      "future24hProxyWinCount": 25,
+      "future24hProxyAuc": 0.4857142857142857,
+      "forecast24hBrier": 0.2627897669681193,
+      "onlineBaseRateBrier": 0.25772766279591647
+    },
+    "PRE_2025_AUG_SEP": {
+      "sourceNaturalIntentCount": 6,
+      "sourceNativeWins": 2,
+      "modelPredictedIntentCount": 6,
+      "nativeOutcomeAuc": 0.625,
+      "nativeWinProbAboveHalf": 2,
+      "nativeWinProbBelowHalf": 0,
+      "nativeLossProbAboveHalf": 3,
+      "nativeLossProbBelowHalf": 1,
+      "future24hProxyOutcomeAvailable": 6,
+      "future24hProxyWinCount": 3,
+      "future24hProxyAuc": 0.4444444444444444,
+      "forecast24hBrier": 0.24905345150983071,
+      "onlineBaseRateBrier": 0.25308925704254276
+    },
+    "BASE_2025_2026": {
+      "sourceNaturalIntentCount": 40,
+      "sourceNativeWins": 24,
+      "modelPredictedIntentCount": 40,
+      "nativeOutcomeAuc": 0.375,
+      "nativeWinProbAboveHalf": 6,
+      "nativeWinProbBelowHalf": 18,
+      "nativeLossProbAboveHalf": 7,
+      "nativeLossProbBelowHalf": 9,
+      "future24hProxyOutcomeAvailable": 40,
+      "future24hProxyWinCount": 19,
+      "future24hProxyAuc": 0.44862155388471175,
+      "forecast24hBrier": 0.26202221103982537,
+      "onlineBaseRateBrier": 0.25913186512218905
+    },
+    "POST_2026_OCT_NOV": {
+      "sourceNaturalIntentCount": 7,
+      "sourceNativeWins": 3,
+      "modelPredictedIntentCount": 7,
+      "nativeOutcomeAuc": 0.5,
+      "nativeWinProbAboveHalf": 0,
+      "nativeWinProbBelowHalf": 3,
+      "nativeLossProbAboveHalf": 0,
+      "nativeLossProbBelowHalf": 4,
+      "future24hProxyOutcomeAvailable": 7,
+      "future24hProxyWinCount": 3,
+      "future24hProxyAuc": 0.4166666666666667,
+      "forecast24hBrier": 0.27894978552261757,
+      "onlineBaseRateBrier": 0.25367942586296505
+    }
+  },
+  "limitations": [
+    "All SOURCE native original53 outcomes are historically observed; 24h online prequential is not a fresh blind unseen-market OOS.",
+    "24h future-H1 label is a market-price direction proxy; original SOURCE SHORT V20 has dynamic 72h STOP and funding.",
+    "Algorithm never observes native trade winner/loser labels during training. No native STOP/ENTRY changes.",
+    "H1 source price is not a signed venue fill; low liquidity and provider H1/M5 mismatch remain unresolved.",
+    "Threshold .5 is a diagnostic, not an executable gate. All 53 original SOURCE candidates are included.",
+    "No live orders, no shared Gross, no portfolio DD, no production deployment authorized."
+  ]
+}
