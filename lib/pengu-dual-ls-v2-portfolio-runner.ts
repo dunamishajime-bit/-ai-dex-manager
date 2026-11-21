@@ -189,6 +189,18 @@ function validLiveAccount(account: DirectAccountSnapshot, now: number, maxAgeMs 
         && account.updatedAt <= now && now - account.updatedAt <= maxAgeMs;
 }
 
+/** Foreign open orders block entries globally, but a reduce-only exit only
+ * conflicts with a foreign order on its own symbol. Managed resident STOPs
+ * are filtered separately and must remain protected. */
+export function penguForeignOrderConflictsWithAction(
+    openOrders: readonly Pick<DirectOpenOrder, "symbol">[],
+    targetSymbol: string,
+    reduceOnly: boolean,
+): boolean {
+    if (!reduceOnly) return openOrders.length > 0;
+    return openOrders.some((order) => String(order.symbol).toUpperCase() === targetSymbol.toUpperCase());
+}
+
 function unmanagedCrossSleeveOpenOrders(
     openOrders: readonly DirectOpenOrder[],
     positions: readonly DirectPosition[],
@@ -764,8 +776,7 @@ export class PenguDualLsV2PortfolioRunner {
                 now = this.now();
                 if (!validLiveAccount(account, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID");
                 const unmanagedOrders = unmanagedCrossSleeveOpenOrders(openOrders, positions);
-                if (unmanagedOrders.length > 0 &&
-                    (!pending.reduceOnly || unmanagedOrders.some((order) => order.symbol === SYMBOL))) {
+                if (penguForeignOrderConflictsWithAction(unmanagedOrders, SYMBOL, pending.reduceOnly)) {
                     throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
                 }
                 const actual = actualPosition(positions);
@@ -957,7 +968,7 @@ export class PenguDualLsV2PortfolioRunner {
             // never bypassed. Orders on other symbols must not prevent an
             // already-open PENGU position from evaluating protective exits.
             const conflictingSameSymbolOrder =
-                nonQuality102OpenOrders.some((order) => order.symbol === SYMBOL)
+                penguForeignOrderConflictsWithAction(nonQuality102OpenOrders, SYMBOL, true)
                 || openOrders.some((order) => order.symbol === SYMBOL && quality102OwnsOrder(quality102Ownership, order));
             if (state.position && conflictingSameSymbolOrder) {
                 await this.dependencies.stateStore.save(state);
