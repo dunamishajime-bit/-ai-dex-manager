@@ -1,0 +1,13 @@
+{
+  "encoding": "gzip.compress(raw,compresslevel=9,mtime=0); base64.b64encode(gzip_bytes)",
+  "gz_base64_text_sha256": "db1c9078ac631f51924d6e6ce9fe4f71c4f166b4cdbb92d606a3966669ffcd57",
+  "gz_base64_text_size": 189029,
+  "gzip_compressed_size": 141769,
+  "raw_original_filename": "PRISM7_P28_LAYER3_FIXED_GROSS_1980_POSITION_LEDGERS_20261122.json",
+  "raw_original_sha256": "3629abdcbbc2d7f8e3c53dede2e4d019e293b5cb5b66c1ff1ba1b84209629706",
+  "raw_original_size": 1918746,
+  "recovered_sha256_parity": true,
+  "rows_verified": 1980,
+  "schema": "prism7-p28-full-1980-ledger-lossless-gzip-base64-manifest/v1",
+  "storage_filename": "PRISM7_P28_LAYER3_FIXED_GROSS_1980_POSITION_LEDGERS_20261122.json.gz.b64"
+}
