@@ -62,11 +62,11 @@ def ci95(w,n):
  z=1.9599639845;p=w/n;d=1+z*z/n;c=(p+z*z/(2*n))/d
  h=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d
  return [round(100*max(0,c-h),2),round(100*min(1,c+h),2)]
-def group(rows,label,frequency,segment):
+def group(rows,label,frequency,fee,segment):
  n=len(rows);w=sum(x["profitable"] for x in rows)
  rets=[x["net_notional_return_pct"] for x in rows]
  pos=sum(max(x,0) for x in rets);loss=sum(max(-x,0) for x in rets)
- return {"segment":segment,"period":frequency,**label,
+ return {"segment":segment,"period":frequency,"fee_bps":fee,**label,
  "n":n,"wins":w,"losses":n-w,"win_pct":round(100*w/n,2),
  "wilson95_win_pct":ci95(w,n),
  "median_net_notional_pct":round(statistics.median(rets),4),
