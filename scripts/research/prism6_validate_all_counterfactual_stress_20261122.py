@@ -63,7 +63,7 @@ for x in limit["events"]:
 assert counter==209
 assert Counter(x["period"] for x in baseline)=={
  "PRE_2025_AUG_SEP":6,"BASE_2025_2026":40,"POST_2026_OCT_NOV":7}
-assert Counter(x["status"] for x in forensic["study"] if x["period"]=="ALL_SEEN")=={} if False else True
+assert len(forensic["study"])==16 and all(x["total_original"]==53 for x in forensic["study"] if x["period"]=="ALL_SEEN")
 rows=csvread("PRISM6_PENGU_V20_STAGED_ENTRY_53_COMPLETE.csv")
 assert len(rows)==1272
 at30=[x for x in delay["grouped"] if x["period"]=="ALL_SEEN" and x["costBps"]==30]
@@ -101,7 +101,7 @@ qa={
     for x in at30}},
  "earlyMarketMicrostructure":{"naturalSource":53,"checkpoints":[1,3,6,12],
   "observations":212,"has_future_labels_as_diagnostics_only":True},
- "stagedGross":{"candidateCount":53,"research_scenarios":96,"none_reaches_win70":all(x["winPct"]<70 for x in staged["cohorts"] if x["bps"]==30)},
+ "stagedGross":{"candidateCount":53,"research_scenarios":96,"none_reaches_win70":all(x["winPct"]<70 for x in staged["cohorts"] if x["bps"]==30 and x["period"]=="ALL_SEEN")},
  "passiveSellLimits":{"sourceScenarioCount":477,"pricePrintTouched":209,
   "touch_not_signed_fill":True,
   "example_05pct_1h_30bps":{"sourceN":53,"assumedPrintTouches":24,
