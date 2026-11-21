@@ -88,9 +88,12 @@ for period,file in FILES:
      nextH1=(touch//H+1)*H
      intra=view(touch,nextH1)
      dangerous=[(t,z) for t,z in intra if z[4]>0 and z[1]>=hard]
+     post_touch=[q for t,q in intra if t>touch and q[4]>0]
+     after_fill_low=min([limit]+[q[2] for q in post_touch])
      record.update({"fillModelPrice":limit,
        "firstTouchM5Ts":touch,"nativeEntryProcessFromH1Ts":nextH1,
        "hardStopPrice":hard,
+       "post_touch_completed_M5_low_excluding_ambiguous_touch_bar":after_fill_low,
        "source_m5_positive_volume_at_touch":z[4],
        "same_touch_M5_crosses_hard_stop":any(t==touch for t,v in dangerous),
        "stop_cross_before_first_completed_H1":bool(dangerous),
