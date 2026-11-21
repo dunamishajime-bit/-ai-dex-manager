@@ -1,0 +1,13 @@
+﻿period,threshold,original_n,model_scored_n,unscored_n,retained_n,retained_win_n,retained_win_pct,retained_mean_net30_pct,retained_price_pf30,excluded_winners,excluded_losers
+PRE_2025_AUG_SEP,0.5,6,0,6,0,0,,,,0,0
+PRE_2025_AUG_SEP,0.6,6,0,6,0,0,,,,0,0
+PRE_2025_AUG_SEP,0.7,6,0,6,0,0,,,,0,0
+BASE_2025_2026,0.5,40,34,6,20,12,60.0,2.1315,1.7798,8,6
+BASE_2025_2026,0.6,40,34,6,2,2,100.0,9.535,,18,14
+BASE_2025_2026,0.7,40,34,6,0,0,,,,20,14
+POST_2026_OCT_NOV,0.5,7,7,0,5,1,20.0,-1.1927,0.454,2,0
+POST_2026_OCT_NOV,0.6,7,7,0,0,0,,,,3,4
+POST_2026_OCT_NOV,0.7,7,7,0,0,0,,,,3,4
+ALL_SEEN,0.5,53,41,12,25,13,52.0,1.4667,1.5591,10,6
+ALL_SEEN,0.6,53,41,12,2,2,100.0,9.535,,21,18
+ALL_SEEN,0.7,53,41,12,0,0,,,,23,18
