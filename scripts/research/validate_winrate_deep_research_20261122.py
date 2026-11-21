@@ -15,7 +15,9 @@ join=load("accepted_portfolio_shadow_gate_join.json")
 assert report["asof_feature_provenance"]["checked_independent_h1_momentum_lookbacks"]==1234
 assert report["asof_feature_provenance"]["verified_independent_h1_momentum_lookbacks"]==1234
 assert report["asof_feature_provenance"]["mismatch"]==[]
-assert report["candidate_count"]==model["observations"]["valid_unique_candidates"]==2892
+assert report["candidate_count"]==2892
+assert model["observations"]["valid_unique_candidates"]==2891
+assert model["observations"]["right_censored_after_bt_end"]=={"Q102":1}
 assert len(report["per_route"])==64
 assert model["source_sha256"]["filled_10"]==report["source_sha256"]["fills_10bps"]
 assert model["source_sha256"]["filled_30"]==report["source_sha256"]["fills_30bps"]
@@ -24,8 +26,8 @@ for fee in ("10","30"):
  cohort=report["runners"][fee]
  assert sum(cohort[s]["n"] for s in ["V4","Q102","PENGU","V52","FET","IDLE","HYPE"])==cohort["ALL"]["n"]
  assert sum(cohort[s]["wins"] for s in ["V4","Q102","PENGU","V52","FET","IDLE","HYPE"])==cohort["ALL"]["wins"]
- assert len(trace[fee])==2892
- assert len(set(x["signal_id"] for x in trace[fee]))==2892
+ assert len(trace[fee])==2891
+ assert len(set(x["signal_id"] for x in trace[fee]))==2891
  assert sum(int(x["price_win"]) for x in trace[fee])>=0
  for x in trace[fee]:
   assert 0<=x["online"]["p"]<=1 and x["online"]["route_n"]<=x["online"]["hist_n"]
@@ -59,6 +61,7 @@ for stat in model["summary"]:
   assert n>=10 and stat["wilson95pct"][0]>=stat["target_pct"]
 assert model["rules"]["no_holdout_selection"]
 assert len(model["summary"])==210
+assert len(model["source_sha256"]["fully_closed_h1"])>=7
 
 assert len(regime["regime_tests"])>0
 for x in regime["regime_tests"]:
