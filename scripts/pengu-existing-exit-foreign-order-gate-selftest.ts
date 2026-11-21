@@ -27,7 +27,7 @@ assert.match(code, /if \(state\.position && conflictingSameSymbolOrder\)/,
     "Unknown PENGUUSDT orders must remain a hard conflict");
 assert.match(code, /penguForeignOrderConflictsWithAction\(unmanagedOrders, SYMBOL, pending\.reduceOnly\)/,
     "Pre-submit must independently distinguish entry from reduce-only exit");
-assert.match(code, /if \(!pending\.reduceOnly\) return openOrders\.length > 0/,
+assert.match(code, /if \(!reduceOnly\) return openOrders\.length > 0/,
     "No global open-order bypass is permitted for entries");
 assert.match(code, /const protectionBlocked = await this\.protectOrdinaryPosition\(state\)/,
     "Venue-resident stop protection must remain present before exit evaluation");
