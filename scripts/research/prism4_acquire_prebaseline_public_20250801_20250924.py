@@ -10,7 +10,7 @@ No account API or real trade calls. Fail-closed on any data hole.
 """
 from __future__ import annotations
 from pathlib import Path
-import datetime as dt,gzip,hashlib,json,sys,time,urllib.request,urllib.parse
+import datetime as dt,gzip,hashlib,json,sys,time,urllib.request,urllib.parse,math
 OUT=Path(sys.argv[1]) if len(sys.argv)>1 else Path.cwd()/"PRISM_PREBASELINE_PUBLIC"
 OUT.mkdir(parents=True,exist_ok=True)
 START=int(dt.datetime(2025,8,1,tzinfo=dt.timezone.utc).timestamp()*1000)
@@ -35,7 +35,7 @@ def request(sym,interval,cursor):
    time.sleep(attempt+1)
  raise RuntimeError("UNREACHABLE")
 def acquire(sym,interval,bar):
- data={};cursor=START;calls=0
+ data={};cursor=START;calls=0;anomalies=[]
  while cursor<END:
   a=request(sym,interval,cursor)
   calls+=1
@@ -46,8 +46,11 @@ def acquire(sym,interval,bar):
    t=int(x[0])
    if not START<=t<END or (t-START)%bar:raise ValueError("INVALID_BAR_TIME")
    o,h,l,c,v=(float(x[i]) for i in (1,2,3,4,5))
-   if not(0<l<=min(o,c,h) and h>=max(o,c,l) and v>=0):
-    raise ValueError("BAD_OHLCV")
+   if not all(map(math.isfinite,(o,h,l,c,v))) or min(o,h,l,c)<=0 or v<0:
+    raise ValueError("BAD_PRICE_OR_VOLUME")
+   if not(l<=min(o,c,h) and h>=max(o,c,l)):
+    if sym!="BTCUSDT":raise ValueError("NON_BTC_MALFORMED_OHLC")
+    anomalies.append({"ts":t,"open":o,"high":h,"low":l,"close":c})
    if t in data:raise ValueError("DUPLICATED_PUBLIC_BAR")
    data[t]=x;n=max(t,n)
   if n<cursor:raise ValueError("STUCK_CURSOR")
@@ -68,7 +71,7 @@ def acquire(sym,interval,bar):
   "begin":START,"endExclusive":END,
   "sha256_uncompressed":hashlib.sha256(payload).hexdigest(),
   "sha256_gzip":hashlib.sha256(file.read_bytes()).hexdigest(),
-  "file":file.name,"requests":calls,"status":"COMPLETE_COVERAGE"}
+  "file":file.name,"requests":calls,"status":"COMPLETE_COVERAGE","malformed_BTC_OHLCV_bars":anomalies}
 manifest={"schema":"disdex-prism-prebaseline-public-20250801-20250924/v1",
  "provider":"Aster /fapi/v3/klines, unsigned public GET","intervals":{},
  "research_only":True,"source_does_not_include_private_fills":True}
