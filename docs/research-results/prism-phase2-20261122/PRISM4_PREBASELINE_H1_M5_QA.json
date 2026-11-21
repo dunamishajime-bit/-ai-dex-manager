@@ -1,0 +1,74 @@
+{
+  "period": [
+    1754006400000,
+    1758672000000
+  ],
+  "research_only": true,
+  "schema": "disdex-prism-prebaseline-H1-M5-QA/v1",
+  "status": "H1_M5_SOURCE_QA_COMPLETE",
+  "symbol": {
+    "BTCUSDT": {
+      "checked": 1296,
+      "fixed_bars": [
+        {
+          "UTC": "2025-09-13T13:00:00+00:00",
+          "fields_changed": [
+            "high",
+            "low"
+          ],
+          "from_positive_volume_M5": [
+            115941.8,
+            115947.5,
+            115580.7,
+            115707.3,
+            285.98
+          ],
+          "raw_OHLCV": [
+            115941.8,
+            115916.1,
+            115580.7,
+            115707.3,
+            285.98
+          ],
+          "ts": 1757768400000
+        }
+      ],
+      "fully_zero_volume_hours": 0,
+      "hours_m5_vs_native_any_field_different": 1,
+      "m5_sha256": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "m5_unverifiable_intrabar_extremes": 1,
+      "qa_file": "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz",
+      "quarantined_M5_raw": [
+        {
+          "raw_OHLCV": [
+            115777.0,
+            115774.3,
+            115580.7,
+            115693.4,
+            37.653
+          ],
+          "status": "M5_HIGH_BELOW_ITS_OWN_OPEN_SOURCE_AMBIGUOUS",
+          "ts": 1757771400000
+        }
+      ],
+      "raw_H1_OHLCV_malformed": 1,
+      "raw_sha256": "0faa79680bd25c44cb1766b655747e9e05a0eab9264649a69440fab6291b5ee8",
+      "research_qa_sha256": "cd04132a64657c3abb6e4485e72d2b8f8b7b0c9ecb7d86ed6769aeca45d6b123",
+      "source_ohlc_quality": "AMBIGUOUS_ONE_M5_EXTREME_BOUNDED_IN_RESEARCH"
+    },
+    "PENGUUSDT": {
+      "checked": 1296,
+      "fixed_bars": [],
+      "fully_zero_volume_hours": 237,
+      "hours_m5_vs_native_any_field_different": 0,
+      "m5_sha256": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "m5_unverifiable_intrabar_extremes": 0,
+      "qa_file": "PENGUUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz",
+      "quarantined_M5_raw": [],
+      "raw_H1_OHLCV_malformed": 0,
+      "raw_sha256": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "research_qa_sha256": "4b7d13c4693856663fcdf5aee262728f2bc4c657ea3079021443a7bd41ef36a2",
+      "source_ohlc_quality": "ALL_M5_VALID"
+    }
+  }
+}
