@@ -1,0 +1,199 @@
+{
+  "by_original_outcome": {
+    "LOSS_SOURCE_MODEL": {
+      "count": 24,
+      "delayed_first_print": 8,
+      "first5_print": 16,
+      "first_hour_any_print": 24,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 24,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 0
+    },
+    "WIN_SOURCE_MODEL": {
+      "count": 29,
+      "delayed_first_print": 11,
+      "first5_print": 17,
+      "first_hour_any_print": 28,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 1,
+      "losers": 0,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 29
+    }
+  },
+  "by_period": {
+    "BASE_2025_2026": {
+      "count": 40,
+      "delayed_first_print": 14,
+      "first5_print": 25,
+      "first_hour_any_print": 39,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 1,
+      "losers": 16,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 24
+    },
+    "POST_2026_OCT_NOV": {
+      "count": 7,
+      "delayed_first_print": 2,
+      "first5_print": 5,
+      "first_hour_any_print": 7,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 4,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 3
+    },
+    "PRE_2025_AUG_SEP": {
+      "count": 6,
+      "delayed_first_print": 3,
+      "first5_print": 3,
+      "first_hour_any_print": 6,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 4,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 15.0,
+      "wins": 2
+    }
+  },
+  "by_source_exit_reason": {
+    "SHORT_HARD_STOP": {
+      "count": 14,
+      "delayed_first_print": 5,
+      "first5_print": 9,
+      "first_hour_any_print": 14,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 14,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 0
+    },
+    "SHORT_MAX_HOLD": {
+      "count": 28,
+      "delayed_first_print": 10,
+      "first5_print": 17,
+      "first_hour_any_print": 27,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 1,
+      "losers": 10,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 18
+    },
+    "SHORT_TRAILING_STOP": {
+      "count": 9,
+      "delayed_first_print": 4,
+      "first5_print": 5,
+      "first_hour_any_print": 9,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 0,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 9
+    },
+    "SHORT_V20_DEADLINE_EXIT": {
+      "count": 2,
+      "delayed_first_print": 0,
+      "first5_print": 2,
+      "first_hour_any_print": 2,
+      "gap_gt_threshold_pct": {
+        "0.05": 0,
+        "0.1": 0,
+        "0.5": 0,
+        "1.0": 0
+      },
+      "hour_without_trade": 0,
+      "losers": 0,
+      "median_abs_h1_first_print_price_gap_pct": 0.0,
+      "median_print_delay_min": 0.0,
+      "wins": 2
+    }
+  },
+  "limitations": [
+    "H1 source entry price preserved; no entry reprice or native STOP recomputation.",
+    "A positive printed M5 bar proves some venue prints, NOT the bot order fill.",
+    "First M5 positive print after entryTs is only known in hindsight.",
+    "No orderbook/quote, queue, own signed fill, partials, funding or gap-stop execution.",
+    "H1 public source price may differ from public M5 source candle open.",
+    "No forward untouched OOS, synthetic benchmark, compound portfolio DD or shared risk."
+  ],
+  "overall": {
+    "count": 53,
+    "delayed_first_print": 19,
+    "first5_print": 33,
+    "first_hour_any_print": 52,
+    "gap_gt_threshold_pct": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.5": 0,
+      "1.0": 0
+    },
+    "hour_without_trade": 1,
+    "losers": 24,
+    "median_abs_h1_first_print_price_gap_pct": 0.0,
+    "median_print_delay_min": 0.0,
+    "wins": 29
+  },
+  "pinned_runtime_commit": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "schema": "prism7-p11-source-native-short53-M5-initial-positive-print-execution-audit/v1",
+  "source_native_original_win30_count": 29,
+  "source_native_short53_count": 53,
+  "source_sha256": {
+    "M5_archive_sha256": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    },
+    "native53_source_evidence": "3aba930fd754fe9acb6bcedc7318f75f74a44a80b00a163ca68cc3c2221b601c"
+  }
+}
