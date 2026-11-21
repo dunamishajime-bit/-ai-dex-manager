@@ -39,7 +39,7 @@ const fundingRaw=Buffer.from('[]');
 const funding=JSON.parse(fundingRaw.toString('utf8')).map(x=>({fundingTime:+x.fundingTime,fundingRate:+x.fundingRate}));
 const history={pengu1h:P.rows,btc1h:B.rows,penguFunding:funding};
 const evalRows=buildPenguDualLsV2EvaluationSeries(history,END);
-assert(evalRows.length===P.rows.length,'EVAL_LENGTH');
+assert(evalRows.length===P.rows.length,JSON.stringify({error:'EVAL_LENGTH',evalRows:evalRows.length,penguh1:P.rows.length,btch1:B.rows.length,firstPengu:P.rows[0]?.openTime,lastPengu:P.rows.at(-1)?.openTime,firstEval:evalRows[0]?.candle?.openTime,lastEval:evalRows.at(-1)?.candle?.openTime}));
 const evalByTs=new Map();
 for(let i=0;i<evalRows.length;i++)if(evalRows[i].features)evalByTs.set(evalRows[i].features.referenceTs,{row:evalRows[i],index:i});
 const penguByTs=new Map(P.rows.map(x=>[x.openTime,x]));
