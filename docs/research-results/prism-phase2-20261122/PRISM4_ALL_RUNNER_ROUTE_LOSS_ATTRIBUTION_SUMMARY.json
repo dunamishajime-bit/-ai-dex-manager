@@ -1,0 +1,1221 @@
+{
+  "inputs": {
+    "fees": [
+      10,
+      30
+    ],
+    "modeled_fill_records": 1876,
+    "period": "2025-10-01/2026-10-01",
+    "portfolio": "STABLE3 Gross425 V52latch research, NOT native Production parity"
+  },
+  "limitations": [
+    "The profit/loss sign of an exit is not proof that the entry direction was incorrect",
+    "Gross425, stable3 retrospective gates and fees are research source, not deployed pin",
+    "Q102 missing history is UNKNOWN, never classified as untradeable",
+    "Do not select trade route disable/threshold based on this same retrospective data",
+    "Most route groups small and overlap across quarters; 95% Wilson only describes sample uncertainty",
+    "Notional-return does not include full account compounding and open-position cross-correlations",
+    "No signed venue fills or actual stop execution, funding and realized slippage are verified"
+  ],
+  "routed_portfolio_candidates": 57,
+  "runner_all": [
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 1,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "FET_PROTECTED_STOP": 2,
+        "MAX_HOLD": 2
+      },
+      "losses": 4,
+      "mean_net_notional_pct": 2.0119,
+      "median_net_notional_pct": 0.8876,
+      "n": 8,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.147,
+      "segment": "strategy",
+      "stale_M5_entry_count": 1,
+      "strategy": "FET",
+      "sum_net_notional_pct": 16.096,
+      "wilson95_win_pct": [
+        21.52,
+        78.48
+      ],
+      "win_pct": 50.0,
+      "wins": 4
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "FORMAL_PRIORITY": 2
+      },
+      "losses": 2,
+      "mean_net_notional_pct": 1.1656,
+      "median_net_notional_pct": 0.7955,
+      "n": 6,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 8.12,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "HYPE",
+      "sum_net_notional_pct": 6.994,
+      "wilson95_win_pct": [
+        30.0,
+        90.32
+      ],
+      "win_pct": 66.67,
+      "wins": 4
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 6,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "IDLE_PROD_IDLE_HARD_STOP": 1,
+        "IDLE_PROD_MAX_HOLD": 6
+      },
+      "losses": 7,
+      "mean_net_notional_pct": -0.1581,
+      "median_net_notional_pct": 0.4416,
+      "n": 17,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 0.909,
+      "segment": "strategy",
+      "stale_M5_entry_count": 6,
+      "strategy": "IDLE",
+      "sum_net_notional_pct": -2.688,
+      "wilson95_win_pct": [
+        36.01,
+        78.39
+      ],
+      "win_pct": 58.82,
+      "wins": 10
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 17,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "PENGU_NATIVE_LONG_HARD_STOP": 1,
+        "PENGU_NATIVE_RECOVERY_V8_HARD_STOP": 5,
+        "PENGU_NATIVE_RECOVERY_V8_MAX_HOLD": 1,
+        "PENGU_NATIVE_SHORT_MAX_HOLD": 1,
+        "SHARED_RISK_FLATTEN": 3
+      },
+      "losses": 11,
+      "mean_net_notional_pct": 4.3415,
+      "median_net_notional_pct": 5.0377,
+      "n": 46,
+      "no_print_entry_count": 3,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 4.682,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "PENGU",
+      "sum_net_notional_pct": 199.707,
+      "wilson95_win_pct": [
+        62.06,
+        86.09
+      ],
+      "win_pct": 76.09,
+      "wins": 35
+    },
+    {
+      "M5_source_missing_count": 3,
+      "entry_timestamp_before_trade_print_count": 12,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "Q102_PROD_72h_time": 2,
+        "Q102_PROD_HARD_STOP": 7,
+        "Q102_PROD_TIME": 14,
+        "Q102_PROD_hard_stop": 2,
+        "SHARED_RISK_FLATTEN": 5,
+        "STOP5": 5,
+        "TIME": 8
+      },
+      "losses": 43,
+      "mean_net_notional_pct": 0.5928,
+      "median_net_notional_pct": 0.7764,
+      "n": 104,
+      "no_print_entry_count": 8,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.424,
+      "segment": "strategy",
+      "stale_M5_entry_count": 8,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 61.654,
+      "wilson95_win_pct": [
+        49.05,
+        67.65
+      ],
+      "win_pct": 58.65,
+      "wins": 61
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 123,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_CORE_STOP": 3,
+        "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 11,
+        "V4_NATIVE_STOP": 19,
+        "V4_NATIVE_TIME": 188,
+        "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 20,
+        "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 59,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 5
+      },
+      "losses": 307,
+      "mean_net_notional_pct": 1.3668,
+      "median_net_notional_pct": 0.6482,
+      "n": 806,
+      "no_print_entry_count": 13,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.552,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 1101.609,
+      "wilson95_win_pct": [
+        58.51,
+        65.2
+      ],
+      "win_pct": 61.91,
+      "wins": 499
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V52_BASIS_CONVERGED": 4,
+        "V52_BASIS_STOP": 4,
+        "V52_TIME_OR_SESSION_FLAT": 6
+      },
+      "losses": 14,
+      "mean_net_notional_pct": 0.9049,
+      "median_net_notional_pct": 0.8551,
+      "n": 85,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 23.932,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "V52",
+      "sum_net_notional_pct": 76.917,
+      "wilson95_win_pct": [
+        74.23,
+        89.93
+      ],
+      "win_pct": 83.53,
+      "wins": 71
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 1,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "FET_PROTECTED_STOP": 2,
+        "MAX_HOLD": 2
+      },
+      "losses": 4,
+      "mean_net_notional_pct": 1.8119,
+      "median_net_notional_pct": 0.6876,
+      "n": 8,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.978,
+      "segment": "strategy",
+      "stale_M5_entry_count": 1,
+      "strategy": "FET",
+      "sum_net_notional_pct": 14.496,
+      "wilson95_win_pct": [
+        21.52,
+        78.48
+      ],
+      "win_pct": 50.0,
+      "wins": 4
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "FORMAL_PRIORITY": 1,
+        "HYPE_REDESIGN_TIME48_NEXTOPEN": 1
+      },
+      "losses": 2,
+      "mean_net_notional_pct": 3.1681,
+      "median_net_notional_pct": 1.2072,
+      "n": 8,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 19.701,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "HYPE",
+      "sum_net_notional_pct": 25.345,
+      "wilson95_win_pct": [
+        40.93,
+        92.85
+      ],
+      "win_pct": 75.0,
+      "wins": 6
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 21,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "IDLE_PROD_IDLE_HARD_STOP": 1,
+        "IDLE_PROD_MAX_HOLD": 17
+      },
+      "losses": 18,
+      "mean_net_notional_pct": 0.1721,
+      "median_net_notional_pct": 0.2049,
+      "n": 37,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.132,
+      "segment": "strategy",
+      "stale_M5_entry_count": 17,
+      "strategy": "IDLE",
+      "sum_net_notional_pct": 6.367,
+      "wilson95_win_pct": [
+        35.89,
+        66.55
+      ],
+      "win_pct": 51.35,
+      "wins": 19
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 16,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "PENGU_NATIVE_LONG_HARD_STOP": 1,
+        "PENGU_NATIVE_RECOVERY_V8_HARD_STOP": 5,
+        "PENGU_NATIVE_RECOVERY_V8_MAX_HOLD": 2,
+        "PENGU_NATIVE_SHORT_MAX_HOLD": 2,
+        "SHARED_RISK_FLATTEN": 1
+      },
+      "losses": 11,
+      "mean_net_notional_pct": 4.2905,
+      "median_net_notional_pct": 5.0047,
+      "n": 47,
+      "no_print_entry_count": 3,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 4.632,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "PENGU",
+      "sum_net_notional_pct": 201.655,
+      "wilson95_win_pct": [
+        62.78,
+        86.4
+      ],
+      "win_pct": 76.6,
+      "wins": 36
+    },
+    {
+      "M5_source_missing_count": 3,
+      "entry_timestamp_before_trade_print_count": 12,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "Q102_PROD_72h_time": 2,
+        "Q102_PROD_HARD_STOP": 8,
+        "Q102_PROD_TIME": 21,
+        "Q102_PROD_hard_stop": 3,
+        "SHARED_RISK_FLATTEN": 4,
+        "STOP5": 5,
+        "TIME": 8
+      },
+      "losses": 51,
+      "mean_net_notional_pct": 0.5418,
+      "median_net_notional_pct": 0.6221,
+      "n": 119,
+      "no_print_entry_count": 8,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.385,
+      "segment": "strategy",
+      "stale_M5_entry_count": 8,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 64.47,
+      "wilson95_win_pct": [
+        48.17,
+        65.67
+      ],
+      "win_pct": 57.14,
+      "wins": 68
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 70,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_CORE_STOP": 1,
+        "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5,
+        "V4_NATIVE_STOP": 12,
+        "V4_NATIVE_TIME": 126,
+        "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 14,
+        "V4_NATIVE_V4_LONG_PROFIT_GUARD_FILLED": 2,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 39,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 6
+      },
+      "losses": 205,
+      "mean_net_notional_pct": 1.2211,
+      "median_net_notional_pct": 0.4666,
+      "n": 498,
+      "no_print_entry_count": 5,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.182,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 608.12,
+      "wilson95_win_pct": [
+        54.46,
+        63.07
+      ],
+      "win_pct": 58.84,
+      "wins": 293
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V52_BASIS_CONVERGED": 5,
+        "V52_BASIS_STOP": 4,
+        "V52_TIME_OR_SESSION_FLAT": 6
+      },
+      "losses": 15,
+      "mean_net_notional_pct": 0.6943,
+      "median_net_notional_pct": 0.6218,
+      "n": 87,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 10.568,
+      "segment": "strategy",
+      "stale_M5_entry_count": 0,
+      "strategy": "V52",
+      "sum_net_notional_pct": 60.404,
+      "wilson95_win_pct": [
+        73.48,
+        89.26
+      ],
+      "win_pct": 82.76,
+      "wins": 72
+    }
+  ],
+  "schema": "disdex-prism4-all-runner-route-winloss-source-audit/v1",
+  "worst10_route_by_net_notional_return": [
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 3,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 10,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+      },
+      "losses": 11,
+      "mean_net_notional_pct": -1.8869,
+      "median_net_notional_pct": -0.6585,
+      "n": 17,
+      "no_print_entry_count": 2,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 0.166,
+      "route": "REC_X12_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": -32.078,
+      "wilson95_win_pct": [
+        17.31,
+        58.7
+      ],
+      "win_pct": 35.29,
+      "wins": 6
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 5,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "IDLE_PROD_MAX_HOLD": 6
+      },
+      "losses": 6,
+      "mean_net_notional_pct": -0.7653,
+      "median_net_notional_pct": -0.6828,
+      "n": 10,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 0.513,
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 3,
+      "strategy": "IDLE",
+      "sum_net_notional_pct": -7.653,
+      "wilson95_win_pct": [
+        16.82,
+        68.73
+      ],
+      "win_pct": 40.0,
+      "wins": 4
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 4,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 12,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+      },
+      "losses": 13,
+      "mean_net_notional_pct": -0.7152,
+      "median_net_notional_pct": -0.1294,
+      "n": 25,
+      "no_print_entry_count": 2,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 0.551,
+      "route": "REC_X12_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": -17.879,
+      "wilson95_win_pct": [
+        30.03,
+        66.5
+      ],
+      "win_pct": 48.0,
+      "wins": 12
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 2,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 14,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4
+      },
+      "losses": 18,
+      "mean_net_notional_pct": -0.3364,
+      "median_net_notional_pct": -0.2878,
+      "n": 32,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 0.838,
+      "route": "REC_X02_TIME_36H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": -10.763,
+      "wilson95_win_pct": [
+        28.17,
+        60.67
+      ],
+      "win_pct": 43.75,
+      "wins": 14
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 8,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "IDLE_PROD_IDLE_HARD_STOP": 1,
+        "IDLE_PROD_MAX_HOLD": 6
+      },
+      "losses": 7,
+      "mean_net_notional_pct": 0.1392,
+      "median_net_notional_pct": 0.3414,
+      "n": 15,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.088,
+      "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 8,
+      "strategy": "IDLE",
+      "sum_net_notional_pct": 2.088,
+      "wilson95_win_pct": [
+        30.12,
+        75.19
+      ],
+      "win_pct": 53.33,
+      "wins": 8
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 5,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_STOP": 2,
+        "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 14
+      },
+      "losses": 16,
+      "mean_net_notional_pct": 0.194,
+      "median_net_notional_pct": 0.2475,
+      "n": 39,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.344,
+      "route": "REC_G3_LATE_BTC_REL",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 7.568,
+      "wilson95_win_pct": [
+        43.42,
+        72.92
+      ],
+      "win_pct": 58.97,
+      "wins": 23
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 9,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_STOP": 4,
+        "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 20
+      },
+      "losses": 24,
+      "mean_net_notional_pct": 0.3121,
+      "median_net_notional_pct": 0.2827,
+      "n": 58,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.583,
+      "route": "REC_G3_LATE_BTC_REL",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 18.099,
+      "wilson95_win_pct": [
+        45.8,
+        70.37
+      ],
+      "win_pct": 58.62,
+      "wins": 34
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 1,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 4
+      },
+      "losses": 4,
+      "mean_net_notional_pct": 0.3472,
+      "median_net_notional_pct": 0.1698,
+      "n": 10,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.077,
+      "route": "REC_Y08_REV_D0_T6",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 3.472,
+      "wilson95_win_pct": [
+        31.27,
+        83.18
+      ],
+      "win_pct": 60.0,
+      "wins": 6
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_CORE_STOP": 1,
+        "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 5
+      },
+      "losses": 6,
+      "mean_net_notional_pct": 0.3518,
+      "median_net_notional_pct": 0.1256,
+      "n": 14,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.691,
+      "route": "FAILED_BREAK_REV_SHORT_6H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 4.926,
+      "wilson95_win_pct": [
+        32.59,
+        78.62
+      ],
+      "win_pct": 57.14,
+      "wins": 8
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 2,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 5,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3
+      },
+      "losses": 8,
+      "mean_net_notional_pct": 0.4693,
+      "median_net_notional_pct": 1.155,
+      "n": 25,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.48,
+      "route": "REC_X04_TIME_24H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 11.733,
+      "wilson95_win_pct": [
+        48.41,
+        82.79
+      ],
+      "win_pct": 68.0,
+      "wins": 17
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 7,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_CORE_STOP": 3,
+        "V4_CORE_TRAILING_CROSSED_BEFORE_REPLACEMENT": 11
+      },
+      "losses": 14,
+      "mean_net_notional_pct": 0.4941,
+      "median_net_notional_pct": 0.2374,
+      "n": 35,
+      "no_print_entry_count": 2,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 3.269,
+      "route": "FAILED_BREAK_REV_SHORT_6H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 17.294,
+      "wilson95_win_pct": [
+        43.57,
+        74.45
+      ],
+      "win_pct": 60.0,
+      "wins": 21
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 12,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 11,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6
+      },
+      "losses": 17,
+      "mean_net_notional_pct": 0.5436,
+      "median_net_notional_pct": -0.282,
+      "n": 32,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.416,
+      "route": "REC_X05_TIME_36H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 17.395,
+      "wilson95_win_pct": [
+        30.87,
+        63.55
+      ],
+      "win_pct": 46.88,
+      "wins": 15
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "Q102_PROD_TIME": 6
+      },
+      "losses": 6,
+      "mean_net_notional_pct": 0.5613,
+      "median_net_notional_pct": 0.4675,
+      "n": 13,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.064,
+      "route": "DOGE|MR72_Z1.5_H12",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 7.297,
+      "wilson95_win_pct": [
+        29.14,
+        76.79
+      ],
+      "win_pct": 53.85,
+      "wins": 7
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 3,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 14,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6
+      },
+      "losses": 20,
+      "mean_net_notional_pct": 0.5614,
+      "median_net_notional_pct": 0.5272,
+      "n": 44,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.352,
+      "route": "REC_X02_TIME_36H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 24.701,
+      "wilson95_win_pct": [
+        40.07,
+        68.29
+      ],
+      "win_pct": 54.55,
+      "wins": 24
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 2,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 8,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+      },
+      "losses": 9,
+      "mean_net_notional_pct": 0.5755,
+      "median_net_notional_pct": -0.6654,
+      "n": 16,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.577,
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 9.208,
+      "wilson95_win_pct": [
+        23.1,
+        66.82
+      ],
+      "win_pct": 43.75,
+      "wins": 7
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "Q102_PROD_HARD_STOP": 1,
+        "Q102_PROD_TIME": 3,
+        "SHARED_RISK_FLATTEN": 1
+      },
+      "losses": 5,
+      "mean_net_notional_pct": 0.6059,
+      "median_net_notional_pct": 1.3119,
+      "n": 10,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.424,
+      "route": "APT|REV6_T0.03_H24",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 6.059,
+      "wilson95_win_pct": [
+        23.66,
+        76.34
+      ],
+      "win_pct": 50.0,
+      "wins": 5
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 6,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_STOP": 15
+      },
+      "losses": 15,
+      "mean_net_notional_pct": 0.6229,
+      "median_net_notional_pct": 1.6051,
+      "n": 33,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.9,
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 20.557,
+      "wilson95_win_pct": [
+        37.99,
+        70.16
+      ],
+      "win_pct": 54.55,
+      "wins": 18
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 5,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_STOP": 10
+      },
+      "losses": 10,
+      "mean_net_notional_pct": 0.6999,
+      "median_net_notional_pct": 1.639,
+      "n": 26,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.978,
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 18.197,
+      "wilson95_win_pct": [
+        42.53,
+        77.57
+      ],
+      "win_pct": 61.54,
+      "wins": 16
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 11,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "STOP5": 5,
+        "TIME": 8
+      },
+      "losses": 13,
+      "mean_net_notional_pct": 0.7269,
+      "median_net_notional_pct": 2.6993,
+      "n": 38,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.733,
+      "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 8,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 27.623,
+      "wilson95_win_pct": [
+        49.89,
+        78.79
+      ],
+      "win_pct": 65.79,
+      "wins": 25
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 11,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "STOP5": 5,
+        "TIME": 8
+      },
+      "losses": 13,
+      "mean_net_notional_pct": 0.7519,
+      "median_net_notional_pct": 2.8985,
+      "n": 35,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.75,
+      "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 8,
+      "strategy": "Q102",
+      "sum_net_notional_pct": 26.316,
+      "wilson95_win_pct": [
+        46.34,
+        76.83
+      ],
+      "win_pct": 62.86,
+      "wins": 22
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 4,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 5,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7
+      },
+      "losses": 12,
+      "mean_net_notional_pct": 0.8166,
+      "median_net_notional_pct": 0.7978,
+      "n": 32,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.788,
+      "route": "REC_X04_TIME_24H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 26.131,
+      "wilson95_win_pct": [
+        45.25,
+        77.07
+      ],
+      "win_pct": 62.5,
+      "wins": 20
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 6,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 3
+      },
+      "losses": 3,
+      "mean_net_notional_pct": 0.8254,
+      "median_net_notional_pct": 0.7886,
+      "n": 17,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 6.496,
+      "route": "CONT_SHORT_MID_AGE24_48",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 14.031,
+      "wilson95_win_pct": [
+        58.97,
+        93.81
+      ],
+      "win_pct": 82.35,
+      "wins": 14
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 3,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 2
+      },
+      "losses": 2,
+      "mean_net_notional_pct": 0.8319,
+      "median_net_notional_pct": 0.6059,
+      "n": 10,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 5.766,
+      "route": "CONT_SHORT_MID_AGE24_48",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 8.319,
+      "wilson95_win_pct": [
+        49.02,
+        94.33
+      ],
+      "win_pct": 80.0,
+      "wins": 8
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 4,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 15
+      },
+      "losses": 15,
+      "mean_net_notional_pct": 0.8971,
+      "median_net_notional_pct": 0.2644,
+      "n": 40,
+      "no_print_entry_count": 2,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.56,
+      "route": "REC_X03_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 35.885,
+      "wilson95_win_pct": [
+        47.03,
+        75.78
+      ],
+      "win_pct": 62.5,
+      "wins": 25
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 13,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 15,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 7
+      },
+      "losses": 22,
+      "mean_net_notional_pct": 0.9052,
+      "median_net_notional_pct": 0.179,
+      "n": 45,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.765,
+      "route": "REC_X05_TIME_36H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 40.734,
+      "wilson95_win_pct": [
+        37.0,
+        65.04
+      ],
+      "win_pct": 51.11,
+      "wins": 23
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 0,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 10
+      },
+      "losses": 10,
+      "mean_net_notional_pct": 0.9534,
+      "median_net_notional_pct": 0.2584,
+      "n": 23,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.091,
+      "route": "REC_X03_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 21.928,
+      "wilson95_win_pct": [
+        36.81,
+        74.37
+      ],
+      "win_pct": 56.52,
+      "wins": 13
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 8,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "IDLE_PROD_MAX_HOLD": 5
+      },
+      "losses": 5,
+      "mean_net_notional_pct": 0.9944,
+      "median_net_notional_pct": 0.2232,
+      "n": 12,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 2.373,
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 6,
+      "strategy": "IDLE",
+      "sum_net_notional_pct": 11.932,
+      "wilson95_win_pct": [
+        31.95,
+        80.67
+      ],
+      "win_pct": 58.33,
+      "wins": 7
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 6,
+      "fee_bps": 10,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 12,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+      },
+      "losses": 19,
+      "mean_net_notional_pct": 1.0223,
+      "median_net_notional_pct": 0.2047,
+      "n": 40,
+      "no_print_entry_count": 1,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.908,
+      "route": "REC_X06_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 40.893,
+      "wilson95_win_pct": [
+        37.5,
+        67.06
+      ],
+      "win_pct": 52.5,
+      "wins": 21
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 2,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 8,
+        "V4_NATIVE_V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 4,
+        "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED": 1
+      },
+      "losses": 13,
+      "mean_net_notional_pct": 1.107,
+      "median_net_notional_pct": 0.0047,
+      "n": 26,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 1.784,
+      "route": "REC_X06_TIME_12H",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 28.783,
+      "wilson95_win_pct": [
+        32.06,
+        67.94
+      ],
+      "win_pct": 50.0,
+      "wins": 13
+    },
+    {
+      "M5_source_missing_count": 0,
+      "entry_timestamp_before_trade_print_count": 5,
+      "fee_bps": 30,
+      "loss_reason_counts": {
+        "V4_NATIVE_TIME": 11
+      },
+      "losses": 11,
+      "mean_net_notional_pct": 1.224,
+      "median_net_notional_pct": 0.7614,
+      "n": 25,
+      "no_print_entry_count": 0,
+      "period": "FULL_2025OCT_2026SEP",
+      "price_profit_factor": 3.031,
+      "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+      "segment": "strategy_route",
+      "stale_M5_entry_count": 0,
+      "strategy": "V4",
+      "sum_net_notional_pct": 30.6,
+      "wilson95_win_pct": [
+        37.07,
+        73.33
+      ],
+      "win_pct": 56.0,
+      "wins": 14
+    }
+  ]
+}
