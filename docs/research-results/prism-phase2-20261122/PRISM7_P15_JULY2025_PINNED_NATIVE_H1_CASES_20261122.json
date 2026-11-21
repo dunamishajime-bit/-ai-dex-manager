@@ -1,0 +1,23 @@
+[
+  {
+    "entryTs": 1753912800000,
+    "entryPrice": 0.034906,
+    "sourceSignalReferenceTs": 1753909200000,
+    "entryH1PositiveVolume": true,
+    "sourcePreEntryH1s": 298,
+    "originalPin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+    "status": "NATIVE_EXIT_MODELED",
+    "exitTs": 1753938000000,
+    "decisionReferenceTs": 1753934400000,
+    "exitPrice": 0.03769848,
+    "exitReason": "SHORT_HARD_STOP",
+    "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+    "sourceNativeStopPureFunction": true,
+    "venueSignedFill": false,
+    "grossReturnPct": -8.000000000000007,
+    "net10Pct": -8.100000000000007,
+    "net30Pct": -8.300000000000008,
+    "signedVenueFill": false,
+    "notM5Verified": true
+  }
+]
