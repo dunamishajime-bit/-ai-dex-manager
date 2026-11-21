@@ -30,7 +30,7 @@ source_sha=hashlib.sha256(IDLE_REPLAY.read_bytes()).hexdigest()
 print("PRISM3_IDLE_REPLAY_SOURCE_VALID",source_sha,"NO_TRADE",59,"VALID",790,flush=True)
 os.environ["DISDEX_Q102_ADOPTED_MODE"]="ON"
 os.environ["DISDEX_PRETARGET_STABLE_CASE"]="STABLE3"
-TXT=WRAPPER.read_text(encoding="utf8-sig")
+TXT=WRAPPER.read_text(encoding="utf-8-sig")
 old='out_name="STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1"'
 new_name="DD_PRISM3_PENGU_IDLE_VOLUME_AWARE_20261122"
 a='exec(compile(orig,str(SRC)+"::PRETARGET_STABLE_"+case,"exec"),{"__name__":"__main__"})'
