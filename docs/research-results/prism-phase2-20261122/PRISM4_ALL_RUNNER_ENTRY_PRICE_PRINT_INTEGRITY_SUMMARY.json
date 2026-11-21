@@ -1,0 +1,1386 @@
+{
+  "constraints": [
+    "Zero-volume candle means no printed historical trades in that interval. A hypothetical user order could itself create a print; quotes/orderbook are unknown.",
+    "The first positive-volume M5 *open* is the historical first print of that five-minute bar, whose existence is not known until after bar completion; it is not automatically a causal executable fill.",
+    "Most source candidates use entry at beginning of H1; this tests their evidence against H1/M5 trade data only, no signed venue execution.",
+    "Historical paper trading, future fundings, gross caps, and candidate admission are not re-implemented by this audit.",
+    "V52 basis/stock proxies intentionally excluded. History missing for some symbols before Aug 2026; report missing instead of pretending no prints.",
+    "All studies are 2025-10 to 2026-09 and observed, not a new blind walk-forward."
+  ],
+  "schema": "disdex-prism4-all-runner-m5-print-reconciliation/v1",
+  "source_file_hashes": {
+    "AAVEUSDT": {
+      "H1": {
+        "AAVEUSDT-1h-20250924-20261001.jsonl.gz": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d"
+      },
+      "M5": {
+        "AAVEUSDT-5m-20250924-20260803.jsonl.gz": "b8587a5b9ffb024e55632e298d60c83dd6588032d4e17200ecdec9404e8a3584",
+        "AAVEUSDT-5m-20260803-20261001.jsonl.gz": "00f1a05603f6f53c323f416588a8b27f65725b2256821bbcb40c3f053a2be247"
+      }
+    },
+    "ADAUSDT": {
+      "H1": {
+        "ADAUSDT-1h-20250924-20261001.jsonl.gz": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29"
+      },
+      "M5": {
+        "ADAUSDT-5m-20250924-20260803.jsonl.gz": "e6bc3216798c37cd132936e51acd078a7354e8960fac0305b9a5297e50d574e9",
+        "ADAUSDT-5m-20260803-20261001.jsonl.gz": "9a3afe5f1a7e272e0810c4decbcd802efeeec2357375df75cd430ac42f989d85"
+      }
+    },
+    "APTUSDT": {
+      "H1": {
+        "APTUSDT-1h-20250924-20261001.jsonl.gz": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e"
+      },
+      "M5": {
+        "APTUSDT-5m-20250924-20260803.jsonl.gz": "f5d8d5c148263311fcf53bed1181acf6dadd8f09f5ee4d3c41df5d02dca42609",
+        "APTUSDT-5m-20260803-20261001.jsonl.gz": "32e42ff6f3263e5ceafc1d7d7177300e54537b4185f4a7e56fefddcbe61a0e60"
+      }
+    },
+    "ARBUSDT": {
+      "H1": {
+        "ARBUSDT-1h-20250924-20261001.jsonl.gz": "6c8dd74b981ea182a08eb9ed685e81f92deaeefe3b80254036cbfadf1b5e0a8d"
+      },
+      "M5": {
+        "ARBUSDT-5m-20260803-20261001.jsonl.gz": "29333d1795c7df0e91b5839b01a8a5d5902d68d52cd08c26bae2e57cb5486524"
+      }
+    },
+    "ATOMUSDT": {
+      "H1": {
+        "ATOMUSDT-1h-20250924-20261001.jsonl.gz": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e"
+      },
+      "M5": {
+        "ATOMUSDT-5m-20250924-20260803.jsonl.gz": "728e46510547ce93d33cd046ab34e18abdd6fed43dbd585a68b23187670bebfe",
+        "ATOMUSDT-5m-20260803-20261001.jsonl.gz": "2dc088bcb390f602bda07414616c0dea70b29aed1c41f2da833f7a627ae69af6"
+      }
+    },
+    "AVAXUSDT": {
+      "H1": {
+        "AVAXUSDT-1h-20250924-20261001.jsonl.gz": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1"
+      },
+      "M5": {
+        "AVAXUSDT-5m-20250924-20260803.jsonl.gz": "22b572df3c94cd1a668e7c1ebc65e1d10a0896ab60c7d8f5aaba305a1bb0ace9",
+        "AVAXUSDT-5m-20260803-20261001.jsonl.gz": "fb4fbd8ed8ea09cff1581207ab9c6847f2c4836fc7600c2ad81141434e0ab197"
+      }
+    },
+    "BNBUSDT": {
+      "H1": {
+        "BNBUSDT-1h-20250924-20261001.jsonl.gz": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc"
+      },
+      "M5": {
+        "BNBUSDT-5m-20250924-20260803.jsonl.gz": "b1974a85b07d7bc192bf32b14b99665cb409f5f9fd4937c3afb2ac28735d1b0e",
+        "BNBUSDT-5m-20260803-20261001.jsonl.gz": "13a9d5c40e78d47b12ec3b5aa8034ce4b3912748e3874cd6beffe15e4ab11103"
+      }
+    },
+    "BTCUSDT": {
+      "H1": {
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      },
+      "M5": {
+        "BTCUSDT-5m-20250924-20260803.jsonl.gz": "5e08252032828062d7047daceddad1ab69e4343174bf7163e5242085b92d1e07",
+        "BTCUSDT-5m-20260803-20261001.jsonl.gz": "9e12516a68ff1058c42982001fb7f86c74e606f27f86db201570362d567f48f5"
+      }
+    },
+    "DOGEUSDT": {
+      "H1": {
+        "DOGEUSDT-1h-20250924-20261001.jsonl.gz": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149"
+      },
+      "M5": {
+        "DOGEUSDT-5m-20250924-20260803.jsonl.gz": "3deb7ac34f8a7a45db510114605e1b697a8e3f500a77c8c37e0e11eb31ba1e4e",
+        "DOGEUSDT-5m-20260803-20261001.jsonl.gz": "893f300d4661bf2203afddb2d8991f17e30ff856addf565fbfa4c60b538e8a31"
+      }
+    },
+    "DOTUSDT": {
+      "H1": {
+        "DOTUSDT-1h-20250924-20261001.jsonl.gz": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e"
+      },
+      "M5": {
+        "DOTUSDT-5m-20250924-20260803.jsonl.gz": "75ac828db03cfab0cb530143ccb919835543510a4a5c4ffa47aaccc8075fb201",
+        "DOTUSDT-5m-20260803-20261001.jsonl.gz": "08da6c31c6cea9bc132d3912f905954963dec8ab13f63a0d371f554c254badd9"
+      }
+    },
+    "ETHUSDT": {
+      "H1": {
+        "ETHUSDT-1h-20250924-20261001.jsonl.gz": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13"
+      },
+      "M5": {
+        "ETHUSDT-5m-20250924-20260803.jsonl.gz": "8650e73f571eb40381926bea9ba31b7e1db4b895a058ba2c339d5692eb81ccb5",
+        "ETHUSDT-5m-20260803-20261001.jsonl.gz": "1da31e0a242a90c0e7381eb92fb014cdb259e3838453d407a1d5a43985c51f8f"
+      }
+    },
+    "FETUSDT": {
+      "H1": {
+        "FETUSDT-1h-20250924-20261001.jsonl.gz": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+      },
+      "M5": {
+        "FETUSDT-5m-20250924-20260803.jsonl.gz": "5da9f44eefb90996aa323b1ce6a4ea656564a956ccc7ce48474156bdc345ed17",
+        "FETUSDT-5m-20260803-20261001.jsonl.gz": "87a865c46f59e4cc739a331ca799719f9b8d080a9c0166c647747beb0c17fa09"
+      }
+    },
+    "HYPEUSDT": {
+      "H1": {
+        "HYPEUSDT-1h-20250924-20261001.jsonl.gz": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc"
+      },
+      "M5": {
+        "HYPEUSDT-5m-20250924-20260803.jsonl.gz": "7529686c7a509749be040eab12fe7d1e961bc391c43334e14cdfe959c5db046a",
+        "HYPEUSDT-5m-20260803-20261001.jsonl.gz": "21ca2e4c449033f39951a67014d35747af6350b94ed18141a5dfd6a7b4dd1148"
+      }
+    },
+    "INJUSDT": {
+      "H1": {
+        "INJUSDT-1h-20250924-20261001.jsonl.gz": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42"
+      },
+      "M5": {
+        "INJUSDT-5m-20250924-20260803.jsonl.gz": "2e0c41747540f92df66ce38efa3e266ac7db54611c6c8acddb5202b3996a33ae",
+        "INJUSDT-5m-20260803-20261001.jsonl.gz": "5a4de2813d56e0ace128e9c86439ed3a0fc18efe4fb9cc5dd64936dcedc07fa0"
+      }
+    },
+    "JUPUSDT": {
+      "H1": {
+        "JUPUSDT-1h-20250924-20261001.jsonl.gz": "8ff145ed07cd872ce4cc8845d780ea8a094bd963ad6accd534f745a97644e908"
+      },
+      "M5": {
+        "JUPUSDT-5m-20250924-20260803.jsonl.gz": "3badd8e1f5895bd30148677b4b6f8e14f575ddfd4d6fc1f293557a2d3e72b7b7",
+        "JUPUSDT-5m-20260803-20261001.jsonl.gz": "5d733caee71a36e86738c629766d252647b509007b3bea19d6e41d9c8efa5c01"
+      }
+    },
+    "LINKUSDT": {
+      "H1": {
+        "LINKUSDT-1h-20250924-20261001.jsonl.gz": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb"
+      },
+      "M5": {
+        "LINKUSDT-5m-20250924-20260803.jsonl.gz": "65029d6744842f08c5de3f0061638bc204f5778b77ae5a8918af0782a17c7006",
+        "LINKUSDT-5m-20260803-20261001.jsonl.gz": "6c441d2c74221f8d8414bddaf0f269b92a12268dcfa6c64ba484f7297ea8d19e"
+      }
+    },
+    "LTCUSDT": {
+      "H1": {
+        "LTCUSDT-1h-20250924-20261001.jsonl.gz": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53"
+      },
+      "M5": {
+        "LTCUSDT-5m-20250924-20260803.jsonl.gz": "32c4761bf8ced0bc88b71f9efd9afc5d507a94496af3d28ba0dce14caac91b91",
+        "LTCUSDT-5m-20260803-20261001.jsonl.gz": "c0d00f8aaf47d161cf0f69de8e48f4031e8d4a04552499704d816ec1e2e15d7b"
+      }
+    },
+    "NEARUSDT": {
+      "H1": {
+        "NEARUSDT-1h-20250924-20261001.jsonl.gz": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85"
+      },
+      "M5": {
+        "NEARUSDT-5m-20250924-20260803.jsonl.gz": "b066aead8e9992c80e54097bf3203429b553f65f418e00ac9d9f8938e9492b1f",
+        "NEARUSDT-5m-20260803-20261001.jsonl.gz": "b67caa8ecc83cc6bfd5c362b5c222b2ef424bc0dcf909e4859bdb87d64aeb13f"
+      }
+    },
+    "ONDOUSDT": {
+      "H1": {
+        "ONDOUSDT-1h-20250924-20261001.jsonl.gz": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263"
+      },
+      "M5": {
+        "ONDOUSDT-5m-20260803-20261001.jsonl.gz": "49cc4b68b7f52abd3dbfb30ae570c1995d2de183bd6e99bc3cad07a220bab93c"
+      }
+    },
+    "PENGUUSDT": {
+      "H1": {
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      },
+      "M5": {
+        "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+        "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b"
+      }
+    },
+    "RENDERUSDT": {
+      "H1": {
+        "RENDERUSDT-1h-20250924-20261001.jsonl.gz": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02"
+      },
+      "M5": {
+        "RENDERUSDT-5m-20250924-20260803.jsonl.gz": "169db218d7458357cb0652d3278ebb1b701b65f467af6743f64ed495f7153567",
+        "RENDERUSDT-5m-20260803-20261001.jsonl.gz": "d4a9ef7027ea180affd554f2eeef882a581e462992355053384be9cd17ba9048"
+      }
+    },
+    "SOLUSDT": {
+      "H1": {
+        "SOLUSDT-1h-20250924-20261001.jsonl.gz": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993"
+      },
+      "M5": {
+        "SOLUSDT-5m-20250924-20260803.jsonl.gz": "89cd21d354a597e0d8c73c14dda4b54ddf63f84b9d950a7cac9c737ebf2780e8",
+        "SOLUSDT-5m-20260803-20261001.jsonl.gz": "f09f0ff404171b7de3e0c6f809ec693e2b08fe16829f69404bba6215585b053d"
+      }
+    },
+    "SUIUSDT": {
+      "H1": {
+        "SUIUSDT-1h-20250924-20261001.jsonl.gz": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c"
+      },
+      "M5": {
+        "SUIUSDT-5m-20260803-20261001.jsonl.gz": "6e562fa29290aed51cc9925938e55a10efaceeaabb91c827ed3bf0442397b69b"
+      }
+    },
+    "TIAUSDT": {
+      "H1": {
+        "TIAUSDT-1h-20250924-20261001.jsonl.gz": "09916a5857d775a904976e150bc653aa35cea8fdc0a03f5a1b435e052ca6feb6"
+      },
+      "M5": {
+        "TIAUSDT-5m-20250924-20260803.jsonl.gz": "4ee3ba22d736e503a54c45d6f90068a08e0cc7d873dedb456ef4c156ebec9c73",
+        "TIAUSDT-5m-20260803-20261001.jsonl.gz": "2957f8902931890651209decea2ddd2f41e67838844211e20db9a4d873fc87bb"
+      }
+    },
+    "UNIUSDT": {
+      "H1": {
+        "UNIUSDT-1h-20250924-20261001.jsonl.gz": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e"
+      },
+      "M5": {
+        "UNIUSDT-5m-20250924-20260803.jsonl.gz": "cba2e4ee50911383e059381514890ac085eb64751ab03db71dcf28738469927e",
+        "UNIUSDT-5m-20260803-20261001.jsonl.gz": "e0ce5a329babab536b371d5d41b6d266884c5969dc5c55ba47e37183e2d658e5"
+      }
+    },
+    "XRPUSDT": {
+      "H1": {
+        "XRPUSDT-1h-20250924-20261001.jsonl.gz": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03"
+      },
+      "M5": {
+        "XRPUSDT-5m-20250924-20260803.jsonl.gz": "fbe1db85cf604af47aa6fe7680e8d7f53054640924d708c4f170313704dd7020",
+        "XRPUSDT-5m-20260803-20261001.jsonl.gz": "d862cb1927bcb68fe70ef33d8ba12d7666341b6d12bd6fab08dee50ca67439f3"
+      }
+    }
+  },
+  "status": "RESEARCH_SOURCE_FEED_AUDIT_ONLY",
+  "summary": [
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 10,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -599189.5558637008,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 6,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 6,
+      "entry_price_diff_gt_5bps": 6,
+      "fee_bps": 10,
+      "fills": 17,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -1.8742058449809473,
+          "entry_ts": 1772398800000,
+          "model_entry_price": 0.3089,
+          "net_pnl_jpy": -79689.38539418876,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00260",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.1149455800371633,
+          "entry_ts": 1780416000000,
+          "model_entry_price": 0.3725,
+          "net_pnl_jpy": -50448.8069838627,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00454",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.9974424552429695,
+          "entry_ts": 1783915200000,
+          "model_entry_price": 0.3871,
+          "net_pnl_jpy": -624267.363834961,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00640",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.496277915632759,
+          "entry_ts": 1779483600000,
+          "model_entry_price": 0.2025,
+          "net_pnl_jpy": 185188.64110039535,
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "signal": "IDLEP_00398",
+          "symbol": "JUPUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.4810996563573977,
+          "entry_ts": 1762113600000,
+          "model_entry_price": 2.896,
+          "net_pnl_jpy": 233.56685100847287,
+          "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+          "signal": "IDLEP_00021",
+          "symbol": "DOTUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 1.874206,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "IDLEP_00122"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 17,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 46,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 3,
+      "zero_print_trade_ids": [
+        "PENGU_00016",
+        "PENGU_00071",
+        "PENGU_00093"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 10,
+      "fills": 104,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 418.8233927365651,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 428487.07644136494,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1559.5187073269576,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 19915.8209920226,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 304843.4119582703,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 123,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 806,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 13,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513",
+        "V4CORE_00023",
+        "V4_00848",
+        "V4_00895",
+        "V4_01005",
+        "V4_01035",
+        "V4_01049",
+        "V4_01078",
+        "V4_01149"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 30,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -91071.55049604499,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 21,
+      "entry_price_diff_gt_5bps": 17,
+      "fee_bps": 30,
+      "fills": 37,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -2.2073921971252575,
+          "entry_ts": 1781686800000,
+          "model_entry_price": 0.1905,
+          "net_pnl_jpy": 15913.248558825855,
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "signal": "IDLEP_00533",
+          "symbol": "JUPUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.8742058449809473,
+          "entry_ts": 1772398800000,
+          "model_entry_price": 0.3089,
+          "net_pnl_jpy": -46688.694467631874,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00260",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.8552390906715455,
+          "entry_ts": 1784296800000,
+          "model_entry_price": 0.3756,
+          "net_pnl_jpy": 114782.54517235135,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00654",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 1.5859766277128484,
+          "entry_ts": 1782820800000,
+          "model_entry_price": 0.3651,
+          "net_pnl_jpy": -32630.837486635206,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00589",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 1.176877812391841,
+          "entry_ts": 1780686000000,
+          "model_entry_price": 0.2923,
+          "net_pnl_jpy": -11257.03453383113,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00501",
+          "symbol": "TIAUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 2.207392,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "IDLEP_00122"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 16,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 47,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 3,
+      "zero_print_trade_ids": [
+        "PENGU_00016",
+        "PENGU_00071",
+        "PENGU_00093"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 30,
+      "fills": 119,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 365.8481161696647,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 85158.81488116349,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1230.826240801914,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 9377.4637542424,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 49210.8047142652,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "BASE_GROSS425",
+      "entry_before_first_M5_print": 70,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 498,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 5,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 10,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -617228.3514382681,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 5,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 6,
+      "entry_price_diff_gt_5bps": 6,
+      "fee_bps": 10,
+      "fills": 18,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -1.8742058449809473,
+          "entry_ts": 1772398800000,
+          "model_entry_price": 0.3089,
+          "net_pnl_jpy": -84241.80217133314,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00260",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.1149455800371633,
+          "entry_ts": 1780416000000,
+          "model_entry_price": 0.3725,
+          "net_pnl_jpy": -51967.584651559126,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00454",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.9974424552429695,
+          "entry_ts": 1783915200000,
+          "model_entry_price": 0.3871,
+          "net_pnl_jpy": -643061.1349377647,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00640",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.496277915632759,
+          "entry_ts": 1779483600000,
+          "model_entry_price": 0.2025,
+          "net_pnl_jpy": 190763.80509791657,
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "signal": "IDLEP_00398",
+          "symbol": "JUPUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.4810996563573977,
+          "entry_ts": 1762113600000,
+          "model_entry_price": 2.896,
+          "net_pnl_jpy": 233.56685100847287,
+          "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+          "signal": "IDLEP_00021",
+          "symbol": "DOTUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 1.874206,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "IDLEP_00122"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 19,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 46,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 10,
+      "fills": 107,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 418.8233927365651,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 585123.8551931946,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1648.6093571341728,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 21053.552412163484,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 314020.8215722327,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 123,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 804,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 13,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513",
+        "V4CORE_00023",
+        "V4_00848",
+        "V4_00895",
+        "V4_01005",
+        "V4_01035",
+        "V4_01049",
+        "V4_01078",
+        "V4_01149"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 30,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -94006.36382030329,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 21,
+      "entry_price_diff_gt_5bps": 17,
+      "fee_bps": 30,
+      "fills": 38,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -2.2073921971252575,
+          "entry_ts": 1781686800000,
+          "model_entry_price": 0.1905,
+          "net_pnl_jpy": 16426.058691609353,
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "signal": "IDLEP_00533",
+          "symbol": "JUPUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.8742058449809473,
+          "entry_ts": 1772398800000,
+          "model_entry_price": 0.3089,
+          "net_pnl_jpy": -49461.299253132274,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00260",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -1.8552390906715455,
+          "entry_ts": 1784296800000,
+          "model_entry_price": 0.3756,
+          "net_pnl_jpy": 118481.45379012798,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00654",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 1.5859766277128484,
+          "entry_ts": 1782820800000,
+          "model_entry_price": 0.3651,
+          "net_pnl_jpy": -33682.377908598726,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00589",
+          "symbol": "TIAUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 1.176877812391841,
+          "entry_ts": 1780686000000,
+          "model_entry_price": 0.2923,
+          "net_pnl_jpy": -11619.796502432491,
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "signal": "IDLEP_00501",
+          "symbol": "TIAUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 2.207392,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "IDLEP_00122"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 18,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 46,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 30,
+      "fills": 119,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 365.8481161696647,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 86032.32795231362,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1303.9187691811926,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 9934.343769358149,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 50796.64051684297,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "PENGU_NO_PRINT",
+      "entry_before_first_M5_print": 70,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 498,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 5,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 10,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -633133.3829902911,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 5,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 17,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 19,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 46,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 10,
+      "fills": 107,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 418.8233927365651,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 601042.9924801108,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1534.2564821350536,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 21248.912788434165,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 325168.2762878402,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 123,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 10,
+      "fills": 804,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 13,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513",
+        "V4CORE_00023",
+        "V4_00848",
+        "V4_00895",
+        "V4_01005",
+        "V4_01035",
+        "V4_01049",
+        "V4_01078",
+        "V4_01149"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 1,
+      "entry_price_diff_gt_5bps": 1,
+      "fee_bps": 30,
+      "fills": 8,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": 0.7472826086956541,
+          "entry_ts": 1785877200000,
+          "model_entry_price": 0.1483,
+          "net_pnl_jpy": -237942.4151554817,
+          "route": "FET_BRK48_RESIDUAL",
+          "signal": "FET_00007",
+          "symbol": "FETUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.747283,
+      "runner": "FET",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 1,
+      "zero_print_trade_ids": [
+        "FET_00003"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 5,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "HYPE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 0,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 18,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "IDLE",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 18,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 45,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "PENGU",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 0,
+      "zero_print_trade_ids": []
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 12,
+      "entry_price_diff_gt_5bps": 8,
+      "fee_bps": 30,
+      "fills": 108,
+      "largest_abs_entry_diff_rows": [
+        {
+          "entry_diff_first_print_pct": -0.523560209424101,
+          "entry_ts": 1760230800000,
+          "model_entry_price": 20.9,
+          "net_pnl_jpy": 365.8481161696647,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00002",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.35137034434293835,
+          "entry_ts": 1788354000000,
+          "model_entry_price": 7.09,
+          "net_pnl_jpy": 176919.4977987545,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00049",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": -0.29732408325073845,
+          "entry_ts": 1770037200000,
+          "model_entry_price": 10.06,
+          "net_pnl_jpy": -1215.5538828065914,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00025",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.2123142250530785,
+          "entry_ts": 1774508400000,
+          "model_entry_price": 9.44,
+          "net_pnl_jpy": 10910.484601304293,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00035",
+          "symbol": "AVAXUSDT"
+        },
+        {
+          "entry_diff_first_print_pct": 0.10789149198520143,
+          "entry_ts": 1782586800000,
+          "model_entry_price": 6.495,
+          "net_pnl_jpy": 118513.5888555837,
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "signal": "Q102Q01365_00041",
+          "symbol": "AVAXUSDT"
+        }
+      ],
+      "max_entry_diff_pct": 0.52356,
+      "runner": "Q102",
+      "source_price_unknown": 3,
+      "zero_print_entry_hour": 8,
+      "zero_print_trade_ids": [
+        "Q102P_00071",
+        "Q102P_00078",
+        "Q102P_00083",
+        "Q102P_00088",
+        "Q102P_00138",
+        "Q102P_00148",
+        "Q102P_00174",
+        "Q102P_00200"
+      ]
+    },
+    {
+      "case": "PENGU_IDLE_FIRST_PRINT",
+      "entry_before_first_M5_print": 123,
+      "entry_price_diff_gt_5bps": 0,
+      "fee_bps": 30,
+      "fills": 799,
+      "largest_abs_entry_diff_rows": [],
+      "max_entry_diff_pct": 0.0,
+      "runner": "V4",
+      "source_price_unknown": 0,
+      "zero_print_entry_hour": 13,
+      "zero_print_trade_ids": [
+        "V4_00075",
+        "V4_00137",
+        "V4_00245",
+        "V4CORE_00013",
+        "V4_00513",
+        "V4CORE_00023",
+        "V4_00848",
+        "V4_00895",
+        "V4_01005",
+        "V4_01035",
+        "V4_01049",
+        "V4_01078",
+        "V4_01149"
+      ]
+    }
+  ],
+  "trade_samples": 5379
+}
