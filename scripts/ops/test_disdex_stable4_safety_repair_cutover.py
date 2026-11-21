@@ -341,6 +341,21 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertIn("write_atomic(V52_MONITOR_INSTANCE_UNIT, instance_data, (0, 0, 0o644))", source)
         self.assertIn("for path, (existed, previous, meta) in snapshot.items():", source)
 
+    def test_q102_tick_timestamp_string_keeps_freshness_gate_exact(self):
+        # poll_cycles records str(tick.updatedAt), even when the tick is
+        # numeric epoch-ms. This must never be mistaken for stale/zero.
+        stamp_ms = 1795237304000
+        self.assertEqual(module.timestamp_ms(stamp_ms), stamp_ms)
+        self.assertEqual(module.timestamp_ms(str(stamp_ms)), stamp_ms)
+        self.assertEqual(module.timestamp_ms("1795237304"), stamp_ms)
+        self.assertEqual(module.timestamp_ms(" 1795237304000 "), stamp_ms)
+        self.assertEqual(module.timestamp_ms(True), 0)
+        for bad in ("", "not-a-date", "17952373040", "-1795237304000", "17952373040000", None):
+            self.assertEqual(module.timestamp_ms(bad), 0)
+        from datetime import datetime, timezone
+        iso = datetime.fromtimestamp(stamp_ms / 1000, timezone.utc).isoformat()
+        self.assertEqual(module.timestamp_ms(iso), stamp_ms)
+
     def test_monitor_dropins_remove_order_capable_exec_paths(self):
         v52 = module.monitor_dropin_text("V52")
         q102 = module.monitor_dropin_text("Q102")
