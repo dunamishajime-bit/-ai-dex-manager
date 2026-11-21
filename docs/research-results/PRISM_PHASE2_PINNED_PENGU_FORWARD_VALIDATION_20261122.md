@@ -94,3 +94,24 @@ PENGU旧BT期間は高値1,182時間、安値1,126時間も0.05%超不一致。�
 証跡の固有SHA256、完全再現116件、フォワード11件の部分損切りを含む再計算、H1/M5比較は PRISM_PHASE2_VERIFIED_COMPACT_CHECKPOINT.json に保存。
 
 **最終状態：PINNED_ENTRY_116_PASS / PINNED_EXIT_116_PASS / FORWARD_11_MODELED / H1_M5_DATA_MISMATCH / TARGET_NOT_MET / NO_DEPLOY**。
+
+
+## 8. 追加反証：部分決済まで再現したPENGU経路別の低容量学習
+
+元ソースで再現済みの127候補（旧116件＋新11件）を、SHORT V20 40+7、Recovery V8 51+4、LONG V64 25+0に分け、途中損切り比率を含む出口損益ラベルで再研究した。使用した8個の入口時点の判定値はPENGU72h/24h、BTC24h、相対24h、BTC EMA168乖離、直近出来高倍率、ATR24、RSI14。**データは確定済みのH1のみ**。学習教師にするのは評価期間の開始前に決済が完了し24時間経過した過去候補だけ。
+
+事前固定の強いL2正則化ルート別ロジスティック、半減期180日、入口採用閾値0.60/0.70/0.80、10/30bpsを、2026年4〜6月、7〜9月、新期間10〜11月で時系列比較した。
+
+| PENGU・30bps | 無フィルター | 時系列予測の結果 |
+|---|---:|---|
+| SHORT V20・2026年7〜9月 | 4/9=44.44% | p≥0.70で **0/3=0%**、勝ち4件を除外 |
+| SHORT V20・新期間 | 3/7=42.86% | p≥0.60で **0/2=0%**、勝ち3件を除外 |
+| Recovery V8・2026年7〜9月 | 7/18=38.89% | p≥0.70で **5/14=35.71%** |
+| Recovery V8・新期間 | 2/4=50.00% | p≥0.60で **0/1=0%** |
+| LONG V64・2026年7〜9月 | 6/8=75.00% | p≥0.60で **3/3=100%**だが3件しか残らない |
+
+**学習モデルでも誤判定が改善しないどころか悪化**した。p値を厳しくするほど0件・極少数へ収縮。目的勝率達成ではないので不採用。新期間は現在の研究者に既に知られており、これらの数字を新規ブラインドOOSの合格証明として扱わない。
+
+旧ソースの入口特徴量は3経路別にPENGU_PINNED_OLD_SHORT_V20_ASOF_FEATURES.json、PENGU_PINNED_OLD_RECOVERY_V8_ASOF_FEATURES.json、PENGU_PINNED_OLD_LONG_V64_ASOF_FEATURES.jsonに保存。予測・棄却された勝ち/負けは PRISM_PENGU_NATIVE_STRONG_SHRINKAGE_OOS_COHORTS.csv と PRISM_PENGU_NATIVE_STRONG_SHRINKAGE_PREDICTIONS.csv に保存。再実行コードは prism_pengu_native_exit_shrunk_route_oos_20261122.py。
+
+**判断：原本純粋関数を完全再現しても、簡易なトレンド多層条件、M5順行追認、価格類似度、強い正則化を加えたOnline勝率予測は、経路の局面変化に対応できなかった。利益やDDを保ちながら70/80へ向上したという証拠はなく、本番へ反映しない。**
