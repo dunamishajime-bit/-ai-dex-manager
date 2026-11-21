@@ -131,8 +131,8 @@ for route in ROUTES:
       "kept_win_pct":round(100*w/n,2) if n else None,
       "wilson95":wilson(w,n),"kept_fraction":round(n/len(test),4),
       "mean_net_pct":round(100*statistics.mean(x["gross"]-fee/10000 for x in kept),4) if kept else None,
-      "discarded_winners":sum(x["gross"]>fee/10000 for x in test if x not in kept),
-      "discarded_losers":sum(x["gross"]<=fee/10000 for x in test if x not in kept),
+      "discarded_winners":sum(x["gross"]>fee/10000 for x,p in zip(test,prob) if p<theta),
+      "discarded_losers":sum(x["gross"]<=fee/10000 for x,p in zip(test,prob) if p<theta),
       "target80_observed":n>=10 and 100*w/n>=80})
  for phase,cut,end in FOLDS:
   cohort=[x for x in data if x["route"]==route and cut<=x["entryTs"]<end]
