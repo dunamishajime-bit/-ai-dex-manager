@@ -1,0 +1,650 @@
+{
+  "comparisons": [
+    {
+      "checked_hours": 8760,
+      "delta_pct": {
+        "close": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "high": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "low": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "open": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "volume": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        }
+      },
+      "period": "baseline",
+      "symbol": "BTCUSDT"
+    },
+    {
+      "checked_hours": 1152,
+      "delta_pct": {
+        "close": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "high": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "low": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "open": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "volume": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        }
+      },
+      "period": "forward",
+      "symbol": "BTCUSDT"
+    },
+    {
+      "checked_hours": 8760,
+      "delta_pct": {
+        "close": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "high": {
+          "max": 4.171615,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 504,
+          "n_gt_5bps": 1182,
+          "p95": 0.556921,
+          "p99": 1.231971
+        },
+        "low": {
+          "max": 3.449951,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 461,
+          "n_gt_5bps": 1126,
+          "p95": 0.525641,
+          "p99": 1.246621
+        },
+        "open": {
+          "max": 4.202554,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 1400,
+          "n_gt_5bps": 3289,
+          "p95": 0.990786,
+          "p99": 1.773425
+        },
+        "volume": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 8760,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        }
+      },
+      "period": "baseline",
+      "symbol": "PENGUUSDT"
+    },
+    {
+      "checked_hours": 1152,
+      "delta_pct": {
+        "close": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "high": {
+          "max": 0.787402,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 5,
+          "n_gt_5bps": 70,
+          "p95": 0.105485,
+          "p99": 0.360825
+        },
+        "low": {
+          "max": 0.495868,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 46,
+          "p95": 0.0,
+          "p99": 0.243605
+        },
+        "open": {
+          "max": 0.879265,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 11,
+          "n_gt_5bps": 244,
+          "p95": 0.322321,
+          "p99": 0.492866
+        },
+        "volume": {
+          "max": 0.0,
+          "median": 0.0,
+          "n": 1152,
+          "n_gt_50bps": 0,
+          "n_gt_5bps": 0,
+          "p95": 0.0,
+          "p99": 0.0
+        }
+      },
+      "period": "forward",
+      "symbol": "PENGUUSDT"
+    }
+  ],
+  "limitations": [
+    "M5 and H1 may differ due to provider corrections or live bar construction; not signed venue proof",
+    "An H1-vs-M5 disagreement invalidates claims that M5 intrabar STOP values are a faithful replay of H1 strategy source",
+    "Do not infer exact order fill price from either public candle series"
+  ],
+  "period": "2025-10-01 through 2026-11-18 UTC",
+  "schema": "disdex-prism-h1-m5-source-consistency/v1",
+  "source": "unsigned Aster V3 klines only",
+  "symbols": {
+    "BTCUSDT": {
+      "checked_hours": 9912,
+      "first_disagreements": [
+        {
+          "close": 0.0,
+          "epoch_ms": 1759276800000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T00:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759280400000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T01:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759284000000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T02:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759287600000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T03:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759291200000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T04:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759294800000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T05:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759298400000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T06:00:00+00:00",
+          "volume": 1.8857631450543437e-14
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759302000000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T07:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759305600000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T08:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759309200000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T09:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759312800000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T10:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759316400000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T11:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759320000000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T12:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759323600000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T13:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759327200000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T14:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759330800000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T15:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759334400000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T16:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759338000000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T17:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759341600000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T18:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1759345200000,
+          "high": 0.0,
+          "low": 0.0,
+          "open": 0.0,
+          "period": "baseline",
+          "utc": "2025-10-01T19:00:00+00:00",
+          "volume": 0.0
+        }
+      ],
+      "h1_bars": 10080,
+      "m5_bars": 120960,
+      "source_sha256": {
+        "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\forward_public_20261001_20261118\\BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba",
+        "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\forward_public_20261001_20261118\\BTCUSDT-5m-20261001-20261118.jsonl.gz": "e9795e2ea033f7373baf12442ad9f6614149baa5c31a0c0e0a55f65525161b38",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-5m-prefix\\BTCUSDT-5m-20250924-20260803.jsonl.gz": "5e08252032828062d7047daceddad1ab69e4343174bf7163e5242085b92d1e07",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-5m-suffix\\BTCUSDT-5m-20260803-20261001.jsonl.gz": "9e12516a68ff1058c42982001fb7f86c74e606f27f86db201570362d567f48f5",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-h1\\BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      }
+    },
+    "PENGUUSDT": {
+      "checked_hours": 9912,
+      "first_disagreements": [
+        {
+          "close": 0.0,
+          "epoch_ms": 1780891200000,
+          "high": 4.171615201900238,
+          "low": 0.0,
+          "open": 4.202554202554193,
+          "period": "baseline",
+          "utc": "2026-06-08T04:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1780858800000,
+          "high": 3.6546368204659627,
+          "low": 0.0,
+          "open": 3.6546368204659627,
+          "period": "baseline",
+          "utc": "2026-06-07T19:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1762293600000,
+          "high": 0.0,
+          "low": 3.243704652155355,
+          "open": 3.566111308046792,
+          "period": "baseline",
+          "utc": "2025-11-04T22:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1785556800000,
+          "high": 0.0,
+          "low": 3.449951409135077,
+          "open": 3.449951409135077,
+          "period": "baseline",
+          "utc": "2026-08-01T04:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1771826400000,
+          "high": 0.0,
+          "low": 3.3447417548226497,
+          "open": 3.419866314316813,
+          "period": "baseline",
+          "utc": "2026-02-23T06:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1782874800000,
+          "high": 0.0,
+          "low": 3.1190019193857945,
+          "open": 3.3508855911919597,
+          "period": "baseline",
+          "utc": "2026-07-01T03:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1781712000000,
+          "high": 0.0,
+          "low": 3.1426602343211565,
+          "open": 3.1426602343211565,
+          "period": "baseline",
+          "utc": "2026-06-17T16:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1786161600000,
+          "high": 0.0,
+          "low": 2.7381723914452483,
+          "open": 2.989657401422112,
+          "period": "baseline",
+          "utc": "2026-08-08T04:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1787940000000,
+          "high": 2.89774619740203,
+          "low": 0.0,
+          "open": 2.89774619740203,
+          "period": "baseline",
+          "utc": "2026-08-28T18:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1769958000000,
+          "high": 2.8677150786308996,
+          "low": 0.0,
+          "open": 2.8677150786308996,
+          "period": "baseline",
+          "utc": "2026-02-01T15:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1771840800000,
+          "high": 0.0,
+          "low": 2.819692120103647,
+          "open": 2.849306719488047,
+          "period": "baseline",
+          "utc": "2026-02-23T10:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1783353600000,
+          "high": 0.0,
+          "low": 1.9077196095829603,
+          "open": 2.5991189427312786,
+          "period": "baseline",
+          "utc": "2026-07-06T16:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1772258400000,
+          "high": 2.5792747686238813,
+          "low": 0.0,
+          "open": 2.5792747686238813,
+          "period": "baseline",
+          "utc": "2026-02-28T06:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1772629200000,
+          "high": 0.0,
+          "low": 2.561603786718643,
+          "open": 2.561603786718643,
+          "period": "baseline",
+          "utc": "2026-03-04T13:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1783810800000,
+          "high": 2.5312294543063714,
+          "low": 0.0,
+          "open": 2.5312294543063714,
+          "period": "baseline",
+          "utc": "2026-07-11T23:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1781244000000,
+          "high": 2.4947400060114138,
+          "low": 0.0,
+          "open": 2.4947400060114138,
+          "period": "baseline",
+          "utc": "2026-06-12T06:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1787853600000,
+          "high": 0.9758123118447041,
+          "low": 0.0,
+          "open": 2.4541815883715907,
+          "period": "baseline",
+          "utc": "2026-08-27T18:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1787749200000,
+          "high": 1.7122550075382232,
+          "low": 0.0,
+          "open": 2.4403470715835085,
+          "period": "baseline",
+          "utc": "2026-08-26T13:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1783436400000,
+          "high": 0.0,
+          "low": 2.4195972347460257,
+          "open": 2.4195972347460257,
+          "period": "baseline",
+          "utc": "2026-07-07T15:00:00+00:00",
+          "volume": 0.0
+        },
+        {
+          "close": 0.0,
+          "epoch_ms": 1772434800000,
+          "high": 2.3991602938971424,
+          "low": 0.0,
+          "open": 2.3991602938971424,
+          "period": "baseline",
+          "utc": "2026-03-02T07:00:00+00:00",
+          "volume": 0.0
+        }
+      ],
+      "h1_bars": 10080,
+      "m5_bars": 120960,
+      "source_sha256": {
+        "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\forward_public_20261001_20261118\\PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433",
+        "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\forward_public_20261001_20261118\\PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-5m-prefix\\PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-5m-suffix\\PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+        "C:\\tmp\\disdex-bt-20251001-20261001\\aster-public-v3-h1\\PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      }
+    }
+  }
+}
