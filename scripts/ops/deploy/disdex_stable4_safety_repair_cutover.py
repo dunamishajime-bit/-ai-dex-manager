@@ -1088,9 +1088,17 @@ def timestamp_ms(value: object) -> int:
         number = int(value)
         return number * 1000 if number < 10**12 else number
     if isinstance(value, str):
+        raw = value.strip()
+        # poll_cycles stores the monitor's timestamp as a string, including
+        # numeric epoch-ms emitted by the Q102 tick publisher. Accept only
+        # unambiguous 10-digit epoch seconds or 13-digit epoch milliseconds.
+        # The caller's freshness and drift checks stay fail-closed.
+        if re.fullmatch(r"[0-9]{10}|[0-9]{13}", raw):
+            number = int(raw)
+            return number * 1000 if len(raw) == 10 else number
         try:
             from datetime import datetime
-            return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+            return int(datetime.fromisoformat(raw.replace("Z", "+00:00")).timestamp() * 1000)
         except (ValueError, TypeError, OverflowError):
             return 0
     return 0
