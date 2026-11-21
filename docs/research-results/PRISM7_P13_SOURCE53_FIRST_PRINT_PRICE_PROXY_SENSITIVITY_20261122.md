@@ -38,7 +38,7 @@
 - summary `docs/research-results/prism-phase2-20261122/PRISM7_P13_NATIVE53_M5_PRICE_PROXY_SUMMARY_20261122.json`（入力P11/P12/M5 SHA256証跡を含む）
 - 同じ入力からの**独立再計算で2出力SHA256完全一致**
   - all636 CSV `24191a038f8658a7731d121a38e08fcdebd0b2334b71d77042fb5ed90564e304`
-  - JSON `53bcaed574cfc b56197bab33aec57f0a231b06a3794eb09d8780c6bb10a60e06`（表示空白を除いたSHAはファイルに記載）。
+  - JSON `53bcaed574cfcb56197bab33aec57f0a231b06a3794eb09d8780c6bb10a60e06`（SHA256一致確認済み）。
 
 ## 4. 決して主張しないこと
 
