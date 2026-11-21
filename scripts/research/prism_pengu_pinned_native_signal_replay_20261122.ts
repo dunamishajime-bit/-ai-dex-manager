@@ -60,6 +60,7 @@ async function load(symbol:string):Promise<{base:DisDexV35Candle[],full:DisDexV3
    old_sha256:crypto.createHash("sha256").update(fs.readFileSync(originalFile)).digest("hex"),
    new_sha256:crypto.createHash("sha256").update(fs.readFileSync(newFile)).digest("hex")}};
 }
+async function main():Promise<void>{
 const [p,b]=await Promise.all([load("PENGUUSDT"),load("BTCUSDT")]);
 function getCandidates(pengu:DisDexV35Candle[],btc:DisDexV35Candle[],now:number){
  const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:[]};
@@ -132,3 +133,6 @@ if(!audit.eligible_for_forward){
   unsigned_public_research_only:true,signals:forwardOnly},null,2)+"\n");
  console.log("FORWARD_NATIVE_SIGNALS",JSON.stringify({total:forwardOnly.length,by_route:forwardOnly.reduce((a,x)=>(a[x.route]=(a[x.route]||0)+1,a),{} as Record<string,number>),first:forwardOnly.slice(0,3)}));
 }
+
+}
+void main().catch((error)=>{console.error(error);process.exitCode=1;});
