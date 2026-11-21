@@ -78,3 +78,24 @@ V4 X02は2025Q4平均+1.55%から2026Q1平均−3.10%へ転換。旧研究Gross4
 GitHub研究ブランチ research/prism-70-80-entry-redesign-phase2-20261122、Draft PR #594。再現コードは scripts/research/prism4_* にあり、SHA付き公開データマニフェスト、15シグナル/15出口、142件の失敗分類、53件の利益保護アブレーション、5379件のas-of入口監査は docs/research-results/prism-phase2-20261122 に保存。原価格データと大きな台帳は所有PCの隔離研究領域に保持。
 
 状態：PINNED_ENTRY_EXIT_116_PASS / EXTERNAL_PRE_15_NATIVE_MODELED / EXTERNAL_POST_11_NATIVE_MODELED / Q102_V4_IDLE_ROUTE_RISK_IDENTIFIED / 70_80_20_NOT_MET / NO_DEPLOY。
+
+
+## 追補：V4 X12/X02の元ソース条件と多層方向判定の否定試験
+
+V4 pinned shadow sourceに紐付くdocs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.jsonとlib/v12-multilogic-v4-shadow.tsを直接調査した。対象の初期候補条件は少数のトークン連言：
+
+- REC_X12_TIME_12H: SIDE_SHORT, AGE_48_72, REL12_NEG, VOL_GE1。
+- REC_X02_TIME_36H: SIDE_SHORT, AGE_24_48, BTC24_ALIGNED, REL12_NEG。
+
+そのままでは底打ち反転、日中の価格効率、短時間の戻り高値、相場全体の変化を十分区別するための証拠が不足し得る。ただし**このV4 shadow実装はorderEnabled=false**であり、LIVEのnative経済ロジックと同一だとは主張しない。
+
+元as-of H1特徴量と30bpsのGross425研究採用トレードを49件照合：勝敗符号不一致0件、価格リターン差最大0.05ポイント以内。Q4 2025の**損益ラベルを一切使わない**市場ボラ中央値を事前固定し、BTC6/銘柄6/24時間のショート方向一致、24hと72hボラの安定化、価格効率の多層条件を、Q1〜Q3で全ケース比較（翌期で閾値を再調整しない）。
+
+- X12 2026Q1：元14件・57.14%・平均−0.3985%、複合トレンド＋ボラ冷却で4件・50%・平均−0.8311%。**不採用**。
+- X02 2026Q1：元18件・44.44%・平均−2.3074%、複合トレンド＋ボラ冷却で10件・60%・平均−0.6439%。一時的には改善したが**70%には届かない**。
+- X02 2026Q2：元11件・72.73%・平均＋2.8967%、複合トレンド＋ボラ冷却で2件・100%・平均＋2.3158%。標本2件だけが残り、元の勝ち6件を除外し機会損失を生む。
+- X02 2026Q3：元2件・50%、複合条件で1件・100%。少数で有意ではない。
+
+仮説を複合化すれば自動的に良くなるわけではない。**全ルート70%達成と採用Gate通過の根拠はない**。同研究の126件比較はPRISM4_V4_RECOVERY_X12_X02_CAUSAL_Q4_FREEZE_Q1_Q2_Q3.csvとしてGitHubに保存。
+
+次の設計は勝率だけではなく、底打ち/squeezeの早期検出を根本から組み込むことに加え、現行Production pinと時系列as-ofの注文/STOPの完全整合、複利10/30bps DD、利益PF、残存件数、真の未使用前方データを必要とする。
