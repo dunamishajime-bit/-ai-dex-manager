@@ -1,0 +1,364 @@
+{
+  "cases": {
+    "NEW_H48_GROSS35": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "676cd870e05dc81b0fc746b433ea0485b9597bce308b172c0195c61d58c8b971",
+          "fills_sha256": "90fe852ecece8a912bde99fe653451179ddb8e33b4c0fdd0ee295af88de4ce30",
+          "final_wallet_model_jpy": 11093070.7,
+          "max_dd_pct": -21.571152,
+          "modeled_fills": 791,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 498,
+          "v52_daily_risk_trip_count": 30,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 64.2225
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "6c219a2f33e0705dd72f3e42e05ed0de9d220f34929a4a21f31f4f30e1e49949",
+          "fills_sha256": "d49bb0652bcbe7e7a279c4dfc21ad23f7e5dc1c2a6eb094cae77134c9458fff0",
+          "final_wallet_model_jpy": 4187854.71,
+          "max_dd_pct": -22.2815905,
+          "modeled_fills": 789,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 497,
+          "v52_daily_risk_trip_count": 35,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 61.97719
+        }
+      },
+      "manifest_sha256": "0fea015ecf14b8c8d673aac7c0e81cb61ccdde0cd22d80655de10bcfc5eca5ba"
+    },
+    "NEW_H48_GROSS425": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "404f2fd7126b1838725769e463936366ec6de5176528bb4b45cb9c9329fbcf3f",
+          "fills_sha256": "cd492d4c847f812b6fd89711a8d86ce3f5ecb6b307e140ea6f52f17ac69a8676",
+          "final_wallet_model_jpy": 13541227.42,
+          "max_dd_pct": -21.571152,
+          "modeled_fills": 795,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 496,
+          "v52_daily_risk_trip_count": 30,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 63.89937
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "3903d601f33a66e6fd5cccfa10ca1081a8294a4cab1711e3f8e3d52f55f54845",
+          "fills_sha256": "6d884fe3d200faf9715a0bd4f8f5531550d3ce443cd273d38a89380aeb764f24",
+          "final_wallet_model_jpy": 4923411.54,
+          "max_dd_pct": -22.2815905,
+          "modeled_fills": 791,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 494,
+          "v52_daily_risk_trip_count": 36,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 61.82048
+        }
+      },
+      "manifest_sha256": "36229cf7f8b399339e09fc6c0c3c6a74a219f91e84324313f460a41eadcff7a2"
+    },
+    "OLD_H48_GROSS35": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "9d5105d45f22f9412af725b00615501bf74955e72230874bfe3cf74e3125fcdd",
+          "fills_sha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+          "final_wallet_model_jpy": 12442421.06,
+          "max_dd_pct": -22.5950789,
+          "modeled_fills": 1027,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 206,
+          "v4_admitted": 801,
+          "v52_daily_risk_trip_count": 122,
+          "v52_deferred_exit_events": 6,
+          "win_rate_pct": 63.19377
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "ac01b7058ef506bb3c2076d6b3edbaba88403ccbf1e78e088bd39e3828cad168",
+          "fills_sha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+          "final_wallet_model_jpy": 4660537.64,
+          "max_dd_pct": -23.2194821,
+          "modeled_fills": 1023,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 209,
+          "v4_admitted": 797,
+          "v52_daily_risk_trip_count": 124,
+          "v52_deferred_exit_events": 6,
+          "win_rate_pct": 60.41056
+        }
+      },
+      "manifest_sha256": "55e6756a30c1d08f4e5cdbef1c40297de145015b800af96c6e630bcc95612fa2"
+    },
+    "RISK35_STOCK15_V52_1P0": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "308e10bb984fe8a9e11f2bcc35e66680e5787aff558f57c4b380767ac9d33ce0",
+          "fills_sha256": "312ccf0235f778d9f639ce72fb4c1726f6a60c79476f9622aceb9d601525341d",
+          "final_wallet_model_jpy": 15052838.89,
+          "max_dd_pct": -23.1887897,
+          "modeled_fills": 1075,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 206,
+          "v4_admitted": 803,
+          "v52_daily_risk_trip_count": 16,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 64.0
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-04T09:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "287d5d6b41ccdfcf855e85429e91ca800b4e28abf5144c345215e04d9f6a9c6e",
+          "fills_sha256": "b2cef54988307d754d3a8ce795db34ad4fe7e3090d3adfd06d6a7ff9b2d55385",
+          "final_wallet_model_jpy": 2626290.4,
+          "max_dd_pct": -21.2933988,
+          "modeled_fills": 803,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 673,
+          "v4_admitted": 497,
+          "v52_daily_risk_trip_count": 17,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 61.76837
+        }
+      },
+      "manifest_sha256": "e54f847351dcbff97bd7c62b048c731ba9ab45ab82a7cb1b20e30fb843d7a411"
+    },
+    "RISK35_STOCK15_V52_1P25": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "3fcb3a159f1d23fd6946eec8a5a89eb89439bd70cb26f69757e86bb97658da40",
+          "fills_sha256": "fa4d43d8b7d968606f839c6a45dac36f3d56317d3177fb56a8d0f9120ee36c49",
+          "final_wallet_model_jpy": 18662684.54,
+          "max_dd_pct": -22.89022,
+          "modeled_fills": 1078,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 206,
+          "v4_admitted": 807,
+          "v52_daily_risk_trip_count": 17,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 64.00742
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-04T09:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "aa97004aa7069ec50412b53cf8a2121a26a684bf7e8b2c3e356f21ca4136ac47",
+          "fills_sha256": "083bcc3985662bd57cf450384b89cc9e968e7db72278cfa89f29f7c29664e154",
+          "final_wallet_model_jpy": 3048896.69,
+          "max_dd_pct": -21.2906408,
+          "modeled_fills": 806,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 673,
+          "v4_admitted": 500,
+          "v52_daily_risk_trip_count": 18,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 61.7866
+        }
+      },
+      "manifest_sha256": "34ff0367a5fe9b75a8bdbec9d9c31af7d3af0c06f9965c3944bb4f9b292bc4ed"
+    },
+    "RISK35_STOCK15_V52_1P5": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "ea4ea17cc8ed36f454057b0df8dc83dc5dc0068ebec520711fca04db1c37133a",
+          "fills_sha256": "35cdc4cd7f2520cb18c04b8613c666226151d83bb9741ccdb390327171c29a04",
+          "final_wallet_model_jpy": 21831488.57,
+          "max_dd_pct": -22.5950789,
+          "modeled_fills": 1075,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 206,
+          "v4_admitted": 803,
+          "v52_daily_risk_trip_count": 17,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 63.90698
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-04T09:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "48dd2c43f6fcedc3d6a761187d7c182962b50c81753473083ee073ae37a4c4c2",
+          "fills_sha256": "436c76ebb8f755c822782c1107b2cd61d393d7bb226c1d098a55c5f4a4c63638",
+          "final_wallet_model_jpy": 3557381.78,
+          "max_dd_pct": -21.2879185,
+          "modeled_fills": 805,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 673,
+          "v4_admitted": 499,
+          "v52_daily_risk_trip_count": 18,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 61.73913
+        }
+      },
+      "manifest_sha256": "7090e30aea3725ed35a241340beea1979a7bf350baf195fb977693caa444ff00"
+    },
+    "V4_REARM20_15": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-07-15T17:30:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "b18087156a298287498e550ee09672c3cd7352911cf349c0e7b8209b43f9f0d2",
+          "fills_sha256": "652f0e96f4356504c744c7009265f437c8cc154661e94ceefafbe07766ebc480",
+          "final_wallet_model_jpy": 17230525.41,
+          "max_dd_pct": -32.4387434,
+          "modeled_fills": 1076,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 40,
+          "v4_admitted": 844,
+          "v52_daily_risk_trip_count": 85,
+          "v52_deferred_exit_events": 8,
+          "win_rate_pct": 63.47584
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-07-15T17:30:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "26f903922a097c817c468fe7b218bcbd507ccec36705aefb4f79c58763b968ca",
+          "fills_sha256": "6bb24b1b64b20d57b6b5d66ad44a8e839bb19eab275f8707d7ee6714e7721b3c",
+          "final_wallet_model_jpy": 6495981.58,
+          "max_dd_pct": -32.0984291,
+          "modeled_fills": 1029,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 165,
+          "v4_admitted": 791,
+          "v52_daily_risk_trip_count": 87,
+          "v52_deferred_exit_events": 8,
+          "win_rate_pct": 60.93294
+        }
+      },
+      "manifest_sha256": "00334f8ec79b6fb055745a733b4ed27b67e4f536ea8c38c70400ec09e61d4809"
+    },
+    "V52_DUE_EXIT_SEPARATED": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-22T05:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "95b4a2698b2005f5cbfd9d3b8ec43a122058ce57e88cde6d61fd09c20d531346",
+          "fills_sha256": "d98552e8dccfd78e9b9838d0edc965eed6e2408fb11f0997f042c7c617b49cfc",
+          "final_wallet_model_jpy": 23752629.08,
+          "max_dd_pct": -35.2518137,
+          "modeled_fills": 1072,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 172,
+          "v4_admitted": 806,
+          "v52_daily_risk_trip_count": 17,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 63.80597
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-04T09:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "66995b032bbc98a8cc0e611e4d4f6cf771bf46a5849f25c02b248ba37403a41c",
+          "fills_sha256": "17e1fc1ccfc613bef5b0192bf86bc58f0563d0fc04ee6dbb47aeeeb9b5c946d2",
+          "final_wallet_model_jpy": 4812232.15,
+          "max_dd_pct": -21.2823829,
+          "modeled_fills": 804,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 673,
+          "v4_admitted": 498,
+          "v52_daily_risk_trip_count": 18,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 61.9403
+        }
+      },
+      "manifest_sha256": "9c92ace3f405b6c6e28d5ffec455ba4b93596342255a2025581493d46cbddb8c"
+    },
+    "V52_EXIT_PLUS_V4_REARM": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-08-20T17:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "ef00d59dc966b0b67d88fbd5a81329dda48668daccde1b0ef270a32ad0780999",
+          "fills_sha256": "8e0ca7b8e6fc5fd72cd8228f9b9a1835f8c131a45b867f727f4e13570a314a5c",
+          "final_wallet_model_jpy": 22123334.95,
+          "max_dd_pct": -21.9936256,
+          "modeled_fills": 1118,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 37,
+          "v4_admitted": 860,
+          "v52_daily_risk_trip_count": 17,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 63.14848
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-09-21T13:00:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "a4b0d164510b8dfaead5f950bfbf864ae3bcddf89a82caa92480c02c75fb9f66",
+          "fills_sha256": "28a69f364982be1899094bb8dee2c7170800cae58e8a3c6c184a961809768178",
+          "final_wallet_model_jpy": 6896132.41,
+          "max_dd_pct": -23.2299459,
+          "modeled_fills": 1099,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 49,
+          "v4_admitted": 841,
+          "v52_daily_risk_trip_count": 22,
+          "v52_deferred_exit_events": 0,
+          "win_rate_pct": 60.87352
+        }
+      },
+      "manifest_sha256": "46cdb0ea4827d199d2a1546d447468a5bfdccff1673d85d1e03879080cb693ea"
+    },
+    "V52_H48_MODEL_ONLY": {
+      "cost_models": {
+        "10bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "404f2fd7126b1838725769e463936366ec6de5176528bb4b45cb9c9329fbcf3f",
+          "fills_sha256": "cd492d4c847f812b6fd89711a8d86ce3f5ecb6b307e140ea6f52f17ac69a8676",
+          "final_wallet_model_jpy": 13541227.42,
+          "max_dd_pct": -21.571152,
+          "modeled_fills": 795,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 496,
+          "v52_daily_risk_trip_count": 30,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 63.89937
+        },
+        "30bps": {
+          "dd_trough_utc": "2026-03-09T02:05:00Z",
+          "equity_rows": 105121,
+          "equity_sha256": "3903d601f33a66e6fd5cccfa10ca1081a8294a4cab1711e3f8e3d52f55f54845",
+          "fills_sha256": "6d884fe3d200faf9715a0bd4f8f5531550d3ce443cd273d38a89380aeb764f24",
+          "final_wallet_model_jpy": 4923411.54,
+          "max_dd_pct": -22.2815905,
+          "modeled_fills": 791,
+          "recalc": "PASS",
+          "v4_21pct_latch_blocks": 683,
+          "v4_admitted": 494,
+          "v52_daily_risk_trip_count": 36,
+          "v52_deferred_exit_events": 7,
+          "win_rate_pct": 61.82048
+        }
+      },
+      "manifest_sha256": "36229cf7f8b399339e09fc6c0c3c6a74a219f91e84324313f460a41eadcff7a2"
+    }
+  },
+  "generated_jst": "2026-11-21T19:59:44.183465+09:00",
+  "hype_production_matched": false,
+  "period": "2025-10-01T00:00Z/2026-10-01T00:00Z",
+  "production_pin_parity_certified": false,
+  "research_only": true,
+  "schema": "disdex-h48-gross-dd-latch-audit/v1",
+  "source_sha256": {
+    "canonical_generated_sim_ON_20261113.py": "e96d9cdb199e7d1e40f91b13a42569a3a6a83f22729d840c5da0e5bb577d932e",
+    "portfolio_stable4_gross425_v4_475_l3_q102_h48_20261116.py": "595fcf25a164392d70f156738c595f2af2697817166255bed2a6aa85b2cbd7f7"
+  }
+}
