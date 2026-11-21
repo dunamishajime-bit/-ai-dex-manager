@@ -1,0 +1,68 @@
+{
+  "beginUTC": "2026-10-01T00:00:00Z",
+  "data_access": "unsigned public GET",
+  "endExclusiveUTC": "2026-11-18T00:00:00Z",
+  "files": {
+    "BTCUSDT:1h": {
+      "expectedRows": 1152,
+      "file": "BTCUSDT-1h-20261001-20261118.jsonl.gz",
+      "firstOpenMs": 1790812800000,
+      "gzipFileSha256": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba",
+      "interval": "1h",
+      "lastOpenMs": 1794956400000,
+      "requests": 2,
+      "rows": 1152,
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "BTCUSDT",
+      "uncompressedSha256": "f12b3f1d1b2eb96c43fdd9b3e7efb441938c9c115a2f22fb3015e9e8ad82a8b6"
+    },
+    "BTCUSDT:5m": {
+      "expectedRows": 13824,
+      "file": "BTCUSDT-5m-20261001-20261118.jsonl.gz",
+      "firstOpenMs": 1790812800000,
+      "gzipFileSha256": "e9795e2ea033f7373baf12442ad9f6614149baa5c31a0c0e0a55f65525161b38",
+      "interval": "5m",
+      "lastOpenMs": 1794959700000,
+      "requests": 14,
+      "rows": 13824,
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "BTCUSDT",
+      "uncompressedSha256": "b8da4f4ab32ee53f753c9282eaaccaff686449448d38cb26fb86fdc78c784d88"
+    },
+    "PENGUUSDT:1h": {
+      "expectedRows": 1152,
+      "file": "PENGUUSDT-1h-20261001-20261118.jsonl.gz",
+      "firstOpenMs": 1790812800000,
+      "gzipFileSha256": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433",
+      "interval": "1h",
+      "lastOpenMs": 1794956400000,
+      "requests": 2,
+      "rows": 1152,
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "PENGUUSDT",
+      "uncompressedSha256": "c146916aa31609ad8c1f4bea14c21266285120a50137e2d134a01e5b1c785c92"
+    },
+    "PENGUUSDT:5m": {
+      "expectedRows": 13824,
+      "file": "PENGUUSDT-5m-20261001-20261118.jsonl.gz",
+      "firstOpenMs": 1790812800000,
+      "gzipFileSha256": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905",
+      "interval": "5m",
+      "lastOpenMs": 1794959700000,
+      "requests": 14,
+      "rows": 13824,
+      "status": "COMPLETE_COVERAGE",
+      "symbol": "PENGUUSDT",
+      "uncompressedSha256": "bd2f575f1e19ef60c438064e2ec7ca8aaeae67b64e6eb8ef98117b1bc1e2e4b9"
+    }
+  },
+  "limitations": [
+    "No actual exchange order execution or funding is verified",
+    "Historical market candles are separate from executable book/mark prices",
+    "Research forward data may not be fully unseen to other researchers; ensure signal freeze"
+  ],
+  "orders_sent": 0,
+  "provider": "Aster public unsigned futures v3 /fapi/v3/klines",
+  "schema": "disdex-prism-new-public-forward-h1-m5/v1",
+  "scope": "independent forward check ONLY; does not modify the original fixed 2025-2026 BT"
+}
