@@ -6,7 +6,7 @@ No future OHLCV features, no portfolio orders. All model/policy variants
 are predeclared and reported; no post-validation threshold tuning.
 """
 from __future__ import annotations
-import bisect,csv,datetime as dt,gzip,hashlib,json,math,statistics,sys
+import bisect,csv,datetime as dt,gzip,hashlib,json,math,statistics,sys,os
 from collections import Counter,defaultdict
 from pathlib import Path
 import numpy as np
@@ -254,6 +254,13 @@ for line in CAND.open(encoding="utf8"):
 data.sort(key=lambda z:(z["entryTs"],z["strategy"],z["id"]))
 if len(data)<2600:raise ValueError("H1_COVERAGE_TOO_LOW:"+str(len(data)))
 print("FEATURE_DATA",len(data),"EXCLUSIONS",dict(missing),"ROUTE_COUNTS",{s:len(v) for s,v in allroutes.items()},flush=True)
+with (OUTPUT/"prism_h1_source_closed_entry_features.jsonl").open("w",encoding="utf8") as output_file:
+ for x in data:
+  output_file.write(json.dumps({k:x[k] for k in ("id","strategy","route","symbol","side","entryTs","exitTs","gross","phase","features")},
+    ensure_ascii=False,separators=(",",":"),allow_nan=False)+"\n")
+if os.getenv("PRISM_FEATURE_ONLY")=="1":
+ print("PRISM_CAUSAL_H1_FEATURES_EXPORTED",len(data),flush=True)
+ sys.exit(0)
 
 route_columns={s:sorted(v) for s,v in allroutes.items()}
 def make_x(rows,s):
