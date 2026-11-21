@@ -1,0 +1,433 @@
+{
+  "candidate_count": 53,
+  "cohort_winrate": [
+    {
+      "excluded_losers": 0,
+      "excluded_winners": 0,
+      "model_scored_n": 0,
+      "original_n": 6,
+      "period": "PRE_2025_AUG_SEP",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.5,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 0,
+      "excluded_winners": 0,
+      "model_scored_n": 0,
+      "original_n": 6,
+      "period": "PRE_2025_AUG_SEP",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.6,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 0,
+      "excluded_winners": 0,
+      "model_scored_n": 0,
+      "original_n": 6,
+      "period": "PRE_2025_AUG_SEP",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.7,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 6,
+      "excluded_winners": 8,
+      "model_scored_n": 34,
+      "original_n": 40,
+      "period": "BASE_2025_2026",
+      "retained_mean_net30_pct": 2.1315,
+      "retained_n": 20,
+      "retained_price_pf30": 1.7798,
+      "retained_win_n": 12,
+      "retained_win_pct": 60.0,
+      "threshold": 0.5,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 14,
+      "excluded_winners": 18,
+      "model_scored_n": 34,
+      "original_n": 40,
+      "period": "BASE_2025_2026",
+      "retained_mean_net30_pct": 9.535,
+      "retained_n": 2,
+      "retained_price_pf30": null,
+      "retained_win_n": 2,
+      "retained_win_pct": 100.0,
+      "threshold": 0.6,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 14,
+      "excluded_winners": 20,
+      "model_scored_n": 34,
+      "original_n": 40,
+      "period": "BASE_2025_2026",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.7,
+      "unscored_n": 6
+    },
+    {
+      "excluded_losers": 0,
+      "excluded_winners": 2,
+      "model_scored_n": 7,
+      "original_n": 7,
+      "period": "POST_2026_OCT_NOV",
+      "retained_mean_net30_pct": -1.1927,
+      "retained_n": 5,
+      "retained_price_pf30": 0.454,
+      "retained_win_n": 1,
+      "retained_win_pct": 20.0,
+      "threshold": 0.5,
+      "unscored_n": 0
+    },
+    {
+      "excluded_losers": 4,
+      "excluded_winners": 3,
+      "model_scored_n": 7,
+      "original_n": 7,
+      "period": "POST_2026_OCT_NOV",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.6,
+      "unscored_n": 0
+    },
+    {
+      "excluded_losers": 4,
+      "excluded_winners": 3,
+      "model_scored_n": 7,
+      "original_n": 7,
+      "period": "POST_2026_OCT_NOV",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.7,
+      "unscored_n": 0
+    },
+    {
+      "excluded_losers": 6,
+      "excluded_winners": 10,
+      "model_scored_n": 41,
+      "original_n": 53,
+      "period": "ALL_SEEN",
+      "retained_mean_net30_pct": 1.4667,
+      "retained_n": 25,
+      "retained_price_pf30": 1.5591,
+      "retained_win_n": 13,
+      "retained_win_pct": 52.0,
+      "threshold": 0.5,
+      "unscored_n": 12
+    },
+    {
+      "excluded_losers": 18,
+      "excluded_winners": 21,
+      "model_scored_n": 41,
+      "original_n": 53,
+      "period": "ALL_SEEN",
+      "retained_mean_net30_pct": 9.535,
+      "retained_n": 2,
+      "retained_price_pf30": null,
+      "retained_win_n": 2,
+      "retained_win_pct": 100.0,
+      "threshold": 0.6,
+      "unscored_n": 12
+    },
+    {
+      "excluded_losers": 18,
+      "excluded_winners": 23,
+      "model_scored_n": 41,
+      "original_n": 53,
+      "period": "ALL_SEEN",
+      "retained_mean_net30_pct": null,
+      "retained_n": 0,
+      "retained_price_pf30": null,
+      "retained_win_n": 0,
+      "retained_win_pct": null,
+      "threshold": 0.7,
+      "unscored_n": 12
+    }
+  ],
+  "feature_names": [
+    "p_r3_atr",
+    "p_r6_atr",
+    "p_r24_atr",
+    "btc_r6",
+    "btc_r24",
+    "relative_r6",
+    "flow_buy3",
+    "flow_buy6",
+    "lower_high6",
+    "lower_low6",
+    "close_location",
+    "lower_wick",
+    "distance_to_6h_low_atr",
+    "efficiency6",
+    "log_volume_ratio6_36",
+    "atr24"
+  ],
+  "limitations": [
+    "No labels from candidate native 53 outcomes are ever used during training",
+    "Market 12h directional target is different from pinned native 24-72h trade profit",
+    "PRE baseline may be unscored due to insufficient training; do not infer improvements",
+    "The three periods were studied before this experiment so not blind OOS",
+    "Order book, live STOP, shared Gross, real funding and future execution slippage omitted",
+    "This is a market-wide learner diagnostic, not a completed Production-ready redesign"
+  ],
+  "method": "Rolling 180d, disjoint 12h labeled rows, L2 fixed 12, 24h after label maturity embargo",
+  "monthly_model_quality": [
+    {
+      "auc": 0.53668,
+      "brier_score": 0.251567,
+      "direction_hit_frequency": 0.5669,
+      "period": "2025-11",
+      "sample_n": 695,
+      "training_n": 162
+    },
+    {
+      "auc": 0.55752,
+      "brier_score": 0.247854,
+      "direction_hit_frequency": 0.5333,
+      "period": "2025-12",
+      "sample_n": 720,
+      "training_n": 219
+    },
+    {
+      "auc": 0.55324,
+      "brier_score": 0.251108,
+      "direction_hit_frequency": 0.5036,
+      "period": "2026-01",
+      "sample_n": 703,
+      "training_n": 280
+    },
+    {
+      "auc": 0.54321,
+      "brier_score": 0.249232,
+      "direction_hit_frequency": 0.5379,
+      "period": "2026-02",
+      "sample_n": 634,
+      "training_n": 340
+    },
+    {
+      "auc": 0.51893,
+      "brier_score": 0.253426,
+      "direction_hit_frequency": 0.5121,
+      "period": "2026-03",
+      "sample_n": 701,
+      "training_n": 344
+    },
+    {
+      "auc": 0.5274,
+      "brier_score": 0.266637,
+      "direction_hit_frequency": 0.3932,
+      "period": "2026-04",
+      "sample_n": 679,
+      "training_n": 347
+    },
+    {
+      "auc": 0.43519,
+      "brier_score": 0.26433,
+      "direction_hit_frequency": 0.5298,
+      "period": "2026-05",
+      "sample_n": 704,
+      "training_n": 344
+    },
+    {
+      "auc": 0.50158,
+      "brier_score": 0.257289,
+      "direction_hit_frequency": 0.5427,
+      "period": "2026-06",
+      "sample_n": 632,
+      "training_n": 345
+    },
+    {
+      "auc": 0.48646,
+      "brier_score": 0.259017,
+      "direction_hit_frequency": 0.439,
+      "period": "2026-07",
+      "sample_n": 590,
+      "training_n": 340
+    },
+    {
+      "auc": 0.54829,
+      "brier_score": 0.252959,
+      "direction_hit_frequency": 0.4192,
+      "period": "2026-08",
+      "sample_n": 625,
+      "training_n": 329
+    },
+    {
+      "auc": 0.49544,
+      "brier_score": 0.262535,
+      "direction_hit_frequency": 0.4639,
+      "period": "2026-09",
+      "sample_n": 692,
+      "training_n": 323
+    },
+    {
+      "auc": 0.48435,
+      "brier_score": 0.25701,
+      "direction_hit_frequency": 0.4764,
+      "period": "2026-10",
+      "sample_n": 741,
+      "training_n": 321
+    },
+    {
+      "auc": 0.50617,
+      "brier_score": 0.254525,
+      "direction_hit_frequency": 0.599,
+      "period": "2026-11",
+      "sample_n": 394,
+      "training_n": 323
+    }
+  ],
+  "monthly_training_cutoffs": {
+    "2025-08": {
+      "first_train_ts": null,
+      "last_matured_label_ts": null,
+      "model": "INSUFFICIENT_TRAIN_HISTORY",
+      "n": 0
+    },
+    "2025-09": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1756555200000,
+      "model": "INSUFFICIENT_TRAIN_HISTORY",
+      "n": 44
+    },
+    "2025-10": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1759147200000,
+      "model": "INSUFFICIENT_TRAIN_HISTORY",
+      "n": 100
+    },
+    "2025-11": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1761825600000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1761955200000,
+      "n": 162,
+      "training_end_cutoff": 1761825600000
+    },
+    "2025-12": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1764417600000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1764547200000,
+      "n": 219,
+      "training_end_cutoff": 1764417600000
+    },
+    "2026-01": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1767096000000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1767225600000,
+      "n": 280,
+      "training_end_cutoff": 1767096000000
+    },
+    "2026-02": {
+      "first_train_ts": 1754395200000,
+      "last_matured_label_ts": 1769774400000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1769904000000,
+      "n": 340,
+      "training_end_cutoff": 1769774400000
+    },
+    "2026-03": {
+      "first_train_ts": 1756771200000,
+      "last_matured_label_ts": 1772193600000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1772323200000,
+      "n": 344,
+      "training_end_cutoff": 1772193600000
+    },
+    "2026-04": {
+      "first_train_ts": 1759449600000,
+      "last_matured_label_ts": 1774872000000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1775001600000,
+      "n": 347,
+      "training_end_cutoff": 1774872000000
+    },
+    "2026-05": {
+      "first_train_ts": 1762041600000,
+      "last_matured_label_ts": 1777464000000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1777593600000,
+      "n": 344,
+      "training_end_cutoff": 1777464000000
+    },
+    "2026-06": {
+      "first_train_ts": 1764720000000,
+      "last_matured_label_ts": 1780142400000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1780272000000,
+      "n": 345,
+      "training_end_cutoff": 1780142400000
+    },
+    "2026-07": {
+      "first_train_ts": 1767312000000,
+      "last_matured_label_ts": 1782734400000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1782864000000,
+      "n": 340,
+      "training_end_cutoff": 1782734400000
+    },
+    "2026-08": {
+      "first_train_ts": 1769990400000,
+      "last_matured_label_ts": 1785412800000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1785542400000,
+      "n": 329,
+      "training_end_cutoff": 1785412800000
+    },
+    "2026-09": {
+      "first_train_ts": 1772668800000,
+      "last_matured_label_ts": 1788091200000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1788220800000,
+      "n": 323,
+      "training_end_cutoff": 1788091200000
+    },
+    "2026-10": {
+      "first_train_ts": 1775390400000,
+      "last_matured_label_ts": 1790683200000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1790812800000,
+      "n": 321,
+      "training_end_cutoff": 1790683200000
+    },
+    "2026-11": {
+      "first_train_ts": 1777939200000,
+      "last_matured_label_ts": 1793361600000,
+      "model": "FROZEN_SHRUNK_LOGIT_12H",
+      "month_start": 1793491200000,
+      "n": 323,
+      "training_end_cutoff": 1793361600000
+    }
+  },
+  "schema": "prism5-all-H1-causal-monthly-direct-12h-short/v1",
+  "source_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "target": "PENGU next 12h price-direction decline after 30bps, not 72h native win"
+}
