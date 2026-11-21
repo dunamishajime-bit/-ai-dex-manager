@@ -123,6 +123,15 @@ class Stable4SafetyRepairTests(unittest.TestCase):
             with self.assertRaises(module.ContractError):
                 module.validate_hold_metadata(uid, mode)
 
+    def test_margin_guard_workflow_never_changes_active_writers_state(self):
+        workflow = (Path(__file__).parents[2] / ".github" / "workflows" /
+                    "disdex-stable4-safety-repair-cutover.yml").read_text(encoding="utf-8")
+        self.assertIn("Verify private shared Margin Guard writer contract (read-only)", workflow)
+        self.assertIn("MARGIN_GUARD_PRIVATE_WRITER_CONTRACT_PASS=TRUE", workflow)
+        self.assertIn("systemctl is-active --quiet \"$guard\"", workflow)
+        self.assertNotIn('chown root:root "$state"', workflow)
+        self.assertNotIn('chmod 600 "$state"', workflow)
+
     def test_margin_guard_private_atomic_writer_security_boundary(self):
         private_dir = SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_uid=1000, st_gid=1000)
         writer = SimpleNamespace(st_mode=stat.S_IFREG | 0o660, st_uid=1000,
