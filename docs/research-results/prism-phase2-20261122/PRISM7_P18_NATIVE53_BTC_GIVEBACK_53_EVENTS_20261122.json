@@ -1,0 +1,1392 @@
+[
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00003",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1755447000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1755450000000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00004",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1755766800000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1755763200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.8391487,
+        "current_gross_short_gain_pct": 5.1456126,
+        "execution_price": 0.029859,
+        "gross_mfe_at_decision_pct": 8.0578643,
+        "positive_m5_triple_taker_buy_ratio": 0.9649152,
+        "profit_giveback_pct": 2.9122518,
+        "proxy_execution_m5_ts": 1755701400000,
+        "signal_close_ts": 1755701400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.8391487,
+        "current_gross_short_gain_pct": 5.1456126,
+        "execution_price": 0.029859,
+        "gross_mfe_at_decision_pct": 8.0578643,
+        "positive_m5_triple_taker_buy_ratio": 0.9649152,
+        "profit_giveback_pct": 2.9122518,
+        "proxy_execution_m5_ts": 1755701400000,
+        "signal_close_ts": 1755701400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00006",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1755723900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1755727200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00008",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1756857300000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1756857600000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.5940822,
+        "current_gross_short_gain_pct": 2.4390244,
+        "execution_price": 0.0281,
+        "gross_mfe_at_decision_pct": 3.5226481,
+        "positive_m5_triple_taker_buy_ratio": 0.6666667,
+        "profit_giveback_pct": 1.0836237,
+        "proxy_execution_m5_ts": 1756767600000,
+        "signal_close_ts": 1756767600000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.8956772,
+        "current_gross_short_gain_pct": 1.7421603,
+        "execution_price": 0.0283,
+        "gross_mfe_at_decision_pct": 3.5226481,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 1.7804878,
+        "proxy_execution_m5_ts": 1756768200000,
+        "signal_close_ts": 1756767900000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 5.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00011",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1757136000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1757134800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00015",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1758682800000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "PRE_2025_AUG_SEP",
+    "sourceH1ExitTs": 1758682800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00004",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1760693400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1760695200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3484785,
+        "current_gross_short_gain_pct": 2.1128248,
+        "execution_price": 0.023284,
+        "gross_mfe_at_decision_pct": 4.7158251,
+        "positive_m5_triple_taker_buy_ratio": 0.6228509,
+        "profit_giveback_pct": 2.6030002,
+        "proxy_execution_m5_ts": 1760627700000,
+        "signal_close_ts": 1760627700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.6527875,
+        "current_gross_short_gain_pct": 3.4185506,
+        "execution_price": 0.022871,
+        "gross_mfe_at_decision_pct": 6.1187408,
+        "positive_m5_triple_taker_buy_ratio": 0.9982196,
+        "profit_giveback_pct": 2.7001902,
+        "proxy_execution_m5_ts": 1760634000000,
+        "signal_close_ts": 1760634000000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00005",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1761418800000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1761415200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.4966365,
+        "current_gross_short_gain_pct": 4.0513069,
+        "execution_price": 0.019821,
+        "gross_mfe_at_decision_pct": 5.5082285,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 1.4569216,
+        "proxy_execution_m5_ts": 1761175500000,
+        "signal_close_ts": 1761175500000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.5706741,
+        "current_gross_short_gain_pct": 0.8422072,
+        "execution_price": 0.020442,
+        "gross_mfe_at_decision_pct": 5.5082285,
+        "positive_m5_triple_taker_buy_ratio": 0.8076587,
+        "profit_giveback_pct": 4.6660213,
+        "proxy_execution_m5_ts": 1761226800000,
+        "signal_close_ts": 1761226800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00006",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1761478500000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1761480000000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00007",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1761864900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1761865200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.360884,
+        "current_gross_short_gain_pct": 3.7822189,
+        "execution_price": 0.020475,
+        "gross_mfe_at_decision_pct": 5.1363467,
+        "positive_m5_triple_taker_buy_ratio": 0.8491807,
+        "profit_giveback_pct": 1.3541278,
+        "proxy_execution_m5_ts": 1761688500000,
+        "signal_close_ts": 1761688200000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 5.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 1.2331042,
+        "current_gross_short_gain_pct": 4.4686216,
+        "execution_price": 0.020494,
+        "gross_mfe_at_decision_pct": 7.1348524,
+        "positive_m5_triple_taker_buy_ratio": 0.9934626,
+        "profit_giveback_pct": 2.6662309,
+        "proxy_execution_m5_ts": 1761803400000,
+        "signal_close_ts": 1761803400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00008",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1762153200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762153200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3214331,
+        "current_gross_short_gain_pct": 3.9163376,
+        "execution_price": 0.01806,
+        "gross_mfe_at_decision_pct": 6.0559172,
+        "positive_m5_triple_taker_buy_ratio": 0.649368,
+        "profit_giveback_pct": 2.1395796,
+        "proxy_execution_m5_ts": 1761938700000,
+        "signal_close_ts": 1761938700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.9657883,
+        "current_gross_short_gain_pct": 2.5504215,
+        "execution_price": 0.01819,
+        "gross_mfe_at_decision_pct": 6.0559172,
+        "positive_m5_triple_taker_buy_ratio": 0.7772368,
+        "profit_giveback_pct": 3.5054957,
+        "proxy_execution_m5_ts": 1761939300000,
+        "signal_close_ts": 1761939300000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00009",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1762186200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762189200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3188183,
+        "current_gross_short_gain_pct": 7.119196,
+        "execution_price": 0.016561,
+        "gross_mfe_at_decision_pct": 8.6856437,
+        "positive_m5_triple_taker_buy_ratio": 0.9725857,
+        "profit_giveback_pct": 1.5664477,
+        "proxy_execution_m5_ts": 1762146300000,
+        "signal_close_ts": 1762146300000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00010",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1762290000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762293600000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.7966057,
+        "current_gross_short_gain_pct": 3.2021511,
+        "execution_price": 0.015816,
+        "gross_mfe_at_decision_pct": 7.0887314,
+        "positive_m5_triple_taker_buy_ratio": 0.8117338,
+        "profit_giveback_pct": 3.8865803,
+        "proxy_execution_m5_ts": 1762190700000,
+        "signal_close_ts": 1762190700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.7966057,
+        "current_gross_short_gain_pct": 3.2021511,
+        "execution_price": 0.015816,
+        "gross_mfe_at_decision_pct": 7.0887314,
+        "positive_m5_triple_taker_buy_ratio": 0.8117338,
+        "profit_giveback_pct": 3.8865803,
+        "proxy_execution_m5_ts": 1762190700000,
+        "signal_close_ts": 1762190700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00011",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1762290000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762293600000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00013",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1762735200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762736400000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00014",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1762715100000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1762718400000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00017",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1763349000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1763344800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 1.3145915,
+        "current_gross_short_gain_pct": 2.0600922,
+        "execution_price": 0.013056,
+        "gross_mfe_at_decision_pct": 6.3662056,
+        "positive_m5_triple_taker_buy_ratio": 0.9864888,
+        "profit_giveback_pct": 4.3061133,
+        "proxy_execution_m5_ts": 1763133000000,
+        "signal_close_ts": 1763132400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 10.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 1.3145915,
+        "current_gross_short_gain_pct": 2.0600922,
+        "execution_price": 0.013056,
+        "gross_mfe_at_decision_pct": 6.3662056,
+        "positive_m5_triple_taker_buy_ratio": 0.9864888,
+        "profit_giveback_pct": 4.3061133,
+        "proxy_execution_m5_ts": 1763133000000,
+        "signal_close_ts": 1763132400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 10.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00018",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1764626700000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1764630000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.5675517,
+        "current_gross_short_gain_pct": 10.5258303,
+        "execution_price": 0.009712,
+        "gross_mfe_at_decision_pct": 11.5405904,
+        "positive_m5_triple_taker_buy_ratio": 0.787434,
+        "profit_giveback_pct": 1.0147601,
+        "proxy_execution_m5_ts": 1764571200000,
+        "signal_close_ts": 1764571200000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 1.0463012,
+        "current_gross_short_gain_pct": 11.1070111,
+        "execution_price": 0.009655,
+        "gross_mfe_at_decision_pct": 13.7453875,
+        "positive_m5_triple_taker_buy_ratio": 0.73868,
+        "profit_giveback_pct": 2.6383764,
+        "proxy_execution_m5_ts": 1764624600000,
+        "signal_close_ts": 1764624600000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00021",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1765068300000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1765069200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00027",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1766031900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766030400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.4755184,
+        "current_gross_short_gain_pct": 5.614467,
+        "execution_price": 0.010011,
+        "gross_mfe_at_decision_pct": 6.693808,
+        "positive_m5_triple_taker_buy_ratio": 0.9931982,
+        "profit_giveback_pct": 1.079341,
+        "proxy_execution_m5_ts": 1765825200000,
+        "signal_close_ts": 1765825200000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.9744037,
+        "current_gross_short_gain_pct": 4.525658,
+        "execution_price": 0.010069,
+        "gross_mfe_at_decision_pct": 6.693808,
+        "positive_m5_triple_taker_buy_ratio": 0.9282773,
+        "profit_giveback_pct": 2.16815,
+        "proxy_execution_m5_ts": 1765825500000,
+        "signal_close_ts": 1765825500000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00029",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1766113500000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766116800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.505416,
+        "current_gross_short_gain_pct": 4.2438733,
+        "execution_price": 0.009616,
+        "gross_mfe_at_decision_pct": 6.8639171,
+        "positive_m5_triple_taker_buy_ratio": 0.685678,
+        "profit_giveback_pct": 2.6200438,
+        "proxy_execution_m5_ts": 1766003400000,
+        "signal_close_ts": 1766003400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.505416,
+        "current_gross_short_gain_pct": 4.2438733,
+        "execution_price": 0.009616,
+        "gross_mfe_at_decision_pct": 6.8639171,
+        "positive_m5_triple_taker_buy_ratio": 0.685678,
+        "profit_giveback_pct": 2.6200438,
+        "proxy_execution_m5_ts": 1766003400000,
+        "signal_close_ts": 1766003400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00031",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1766273400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766271600000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3565028,
+        "current_gross_short_gain_pct": 1.9541206,
+        "execution_price": 0.009219,
+        "gross_mfe_at_decision_pct": 3.4728122,
+        "positive_m5_triple_taker_buy_ratio": 0.9923928,
+        "profit_giveback_pct": 1.5186916,
+        "proxy_execution_m5_ts": 1766052000000,
+        "signal_close_ts": 1766051700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 5.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.5779382,
+        "current_gross_short_gain_pct": 1.6886151,
+        "execution_price": 0.009252,
+        "gross_mfe_at_decision_pct": 3.4728122,
+        "positive_m5_triple_taker_buy_ratio": 0.9570294,
+        "profit_giveback_pct": 1.7841971,
+        "proxy_execution_m5_ts": 1766052600000,
+        "signal_close_ts": 1766052600000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00032",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1766322000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766318400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.4374256,
+        "current_gross_short_gain_pct": 2.9242309,
+        "execution_price": 0.008854,
+        "gross_mfe_at_decision_pct": 5.0983803,
+        "positive_m5_triple_taker_buy_ratio": 0.9736461,
+        "profit_giveback_pct": 2.1741494,
+        "proxy_execution_m5_ts": 1766083500000,
+        "signal_close_ts": 1766082000000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 25.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.972357,
+        "current_gross_short_gain_pct": 4.9027068,
+        "execution_price": 0.008743,
+        "gross_mfe_at_decision_pct": 7.1746929,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.2719861,
+        "proxy_execution_m5_ts": 1766093700000,
+        "signal_close_ts": 1766093700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00033",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1766336700000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766336400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.4374256,
+        "current_gross_short_gain_pct": 3.6365598,
+        "execution_price": 0.008854,
+        "gross_mfe_at_decision_pct": 5.7947556,
+        "positive_m5_triple_taker_buy_ratio": 0.9736461,
+        "profit_giveback_pct": 2.1581957,
+        "proxy_execution_m5_ts": 1766083500000,
+        "signal_close_ts": 1766082000000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 25.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.972357,
+        "current_gross_short_gain_pct": 5.600518,
+        "execution_price": 0.008743,
+        "gross_mfe_at_decision_pct": 7.8558325,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.2553146,
+        "proxy_execution_m5_ts": 1766093700000,
+        "signal_close_ts": 1766093700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00034",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1766157300000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766160000000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.972357,
+        "current_gross_short_gain_pct": 1.5751575,
+        "execution_price": 0.008743,
+        "gross_mfe_at_decision_pct": 3.9266427,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.3514851,
+        "proxy_execution_m5_ts": 1766093700000,
+        "signal_close_ts": 1766093700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.972357,
+        "current_gross_short_gain_pct": 1.5751575,
+        "execution_price": 0.008743,
+        "gross_mfe_at_decision_pct": 3.9266427,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.3514851,
+        "proxy_execution_m5_ts": 1766093700000,
+        "signal_close_ts": 1766093700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00035",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1766155200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1766156400000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00046",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1769886000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1769889600000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00051",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1772311200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1772312400000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00055",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1774800900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1774800000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3954462,
+        "current_gross_short_gain_pct": 5.8883249,
+        "execution_price": 0.006488,
+        "gross_mfe_at_decision_pct": 7.5126904,
+        "positive_m5_triple_taker_buy_ratio": 0.9373422,
+        "profit_giveback_pct": 1.6243655,
+        "proxy_execution_m5_ts": 1774700400000,
+        "signal_close_ts": 1774700400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.6915581,
+        "current_gross_short_gain_pct": 4.3944888,
+        "execution_price": 0.00656,
+        "gross_mfe_at_decision_pct": 7.5126904,
+        "positive_m5_triple_taker_buy_ratio": 0.8192556,
+        "profit_giveback_pct": 3.1182016,
+        "proxy_execution_m5_ts": 1774705800000,
+        "signal_close_ts": 1774705800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00057",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1775419200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1775412000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00070",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1778918400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1778922000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.5249301,
+        "current_gross_short_gain_pct": 2.7282492,
+        "execution_price": 0.009053,
+        "gross_mfe_at_decision_pct": 5.2846402,
+        "positive_m5_triple_taker_buy_ratio": 0.9589556,
+        "profit_giveback_pct": 2.556391,
+        "proxy_execution_m5_ts": 1778697600000,
+        "signal_close_ts": 1778695800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 30.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.5249301,
+        "current_gross_short_gain_pct": 2.7282492,
+        "execution_price": 0.009053,
+        "gross_mfe_at_decision_pct": 5.2846402,
+        "positive_m5_triple_taker_buy_ratio": 0.9589556,
+        "profit_giveback_pct": 2.556391,
+        "proxy_execution_m5_ts": 1778697600000,
+        "signal_close_ts": 1778695800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 30.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00071",
+    "p14BaselineExitType": null,
+    "p14ExitTimeM5Ts": null,
+    "p14ObservedStatus": "NO_ENTRY_POSITIVE_PRINT_IN_H1",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1778976000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00072",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1779019500000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1779015600000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3302296,
+        "current_gross_short_gain_pct": 4.6207596,
+        "execution_price": 0.008462,
+        "gross_mfe_at_decision_pct": 5.9055562,
+        "positive_m5_triple_taker_buy_ratio": 0.9946797,
+        "profit_giveback_pct": 1.2847966,
+        "proxy_execution_m5_ts": 1778944500000,
+        "signal_close_ts": 1778943000000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 25.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00075",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1780225200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1780225200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.9606248,
+        "current_gross_short_gain_pct": 1.3803681,
+        "execution_price": 0.007783,
+        "gross_mfe_at_decision_pct": 3.8343558,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.4539877,
+        "proxy_execution_m5_ts": 1780067400000,
+        "signal_close_ts": 1780067400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.9606248,
+        "current_gross_short_gain_pct": 1.3803681,
+        "execution_price": 0.007783,
+        "gross_mfe_at_decision_pct": 3.8343558,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 2.4539877,
+        "proxy_execution_m5_ts": 1780067400000,
+        "signal_close_ts": 1780067400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00076",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1780257900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1780257600000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00080",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1782105600000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1782100800000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00081",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1782523200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1782518400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 1.6575613,
+        "current_gross_short_gain_pct": 5.8185876,
+        "execution_price": 0.005962,
+        "gross_mfe_at_decision_pct": 9.5966842,
+        "positive_m5_triple_taker_buy_ratio": 0.6803798,
+        "profit_giveback_pct": 3.7780966,
+        "proxy_execution_m5_ts": 1782332700000,
+        "signal_close_ts": 1782331800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 15.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 1.6575613,
+        "current_gross_short_gain_pct": 5.8185876,
+        "execution_price": 0.005962,
+        "gross_mfe_at_decision_pct": 9.5966842,
+        "positive_m5_triple_taker_buy_ratio": 0.6803798,
+        "profit_giveback_pct": 3.7780966,
+        "proxy_execution_m5_ts": 1782332700000,
+        "signal_close_ts": 1782331800000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 15.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00086",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1784548500000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1784548800000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00088",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1785492000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1785492000000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.9834959,
+        "current_gross_short_gain_pct": 0.9118541,
+        "execution_price": 0.005886,
+        "gross_mfe_at_decision_pct": 4.1877744,
+        "positive_m5_triple_taker_buy_ratio": 0.9305251,
+        "profit_giveback_pct": 3.2759203,
+        "proxy_execution_m5_ts": 1785380700000,
+        "signal_close_ts": 1785377700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 50.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.9834959,
+        "current_gross_short_gain_pct": 0.9118541,
+        "execution_price": 0.005886,
+        "gross_mfe_at_decision_pct": 4.1877744,
+        "positive_m5_triple_taker_buy_ratio": 0.9305251,
+        "profit_giveback_pct": 3.2759203,
+        "proxy_execution_m5_ts": 1785380700000,
+        "signal_close_ts": 1785377700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 50.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00101",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1788450000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1788451200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00103",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1788660000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1788663600000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00104",
+    "p14BaselineExitType": "RESIDENT_STOP_M5_HIGH_FIRST_TOUCH_PROXY",
+    "p14ExitTimeM5Ts": 1788660600000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1788663600000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00105",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1789135200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1789135200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3225535,
+        "current_gross_short_gain_pct": 2.7259332,
+        "execution_price": 0.007972,
+        "gross_mfe_at_decision_pct": 4.2485265,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 1.5225933,
+        "proxy_execution_m5_ts": 1788971400000,
+        "signal_close_ts": 1788971400000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.878374,
+        "current_gross_short_gain_pct": 8.3374263,
+        "execution_price": 0.007451,
+        "gross_mfe_at_decision_pct": 10.1915521,
+        "positive_m5_triple_taker_buy_ratio": 0.9961355,
+        "profit_giveback_pct": 1.8541257,
+        "proxy_execution_m5_ts": 1789061700000,
+        "signal_close_ts": 1789061700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00107",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1789290000000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1789286400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.878374,
+        "current_gross_short_gain_pct": 1.5301411,
+        "execution_price": 0.007451,
+        "gross_mfe_at_decision_pct": 3.5219628,
+        "positive_m5_triple_taker_buy_ratio": 0.9961355,
+        "profit_giveback_pct": 1.9918217,
+        "proxy_execution_m5_ts": 1789061700000,
+        "signal_close_ts": 1789061700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.878374,
+        "current_gross_short_gain_pct": 1.5301411,
+        "execution_price": 0.007451,
+        "gross_mfe_at_decision_pct": 3.5219628,
+        "positive_m5_triple_taker_buy_ratio": 0.9961355,
+        "profit_giveback_pct": 1.9918217,
+        "proxy_execution_m5_ts": 1789061700000,
+        "signal_close_ts": 1789061700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00108",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1789315200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1789315200000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3635765,
+        "current_gross_short_gain_pct": 2.4839744,
+        "execution_price": 0.00733,
+        "gross_mfe_at_decision_pct": 4.2467949,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 1.7628205,
+        "proxy_execution_m5_ts": 1789157100000,
+        "signal_close_ts": 1789157100000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00109",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1789335900000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "BASE_2025_2026",
+    "sourceH1ExitTs": 1789326000000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3635765,
+        "current_gross_short_gain_pct": 2.0128824,
+        "execution_price": 0.00733,
+        "gross_mfe_at_decision_pct": 3.784219,
+        "positive_m5_triple_taker_buy_ratio": 1.0,
+        "profit_giveback_pct": 1.7713366,
+        "proxy_execution_m5_ts": 1789157100000,
+        "signal_close_ts": 1789157100000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00001",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1791694800000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1791694800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 1.1183276,
+        "current_gross_short_gain_pct": 8.0942384,
+        "execution_price": 0.00786,
+        "gross_mfe_at_decision_pct": 11.2782832,
+        "positive_m5_triple_taker_buy_ratio": 0.9832726,
+        "profit_giveback_pct": 3.1840448,
+        "proxy_execution_m5_ts": 1791483900000,
+        "signal_close_ts": 1791483900000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 1.1183276,
+        "current_gross_short_gain_pct": 8.0942384,
+        "execution_price": 0.00786,
+        "gross_mfe_at_decision_pct": 11.2782832,
+        "positive_m5_triple_taker_buy_ratio": 0.9832726,
+        "profit_giveback_pct": 3.1840448,
+        "proxy_execution_m5_ts": 1791483900000,
+        "signal_close_ts": 1791483900000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00003",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1791763500000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1791763200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "MODEST_FAVORABLE_BUT_NET_LOSS",
+    "id": "PENGU_00004",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1791781200000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1791781200000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "PROFIT_GIVEBACK_AFTER_MFE3",
+    "id": "PENGU_00006",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1793138400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1793134800000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.3049308,
+        "current_gross_short_gain_pct": 2.2222222,
+        "execution_price": 0.007404,
+        "gross_mfe_at_decision_pct": 3.4656085,
+        "positive_m5_triple_taker_buy_ratio": 0.9014283,
+        "profit_giveback_pct": 1.2433862,
+        "proxy_execution_m5_ts": 1792988100000,
+        "signal_close_ts": 1792988100000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.8039808,
+        "current_gross_short_gain_pct": 1.1111111,
+        "execution_price": 0.007488,
+        "gross_mfe_at_decision_pct": 3.4656085,
+        "positive_m5_triple_taker_buy_ratio": 0.9996116,
+        "profit_giveback_pct": 2.3544974,
+        "proxy_execution_m5_ts": 1792990500000,
+        "signal_close_ts": 1792990500000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  },
+  {
+    "diagnosticCategory": "NO_FAVORABLE_ONE_PERCENT",
+    "id": "PENGU_00008",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1793606400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1793606400000,
+    "sourceNativeWin30": false,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00009",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1793642400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1793642400000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": null,
+      "BTC_STRONG_BOUNCE_LOCK": null
+    }
+  },
+  {
+    "diagnosticCategory": "WIN_NATIVE_EXIT_PRICE_MODEL",
+    "id": "PENGU_00011",
+    "p14BaselineExitType": "NATIVE_H1_CLOSE_INTENT_NEXT_POSITIVE_M5_OPEN_PROXY",
+    "p14ExitTimeM5Ts": 1794200400000,
+    "p14ObservedStatus": "PRICE_PROXY_CLOSED",
+    "period": "POST_2026_OCT_NOV",
+    "sourceH1ExitTs": 1794196800000,
+    "sourceNativeWin30": true,
+    "triggerByRule": {
+      "BTC_CONFIRM_GAIN_LOCK": {
+        "btc_prior_1h_return_pct": 0.8967906,
+        "current_gross_short_gain_pct": 6.0615245,
+        "execution_price": 0.006194,
+        "gross_mfe_at_decision_pct": 9.1832096,
+        "positive_m5_triple_taker_buy_ratio": 0.9936079,
+        "profit_giveback_pct": 3.1216851,
+        "proxy_execution_m5_ts": 1794179700000,
+        "signal_close_ts": 1794179700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      },
+      "BTC_STRONG_BOUNCE_LOCK": {
+        "btc_prior_1h_return_pct": 0.8967906,
+        "current_gross_short_gain_pct": 6.0615245,
+        "execution_price": 0.006194,
+        "gross_mfe_at_decision_pct": 9.1832096,
+        "positive_m5_triple_taker_buy_ratio": 0.9936079,
+        "profit_giveback_pct": 3.1216851,
+        "proxy_execution_m5_ts": 1794179700000,
+        "signal_close_ts": 1794179700000,
+        "signal_uses_future_data": false,
+        "source_native_stop_priority_respected": true,
+        "time_to_next_positive_print_minutes": 0.0
+      }
+    }
+  }
+]
