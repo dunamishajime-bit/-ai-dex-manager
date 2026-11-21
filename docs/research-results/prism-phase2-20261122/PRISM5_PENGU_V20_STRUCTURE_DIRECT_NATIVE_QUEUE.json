@@ -1,0 +1,65 @@
+{
+  "schema": "prism5-v20-native-unchanged-direct-entries/v1",
+  "events": [
+    {
+      "period": "PRE_2025_AUG_SEP",
+      "source_original_id": "PENGU_00004",
+      "entryTs": 1755504000000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "PRE_2025_AUG_SEP",
+      "source_original_id": "PENGU_00006",
+      "entryTs": 1755698400000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00004",
+      "entryTs": 1760544000000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00009",
+      "entryTs": 1761930000000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00013",
+      "entryTs": 1762650000000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00018",
+      "entryTs": 1764439200000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00034",
+      "entryTs": 1766080800000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00035",
+      "entryTs": 1766102400000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00070",
+      "entryTs": 1778673600000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    },
+    {
+      "period": "BASE_2025_2026",
+      "source_original_id": "PENGU_00109",
+      "entryTs": 1789066800000,
+      "source_native_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+    }
+  ]
+}
