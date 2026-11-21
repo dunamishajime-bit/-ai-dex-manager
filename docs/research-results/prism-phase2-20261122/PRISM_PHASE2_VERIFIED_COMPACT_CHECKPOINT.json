@@ -1,0 +1,280 @@
+{
+  "findings": {
+    "H1_to_M5_aggregation_forward_candidates": 11,
+    "H1_to_M5_aggregation_original_116": 115,
+    "H1_to_M5_aggregation_original_dropped_short_v20": [
+      1775152800000
+    ],
+    "forward_native_model_weighted": {
+      "ALL": {
+        "mean_price10_pct": 0.3929,
+        "mean_price30_pct": 0.1929,
+        "n": 11,
+        "win_rate10_pct": 45.45,
+        "win_rate30_pct": 45.45,
+        "wins10": 5,
+        "wins30": 5
+      },
+      "RECOVERY_V8": {
+        "mean_price10_pct": 0.6565,
+        "mean_price30_pct": 0.4565,
+        "n": 4,
+        "win_rate10_pct": 50.0,
+        "win_rate30_pct": 50.0,
+        "wins10": 2,
+        "wins30": 2
+      },
+      "SHORT_V20": {
+        "mean_price10_pct": 0.2422,
+        "mean_price30_pct": 0.0422,
+        "n": 7,
+        "win_rate10_pct": 42.86,
+        "win_rate30_pct": 42.86,
+        "wins10": 3,
+        "wins30": 3
+      }
+    },
+    "forward_pinned_n": 11,
+    "forward_unresolved": 0,
+    "model_proof": "Pinned current source pure functions: native entry + native H1 exit, but modeled prices not signed executions",
+    "new_period_native_H1_M5_gt_5bps_at_signal": 3,
+    "source_116_entry_parity": 116,
+    "source_116_native_exit_parity": 116,
+    "source_entry_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+    "source_h1_m5_coherence": {
+      "BTCUSDT_baseline": {
+        "close_gt_5bps": 0,
+        "high_gt_5bps": 0,
+        "hours": 8760,
+        "low_gt_5bps": 0,
+        "open_gt_50bps": 0,
+        "open_gt_5bps": 0,
+        "open_max_pct": 0.0,
+        "volume_gt_5bps": 0
+      },
+      "BTCUSDT_forward": {
+        "close_gt_5bps": 0,
+        "high_gt_5bps": 0,
+        "hours": 1152,
+        "low_gt_5bps": 0,
+        "open_gt_50bps": 0,
+        "open_gt_5bps": 0,
+        "open_max_pct": 0.0,
+        "volume_gt_5bps": 0
+      },
+      "PENGUUSDT_baseline": {
+        "close_gt_5bps": 0,
+        "high_gt_5bps": 1182,
+        "hours": 8760,
+        "low_gt_5bps": 1126,
+        "open_gt_50bps": 1400,
+        "open_gt_5bps": 3289,
+        "open_max_pct": 4.202554,
+        "volume_gt_5bps": 0
+      },
+      "PENGUUSDT_forward": {
+        "close_gt_5bps": 0,
+        "high_gt_5bps": 70,
+        "hours": 1152,
+        "low_gt_5bps": 46,
+        "open_gt_50bps": 11,
+        "open_gt_5bps": 244,
+        "open_max_pct": 0.879265,
+        "volume_gt_5bps": 0
+      }
+    },
+    "source_signal_blob": "06476fed9985a165cf73971e790322ef3d03bd90"
+  },
+  "forward_weighted_trade_ledger": [
+    {
+      "entry_price": 0.008574,
+      "entry_ts": 1791435600000,
+      "exit_price": 0.00823,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1791694800000,
+      "id": "PENGU_00001",
+      "partial_events": 0,
+      "price_net10bps_pct": 3.912129694425015,
+      "price_net30bps_pct": 3.712129694425015,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": 3.712129694425015,
+      "weighted_net30bps_pct": 3.712129694425015
+    },
+    {
+      "entry_price": 0.00871,
+      "entry_ts": 1791453600000,
+      "exit_price": 0.008187400000000001,
+      "exit_reason": "RECOVERY_V8_HARD_STOP",
+      "exit_ts": 1791475200000,
+      "id": "PENGU_00002",
+      "partial_events": 0,
+      "price_net10bps_pct": -6.099999999999994,
+      "price_net30bps_pct": -6.2999999999999945,
+      "remaining_fraction": 1.0,
+      "route": "RECOVERY_V8",
+      "terminal_only_net30bps_pct": -6.2999999999999945,
+      "weighted_net30bps_pct": -6.2999999999999945
+    },
+    {
+      "entry_price": 0.007944,
+      "entry_ts": 1791504000000,
+      "exit_price": 0.008229,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1791763200000,
+      "id": "PENGU_00003",
+      "partial_events": 0,
+      "price_net10bps_pct": -3.6876132930513728,
+      "price_net30bps_pct": -3.887613293051373,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": -3.887613293051373,
+      "weighted_net30bps_pct": -3.887613293051373
+    },
+    {
+      "entry_price": 0.00808,
+      "entry_ts": 1791522000000,
+      "exit_price": 0.00835,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1791781200000,
+      "id": "PENGU_00004",
+      "partial_events": 0,
+      "price_net10bps_pct": -3.4415841584158335,
+      "price_net30bps_pct": -3.6415841584158337,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": -3.6415841584158337,
+      "weighted_net30bps_pct": -3.6415841584158337
+    },
+    {
+      "entry_price": 0.007454,
+      "entry_ts": 1792364400000,
+      "exit_price": 0.00796176,
+      "exit_reason": "RECOVERY_V8_TRAILING_STOP",
+      "exit_ts": 1792548000000,
+      "id": "PENGU_00005",
+      "partial_events": 0,
+      "price_net10bps_pct": 6.711913066809771,
+      "price_net30bps_pct": 6.511913066809772,
+      "remaining_fraction": 1.0,
+      "route": "RECOVERY_V8",
+      "terminal_only_net30bps_pct": 6.511913066809772,
+      "weighted_net30bps_pct": 6.511913066809772
+    },
+    {
+      "entry_price": 0.00756,
+      "entry_ts": 1792875600000,
+      "exit_price": 0.007698,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1793134800000,
+      "id": "PENGU_00006",
+      "partial_events": 0,
+      "price_net10bps_pct": -1.925396825396819,
+      "price_net30bps_pct": -2.1253968253968187,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": -2.1253968253968187,
+      "weighted_net30bps_pct": -2.1253968253968187
+    },
+    {
+      "entry_price": 0.007644,
+      "entry_ts": 1792890000000,
+      "exit_price": 0.007745,
+      "exit_reason": "RECOVERY_V8_MAX_HOLD",
+      "exit_ts": 1793149200000,
+      "id": "PENGU_00007",
+      "partial_events": 1,
+      "price_net10bps_pct": -1.4393511250654134,
+      "price_net30bps_pct": -1.6393511250654131,
+      "remaining_fraction": 0.5,
+      "route": "RECOVERY_V8",
+      "terminal_only_net30bps_pct": 1.021297749869177,
+      "weighted_net30bps_pct": -1.6393511250654131
+    },
+    {
+      "entry_price": 0.007134,
+      "entry_ts": 1793347200000,
+      "exit_price": 0.007203,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1793606400000,
+      "id": "PENGU_00008",
+      "partial_events": 0,
+      "price_net10bps_pct": -1.067199327165691,
+      "price_net30bps_pct": -1.2671993271656907,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": -1.2671993271656907,
+      "weighted_net30bps_pct": -1.2671993271656907
+    },
+    {
+      "entry_price": 0.007236,
+      "entry_ts": 1793383200000,
+      "exit_price": 0.00703,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1793642400000,
+      "id": "PENGU_00009",
+      "partial_events": 0,
+      "price_net10bps_pct": 2.746876727473746,
+      "price_net30bps_pct": 2.5468767274737463,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": 2.5468767274737463,
+      "weighted_net30bps_pct": 2.5468767274737463
+    },
+    {
+      "entry_price": 0.00709,
+      "entry_ts": 1793710800000,
+      "exit_price": 0.00734193,
+      "exit_reason": "RECOVERY_V8_TRAILING_STOP",
+      "exit_ts": 1793815200000,
+      "id": "PENGU_00010",
+      "partial_events": 0,
+      "price_net10bps_pct": 3.453314527503537,
+      "price_net30bps_pct": 3.253314527503537,
+      "remaining_fraction": 1.0,
+      "route": "RECOVERY_V8",
+      "terminal_only_net30bps_pct": 3.253314527503537,
+      "weighted_net30bps_pct": 3.253314527503537
+    },
+    {
+      "entry_price": 0.006599,
+      "entry_ts": 1793937600000,
+      "exit_price": 0.006252,
+      "exit_reason": "SHORT_MAX_HOLD",
+      "exit_ts": 1794196800000,
+      "id": "PENGU_00011",
+      "partial_events": 0,
+      "price_net10bps_pct": 5.158372480678897,
+      "price_net30bps_pct": 4.9583724806788965,
+      "remaining_fraction": 1.0,
+      "route": "SHORT_V20",
+      "terminal_only_net30bps_pct": 4.9583724806788965,
+      "weighted_net30bps_pct": 4.9583724806788965
+    }
+  ],
+  "limitations": [
+    "This is evidence of fixed PENGU source consistency, not Production installed SHA verification",
+    "Native H1 resident STOP/trailing modeled stop prices are not actual exchange fills; funding omitted",
+    "No shared Gross / position occupancy or correlated signal portfolio replay",
+    "No 70/80 target achieved; 11 signals far too few for confidence in live win rates",
+    "H1/M5 price inconsistency changes native entry price and 1 historical candidate, so dual-source STOP replay requires conservative bounds",
+    "No deployed strategy/economic changes; do not treat historical rule selection as blind future success"
+  ],
+  "periods": {
+    "baseline": "2025-10-01/2026-10-01 UTC",
+    "forward": "2026-10-01/2026-11-18 UTC"
+  },
+  "schema": "disdex-prism2-external-validation-checkpoint/v1",
+  "source_hashes": {
+    "pinned_native_baseline_116_exit": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+    "pinned_native_forward_11_exit": "f4bae44aee5c6f61587f230840f1dfe992e7cf77cdc43bd6025ee92d82e1d57e",
+    "pinned_native_original_116_signal": "7d2dd287a3fefba44c07a018863fd0a29b6a59452dddc6352e78d4457832a9d6",
+    "public_forward": {
+      "BTCUSDT:1h": "f12b3f1d1b2eb96c43fdd9b3e7efb441938c9c115a2f22fb3015e9e8ad82a8b6",
+      "BTCUSDT:5m": "b8da4f4ab32ee53f753c9282eaaccaff686449448d38cb26fb86fdc78c784d88",
+      "PENGUUSDT:1h": "c146916aa31609ad8c1f4bea14c21266285120a50137e2d134a01e5b1c785c92",
+      "PENGUUSDT:5m": "bd2f575f1e19ef60c438064e2ec7ca8aaeae67b64e6eb8ef98117b1bc1e2e4b9"
+    }
+  },
+  "verification_status": "READ_ONLY_HISTORICAL_COHORT_RECALC_PASS"
+}
