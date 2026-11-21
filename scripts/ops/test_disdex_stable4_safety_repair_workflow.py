@@ -30,9 +30,9 @@ class Stable4SafetyRepairWorkflowTests(unittest.TestCase):
             "chmod g+r",
             "test -x \"$parent\"",
             "Q102_STATE_DEPLOY_READ_POSIX_PASS=",
-            "Repair shared Margin Guard metadata without changing bytes",
+            "Verify private shared Margin Guard writer contract (read-only)",
             "/var/lib/disdex/shared/margin-risk/guard-live.json",
-            "MARGIN_GUARD_SHA256_UNCHANGED=",
+            "MARGIN_GUARD_PRIVATE_WRITER_CONTRACT_PASS=TRUE",
             "scripts/disdex-quality102-causal-v1-monitor.ts",
             "tests/quality102-monitor-only.test.ts",
         ):

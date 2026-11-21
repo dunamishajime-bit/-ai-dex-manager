@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import stat
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -121,6 +122,46 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         for uid, mode in ((1001, 0o600), (1000, 0o640), (0, 0o644)):
             with self.assertRaises(module.ContractError):
                 module.validate_hold_metadata(uid, mode)
+
+    def test_margin_guard_workflow_never_changes_active_writers_state(self):
+        workflow = (Path(__file__).parents[2] / ".github" / "workflows" /
+                    "disdex-stable4-safety-repair-cutover.yml").read_text(encoding="utf-8")
+        self.assertIn("Verify private shared Margin Guard writer contract (read-only)", workflow)
+        self.assertIn("MARGIN_GUARD_PRIVATE_WRITER_CONTRACT_PASS=TRUE", workflow)
+        self.assertIn("systemctl is-active --quiet \"$guard\"", workflow)
+        margin_step = workflow.split(
+            "Verify private shared Margin Guard writer contract (read-only)", 1
+        )[1].split("Root read-only preflight", 1)[0]
+        self.assertNotIn('chown root:root "$state"', margin_step)
+        self.assertNotIn('chmod 600 "$state"', margin_step)
+
+    def test_margin_guard_private_atomic_writer_security_boundary(self):
+        private_dir = SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_uid=1000, st_gid=1000)
+        writer = SimpleNamespace(st_mode=stat.S_IFREG | 0o660, st_uid=1000,
+                                 st_gid=1000, st_size=1822)
+        verifier = module.trusted_margin_guard_snapshot_metadata
+        # Existing deploy-owned Margin Guard writes 0660 under a private 0700
+        # directory. This does not grant effective access to other group users.
+        self.assertTrue(verifier(private_dir, writer, 1000, 1000))
+        root_staged = SimpleNamespace(st_mode=stat.S_IFREG | 0o600, st_uid=0,
+                                      st_gid=0, st_size=1822)
+        self.assertTrue(verifier(private_dir, root_staged, 1000, 1000))
+        # No broader permission acceptance: any group-accessible directory,
+        # public file, untrusted owner or oversized state is rejected.
+        for parent in (
+            SimpleNamespace(st_mode=stat.S_IFDIR | 0o770, st_uid=1000, st_gid=1000),
+            SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_uid=1001, st_gid=1000),
+            SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_uid=1000, st_gid=1001),
+        ):
+            self.assertFalse(verifier(parent, writer, 1000, 1000))
+        for candidate in (
+            SimpleNamespace(st_mode=stat.S_IFREG | 0o666, st_uid=1000, st_gid=1000, st_size=1822),
+            SimpleNamespace(st_mode=stat.S_IFREG | 0o660, st_uid=1001, st_gid=1000, st_size=1822),
+            SimpleNamespace(st_mode=stat.S_IFREG | 0o660, st_uid=1000, st_gid=1001, st_size=1822),
+            SimpleNamespace(st_mode=stat.S_IFLNK | 0o660, st_uid=1000, st_gid=1000, st_size=1822),
+            SimpleNamespace(st_mode=stat.S_IFREG | 0o660, st_uid=1000, st_gid=1000, st_size=1_000_001),
+        ):
+            self.assertFalse(verifier(private_dir, candidate, 1000, 1000))
 
     def test_cutover_blocked_reason_preserves_the_fail_closed_detail(self):
         error = module.ContractError("TARGET_RESTART_COUNT_CHANGED")

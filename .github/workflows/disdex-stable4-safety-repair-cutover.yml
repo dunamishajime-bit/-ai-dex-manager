@@ -305,7 +305,7 @@ jobs:
           echo "Q102_STATE_SHA256_UNCHANGED=$after"
           REMOTE
 
-      - name: Repair shared Margin Guard metadata without changing bytes
+      - name: Verify private shared Margin Guard writer contract (read-only)
         if: ${{ inputs.mode == 'execute' }}
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -320,28 +320,22 @@ jobs:
           set -euo pipefail
           state=/var/lib/disdex/shared/margin-risk/guard-live.json
           parent=/var/lib/disdex/shared/margin-risk
+          guard=disdex-v12-v52-margin-guard@7688ed7c93a1918d8b44837339b7da5584a868f5.service
           test -d "$parent"
           test ! -L "$parent"
           test -f "$state"
           test ! -L "$state"
-          before="$(sha256sum "$state" | awk '{print $1}')"
-          owner_before="$(stat -c '%u:%g:%a' "$state")"
-          mode_text="$(stat -c '%a' "$state")"
-          mode_value=$((8#$mode_text))
-          case "$owner_before" in
-            0:0:600) ;;
-            1000:1000:*|1000:0:*|0:1000:*)
-              (( (mode_value & 18) != 0 ))
-              chown root:root "$state"
-              chmod 600 "$state"
-              ;;
-            *) echo "MARGIN_GUARD_OWNER_UNEXPECTED=$owner_before"; exit 1 ;;
+          uid="$(id -u deploy)"
+          gid="$(id -g deploy)"
+          test "$(stat -c '%u:%g:%a' "$parent")" = "$uid:$gid:700"
+          current_meta="$(stat -c '%u:%g:%a' "$state")"
+          case "$current_meta" in
+            "$uid:$gid:660"|0:0:600) ;;
+            *) echo "MARGIN_GUARD_WRITER_METADATA_UNSAFE"; exit 1 ;;
           esac
-          after="$(sha256sum "$state" | awk '{print $1}')"
-          test "$before" = "$after"
-          test "$(stat -c '%u:%g:%a' "$state")" = '0:0:600'
-          echo "MARGIN_GUARD_METADATA_REPAIR_PASS=$owner_before->0:0:600"
-          echo "MARGIN_GUARD_SHA256_UNCHANGED=$after"
+          systemctl is-active --quiet "$guard"
+          echo "MARGIN_GUARD_PRIVATE_WRITER_CONTRACT_PASS=TRUE"
+          echo "MARGIN_GUARD_STATE_UNCHANGED=TRUE"
           REMOTE
 
       - name: Root read-only preflight (three signed GETs)
