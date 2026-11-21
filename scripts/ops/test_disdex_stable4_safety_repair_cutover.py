@@ -315,6 +315,9 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         # drop-in's static environment and ExecStart export must select the
         # immutable Q102 policy contract (3.0) in *monitor-only* mode.
         self.assertEqual(q102.count("QUALITY102_CAUSAL_V1_MAX_GROSS=3.0"), 2)
+        # The old EnvironmentFile sets DERIVED_HIGH_VOL_ONLY, but the current
+        # immutable Q102 causal-v4 code requires the CAUSAL_V4 selector.
+        self.assertEqual(q102.count("QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4"), 2)
         self.assertIn("DISDEX_MONITOR_NEW_ORDERS_ALLOWED=false", q102)
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", q102)
 
