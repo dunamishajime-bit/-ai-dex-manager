@@ -1,0 +1,23 @@
+{
+  "schema": "disdex-prism-pengu-native-pinned-replay/v1",
+  "source_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "source_signal_blob": "06476fed9985a165cf73971e790322ef3d03bd90",
+  "original_count": 116,
+  "replay_count": 116,
+  "matched_count": 116,
+  "missing_old": [],
+  "extra_old": [],
+  "price_mismatch": [],
+  "features_mismatch": [],
+  "data": {
+    "PENGUUSDT": {
+      "old_sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "new_sha256": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+    },
+    "BTCUSDT": {
+      "old_sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "new_sha256": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+    }
+  },
+  "eligible_for_forward": true
+}
