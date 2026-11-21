@@ -1,0 +1,74 @@
+{
+  "schema": "prism7-p8-immutable-pinned-source-native53-real-parity/v1",
+  "sourcePinnedRuntimeSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "matchedSourceNativeShortExits": 53,
+  "entryAndExitParity": "PASS_53_53",
+  "pinnedNativeCandidateCoverage": "PASS_53_53_IN_SOURCE_OWN_ENTRY_PERIOD",
+  "sharedNativeExitCoreParity": "PASS_53_53",
+  "perPeriod": [
+    {
+      "period": "PRE_2025_AUG_SEP",
+      "entryCutUtc": "2025-09-24T00:00:00.000Z",
+      "sourceShortCount": 6,
+      "pinnedShortSignalsWithinPeriod": 6,
+      "rawShortSignalsAbsentFromSourceExitTape": [],
+      "pinnedExitParity": 6
+    },
+    {
+      "period": "BASE_2025_2026",
+      "entryCutUtc": "2026-10-01T00:00:00.000Z",
+      "sourceShortCount": 40,
+      "pinnedShortSignalsWithinPeriod": 40,
+      "rawShortSignalsAbsentFromSourceExitTape": [],
+      "pinnedExitParity": 40
+    },
+    {
+      "period": "POST_2026_OCT_NOV",
+      "entryCutUtc": "2026-11-18T00:00:00.000Z",
+      "sourceShortCount": 7,
+      "pinnedShortSignalsWithinPeriod": 7,
+      "rawShortSignalsAbsentFromSourceExitTape": [],
+      "pinnedExitParity": 7
+    }
+  ],
+  "sources": {
+    "PRE_2025_AUG_SEP": {
+      "exit_source_sha256": "0c677cc6c4c20b9a5334c25a2b4d3ea1b15401dcef77e9839fe5f1ff9e20ee1d",
+      "pengu_h1_sha256": {
+        "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      },
+      "btc_h1_sha256": {
+        "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      }
+    },
+    "BASE_2025_2026": {
+      "exit_source_sha256": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+      "pengu_h1_sha256": {
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      },
+      "btc_h1_sha256": {
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      }
+    },
+    "POST_2026_OCT_NOV": {
+      "exit_source_sha256": "f4bae44aee5c6f61587f230840f1dfe992e7cf77cdc43bd6025ee92d82e1d57e",
+      "pengu_h1_sha256": {
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+        "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+      },
+      "btc_h1_sha256": {
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+        "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+      }
+    }
+  },
+  "sourceImplementation": "PINNED_NATIVE_TS_MODULES_IMPORT_PATH_ADAPTER_ONLY",
+  "limitations": [
+    "Native source resident STOP price model, not actual venue order fills.",
+    "The same already studied H1 source periods are not independent OOS.",
+    "PENGU H1 and M5 provider mismatch remains a separate known source issue.",
+    "No owner admission, funding, true gross/shared risk or multiple-runner PnL."
+  ]
+}
