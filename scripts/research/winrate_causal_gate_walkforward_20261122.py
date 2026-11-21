@@ -38,7 +38,7 @@ def keyrow(d):
  return (d["strategy"],d["symbol"],d["side"],d["route"],d["entryTs"])
 
 candidates=[]
-missing=Counter();bad=Counter();duplicate=Counter()
+missing=Counter();bad=Counter();duplicate=Counter();censored=Counter()
 seen=set()
 with f.CANDIDATE_SOURCE.open(encoding="utf8") as source:
  for line in source:
@@ -54,6 +54,10 @@ with f.CANDIDATE_SOURCE.open(encoding="utf8") as source:
   entryPrice=m.get("entryPrice");exitPrice=m.get("exitPrice");exitTs=m.get("exitTs")
   if not all(safe(v) for v in (entryPrice,exitPrice,exitTs)) or not min(entryPrice,exitPrice)>0 or exitTs<=entry:
    bad[signal["strategy"]]+=1
+   continue
+  # Exit after the terminal BT boundary is right-censored, not a win/loss.
+  if exitTs>=END:
+   censored[signal["strategy"]]+=1
    continue
   feat=prefeatures(signal)
   if not feat:
@@ -252,10 +256,11 @@ out={
    "prior":"global Beta(12,12), route shrinkage 16, nearest 24 with pseudocount 10; no coefficients fit to outcomes",
    "target":"70% all, 80% PENGU; also Wilson 95% lower bound and minimum retained n=10",
    "no_holdout_selection":"five pre-registered policies are evaluated on every phase; no policy promoted based solely on final phase"},
- "source_sha256":{"candidate_layer1":f.hashfile(f.CANDIDATE_SOURCE),"filled_10":f.files["10"],"filled_30":f.files["30"]},
+ "source_sha256":{"candidate_layer1":f.hashfile(f.CANDIDATE_SOURCE),"filled_10":f.files["10"],"filled_30":f.files["30"],
+  "fully_closed_h1":{sym:row[2] for sym,row in sorted(f.bars_cache.items()) if row is not None}},
  "observations":{
   "valid_unique_candidates":len(candidates),"excluded_missing_h1_closed":dict(missing),
-  "invalid_future_outcome":dict(bad),"duplicate_keys":dict(duplicate)},
+  "invalid_future_outcome":dict(bad),"right_censored_after_bt_end":dict(censored),"duplicate_keys":dict(duplicate)},
  "summary":rows,
  "accepted_shadow_join":model_join,
  "limitations":[
