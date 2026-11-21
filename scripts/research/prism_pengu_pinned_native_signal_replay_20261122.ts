@@ -115,6 +115,10 @@ function getCandidates(pengu:DisDexV35Candle[],btc:DisDexV35Candle[],now:number)
  return out;
 }
 const historic=getCandidates(p.base,b.base,CUT);
+fs.writeFileSync(path.join(output,aggregatedMode?"PENGU_ORIGINAL_115_M5AGG_FEATURES.json":"PENGU_ORIGINAL_116_NATIVE_ASOF_FEATURES.json"),
+  JSON.stringify({schema:"disdex-prism-native-asof-pengu-entry-features/v1",data_source:aggregatedMode?"M5_AGGREGATED_RESEARCH":"NATIVE_PINNED_H1",
+    source_signal_blob:"06476fed9985a165cf73971e790322ef3d03bd90",
+    candidates:historic},null,2)+"\n");
 const rawFile=path.join(original,"native-new-signal-20251001-20261001","native-PENGU-raw-intentions.jsonl");
 const raw=fs.readFileSync(rawFile,"utf8").trim().split(/\r?\n/).map(x=>JSON.parse(x));
 const match=(x:{route:string,side:string,signalTs:number,entryTs:number},y:{route:string,side:string,signalTs:number,entryTs:number})=>
