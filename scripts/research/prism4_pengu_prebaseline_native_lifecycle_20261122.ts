@@ -28,7 +28,7 @@ function loadH1(sym){
   const added=ROOT+'/aster-public-v3-h1/'+sym+'-1h-20250924-20261001.jsonl.gz';
   const gz=fs.readFileSync(original), additional=fs.readFileSync(added);
   const both=zlib.gunzipSync(gz).toString('utf8').trim()+'\n'+zlib.gunzipSync(additional).toString('utf8').trim();
-  const raw=both.split('\n').filter(Boolean).map(JSON.parse);
+  const raw=both.split('\n').filter(Boolean).map(JSON.parse).filter(v=>+v[0]<END);
   const rows=raw.map(v=>({openTime:+v[0],closeTime:+v[6],open:+v[1],high:+v[2],low:+v[3],close:+v[4],volume:+v[5]}));
   for(let i=1;i<rows.length;i++)assert(rows[i].openTime-rows[i-1].openTime===HOUR,'H1_GAP_'+sym+'_'+i);
   return {rows,path:original,newPublicPath:added,sha256:sha(Buffer.concat([gz,additional]))};
