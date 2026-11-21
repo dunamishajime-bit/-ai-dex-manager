@@ -1,0 +1,84 @@
+{
+  "adverseMarketFillStress": {
+    "all_winner_mass_100pct_assumption_is_optimistic": true,
+    "gridEvaluations": 1152
+  },
+  "earlyMarketMicrostructure": {
+    "checkpoints": [
+      1,
+      3,
+      6,
+      12
+    ],
+    "has_future_labels_as_diagnostics_only": true,
+    "naturalSource": 53,
+    "observations": 212
+  },
+  "findings": [
+    "Fixed delay cannot reliably improve win rate or profit",
+    "Confirmed scale-in often reduces wins or mean PnL and leaves idle gross",
+    "Passive limit touch can raise paper PF but omits many signals and signed fills are unknown",
+    "Fill-rate adverse selection rapidly destroys apparent performance",
+    "Must distinguish entry direction error, post-entry giveback and venue STOP ambiguity",
+    "A price-print-touch model must never be called an actual 100% executable limit order"
+  ],
+  "fixedDelay": {
+    "all53_30bps": {
+      "0": {
+        "meanNetPct": 1.00066,
+        "winPct": 54.717
+      },
+      "1": {
+        "meanNetPct": 0.13695,
+        "winPct": 47.17
+      },
+      "2": {
+        "meanNetPct": 0.94705,
+        "winPct": 50.943
+      },
+      "3": {
+        "meanNetPct": 0.4462,
+        "winPct": 50.943
+      },
+      "6": {
+        "meanNetPct": 0.76542,
+        "winPct": 54.717
+      }
+    },
+    "nativeRepriced": 265,
+    "originalNativeExitParity": 53,
+    "variants": 5
+  },
+  "meetsTargetWinRate80": false,
+  "naturalShortSource": 53,
+  "no_live_mutations": true,
+  "passiveSellLimits": {
+    "example_05pct_1h_30bps": {
+      "adverseWinnerMass25PctMeanNet": -0.45451,
+      "adverseWinnerMass50PctMeanNet": 0.08516,
+      "assumedPrintTouches": 24,
+      "assumedWinPct": 62.5,
+      "assumedWinners": 15,
+      "meanNetPerNaturalSignalPct": 1.16449,
+      "sourceN": 53,
+      "winnerWilson95Pct": [
+        42.71,
+        78.84
+      ]
+    },
+    "pricePrintTouched": 209,
+    "sourceScenarioCount": 477,
+    "touch_not_signed_fill": true
+  },
+  "permissionToDeploy": false,
+  "portfolio10_30bps_DD20Verified": false,
+  "productionEconomicParity": false,
+  "schema": "disdex-prism6-pengu-short-53-failure-variants-verified/v1",
+  "sourcePin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "stagedGross": {
+    "candidateCount": 53,
+    "none_reaches_win70": true,
+    "research_scenarios": 96
+  },
+  "status": "PASS_TESTS_BUT_NONE_ELIGIBLE_FOR_LIVE"
+}
