@@ -49,7 +49,7 @@ def event_trigger(rule, now, trailing, atr_ratio):
     if rule=="BUY_FLOW_2UP":
         return (fall>=max(1.0,0.75*atr_ratio*100)
                 and clos>float(prev1[4])>float(prev2[4]) and buy>=.55)
-    prior=[x[1] for x in trailing[:-1] if x[0]>=t-H]
+    prior=[x[1] for x in trailing[-13:-1] if x[0]>=t-H]
     if rule=="MICRO_BREAKOUT":
         return (len(prior)>=2 and clos>max(float(x[2]) for x in prior)
                 and buy>=.55)
