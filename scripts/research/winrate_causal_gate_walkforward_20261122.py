@@ -203,7 +203,8 @@ for bps,scored in all_scores.items():
 
 def writecsv(path,records):
  with path.open("w",encoding="utf-8-sig",newline="") as file:
-  writer=csv.DictWriter(file,list(records[0]));writer.writeheader();writer.writerows(records)
+  fields=list(dict.fromkeys(k for record in records for k in record))
+  writer=csv.DictWriter(file,fields);writer.writeheader();writer.writerows(records)
 
 writecsv(OUT/"candidate_policy_walkforward_10_30bps.csv",rows)
 writecsv(OUT/"candidate_route_post_validation_10_30bps.csv",route_rows)
