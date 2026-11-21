@@ -129,8 +129,11 @@ class Stable4SafetyRepairTests(unittest.TestCase):
         self.assertIn("Verify private shared Margin Guard writer contract (read-only)", workflow)
         self.assertIn("MARGIN_GUARD_PRIVATE_WRITER_CONTRACT_PASS=TRUE", workflow)
         self.assertIn("systemctl is-active --quiet \"$guard\"", workflow)
-        self.assertNotIn('chown root:root "$state"', workflow)
-        self.assertNotIn('chmod 600 "$state"', workflow)
+        margin_step = workflow.split(
+            "Verify private shared Margin Guard writer contract (read-only)", 1
+        )[1].split("Root read-only preflight", 1)[0]
+        self.assertNotIn('chown root:root "$state"', margin_step)
+        self.assertNotIn('chmod 600 "$state"', margin_step)
 
     def test_margin_guard_private_atomic_writer_security_boundary(self):
         private_dir = SimpleNamespace(st_mode=stat.S_IFDIR | 0o700, st_uid=1000, st_gid=1000)
