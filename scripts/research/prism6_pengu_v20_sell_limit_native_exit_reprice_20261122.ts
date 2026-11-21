@@ -148,7 +148,7 @@ for(const period of group){
    sourceNativeRuntimeSha:PIN,sourceOriginalEntryTs:source.entryTs,
    sourceOriginalExitTs:source.exitTs,
    entryTs:entry,entryPrice:ep,requestedGross:gross,
-   entryFeatureReferenceTs:f.referenceTs,
+   entryFeatureReferenceTs:anchorFeature.referenceTs,
    ...final,
    rawReturn:1-final.exitPrice/ep,
    cost10NetReturn:(1-final.exitPrice/ep)-.001,
