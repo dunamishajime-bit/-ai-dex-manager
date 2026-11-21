@@ -1,0 +1,1202 @@
+{
+  "BTCSourceMalformedOffPosition": [
+    {
+      "overlappingS4CandidatePositions": 0,
+      "priceNotModified": true,
+      "rawGzipFile": "BTCUSDT-5m-20250801-20250924.jsonl.gz",
+      "rawGzipSHA256": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "timestamp": 1757771400000
+    }
+  ],
+  "all12SourceFeeCostDelayScenarios": [
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 0,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 6.01939432,
+        "netProfitPctPoints": 126.40728068,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.668506,
+        "referenceSequentialEquityEndYen": 31400.199,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 24.89497733,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 31110.14794,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12786.798624918029,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 0,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.81939432,
+        "netProfitPctPoints": 122.20728068,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.427261,
+        "referenceSequentialEquityEndYen": 30169.923,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.22992914,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29830.89672,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12664.36865572604,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 100,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.98612815,
+        "netProfitPctPoints": 125.70869113,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.648232,
+        "referenceSequentialEquityEndYen": 31231.515,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.29844674,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 30943.02206,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12718.107051225725,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 100,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.78612815,
+        "netProfitPctPoints": 121.50869113,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.407669,
+        "referenceSequentialEquityEndYen": 30007.599,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 25.63221788,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29670.39622,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12596.229988732124,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 1000,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.68673262,
+        "netProfitPctPoints": 119.42138512,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.465767,
+        "referenceSequentialEquityEndYen": 29713.358,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.92967151,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.02779865,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29438.88911,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 12099.882887994996,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10597.163685057147,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 1000,
+      "positivePrintDelayAfterRecovery": 1,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.48673262,
+        "netProfitPctPoints": 115.22138512,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.231344,
+        "referenceSequentialEquityEndYen": 28546.677,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 29.25281658,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 28225.89169,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14142,
+        "totalPositivePrintBarsDuringHold": 8525,
+        "worstM5CloseDDRecord": {
+          "equity": 11982.98198578688,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10534.586402364139,
+          "id": "S3_01700",
+          "stressHigh": 0.023038,
+          "time": 1760130900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 0,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.76042351,
+        "netProfitPctPoints": 120.96889363,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.510677,
+        "referenceSequentialEquityEndYen": 30087.026,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.03591014,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.59889958,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29809.10467,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 12252.047766427317,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10623.927357806731,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 0,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.56042351,
+        "netProfitPctPoints": 116.76889363,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.274743,
+        "referenceSequentialEquityEndYen": 28906.257,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.36167063,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.64670276,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 28581.43078,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 12133.922070899987,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10561.246419816678,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 100,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.72456763,
+        "netProfitPctPoints": 120.2159202,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.488825,
+        "referenceSequentialEquityEndYen": 29905.21,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.47078888,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.59889958,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 29628.96836,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 12178.008684150105,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10623.927357806731,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 100,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.52456763,
+        "netProfitPctPoints": 116.0159202,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.253626,
+        "referenceSequentialEquityEndYen": 28731.296,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 28.79527678,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.64670276,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 28408.43562,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 12060.47893805781,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10561.246419816678,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 1000,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.40186473,
+        "netProfitPctPoints": 113.43915936,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.292154,
+        "referenceSequentialEquityEndYen": 28268.868,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 15.73497,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 32.3846976,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.59889958,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 28007.74151,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 11511.656943655214,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10623.927357806731,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 10,
+      "sourceRecoveryConfirmEventCount": 1
+    },
+    {
+      "allH1SourceStructureIntents": 120,
+      "earlyExitExecutedCountAfterSingleSlot": 1,
+      "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+      "extraP30ExitSlipBps": 1000,
+      "positivePrintDelayAfterRecovery": 2,
+      "referenceEconomics": {
+        "ambiguousSameEntryM5Stop": 0,
+        "candidateIntents": 120,
+        "entryPriceNoPrint": 0,
+        "exitReasons": {
+          "REFERENCE_HARD_STOP": 4,
+          "REFERENCE_MAX_HOLD_72H": 10,
+          "REFERENCE_TRAILING_STOP": 6,
+          "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+        },
+        "meanNetPctConditional": 5.20186473,
+        "netProfitPctPoints": 109.23915936,
+        "notProductionAccountDD": true,
+        "occupiedSlot": 9,
+        "priceProxyClosed": 21,
+        "profitFactorConditional": 4.063574,
+        "referenceSequentialEquityEndYen": 27156.645,
+        "referenceSequentialEquityStartYen": 10000,
+        "referenceSequentialRealizedDDPct": 16.101754,
+        "rightCensored": 1,
+        "winratePctConditional": 71.428571,
+        "wins": 15
+      },
+      "referenceM5Risk": {
+        "initialCapitalYen": 10000.0,
+        "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+        "maximumM5CloseMarkToMarketDDPct": 32.69773221,
+        "maximumM5HighAdverseEnvelopeDDPct": 37.64670276,
+        "priceProxyClosed": 21,
+        "referenceFinalEquityIncludingUnrealizedYen": 26851.47916,
+        "rightCensoredOpenPositions": 1,
+        "sourceIntents": 120,
+        "totalHoldingBarsChecked": 14143,
+        "totalPositivePrintBarsDuringHold": 8526,
+        "worstM5CloseDDRecord": {
+          "equity": 11399.490742478221,
+          "id": "S3_02173",
+          "priceMark": 0.019098,
+          "time": 1761873900000
+        },
+        "worstM5HighEnvelopeDDRecord": {
+          "equity": 10561.246419816678,
+          "id": "S3_01700",
+          "stressHigh": 0.022982,
+          "time": 1760132100000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "sourceRecoveryConfirmEventCount": 1
+    }
+  ],
+  "frozenRecoveryThresholds": {
+    "BTCShockCloseMultiplier": 1.005,
+    "PENGUM5MustBeGreen": true,
+    "PENGUShockCloseMultiplier": 1.01,
+    "asofMaxHours": 2
+  },
+  "inputSHA256": {
+    "BTCM5": {
+      "BTCUSDT-5m-20250801-20250924.jsonl.gz": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+      "BTCUSDT-5m-20250924-20260803.jsonl.gz": "5e08252032828062d7047daceddad1ab69e4343174bf7163e5242085b92d1e07",
+      "BTCUSDT-5m-20260803-20261001.jsonl.gz": "9e12516a68ff1058c42982001fb7f86c74e606f27f86db201570362d567f48f5",
+      "BTCUSDT-5m-20261001-20261118.jsonl.gz": "e9795e2ea033f7373baf12442ad9f6614149baa5c31a0c0e0a55f65525161b38"
+    },
+    "P22Source": "a2792d43277729834f5d658b039ca0299f2084c5ec018e9cffc53cc5d51263ea",
+    "P25Source": "2796066f00f1c0fe16c134e924eb5dc8d0fc525d545481d56879f86694615a3e",
+    "PENGUM5": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    }
+  },
+  "limitations": [
+    "P30 rule was invented after seeing original October 2025 actual flash event and P29 synthetic profit outcomes: NOT independent OOS.",
+    "Frozen source H1 structure and REFERENCE_STOP72 are research economic overlay, NOT pinned PENGU SHORT V20 native position logic.",
+    "Positive PENGU M5 open source proxy is not signed venue execution, actual bid/ask fill or orderbook depth.",
+    "Changing only one historic trade cannot prove outperformance against unseen real or artificial false-bounce futures.",
+    "No funding, real margin gross, multi-Runner correlated risk, daily shared risk7.5% or account mark DD full portfolio."
+  ],
+  "main30BpsFirstPositivePrintZeroSlip": {
+    "allH1SourceStructureIntents": 120,
+    "earlyExitExecutedCountAfterSingleSlot": 1,
+    "entrySlotAndOriginalSourceReferenceStopUnchanged": true,
+    "extraP30ExitSlipBps": 0,
+    "positivePrintDelayAfterRecovery": 1,
+    "referenceEconomics": {
+      "ambiguousSameEntryM5Stop": 0,
+      "candidateIntents": 120,
+      "entryPriceNoPrint": 0,
+      "exitReasons": {
+        "REFERENCE_HARD_STOP": 4,
+        "REFERENCE_MAX_HOLD_72H": 10,
+        "REFERENCE_TRAILING_STOP": 6,
+        "RESEARCH_P30_RECOVERY_CONFIRMED_EXIT": 1
+      },
+      "meanNetPctConditional": 5.81939432,
+      "netProfitPctPoints": 122.20728068,
+      "notProductionAccountDD": true,
+      "occupiedSlot": 9,
+      "priceProxyClosed": 21,
+      "profitFactorConditional": 4.427261,
+      "referenceSequentialEquityEndYen": 30169.923,
+      "referenceSequentialEquityStartYen": 10000,
+      "referenceSequentialRealizedDDPct": 16.101754,
+      "rightCensored": 1,
+      "winratePctConditional": 71.428571,
+      "wins": 15
+    },
+    "referenceM5Risk": {
+      "initialCapitalYen": 10000.0,
+      "longestStaleNoPositivePrintBarsWhilePositionOpen": 37,
+      "maximumM5CloseMarkToMarketDDPct": 25.22992914,
+      "maximumM5HighAdverseEnvelopeDDPct": 37.07542728,
+      "priceProxyClosed": 21,
+      "referenceFinalEquityIncludingUnrealizedYen": 29830.89672,
+      "rightCensoredOpenPositions": 1,
+      "sourceIntents": 120,
+      "totalHoldingBarsChecked": 14142,
+      "totalPositivePrintBarsDuringHold": 8525,
+      "worstM5CloseDDRecord": {
+        "equity": 12664.36865572604,
+        "id": "S3_02173",
+        "priceMark": 0.019098,
+        "time": 1761873900000
+      },
+      "worstM5HighEnvelopeDDRecord": {
+        "equity": 10534.586402364139,
+        "id": "S3_01700",
+        "stressHigh": 0.023038,
+        "time": 1760130900000
+      }
+    },
+    "roundtripFeeBps": 30,
+    "sourceRecoveryConfirmEventCount": 1
+  },
+  "newStateAfterExistingP25Events": {
+    "S3_00273": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_00338": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01088": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01257": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01259": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01270": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01342": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01348": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01350": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01634": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01700": {
+      "btcConfirmedClose": 109076.5,
+      "confirmPENGUGreenClose": true,
+      "confirmationM5CloseTs": 1760131800000,
+      "confirmationM5StartTs": 1760131500000,
+      "lastCapitulationCloseTs": 1760131200000,
+      "newInformationOnlyAfterShock": true,
+      "noFutureM5PriceUsedToDecideConfirmation": true,
+      "penguConfirmedClose": 0.013801,
+      "positiveM5BuyProxyAfterConfirmation": [
+        {
+          "positiveM5NotionalAtOpenUSDT": 3790.4200000000005,
+          "positiveM5Volume": 239900.0,
+          "px": 0.0158,
+          "ts": 1760131800000
+        },
+        {
+          "positiveM5NotionalAtOpenUSDT": 4592.41198,
+          "positiveM5Volume": 269666.0,
+          "px": 0.01703,
+          "ts": 1760132100000
+        }
+      ],
+      "signedVenueFillProven": false,
+      "status": "RECOVERY_CONFIRMED_COMPLETED_SOURCE_M5"
+    },
+    "S3_01713": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01719": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01792": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01798": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01860": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01864": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01948": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01950": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01957": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01968": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_01983": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02173": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02261": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02266": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02291": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02365": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02456": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02457": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02520": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02586": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02656": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02658": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02699": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02701": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02707": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02930": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_02941": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03049": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03052": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03178": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03182": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03184": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03187": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03280": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03330": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03462": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03527": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03528": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_03848": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04116": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04145": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04267": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04361": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04381": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04400": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04401": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04404": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04406": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04533": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04661": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04665": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_04980": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05222": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05514": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05693": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05697": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05707": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05722": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05726": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_05744": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_06830": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07174": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07302": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07304": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07307": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07309": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07341": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07398": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07417": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07831": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07864": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_07961": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_08187": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_08664": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_08665": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_08703": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_08704": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_09429": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_09589": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_09844": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_09847": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10161": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10173": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10370": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10381": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10382": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10384": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10500": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10602": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10732": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10734": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10791": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10918": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10925": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_10936": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11012": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11084": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11090": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11096": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11100": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11200": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11245": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11246": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11298": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11300": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11302": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11315": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11317": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    },
+    "S3_11367": {
+      "status": "NO_SOURCE_CAPITULATION_SIGNAL"
+    }
+  },
+  "originalH1StructuralSetups": 120,
+  "originalSourceS4SingleSlot120Parity": "PASS",
+  "p25SourceCapitulationEvents": {
+    "S3_01700": {
+      "btc5mDropPct": -6.636875752984528,
+      "btcM5Close": 104694.7,
+      "btcPreviousPositivePrintClose": 112137.1,
+      "entryPrice": 0.022617,
+      "entryTs": 1760130900000,
+      "eventCloseTs": 1760131200000,
+      "eventM5OpenTs": 1760130900000,
+      "first3AfterSignalPositiveM5OpenProxies": [
+        {
+          "positiveVolumeNotionalUSDT": 1320.633046,
+          "positiveVolumeUnits": 211606.0,
+          "px": 0.006241,
+          "ts": 1760131200000
+        },
+        {
+          "positiveVolumeNotionalUSDT": 1705.4253999999999,
+          "positiveVolumeUnits": 168854.0,
+          "px": 0.0101,
+          "ts": 1760131500000
+        },
+        {
+          "positiveVolumeNotionalUSDT": 3790.4200000000005,
+          "positiveVolumeUnits": 239900.0,
+          "px": 0.0158,
+          "ts": 1760131800000
+        }
+      ],
+      "pengu5mDropPct": -55.695361304328564,
+      "penguM5Close": 0.01,
+      "penguPreviousPositivePrintClose": 0.022571,
+      "penguTakerBuyVolumeRatio": 0.09308675257928534,
+      "penguTradeGrossShortGainAtSignalPct": 55.785471105805364,
+      "signalUsesFutureM5Bars": false,
+      "sourceBaselineExitPrice": 0.020007,
+      "sourceBaselineExitReason": "REFERENCE_TRAILING_STOP",
+      "sourceBaselineExitTs": 1760133600000,
+      "state": "CROSS_ASSET_CAPITULATION_CONFIRMED",
+      "venueSignedFillProven": false
+    }
+  },
+  "researchEngineName": "PENGU_S4_RECOVERY_CONFIRMED_EXIT_V1",
+  "schema": "prism7-p30-real-p25S4-120-causal-buyer-recovery-before-native-reference-stop/v1",
+  "sourceReferencePinnedV20": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+}
