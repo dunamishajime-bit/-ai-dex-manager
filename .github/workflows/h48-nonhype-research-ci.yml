@@ -1,0 +1,33 @@
+name: H48 Non-HYPE Research Validation
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research/audit_bt_nonhype_h48_*.py"
+      - "tests/test_bt_nonhype_h48_*.py"
+      - "docs/research-results/H48_NON_HYPE_HOLD_CAP48_FIXED_FILLS_20261121.json"
+      - "docs/implementation/H48_NON_HYPE_RESEARCH_CHECKPOINT_20261121.md"
+      - ".github/workflows/h48-nonhype-research-ci.yml"
+  push:
+    branches: [master]
+    paths:
+      - "scripts/research/audit_bt_nonhype_h48_*.py"
+      - "tests/test_bt_nonhype_h48_*.py"
+      - ".github/workflows/h48-nonhype-research-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-h48-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout immutable reviewed source
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify non-HYPE research stays offline and deterministic
+        run: python -m unittest discover -s tests -p 'test_bt_nonhype_h48*.py' -v
