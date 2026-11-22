@@ -1,0 +1,100 @@
+{
+  "schema": "p107-v4-pinned-dd21-native-journal-hold-rearm-test/v1",
+  "sourceSha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "riskThresholdPct": 21,
+  "riskReservationCode": "lib/v12-v4-shared-reservations.ts:74",
+  "stateJournalSourceCode": "lib/v12-v4-production-lifecycle.ts:212-220",
+  "note": "In this pinned code, a max drawdown >21% persists in cumulative state.maxDrawdown even after later equity recovery; shared reservation fails closed. Re-arming needs an external formally defined and approved reset, not a BT auto-unlock.",
+  "realVPSStateTouched": false,
+  "venueOrderCount": 0,
+  "fullSTABLE4BT": false,
+  "tests": [
+    {
+      "scenario": "20pct",
+      "equityMarks": [
+        10000,
+        8000
+      ],
+      "finalEquity": 8000,
+      "equityPeak": 10000,
+      "latchedMaximumDDPct": 19.999999999999996,
+      "sharedReservationsDd21Hold": false,
+      "sourcePortfolioGross": {
+        "recovery": 0,
+        "v12": 0,
+        "crypto": 0,
+        "total": 0
+      }
+    },
+    {
+      "scenario": "21pct_exact",
+      "equityMarks": [
+        10000,
+        7900
+      ],
+      "finalEquity": 7900,
+      "equityPeak": 10000,
+      "latchedMaximumDDPct": 20.999999999999996,
+      "sharedReservationsDd21Hold": false,
+      "sourcePortfolioGross": {
+        "recovery": 0,
+        "v12": 0,
+        "crypto": 0,
+        "total": 0
+      }
+    },
+    {
+      "scenario": "21pct_plus",
+      "equityMarks": [
+        10000,
+        7899
+      ],
+      "finalEquity": 7899,
+      "equityPeak": 10000,
+      "latchedMaximumDDPct": 21.009999999999994,
+      "sharedReservationsDd21Hold": true,
+      "sourcePortfolioGross": {
+        "recovery": 0,
+        "v12": 0,
+        "crypto": 0,
+        "total": 0
+      }
+    },
+    {
+      "scenario": "22pct_then_full_rebound",
+      "equityMarks": [
+        10000,
+        7800,
+        10000
+      ],
+      "finalEquity": 10000,
+      "equityPeak": 10000,
+      "latchedMaximumDDPct": 21.999999999999996,
+      "sharedReservationsDd21Hold": true,
+      "sourcePortfolioGross": {
+        "recovery": 0,
+        "v12": 0,
+        "crypto": 0,
+        "total": 0
+      }
+    },
+    {
+      "scenario": "new_peak_12500_then_22pct_retrace",
+      "equityMarks": [
+        10000,
+        12500,
+        9750
+      ],
+      "finalEquity": 9750,
+      "equityPeak": 12500,
+      "latchedMaximumDDPct": 21.999999999999996,
+      "sharedReservationsDd21Hold": true,
+      "sourcePortfolioGross": {
+        "recovery": 0,
+        "v12": 0,
+        "crypto": 0,
+        "total": 0
+      }
+    }
+  ]
+}

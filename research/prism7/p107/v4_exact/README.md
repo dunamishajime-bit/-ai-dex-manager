@@ -24,3 +24,11 @@ Pinned V4 SHA e788abc82e80f9fc7ab0e1ba83fdb8be267eb513. The old 1394 modeled exi
 Strict distinction: the FOUR_RULE_M5 outcome is named V4_SHORT_INITIAL_ADVERSE_CANDIDATE in code. It is a prospective exit signal, not a signed ASTER fill. The old trade book models it as an execution. None of the 1394 entries or exits has verified actual venue fill proof as part of this study. It is source-model parity CONDITIONAL on hypothetical isolated fills and ATR, not chronological portfolio order/fill/DD21 HOLD/Shared Risk/Gross parity. Do not treat 1394 as a permitted LIVE trade count. Account NAV/DD and order-readmission must be rerun from source-native events and signed broker geometry and complete market data before P107 PASS.
 
 Research only; no production mutations, no order/STOP/Kill Switch action.
+
+## 2026-11-23 V4 shared reservation DD21 cumulative-latch source test
+
+The exact native pinned createProductionState and applyProductionEvent journal set maxDrawdown to the maximum of prior drawdown and 1 - equity / equityPeak. V4SharedReservations.reserveUnderLease rejects if maxDrawdown > V12_V4_MAXIMUM_DRAWDOWN + 1e-12 (21%). Five static cases passed: 20%, exactly 21%, just over 21%, 22% then full NAV recovery, and a new equity peak followed by a 22% drawdown.
+
+A later NAV recovery alone does not reset cumulative maxDD; a V4 shared reservation remains blocked after DD exceeding 21%. This is the pinned runtime source rule; any operational rearm requires an independently authorized and verified mechanism, not a BT-invented automatic unblocking.
+
+This tests source-latched DD state only. It does not model chronological account NAV, shared daily-loss kill switch, portfolio opportunity allocation or signed exchange orders. No live settings were changed.
