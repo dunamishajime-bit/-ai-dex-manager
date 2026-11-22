@@ -1,0 +1,170 @@
+{
+  "criticalLimit": "STABLE4 and V4 DD21 20261122 full parity not in P92 model; 673 prior DD block recoveries cannot be determined here.",
+  "fullUnabridgedFiveMinuteEquityTimeSeriesStoredOnOwnerPC": true,
+  "masterProductionRunnerStopOrdersUnchanged": true,
+  "oneYearOriginalNativeAndNewAllRunnerSemanticsPinned": true,
+  "portableBundles": [
+    {
+      "compressedSizeBytes": 190231,
+      "excludedEquitySourceRetainedLocal": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv": {
+          "canReproduceFromIsolatedP92Source": true,
+          "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BASE5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv",
+          "sha256": "e492c819a0a26e36250ace2590d8784c62ecbc36fa8902321f8c37297d440db6",
+          "size": 12567840
+        }
+      },
+      "feeBps": 10,
+      "files": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_DECISIONS.csv": {
+          "sha256": "25c3482b73cef5cce5c7561177100f4f45034c1c96963726c72432c8a823d083",
+          "size": 218927
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FILLS.csv": {
+          "sha256": "fe417d647fc335923c2cfa935853d772b9b18cfbf3988346400318921ff1036a",
+          "size": 361902
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FUNDING.csv": {
+          "sha256": "d236b101124b905ebd38b92fb369a27341720356571d98e042299ba9adbd0b76",
+          "size": 502871
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_PENGU_PARTIAL_EVENTS.csv": {
+          "sha256": "47d9e49fb8b95d140afea217576181e51f48105cf4cf1662a8404d8639f86fb4",
+          "size": 628
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_RESIDUAL_PREEMPTIONS.csv": {
+          "sha256": "112e5987c6951653b128ddc80787e87539099be29185b647fba3ac3f657e10de",
+          "size": 1099
+        }
+      },
+      "mode": "BASE5M_CAPS",
+      "portableBase64SHA256": "eaea4c462b0c95adbcd682d7358054561930dd17173d6c21a423661a8dc51fdc",
+      "portableBundlePath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P94_PORTABLE_LEDGER_BUNDLES\\P94_BASE5M_CAPS_10BPS_SOURCE_MODEL_FILLS_DECISIONS_FUNDING_ALL_RUNNERS_20261122.zip.b64",
+      "researchSourceOnly": true,
+      "sourceP92EngineSHA256": "e5d92d1438a1da328346b06b270001065750900a33a117dffa1256dd15d9ee27",
+      "zipSHA256": "1d0d597321af0bc25501ab90c2d594f95375c97b18b6f3f63abc44589327732d"
+    },
+    {
+      "compressedSizeBytes": 190378,
+      "excludedEquitySourceRetainedLocal": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv": {
+          "canReproduceFromIsolatedP92Source": true,
+          "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BASE5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv",
+          "sha256": "0e77e446ba7935c86579b0e62b20ee65c35046b474b8b4dd7e134343580e11ef",
+          "size": 12583205
+        }
+      },
+      "feeBps": 30,
+      "files": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_DECISIONS.csv": {
+          "sha256": "59288a966007159daceed8ad5ad424e154e8fdbe6055a0e796c223d0a576c958",
+          "size": 218923
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FILLS.csv": {
+          "sha256": "0a7d85e9b87fcfe3e9909a4b014496b6f6a3919626ffa1285eaf4889c8023a9b",
+          "size": 362016
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FUNDING.csv": {
+          "sha256": "679b5af8a9440f3c5389737eed0d479c69b73fbab4f4f7f741be8dcf4a5bdc2b",
+          "size": 503007
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_PENGU_PARTIAL_EVENTS.csv": {
+          "sha256": "6a2a28eeff6a72db34be7daef2d34a98e711b1fe4671dc248c54390957ce6a70",
+          "size": 630
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_RESIDUAL_PREEMPTIONS.csv": {
+          "sha256": "eed2d07ea73cdeb2c918e4b50a069fdae646c6058aecd0a570b549af5a50f221",
+          "size": 1100
+        }
+      },
+      "mode": "BASE5M_CAPS",
+      "portableBase64SHA256": "d72b516f43d811a5470317e2e2ccc1aebea2704e29cec098409551d59996bbec",
+      "portableBundlePath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P94_PORTABLE_LEDGER_BUNDLES\\P94_BASE5M_CAPS_30BPS_SOURCE_MODEL_FILLS_DECISIONS_FUNDING_ALL_RUNNERS_20261122.zip.b64",
+      "researchSourceOnly": true,
+      "sourceP92EngineSHA256": "e5d92d1438a1da328346b06b270001065750900a33a117dffa1256dd15d9ee27",
+      "zipSHA256": "b43de542b18ff1269f84953c421a3122e9d1bbb7e38bcc53bb175766d43907ae"
+    },
+    {
+      "compressedSizeBytes": 186287,
+      "excludedEquitySourceRetainedLocal": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv": {
+          "canReproduceFromIsolatedP92Source": true,
+          "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BIN5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv",
+          "sha256": "566949ea1027e69d69b90b9ac43911945ddea00f38ace093a5140da131639fd9",
+          "size": 12564464
+        }
+      },
+      "feeBps": 10,
+      "files": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_DECISIONS.csv": {
+          "sha256": "8083d67bc02e5de6ea94d31652bab119b09397d2c5b3cacc16248fa37b8a04f0",
+          "size": 216386
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FILLS.csv": {
+          "sha256": "07a021ecd479872fd48e503a6a11b388b79c4673f6b8281db9441a43a6432d76",
+          "size": 359103
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FUNDING.csv": {
+          "sha256": "a483b569cf52f4323573f3addddb4a9acee3e89a97a0a1f61529d02d424f13d4",
+          "size": 484282
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_PENGU_PARTIAL_EVENTS.csv": {
+          "sha256": "f3cfc447c067794f92959fbd09d341f05bfdaa2299c5af0950c715abe4516a6d",
+          "size": 629
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_RESIDUAL_PREEMPTIONS.csv": {
+          "sha256": "c71b34359b1b261551d83ddf1fe92a99c025a99d5d905fac9321d89a526c678a",
+          "size": 1396
+        }
+      },
+      "mode": "BIN5M_CAPS",
+      "portableBase64SHA256": "720b75a0e30d959b8c59985bf2eb5281eddc042eb74a42f570b34d744fcd7ff4",
+      "portableBundlePath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P94_PORTABLE_LEDGER_BUNDLES\\P94_BIN5M_CAPS_10BPS_SOURCE_MODEL_FILLS_DECISIONS_FUNDING_ALL_RUNNERS_20261122.zip.b64",
+      "researchSourceOnly": true,
+      "sourceP92EngineSHA256": "9ef0ba991a07c0fc12b80cc22c1579efa31a8b23fcc33a8db9f25676259e36b0",
+      "zipSHA256": "67dd3e397e5ae269d40e33124eda7050d2e539a972f1f3360f1954d07be21300"
+    },
+    {
+      "compressedSizeBytes": 186350,
+      "excludedEquitySourceRetainedLocal": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv": {
+          "canReproduceFromIsolatedP92Source": true,
+          "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BIN5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv",
+          "sha256": "ff4867eac1bf7f78c9a4c300e3dc599136c04f16d9de39718c5f57705af0c56e",
+          "size": 12534494
+        }
+      },
+      "feeBps": 30,
+      "files": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_DECISIONS.csv": {
+          "sha256": "a6864a5c7bfdbe9b2272cc7d8ade74e6da81d99c70626eb99ad1a807b78d488f",
+          "size": 216382
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FILLS.csv": {
+          "sha256": "b3fdcbc19340aed051aef5140ce860a9e14e4db56e2c8de44977f96ab5c1856f",
+          "size": 359016
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FUNDING.csv": {
+          "sha256": "55a3686c6aac9ebe6b3af64412ac4adf2caaf0b779c9169f847752ccd90e80f8",
+          "size": 484478
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_PENGU_PARTIAL_EVENTS.csv": {
+          "sha256": "6a71e5bd0e41adfa9cc056dc3a31fcca5bcab83241de793c2b5267ba0e5213ee",
+          "size": 629
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_RESIDUAL_PREEMPTIONS.csv": {
+          "sha256": "f8debb67d920dca1bf731d7ad6c629cea8d05d503811e95f81a64d6c190d9eff",
+          "size": 1394
+        }
+      },
+      "mode": "BIN5M_CAPS",
+      "portableBase64SHA256": "6b15e392fe01e91cc894ad42a7eaedeccf5421b107bcadee3b6000fe3df6a908",
+      "portableBundlePath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P94_PORTABLE_LEDGER_BUNDLES\\P94_BIN5M_CAPS_30BPS_SOURCE_MODEL_FILLS_DECISIONS_FUNDING_ALL_RUNNERS_20261122.zip.b64",
+      "researchSourceOnly": true,
+      "sourceP92EngineSHA256": "9ef0ba991a07c0fc12b80cc22c1579efa31a8b23fcc33a8db9f25676259e36b0",
+      "zipSHA256": "8ff70eb80de14066a74dd17ef13178a8988fc17c7d9e2f85cf8da685e37eaa43"
+    }
+  ],
+  "rebuildSteps": "Decode ASCII base64 .zip.b64 to bytes and decompress ZIP; compare every original file SHA256 to manifest. For 5m equity CSV use P92 isolated source engine and input SHA fixed in P93.",
+  "schema": "prism7-p94-portable-full-research-only-allrunner-model-fills-decisions-funding-10-30bps-base-vs-binance5m/v1"
+}
