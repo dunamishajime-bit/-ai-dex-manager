@@ -1,0 +1,61 @@
+{
+  "P51": {
+    "asofPreEntryM5Confirmed": true,
+    "models": 15,
+    "researchWin70DD20N20": 0,
+    "scenarioCount": 120,
+    "strictFirstH1Candidates": 107
+  },
+  "P52": {
+    "first24hRawEpisodes": 142,
+    "genuineM5SourceAllRaw": 846,
+    "negativeControlStrongBuyRatio0p3SingleSlot": {
+      "DD": 15.2443,
+      "closed": 23,
+      "wins": 17,
+      "zeroVolumeAtNextM5Open": 7
+    },
+    "notConfirmedFirstDrop": true,
+    "scenarioCount": 104
+  },
+  "P53": {
+    "outcomesPerCandidateNotOneSlot": true,
+    "prior24hCompletedM5PathDropOver3PctAmongFirst142": 103,
+    "remainingNotAlreadyDropped3Pct": 39,
+    "whenNoPrior3PctDrop_BuyRatio60": {
+      "entryZeroVolume": 3,
+      "sourceCandidates": 10,
+      "wins": 7
+    },
+    "whenNoPrior3PctDrop_SellRatio55": {
+      "sourceCandidates": 24,
+      "wins": 10
+    }
+  },
+  "claimsNotEstablished": [
+    "initial break profitable real fills",
+    "unseen OOS",
+    "pinned native stop/exit parity for new M5 routes",
+    "live DD or shared risk",
+    "buyer absorption market mechanism"
+  ],
+  "nextTask": "P54 strict 39 cases, one-slot, confirmation after next completed M5, 30bps +100bps and source liquidity",
+  "ownerApprovalRequiredForLIVE": true,
+  "productionTouched": false,
+  "schema": "prism7-p51-p53-first-drop-native-v20-research-checkpoint/v1",
+  "sourcePinnedV20": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "sources": [
+    {
+      "name": "P51",
+      "sha256": "7f0c9a26c60639a52ad31f0e5e85fbc5320a4f62f5a3266abbe42605ba5da4de"
+    },
+    {
+      "name": "P52",
+      "sha256": "47f1a6903831c0b26fc9af1c1c66d6effbec009608c8b86426e4936d9358f718"
+    },
+    {
+      "name": "P53",
+      "sha256": "8d0b3d94e829cafd1be8bc8a678809dc3ca9bb5349ec55dbd385da6299edf8e7"
+    }
+  ]
+}
