@@ -1,0 +1,3275 @@
+{
+  "allTwentyFiveFixed0p75Scenarios": [
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "BASE_UNMODIFIED",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.50581789,
+        "conditionalProfitFactor": 4.5071145,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23017.74646,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.62217569,
+        "worstChronologicalHighEvent": {
+          "equity": 19735.24208535817,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23786.398706498712,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19735.24208535817,
+          "id": "S3_10918",
+          "priorPeak": 23786.398706498712,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 12.280734155460424,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "BASE_UNMODIFIED",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.34632977,
+        "conditionalProfitFactor": 4.38297652,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22472.0865,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.27292513,
+        "worstChronologicalHighEvent": {
+          "equity": 19267.397353581455,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23222.517033568423,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19267.397353581455,
+          "id": "S3_10918",
+          "priorPeak": 23222.517033568423,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 11.722525728171215,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "BASE_UNMODIFIED",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.60573641,
+        "conditionalProfitFactor": 3.80653385,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.4662988,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.52037402,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19938.279356,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 75.72046459,
+        "worstChronologicalHighEvent": {
+          "equity": 10885.793791380713,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10893.200113291265,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 9.130448971749054,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "BASE_UNMODIFIED",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.35624014,
+        "conditionalProfitFactor": 3.61233781,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 23.87133174,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 23.92309187,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19084.672685,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 70.48104291,
+        "worstChronologicalHighEvent": {
+          "equity": 10419.746243642006,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10426.835482735234,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 8.257212026088709,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "BASE_UNMODIFIED",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_OFF",
+      "positiveM5PrintAfterShock": null,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 2.94141311,
+        "conditionalProfitFactor": 3.28945617,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 29.53273777,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 17665.41653,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 61.76967536,
+        "worstChronologicalHighEvent": {
+          "equity": 9441.675508208207,
+          "id": "S3_01700",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.022982,
+          "time": 1760132100000
+        },
+        "worstMarkEvent": {
+          "equity": 9651.430492563915,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 6.8053174335255955,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 23,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_BTC_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 2.8674641148325524,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 5.19455672,
+        "conditionalProfitFactor": 5.75530091,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 24028.951202,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 98.6965776,
+        "worstChronologicalHighEvent": {
+          "equity": 20602.24139842019,
+          "id": "S3_10918",
+          "priorCompletedPeak": 24831.37151451174,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 20602.24139842019,
+          "id": "S3_10918",
+          "priorPeak": 24831.37151451174,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 12.280734155460424,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 4.03559908797275,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 7,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 23,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 16,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 23,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_BTC_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 2.8674641148325524,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 5.01828037,
+        "conditionalProfitFactor": 5.59393064,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23459.319566,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 95.34732704,
+        "worstChronologicalHighEvent": {
+          "equity": 20113.843533354528,
+          "id": "S3_10918",
+          "priorCompletedPeak": 24242.717658855538,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 20113.843533354528,
+          "id": "S3_10918",
+          "priorPeak": 24242.717658855538,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 11.722525728171215,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 4.03559908797275,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 7,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 23,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 16,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 23,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_BTC_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 2.8674641148325524,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.19972982,
+        "conditionalProfitFactor": 4.84459736,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 20814.198406,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 79.7948665,
+        "worstChronologicalHighEvent": {
+          "equity": 17845.936615376362,
+          "id": "S3_10918",
+          "priorCompletedPeak": 21509.265596451998,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 17845.936615376362,
+          "id": "S3_10918",
+          "priorPeak": 21509.265596451998,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 9.130448971749054,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 4.03559908797275,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 7,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 23,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 16,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 23,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_BTC_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 2.8674641148325524,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.92397078,
+        "conditionalProfitFactor": 4.59215672,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 18.81773579,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 18.87293188,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19923.091491,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 74.55544483,
+        "worstChronologicalHighEvent": {
+          "equity": 10877.501603137727,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13407.980658824114,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10884.902283326908,
+          "id": "S3_02173",
+          "priorPeak": 13407.980658824114,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 8.257212026088709,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 4.03559908797275,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 7,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 23,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 16,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 23,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_BTC_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 2.8674641148325524,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_OFF",
+      "positiveM5PrintAfterShock": null,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.46547775,
+        "conditionalProfitFactor": 4.17243423,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 24.85495896,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 18441.485246,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 65.84407727,
+        "worstChronologicalHighEvent": {
+          "equity": 9242.897922386921,
+          "id": "S3_01700",
+          "priorCompletedPeak": 13407.980658824114,
+          "sourceHigh": 0.022982,
+          "time": 1760132100000
+        },
+        "worstMarkEvent": {
+          "equity": 10075.432568187145,
+          "id": "S3_02173",
+          "priorPeak": 13407.980658824114,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 6.8053174335255955,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 4.03559908797275,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 7,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 23,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 16,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 21,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_REL_WEAKNESS_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 5.279341717955577,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 5.09935102,
+        "conditionalProfitFactor": 5.66814589,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23610.844494,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 96.8876694,
+        "worstChronologicalHighEvent": {
+          "equity": 20243.75986284202,
+          "id": "S3_10918",
+          "priorCompletedPeak": 24399.302594490408,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 20243.75986284202,
+          "id": "S3_10918",
+          "priorPeak": 24399.302594490408,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 12.280734155460424,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.5532235673481454,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 8,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 17,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 21,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_REL_WEAKNESS_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 5.279341717955577,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.92307468,
+        "conditionalProfitFactor": 5.50677561,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23051.124519,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 93.53841884,
+        "worstChronologicalHighEvent": {
+          "equity": 19763.860180729174,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23820.89138836048,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19763.860180729174,
+          "id": "S3_10918",
+          "priorPeak": 23820.89138836048,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 11.722525728171215,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.5532235673481454,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 8,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 17,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 21,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_REL_WEAKNESS_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 5.279341717955577,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.10452412,
+        "conditionalProfitFactor": 4.75744233,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 20452.028793,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 77.9859583,
+        "worstChronologicalHighEvent": {
+          "equity": 17535.415122205162,
+          "id": "S3_10918",
+          "priorCompletedPeak": 21135.001728212592,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 17535.415122205162,
+          "id": "S3_10918",
+          "priorPeak": 21135.001728212592,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 9.130448971749054,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.5532235673481454,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 8,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 17,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 21,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_REL_WEAKNESS_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 5.279341717955577,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.82876509,
+        "conditionalProfitFactor": 4.5050017,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 18.81773579,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 18.87293188,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19576.427247,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 72.74653663,
+        "worstChronologicalHighEvent": {
+          "equity": 11111.432944432958,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 11118.992783508647,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 8.257212026088709,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.5532235673481454,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 8,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 17,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 21,
+      "blockedOfNativeValidEntryCandidates": 4,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_REL_WEAKNESS_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 5.279341717955577,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_OFF",
+      "positiveM5PrintAfterShock": null,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.37027206,
+        "conditionalProfitFactor": 4.0852792,
+        "conditionalWinCount": 14,
+        "conditionalWinratePct": 73.68421053,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 19,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 24.85495896,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 18120.601134,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 64.03516907,
+        "worstChronologicalHighEvent": {
+          "equity": 9441.675508208207,
+          "id": "S3_01700",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.022982,
+          "time": 1760132100000
+        },
+        "worstMarkEvent": {
+          "equity": 10292.114628167334,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 6.8053174335255955,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 5,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.5532235673481454,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 4
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 8,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 7,
+        "PRICE_PROXY_CLOSED": 19,
+        "RESEARCH_P34_GATE_BLOCKED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 17,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 14,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_EMA_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.50581789,
+        "conditionalProfitFactor": 4.5071145,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23017.74646,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.62217569,
+        "worstChronologicalHighEvent": {
+          "equity": 19735.24208535817,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23786.398706498712,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19735.24208535817,
+          "id": "S3_10918",
+          "priorPeak": 23786.398706498712,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 12.280734155460424,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_EMA_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.34632977,
+        "conditionalProfitFactor": 4.38297652,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22472.0865,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.27292513,
+        "worstChronologicalHighEvent": {
+          "equity": 19267.397353581455,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23222.517033568423,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19267.397353581455,
+          "id": "S3_10918",
+          "priorPeak": 23222.517033568423,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 11.722525728171215,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_EMA_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.60573641,
+        "conditionalProfitFactor": 3.80653385,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 20.4662988,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 20.52037402,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19938.279356,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 75.72046459,
+        "worstChronologicalHighEvent": {
+          "equity": 10885.793791380713,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10893.200113291265,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 9.130448971749054,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_EMA_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.35624014,
+        "conditionalProfitFactor": 3.61233781,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 23.87133174,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 23.92309187,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19084.672685,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 70.48104291,
+        "worstChronologicalHighEvent": {
+          "equity": 10419.746243642006,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10426.835482735234,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 8.257212026088709,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 0,
+      "blockedOfNativeValidEntryCandidates": 0,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_EMA_TREND_ONLY",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 0,
+      "originalReferenceWinnersNetPctPointsLost": 0,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_OFF",
+      "positiveM5PrintAfterShock": null,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 2.94141311,
+        "conditionalProfitFactor": 3.28945617,
+        "conditionalWinCount": 15,
+        "conditionalWinratePct": 71.42857143,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 21,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 29.53273777,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 17665.41653,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 61.76967536,
+        "worstChronologicalHighEvent": {
+          "equity": 9441.675508208207,
+          "id": "S3_01700",
+          "priorCompletedPeak": 13696.332434260716,
+          "sourceHigh": 0.022982,
+          "time": 1760132100000
+        },
+        "worstMarkEvent": {
+          "equity": 9651.430492563915,
+          "id": "S3_02173",
+          "priorPeak": 13696.332434260716,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 6.8053174335255955,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 7,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 2.1064942220994705,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 5
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01634",
+        "S3_01700",
+        "S3_01864",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05514",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 18,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 9,
+        "PRICE_PROXY_CLOSED": 21,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 24,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 15,
+      "stoppedOriginalLosers": [],
+      "stoppedOriginalWinners": []
+    },
+    {
+      "blockedIntentsOfSource120": 31,
+      "blockedOfNativeValidEntryCandidates": 6,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_CONSENSUS_3_OF_3",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 8.146805832788129,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 5.26317063,
+        "conditionalProfitFactor": 5.5645279,
+        "conditionalWinCount": 13,
+        "conditionalWinratePct": 72.22222222,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 18,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 23113.760405,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 94.73707132,
+        "worstChronologicalHighEvent": {
+          "equity": 19817.56371683136,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23885.618930903427,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19817.56371683136,
+          "id": "S3_10918",
+          "priorPeak": 23885.618930903427,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 12.280734155460424,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 4,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.724663430477043,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 3
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 5,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 6,
+        "PRICE_PROXY_CLOSED": 18,
+        "RESEARCH_P34_GATE_BLOCKED": 31,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 12,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 13,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        },
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 31,
+      "blockedOfNativeValidEntryCandidates": 6,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_CONSENSUS_3_OF_3",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 8.146805832788129,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 2,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 5.07710115,
+        "conditionalProfitFactor": 5.40315762,
+        "conditionalWinCount": 13,
+        "conditionalWinratePct": 72.22222222,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 18,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 22565.824333,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 91.38782075,
+        "worstChronologicalHighEvent": {
+          "equity": 19347.767463941844,
+          "id": "S3_10918",
+          "priorCompletedPeak": 23319.385137889058,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 19347.767463941844,
+          "id": "S3_10918",
+          "priorPeak": 23319.385137889058,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 11.722525728171215,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 4,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.724663430477043,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 3
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 5,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 6,
+        "PRICE_PROXY_CLOSED": 18,
+        "RESEARCH_P34_GATE_BLOCKED": 31,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 12,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 13,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        },
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 31,
+      "blockedOfNativeValidEntryCandidates": 6,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_CONSENSUS_3_OF_3",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 8.146805832788129,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 4.21307557,
+        "conditionalProfitFactor": 4.65382434,
+        "conditionalWinCount": 13,
+        "conditionalWinratePct": 72.22222222,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 18,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 17.03139963,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 20021.447917,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 75.83536021,
+        "worstChronologicalHighEvent": {
+          "equity": 17166.238329237036,
+          "id": "S3_10918",
+          "priorCompletedPeak": 20690.04207923816,
+          "sourceHigh": 0.007548,
+          "time": 1793403300000
+        },
+        "worstMarkEvent": {
+          "equity": 17166.238329237036,
+          "id": "S3_10918",
+          "priorPeak": 20690.04207923816,
+          "sourceCloseMark": 0.007548,
+          "time": 1793403300000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 9.130448971749054,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 4,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.724663430477043,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 3
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 5,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 6,
+        "PRICE_PROXY_CLOSED": 18,
+        "RESEARCH_P34_GATE_BLOCKED": 31,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 12,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 13,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        },
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 31,
+      "blockedOfNativeValidEntryCandidates": 6,
+      "buyCoverExtraSlipBps": 1000,
+      "gross": 0.75,
+      "model": "SELLER_CONSENSUS_3_OF_3",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 8.146805832788129,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_ON",
+      "positiveM5PrintAfterShock": 3,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.92199659,
+        "conditionalProfitFactor": 4.40138371,
+        "conditionalWinCount": 13,
+        "conditionalWinratePct": 72.22222222,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 18,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 18.81773579,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 18.87293188,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 19164.280596,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 70.59593854,
+        "worstChronologicalHighEvent": {
+          "equity": 10877.501603137727,
+          "id": "S3_02173",
+          "priorCompletedPeak": 13407.980658824114,
+          "sourceHigh": 0.019115,
+          "time": 1761873300000
+        },
+        "worstMarkEvent": {
+          "equity": 10884.902283326908,
+          "id": "S3_02173",
+          "priorPeak": 13407.980658824114,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 8.257212026088709,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 4,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.724663430477043,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 3
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 5,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 6,
+        "PRICE_PROXY_CLOSED": 18,
+        "RESEARCH_P34_GATE_BLOCKED": 31,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 12,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 13,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        },
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    },
+    {
+      "blockedIntentsOfSource120": 31,
+      "blockedOfNativeValidEntryCandidates": 6,
+      "buyCoverExtraSlipBps": 0,
+      "gross": 0.75,
+      "model": "SELLER_CONSENSUS_3_OF_3",
+      "nativeReference21Completed": 21,
+      "newlyAdmittedTrades": [],
+      "originalReferenceLosersNetPctPointsAvoided": 8.300000000000008,
+      "originalReferenceWinnersNetPctPointsLost": 8.146805832788129,
+      "originalSourceS4Intents": 120,
+      "originalSurvivorChangedEconomics": [],
+      "p25ShockModel": "SHOCK_OFF",
+      "positiveM5PrintAfterShock": null,
+      "productionReady": false,
+      "riskAndProfitAtFixed0p75": {
+        "conditionalMeanNetReturnPctOnEquity": 3.43803172,
+        "conditionalProfitFactor": 3.98166121,
+        "conditionalWinCount": 13,
+        "conditionalWinratePct": 72.22222222,
+        "notActualPortfolioDD": true,
+        "originalSourceCompletedTradeCount": 18,
+        "originalSourceStructuralSetups": 120,
+        "sourceCensoredOpenPositionCount": 1,
+        "sourceGross": 0.75,
+        "sourceM5CloseMarkedDDPct": 24.85495896,
+        "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+        "sourceRealizedOnlyDDPct": 12.20871973,
+        "sourceReferenceFinalEquityInclCensoredMarkYen": 17739.104296,
+        "sourceRoundtripFeeBps": 30,
+        "sourceSingleSlotTotalReturnPointsOnEquity": 61.88457098,
+        "worstChronologicalHighEvent": {
+          "equity": 9242.897922386921,
+          "id": "S3_01700",
+          "priorCompletedPeak": 13407.980658824114,
+          "sourceHigh": 0.022982,
+          "time": 1760132100000
+        },
+        "worstMarkEvent": {
+          "equity": 10075.432568187145,
+          "id": "S3_02173",
+          "priorPeak": 13407.980658824114,
+          "sourceCloseMark": 0.019098,
+          "time": 1761873900000
+        }
+      },
+      "roundtripFeeBps": 30,
+      "routeCohortClosedAt0p75": [
+        {
+          "closed": 8,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 6.8053174335255955,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 7
+        },
+        {
+          "closed": 3,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 6.095384121354933,
+          "route": "BREAKDOWN_RETEST_FAILURE",
+          "wins": 2
+        },
+        {
+          "closed": 4,
+          "cohort": "BASE_2025_2026",
+          "meanNetOnNotional": 3.724663430477043,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 3
+        },
+        {
+          "closed": 2,
+          "cohort": "POST_2026_OCT_NOV",
+          "meanNetOnNotional": 1.5927078788958609,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 1
+        },
+        {
+          "closed": 1,
+          "cohort": "PRE_2025_AUG_SEP",
+          "meanNetOnNotional": -8.300000000000008,
+          "route": "SELLER_PULLBACK_REJECTION",
+          "wins": 0
+        }
+      ],
+      "selectedIds": [
+        "S3_01348",
+        "S3_01700",
+        "S3_02173",
+        "S3_02261",
+        "S3_02586",
+        "S3_02699",
+        "S3_03280",
+        "S3_04401",
+        "S3_04533",
+        "S3_05693",
+        "S3_07302",
+        "S3_07864",
+        "S3_10161",
+        "S3_10500",
+        "S3_10732",
+        "S3_10918",
+        "S3_11084",
+        "S3_11246",
+        "S3_11302"
+      ],
+      "sourceOriginalSourceStatusCounts": {
+        "NO_BUYER_RETEST_WITHIN_8H": 5,
+        "NO_ENTRY_PRINT_AFTER_CONFIRMED_M5_BEFORE_2H": 2,
+        "NO_SELLER_CONFIRMATION_WITHIN_2H": 45,
+        "OCCUPIED_SLOT": 6,
+        "PRICE_PROXY_CLOSED": 18,
+        "RESEARCH_P34_GATE_BLOCKED": 31,
+        "RETEST_NO_VALID_REJECTION_WITHIN_8H": 12,
+        "RIGHT_CENSORED_NATIVE_SOURCE_DATA_END": 1
+      },
+      "sourceReferenceWinners": 15,
+      "sourceWinnersPreserved": 13,
+      "stoppedOriginalLosers": [
+        {
+          "id": "S3_01864",
+          "referenceGrossNetPct": -8.300000000000008
+        }
+      ],
+      "stoppedOriginalWinners": [
+        {
+          "id": "S3_01634",
+          "referenceGrossNetPct": 2.8674641148325524
+        },
+        {
+          "id": "S3_05514",
+          "referenceGrossNetPct": 5.279341717955577
+        }
+      ]
+    }
+  ],
+  "grossFixed": 0.75,
+  "inputSHA": {
+    "P20SourceAsOfOriginal120": "975e49198c3a93c27fb6022d01936680cc5e8a4f8c0d84f4024d5a8b7736aa97",
+    "P32NativeS4All120": "97cd136c49cdd805942864c8758c92a5243efcb1e006361a6319fd332feeb60f",
+    "P32NativeS4Single120": "a3b0122e6441e3853b977e82f99d6310f46f58f5221ce10f92015de5e55e89f1",
+    "P33CausalSourceShock": "4385547534cc72da6d9e5026a66ebd3679ce49db0cfc8e549383be6fcc7808d9",
+    "P33EconomicSourceComparator": "24cbf2ac763e381c27a22c4daabd194f8e48e790777bcbfe2fb93fd29d27ec55",
+    "PENGUM5Source": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    }
+  },
+  "limitations": [
+    "PRE, BASE, and POST price outcomes have already been used in prior phase studies. POST is not a truly blind untouched time-period validation.",
+    "Only 21 source S4 native reference completed positions with 15wins. A threshold-based screen may be inflated by low sample and structurally biased missing opportunity trades.",
+    "Fixed P33 shock rule was developed in sample from a 2025-10 flash crash, and only 1 signal was seen in 120 causal source setups.",
+    "S4 entry is NEW and not a pinned original V20 runner entry signal.",
+    "Actual multi-runner portfolio DD, fills, asks, funding and source trading approvals not represented. Production blocked."
+  ],
+  "p33OriginalNativeExitBaseParityVerified": true,
+  "schema": "prism7-p34-pengu-seller-3asof-gates-fixed0p75-source120-25-models/v1",
+  "source120IntentsPreserved": true,
+  "source120SignalProfileStats": {
+    "SELLER_PULLBACK_REJECTION": {
+      "allSourceCandidates": 58,
+      "precommittedFlagsAggregateCounts": {
+        "btcWeak6h": 35,
+        "emaDown24Below72": 58,
+        "relativeWeak6h": 37
+      }
+    },
+    "allNativeS4StructureCandidates": 120
+  },
+  "sourceM5StressScenarios": [
+    [
+      "SHOCK_ON",
+      2,
+      0
+    ],
+    [
+      "SHOCK_ON",
+      2,
+      1000
+    ],
+    [
+      "SHOCK_ON",
+      3,
+      0
+    ],
+    [
+      "SHOCK_ON",
+      3,
+      1000
+    ],
+    [
+      "SHOCK_OFF",
+      0,
+      0
+    ]
+  ],
+  "sourceNative53NaturalSignalsUnaltered": true,
+  "sourcePinnedSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "testedModels": [
+    "BASE_UNMODIFIED",
+    "SELLER_BTC_TREND_ONLY",
+    "SELLER_REL_WEAKNESS_ONLY",
+    "SELLER_EMA_TREND_ONLY",
+    "SELLER_CONSENSUS_3_OF_3"
+  ]
+}
