@@ -1,0 +1,46 @@
+{
+  "AsterOriginal33BaselineNAV": 14193.07,
+  "BinanceStrict35BaselineNAV": 17769.89,
+  "asterNative53NaturalWins29": true,
+  "asterPromisingNo025Example": {
+    "M5DD": 15.490302,
+    "NAVJPY": 15683.87,
+    "extra100bpsM5DD": 17.569858,
+    "sourceWins": "18/30"
+  },
+  "binanceFullSameRule": {
+    "M5DD": 18.95153,
+    "NAVJPY": 14574.08,
+    "extra100bpsM5DD": 21.572206,
+    "originalNAVJPY": 16237.27,
+    "sourceWins": "19/33"
+  },
+  "binanceNative62NaturalWins32": true,
+  "binanceSameEntryRangeSameRule": {
+    "M5DD": 14.734187,
+    "NAVJPY": 15949.71,
+    "extra100bpsM5DD": 16.669811,
+    "originalNAVJPY": 17769.89,
+    "sourceWins": "18/30"
+  },
+  "crossMarket19PrespecifiedPolicyResultsNoJointPass": true,
+  "danger": "Double count same BTC/PENGU trend from highly correlated venues; use agreement/divergence as confidence, not 2 independent alpha votes.",
+  "decision": "NO_LIVE_ADOPTION__FROZEN_19_POLICY_CROSS_MARKET_PROFIT_AND_DD20_STRESS_NONE_PASS",
+  "dualVenueBTCStronglyCorrelatedH1Return": 0.999244,
+  "macroBullFullVetoRejectsOriginalWinningIntents": true,
+  "nativeSourceSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "noProductionMasterRunnerSTOPGrossOrOrdersChanges": true,
+  "officialBinancePENGUBTC1H5METH1HMatchingData": 165,
+  "ownerGrossConstraint": "No entry with gross 0.25. Allowed pre-entry 0,0.5,0.75,1.0 research only.",
+  "researchOutputUnabridgedSHA256": {
+    "P73": "76a8874c5a632f2d7a2f43596e1368c48ca54a01e0944a0e5c243fdfea2e5aa6",
+    "P74": "1569e71de720a288a7b999e746f3349c1b9976892af5cb162ca218ed8c724b1e",
+    "P75": "5fcd9bf4dff0085e54c5620753647c069ba6c8671f283c81bce046fcf0fdce5c",
+    "P76": "902218a9ca2b115b1a204e30c0fa19da55f33bb559bc28f59da5b353476830e1",
+    "P77": "4531767cd6ebf647dbcf0fdd708a88c314ffb25036e7a8831442278ae0e419d1"
+  },
+  "sameHourNativeReturnStronglyCorrelated": 0.999219,
+  "sameHourNativeSignalPair27BothWin15BothLoss12": true,
+  "schema": "prism7-p73-p77-owner-no025-2venue-native53-native62-final-gate/v1",
+  "successCondition": "Future unseen Aster source and same UTC Binance frozen rule, 30bps and +100bps cover stress DD<=20 both plus gross.75 baseline NAV noninferiority, preserve large original native winners. Verify native signed STOP fills and gross across all runners."
+}
