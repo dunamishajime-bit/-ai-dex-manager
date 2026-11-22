@@ -1,0 +1,190 @@
+{
+  "phase": "P107-A",
+  "prod_changes": false,
+  "orders_sent": 0,
+  "current_STABLE4_PARITY_PASS": false,
+  "p106": {
+    "baseline_final_jpy": 551075,
+    "baseline_max_dd_pct": 29.95,
+    "selected_final_jpy": 607456,
+    "selected_max_dd_pct": 23.17,
+    "selected_win_rate_pct": 60.34,
+    "model": "P92 old STRICT_V2; V4 DD21 HOLD not represented"
+  },
+  "checks": [
+    {
+      "manifest": "C:\\tmp\\disdex-bt-20251001-20261001\\STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2\\RUN_MANIFEST.json",
+      "manifest_sha256": "0fea015ecf14b8c8d673aac7c0e81cb61ccdde0cd22d80655de10bcfc5eca5ba",
+      "status": "P107_GATE_BLOCKED_RESEARCH_ONLY",
+      "reasons": [
+        "EXACT_SHA_AND_FILLS_PARITY_NOT_ATTESTED",
+        "EXPLICIT_RESEARCH_ONLY_NOT_PRODUCTION_PARITY",
+        "Q102_HIGH_VOL_OR_66_UNRESOLVED",
+        "STOCK_GROSS_ABOVE_1P5"
+      ],
+      "observations": [
+        "Manifest records model-level DD21 holds, but does not by itself prove exact Runner replay.",
+        "P106 uses a different PENGU Native Binance/M5 pathway; candidate and order counts cannot be compared one-to-one.",
+        "H48, exact production Runner pin, intrabar STOP/Funding and fill parity are not proven by this manifest."
+      ],
+      "summaries": [
+        {
+          "bps": 10,
+          "final_jpy": 11093070.7,
+          "max_hourly_dd_pct_signed": -21.571152025921158,
+          "win_rate_pct": 64.22250316055626,
+          "modeled_fills": 791,
+          "v4_dd21_blocked_candidates": 683,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 3.5,
+          "PENGU_admissions": 46
+        },
+        {
+          "bps": 30,
+          "final_jpy": 4187854.71,
+          "max_hourly_dd_pct_signed": -22.281590510182504,
+          "win_rate_pct": 61.97718631178707,
+          "modeled_fills": 789,
+          "v4_dd21_blocked_candidates": 683,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 3.5,
+          "PENGU_admissions": 45
+        }
+      ],
+      "source_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY"
+    },
+    {
+      "manifest": "C:\\tmp\\disdex-bt-20251001-20261001\\STABLE4_OPPORTUNITY_PROD_CAPS_20261114\\RUN_MANIFEST.json",
+      "manifest_sha256": "55e6756a30c1d08f4e5cdbef1c40297de145015b800af96c6e630bcc95612fa2",
+      "status": "P107_GATE_BLOCKED_RESEARCH_ONLY",
+      "reasons": [
+        "EXACT_SHA_AND_FILLS_PARITY_NOT_ATTESTED",
+        "EXPLICIT_RESEARCH_ONLY_NOT_PRODUCTION_PARITY",
+        "Q102_HIGH_VOL_OR_66_UNRESOLVED"
+      ],
+      "observations": [
+        "Manifest records model-level DD21 holds, but does not by itself prove exact Runner replay.",
+        "P106 uses a different PENGU Native Binance/M5 pathway; candidate and order counts cannot be compared one-to-one.",
+        "H48, exact production Runner pin, intrabar STOP/Funding and fill parity are not proven by this manifest."
+      ],
+      "summaries": [
+        {
+          "bps": 10,
+          "final_jpy": 12442421.06,
+          "max_hourly_dd_pct_signed": -22.5950788661174,
+          "win_rate_pct": 63.1937682570594,
+          "modeled_fills": 1027,
+          "v4_dd21_blocked_candidates": 206,
+          "stock_cap": 1.5,
+          "crypto_cap": 3.0,
+          "total_cap": 3.5,
+          "PENGU_admissions": 45
+        },
+        {
+          "bps": 30,
+          "final_jpy": 4660537.64,
+          "max_hourly_dd_pct_signed": -23.219482096692147,
+          "win_rate_pct": 60.410557184750736,
+          "modeled_fills": 1023,
+          "v4_dd21_blocked_candidates": 209,
+          "stock_cap": 1.5,
+          "crypto_cap": 3.0,
+          "total_cap": 3.5,
+          "PENGU_admissions": 44
+        }
+      ],
+      "source_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY"
+    },
+    {
+      "manifest": "C:\\tmp\\disdex-bt-20251001-20261001\\STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1\\RUN_MANIFEST.json",
+      "manifest_sha256": "36229cf7f8b399339e09fc6c0c3c6a74a219f91e84324313f460a41eadcff7a2",
+      "status": "P107_GATE_BLOCKED_RESEARCH_ONLY",
+      "reasons": [
+        "EXACT_SHA_AND_FILLS_PARITY_NOT_ATTESTED",
+        "EXPLICIT_RESEARCH_ONLY_NOT_PRODUCTION_PARITY",
+        "Q102_HIGH_VOL_OR_66_UNRESOLVED",
+        "STOCK_GROSS_ABOVE_1P5",
+        "TOTAL_GROSS_ABOVE_3P5"
+      ],
+      "observations": [
+        "Manifest records model-level DD21 holds, but does not by itself prove exact Runner replay.",
+        "P106 uses a different PENGU Native Binance/M5 pathway; candidate and order counts cannot be compared one-to-one.",
+        "H48, exact production Runner pin, intrabar STOP/Funding and fill parity are not proven by this manifest."
+      ],
+      "summaries": [
+        {
+          "bps": 10,
+          "final_jpy": 13541227.42,
+          "max_hourly_dd_pct_signed": -21.571152025921148,
+          "win_rate_pct": 63.899371069182386,
+          "modeled_fills": 795,
+          "v4_dd21_blocked_candidates": 683,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 4.25,
+          "PENGU_admissions": 47
+        },
+        {
+          "bps": 30,
+          "final_jpy": 4923411.54,
+          "max_hourly_dd_pct_signed": -22.281590510182536,
+          "win_rate_pct": 61.820480404551205,
+          "modeled_fills": 791,
+          "v4_dd21_blocked_candidates": 683,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 4.25,
+          "PENGU_admissions": 46
+        }
+      ],
+      "source_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY"
+    },
+    {
+      "manifest": "C:\\tmp\\disdex-bt-20251001-20261001\\DD_PRISM3_PENGU_IDLE_VOLUME_AWARE_20261122\\RUN_MANIFEST.json",
+      "manifest_sha256": "1c39eccc878b1d41f7b33338aea58247ee19320930ee6a01a002172912f0bcb5",
+      "status": "P107_GATE_BLOCKED_RESEARCH_ONLY",
+      "reasons": [
+        "EXACT_SHA_AND_FILLS_PARITY_NOT_ATTESTED",
+        "EXPLICIT_RESEARCH_ONLY_NOT_PRODUCTION_PARITY",
+        "Q102_HIGH_VOL_OR_66_UNRESOLVED",
+        "STOCK_GROSS_ABOVE_1P5",
+        "TOTAL_GROSS_ABOVE_3P5"
+      ],
+      "observations": [
+        "Manifest records model-level DD21 holds, but does not by itself prove exact Runner replay.",
+        "P106 uses a different PENGU Native Binance/M5 pathway; candidate and order counts cannot be compared one-to-one.",
+        "H48, exact production Runner pin, intrabar STOP/Funding and fill parity are not proven by this manifest."
+      ],
+      "summaries": [
+        {
+          "bps": 10,
+          "final_jpy": 33419229.54,
+          "max_hourly_dd_pct_signed": -23.493429895846784,
+          "win_rate_pct": 64.05959031657356,
+          "modeled_fills": 1074,
+          "v4_dd21_blocked_candidates": 206,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 4.25,
+          "PENGU_admissions": 46
+        },
+        {
+          "bps": 30,
+          "final_jpy": 10027951.94,
+          "max_hourly_dd_pct_signed": -24.572763001656227,
+          "win_rate_pct": 61.40186915887851,
+          "modeled_fills": 1070,
+          "v4_dd21_blocked_candidates": 209,
+          "stock_cap": 4.0,
+          "crypto_cap": 3.0,
+          "total_cap": 4.25,
+          "PENGU_admissions": 45
+        }
+      ],
+      "source_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY"
+    }
+  ],
+  "next": "Exact live pins -> no-change full engine baseline parity -> native Binance re-fire -> OOS/portfolio tests"
+}
