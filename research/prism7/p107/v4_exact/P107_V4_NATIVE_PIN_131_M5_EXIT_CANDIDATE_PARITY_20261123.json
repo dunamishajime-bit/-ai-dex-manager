@@ -1,0 +1,931 @@
+{
+  "schema": "p107-v4-131-modelled-early-exit-candidates-source-rule-m5-parity/v1",
+  "currentPin": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "oldExitCount": 131,
+  "nativeCandidateIdentityPriceMatchCount": 131,
+  "nativeCandidateMismatchCount": 0,
+  "mismatches": [],
+  "sourceConfirmedCandidates": [
+    {
+      "id": "V4_00468",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767694200000,
+      "referencePrice": 173.08,
+      "evidenceBarTs": 1767693900000
+    },
+    {
+      "id": "V4_00687",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771133400000,
+      "referencePrice": 131.28,
+      "evidenceBarTs": 1771133100000
+    },
+    {
+      "id": "V4_00721",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771855500000,
+      "referencePrice": 118.72,
+      "evidenceBarTs": 1771855200000
+    },
+    {
+      "id": "V4_00928",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780037700000,
+      "referencePrice": 81.8,
+      "evidenceBarTs": 1780037400000
+    },
+    {
+      "id": "V4_01308",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789805100000,
+      "referencePrice": 142.74,
+      "evidenceBarTs": 1789804800000
+    },
+    {
+      "id": "V4_01310",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789819500000,
+      "referencePrice": 142.92,
+      "evidenceBarTs": 1789819200000
+    },
+    {
+      "id": "V4_00042",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760328300000,
+      "referencePrice": 0.7029,
+      "evidenceBarTs": 1760328000000
+    },
+    {
+      "id": "V4_00399",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1765397700000,
+      "referencePrice": 0.4725,
+      "evidenceBarTs": 1765397400000
+    },
+    {
+      "id": "V4_00447",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767575400000,
+      "referencePrice": 0.4052,
+      "evidenceBarTs": 1767575100000
+    },
+    {
+      "id": "V4_00467",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767708900000,
+      "referencePrice": 0.4302,
+      "evidenceBarTs": 1767708600000
+    },
+    {
+      "id": "V4_01094",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783080300000,
+      "referencePrice": 0.1702,
+      "evidenceBarTs": 1783080000000
+    },
+    {
+      "id": "V4_01268",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1788496800000,
+      "referencePrice": 0.2261,
+      "evidenceBarTs": 1788496500000
+    },
+    {
+      "id": "V4_01341",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789985100000,
+      "referencePrice": 0.2378,
+      "evidenceBarTs": 1789984800000
+    },
+    {
+      "id": "V4_01343",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789992300000,
+      "referencePrice": 0.2416,
+      "evidenceBarTs": 1789992000000
+    },
+    {
+      "id": "V4_00036",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760292300000,
+      "referencePrice": 3.51,
+      "evidenceBarTs": 1760292000000
+    },
+    {
+      "id": "V4_00076",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760872500000,
+      "referencePrice": 3.22,
+      "evidenceBarTs": 1760872200000
+    },
+    {
+      "id": "V4_00188",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1762776300000,
+      "referencePrice": 3.051,
+      "evidenceBarTs": 1762776000000
+    },
+    {
+      "id": "V4_00273",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763510700000,
+      "referencePrice": 2.775,
+      "evidenceBarTs": 1763510400000
+    },
+    {
+      "id": "V4_00274",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763517900000,
+      "referencePrice": 2.775,
+      "evidenceBarTs": 1763517600000
+    },
+    {
+      "id": "V4_01005",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780870500000,
+      "referencePrice": 1.721,
+      "evidenceBarTs": 1780870200000
+    },
+    {
+      "id": "V4_01155",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1784579400000,
+      "referencePrice": 1.492,
+      "evidenceBarTs": 1784579100000
+    },
+    {
+      "id": "V4_01213",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787436300000,
+      "referencePrice": 1.57,
+      "evidenceBarTs": 1787436000000
+    },
+    {
+      "id": "V4_01305",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789783500000,
+      "referencePrice": 1.712,
+      "evidenceBarTs": 1789783200000
+    },
+    {
+      "id": "V4_00423",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1765937100000,
+      "referencePrice": 12.31,
+      "evidenceBarTs": 1765936800000
+    },
+    {
+      "id": "V4_00429",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1766066700000,
+      "referencePrice": 12.23,
+      "evidenceBarTs": 1766066400000
+    },
+    {
+      "id": "V4_00435",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1766974200000,
+      "referencePrice": 12.87,
+      "evidenceBarTs": 1766973900000
+    },
+    {
+      "id": "V4_01199",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787357100000,
+      "referencePrice": 7.819,
+      "evidenceBarTs": 1787356800000
+    },
+    {
+      "id": "V4_01317",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789848300000,
+      "referencePrice": 9.611,
+      "evidenceBarTs": 1789848000000
+    },
+    {
+      "id": "V4_00098",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1761565200000,
+      "referencePrice": 1162.4,
+      "evidenceBarTs": 1761564900000
+    },
+    {
+      "id": "V4_00672",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770854700000,
+      "referencePrice": 609.5,
+      "evidenceBarTs": 1770854400000
+    },
+    {
+      "id": "V4_00851",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1775433900000,
+      "referencePrice": 606,
+      "evidenceBarTs": 1775433600000
+    },
+    {
+      "id": "V4_01004",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780850100000,
+      "referencePrice": 594.88,
+      "evidenceBarTs": 1780849800000
+    },
+    {
+      "id": "V4_01007",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780870500000,
+      "referencePrice": 607.88,
+      "evidenceBarTs": 1780870200000
+    },
+    {
+      "id": "V4_01010",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780870500000,
+      "referencePrice": 607.88,
+      "evidenceBarTs": 1780870200000
+    },
+    {
+      "id": "V4_01017",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1781528100000,
+      "referencePrice": 623.99,
+      "evidenceBarTs": 1781527800000
+    },
+    {
+      "id": "V4_01110",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783254900000,
+      "referencePrice": 585.63,
+      "evidenceBarTs": 1783254600000
+    },
+    {
+      "id": "V4_01237",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787625000000,
+      "referencePrice": 719.1,
+      "evidenceBarTs": 1787624700000
+    },
+    {
+      "id": "V4_01303",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789822500000,
+      "referencePrice": 772.47,
+      "evidenceBarTs": 1789822200000
+    },
+    {
+      "id": "V4_00034",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760285100000,
+      "referencePrice": 113870.5,
+      "evidenceBarTs": 1760284800000
+    },
+    {
+      "id": "V4_00041",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760321100000,
+      "referencePrice": 115326.8,
+      "evidenceBarTs": 1760320800000
+    },
+    {
+      "id": "V4_00078",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760932500000,
+      "referencePrice": 110233.9,
+      "evidenceBarTs": 1760932200000
+    },
+    {
+      "id": "V4_00080",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1760933400000,
+      "referencePrice": 110157.8,
+      "evidenceBarTs": 1760933100000
+    },
+    {
+      "id": "V4_00284",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763625900000,
+      "referencePrice": 92160.5,
+      "evidenceBarTs": 1763625600000
+    },
+    {
+      "id": "V4_00449",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767625200000,
+      "referencePrice": 93374.4,
+      "evidenceBarTs": 1767624900000
+    },
+    {
+      "id": "V4_00455",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767627900000,
+      "referencePrice": 93801.7,
+      "evidenceBarTs": 1767627600000
+    },
+    {
+      "id": "V4_00648",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770393900000,
+      "referencePrice": 68836.5,
+      "evidenceBarTs": 1770393600000
+    },
+    {
+      "id": "V4_01245",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787637900000,
+      "referencePrice": 80696.9,
+      "evidenceBarTs": 1787637600000
+    },
+    {
+      "id": "V4_01331",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789979700000,
+      "referencePrice": 82516.2,
+      "evidenceBarTs": 1789979400000
+    },
+    {
+      "id": "V4_01333",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789980000000,
+      "referencePrice": 83488.4,
+      "evidenceBarTs": 1789979700000
+    },
+    {
+      "id": "V4_01336",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789980000000,
+      "referencePrice": 83488.4,
+      "evidenceBarTs": 1789979700000
+    },
+    {
+      "id": "V4_01344",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789992300000,
+      "referencePrice": 84938.2,
+      "evidenceBarTs": 1789992000000
+    },
+    {
+      "id": "V4_01347",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790006700000,
+      "referencePrice": 85732.1,
+      "evidenceBarTs": 1790006400000
+    },
+    {
+      "id": "V4_00187",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1762782000000,
+      "referencePrice": 0.183575,
+      "evidenceBarTs": 1762781700000
+    },
+    {
+      "id": "V4_00443",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767535500000,
+      "referencePrice": 0.15194,
+      "evidenceBarTs": 1767535200000
+    },
+    {
+      "id": "V4_00650",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770408300000,
+      "referencePrice": 0.0988,
+      "evidenceBarTs": 1770408000000
+    },
+    {
+      "id": "V4_00675",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770888900000,
+      "referencePrice": 0.09329,
+      "evidenceBarTs": 1770888600000
+    },
+    {
+      "id": "V4_00684",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770978000000,
+      "referencePrice": 0.09374,
+      "evidenceBarTs": 1770977700000
+    },
+    {
+      "id": "V4_00691",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771135500000,
+      "referencePrice": 0.11572,
+      "evidenceBarTs": 1771135200000
+    },
+    {
+      "id": "V4_00693",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771142700000,
+      "referencePrice": 0.11607,
+      "evidenceBarTs": 1771142400000
+    },
+    {
+      "id": "V4_00695",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771149900000,
+      "referencePrice": 0.11422,
+      "evidenceBarTs": 1771149600000
+    },
+    {
+      "id": "V4_00719",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771579500000,
+      "referencePrice": 0.0991,
+      "evidenceBarTs": 1771579200000
+    },
+    {
+      "id": "V4_01145",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783648200000,
+      "referencePrice": 0.07386,
+      "evidenceBarTs": 1783647900000
+    },
+    {
+      "id": "V4_01192",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787299500000,
+      "referencePrice": 0.08377,
+      "evidenceBarTs": 1787299200000
+    },
+    {
+      "id": "V4_00258",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763390400000,
+      "referencePrice": 3196.5,
+      "evidenceBarTs": 1763390100000
+    },
+    {
+      "id": "V4_00387",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1765344000000,
+      "referencePrice": 3328.68,
+      "evidenceBarTs": 1765343700000
+    },
+    {
+      "id": "V4_00395",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1765392000000,
+      "referencePrice": 3424.75,
+      "evidenceBarTs": 1765391700000
+    },
+    {
+      "id": "V4_00396",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1765387500000,
+      "referencePrice": 3377.95,
+      "evidenceBarTs": 1765387200000
+    },
+    {
+      "id": "V4_00428",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1766063400000,
+      "referencePrice": 2891.95,
+      "evidenceBarTs": 1766063100000
+    },
+    {
+      "id": "V4_00440",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1767405900000,
+      "referencePrice": 3123.26,
+      "evidenceBarTs": 1767405600000
+    },
+    {
+      "id": "V4_00602",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770069900000,
+      "referencePrice": 2346.4,
+      "evidenceBarTs": 1770069600000
+    },
+    {
+      "id": "V4_00853",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1775430000000,
+      "referencePrice": 2084.7,
+      "evidenceBarTs": 1775429700000
+    },
+    {
+      "id": "V4_01009",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780870500000,
+      "referencePrice": 1704.89,
+      "evidenceBarTs": 1780870200000
+    },
+    {
+      "id": "V4_01108",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783177800000,
+      "referencePrice": 1788.67,
+      "evidenceBarTs": 1783177500000
+    },
+    {
+      "id": "V4_01116",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783290900000,
+      "referencePrice": 1796.44,
+      "evidenceBarTs": 1783290600000
+    },
+    {
+      "id": "V4_01200",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787364300000,
+      "referencePrice": 2510.55,
+      "evidenceBarTs": 1787364000000
+    },
+    {
+      "id": "V4_01334",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789979400000,
+      "referencePrice": 2679.83,
+      "evidenceBarTs": 1789979100000
+    },
+    {
+      "id": "V4_01337",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789979700000,
+      "referencePrice": 2684.79,
+      "evidenceBarTs": 1789979400000
+    },
+    {
+      "id": "V4_00334",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1764273900000,
+      "referencePrice": 6.242,
+      "evidenceBarTs": 1764273600000
+    },
+    {
+      "id": "V4_00335",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1764317700000,
+      "referencePrice": 6.248,
+      "evidenceBarTs": 1764317400000
+    },
+    {
+      "id": "V4_00910",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1779047100000,
+      "referencePrice": 4.748,
+      "evidenceBarTs": 1779046800000
+    },
+    {
+      "id": "V4_01193",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787306700000,
+      "referencePrice": 4.905,
+      "evidenceBarTs": 1787306400000
+    },
+    {
+      "id": "V4_01241",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787623500000,
+      "referencePrice": 5.851,
+      "evidenceBarTs": 1787623200000
+    },
+    {
+      "id": "V4_01248",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787645100000,
+      "referencePrice": 5.927,
+      "evidenceBarTs": 1787644800000
+    },
+    {
+      "id": "V4_00312",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763870700000,
+      "referencePrice": 12.48,
+      "evidenceBarTs": 1763870400000
+    },
+    {
+      "id": "V4_00314",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763885100000,
+      "referencePrice": 12.392,
+      "evidenceBarTs": 1763884800000
+    },
+    {
+      "id": "V4_00316",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763899500000,
+      "referencePrice": 12.513,
+      "evidenceBarTs": 1763899200000
+    },
+    {
+      "id": "V4_00357",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1764777900000,
+      "referencePrice": 14.411,
+      "evidenceBarTs": 1764777600000
+    },
+    {
+      "id": "V4_00359",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1764842100000,
+      "referencePrice": 14.776,
+      "evidenceBarTs": 1764841800000
+    },
+    {
+      "id": "V4_00101",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1761579600000,
+      "referencePrice": 101.78,
+      "evidenceBarTs": 1761579300000
+    },
+    {
+      "id": "V4_00283",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1763625900000,
+      "referencePrice": 92.89,
+      "evidenceBarTs": 1763625600000
+    },
+    {
+      "id": "V4_00544",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1769061900000,
+      "referencePrice": 68.72,
+      "evidenceBarTs": 1769061600000
+    },
+    {
+      "id": "V4_01075",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1782566400000,
+      "referencePrice": 42.99,
+      "evidenceBarTs": 1782566100000
+    },
+    {
+      "id": "V4_01349",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790013900000,
+      "referencePrice": 61.61,
+      "evidenceBarTs": 1790013600000
+    },
+    {
+      "id": "V4_00740",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1772510700000,
+      "referencePrice": 1.41,
+      "evidenceBarTs": 1772510400000
+    },
+    {
+      "id": "V4_00741",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1772517900000,
+      "referencePrice": 1.36,
+      "evidenceBarTs": 1772517600000
+    },
+    {
+      "id": "V4_00865",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1775748000000,
+      "referencePrice": 1.363,
+      "evidenceBarTs": 1775747700000
+    },
+    {
+      "id": "V4_00869",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1775834100000,
+      "referencePrice": 1.393,
+      "evidenceBarTs": 1775833800000
+    },
+    {
+      "id": "V4_01022",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1781561100000,
+      "referencePrice": 2.457,
+      "evidenceBarTs": 1781560800000
+    },
+    {
+      "id": "V4_01097",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783101900000,
+      "referencePrice": 2.016,
+      "evidenceBarTs": 1783101600000
+    },
+    {
+      "id": "V4_01098",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783109100000,
+      "referencePrice": 2.006,
+      "evidenceBarTs": 1783108800000
+    },
+    {
+      "id": "V4_00102",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1761641100000,
+      "referencePrice": 203.445,
+      "evidenceBarTs": 1761640800000
+    },
+    {
+      "id": "V4_00685",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1770977100000,
+      "referencePrice": 79.72,
+      "evidenceBarTs": 1770976800000
+    },
+    {
+      "id": "V4_00689",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771129200000,
+      "referencePrice": 89.04,
+      "evidenceBarTs": 1771128900000
+    },
+    {
+      "id": "V4_00715",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1771553100000,
+      "referencePrice": 83.19,
+      "evidenceBarTs": 1771552800000
+    },
+    {
+      "id": "V4_00752",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1772706600000,
+      "referencePrice": 92.2,
+      "evidenceBarTs": 1772706300000
+    },
+    {
+      "id": "V4_01008",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780870500000,
+      "referencePrice": 67.4,
+      "evidenceBarTs": 1780870200000
+    },
+    {
+      "id": "V4_01085",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783042800000,
+      "referencePrice": 81.56,
+      "evidenceBarTs": 1783042500000
+    },
+    {
+      "id": "V4_01091",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783107600000,
+      "referencePrice": 82.97,
+      "evidenceBarTs": 1783107300000
+    },
+    {
+      "id": "V4_01159",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1785105900000,
+      "referencePrice": 76.63,
+      "evidenceBarTs": 1785105600000
+    },
+    {
+      "id": "V4_01160",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1785107400000,
+      "referencePrice": 77,
+      "evidenceBarTs": 1785107100000
+    },
+    {
+      "id": "V4_01162",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1785132600000,
+      "referencePrice": 76.74,
+      "evidenceBarTs": 1785132300000
+    },
+    {
+      "id": "V4_01163",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1785159900000,
+      "referencePrice": 77.34,
+      "evidenceBarTs": 1785159600000
+    },
+    {
+      "id": "V4_01165",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1785159900000,
+      "referencePrice": 77.34,
+      "evidenceBarTs": 1785159600000
+    },
+    {
+      "id": "V4_01201",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787371500000,
+      "referencePrice": 96.63,
+      "evidenceBarTs": 1787371200000
+    },
+    {
+      "id": "V4_01238",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787609100000,
+      "referencePrice": 97.46,
+      "evidenceBarTs": 1787608800000
+    },
+    {
+      "id": "V4_01247",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787645100000,
+      "referencePrice": 100.21,
+      "evidenceBarTs": 1787644800000
+    },
+    {
+      "id": "V4_01335",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789963500000,
+      "referencePrice": 111.35,
+      "evidenceBarTs": 1789963200000
+    },
+    {
+      "id": "V4_01338",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789978200000,
+      "referencePrice": 112.55,
+      "evidenceBarTs": 1789977900000
+    },
+    {
+      "id": "V4_01342",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789985100000,
+      "referencePrice": 115.63,
+      "evidenceBarTs": 1789984800000
+    },
+    {
+      "id": "V4_01345",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1789992300000,
+      "referencePrice": 116.53,
+      "evidenceBarTs": 1789992000000
+    },
+    {
+      "id": "V4_01348",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790006700000,
+      "referencePrice": 117.65,
+      "evidenceBarTs": 1790006400000
+    },
+    {
+      "id": "V4_01350",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790013900000,
+      "referencePrice": 117.21,
+      "evidenceBarTs": 1790013600000
+    },
+    {
+      "id": "V4_01351",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790021100000,
+      "referencePrice": 118.36,
+      "evidenceBarTs": 1790020800000
+    },
+    {
+      "id": "V4_00433",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1766153100000,
+      "referencePrice": 1.8708,
+      "evidenceBarTs": 1766152800000
+    },
+    {
+      "id": "V4_00528",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1769005200000,
+      "referencePrice": 1.932,
+      "evidenceBarTs": 1769004900000
+    },
+    {
+      "id": "V4_00944",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1780503000000,
+      "referencePrice": 1.2226,
+      "evidenceBarTs": 1780502700000
+    },
+    {
+      "id": "V4_01102",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783174200000,
+      "referencePrice": 1.1569,
+      "evidenceBarTs": 1783173900000
+    },
+    {
+      "id": "V4_01105",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1783174500000,
+      "referencePrice": 1.1652,
+      "evidenceBarTs": 1783174200000
+    },
+    {
+      "id": "V4_01187",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1787277900000,
+      "referencePrice": 1.2931,
+      "evidenceBarTs": 1787277600000
+    },
+    {
+      "id": "V4_01352",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790021100000,
+      "referencePrice": 1.5062,
+      "evidenceBarTs": 1790020800000
+    },
+    {
+      "id": "V4_01370",
+      "sourceReason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "exitTs": 1790122500000,
+      "referencePrice": 1.5779,
+      "evidenceBarTs": 1790122200000
+    }
+  ],
+  "actualExchangeSignedFills": 0,
+  "oldTapeUsedCandidateAsModeledExit": true,
+  "important": "Exact source M5 timing/price candidate match is NOT a signed market fill. Actual fill, STOP, ownership, funding and account replay missing.",
+  "p107_full_production_parity": false
+}

@@ -11,3 +11,16 @@ Compared every event to the independent native 2026-11-09 tape native-V4-raw-int
 The pinned code exports V12_V4_MAXIMUM_DRAWDOWN=0.21 as a risk rule. Actual DD HOLD, margin/position competition, shared risk, exit / STOP / TP / partial and funding were **not** applied to these 1,394 source candidates. The decision builder itself returns orderEnabled=false, realOrderEnabledV4=0 and tradingMutation=0.
 
 Repro on owner PC: place p107_v4_current_pin_native_h1_scan.ts alongside a standalone V4 checkout at exact SHA e788abc8..., then execute tsx with the checkout tsconfig path, pointing at the local ASTER BT root and a new isolated output JSON. p107_compare_v4_1394_pin_old_ledger.py regenerates the identity comparison given raw old tape. No production actions.
+## 2026-11-23 1394 / 1394 model exit rule and ATR verification
+
+Pinned V4 SHA e788abc82e80f9fc7ab0e1ba83fdb8be267eb513. The old 1394 modeled exits were generated from older SHA 3ad654... and audited against immutable current pinned source from ASTER historical H1/M5.
+
+- Independently recomputed native production H1 entry ATR for every 1394 candidate: 1394 / 1394 identical, maximum absolute difference zero.
+- FOUR_RULE_M5 early adverse candidate source function: 131 / 131 exactly matching event time, reason and market reference price.
+- FOUR_RULE_H1 profit protection combined with chronological M5 state: 176 / 176 exactly matching event time, reason and reference price; zero conflicting earlier M5 exits.
+- Actual current pinned evaluateProductionExit / evaluateNativeProductionExit for the remaining TIME, ATR and NATIVE exits: 1087 / 1087 exactly matching event time, reason and reference price.
+- Summed 307+1087 = 1394 all conditional model exits identical. No source exception or gap. We preserve the complete unmodified ASTER historical input windows, source file SHA256 and a zipped input bundle.
+
+Strict distinction: the FOUR_RULE_M5 outcome is named V4_SHORT_INITIAL_ADVERSE_CANDIDATE in code. It is a prospective exit signal, not a signed ASTER fill. The old trade book models it as an execution. None of the 1394 entries or exits has verified actual venue fill proof as part of this study. It is source-model parity CONDITIONAL on hypothetical isolated fills and ATR, not chronological portfolio order/fill/DD21 HOLD/Shared Risk/Gross parity. Do not treat 1394 as a permitted LIVE trade count. Account NAV/DD and order-readmission must be rerun from source-native events and signed broker geometry and complete market data before P107 PASS.
+
+Research only; no production mutations, no order/STOP/Kill Switch action.

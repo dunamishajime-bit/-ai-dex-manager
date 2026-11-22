@@ -1,0 +1,21 @@
+{
+  "schema": "p107-v4-native-exit-historical-input-hashes/v1",
+  "sourcePinnedSHA": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "files": {
+    "P107_V4_M5_FOUR_RULE_131_NATIVE_INPUT_20261123.json": {
+      "sha256": "6c22dd53a7b373c9992cba3c9cedebbbf3a67cbed2d4cb21bb43e3a866eb467d",
+      "bytes": 2548452,
+      "trades": 131
+    },
+    "P107_V4_H1_FOUR_RULE_176_NATIVE_INPUT_20261123.json": {
+      "sha256": "9ca8de9eff309d30135e68dc2cf6c40c34470de9bb60860e4f21d21d66e3c158",
+      "bytes": 7839473,
+      "trades": 176
+    },
+    "P107_V4_PRODUCTION_EXIT_1087_NATIVE_H1_INPUT_20261123.json": {
+      "sha256": "4fce8853e815b84041f52d28df94f846a877632c886d554fbea033ad31001222",
+      "bytes": 3410830,
+      "trades": 1087
+    }
+  }
+}

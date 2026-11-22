@@ -1,0 +1,7622 @@
+{
+  "schema": "p107-v4-1087-production-exit-pinned-source-price-model-parity/v1",
+  "currentPin": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "historicalModelCount": 1087,
+  "sourceNativeExitIdenticalCount": 1087,
+  "sourceNativeExitMismatchedCount": 0,
+  "oldNativeSpecCount": 64,
+  "matches": [
+    {
+      "id": "V4_00058",
+      "exitTs": 1760688000000,
+      "reason": "TIME",
+      "price": 208.68,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00060",
+      "exitTs": 1760695200000,
+      "reason": "TIME",
+      "price": 208.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00062",
+      "exitTs": 1760691600000,
+      "reason": "TP",
+      "price": 203.57357142857143,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00065",
+      "exitTs": 1760720400000,
+      "reason": "TIME",
+      "price": 202.69,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00066",
+      "exitTs": 1760727600000,
+      "reason": "TIME",
+      "price": 203.93,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00067",
+      "exitTs": 1760745600000,
+      "reason": "TIME",
+      "price": 206.22,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00224",
+      "exitTs": 1763222400000,
+      "reason": "TIME",
+      "price": 179.08,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00244",
+      "exitTs": 1763280000000,
+      "reason": "TIME",
+      "price": 180.52,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00245",
+      "exitTs": 1763308800000,
+      "reason": "TIME",
+      "price": 173.23,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00251",
+      "exitTs": 1763312400000,
+      "reason": "STOP",
+      "price": 173.3605714285714,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00255",
+      "exitTs": 1763323200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 172.94,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00313",
+      "exitTs": 1763956800000,
+      "reason": "TIME",
+      "price": 173.11,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00319",
+      "exitTs": 1763906400000,
+      "reason": "TIME",
+      "price": 164.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00320",
+      "exitTs": 1764295200000,
+      "reason": "TIME",
+      "price": 183.17,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00324",
+      "exitTs": 1764374400000,
+      "reason": "TIME",
+      "price": 185.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00326",
+      "exitTs": 1764381600000,
+      "reason": "TIME",
+      "price": 184.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00332",
+      "exitTs": 1764460800000,
+      "reason": "TIME",
+      "price": 182.73,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00351",
+      "exitTs": 1764594000000,
+      "reason": "TIME",
+      "price": 168.59,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00365",
+      "exitTs": 1764943200000,
+      "reason": "TIME",
+      "price": 188.52,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00367",
+      "exitTs": 1765080000000,
+      "reason": "TIME",
+      "price": 190.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00373",
+      "exitTs": 1765108800000,
+      "reason": "TIME",
+      "price": 188.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00419",
+      "exitTs": 1765821600000,
+      "reason": "TP",
+      "price": 181.5507142857143,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00434",
+      "exitTs": 1766700000000,
+      "reason": "TIME",
+      "price": 152.18,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00474",
+      "exitTs": 1767931200000,
+      "reason": "TIME",
+      "price": 165.99,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00475",
+      "exitTs": 1767938400000,
+      "reason": "TIME",
+      "price": 166.08,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00477",
+      "exitTs": 1767945600000,
+      "reason": "TIME",
+      "price": 165,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00483",
+      "exitTs": 1768003200000,
+      "reason": "TIME",
+      "price": 164.46,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00503",
+      "exitTs": 1768507200000,
+      "reason": "TIME",
+      "price": 170.84,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00569",
+      "exitTs": 1769882400000,
+      "reason": "TIME",
+      "price": 124.43,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00582",
+      "exitTs": 1769990400000,
+      "reason": "TIME",
+      "price": 124.31,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00666",
+      "exitTs": 1770861600000,
+      "reason": "TIME",
+      "price": 108.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00686",
+      "exitTs": 1771329600000,
+      "reason": "TIME",
+      "price": 124.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00690",
+      "exitTs": 1771351200000,
+      "reason": "TIME",
+      "price": 126.63,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00697",
+      "exitTs": 1771372800000,
+      "reason": "TIME",
+      "price": 126.87,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00700",
+      "exitTs": 1771394400000,
+      "reason": "TIME",
+      "price": 127.07,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00707",
+      "exitTs": 1771416000000,
+      "reason": "TIME",
+      "price": 127.16,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00723",
+      "exitTs": 1771840800000,
+      "reason": "TIME",
+      "price": 117.97,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00724",
+      "exitTs": 1771920000000,
+      "reason": "TIME",
+      "price": 112.53,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00725",
+      "exitTs": 1772071200000,
+      "reason": "TIME",
+      "price": 118.84,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00726",
+      "exitTs": 1771916400000,
+      "reason": "TIME",
+      "price": 112.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00815",
+      "exitTs": 1774166400000,
+      "reason": "TIME",
+      "price": 108,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00823",
+      "exitTs": 1774699200000,
+      "reason": "TIME",
+      "price": 96.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00824",
+      "exitTs": 1774627200000,
+      "reason": "STOP",
+      "price": 101,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00825",
+      "exitTs": 1774684800000,
+      "reason": "TIME",
+      "price": 97.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00826",
+      "exitTs": 1774684800000,
+      "reason": "TIME",
+      "price": 97.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00827",
+      "exitTs": 1774681200000,
+      "reason": "TIME",
+      "price": 96.99,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00837",
+      "exitTs": 1774857600000,
+      "reason": "TIME",
+      "price": 98.73,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00846",
+      "exitTs": 1775520000000,
+      "reason": "TIME",
+      "price": 92.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00847",
+      "exitTs": 1775484000000,
+      "reason": "TIME",
+      "price": 96.79,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00857",
+      "exitTs": 1775401200000,
+      "reason": "TIME",
+      "price": 91.09,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00861",
+      "exitTs": 1775415600000,
+      "reason": "TIME",
+      "price": 91.54,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00878",
+      "exitTs": 1776391200000,
+      "reason": "TIME",
+      "price": 113.52,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00879",
+      "exitTs": 1776456000000,
+      "reason": "TIME",
+      "price": 117.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00883",
+      "exitTs": 1776628800000,
+      "reason": "TIME",
+      "price": 90.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00888",
+      "exitTs": 1776708000000,
+      "reason": "TIME",
+      "price": 89.61,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00889",
+      "exitTs": 1776643200000,
+      "reason": "TIME",
+      "price": 90.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00908",
+      "exitTs": 1778947200000,
+      "reason": "TIME",
+      "price": 90.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00926",
+      "exitTs": 1779951600000,
+      "reason": "TIME",
+      "price": 80.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00927",
+      "exitTs": 1779991200000,
+      "reason": "TIME",
+      "price": 80.72,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00929",
+      "exitTs": 1780142400000,
+      "reason": "TIME",
+      "price": 82.96,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00936",
+      "exitTs": 1780516800000,
+      "reason": "TIME",
+      "price": 74.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00975",
+      "exitTs": 1780660800000,
+      "reason": "TIME",
+      "price": 66.08,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01081",
+      "exitTs": 1782871200000,
+      "reason": "TIME",
+      "price": 86.16,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01082",
+      "exitTs": 1782878400000,
+      "reason": "TIME",
+      "price": 86.97,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01142",
+      "exitTs": 1783634400000,
+      "reason": "TIME",
+      "price": 90.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01143",
+      "exitTs": 1783641600000,
+      "reason": "TIME",
+      "price": 91.44,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01170",
+      "exitTs": 1785679200000,
+      "reason": "TIME",
+      "price": 90.89,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01203",
+      "exitTs": 1787508000000,
+      "reason": "TIME",
+      "price": 140.26,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01221",
+      "exitTs": 1787752800000,
+      "reason": "TIME",
+      "price": 124.03,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01259",
+      "exitTs": 1787824800000,
+      "reason": "TIME",
+      "price": 129.28,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01267",
+      "exitTs": 1788710400000,
+      "reason": "TIME",
+      "price": 133.59,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01269",
+      "exitTs": 1788717600000,
+      "reason": "TIME",
+      "price": 133.31,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01271",
+      "exitTs": 1788724800000,
+      "reason": "TIME",
+      "price": 132.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01273",
+      "exitTs": 1788652800000,
+      "reason": "TIME",
+      "price": 134.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01276",
+      "exitTs": 1788746400000,
+      "reason": "TIME",
+      "price": 133.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00024",
+      "exitTs": 1760133600000,
+      "reason": "TIME",
+      "price": 0.6186,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00026",
+      "exitTs": 1760140800000,
+      "reason": "TIME",
+      "price": 0.6347,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00027",
+      "exitTs": 1760148000000,
+      "reason": "TIME",
+      "price": 0.6358,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00050",
+      "exitTs": 1760443200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.6767,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00055",
+      "exitTs": 1760702400000,
+      "reason": "TIME",
+      "price": 0.618,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00111",
+      "exitTs": 1761847200000,
+      "reason": "TP",
+      "price": 0.5974178571428571,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00113",
+      "exitTs": 1761854400000,
+      "reason": "TP",
+      "price": 0.5876464285714286,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00126",
+      "exitTs": 1762027200000,
+      "reason": "TIME",
+      "price": 0.6136,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00128",
+      "exitTs": 1762034400000,
+      "reason": "TIME",
+      "price": 0.6078,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00131",
+      "exitTs": 1762192800000,
+      "reason": "STOP",
+      "price": 0.5615142857142857,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00153",
+      "exitTs": 1762394400000,
+      "reason": "TIME",
+      "price": 0.5408,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00176",
+      "exitTs": 1762509600000,
+      "reason": "TIME",
+      "price": 0.5409,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00230",
+      "exitTs": 1763265600000,
+      "reason": "TIME",
+      "price": 0.5031,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00232",
+      "exitTs": 1763280000000,
+      "reason": "TIME",
+      "price": 0.5054,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00234",
+      "exitTs": 1763287200000,
+      "reason": "TIME",
+      "price": 0.5078,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00236",
+      "exitTs": 1763229600000,
+      "reason": "TIME",
+      "price": 0.5095,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00238",
+      "exitTs": 1763308800000,
+      "reason": "TIME",
+      "price": 0.4836,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00242",
+      "exitTs": 1763316000000,
+      "reason": "TIME",
+      "price": 0.4802,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00250",
+      "exitTs": 1763301600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4927,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00252",
+      "exitTs": 1763308800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4836,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00253",
+      "exitTs": 1763316000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4802,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00257",
+      "exitTs": 1763330400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4793,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00261",
+      "exitTs": 1763391600000,
+      "reason": "STOP",
+      "price": 0.49066504285714285,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00262",
+      "exitTs": 1763413200000,
+      "reason": "STOP",
+      "price": 0.46098,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00264",
+      "exitTs": 1763416800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4598,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00267",
+      "exitTs": 1763560800000,
+      "reason": "TIME",
+      "price": 0.4652,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00269",
+      "exitTs": 1763481600000,
+      "reason": "TIME",
+      "price": 0.4743,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00275",
+      "exitTs": 1763568000000,
+      "reason": "TIME",
+      "price": 0.4559,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00281",
+      "exitTs": 1763575200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.4458,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00296",
+      "exitTs": 1763712000000,
+      "reason": "TAKE_PROFIT",
+      "price": 0.39711839285714284,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00336",
+      "exitTs": 1764532800000,
+      "reason": "TIME",
+      "price": 0.4254,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00346",
+      "exitTs": 1764594000000,
+      "reason": "TP",
+      "price": 0.3759857142857143,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00348",
+      "exitTs": 1764612000000,
+      "reason": "TIME",
+      "price": 0.3747,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00353",
+      "exitTs": 1764648000000,
+      "reason": "TIME",
+      "price": 0.3917,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00356",
+      "exitTs": 1764993600000,
+      "reason": "TIME",
+      "price": 0.4159,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00361",
+      "exitTs": 1765058400000,
+      "reason": "TIME",
+      "price": 0.4139,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00363",
+      "exitTs": 1765065600000,
+      "reason": "TIME",
+      "price": 0.4142,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00374",
+      "exitTs": 1765123200000,
+      "reason": "TIME",
+      "price": 0.4193,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00386",
+      "exitTs": 1765555200000,
+      "reason": "TIME",
+      "price": 0.4075,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00388",
+      "exitTs": 1765562400000,
+      "reason": "TIME",
+      "price": 0.4082,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00392",
+      "exitTs": 1765576800000,
+      "reason": "TIME",
+      "price": 0.4095,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00394",
+      "exitTs": 1765584000000,
+      "reason": "TIME",
+      "price": 0.409,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00397",
+      "exitTs": 1765591200000,
+      "reason": "TIME",
+      "price": 0.4099,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00400",
+      "exitTs": 1765620000000,
+      "reason": "TIME",
+      "price": 0.4113,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00401",
+      "exitTs": 1765656000000,
+      "reason": "TIME",
+      "price": 0.41,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00404",
+      "exitTs": 1765800000000,
+      "reason": "TIME",
+      "price": 0.4027,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00409",
+      "exitTs": 1765807200000,
+      "reason": "TIME",
+      "price": 0.4018,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00412",
+      "exitTs": 1765814400000,
+      "reason": "TIME",
+      "price": 0.3849,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00415",
+      "exitTs": 1765821600000,
+      "reason": "TIME",
+      "price": 0.3807,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00417",
+      "exitTs": 1765828800000,
+      "reason": "TIME",
+      "price": 0.3837,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00418",
+      "exitTs": 1765843200000,
+      "reason": "TIME",
+      "price": 0.3874,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00424",
+      "exitTs": 1765915200000,
+      "reason": "TIME",
+      "price": 0.3872,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00425",
+      "exitTs": 1766016000000,
+      "reason": "TIME",
+      "price": 0.3662,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00431",
+      "exitTs": 1766095200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.3544,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00441",
+      "exitTs": 1767636000000,
+      "reason": "TIME",
+      "price": 0.4128,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00446",
+      "exitTs": 1767528000000,
+      "reason": "TIME",
+      "price": 0.401,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00456",
+      "exitTs": 1767837600000,
+      "reason": "TIME",
+      "price": 0.4037,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00463",
+      "exitTs": 1767888000000,
+      "reason": "TIME",
+      "price": 0.395,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00464",
+      "exitTs": 1767657600000,
+      "reason": "TIME",
+      "price": 0.4213,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00469",
+      "exitTs": 1767909600000,
+      "reason": "TIME",
+      "price": 0.3977,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00470",
+      "exitTs": 1767916800000,
+      "reason": "TIME",
+      "price": 0.3965,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00499",
+      "exitTs": 1768622400000,
+      "reason": "TIME",
+      "price": 0.3947,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00501",
+      "exitTs": 1768629600000,
+      "reason": "TIME",
+      "price": 0.396,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00506",
+      "exitTs": 1768651200000,
+      "reason": "TIME",
+      "price": 0.3954,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00512",
+      "exitTs": 1768831200000,
+      "reason": "TIME",
+      "price": 0.3659,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00525",
+      "exitTs": 1768950000000,
+      "reason": "TIME",
+      "price": 0.351,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00567",
+      "exitTs": 1769918400000,
+      "reason": "TIME",
+      "price": 0.2967,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00575",
+      "exitTs": 1769878800000,
+      "reason": "TIME",
+      "price": 0.2928,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00601",
+      "exitTs": 1770069600000,
+      "reason": "TIME",
+      "price": 0.3005,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00670",
+      "exitTs": 1770890400000,
+      "reason": "TIME",
+      "price": 0.2655,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00692",
+      "exitTs": 1771358400000,
+      "reason": "TIME",
+      "price": 0.2832,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00694",
+      "exitTs": 1771365600000,
+      "reason": "TIME",
+      "price": 0.282,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00722",
+      "exitTs": 1771815600000,
+      "reason": "STOP",
+      "price": 0.2601571428571428,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00728",
+      "exitTs": 1772085600000,
+      "reason": "TIME",
+      "price": 0.295,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00731",
+      "exitTs": 1772308800000,
+      "reason": "TIME",
+      "price": 0.2747,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00733",
+      "exitTs": 1772316000000,
+      "reason": "TIME",
+      "price": 0.2788,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00736",
+      "exitTs": 1772280000000,
+      "reason": "TIME",
+      "price": 0.2631,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00803",
+      "exitTs": 1774044000000,
+      "reason": "TIME",
+      "price": 0.2659,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00805",
+      "exitTs": 1774065600000,
+      "reason": "TIME",
+      "price": 0.266,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00807",
+      "exitTs": 1774000800000,
+      "reason": "TIME",
+      "price": 0.2678,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00921",
+      "exitTs": 1779292800000,
+      "reason": "TIME",
+      "price": 0.2498,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00937",
+      "exitTs": 1780473600000,
+      "reason": "TIME",
+      "price": 0.2171,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00941",
+      "exitTs": 1780509600000,
+      "reason": "TIME",
+      "price": 0.2094,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00956",
+      "exitTs": 1780588800000,
+      "reason": "TIME",
+      "price": 0.1886,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00971",
+      "exitTs": 1780675200000,
+      "reason": "TIME",
+      "price": 0.157,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00974",
+      "exitTs": 1780675200000,
+      "reason": "TIME",
+      "price": 0.157,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00976",
+      "exitTs": 1780632000000,
+      "reason": "TAKE_PROFIT",
+      "price": 0.160001875,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01019",
+      "exitTs": 1781740800000,
+      "reason": "TIME",
+      "price": 0.1668,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01021",
+      "exitTs": 1781776800000,
+      "reason": "TIME",
+      "price": 0.166,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01023",
+      "exitTs": 1781784000000,
+      "reason": "TIME",
+      "price": 0.1649,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01025",
+      "exitTs": 1781791200000,
+      "reason": "TIME",
+      "price": 0.164,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01032",
+      "exitTs": 1781733600000,
+      "reason": "TIME",
+      "price": 0.1659,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01036",
+      "exitTs": 1781802000000,
+      "reason": "STOP",
+      "price": 0.16194999999999998,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01037",
+      "exitTs": 1781848800000,
+      "reason": "TIME",
+      "price": 0.1607,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01043",
+      "exitTs": 1781913600000,
+      "reason": "TIME",
+      "price": 0.1621,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01047",
+      "exitTs": 1782028800000,
+      "reason": "TIME",
+      "price": 0.1613,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01050",
+      "exitTs": 1782252000000,
+      "reason": "TIME",
+      "price": 0.1513,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01052",
+      "exitTs": 1782266400000,
+      "reason": "TIME",
+      "price": 0.152,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01053",
+      "exitTs": 1782252000000,
+      "reason": "TIME",
+      "price": 0.1513,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01055",
+      "exitTs": 1782331200000,
+      "reason": "TIME",
+      "price": 0.1409,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01057",
+      "exitTs": 1782320400000,
+      "reason": "TP",
+      "price": 0.14144642857142858,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01059",
+      "exitTs": 1782327600000,
+      "reason": "STOP",
+      "price": 0.14227857142857142,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01083",
+      "exitTs": 1783137600000,
+      "reason": "TIME",
+      "price": 0.1772,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01088",
+      "exitTs": 1783260000000,
+      "reason": "TIME",
+      "price": 0.1889,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01095",
+      "exitTs": 1783310400000,
+      "reason": "TIME",
+      "price": 0.1882,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01099",
+      "exitTs": 1783245600000,
+      "reason": "TIME",
+      "price": 0.1872,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01100",
+      "exitTs": 1783252800000,
+      "reason": "TIME",
+      "price": 0.1864,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01106",
+      "exitTs": 1783296000000,
+      "reason": "TIME",
+      "price": 0.1894,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01131",
+      "exitTs": 1783404000000,
+      "reason": "TIME",
+      "price": 0.1799,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01141",
+      "exitTs": 1783634400000,
+      "reason": "TIME",
+      "price": 0.1668,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01144",
+      "exitTs": 1783555200000,
+      "reason": "TIME",
+      "price": 0.1667,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01164",
+      "exitTs": 1785175200000,
+      "reason": "TIME",
+      "price": 0.1591,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01166",
+      "exitTs": 1785182400000,
+      "reason": "TIME",
+      "price": 0.159,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01167",
+      "exitTs": 1785204000000,
+      "reason": "TIME",
+      "price": 0.1545,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01169",
+      "exitTs": 1785225600000,
+      "reason": "TIME",
+      "price": 0.1569,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01178",
+      "exitTs": 1786485600000,
+      "reason": "TIME",
+      "price": 0.1868,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01300",
+      "exitTs": 1789560000000,
+      "reason": "TIME",
+      "price": 0.1947,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01302",
+      "exitTs": 1789534800000,
+      "reason": "TIME",
+      "price": 0.1956,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01321",
+      "exitTs": 1790085600000,
+      "reason": "TIME",
+      "price": 0.2532,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01323",
+      "exitTs": 1790100000000,
+      "reason": "TIME",
+      "price": 0.2499,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01369",
+      "exitTs": 1790200800000,
+      "reason": "TIME",
+      "price": 0.238,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01381",
+      "exitTs": 1790258400000,
+      "reason": "TIME",
+      "price": 0.2415,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00037",
+      "exitTs": 1760299200000,
+      "reason": "TIME",
+      "price": 3.51,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00039",
+      "exitTs": 1760313600000,
+      "reason": "TIME",
+      "price": 3.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00040",
+      "exitTs": 1760320800000,
+      "reason": "TIME",
+      "price": 3.49,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00132",
+      "exitTs": 1762189200000,
+      "reason": "STOP",
+      "price": 2.6334999999999997,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00135",
+      "exitTs": 1762228800000,
+      "reason": "TIME",
+      "price": 2.519,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00165",
+      "exitTs": 1762473600000,
+      "reason": "TIME",
+      "price": 2.648,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00167",
+      "exitTs": 1762531200000,
+      "reason": "TIME",
+      "price": 2.867,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00173",
+      "exitTs": 1762495200000,
+      "reason": "TIME",
+      "price": 2.742,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00177",
+      "exitTs": 1762509600000,
+      "reason": "TIME",
+      "price": 2.76,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00178",
+      "exitTs": 1762516800000,
+      "reason": "TIME",
+      "price": 2.722,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00317",
+      "exitTs": 1763985600000,
+      "reason": "TIME",
+      "price": 2.433,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00439",
+      "exitTs": 1767369600000,
+      "reason": "TIME",
+      "price": 2.126,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00450",
+      "exitTs": 1767722400000,
+      "reason": "TIME",
+      "price": 2.382,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00453",
+      "exitTs": 1767736800000,
+      "reason": "TIME",
+      "price": 2.489,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00821",
+      "exitTs": 1774173600000,
+      "reason": "TIME",
+      "price": 1.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00822",
+      "exitTs": 1774566000000,
+      "reason": "TIME",
+      "price": 1.693,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00828",
+      "exitTs": 1774814400000,
+      "reason": "TIME",
+      "price": 1.639,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00895",
+      "exitTs": 1777723200000,
+      "reason": "TIME",
+      "price": 1.87,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00932",
+      "exitTs": 1780257600000,
+      "reason": "TIME",
+      "price": 1.918,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00933",
+      "exitTs": 1780344000000,
+      "reason": "TIME",
+      "price": 1.91,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00935",
+      "exitTs": 1780308000000,
+      "reason": "TIME",
+      "price": 1.932,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01035",
+      "exitTs": 1781827200000,
+      "reason": "TIME",
+      "price": 1.81,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01049",
+      "exitTs": 1782057600000,
+      "reason": "TIME",
+      "price": 1.748,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01073",
+      "exitTs": 1782669600000,
+      "reason": "TIME",
+      "price": 1.575,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01074",
+      "exitTs": 1782511200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 1.602,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01078",
+      "exitTs": 1782979200000,
+      "reason": "TIME",
+      "price": 1.545,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01080",
+      "exitTs": 1782777600000,
+      "reason": "TIME",
+      "price": 1.502,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01149",
+      "exitTs": 1784520000000,
+      "reason": "TIME",
+      "price": 1.474,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01150",
+      "exitTs": 1784473200000,
+      "reason": "TIME",
+      "price": 1.486,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01157",
+      "exitTs": 1785103200000,
+      "reason": "TIME",
+      "price": 1.396,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01158",
+      "exitTs": 1785110400000,
+      "reason": "TIME",
+      "price": 1.393,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01161",
+      "exitTs": 1785240000000,
+      "reason": "TIME",
+      "price": 1.301,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01168",
+      "exitTs": 1785290400000,
+      "reason": "TIME",
+      "price": 1.28,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01184",
+      "exitTs": 1787068800000,
+      "reason": "TIME",
+      "price": 1.41,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01210",
+      "exitTs": 1787508000000,
+      "reason": "TIME",
+      "price": 1.609,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01219",
+      "exitTs": 1787716800000,
+      "reason": "TIME",
+      "price": 1.529,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01225",
+      "exitTs": 1787767200000,
+      "reason": "TIME",
+      "price": 1.495,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01227",
+      "exitTs": 1787774400000,
+      "reason": "TIME",
+      "price": 1.489,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01229",
+      "exitTs": 1787781600000,
+      "reason": "TIME",
+      "price": 1.501,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01295",
+      "exitTs": 1789304400000,
+      "reason": "TIME",
+      "price": 1.588,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01297",
+      "exitTs": 1789430400000,
+      "reason": "TIME",
+      "price": 1.584,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00023",
+      "exitTs": 1760122800000,
+      "reason": "STOP",
+      "price": 26.768,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00025",
+      "exitTs": 1760126400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 26.45,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00035",
+      "exitTs": 1760248800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 21.38,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00122",
+      "exitTs": 1761962400000,
+      "reason": "TIME",
+      "price": 18.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00179",
+      "exitTs": 1762516800000,
+      "reason": "TIME",
+      "price": 16.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00193",
+      "exitTs": 1763028000000,
+      "reason": "TIME",
+      "price": 17.29,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00195",
+      "exitTs": 1763035200000,
+      "reason": "TIME",
+      "price": 17.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00220",
+      "exitTs": 1763100000000,
+      "reason": "TIME",
+      "price": 15.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00229",
+      "exitTs": 1763193600000,
+      "reason": "TIME",
+      "price": 15.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00249",
+      "exitTs": 1763330400000,
+      "reason": "TIME",
+      "price": 14.84,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00254",
+      "exitTs": 1763316000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 14.76,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00259",
+      "exitTs": 1763488800000,
+      "reason": "TIME",
+      "price": 14.74,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00279",
+      "exitTs": 1763568000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 14.1,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00311",
+      "exitTs": 1763906400000,
+      "reason": "TIME",
+      "price": 13.36,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00325",
+      "exitTs": 1764374400000,
+      "reason": "TIME",
+      "price": 14.83,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00327",
+      "exitTs": 1764403200000,
+      "reason": "TIME",
+      "price": 14.64,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00339",
+      "exitTs": 1764475200000,
+      "reason": "TIME",
+      "price": 14.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00341",
+      "exitTs": 1764453600000,
+      "reason": "TIME",
+      "price": 14.34,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00343",
+      "exitTs": 1764475200000,
+      "reason": "TIME",
+      "price": 14.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00347",
+      "exitTs": 1764604800000,
+      "reason": "TP",
+      "price": 12.642857142857142,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00354",
+      "exitTs": 1764734400000,
+      "reason": "TIME",
+      "price": 13.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00390",
+      "exitTs": 1765569600000,
+      "reason": "TIME",
+      "price": 13.05,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00393",
+      "exitTs": 1765576800000,
+      "reason": "TIME",
+      "price": 13.07,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00436",
+      "exitTs": 1767139200000,
+      "reason": "TIME",
+      "price": 12.51,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00451",
+      "exitTs": 1767729600000,
+      "reason": "TIME",
+      "price": 14.49,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00452",
+      "exitTs": 1767823200000,
+      "reason": "TIME",
+      "price": 14.03,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00454",
+      "exitTs": 1767700800000,
+      "reason": "TIME",
+      "price": 14.52,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00457",
+      "exitTs": 1767837600000,
+      "reason": "TIME",
+      "price": 14.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00459",
+      "exitTs": 1767844800000,
+      "reason": "TIME",
+      "price": 14.02,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00510",
+      "exitTs": 1768809600000,
+      "reason": "TIME",
+      "price": 12.64,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00531",
+      "exitTs": 1769011200000,
+      "reason": "TIME",
+      "price": 12.3947,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00533",
+      "exitTs": 1769018400000,
+      "reason": "TIME",
+      "price": 12.0136,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00539",
+      "exitTs": 1769004000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 12.015,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00562",
+      "exitTs": 1769832000000,
+      "reason": "TIME",
+      "price": 10.84,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00579",
+      "exitTs": 1769886000000,
+      "reason": "TP",
+      "price": 9.546071428571429,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00614",
+      "exitTs": 1770163200000,
+      "reason": "TIME",
+      "price": 9.97,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00654",
+      "exitTs": 1770501600000,
+      "reason": "TIME",
+      "price": 9.28,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00701",
+      "exitTs": 1771394400000,
+      "reason": "TIME",
+      "price": 9.05,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00729",
+      "exitTs": 1772056800000,
+      "reason": "TIME",
+      "price": 9.71,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00748",
+      "exitTs": 1772776800000,
+      "reason": "TIME",
+      "price": 9.37,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00757",
+      "exitTs": 1773021600000,
+      "reason": "TIME",
+      "price": 8.84,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00769",
+      "exitTs": 1773424800000,
+      "reason": "TIME",
+      "price": 9.78,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00773",
+      "exitTs": 1773496800000,
+      "reason": "TIME",
+      "price": 9.57,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00775",
+      "exitTs": 1773504000000,
+      "reason": "TIME",
+      "price": 9.56,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00776",
+      "exitTs": 1773511200000,
+      "reason": "TIME",
+      "price": 9.56,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00777",
+      "exitTs": 1773446400000,
+      "reason": "TIME",
+      "price": 9.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00789",
+      "exitTs": 1773590400000,
+      "reason": "TIME",
+      "price": 9.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00814",
+      "exitTs": 1774072800000,
+      "reason": "TIME",
+      "price": 9.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00818",
+      "exitTs": 1774137600000,
+      "reason": "TIME",
+      "price": 9.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00819",
+      "exitTs": 1774188000000,
+      "reason": "TIME",
+      "price": 9.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00829",
+      "exitTs": 1774864800000,
+      "reason": "TIME",
+      "price": 8.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00832",
+      "exitTs": 1774857600000,
+      "reason": "TIME",
+      "price": 8.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00842",
+      "exitTs": 1774893600000,
+      "reason": "TIME",
+      "price": 8.86,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00917",
+      "exitTs": 1779105600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 9.192,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00938",
+      "exitTs": 1780459200000,
+      "reason": "TIME",
+      "price": 8.076,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00972",
+      "exitTs": 1780682400000,
+      "reason": "TIME",
+      "price": 7.022,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01000",
+      "exitTs": 1780934400000,
+      "reason": "TIME",
+      "price": 6.801,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01014",
+      "exitTs": 1780858800000,
+      "reason": "STOP",
+      "price": 6.694585714285714,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01038",
+      "exitTs": 1781856000000,
+      "reason": "TIME",
+      "price": 5.983,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01041",
+      "exitTs": 1781856000000,
+      "reason": "TIME",
+      "price": 5.983,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01042",
+      "exitTs": 1781892000000,
+      "reason": "TIME",
+      "price": 5.987,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01044",
+      "exitTs": 1781863200000,
+      "reason": "STOP",
+      "price": 6.054,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01046",
+      "exitTs": 1781902800000,
+      "reason": "TIME",
+      "price": 5.926,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01048",
+      "exitTs": 1782028800000,
+      "reason": "TIME",
+      "price": 6.294,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01224",
+      "exitTs": 1787760000000,
+      "reason": "TIME",
+      "price": 7.225,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01230",
+      "exitTs": 1787788800000,
+      "reason": "TIME",
+      "price": 7.437,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01283",
+      "exitTs": 1788926400000,
+      "reason": "TIME",
+      "price": 7.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01292",
+      "exitTs": 1789459200000,
+      "reason": "TIME",
+      "price": 7.453,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01318",
+      "exitTs": 1790071200000,
+      "reason": "TIME",
+      "price": 10.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01320",
+      "exitTs": 1790078400000,
+      "reason": "TIME",
+      "price": 10.848,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01326",
+      "exitTs": 1789999200000,
+      "reason": "TIME",
+      "price": 11.26,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01330",
+      "exitTs": 1790164800000,
+      "reason": "TIME",
+      "price": 11.12,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01373",
+      "exitTs": 1790352000000,
+      "reason": "TIME",
+      "price": 10.356,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01387",
+      "exitTs": 1790330400000,
+      "reason": "TIME",
+      "price": 10.426,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01389",
+      "exitTs": 1790337600000,
+      "reason": "TIME",
+      "price": 10.588,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00012",
+      "exitTs": 1759658400000,
+      "reason": "TIME",
+      "price": 1161.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00014",
+      "exitTs": 1759672800000,
+      "reason": "TIME",
+      "price": 1163.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00015",
+      "exitTs": 1759831200000,
+      "reason": "TIME",
+      "price": 1280.851,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00017",
+      "exitTs": 1759838400000,
+      "reason": "TIME",
+      "price": 1314.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00019",
+      "exitTs": 1759845600000,
+      "reason": "TIME",
+      "price": 1317.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00053",
+      "exitTs": 1760634000000,
+      "reason": "STOP",
+      "price": 1150.818857142857,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00054",
+      "exitTs": 1760724000000,
+      "reason": "TIME",
+      "price": 1075.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00072",
+      "exitTs": 1760868000000,
+      "reason": "TIME",
+      "price": 1091.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00115",
+      "exitTs": 1761868800000,
+      "reason": "TIME",
+      "price": 1078.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00119",
+      "exitTs": 1761904800000,
+      "reason": "TIME",
+      "price": 1089.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00125",
+      "exitTs": 1762020000000,
+      "reason": "TIME",
+      "price": 1092.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00139",
+      "exitTs": 1762239600000,
+      "reason": "STOP",
+      "price": 962.5230714285714,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00141",
+      "exitTs": 1762264800000,
+      "reason": "TIME",
+      "price": 947.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00143",
+      "exitTs": 1762315200000,
+      "reason": "TIME",
+      "price": 949.65,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00149",
+      "exitTs": 1762372800000,
+      "reason": "TIME",
+      "price": 959.388,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00151",
+      "exitTs": 1762387200000,
+      "reason": "TIME",
+      "price": 959,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00172",
+      "exitTs": 1762452000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 944.8,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00174",
+      "exitTs": 1762588800000,
+      "reason": "TIME",
+      "price": 995.369,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00180",
+      "exitTs": 1762653600000,
+      "reason": "TIME",
+      "price": 993.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00298",
+      "exitTs": 1763722800000,
+      "reason": "TP",
+      "price": 812.3765,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00299",
+      "exitTs": 1763762400000,
+      "reason": "TIME",
+      "price": 834.267,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00301",
+      "exitTs": 1763769600000,
+      "reason": "TIME",
+      "price": 831.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00305",
+      "exitTs": 1763762400000,
+      "reason": "TIME",
+      "price": 834.267,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00306",
+      "exitTs": 1763877600000,
+      "reason": "TIME",
+      "price": 847.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00380",
+      "exitTs": 1765188000000,
+      "reason": "TIME",
+      "price": 910.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00589",
+      "exitTs": 1770048000000,
+      "reason": "TIME",
+      "price": 777.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00592",
+      "exitTs": 1770019200000,
+      "reason": "TIME",
+      "price": 752.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00613",
+      "exitTs": 1770120000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 768.7,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00615",
+      "exitTs": 1770177600000,
+      "reason": "TIME",
+      "price": 762.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00618",
+      "exitTs": 1770285600000,
+      "reason": "TIME",
+      "price": 698,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00626",
+      "exitTs": 1770235200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 718.2,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00630",
+      "exitTs": 1770314400000,
+      "reason": "TIME",
+      "price": 655.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00632",
+      "exitTs": 1770271200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 692.7,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00635",
+      "exitTs": 1770357600000,
+      "reason": "TIME",
+      "price": 639.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00638",
+      "exitTs": 1770336000000,
+      "reason": "TIME",
+      "price": 608.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00640",
+      "exitTs": 1770343200000,
+      "reason": "TIME",
+      "price": 630.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00642",
+      "exitTs": 1770336000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 608.55,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00645",
+      "exitTs": 1770343200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 630.4,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00649",
+      "exitTs": 1770487200000,
+      "reason": "TIME",
+      "price": 647.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00659",
+      "exitTs": 1770616800000,
+      "reason": "TIME",
+      "price": 641.65,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00661",
+      "exitTs": 1770732000000,
+      "reason": "TIME",
+      "price": 624.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00668",
+      "exitTs": 1770926400000,
+      "reason": "TIME",
+      "price": 608.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00671",
+      "exitTs": 1770822000000,
+      "reason": "STOP",
+      "price": 598.725,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00674",
+      "exitTs": 1770847200000,
+      "reason": "TIME",
+      "price": 613.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00681",
+      "exitTs": 1770962400000,
+      "reason": "TIME",
+      "price": 599,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00682",
+      "exitTs": 1770969600000,
+      "reason": "TIME",
+      "price": 598,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00759",
+      "exitTs": 1773050400000,
+      "reason": "TIME",
+      "price": 627.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00762",
+      "exitTs": 1773100800000,
+      "reason": "TIME",
+      "price": 634.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00810",
+      "exitTs": 1774180800000,
+      "reason": "TIME",
+      "price": 627.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00811",
+      "exitTs": 1774144800000,
+      "reason": "TIME",
+      "price": 631.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00812",
+      "exitTs": 1774195200000,
+      "reason": "TIME",
+      "price": 629.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00839",
+      "exitTs": 1774864800000,
+      "reason": "TIME",
+      "price": 617.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00854",
+      "exitTs": 1775556000000,
+      "reason": "TIME",
+      "price": 605.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00856",
+      "exitTs": 1775520000000,
+      "reason": "TIME",
+      "price": 600.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00882",
+      "exitTs": 1776513600000,
+      "reason": "TIME",
+      "price": 633.64,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00918",
+      "exitTs": 1779127200000,
+      "reason": "TIME",
+      "price": 640.46,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00922",
+      "exitTs": 1779163200000,
+      "reason": "TIME",
+      "price": 643.06,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00950",
+      "exitTs": 1780538400000,
+      "reason": "TIME",
+      "price": 602.82,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00959",
+      "exitTs": 1780542000000,
+      "reason": "TIME",
+      "price": 608.37,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00961",
+      "exitTs": 1780668000000,
+      "reason": "TIME",
+      "price": 581.39,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00963",
+      "exitTs": 1780675200000,
+      "reason": "TIME",
+      "price": 579.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00964",
+      "exitTs": 1780617600000,
+      "reason": "TIME",
+      "price": 604.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00966",
+      "exitTs": 1780632000000,
+      "reason": "TIME",
+      "price": 595.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00969",
+      "exitTs": 1780711200000,
+      "reason": "TIME",
+      "price": 576.73,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00977",
+      "exitTs": 1780675200000,
+      "reason": "TIME",
+      "price": 579.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00979",
+      "exitTs": 1780642800000,
+      "reason": "TP",
+      "price": 573.7110714285714,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00985",
+      "exitTs": 1780718400000,
+      "reason": "TIME",
+      "price": 573.37,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00987",
+      "exitTs": 1780725600000,
+      "reason": "TIME",
+      "price": 576.58,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01011",
+      "exitTs": 1780999200000,
+      "reason": "TIME",
+      "price": 600.32,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01016",
+      "exitTs": 1781704800000,
+      "reason": "TIME",
+      "price": 608.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01114",
+      "exitTs": 1783332000000,
+      "reason": "TIME",
+      "price": 577.79,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01211",
+      "exitTs": 1787644800000,
+      "reason": "TIME",
+      "price": 706.75,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01214",
+      "exitTs": 1787652000000,
+      "reason": "TIME",
+      "price": 699.16,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01239",
+      "exitTs": 1787832000000,
+      "reason": "TIME",
+      "price": 707.13,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01244",
+      "exitTs": 1787724000000,
+      "reason": "TIME",
+      "price": 696.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01288",
+      "exitTs": 1788926400000,
+      "reason": "TIME",
+      "price": 749.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01304",
+      "exitTs": 1789977600000,
+      "reason": "TIME",
+      "price": 769.17,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00030",
+      "exitTs": 1760184000000,
+      "reason": "TIME",
+      "price": 112280.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00038",
+      "exitTs": 1760306400000,
+      "reason": "TIME",
+      "price": 114840.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00044",
+      "exitTs": 1760335200000,
+      "reason": "TIME",
+      "price": 114570.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00079",
+      "exitTs": 1760911200000,
+      "reason": "TIME",
+      "price": 108696.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00089",
+      "exitTs": 1761624000000,
+      "reason": "TIME",
+      "price": 113850.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00090",
+      "exitTs": 1761638400000,
+      "reason": "TIME",
+      "price": 114128.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00092",
+      "exitTs": 1761645600000,
+      "reason": "TIME",
+      "price": 114468.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00155",
+      "exitTs": 1762509600000,
+      "reason": "TIME",
+      "price": 100955,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00156",
+      "exitTs": 1762473600000,
+      "reason": "TIME",
+      "price": 101307.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00158",
+      "exitTs": 1762480800000,
+      "reason": "TIME",
+      "price": 101508,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00175",
+      "exitTs": 1762588800000,
+      "reason": "TIME",
+      "price": 102302.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00231",
+      "exitTs": 1763316000000,
+      "reason": "TIME",
+      "price": 94298.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00239",
+      "exitTs": 1763308800000,
+      "reason": "TIME",
+      "price": 94520,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00240",
+      "exitTs": 1763330400000,
+      "reason": "TIME",
+      "price": 93476.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00256",
+      "exitTs": 1763344800000,
+      "reason": "TIME",
+      "price": 94741.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00285",
+      "exitTs": 1763719200000,
+      "reason": "TIME",
+      "price": 82185.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00287",
+      "exitTs": 1763704800000,
+      "reason": "TIME",
+      "price": 86152.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00289",
+      "exitTs": 1763712000000,
+      "reason": "TIME",
+      "price": 84000.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00290",
+      "exitTs": 1763805600000,
+      "reason": "TIME",
+      "price": 83908.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00297",
+      "exitTs": 1763755200000,
+      "reason": "TIME",
+      "price": 84170.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00300",
+      "exitTs": 1763805600000,
+      "reason": "TIME",
+      "price": 83908.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00302",
+      "exitTs": 1763812800000,
+      "reason": "TIME",
+      "price": 84055.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00304",
+      "exitTs": 1763827200000,
+      "reason": "TIME",
+      "price": 84238.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00340",
+      "exitTs": 1764568800000,
+      "reason": "TIME",
+      "price": 86048.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00344",
+      "exitTs": 1764518400000,
+      "reason": "TIME",
+      "price": 91406.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00381",
+      "exitTs": 1765281600000,
+      "reason": "TIME",
+      "price": 90341.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00382",
+      "exitTs": 1765288800000,
+      "reason": "TIME",
+      "price": 90384.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00385",
+      "exitTs": 1765144800000,
+      "reason": "TIME",
+      "price": 90184.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00410",
+      "exitTs": 1765771200000,
+      "reason": "TIME",
+      "price": 89236.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00413",
+      "exitTs": 1765778400000,
+      "reason": "TIME",
+      "price": 89574.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00511",
+      "exitTs": 1768924800000,
+      "reason": "TIME",
+      "price": 90643.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00517",
+      "exitTs": 1769025600000,
+      "reason": "TIME",
+      "price": 90322,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00519",
+      "exitTs": 1769032800000,
+      "reason": "TIME",
+      "price": 90211,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00520",
+      "exitTs": 1769047200000,
+      "reason": "TIME",
+      "price": 90063.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00522",
+      "exitTs": 1769054400000,
+      "reason": "TIME",
+      "price": 89851.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00524",
+      "exitTs": 1769061600000,
+      "reason": "TIME",
+      "price": 89974.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00526",
+      "exitTs": 1768950000000,
+      "reason": "TIME",
+      "price": 88445.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00527",
+      "exitTs": 1769040000000,
+      "reason": "TIME",
+      "price": 89411,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00578",
+      "exitTs": 1769925600000,
+      "reason": "TIME",
+      "price": 78584.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00580",
+      "exitTs": 1769976000000,
+      "reason": "TIME",
+      "price": 77128.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00581",
+      "exitTs": 1769983200000,
+      "reason": "TIME",
+      "price": 76470.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00583",
+      "exitTs": 1769990400000,
+      "reason": "TIME",
+      "price": 76930.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00590",
+      "exitTs": 1770098400000,
+      "reason": "TIME",
+      "price": 78214,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00591",
+      "exitTs": 1769997600000,
+      "reason": "TIME",
+      "price": 77481.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00599",
+      "exitTs": 1770177600000,
+      "reason": "TIME",
+      "price": 76667.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00600",
+      "exitTs": 1770033600000,
+      "reason": "TIME",
+      "price": 77723.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00605",
+      "exitTs": 1770220800000,
+      "reason": "TIME",
+      "price": 74110.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00612",
+      "exitTs": 1770285600000,
+      "reason": "TIME",
+      "price": 71538.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00616",
+      "exitTs": 1770307200000,
+      "reason": "TIME",
+      "price": 67464.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00620",
+      "exitTs": 1770336000000,
+      "reason": "TIME",
+      "price": 62864.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00629",
+      "exitTs": 1770379200000,
+      "reason": "TIME",
+      "price": 66576,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00644",
+      "exitTs": 1770357600000,
+      "reason": "TIME",
+      "price": 66375.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00653",
+      "exitTs": 1770580800000,
+      "reason": "TIME",
+      "price": 71376.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00655",
+      "exitTs": 1770580800000,
+      "reason": "TIME",
+      "price": 71376.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00658",
+      "exitTs": 1770645600000,
+      "reason": "TIME",
+      "price": 68564.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00662",
+      "exitTs": 1770926400000,
+      "reason": "TIME",
+      "price": 65776,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00665",
+      "exitTs": 1770933600000,
+      "reason": "TIME",
+      "price": 65792.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00749",
+      "exitTs": 1772784000000,
+      "reason": "TIME",
+      "price": 71025.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00754",
+      "exitTs": 1772841600000,
+      "reason": "TIME",
+      "price": 68083.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00758",
+      "exitTs": 1773122400000,
+      "reason": "TIME",
+      "price": 69941.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00760",
+      "exitTs": 1772985600000,
+      "reason": "TIME",
+      "price": 67190.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00763",
+      "exitTs": 1772992800000,
+      "reason": "TIME",
+      "price": 67039.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00765",
+      "exitTs": 1773151200000,
+      "reason": "TIME",
+      "price": 69886,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00766",
+      "exitTs": 1773115200000,
+      "reason": "TIME",
+      "price": 69396.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00767",
+      "exitTs": 1773180000000,
+      "reason": "TIME",
+      "price": 69694.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00835",
+      "exitTs": 1774828800000,
+      "reason": "TIME",
+      "price": 65973.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00836",
+      "exitTs": 1774965600000,
+      "reason": "TIME",
+      "price": 67259.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00838",
+      "exitTs": 1774972800000,
+      "reason": "TIME",
+      "price": 66701.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00841",
+      "exitTs": 1774850400000,
+      "reason": "TIME",
+      "price": 67460.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00873",
+      "exitTs": 1776088800000,
+      "reason": "TIME",
+      "price": 71626.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00900",
+      "exitTs": 1778018400000,
+      "reason": "TIME",
+      "price": 81360.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00916",
+      "exitTs": 1779184800000,
+      "reason": "TIME",
+      "price": 76787,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00919",
+      "exitTs": 1779127200000,
+      "reason": "TIME",
+      "price": 76678.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00923",
+      "exitTs": 1779163200000,
+      "reason": "TIME",
+      "price": 76746.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00958",
+      "exitTs": 1780574400000,
+      "reason": "TIME",
+      "price": 62517.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00960",
+      "exitTs": 1780581600000,
+      "reason": "TIME",
+      "price": 64197.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00962",
+      "exitTs": 1780588800000,
+      "reason": "TIME",
+      "price": 63864.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00967",
+      "exitTs": 1780653600000,
+      "reason": "TIME",
+      "price": 62826.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00968",
+      "exitTs": 1780754400000,
+      "reason": "TIME",
+      "price": 60780.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00970",
+      "exitTs": 1780718400000,
+      "reason": "TIME",
+      "price": 60643.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00990",
+      "exitTs": 1780826400000,
+      "reason": "TIME",
+      "price": 62505.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00991",
+      "exitTs": 1780833600000,
+      "reason": "TIME",
+      "price": 62596,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01012",
+      "exitTs": 1780999200000,
+      "reason": "TIME",
+      "price": 62683.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01076",
+      "exitTs": 1782871200000,
+      "reason": "TIME",
+      "price": 58747.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01107",
+      "exitTs": 1783260000000,
+      "reason": "TIME",
+      "price": 62771.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01119",
+      "exitTs": 1783353600000,
+      "reason": "TIME",
+      "price": 63514.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01125",
+      "exitTs": 1783368000000,
+      "reason": "TIME",
+      "price": 63702.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01127",
+      "exitTs": 1783339200000,
+      "reason": "TIME",
+      "price": 62463.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01136",
+      "exitTs": 1783317600000,
+      "reason": "TIME",
+      "price": 63088.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01138",
+      "exitTs": 1783324800000,
+      "reason": "TIME",
+      "price": 63065.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01242",
+      "exitTs": 1787846400000,
+      "reason": "TIME",
+      "price": 80266.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01285",
+      "exitTs": 1788854400000,
+      "reason": "TIME",
+      "price": 78442,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01286",
+      "exitTs": 1788760800000,
+      "reason": "TIME",
+      "price": 79713.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01287",
+      "exitTs": 1789005600000,
+      "reason": "TIME",
+      "price": 78074.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01294",
+      "exitTs": 1789336800000,
+      "reason": "TIME",
+      "price": 77281.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01296",
+      "exitTs": 1789344000000,
+      "reason": "TIME",
+      "price": 76797.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01391",
+      "exitTs": 1790344800000,
+      "reason": "TIME",
+      "price": 83885.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00006",
+      "exitTs": 1759773600000,
+      "reason": "TIME",
+      "price": 0.267315,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00046",
+      "exitTs": 1760428800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.197725,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00048",
+      "exitTs": 1760436000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.199495,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00074",
+      "exitTs": 1760925600000,
+      "reason": "TIME",
+      "price": 0.193985,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00077",
+      "exitTs": 1760860800000,
+      "reason": "TIME",
+      "price": 0.188695,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00083",
+      "exitTs": 1761321600000,
+      "reason": "TIME",
+      "price": 0.194845,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00108",
+      "exitTs": 1761825600000,
+      "reason": "TIME",
+      "price": 0.18782,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00114",
+      "exitTs": 1761872400000,
+      "reason": "STOP",
+      "price": 0.18346,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00116",
+      "exitTs": 1761890400000,
+      "reason": "TIME",
+      "price": 0.185025,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00117",
+      "exitTs": 1761865200000,
+      "reason": "TIME",
+      "price": 0.1805,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00124",
+      "exitTs": 1762012800000,
+      "reason": "TIME",
+      "price": 0.18725,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00133",
+      "exitTs": 1762286400000,
+      "reason": "TIME",
+      "price": 0.157955,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00157",
+      "exitTs": 1762394400000,
+      "reason": "TIME",
+      "price": 0.166095,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00194",
+      "exitTs": 1762941600000,
+      "reason": "TIME",
+      "price": 0.175095,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00210",
+      "exitTs": 1762963200000,
+      "reason": "TIME",
+      "price": 0.17121,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00266",
+      "exitTs": 1763481600000,
+      "reason": "TIME",
+      "price": 0.159155,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00268",
+      "exitTs": 1763452800000,
+      "reason": "TIME",
+      "price": 0.155015,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00328",
+      "exitTs": 1764439200000,
+      "reason": "TIME",
+      "price": 0.147685,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00384",
+      "exitTs": 1765180800000,
+      "reason": "TIME",
+      "price": 0.142135,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00391",
+      "exitTs": 1765569600000,
+      "reason": "TIME",
+      "price": 0.136005,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00406",
+      "exitTs": 1765724400000,
+      "reason": "TIME",
+      "price": 0.13551,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00407",
+      "exitTs": 1765807200000,
+      "reason": "TIME",
+      "price": 0.13634,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00430",
+      "exitTs": 1766109600000,
+      "reason": "TIME",
+      "price": 0.121065,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00432",
+      "exitTs": 1766109600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.121065,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00438",
+      "exitTs": 1766980800000,
+      "reason": "TIME",
+      "price": 0.127417,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00442",
+      "exitTs": 1767636000000,
+      "reason": "TIME",
+      "price": 0.152905,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00465",
+      "exitTs": 1767657600000,
+      "reason": "TIME",
+      "price": 0.151645,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00481",
+      "exitTs": 1767974400000,
+      "reason": "TIME",
+      "price": 0.142005,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00485",
+      "exitTs": 1767952800000,
+      "reason": "TIME",
+      "price": 0.140635,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00486",
+      "exitTs": 1767938400000,
+      "reason": "TIME",
+      "price": 0.142878,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00487",
+      "exitTs": 1768284000000,
+      "reason": "TIME",
+      "price": 0.138895,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00488",
+      "exitTs": 1768312800000,
+      "reason": "TIME",
+      "price": 0.139555,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00498",
+      "exitTs": 1768615200000,
+      "reason": "TIME",
+      "price": 0.138098,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00500",
+      "exitTs": 1768622400000,
+      "reason": "TIME",
+      "price": 0.137315,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00509",
+      "exitTs": 1768543200000,
+      "reason": "TIME",
+      "price": 0.139985,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00529",
+      "exitTs": 1769004000000,
+      "reason": "TIME",
+      "price": 0.122555,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00555",
+      "exitTs": 1769378400000,
+      "reason": "TIME",
+      "price": 0.119555,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00560",
+      "exitTs": 1769760000000,
+      "reason": "TIME",
+      "price": 0.114475,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00594",
+      "exitTs": 1770033600000,
+      "reason": "TIME",
+      "price": 0.10484,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00677",
+      "exitTs": 1770998400000,
+      "reason": "TIME",
+      "price": 0.09528,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00678",
+      "exitTs": 1771005600000,
+      "reason": "TIME",
+      "price": 0.09624,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00679",
+      "exitTs": 1770926400000,
+      "reason": "TIME",
+      "price": 0.09163,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00698",
+      "exitTs": 1771387200000,
+      "reason": "TIME",
+      "price": 0.10117,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00711",
+      "exitTs": 1771509600000,
+      "reason": "TIME",
+      "price": 0.09694,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00713",
+      "exitTs": 1771502400000,
+      "reason": "TIME",
+      "price": 0.09763,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00714",
+      "exitTs": 1771524000000,
+      "reason": "TIME",
+      "price": 0.09674,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00716",
+      "exitTs": 1771531200000,
+      "reason": "TIME",
+      "price": 0.09805,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00717",
+      "exitTs": 1771538400000,
+      "reason": "TIME",
+      "price": 0.0977,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00764",
+      "exitTs": 1772992800000,
+      "reason": "TIME",
+      "price": 0.08859,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00779",
+      "exitTs": 1773626400000,
+      "reason": "TIME",
+      "price": 0.09758,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00780",
+      "exitTs": 1773633600000,
+      "reason": "TIME",
+      "price": 0.09995,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00782",
+      "exitTs": 1773640800000,
+      "reason": "TIME",
+      "price": 0.10154,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00784",
+      "exitTs": 1773655200000,
+      "reason": "TIME",
+      "price": 0.1011,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00787",
+      "exitTs": 1773583200000,
+      "reason": "TIME",
+      "price": 0.09526,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00788",
+      "exitTs": 1773676800000,
+      "reason": "TIME",
+      "price": 0.10002,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00790",
+      "exitTs": 1773936000000,
+      "reason": "TIME",
+      "price": 0.09282,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00791",
+      "exitTs": 1773943200000,
+      "reason": "TIME",
+      "price": 0.09284,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00792",
+      "exitTs": 1773964800000,
+      "reason": "TIME",
+      "price": 0.09348,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00794",
+      "exitTs": 1773972000000,
+      "reason": "TIME",
+      "price": 0.0942,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00809",
+      "exitTs": 1774137600000,
+      "reason": "TIME",
+      "price": 0.09128,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00813",
+      "exitTs": 1774202400000,
+      "reason": "TIME",
+      "price": 0.09137,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00880",
+      "exitTs": 1776578400000,
+      "reason": "TIME",
+      "price": 0.09477,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00881",
+      "exitTs": 1776585600000,
+      "reason": "TIME",
+      "price": 0.09408,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00884",
+      "exitTs": 1776628800000,
+      "reason": "TIME",
+      "price": 0.09444,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00885",
+      "exitTs": 1776693600000,
+      "reason": "TIME",
+      "price": 0.09485,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00887",
+      "exitTs": 1776463200000,
+      "reason": "TIME",
+      "price": 0.10009,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00893",
+      "exitTs": 1776916800000,
+      "reason": "TIME",
+      "price": 0.09555,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00894",
+      "exitTs": 1777500000000,
+      "reason": "TIME",
+      "price": 0.10319,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00896",
+      "exitTs": 1777665600000,
+      "reason": "TIME",
+      "price": 0.10907,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00897",
+      "exitTs": 1777910400000,
+      "reason": "TIME",
+      "price": 0.11019,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00898",
+      "exitTs": 1777759200000,
+      "reason": "TIME",
+      "price": 0.10869,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00899",
+      "exitTs": 1777888800000,
+      "reason": "TIME",
+      "price": 0.11183,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00901",
+      "exitTs": 1778313600000,
+      "reason": "TIME",
+      "price": 0.11017,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00902",
+      "exitTs": 1778320800000,
+      "reason": "TIME",
+      "price": 0.1099,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00913",
+      "exitTs": 1779134400000,
+      "reason": "TIME",
+      "price": 0.10472,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00914",
+      "exitTs": 1779134400000,
+      "reason": "TIME",
+      "price": 0.10472,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00925",
+      "exitTs": 1779364800000,
+      "reason": "TIME",
+      "price": 0.10427,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00999",
+      "exitTs": 1780804800000,
+      "reason": "TIME",
+      "price": 0.08348,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01077",
+      "exitTs": 1782871200000,
+      "reason": "TIME",
+      "price": 0.07183,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01146",
+      "exitTs": 1783706400000,
+      "reason": "TIME",
+      "price": 0.07384,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01147",
+      "exitTs": 1783713600000,
+      "reason": "TIME",
+      "price": 0.07414,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01153",
+      "exitTs": 1784635200000,
+      "reason": "TIME",
+      "price": 0.07363,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01194",
+      "exitTs": 1787522400000,
+      "reason": "TIME",
+      "price": 0.09336,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01195",
+      "exitTs": 1787536800000,
+      "reason": "TIME",
+      "price": 0.0907,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01223",
+      "exitTs": 1787630400000,
+      "reason": "TIME",
+      "price": 0.09191,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01233",
+      "exitTs": 1787709600000,
+      "reason": "TIME",
+      "price": 0.08646,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01265",
+      "exitTs": 1788033600000,
+      "reason": "TIME",
+      "price": 0.0852,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01279",
+      "exitTs": 1788768000000,
+      "reason": "TIME",
+      "price": 0.08936,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01289",
+      "exitTs": 1789092000000,
+      "reason": "TIME",
+      "price": 0.08351,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01293",
+      "exitTs": 1789293600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 0.08351,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01358",
+      "exitTs": 1790280000000,
+      "reason": "TIME",
+      "price": 0.09617,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01359",
+      "exitTs": 1790287200000,
+      "reason": "TIME",
+      "price": 0.09585,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01361",
+      "exitTs": 1790294400000,
+      "reason": "TIME",
+      "price": 0.09572,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01363",
+      "exitTs": 1790301600000,
+      "reason": "TIME",
+      "price": 0.09593,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01364",
+      "exitTs": 1790308800000,
+      "reason": "TIME",
+      "price": 0.09516,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01382",
+      "exitTs": 1790395200000,
+      "reason": "TIME",
+      "price": 0.0979,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00013",
+      "exitTs": 1759910400000,
+      "reason": "TIME",
+      "price": 4464.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00029",
+      "exitTs": 1760227200000,
+      "reason": "TIME",
+      "price": 3745.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00031",
+      "exitTs": 1760234400000,
+      "reason": "TIME",
+      "price": 3717.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00112",
+      "exitTs": 1761854400000,
+      "reason": "TP",
+      "price": 3698.4660714285715,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00140",
+      "exitTs": 1762286400000,
+      "reason": "TIME",
+      "price": 3229.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00142",
+      "exitTs": 1762336800000,
+      "reason": "TIME",
+      "price": 3306.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00146",
+      "exitTs": 1762293600000,
+      "reason": "TIME",
+      "price": 3214.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00148",
+      "exitTs": 1762282800000,
+      "reason": "TP",
+      "price": 3279.2714285714287,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00150",
+      "exitTs": 1762290000000,
+      "reason": "TP",
+      "price": 3132.9,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00152",
+      "exitTs": 1762311600000,
+      "reason": "TIME",
+      "price": 3324.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00183",
+      "exitTs": 1762516800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 3257.9,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00218",
+      "exitTs": 1763157600000,
+      "reason": "TIME",
+      "price": 3165.65,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00222",
+      "exitTs": 1763172000000,
+      "reason": "TIME",
+      "price": 3172,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00228",
+      "exitTs": 1763251200000,
+      "reason": "TIME",
+      "price": 3166.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00246",
+      "exitTs": 1763308800000,
+      "reason": "TIME",
+      "price": 3103.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00333",
+      "exitTs": 1764230400000,
+      "reason": "TIME",
+      "price": 3032.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00368",
+      "exitTs": 1764957600000,
+      "reason": "TIME",
+      "price": 3032.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00370",
+      "exitTs": 1764964800000,
+      "reason": "TIME",
+      "price": 3037.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00375",
+      "exitTs": 1765123200000,
+      "reason": "TIME",
+      "price": 3025.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00376",
+      "exitTs": 1765130400000,
+      "reason": "TIME",
+      "price": 3113,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00389",
+      "exitTs": 1765562400000,
+      "reason": "TIME",
+      "price": 3064.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00402",
+      "exitTs": 1765656000000,
+      "reason": "TIME",
+      "price": 3107.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00403",
+      "exitTs": 1765879200000,
+      "reason": "TIME",
+      "price": 2925.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00405",
+      "exitTs": 1765843200000,
+      "reason": "TIME",
+      "price": 2963.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00408",
+      "exitTs": 1765893600000,
+      "reason": "TIME",
+      "price": 2909.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00411",
+      "exitTs": 1765857600000,
+      "reason": "TIME",
+      "price": 2935.15,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00414",
+      "exitTs": 1765864800000,
+      "reason": "TIME",
+      "price": 2921.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00416",
+      "exitTs": 1765915200000,
+      "reason": "TIME",
+      "price": 2944,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00444",
+      "exitTs": 1767513600000,
+      "reason": "TIME",
+      "price": 3139.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00445",
+      "exitTs": 1767520800000,
+      "reason": "TIME",
+      "price": 3142.89,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00548",
+      "exitTs": 1769097600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 2940.35,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00549",
+      "exitTs": 1769148000000,
+      "reason": "TIME",
+      "price": 2967,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00553",
+      "exitTs": 1769371200000,
+      "reason": "TIME",
+      "price": 2811.15,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00556",
+      "exitTs": 1769378400000,
+      "reason": "TIME",
+      "price": 2817.05,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00586",
+      "exitTs": 1769990400000,
+      "reason": "TIME",
+      "price": 2269.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00606",
+      "exitTs": 1770220800000,
+      "reason": "TIME",
+      "price": 2151.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00624",
+      "exitTs": 1770379200000,
+      "reason": "TIME",
+      "price": 1931.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00656",
+      "exitTs": 1770580800000,
+      "reason": "TIME",
+      "price": 2125.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00680",
+      "exitTs": 1771041600000,
+      "reason": "TIME",
+      "price": 2053.4,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00753",
+      "exitTs": 1772906400000,
+      "reason": "TIME",
+      "price": 1979.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00755",
+      "exitTs": 1772841600000,
+      "reason": "TIME",
+      "price": 1980.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00778",
+      "exitTs": 1773576000000,
+      "reason": "TIME",
+      "price": 2118.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00800",
+      "exitTs": 1774022400000,
+      "reason": "TIME",
+      "price": 2133.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00808",
+      "exitTs": 1774173600000,
+      "reason": "TIME",
+      "price": 2083.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00816",
+      "exitTs": 1774166400000,
+      "reason": "TIME",
+      "price": 2092.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00845",
+      "exitTs": 1775296800000,
+      "reason": "TIME",
+      "price": 2049.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00855",
+      "exitTs": 1775412000000,
+      "reason": "TIME",
+      "price": 2061.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00858",
+      "exitTs": 1775419200000,
+      "reason": "TIME",
+      "price": 2061,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00860",
+      "exitTs": 1775426400000,
+      "reason": "TIME",
+      "price": 2058.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00891",
+      "exitTs": 1776952800000,
+      "reason": "TIME",
+      "price": 2318.65,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00892",
+      "exitTs": 1776808800000,
+      "reason": "TIME",
+      "price": 2310.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00934",
+      "exitTs": 1780286400000,
+      "reason": "TIME",
+      "price": 2008.75,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00942",
+      "exitTs": 1780538400000,
+      "reason": "TIME",
+      "price": 1759.18,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00943",
+      "exitTs": 1780524000000,
+      "reason": "TIME",
+      "price": 1848.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00945",
+      "exitTs": 1780488000000,
+      "reason": "TIME",
+      "price": 1877.57,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00947",
+      "exitTs": 1780560000000,
+      "reason": "TIME",
+      "price": 1776.12,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00948",
+      "exitTs": 1780567200000,
+      "reason": "TIME",
+      "price": 1765.72,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00951",
+      "exitTs": 1780624800000,
+      "reason": "TIME",
+      "price": 1752.63,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00955",
+      "exitTs": 1780538400000,
+      "reason": "TIME",
+      "price": 1759.18,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00965",
+      "exitTs": 1780689600000,
+      "reason": "TIME",
+      "price": 1572.67,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00978",
+      "exitTs": 1780718400000,
+      "reason": "TIME",
+      "price": 1562.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00980",
+      "exitTs": 1780642800000,
+      "reason": "TP",
+      "price": 1648.5467857142858,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00981",
+      "exitTs": 1780740000000,
+      "reason": "TIME",
+      "price": 1569.91,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00988",
+      "exitTs": 1780689600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 1572.67,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00997",
+      "exitTs": 1780790400000,
+      "reason": "TIME",
+      "price": 1568.43,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01003",
+      "exitTs": 1780840800000,
+      "reason": "TIME",
+      "price": 1616.56,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01013",
+      "exitTs": 1780999200000,
+      "reason": "TIME",
+      "price": 1669.42,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01072",
+      "exitTs": 1782532800000,
+      "reason": "TIME",
+      "price": 1579.72,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01103",
+      "exitTs": 1783288800000,
+      "reason": "TIME",
+      "price": 1786.24,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01113",
+      "exitTs": 1783288800000,
+      "reason": "TIME",
+      "price": 1786.24,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01118",
+      "exitTs": 1783440000000,
+      "reason": "TIME",
+      "price": 1796.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01121",
+      "exitTs": 1783447200000,
+      "reason": "TIME",
+      "price": 1809.37,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01123",
+      "exitTs": 1783454400000,
+      "reason": "TIME",
+      "price": 1789.89,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01128",
+      "exitTs": 1783382400000,
+      "reason": "TIME",
+      "price": 1798.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01129",
+      "exitTs": 1783389600000,
+      "reason": "TIME",
+      "price": 1791.91,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01134",
+      "exitTs": 1783548000000,
+      "reason": "TIME",
+      "price": 1737.33,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01135",
+      "exitTs": 1783555200000,
+      "reason": "TIME",
+      "price": 1742.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01137",
+      "exitTs": 1783432800000,
+      "reason": "TIME",
+      "price": 1767.91,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01139",
+      "exitTs": 1783569600000,
+      "reason": "TIME",
+      "price": 1729.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01151",
+      "exitTs": 1784556000000,
+      "reason": "TIME",
+      "price": 1861.49,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01152",
+      "exitTs": 1784534400000,
+      "reason": "TIME",
+      "price": 1863.03,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01154",
+      "exitTs": 1784527200000,
+      "reason": "TIME",
+      "price": 1854.61,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01173",
+      "exitTs": 1786284000000,
+      "reason": "TIME",
+      "price": 1922.73,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01174",
+      "exitTs": 1786291200000,
+      "reason": "TIME",
+      "price": 1925.92,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01176",
+      "exitTs": 1786528800000,
+      "reason": "TIME",
+      "price": 1905,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01202",
+      "exitTs": 1787594400000,
+      "reason": "TIME",
+      "price": 2468.72,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01204",
+      "exitTs": 1787472000000,
+      "reason": "TIME",
+      "price": 2388.5,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01231",
+      "exitTs": 1787788800000,
+      "reason": "TIME",
+      "price": 2505.6,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01253",
+      "exitTs": 1787760000000,
+      "reason": "TIME",
+      "price": 2448.76,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01255",
+      "exitTs": 1787896800000,
+      "reason": "TIME",
+      "price": 2492.04,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01284",
+      "exitTs": 1788933600000,
+      "reason": "TIME",
+      "price": 2495.27,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01355",
+      "exitTs": 1790172000000,
+      "reason": "TIME",
+      "price": 2714.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00047",
+      "exitTs": 1760425200000,
+      "reason": "TAKE_PROFIT",
+      "price": 9.147047500000001,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00049",
+      "exitTs": 1760436000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 9.206,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00073",
+      "exitTs": 1760868000000,
+      "reason": "TIME",
+      "price": 8.437,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00075",
+      "exitTs": 1760839200000,
+      "reason": "TIME",
+      "price": 8.381,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00109",
+      "exitTs": 1761825600000,
+      "reason": "TIME",
+      "price": 8.101,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00110",
+      "exitTs": 1761948000000,
+      "reason": "TIME",
+      "price": 7.555,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00120",
+      "exitTs": 1761890400000,
+      "reason": "TIME",
+      "price": 7.751,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00202",
+      "exitTs": 1763064000000,
+      "reason": "TIME",
+      "price": 6.791,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00206",
+      "exitTs": 1762948800000,
+      "reason": "TIME",
+      "price": 7.819,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00337",
+      "exitTs": 1764532800000,
+      "reason": "TIME",
+      "price": 5.91,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00338",
+      "exitTs": 1764547200000,
+      "reason": "TIME",
+      "price": 5.708,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00342",
+      "exitTs": 1764583200000,
+      "reason": "TIME",
+      "price": 5.261,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00484",
+      "exitTs": 1768003200000,
+      "reason": "TIME",
+      "price": 5.159,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00513",
+      "exitTs": 1768831200000,
+      "reason": "TIME",
+      "price": 4.662,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00516",
+      "exitTs": 1769025600000,
+      "reason": "TIME",
+      "price": 4.7585,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00518",
+      "exitTs": 1769032800000,
+      "reason": "TIME",
+      "price": 4.7375,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00558",
+      "exitTs": 1769389200000,
+      "reason": "STOP",
+      "price": 4.309,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00593",
+      "exitTs": 1769990400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 3.524,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00739",
+      "exitTs": 1772280000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 2.928,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00886",
+      "exitTs": 1776571200000,
+      "reason": "TIME",
+      "price": 3.228,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00911",
+      "exitTs": 1779148800000,
+      "reason": "TIME",
+      "price": 5.147,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00912",
+      "exitTs": 1779199200000,
+      "reason": "TIME",
+      "price": 4.894,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00915",
+      "exitTs": 1779102000000,
+      "reason": "TIME",
+      "price": 4.524,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00924",
+      "exitTs": 1779177600000,
+      "reason": "TIME",
+      "price": 4.974,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00996",
+      "exitTs": 1780783200000,
+      "reason": "TIME",
+      "price": 5.121,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01033",
+      "exitTs": 1781863200000,
+      "reason": "TIME",
+      "price": 5.094,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01056",
+      "exitTs": 1782324000000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 4.186,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01058",
+      "exitTs": 1782331200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 4.257,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01064",
+      "exitTs": 1782396000000,
+      "reason": "STOP",
+      "price": 4.316,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01066",
+      "exitTs": 1782489600000,
+      "reason": "TIME",
+      "price": 4.711,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01067",
+      "exitTs": 1782453600000,
+      "reason": "TIME",
+      "price": 4.41,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01068",
+      "exitTs": 1782460800000,
+      "reason": "TIME",
+      "price": 4.48,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01109",
+      "exitTs": 1783310400000,
+      "reason": "TIME",
+      "price": 4.888,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01171",
+      "exitTs": 1785945600000,
+      "reason": "TIME",
+      "price": 4.925,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01172",
+      "exitTs": 1785952800000,
+      "reason": "TIME",
+      "price": 4.935,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01181",
+      "exitTs": 1786878000000,
+      "reason": "TIME",
+      "price": 4.077,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01182",
+      "exitTs": 1787011200000,
+      "reason": "TIME",
+      "price": 4.077,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01183",
+      "exitTs": 1786982400000,
+      "reason": "TIME",
+      "price": 4.129,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01186",
+      "exitTs": 1787493600000,
+      "reason": "TIME",
+      "price": 5.137,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01188",
+      "exitTs": 1787500800000,
+      "reason": "TIME",
+      "price": 5.223,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01196",
+      "exitTs": 1787313600000,
+      "reason": "TIME",
+      "price": 4.86,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01216",
+      "exitTs": 1787608800000,
+      "reason": "TIME",
+      "price": 5.696,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01246",
+      "exitTs": 1787853600000,
+      "reason": "TIME",
+      "price": 5.522,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01251",
+      "exitTs": 1787882400000,
+      "reason": "TIME",
+      "price": 5.436,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01257",
+      "exitTs": 1787904000000,
+      "reason": "TIME",
+      "price": 5.338,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01260",
+      "exitTs": 1787824800000,
+      "reason": "TIME",
+      "price": 5.502,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01261",
+      "exitTs": 1787932800000,
+      "reason": "TIME",
+      "price": 5.281,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01301",
+      "exitTs": 1789567200000,
+      "reason": "TIME",
+      "price": 5.426,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01319",
+      "exitTs": 1790071200000,
+      "reason": "TIME",
+      "price": 7.72,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01327",
+      "exitTs": 1790143200000,
+      "reason": "TIME",
+      "price": 7.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01371",
+      "exitTs": 1790344800000,
+      "reason": "TIME",
+      "price": 8.256,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00057",
+      "exitTs": 1760788800000,
+      "reason": "TIME",
+      "price": 16.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00061",
+      "exitTs": 1760695200000,
+      "reason": "TIME",
+      "price": 16.044,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00070",
+      "exitTs": 1760868000000,
+      "reason": "TIME",
+      "price": 16.881,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00071",
+      "exitTs": 1760817600000,
+      "reason": "TIME",
+      "price": 16.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00084",
+      "exitTs": 1761084000000,
+      "reason": "TIME",
+      "price": 17.985,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00123",
+      "exitTs": 1761897600000,
+      "reason": "TIME",
+      "price": 17.203,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00130",
+      "exitTs": 1762171200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 16.068,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00182",
+      "exitTs": 1762660800000,
+      "reason": "TIME",
+      "price": 15.107,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00196",
+      "exitTs": 1763035200000,
+      "reason": "TIME",
+      "price": 15.757,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00237",
+      "exitTs": 1763186400000,
+      "reason": "TIME",
+      "price": 14.176,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00241",
+      "exitTs": 1763211600000,
+      "reason": "TIME",
+      "price": 14.157,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00271",
+      "exitTs": 1763488800000,
+      "reason": "TIME",
+      "price": 13.828,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00315",
+      "exitTs": 1763892000000,
+      "reason": "TIME",
+      "price": 12.558,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00355",
+      "exitTs": 1764662400000,
+      "reason": "TIME",
+      "price": 12.124,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00358",
+      "exitTs": 1765029600000,
+      "reason": "TIME",
+      "price": 13.667,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00360",
+      "exitTs": 1765044000000,
+      "reason": "TIME",
+      "price": 14.01,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00362",
+      "exitTs": 1765058400000,
+      "reason": "TIME",
+      "price": 13.958,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00364",
+      "exitTs": 1765065600000,
+      "reason": "TIME",
+      "price": 13.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00366",
+      "exitTs": 1765072800000,
+      "reason": "TIME",
+      "price": 13.892,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00372",
+      "exitTs": 1765101600000,
+      "reason": "TIME",
+      "price": 13.767,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00420",
+      "exitTs": 1766008800000,
+      "reason": "TIME",
+      "price": 12.194,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00426",
+      "exitTs": 1766059200000,
+      "reason": "TIME",
+      "price": 12.276,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00534",
+      "exitTs": 1769068800000,
+      "reason": "TIME",
+      "price": 12.432,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00537",
+      "exitTs": 1769162400000,
+      "reason": "TIME",
+      "price": 12.212,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00561",
+      "exitTs": 1769781600000,
+      "reason": "TIME",
+      "price": 10.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00564",
+      "exitTs": 1769781600000,
+      "reason": "TIME",
+      "price": 10.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00566",
+      "exitTs": 1769796000000,
+      "reason": "TIME",
+      "price": 10.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00568",
+      "exitTs": 1769810400000,
+      "reason": "TIME",
+      "price": 10.787,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00587",
+      "exitTs": 1769990400000,
+      "reason": "TIME",
+      "price": 9.405,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00611",
+      "exitTs": 1770206400000,
+      "reason": "TIME",
+      "price": 9.551,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00657",
+      "exitTs": 1770501600000,
+      "reason": "TIME",
+      "price": 8.959,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00676",
+      "exitTs": 1770861600000,
+      "reason": "TIME",
+      "price": 8.388,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00756",
+      "exitTs": 1772848800000,
+      "reason": "TIME",
+      "price": 8.783,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00817",
+      "exitTs": 1774166400000,
+      "reason": "TIME",
+      "price": 8.833,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00830",
+      "exitTs": 1774764000000,
+      "reason": "TIME",
+      "price": 8.535,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00848",
+      "exitTs": 1775491200000,
+      "reason": "TIME",
+      "price": 9.069,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00852",
+      "exitTs": 1775419200000,
+      "reason": "TIME",
+      "price": 8.621,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00859",
+      "exitTs": 1775419200000,
+      "reason": "TIME",
+      "price": 8.621,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00909",
+      "exitTs": 1779019200000,
+      "reason": "TIME",
+      "price": 9.83,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00983",
+      "exitTs": 1780675200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 7.298,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00986",
+      "exitTs": 1780682400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 7.454,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00989",
+      "exitTs": 1780711200000,
+      "reason": "TIME",
+      "price": 7.376,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01104",
+      "exitTs": 1783382400000,
+      "reason": "TIME",
+      "price": 8.023,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01190",
+      "exitTs": 1787508000000,
+      "reason": "TIME",
+      "price": 11.506,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01209",
+      "exitTs": 1787544000000,
+      "reason": "TIME",
+      "price": 11.397,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01249",
+      "exitTs": 1787781600000,
+      "reason": "TIME",
+      "price": 11.461,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01290",
+      "exitTs": 1789120800000,
+      "reason": "TIME",
+      "price": 11.423,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01291",
+      "exitTs": 1789250400000,
+      "reason": "TIME",
+      "price": 11.493,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01392",
+      "exitTs": 1790733600000,
+      "reason": "TIME",
+      "price": 14.44,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01393",
+      "exitTs": 1790740800000,
+      "reason": "TIME",
+      "price": 14.384,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01394",
+      "exitTs": 1790748000000,
+      "reason": "TIME",
+      "price": 14.424,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00010",
+      "exitTs": 1759888800000,
+      "reason": "TIME",
+      "price": 117.63,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00011",
+      "exitTs": 1759896000000,
+      "reason": "TIME",
+      "price": 116.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00099",
+      "exitTs": 1761753600000,
+      "reason": "TIME",
+      "price": 98.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00104",
+      "exitTs": 1761782400000,
+      "reason": "TIME",
+      "price": 98.68,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00107",
+      "exitTs": 1761804000000,
+      "reason": "TIME",
+      "price": 98.23,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00159",
+      "exitTs": 1762444800000,
+      "reason": "TIME",
+      "price": 86.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00163",
+      "exitTs": 1762466400000,
+      "reason": "TIME",
+      "price": 87.38,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00212",
+      "exitTs": 1763100000000,
+      "reason": "TIME",
+      "price": 96.04,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00213",
+      "exitTs": 1762999200000,
+      "reason": "TIME",
+      "price": 99.04,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00276",
+      "exitTs": 1763676000000,
+      "reason": "TIME",
+      "price": 87.69,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00277",
+      "exitTs": 1763683200000,
+      "reason": "TIME",
+      "price": 87.16,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00278",
+      "exitTs": 1763625600000,
+      "reason": "TIME",
+      "price": 93.04,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00280",
+      "exitTs": 1763578800000,
+      "reason": "TIME",
+      "price": 89.3,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00282",
+      "exitTs": 1763596800000,
+      "reason": "TIME",
+      "price": 92.74,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00286",
+      "exitTs": 1763784000000,
+      "reason": "TIME",
+      "price": 83.25,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00303",
+      "exitTs": 1763820000000,
+      "reason": "TIME",
+      "price": 81.36,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00308",
+      "exitTs": 1763798400000,
+      "reason": "TIME",
+      "price": 83.12,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00309",
+      "exitTs": 1763935200000,
+      "reason": "TIME",
+      "price": 84.31,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00310",
+      "exitTs": 1763942400000,
+      "reason": "TIME",
+      "price": 82.96,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00437",
+      "exitTs": 1767139200000,
+      "reason": "TIME",
+      "price": 78.64,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00530",
+      "exitTs": 1769090400000,
+      "reason": "TIME",
+      "price": 68.48,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00573",
+      "exitTs": 1769911200000,
+      "reason": "TIME",
+      "price": 59.52,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00574",
+      "exitTs": 1769997600000,
+      "reason": "TIME",
+      "price": 59.29,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00588",
+      "exitTs": 1770127200000,
+      "reason": "TIME",
+      "price": 60.06,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00596",
+      "exitTs": 1770163200000,
+      "reason": "TIME",
+      "price": 59.29,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00646",
+      "exitTs": 1770364800000,
+      "reason": "TIME",
+      "price": 50.95,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00705",
+      "exitTs": 1771408800000,
+      "reason": "TIME",
+      "price": 54.17,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00907",
+      "exitTs": 1778702400000,
+      "reason": "TIME",
+      "price": 56.81,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01002",
+      "exitTs": 1780783200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 41.61,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01175",
+      "exitTs": 1786500000000,
+      "reason": "TIME",
+      "price": 45.44,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01177",
+      "exitTs": 1786528800000,
+      "reason": "TIME",
+      "price": 45.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01179",
+      "exitTs": 1786759200000,
+      "reason": "TIME",
+      "price": 43.83,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01180",
+      "exitTs": 1786946400000,
+      "reason": "TIME",
+      "price": 44.22,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01217",
+      "exitTs": 1787608800000,
+      "reason": "TIME",
+      "price": 51.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01222",
+      "exitTs": 1787752800000,
+      "reason": "TIME",
+      "price": 50.31,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01228",
+      "exitTs": 1787781600000,
+      "reason": "TIME",
+      "price": 50.27,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01311",
+      "exitTs": 1790035200000,
+      "reason": "TIME",
+      "price": 62.04,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01313",
+      "exitTs": 1790042400000,
+      "reason": "TIME",
+      "price": 61.12,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01315",
+      "exitTs": 1790049600000,
+      "reason": "TIME",
+      "price": 61.16,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00005",
+      "exitTs": 1759766400000,
+      "reason": "TIME",
+      "price": 3.068,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00020",
+      "exitTs": 1759845600000,
+      "reason": "TIME",
+      "price": 3.018,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00051",
+      "exitTs": 1760443200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 2.399,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00063",
+      "exitTs": 1760695200000,
+      "reason": "STOP",
+      "price": 2.1247857142857143,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00064",
+      "exitTs": 1760839200000,
+      "reason": "TIME",
+      "price": 2.155,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00068",
+      "exitTs": 1760767200000,
+      "reason": "TIME",
+      "price": 2.149,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00069",
+      "exitTs": 1760868000000,
+      "reason": "TIME",
+      "price": 2.192,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00118",
+      "exitTs": 1761865200000,
+      "reason": "STOP",
+      "price": 2.0727857142857142,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00127",
+      "exitTs": 1762027200000,
+      "reason": "TIME",
+      "price": 2.168,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00129",
+      "exitTs": 1762063200000,
+      "reason": "TIME",
+      "price": 2.177,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00169",
+      "exitTs": 1762545600000,
+      "reason": "TIME",
+      "price": 2.802,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00191",
+      "exitTs": 1763013600000,
+      "reason": "TIME",
+      "price": 2.589,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00214",
+      "exitTs": 1763096400000,
+      "reason": "TP",
+      "price": 2.371571428571429,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00216",
+      "exitTs": 1763128800000,
+      "reason": "TIME",
+      "price": 2.406,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00225",
+      "exitTs": 1763103600000,
+      "reason": "TIME",
+      "price": 2.432,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00227",
+      "exitTs": 1763125200000,
+      "reason": "STOP",
+      "price": 2.3793428571428574,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00307",
+      "exitTs": 1763769600000,
+      "reason": "TIME",
+      "price": 1.864,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00318",
+      "exitTs": 1763949600000,
+      "reason": "TIME",
+      "price": 1.83,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00345",
+      "exitTs": 1764561600000,
+      "reason": "TP",
+      "price": 1.6735714285714285,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00349",
+      "exitTs": 1764612000000,
+      "reason": "TIME",
+      "price": 1.601,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00350",
+      "exitTs": 1764619200000,
+      "reason": "TIME",
+      "price": 1.617,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00352",
+      "exitTs": 1764619200000,
+      "reason": "TIME",
+      "price": 1.617,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00458",
+      "exitTs": 1767837600000,
+      "reason": "TIME",
+      "price": 1.723,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00460",
+      "exitTs": 1767844800000,
+      "reason": "TIME",
+      "price": 1.697,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00462",
+      "exitTs": 1767888000000,
+      "reason": "TIME",
+      "price": 1.694,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00466",
+      "exitTs": 1767902400000,
+      "reason": "TIME",
+      "price": 1.673,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00479",
+      "exitTs": 1767960000000,
+      "reason": "TIME",
+      "price": 1.69,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00493",
+      "exitTs": 1768579200000,
+      "reason": "TIME",
+      "price": 1.696,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00494",
+      "exitTs": 1768586400000,
+      "reason": "TIME",
+      "price": 1.69,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00495",
+      "exitTs": 1768593600000,
+      "reason": "TIME",
+      "price": 1.686,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00496",
+      "exitTs": 1768608000000,
+      "reason": "TIME",
+      "price": 1.734,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00502",
+      "exitTs": 1768629600000,
+      "reason": "TIME",
+      "price": 1.742,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00505",
+      "exitTs": 1768644000000,
+      "reason": "TIME",
+      "price": 1.802,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00507",
+      "exitTs": 1768651200000,
+      "reason": "TIME",
+      "price": 1.796,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00514",
+      "exitTs": 1768903200000,
+      "reason": "TIME",
+      "price": 1.552,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00521",
+      "exitTs": 1768928400000,
+      "reason": "TIME",
+      "price": 1.519,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00532",
+      "exitTs": 1769011200000,
+      "reason": "TIME",
+      "price": 1.5525,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00535",
+      "exitTs": 1769025600000,
+      "reason": "TIME",
+      "price": 1.5723,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00536",
+      "exitTs": 1769032800000,
+      "reason": "TIME",
+      "price": 1.5659,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00538",
+      "exitTs": 1769007600000,
+      "reason": "TIME",
+      "price": 1.5494,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00541",
+      "exitTs": 1769014800000,
+      "reason": "TIME",
+      "price": 1.4995,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00543",
+      "exitTs": 1769040000000,
+      "reason": "TIME",
+      "price": 1.5295,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00545",
+      "exitTs": 1769068800000,
+      "reason": "TIME",
+      "price": 1.5466,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00546",
+      "exitTs": 1769076000000,
+      "reason": "TIME",
+      "price": 1.5558,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00547",
+      "exitTs": 1769083200000,
+      "reason": "TIME",
+      "price": 1.5315,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00559",
+      "exitTs": 1769803200000,
+      "reason": "TIME",
+      "price": 1.335,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00565",
+      "exitTs": 1769781600000,
+      "reason": "TIME",
+      "price": 1.328,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00570",
+      "exitTs": 1769817600000,
+      "reason": "TIME",
+      "price": 1.318,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00571",
+      "exitTs": 1769940000000,
+      "reason": "TIME",
+      "price": 1.208,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00572",
+      "exitTs": 1770012000000,
+      "reason": "TIME",
+      "price": 1.148,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00577",
+      "exitTs": 1769961600000,
+      "reason": "TIME",
+      "price": 1.164,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00595",
+      "exitTs": 1770033600000,
+      "reason": "TIME",
+      "price": 1.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00652",
+      "exitTs": 1770494400000,
+      "reason": "TIME",
+      "price": 1.08,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00667",
+      "exitTs": 1770919200000,
+      "reason": "TIME",
+      "price": 0.947,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00669",
+      "exitTs": 1770807600000,
+      "reason": "TP",
+      "price": 0.9447142857142857,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00673",
+      "exitTs": 1770822000000,
+      "reason": "TIME",
+      "price": 0.951,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00730",
+      "exitTs": 1772056800000,
+      "reason": "TIME",
+      "price": 1.22,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00732",
+      "exitTs": 1772308800000,
+      "reason": "TIME",
+      "price": 1.126,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00734",
+      "exitTs": 1772316000000,
+      "reason": "TIME",
+      "price": 1.172,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00742",
+      "exitTs": 1772740800000,
+      "reason": "TIME",
+      "price": 1.264,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00743",
+      "exitTs": 1772748000000,
+      "reason": "TIME",
+      "price": 1.279,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00744",
+      "exitTs": 1772755200000,
+      "reason": "TIME",
+      "price": 1.272,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00747",
+      "exitTs": 1772784000000,
+      "reason": "TIME",
+      "price": 1.267,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00750",
+      "exitTs": 1772877600000,
+      "reason": "TIME",
+      "price": 1.219,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00774",
+      "exitTs": 1773259200000,
+      "reason": "TIME",
+      "price": 1.292,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00783",
+      "exitTs": 1773561600000,
+      "reason": "TIME",
+      "price": 1.338,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00793",
+      "exitTs": 1773842400000,
+      "reason": "TIME",
+      "price": 1.405,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00795",
+      "exitTs": 1773986400000,
+      "reason": "TIME",
+      "price": 1.361,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00797",
+      "exitTs": 1773914400000,
+      "reason": "TIME",
+      "price": 1.36,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00801",
+      "exitTs": 1773907200000,
+      "reason": "TIME",
+      "price": 1.353,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00802",
+      "exitTs": 1774044000000,
+      "reason": "TIME",
+      "price": 1.331,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00804",
+      "exitTs": 1774058400000,
+      "reason": "TIME",
+      "price": 1.312,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00866",
+      "exitTs": 1775973600000,
+      "reason": "TIME",
+      "price": 1.338,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00867",
+      "exitTs": 1775980800000,
+      "reason": "TIME",
+      "price": 1.335,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00868",
+      "exitTs": 1776009600000,
+      "reason": "TIME",
+      "price": 1.334,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00870",
+      "exitTs": 1776045600000,
+      "reason": "TIME",
+      "price": 1.384,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00871",
+      "exitTs": 1775966400000,
+      "reason": "TIME",
+      "price": 1.337,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00903",
+      "exitTs": 1778328000000,
+      "reason": "TIME",
+      "price": 1.567,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00904",
+      "exitTs": 1778335200000,
+      "reason": "TIME",
+      "price": 1.563,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00905",
+      "exitTs": 1778342400000,
+      "reason": "TIME",
+      "price": 1.563,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00930",
+      "exitTs": 1780185600000,
+      "reason": "TIME",
+      "price": 2.251,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00931",
+      "exitTs": 1780117200000,
+      "reason": "TP",
+      "price": 2.2570714285714284,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01018",
+      "exitTs": 1781654400000,
+      "reason": "TIME",
+      "price": 2.307,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01020",
+      "exitTs": 1781661600000,
+      "reason": "TIME",
+      "price": 2.34,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01028",
+      "exitTs": 1781683200000,
+      "reason": "TIME",
+      "price": 2.316,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01031",
+      "exitTs": 1781856000000,
+      "reason": "TIME",
+      "price": 2.125,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01040",
+      "exitTs": 1781848800000,
+      "reason": "TIME",
+      "price": 2.123,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01051",
+      "exitTs": 1782252000000,
+      "reason": "TIME",
+      "price": 1.994,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01054",
+      "exitTs": 1782324000000,
+      "reason": "TIME",
+      "price": 1.872,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01061",
+      "exitTs": 1782468000000,
+      "reason": "TIME",
+      "price": 1.803,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01063",
+      "exitTs": 1782410400000,
+      "reason": "TIME",
+      "price": 1.866,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01069",
+      "exitTs": 1782482400000,
+      "reason": "TIME",
+      "price": 1.804,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01071",
+      "exitTs": 1782482400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 1.804,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01086",
+      "exitTs": 1783252800000,
+      "reason": "TIME",
+      "price": 1.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01090",
+      "exitTs": 1783180800000,
+      "reason": "TIME",
+      "price": 2.031,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01092",
+      "exitTs": 1783188000000,
+      "reason": "TIME",
+      "price": 2.028,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01093",
+      "exitTs": 1783195200000,
+      "reason": "TIME",
+      "price": 2.006,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01096",
+      "exitTs": 1783310400000,
+      "reason": "TIME",
+      "price": 1.989,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01148",
+      "exitTs": 1784383200000,
+      "reason": "TIME",
+      "price": 1.915,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01185",
+      "exitTs": 1787443200000,
+      "reason": "TIME",
+      "price": 1.883,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01275",
+      "exitTs": 1788660000000,
+      "reason": "TIME",
+      "price": 2.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01278",
+      "exitTs": 1788681600000,
+      "reason": "TIME",
+      "price": 2.306,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01307",
+      "exitTs": 1789927200000,
+      "reason": "TIME",
+      "price": 4.095,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01328",
+      "exitTs": 1790064000000,
+      "reason": "TIME",
+      "price": 4.367,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01329",
+      "exitTs": 1790071200000,
+      "reason": "TIME",
+      "price": 4.515,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01332",
+      "exitTs": 1790172000000,
+      "reason": "TIME",
+      "price": 4.754,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00016",
+      "exitTs": 1759831200000,
+      "reason": "TIME",
+      "price": 230.29,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00018",
+      "exitTs": 1759838400000,
+      "reason": "TIME",
+      "price": 230.53,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00028",
+      "exitTs": 1760162400000,
+      "reason": "TP",
+      "price": 180.13069285714286,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00032",
+      "exitTs": 1760234400000,
+      "reason": "TIME",
+      "price": 173.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00033",
+      "exitTs": 1760256000000,
+      "reason": "TIME",
+      "price": 182.36,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00100",
+      "exitTs": 1761760800000,
+      "reason": "TIME",
+      "price": 198.335,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00121",
+      "exitTs": 1761890400000,
+      "reason": "TIME",
+      "price": 185.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00154",
+      "exitTs": 1762444800000,
+      "reason": "TIME",
+      "price": 155.845,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00170",
+      "exitTs": 1762516800000,
+      "reason": "TIME",
+      "price": 153.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00181",
+      "exitTs": 1762653600000,
+      "reason": "TIME",
+      "price": 158.075,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00184",
+      "exitTs": 1762516800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 153.77,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00185",
+      "exitTs": 1762574400000,
+      "reason": "TIME",
+      "price": 162.435,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00215",
+      "exitTs": 1763064000000,
+      "reason": "TP",
+      "price": 143.45470357142858,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00217",
+      "exitTs": 1763078400000,
+      "reason": "STOP",
+      "price": 145.21507857142856,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00219",
+      "exitTs": 1763114400000,
+      "reason": "TIME",
+      "price": 140.8561,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00221",
+      "exitTs": 1763100000000,
+      "reason": "TIME",
+      "price": 143.08,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00331",
+      "exitTs": 1764453600000,
+      "reason": "TIME",
+      "price": 136.39,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00377",
+      "exitTs": 1765130400000,
+      "reason": "TIME",
+      "price": 134.795,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00383",
+      "exitTs": 1765288800000,
+      "reason": "TIME",
+      "price": 132.33,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00421",
+      "exitTs": 1765893600000,
+      "reason": "TIME",
+      "price": 126.7,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00422",
+      "exitTs": 1765900800000,
+      "reason": "TIME",
+      "price": 129.675,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00497",
+      "exitTs": 1768608000000,
+      "reason": "TIME",
+      "price": 144.855,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00504",
+      "exitTs": 1768550400000,
+      "reason": "TIME",
+      "price": 142.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00508",
+      "exitTs": 1768428000000,
+      "reason": "TIME",
+      "price": 146.795,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00523",
+      "exitTs": 1768935600000,
+      "reason": "TIME",
+      "price": 126.905,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00540",
+      "exitTs": 1769176800000,
+      "reason": "TIME",
+      "price": 126.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00554",
+      "exitTs": 1769371200000,
+      "reason": "TIME",
+      "price": 117.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00604",
+      "exitTs": 1770170400000,
+      "reason": "TIME",
+      "price": 99.015,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00617",
+      "exitTs": 1770148800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 98.94,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00619",
+      "exitTs": 1770163200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 97.795,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00621",
+      "exitTs": 1770228000000,
+      "reason": "TIME",
+      "price": 91.36,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00622",
+      "exitTs": 1770343200000,
+      "reason": "TIME",
+      "price": 79.425,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00623",
+      "exitTs": 1770206400000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 96.065,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00625",
+      "exitTs": 1770220800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 92.69,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00628",
+      "exitTs": 1770249600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 92.055,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00647",
+      "exitTs": 1770436800000,
+      "reason": "TIME",
+      "price": 88.02,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00651",
+      "exitTs": 1770444000000,
+      "reason": "TIME",
+      "price": 87.695,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00660",
+      "exitTs": 1770616800000,
+      "reason": "TIME",
+      "price": 87.185,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00683",
+      "exitTs": 1770948000000,
+      "reason": "TIME",
+      "price": 78.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00696",
+      "exitTs": 1771243200000,
+      "reason": "TIME",
+      "price": 85.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00702",
+      "exitTs": 1771394400000,
+      "reason": "TIME",
+      "price": 84.85,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00706",
+      "exitTs": 1771408800000,
+      "reason": "TIME",
+      "price": 85.27,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00708",
+      "exitTs": 1771416000000,
+      "reason": "TIME",
+      "price": 82.79,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00709",
+      "exitTs": 1771488000000,
+      "reason": "TIME",
+      "price": 82.33,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00710",
+      "exitTs": 1771502400000,
+      "reason": "TIME",
+      "price": 81.17,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00718",
+      "exitTs": 1771538400000,
+      "reason": "TIME",
+      "price": 82.02,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00720",
+      "exitTs": 1771545600000,
+      "reason": "TIME",
+      "price": 82.44,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00751",
+      "exitTs": 1772884800000,
+      "reason": "TIME",
+      "price": 84.61,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00785",
+      "exitTs": 1773662400000,
+      "reason": "TIME",
+      "price": 93.71,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00806",
+      "exitTs": 1773954000000,
+      "reason": "TIME",
+      "price": 88.93,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00831",
+      "exitTs": 1774843200000,
+      "reason": "TIME",
+      "price": 83.22,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00834",
+      "exitTs": 1774872000000,
+      "reason": "TIME",
+      "price": 84.2,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00840",
+      "exitTs": 1774886400000,
+      "reason": "TIME",
+      "price": 84.45,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00843",
+      "exitTs": 1774893600000,
+      "reason": "TIME",
+      "price": 83.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00844",
+      "exitTs": 1774908000000,
+      "reason": "TIME",
+      "price": 83.1,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00862",
+      "exitTs": 1775865600000,
+      "reason": "TIME",
+      "price": 84.77,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00864",
+      "exitTs": 1775894400000,
+      "reason": "TIME",
+      "price": 84.22,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00906",
+      "exitTs": 1778666400000,
+      "reason": "TIME",
+      "price": 95.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00939",
+      "exitTs": 1780459200000,
+      "reason": "TIME",
+      "price": 72.65,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00940",
+      "exitTs": 1780488000000,
+      "reason": "TIME",
+      "price": 75.07,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00946",
+      "exitTs": 1780488000000,
+      "reason": "TIME",
+      "price": 75.07,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00949",
+      "exitTs": 1780617600000,
+      "reason": "TIME",
+      "price": 68.8,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00982",
+      "exitTs": 1780671600000,
+      "reason": "STOP",
+      "price": 64.53142857142858,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00984",
+      "exitTs": 1780675200000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 64.2,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00993",
+      "exitTs": 1780725600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 62.57,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00998",
+      "exitTs": 1780761600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 61.98,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01001",
+      "exitTs": 1780779600000,
+      "reason": "STOP",
+      "price": 61.625571428571426,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_01006",
+      "exitTs": 1780848000000,
+      "reason": "TIME",
+      "price": 64.93,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01045",
+      "exitTs": 1781899200000,
+      "reason": "TIME",
+      "price": 68.94,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01084",
+      "exitTs": 1783224000000,
+      "reason": "TIME",
+      "price": 80.51,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01087",
+      "exitTs": 1783252800000,
+      "reason": "TIME",
+      "price": 80.53,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01089",
+      "exitTs": 1783260000000,
+      "reason": "TIME",
+      "price": 81.19,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01101",
+      "exitTs": 1783368000000,
+      "reason": "TIME",
+      "price": 82.02,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01112",
+      "exitTs": 1783411200000,
+      "reason": "TIME",
+      "price": 81.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01156",
+      "exitTs": 1784815200000,
+      "reason": "TIME",
+      "price": 76.66,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01212",
+      "exitTs": 1787558400000,
+      "reason": "TIME",
+      "price": 94.12,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01218",
+      "exitTs": 1787623200000,
+      "reason": "TIME",
+      "price": 100.47,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01240",
+      "exitTs": 1787832000000,
+      "reason": "TIME",
+      "price": 103.9,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01250",
+      "exitTs": 1787875200000,
+      "reason": "TIME",
+      "price": 109.11,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01258",
+      "exitTs": 1787817600000,
+      "reason": "TIME",
+      "price": 101.79,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01262",
+      "exitTs": 1788084000000,
+      "reason": "TIME",
+      "price": 104.55,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01263",
+      "exitTs": 1788105600000,
+      "reason": "TIME",
+      "price": 106.21,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01339",
+      "exitTs": 1790193600000,
+      "reason": "TIME",
+      "price": 114.48,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00021",
+      "exitTs": 1760198400000,
+      "reason": "TIME",
+      "price": 2.4775,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00022",
+      "exitTs": 1760234400000,
+      "reason": "TIME",
+      "price": 2.3256,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00043",
+      "exitTs": 1760328000000,
+      "reason": "TIME",
+      "price": 2.5499,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00052",
+      "exitTs": 1760695200000,
+      "reason": "TIME",
+      "price": 2.224,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00059",
+      "exitTs": 1760688000000,
+      "reason": "TIME",
+      "price": 2.2384,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00093",
+      "exitTs": 1761732000000,
+      "reason": "TIME",
+      "price": 2.6466,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00095",
+      "exitTs": 1761739200000,
+      "reason": "TIME",
+      "price": 2.6488,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00096",
+      "exitTs": 1761746400000,
+      "reason": "TIME",
+      "price": 2.6331,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00103",
+      "exitTs": 1761782400000,
+      "reason": "TIME",
+      "price": 2.5489,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00105",
+      "exitTs": 1761552000000,
+      "reason": "TIME",
+      "price": 2.6289,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00106",
+      "exitTs": 1761674400000,
+      "reason": "TIME",
+      "price": 2.6592,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00134",
+      "exitTs": 1762243200000,
+      "reason": "TIME",
+      "price": 2.2423,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00136",
+      "exitTs": 1762228800000,
+      "reason": "TIME",
+      "price": 2.3559,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00138",
+      "exitTs": 1762300800000,
+      "reason": "TIME",
+      "price": 2.2041,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00161",
+      "exitTs": 1762459200000,
+      "reason": "TIME",
+      "price": 2.2113,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00166",
+      "exitTs": 1762480800000,
+      "reason": "TIME",
+      "price": 2.2171,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00168",
+      "exitTs": 1762488000000,
+      "reason": "TIME",
+      "price": 2.2278,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00197",
+      "exitTs": 1763042400000,
+      "reason": "TIME",
+      "price": 2.4583,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00233",
+      "exitTs": 1763280000000,
+      "reason": "TIME",
+      "price": 2.266,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00235",
+      "exitTs": 1763287200000,
+      "reason": "TIME",
+      "price": 2.2753,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00243",
+      "exitTs": 1763316000000,
+      "reason": "TIME",
+      "price": 2.174,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00263",
+      "exitTs": 1763413200000,
+      "reason": "STOP",
+      "price": 2.1269342857142854,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00265",
+      "exitTs": 1763416800000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 2.1523,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00270",
+      "exitTs": 1763481600000,
+      "reason": "TIME",
+      "price": 2.2123,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00288",
+      "exitTs": 1763690400000,
+      "reason": "TIME",
+      "price": 2.0153,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00291",
+      "exitTs": 1763719200000,
+      "reason": "TIME",
+      "price": 1.9031,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00321",
+      "exitTs": 1764295200000,
+      "reason": "TIME",
+      "price": 2.1712,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00322",
+      "exitTs": 1764302400000,
+      "reason": "TIME",
+      "price": 2.1844,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00323",
+      "exitTs": 1764309600000,
+      "reason": "TIME",
+      "price": 2.2136,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00329",
+      "exitTs": 1764208800000,
+      "reason": "TIME",
+      "price": 2.2258,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00330",
+      "exitTs": 1764453600000,
+      "reason": "TIME",
+      "price": 2.2058,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00427",
+      "exitTs": 1766066400000,
+      "reason": "TIME",
+      "price": 1.913,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00476",
+      "exitTs": 1767938400000,
+      "reason": "TIME",
+      "price": 2.1365,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00478",
+      "exitTs": 1767859200000,
+      "reason": "TIME",
+      "price": 2.1183,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00489",
+      "exitTs": 1768276800000,
+      "reason": "TIME",
+      "price": 2.0494,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00490",
+      "exitTs": 1768240800000,
+      "reason": "TIME",
+      "price": 2.0669,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00491",
+      "exitTs": 1768291200000,
+      "reason": "TIME",
+      "price": 2.0526,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00492",
+      "exitTs": 1768262400000,
+      "reason": "TIME",
+      "price": 2.0534,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00551",
+      "exitTs": 1769378400000,
+      "reason": "TIME",
+      "price": 1.8386,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00552",
+      "exitTs": 1769479200000,
+      "reason": "TIME",
+      "price": 1.9056,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00557",
+      "exitTs": 1769378400000,
+      "reason": "TIME",
+      "price": 1.8386,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00563",
+      "exitTs": 1769788800000,
+      "reason": "TIME",
+      "price": 1.7572,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00584",
+      "exitTs": 1769954400000,
+      "reason": "TIME",
+      "price": 1.6285,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00627",
+      "exitTs": 1770285600000,
+      "reason": "TIME",
+      "price": 1.4138,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00631",
+      "exitTs": 1770321600000,
+      "reason": "TIME",
+      "price": 1.2128,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00633",
+      "exitTs": 1770307200000,
+      "reason": "TIME",
+      "price": 1.2959,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00634",
+      "exitTs": 1770336000000,
+      "reason": "TIME",
+      "price": 1.2135,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00637",
+      "exitTs": 1770328800000,
+      "reason": "TIME",
+      "price": 1.1626,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00639",
+      "exitTs": 1770336000000,
+      "reason": "TIME",
+      "price": 1.2135,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00641",
+      "exitTs": 1770325200000,
+      "reason": "TP",
+      "price": 1.1504535714285715,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_00643",
+      "exitTs": 1770350400000,
+      "reason": "TIME",
+      "price": 1.269,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00663",
+      "exitTs": 1770926400000,
+      "reason": "TIME",
+      "price": 1.3643,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00703",
+      "exitTs": 1771401600000,
+      "reason": "TIME",
+      "price": 1.4862,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00712",
+      "exitTs": 1771495200000,
+      "reason": "TIME",
+      "price": 1.4143,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00727",
+      "exitTs": 1772071200000,
+      "reason": "TIME",
+      "price": 1.423,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00761",
+      "exitTs": 1772985600000,
+      "reason": "TIME",
+      "price": 1.3446,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00796",
+      "exitTs": 1773993600000,
+      "reason": "TIME",
+      "price": 1.4536,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00798",
+      "exitTs": 1774000800000,
+      "reason": "TIME",
+      "price": 1.4472,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00799",
+      "exitTs": 1774008000000,
+      "reason": "TIME",
+      "price": 1.4485,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00833",
+      "exitTs": 1774900800000,
+      "reason": "TIME",
+      "price": 1.3218,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00849",
+      "exitTs": 1775534400000,
+      "reason": "TIME",
+      "price": 1.3162,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00850",
+      "exitTs": 1775412000000,
+      "reason": "TIME",
+      "price": 1.3014,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00872",
+      "exitTs": 1776074400000,
+      "reason": "TIME",
+      "price": 1.3261,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00890",
+      "exitTs": 1776736800000,
+      "reason": "TIME",
+      "price": 1.425,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00920",
+      "exitTs": 1779285600000,
+      "reason": "TIME",
+      "price": 1.3634,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00973",
+      "exitTs": 1780776000000,
+      "reason": "TIME",
+      "price": 1.0796,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00992",
+      "exitTs": 1780747200000,
+      "reason": "TIME",
+      "price": 1.0866,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_00994",
+      "exitTs": 1780725600000,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "price": 1.0889,
+      "specKind": "NATIVE"
+    },
+    {
+      "id": "V4_00995",
+      "exitTs": 1780776000000,
+      "reason": "TIME",
+      "price": 1.0796,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01065",
+      "exitTs": 1782399600000,
+      "reason": "STOP",
+      "price": 1.0265428571428572,
+      "specKind": "ATR"
+    },
+    {
+      "id": "V4_01070",
+      "exitTs": 1782633600000,
+      "reason": "TIME",
+      "price": 1.0503,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01117",
+      "exitTs": 1783346400000,
+      "reason": "TIME",
+      "price": 1.1154,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01120",
+      "exitTs": 1783353600000,
+      "reason": "TIME",
+      "price": 1.1442,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01122",
+      "exitTs": 1783360800000,
+      "reason": "TIME",
+      "price": 1.1465,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01126",
+      "exitTs": 1783461600000,
+      "reason": "TIME",
+      "price": 1.1125,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01189",
+      "exitTs": 1787500800000,
+      "reason": "TIME",
+      "price": 1.4969,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01266",
+      "exitTs": 1787990400000,
+      "reason": "TIME",
+      "price": 1.3816,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01272",
+      "exitTs": 1788732000000,
+      "reason": "TIME",
+      "price": 1.4247,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01299",
+      "exitTs": 1789552800000,
+      "reason": "TIME",
+      "price": 1.2906,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01354",
+      "exitTs": 1790164800000,
+      "reason": "TIME",
+      "price": 1.5726,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01356",
+      "exitTs": 1790172000000,
+      "reason": "TIME",
+      "price": 1.5742,
+      "specKind": "TIME"
+    },
+    {
+      "id": "V4_01357",
+      "exitTs": 1790179200000,
+      "reason": "TIME",
+      "price": 1.5048,
+      "specKind": "TIME"
+    }
+  ],
+  "mismatches": [],
+  "realVenueSignedExitFills": 0,
+  "fullSTABLE4AccountParity": false
+}

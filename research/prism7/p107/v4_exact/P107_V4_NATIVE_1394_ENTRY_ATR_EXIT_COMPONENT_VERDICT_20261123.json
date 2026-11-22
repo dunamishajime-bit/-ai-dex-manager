@@ -1,0 +1,41 @@
+{
+  "schema": "p107-v4-model-native-1394-all-exit-price-identity-v1",
+  "pinnedSHA": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "entryEventIdentityMatched": 1394,
+  "entryEventTotal": 1394,
+  "entryAtrNativeMatched": 1394,
+  "entryAtrTotal": 1394,
+  "fourRuleM5ConditionalExitMatched": 131,
+  "fourRuleH1ConditionalExitMatched": 176,
+  "productionH1ConditionalExitMatched": 1087,
+  "conditionalModelExitTotalMatched": 1394,
+  "conditionalModelExitTotal": 1394,
+  "dataPrepMissingTradePaths": 0,
+  "sourceNativeExitMismatchCount": 0,
+  "actualSignedExchangeEntryOrExitFillsVerified": 0,
+  "portfolioAcceptanceDD21SharedRiskGrossReplayed": false,
+  "allSTABLE4P107ProductionParity": false,
+  "important": "Native source matches old model exits CONDITIONAL ON price inputs, entry ATR, hypothetical independent filled trades. It does not prove which trades were admitted or execution/STOP/cooldown/funding.",
+  "proofs": {
+    "P107_V4_NATIVE_PIN_131_M5_EXIT_CANDIDATE_PARITY_20261123.json": {
+      "matched": 131,
+      "fullSourceModelMatch": true,
+      "sha256": "c7fde1cc1f59546982e54695ca9e155ad77155427cf0be817b94b29f3d11cca6"
+    },
+    "P107_V4_NATIVE_PIN_176_H1_EXIT_CANDIDATE_PARITY_20261123.json": {
+      "matched": 176,
+      "fullSourceModelMatch": true,
+      "sha256": "f69c5836436ed41325551a55b78322c5e172b8667d08a11851a2c52dac8ea2bc"
+    },
+    "P107_V4_1087_PRODUCTION_EXIT_NATIVE_PARITY_20261123.json": {
+      "matched": 1087,
+      "fullSourceModelMatch": true,
+      "sha256": "d79eae4b2879e68be784064474865a1aa0c47263a14a4be8afb28f2309dc0587"
+    },
+    "P107_V4_PIN_1394_ENTRY_ATR_SOURCE_PARITY_20261123.json": {
+      "matched": 1394,
+      "fullSourceModelMatch": true,
+      "sha256": "a694cb6d7e57ed1f02c59d8b3325089f5f5a3e5db05e34812b9ea40b84b48eff"
+    }
+  }
+}
