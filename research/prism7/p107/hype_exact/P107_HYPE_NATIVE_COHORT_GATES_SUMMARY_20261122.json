@@ -1,0 +1,44 @@
+{
+  "schema": "p107-hype-native-full-h1-causal-candidate-and-exact-h48-contract-evidence/v1",
+  "p107_all_runner_full_parity": false,
+  "hype_source_parity_signal_and_logical_exit_only": true,
+  "current_pinned_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "source_file_sha256": {
+    "config/disdexStable4Opportunity.ts": "3ebe944817303c5131b3f4280546f8eef07a9ccc591f05c1558834148f36e4fb",
+    "lib/hype-stable4-opportunity-signal.ts": "ff9ba19429dd4c4f933d1b8a28c4726f474afd77cbfe216baf07e814ddd68063",
+    "lib/hype-stable4-time-only-contract.ts": "2c27fa29c54d467d31f6e8625fd6f93c24340b6fc7bd9a907ffe1eaa5cc09c25"
+  },
+  "market_inputs": {
+    "HYPEUSDT-1h-from-aster-public.json": {
+      "sha256": "b39c5925d657f027d0472504d205973dcc1a0d155b09287285173bc0733e6c3d",
+      "size_bytes": 1240617
+    },
+    "BTCUSDT-1h-from-aster-public.json": {
+      "sha256": "fed9cb912f0c2a3bad717cf3ce439dfc1d1d6694276fe1ebdbe9be866848ab0d",
+      "size_bytes": 1179799
+    }
+  },
+  "legacy_input": {
+    "filename": "hype-trend-pinned-candidates.json",
+    "sha256": "1a996f77e52bc645c517f67f95a89561ca2c01896e3055c562de938b527ed6e6",
+    "old_candidates": 78,
+    "old_6h_aligned": 8,
+    "entry_time_overlap_with_pinned_hype_source": 0
+  },
+  "h1_grids_evaluated": 1460,
+  "accepted_hype_signal_candidates": 35,
+  "H48_boundary_open_available": 35,
+  "H48_clock_malformed_or_stale_negative_tests": "PASS",
+  "source_produced_not_real_fills": true,
+  "rejected_by_reason": {
+    "STABLE4_HYPE_GATE_WAIT": 1425
+  },
+  "unresolved": [
+    "Real venue book and signed actual fills",
+    "HYPE account and runner permit/GLOBAL HOLD",
+    "STOP/TP conditional state separate from H48 no resident stop contract",
+    "Other Runner portfolio arbitration",
+    "Shared Risk and full cap replay",
+    "Runner entry price and next-open quote execution vs slippage"
+  ]
+}

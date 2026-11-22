@@ -1,0 +1,40 @@
+import * as fs from "node:fs";
+import assert from "node:assert/strict";
+import {evaluateStable4HypeSignal} from "./source/lib/hype-stable4-opportunity-signal";
+import {createHypeH48TimeOnlyContract,evaluateHypeH48TimeOnlyExit} from "./source/lib/hype-stable4-time-only-contract";
+const HOUR=3600000;
+const [hypePath,btcPath]=process.argv.slice(2);
+assert(hypePath&&btcPath);
+const rows=(p:string)=>JSON.parse(fs.readFileSync(p,"utf8")).rows.map((x:any[])=>({ts:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4])}));
+const h=rows(hypePath),b=rows(btcPath);
+let idx=-1,accepted:any,now=0;
+for(let i=24;i<h.length;i++){
+ const t=h[i].ts+HOUR;
+ if(t%(6*HOUR)!==0)continue;
+ const z=evaluateStable4HypeSignal({now:t,hype1h:h.slice(i-24,i+1),btc1h:b.slice(i-24,i+1)});
+ if(z.accepted){idx=i;accepted=z;now=t;break;}
+}
+assert(idx>=24,"NO_ACCEPTED_CASE");
+const hu=h.slice(idx-24,idx+1),bt=b.slice(idx-24,idx+1);
+assert.equal(accepted.signalTs,now);
+assert.equal(evaluateStable4HypeSignal({now:now-1,hype1h:hu,btc1h:bt}).reason,"STABLE4_HYPE_ENTRY_WINDOW_CLOSED");
+assert.equal(evaluateStable4HypeSignal({now:now+20*60000+1,hype1h:hu,btc1h:bt}).reason,"STABLE4_HYPE_ENTRY_WINDOW_CLOSED");
+const gap=hu.filter((_,i)=>i!==6);
+assert.equal(evaluateStable4HypeSignal({now,hype1h:gap,btc1h:bt}).accepted,false);
+const corrupt=hu.map(x=>({...x}));
+corrupt[7].open=0;
+assert.equal(evaluateStable4HypeSignal({now,hype1h:corrupt,btc1h:bt}).reason,"STABLE4_HYPE_INVALID_H1");
+const dup=hu.map(x=>({...x}));
+dup[7].ts=dup[6].ts;
+assert.equal(evaluateStable4HypeSignal({now,hype1h:dup,btc1h:bt}).accepted,false);
+const entry={positionId:"TEST",sourceSha:"e0e4f1d8f22b62e9410188ef6e590a20e31f760f",logicalEntryTs:now};
+const c=createHypeH48TimeOnlyContract(entry);
+const ex=now+48*HOUR;
+assert.equal(c.logicalExitTs,ex);
+assert.equal(evaluateHypeH48TimeOnlyExit(c,ex-1).due,false);
+assert.throws(()=>evaluateHypeH48TimeOnlyExit(c,ex),/HYPE_H48_BOUNDARY_OPEN_UNVERIFIED/);
+assert.throws(()=>evaluateHypeH48TimeOnlyExit(c,ex,{openTs:ex+HOUR,open:50,observedAt:ex}),/HYPE_H48_BOUNDARY_OPEN_UNVERIFIED/);
+assert.throws(()=>evaluateHypeH48TimeOnlyExit(c,ex+120001,{openTs:ex,open:50,observedAt:ex}),/HYPE_H48_BOUNDARY_OPEN_UNVERIFIED/);
+const ok=evaluateHypeH48TimeOnlyExit(c,ex,{openTs:ex,open:50,observedAt:ex});
+assert.equal(ok.due,true);
+console.log(JSON.stringify({status:"PASS",asofPriceEntryBoundary:true,contiguousH1Gate:true,duplicateReject:true,zeroOpenReject:true,futureEntryReject:true,expiryContract:true,exactOpenBoundaryRequired:true,staleBoundaryRejected:true,sourceSha:entry.sourceSha}));

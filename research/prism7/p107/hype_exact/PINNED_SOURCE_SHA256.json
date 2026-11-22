@@ -1,0 +1,9 @@
+{
+  "repoCommitSha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  "files": {
+    "config/disdexStable4Opportunity.ts": "3ebe944817303c5131b3f4280546f8eef07a9ccc591f05c1558834148f36e4fb",
+    "lib/hype-stable4-opportunity-signal.ts": "ff9ba19429dd4c4f933d1b8a28c4726f474afd77cbfe216baf07e814ddd68063",
+    "lib/hype-stable4-time-only-contract.ts": "2c27fa29c54d467d31f6e8625fd6f93c24340b6fc7bd9a907ffe1eaa5cc09c25"
+  },
+  "researchSourceImmutable": true
+}
