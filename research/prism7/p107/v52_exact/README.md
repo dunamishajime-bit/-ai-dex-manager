@@ -1,0 +1,11 @@
+# P107 V52 status and native source data requirements, 2026-11-23
+
+Current VPS read-only systemd audit confirms \`disdex-v52-aster-only@c7310d34ba1b6de07071d8883a2ed0de8dcce2a7.service\` is **active/running** with a process. Earlier V52 unit 7688... and another older unit were inactive. **Service active does NOT attest order approval, armed execution or signed fills.** No restart or mutation executed.
+
+The current immutable source is scripts/disdex_v52_aster_only_live_engine.py inheriting scripts/disdex_v52_aster_only_legacy_engine.py, pinned c7310d34... . Current V50 profile: POST_EARLY3, NY windows 11:30 / 12:30 / 13:30, reference price vs ASTER mid basis >=60bps, convergence <=20bps, basis stop multiple 1.75, net edge >=7.5bps, cost <=60bps, spread <=20bps, holding 3H. Fixed source policy stock aggregate <=4.0x, per slot <=2.0x, integrated total <=4.25x (these are source defaults, actual effective environment not newly attested).
+
+Source dependencies: aligned fresh ASTER bid/ask/mid/spread, book depth (>=2x size), reference price and received timestamps, source clock tolerance, maker/taker fees and VWAP slippage, matching NY market session; in AMZN SHORT only, the separate confirmed Yahoo H1 reference 1% previous-close gate. The source's own no-network Yahoo gate selftest passes (6 deterministic test functions). Historical Yahoo H1 for five equities exists but cannot replace missing historical synchronized ASTER orderbook / external reference quote book / receive-time checks.
+
+The archived Nov21 price-only integrated model contains 87 V52 trade-model rows in BOTH 10bps and 30bps (META24, TSLA20, AMZN17, MSFT17, NVDA9) and **zero signed fills**. Every one is categorized V52_H1_BASIS_PRICE_ONLY. Original old model SHA is not this current pin. This is an approximate price scenario, NOT 87 source-native current V52 executable fills. V11 independent stock lane also needs separate native evaluation.
+
+**V52 must be included in Gross and account NAV once source-backed tick/quote replay can be produced.** It must NOT be silently dropped, or automatically upgraded from a price-only proxy. Missing time-aligned source snapshots and signed historical fills block P107 full parity. Zero live actions or Production mutations.

@@ -1,0 +1,30 @@
+{
+  "observedUtc": "2026-11-22T18:02:55.585855+00:00",
+  "v52Units": [
+    {
+      "unit": "disdex-v52-aster-only@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "load": "loaded",
+      "active": "inactive",
+      "sub": "dead",
+      "hasProcess": false,
+      "exitStatus": "0"
+    },
+    {
+      "unit": "disdex-v52-aster-only@c7310d34ba1b6de07071d8883a2ed0de8dcce2a7.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "hasProcess": true,
+      "exitStatus": "0"
+    },
+    {
+      "unit": "disdex-v52-aster-only@f8c70d3d3144478afff0a8faf6dfc8405d304532.service",
+      "load": "loaded",
+      "active": "inactive",
+      "sub": "dead",
+      "hasProcess": false,
+      "exitStatus": "0"
+    }
+  ],
+  "readOnly": true
+}

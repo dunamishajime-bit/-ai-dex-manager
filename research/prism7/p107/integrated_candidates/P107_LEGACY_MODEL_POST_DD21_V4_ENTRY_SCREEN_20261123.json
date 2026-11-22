@@ -1,0 +1,222 @@
+{
+  "schema": "p107-legacy-model-5minute-account-peak-dd21-latched-v4-entry-violation-screen/v1",
+  "sourceV4Sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "liveSourceRule": "maxDrawdown is cumulative over signed ACCOUNT_MARK and V4 SharedReservations.reserveUnderLease rejects when >0.21; the native latch persists after equity recovery",
+  "conditionalInterpretation": "The archived research equity is a modeled 5-minute path, not authenticated production ACCOUNT_MARK. Any V4 model entries after modeled DD>21 are potential parity conflicts unless a separately proven owner-approved reset or different account mark timing exists.",
+  "scenarios": [
+    {
+      "scenario": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111",
+      "bps": 10,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2025-11-10T10:00:00Z",
+      "max5minObservedDrawdownPct": 56.313522727,
+      "modeledTotalFills": 537,
+      "modeledV4Fills": 131,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111\\EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv",
+        "equitySha256": "960dfa7007aa6b53388cff64606170f28cec0e3078178e21e0e3cfd462fa2c26",
+        "fillsPath": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111\\EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_FILLS.csv",
+        "fillsSha256": "63275c38f59fdebe99407ba9ac2cba23cc472151a7a0af47b6020caf58034828"
+      }
+    },
+    {
+      "scenario": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111",
+      "bps": 30,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2025-11-10T10:00:00Z",
+      "max5minObservedDrawdownPct": 63.195789232,
+      "modeledTotalFills": 537,
+      "modeledV4Fills": 130,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111\\EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv",
+        "equitySha256": "37a3bb26c77d2fba3c48fb417afe68d9bda3a450502f0e19d59c36c292a0abed",
+        "fillsPath": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111\\EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_FILLS.csv",
+        "fillsSha256": "f007adf8045a43446c2140c46b761968750cf0de8cce5c6b86a6d6fe5f6c6521"
+      }
+    },
+    {
+      "scenario": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114",
+      "bps": 10,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-08-20T16:00:00Z",
+      "max5minObservedDrawdownPct": 22.595078866,
+      "modeledTotalFills": 1027,
+      "modeledV4Fills": 801,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv",
+        "equitySha256": "9d5105d45f22f9412af725b00615501bf74955e72230874bfe3cf74e3125fcdd",
+        "fillsPath": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv",
+        "fillsSha256": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9"
+      }
+    },
+    {
+      "scenario": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114",
+      "bps": 30,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-08-19T23:00:00Z",
+      "max5minObservedDrawdownPct": 23.219482097,
+      "modeledTotalFills": 1023,
+      "modeledV4Fills": 797,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv",
+        "equitySha256": "ac01b7058ef506bb3c2076d6b3edbaba88403ccbf1e78e088bd39e3828cad168",
+        "fillsPath": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv",
+        "fillsSha256": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84"
+      }
+    },
+    {
+      "scenario": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2",
+      "bps": 10,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-03-02T06:55:00Z",
+      "max5minObservedDrawdownPct": 21.571152026,
+      "modeledTotalFills": 791,
+      "modeledV4Fills": 498,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv",
+        "equitySha256": "676cd870e05dc81b0fc746b433ea0485b9597bce308b172c0195c61d58c8b971",
+        "fillsPath": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv",
+        "fillsSha256": "90fe852ecece8a912bde99fe653451179ddb8e33b4c0fdd0ee295af88de4ce30"
+      }
+    },
+    {
+      "scenario": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2",
+      "bps": 30,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-03-02T06:55:00Z",
+      "max5minObservedDrawdownPct": 22.28159051,
+      "modeledTotalFills": 789,
+      "modeledV4Fills": 497,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv",
+        "equitySha256": "6c219a2f33e0705dd72f3e42e05ed0de9d220f34929a4a21f31f4f30e1e49949",
+        "fillsPath": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv",
+        "fillsSha256": "d49bb0652bcbe7e7a279c4dfc21ad23f7e5dc1c2a6eb094cae77134c9458fff0"
+      }
+    },
+    {
+      "scenario": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1",
+      "bps": 10,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-03-02T06:55:00Z",
+      "max5minObservedDrawdownPct": 21.571152026,
+      "modeledTotalFills": 795,
+      "modeledV4Fills": 496,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv",
+        "equitySha256": "404f2fd7126b1838725769e463936366ec6de5176528bb4b45cb9c9329fbcf3f",
+        "fillsPath": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv",
+        "fillsSha256": "cd492d4c847f812b6fd89711a8d86ce3f5ecb6b307e140ea6f52f17ac69a8676"
+      }
+    },
+    {
+      "scenario": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1",
+      "bps": 30,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-03-02T06:55:00Z",
+      "max5minObservedDrawdownPct": 22.28159051,
+      "modeledTotalFills": 791,
+      "modeledV4Fills": 494,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv",
+        "equitySha256": "3903d601f33a66e6fd5cccfa10ca1081a8294a4cab1711e3f8e3d52f55f54845",
+        "fillsPath": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv",
+        "fillsSha256": "6d884fe3d200faf9715a0bd4f8f5531550d3ce443cd273d38a89380aeb764f24"
+      }
+    },
+    {
+      "scenario": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121",
+      "bps": 10,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-08-20T16:00:00Z",
+      "max5minObservedDrawdownPct": 23.188789651,
+      "modeledTotalFills": 1075,
+      "modeledV4Fills": 803,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv",
+        "equitySha256": "308e10bb984fe8a9e11f2bcc35e66680e5787aff558f57c4b380767ac9d33ce0",
+        "fillsPath": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv",
+        "fillsSha256": "312ccf0235f778d9f639ce72fb4c1726f6a60c79476f9622aceb9d601525341d"
+      }
+    },
+    {
+      "scenario": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121",
+      "bps": 30,
+      "equityObservations": 105121,
+      "firstDdOver21Utc": "2026-03-04T09:00:00Z",
+      "max5minObservedDrawdownPct": 21.293398765,
+      "modeledTotalFills": 803,
+      "modeledV4Fills": 497,
+      "modeledV4EntriesStrictlyAfterFirstDdOver21": 0,
+      "firstV4ModeledEntryAfterBreach": null,
+      "lastV4ModeledEntryAfterBreach": null,
+      "signedFillsInAfterBreachSubset": 0,
+      "allAfterBreachV4AreModelled": true,
+      "grossCapMatchToCurrentProductionNotProven": true,
+      "inputProvenance": {
+        "equityPath": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv",
+        "equitySha256": "287d5d6b41ccdfcf855e85429e91ca800b4e28abf5144c345215e04d9f6a9c6e",
+        "fillsPath": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121\\EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv",
+        "fillsSha256": "b2cef54988307d754d3a8ce795db34ad4fe7e3090d3adfd06d6a7ff9b2d55385"
+      }
+    }
+  ],
+  "doNotCallTradesActualSignedVenueFills": true,
+  "doesNotProveNoFormalResetOccurred": true,
+  "fullCurrentSTABLE4ProductionParity": false,
+  "productionOperations": 0
+}

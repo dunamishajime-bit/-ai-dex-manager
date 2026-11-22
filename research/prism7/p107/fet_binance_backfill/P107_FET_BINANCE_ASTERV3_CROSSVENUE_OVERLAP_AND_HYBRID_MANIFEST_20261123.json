@@ -1,0 +1,49 @@
+{
+  "schema": "p107-fet-binance-official-h1-only-before-first-ASTER-FET-hour-research/v1",
+  "instrument": "FETUSDT",
+  "futuresReferenceVenue": "Binance USDⓈ-M",
+  "executionVenue": "ASTER",
+  "fromSource": "Official monthly Binance futures raw H1 archive verified 11/11 SHA256",
+  "toSource": "Original ASTER public V3 1H dataset",
+  "notAsterNativeHistoricalParity": true,
+  "notAsterExecutionBeforeFirstAsterFETCandle": true,
+  "cutoverUtc": "2026-01-09T18:00:00+00:00",
+  "binanceUsedForHoursBeforeCutover": 7554,
+  "asterUsedAtOrAfterCutover": 6342,
+  "sourceOverlapCount": 534,
+  "firstOverlapUtc": "2026-01-09T18:00:00+00:00",
+  "lastOverlapUtc": "2026-01-31T23:00:00+00:00",
+  "absClosePriceCrossVenueDifferencePct": {
+    "median": 0.3542384638473506,
+    "p95": 1.982228298017752,
+    "p99": 3.0125523012552335,
+    "max": 4.148027653517694
+  },
+  "maxAbsPriceDifference": {
+    "utc": "2026-01-21T19:00:00+00:00",
+    "absoluteCloseDiffPct": 4.148027653517694,
+    "signedCloseDiffPct": -4.148027653517694,
+    "asterClose": 0.2357,
+    "binanceClose": 0.2459
+  },
+  "invalidOHLCInOverlap": {
+    "binance": 0,
+    "aster": 0
+  },
+  "combinedTotalHours": 13896,
+  "combinedHourGaps": 0,
+  "combinedStartUtc": "2025-03-01T00:00:00+00:00",
+  "combinedEndUtc": "2026-09-30T23:00:00+00:00",
+  "sourceSHA256": {
+    "binanceSourceGzip": "621bd04aa43a7670fb3c484b58ab690cb9af1f22e97b0336611ca03943c01101",
+    "asterSourceGzip": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+  },
+  "mixedDataset": {
+    "filename": "FETUSDT_BINANCE_WARMUP_ASTERV3_ENTRY_1H_MIXED_PROVENANCE_20261123.jsonl.gz",
+    "sha256": "4836e2c747f599dca02983289991a8114b987343e6aade34ce2018aa790c9ff4",
+    "bytes": 510119
+  },
+  "marketDataFillingPolicy": "Before ASTER first FET candle, Binance source may support indicators but may NOT serve as a historical ASTER executable fill. At and after first ASTER candle use ASTER OHLC. Source must be marked MIXED_CROSS_VENUE; never silently label ASTER native.",
+  "accountBTComplete": false,
+  "productionChanges": 0
+}

@@ -1,0 +1,128 @@
+{
+  "schema": "P107_FET_BINANCE_OFFICIAL_USDM_UM_FUTURES_MONTHLY_H1_DOWNLOAD_V1",
+  "venue": "Binance",
+  "product": "USDⓈ-M perpetual FETUSDT",
+  "intendedUse": "OFFICIAL_CROSS_VENUE_INDICATOR_BACKFILL_COMPARISON_ONLY",
+  "notAnAsterSignedFill": true,
+  "monthlyInputs": [
+    {
+      "month": "2025-03",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-03.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-03.zip",
+      "archive_sha256": "fd2302f13cfcdfb05c88f57b2e92f81c276e4eea306c2ca07479d168766ab4e3",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-03-01T00:00:00+00:00",
+      "lastUTC": "2025-03-31T23:00:00+00:00"
+    },
+    {
+      "month": "2025-04",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-04.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-04.zip",
+      "archive_sha256": "649170790ba29dc3972b04104e698c978653b88b3eb69249f48ef5b169de61e6",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 720,
+      "firstUTC": "2025-04-01T00:00:00+00:00",
+      "lastUTC": "2025-04-30T23:00:00+00:00"
+    },
+    {
+      "month": "2025-05",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-05.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-05.zip",
+      "archive_sha256": "70576c602e7eea31eaf3a8934c048f5f05257588719f4c7395b758908d942314",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-05-01T00:00:00+00:00",
+      "lastUTC": "2025-05-31T23:00:00+00:00"
+    },
+    {
+      "month": "2025-06",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-06.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-06.zip",
+      "archive_sha256": "1ad0644b2a2de68852e4a51ae1945be48a5f1e5d61b27437d87d0f60798b050b",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 720,
+      "firstUTC": "2025-06-01T00:00:00+00:00",
+      "lastUTC": "2025-06-30T23:00:00+00:00"
+    },
+    {
+      "month": "2025-07",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-07.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-07.zip",
+      "archive_sha256": "645bef2bc69b92f5ba17bfdb44d8ce811d83216889461b8ce2ba195b5ac0e507",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-07-01T00:00:00+00:00",
+      "lastUTC": "2025-07-31T23:00:00+00:00"
+    },
+    {
+      "month": "2025-08",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-08.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-08.zip",
+      "archive_sha256": "35789baaca162d0a7037a08e4d1e4911e207017074ff7375f473acca998aeae4",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-08-01T00:00:00+00:00",
+      "lastUTC": "2025-08-31T23:00:00+00:00"
+    },
+    {
+      "month": "2025-09",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-09.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-09.zip",
+      "archive_sha256": "52e0acaf0b04e372de611d22264ddd4eeaf08d0a02de1116da658f4d6d34c919",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 720,
+      "firstUTC": "2025-09-01T00:00:00+00:00",
+      "lastUTC": "2025-09-30T23:00:00+00:00"
+    },
+    {
+      "month": "2025-10",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-10.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-10.zip",
+      "archive_sha256": "e9f7061b8087b9e885b9edf7754add583f243f61d7c3be6f4dcc3acecd792a39",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-10-01T00:00:00+00:00",
+      "lastUTC": "2025-10-31T23:00:00+00:00"
+    },
+    {
+      "month": "2025-11",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-11.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-11.zip",
+      "archive_sha256": "2407811c2be3fc344f674dc4fc3dfe334696edf546c161946ca2891d9a7dddb5",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 720,
+      "firstUTC": "2025-11-01T00:00:00+00:00",
+      "lastUTC": "2025-11-30T23:00:00+00:00"
+    },
+    {
+      "month": "2025-12",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-12.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2025-12.zip",
+      "archive_sha256": "6b65cd93bf19f108e557248e546a892fdf057eb89e8f20a89987a6cff3c76ed6",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2025-12-01T00:00:00+00:00",
+      "lastUTC": "2025-12-31T23:00:00+00:00"
+    },
+    {
+      "month": "2026-01",
+      "archive_url": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2026-01.zip",
+      "archive_file": "raw_archive\\FETUSDT-1h-2026-01.zip",
+      "archive_sha256": "fe525f4e27c1b61b2b71d3c03cdc2cdf5d9bf3ff1dcd5b41c523c706cde0d64f",
+      "archive_integrity": "OFFICIAL_SHA256_CHECKSUM_VERIFIED",
+      "rows": 744,
+      "firstUTC": "2026-01-01T00:00:00+00:00",
+      "lastUTC": "2026-01-31T23:00:00+00:00"
+    }
+  ],
+  "uniqueHourBars": 8088,
+  "firstUTC": "2025-03-01T00:00:00+00:00",
+  "lastUTC": "2026-01-31T23:00:00+00:00",
+  "hourlyMissingGaps": 0,
+  "gzipSource": {
+    "filename": "FETUSDT_BINANCE_UM_1H_202503_202601.jsonl.gz",
+    "sha256": "621bd04aa43a7670fb3c484b58ab690cb9af1f22e97b0336611ca03943c01101",
+    "bytes": 366913
+  }
+}

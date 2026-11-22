@@ -1,0 +1,154 @@
+{
+  "schema": "p107-v52-current-pin-source-microstructure-readiness-v1",
+  "pinSha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "liveUnitReadOnly": {
+    "observedUtc": "2026-11-22T18:02:55.585855+00:00",
+    "v52Units": [
+      {
+        "unit": "disdex-v52-aster-only@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+        "load": "loaded",
+        "active": "inactive",
+        "sub": "dead",
+        "hasProcess": false,
+        "exitStatus": "0"
+      },
+      {
+        "unit": "disdex-v52-aster-only@c7310d34ba1b6de07071d8883a2ed0de8dcce2a7.service",
+        "load": "loaded",
+        "active": "active",
+        "sub": "running",
+        "hasProcess": true,
+        "exitStatus": "0"
+      },
+      {
+        "unit": "disdex-v52-aster-only@f8c70d3d3144478afff0a8faf6dfc8405d304532.service",
+        "load": "loaded",
+        "active": "inactive",
+        "sub": "dead",
+        "hasProcess": false,
+        "exitStatus": "0"
+      }
+    ],
+    "readOnly": true
+  },
+  "pinnedV50Policy": {
+    "policyId": "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20",
+    "strategy": "V50_POST_OPEN_BASIS",
+    "windowPolicy": "POST_EARLY3",
+    "windowsNy": [
+      "11:30",
+      "12:30",
+      "13:30"
+    ],
+    "direction": "BOTH",
+    "minimumEntryBasisBps": 60,
+    "convergenceBps": 20,
+    "basisStopMultiple": 1.75,
+    "minimumNetEdgeBps": 7.5,
+    "maximumRoundTripCostBps": 60,
+    "maximumSpreadBps": 20,
+    "maximumHoldingHours": 3,
+    "stockAggregateGross": 4.0,
+    "slotGross": 2.0
+  },
+  "nativeSourceFileSha256": {
+    "currentLiveEngine": "97b879783d0f961d4561b2d9fccb8224669415f7a29557fd549ea438a9a9708c",
+    "inheritedLegacyEngine": "589b0723389656cade99b475b0208710d490b52b73c08af67d1c9be4e9b9349d",
+    "AMZN_short_reference_gate_test": "978bca0a1a54e933e816baf94ed1b0b540a295886659fe4e887a471304ac9030"
+  },
+  "sourceProofRequiredDataFields": [
+    "reference_basis_vs_aster_mid",
+    "live_signal_basis",
+    "source_age",
+    "reference_age",
+    "source_clock_drift",
+    "spread_bps",
+    "minimum_orderbook_depth",
+    "AMZN_SHORT_additional_Yahoo_H1",
+    "exit_basis",
+    "exit_stop",
+    "time_exit",
+    "post_only_entry",
+    "poll_signed_fill"
+  ],
+  "AMZNShortYahooGatePinnedTest": "PASS native 6 deterministic tests by running pinned scripts/dd-reduction/test_v52_amzn_yahoo_gate.py",
+  "model10_30bps": {
+    "10": {
+      "modeledFills": 87,
+      "signedFills": 0,
+      "modelClass": "V52_H1_BASIS_PRICE_ONLY",
+      "bySymbol": {
+        "METAUSDT": 24,
+        "TSLAUSDT": 20,
+        "AMZNUSDT": 17,
+        "NVDAUSDT": 9,
+        "MSFTUSDT": 17
+      },
+      "modeledExitReason": {
+        "V52_BASIS_CONVERGED": 63,
+        "V52_TIME_OR_SESSION_FLAT": 20,
+        "V52_BASIS_STOP": 4
+      },
+      "pinSHAs": [
+        "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+      ],
+      "sourceFileSha256": "312ccf0235f778d9f639ce72fb4c1726f6a60c79476f9622aceb9d601525341d"
+    },
+    "30": {
+      "modeledFills": 87,
+      "signedFills": 0,
+      "modelClass": "V52_H1_BASIS_PRICE_ONLY",
+      "bySymbol": {
+        "METAUSDT": 24,
+        "TSLAUSDT": 20,
+        "AMZNUSDT": 17,
+        "NVDAUSDT": 9,
+        "MSFTUSDT": 17
+      },
+      "modeledExitReason": {
+        "V52_BASIS_CONVERGED": 63,
+        "V52_TIME_OR_SESSION_FLAT": 20,
+        "V52_BASIS_STOP": 4
+      },
+      "pinSHAs": [
+        "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+      ],
+      "sourceFileSha256": "b2cef54988307d754d3a8ce795db34ad4fe7e3090d3adfd06d6a7ff9b2d55385"
+    }
+  },
+  "availableArchivedStockReferenceH1": {
+    "AMZN-Yahoo-H1-20251001-20261001.json": {
+      "sha256": "179c7ebd3a87c027dcc215023c555edbe7d93ac0c4d9521dfc06cfe67bd69bf8",
+      "bytes": 246895
+    },
+    "META-Yahoo-H1-20251001-20261001.json": {
+      "sha256": "96e4d944f00f4b0258cdd2f1a2c78bcae1f2724a6e08b3ce373317015305ebbb",
+      "bytes": 238341
+    },
+    "MSFT-Yahoo-H1-20251001-20261001.json": {
+      "sha256": "6c9a5ba76f92c826279ac051f981bd3f5549435abe40eec797c018caccb1924f",
+      "bytes": 243509
+    },
+    "NVDA-Yahoo-H1-20251001-20261001.json": {
+      "sha256": "3f0037c52ab98985262c9eb172d67dfabc73203cec6ec16cdea02bafa7c15989",
+      "bytes": 249314
+    },
+    "TSLA-Yahoo-H1-20251001-20261001.json": {
+      "sha256": "f82ec00d598e677e74e7e91f02b853a00466bda33cc6437a0bcd0701205c63c6",
+      "bytes": 244376
+    }
+  },
+  "verifiedHistoricalAsterQuoteBookMarketDepthAndCrossVenueReceiveTimestampsAvailable": false,
+  "marketMicrostructureArchiveDiscoveryScope": "2025-10-01..2026-10-01 owner PC BT roots inspected; no replayable historical time-aligned ASTER bid/ask/depth and IEX/Pyth reference receipt ledger verified",
+  "sourceEntryAndExitNativeFullReplayed": false,
+  "v11IndependentSubrouteFullySourceReplayed": false,
+  "oldHourlyBasisProxyIsNotAVerifiedCurrentV52Trade": true,
+  "stockGrossSourceNotionalCap": 4.0,
+  "stockPerSlotSourceGross": 2.0,
+  "totalGrossIntegratedPolicySource": 4.25,
+  "sourceNotEffectiveEnvProved": true,
+  "realExchangeOrdersMade": 0,
+  "signedHistoricalFillReconstruction": 0,
+  "allPortfolioP107FullParity": false,
+  "nextEvidence": "Chronological ASTER bid/ask/depth, reference quote prices and reception timestamps, exchange fee and real fill outcome, NY session window state, V11 and V50 slot/exit time. Freeze SHA and matching market tick datasets."
+}
