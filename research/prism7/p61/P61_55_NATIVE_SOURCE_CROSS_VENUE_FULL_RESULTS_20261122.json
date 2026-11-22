@@ -1,0 +1,5615 @@
+{
+  "schema": "prism7-p61-previously-unavailable-2025jan-jul-BINANCE-cross-venue-nativeV20-p44-frozen-gate/v1",
+  "status": "EXTERNAL_CROSS_VENUE_HISTORICAL_RESEARCH_NOT_NATIVE_ASTER_EXECUTION_PARITY",
+  "nativeCodePinnedSourceSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "unmodifiedNativeSourceH1SignalAndExitReplay": true,
+  "nativeReplayImplementation": "pengu-dual-ls-v2.ts buildPenguDualLsV2EvaluationSeries / P8 replayPinnedShortExit",
+  "crossVenueBinanceDifferentFromOriginalAsterMarketSource": true,
+  "originalAster2025JulyBinanceH1OHLCVMismatchMaterial": true,
+  "sourceH1OfficialZipChecksumsPass": true,
+  "monthlyArchiveManifestSha": "895ee1801fd0ee84e71d3b4215fa156427579c374c3f83ea5526aafa8ea6e9e3",
+  "rawOfficialPublicGzipInputSha": {
+    "PENGUUSDT": "a0cb86ff8c52a49007365f3363c00efe9bcbc2571b395abb1f061066799e5559",
+    "BTCUSDT": "738f673d12fbdb41e9c7f036ca686e37710ef1ac423bbc73e641d1afb9e7b342"
+  },
+  "sourceH1Aligned5424": true,
+  "studyPeriodEntryStartUTC": "2025-01-15T00:00:00.000Z",
+  "studyPeriodEntryEndExclusiveUTC": "2025-07-18T00:00:00.000Z",
+  "sourceObservationEndUTC": "2025-08-01T00:00:00.000Z",
+  "sourceNativeNaturalCrossVenueCandidates": 55,
+  "sourceNativeNaturalClosed": 55,
+  "priorD3CrossingCount": 250,
+  "priorD5CrossingCount": 193,
+  "originalP44RuleFrozenInAdvance": true,
+  "controlsAndWindows": [
+    [
+      "ORIGINAL_PINNED_NATIVE_SOURCE_ALL",
+      null,
+      null
+    ],
+    [
+      "P44_FROZEN_D3_PRIOR48H_ALL3",
+      3,
+      48
+    ],
+    [
+      "D3_PRIOR24H_ALL3_SENSITIVITY",
+      3,
+      24
+    ],
+    [
+      "D3_PRIOR72H_ALL3_SENSITIVITY",
+      3,
+      72
+    ],
+    [
+      "D5_PRIOR48H_ALL3_SENSITIVITY",
+      5,
+      48
+    ]
+  ],
+  "comparison": [
+    {
+      "gate": "ORIGINAL_PINNED_NATIVE_SOURCE_ALL",
+      "earlierDropPct": null,
+      "priorHours": null,
+      "originalSourceNatural53InputMustNotBeMixed": true,
+      "sourceNatural": {
+        "naturalIntents": 55,
+        "closed": 55,
+        "wins": 28,
+        "losses": 27,
+        "winPct": 50.909091,
+        "sourceNet30NotionalPoints": 45.05069,
+        "sumSourceAbsoluteNet30Pct": 45.05069,
+        "rightCensored": 0
+      },
+      "noSlipNaturalSingleSlotPriceProxy": {
+        "trades": 23,
+        "wins": 13,
+        "winPct": 56.521739,
+        "realizedOnlyDDPct": 17.561799,
+        "finalNavYen": 14397.7,
+        "profitFactor": 1.939908,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "extra100bpsCoverSingleSlotPriceProxy": {
+        "trades": 23,
+        "wins": 13,
+        "winPct": 56.521739,
+        "realizedOnlyDDPct": 20.280653,
+        "finalNavYen": 12182.38,
+        "profitFactor": 1.474161,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "sourceSlotOverlapBlocked": 32,
+      "sourceSelectedIDs": [
+        "P61_BINANCE_MKT_00000",
+        "P61_BINANCE_MKT_00001",
+        "P61_BINANCE_MKT_00003",
+        "P61_BINANCE_MKT_00004",
+        "P61_BINANCE_MKT_00005",
+        "P61_BINANCE_MKT_00010",
+        "P61_BINANCE_MKT_00012",
+        "P61_BINANCE_MKT_00017",
+        "P61_BINANCE_MKT_00018",
+        "P61_BINANCE_MKT_00021",
+        "P61_BINANCE_MKT_00024",
+        "P61_BINANCE_MKT_00027",
+        "P61_BINANCE_MKT_00028",
+        "P61_BINANCE_MKT_00029",
+        "P61_BINANCE_MKT_00031",
+        "P61_BINANCE_MKT_00032",
+        "P61_BINANCE_MKT_00035",
+        "P61_BINANCE_MKT_00040",
+        "P61_BINANCE_MKT_00042",
+        "P61_BINANCE_MKT_00045",
+        "P61_BINANCE_MKT_00047",
+        "P61_BINANCE_MKT_00050",
+        "P61_BINANCE_MKT_00052"
+      ],
+      "sourceBlockedIDs": [
+        "P61_BINANCE_MKT_00002",
+        "P61_BINANCE_MKT_00006",
+        "P61_BINANCE_MKT_00007",
+        "P61_BINANCE_MKT_00008",
+        "P61_BINANCE_MKT_00009",
+        "P61_BINANCE_MKT_00011",
+        "P61_BINANCE_MKT_00013",
+        "P61_BINANCE_MKT_00014",
+        "P61_BINANCE_MKT_00015",
+        "P61_BINANCE_MKT_00016",
+        "P61_BINANCE_MKT_00019",
+        "P61_BINANCE_MKT_00020",
+        "P61_BINANCE_MKT_00022",
+        "P61_BINANCE_MKT_00023",
+        "P61_BINANCE_MKT_00025",
+        "P61_BINANCE_MKT_00026",
+        "P61_BINANCE_MKT_00030",
+        "P61_BINANCE_MKT_00033",
+        "P61_BINANCE_MKT_00034",
+        "P61_BINANCE_MKT_00036",
+        "P61_BINANCE_MKT_00037",
+        "P61_BINANCE_MKT_00038",
+        "P61_BINANCE_MKT_00039",
+        "P61_BINANCE_MKT_00041",
+        "P61_BINANCE_MKT_00043",
+        "P61_BINANCE_MKT_00044",
+        "P61_BINANCE_MKT_00046",
+        "P61_BINANCE_MKT_00048",
+        "P61_BINANCE_MKT_00049",
+        "P61_BINANCE_MKT_00051",
+        "P61_BINANCE_MKT_00053",
+        "P61_BINANCE_MKT_00054"
+      ],
+      "perMonth": {
+        "2025-01": {
+          "naturalIntents": 10,
+          "closed": 10,
+          "wins": 3,
+          "losses": 7,
+          "winPct": 30,
+          "sourceNet30NotionalPoints": -28.056479,
+          "sumSourceAbsoluteNet30Pct": -28.056479,
+          "rightCensored": 0
+        },
+        "2025-02": {
+          "naturalIntents": 18,
+          "closed": 18,
+          "wins": 6,
+          "losses": 12,
+          "winPct": 33.333333,
+          "sourceNet30NotionalPoints": -18.782979,
+          "sumSourceAbsoluteNet30Pct": -18.782979,
+          "rightCensored": 0
+        },
+        "2025-03": {
+          "naturalIntents": 8,
+          "closed": 8,
+          "wins": 6,
+          "losses": 2,
+          "winPct": 75,
+          "sourceNet30NotionalPoints": 64.757755,
+          "sumSourceAbsoluteNet30Pct": 64.757755,
+          "rightCensored": 0
+        },
+        "2025-04": {
+          "naturalIntents": 6,
+          "closed": 6,
+          "wins": 6,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 42.345039,
+          "sumSourceAbsoluteNet30Pct": 42.345039,
+          "rightCensored": 0
+        },
+        "2025-05": {
+          "naturalIntents": 5,
+          "closed": 5,
+          "wins": 2,
+          "losses": 3,
+          "winPct": 40,
+          "sourceNet30NotionalPoints": -22.559003,
+          "sumSourceAbsoluteNet30Pct": -22.559003,
+          "rightCensored": 0
+        },
+        "2025-06": {
+          "naturalIntents": 8,
+          "closed": 8,
+          "wins": 5,
+          "losses": 3,
+          "winPct": 62.5,
+          "sourceNet30NotionalPoints": 7.346358,
+          "sumSourceAbsoluteNet30Pct": 7.346358,
+          "rightCensored": 0
+        }
+      }
+    },
+    {
+      "gate": "P44_FROZEN_D3_PRIOR48H_ALL3",
+      "earlierDropPct": 3,
+      "priorHours": 48,
+      "originalSourceNatural53InputMustNotBeMixed": true,
+      "sourceNatural": {
+        "naturalIntents": 14,
+        "closed": 14,
+        "wins": 7,
+        "losses": 7,
+        "winPct": 50,
+        "sourceNet30NotionalPoints": -1.471783,
+        "sumSourceAbsoluteNet30Pct": -1.471783,
+        "rightCensored": 0
+      },
+      "noSlipNaturalSingleSlotPriceProxy": {
+        "trades": 7,
+        "wins": 5,
+        "winPct": 71.428571,
+        "realizedOnlyDDPct": 1.637205,
+        "finalNavYen": 13116.14,
+        "profitFactor": 17.838747,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "extra100bpsCoverSingleSlotPriceProxy": {
+        "trades": 7,
+        "wins": 5,
+        "winPct": 71.428571,
+        "realizedOnlyDDPct": 2.401327,
+        "finalNavYen": 12501.18,
+        "profitFactor": 8.38303,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "sourceSlotOverlapBlocked": 7,
+      "sourceSelectedIDs": [
+        "P61_BINANCE_MKT_00011",
+        "P61_BINANCE_MKT_00023",
+        "P61_BINANCE_MKT_00027",
+        "P61_BINANCE_MKT_00041",
+        "P61_BINANCE_MKT_00045",
+        "P61_BINANCE_MKT_00049",
+        "P61_BINANCE_MKT_00052"
+      ],
+      "sourceBlockedIDs": [
+        "P61_BINANCE_MKT_00024",
+        "P61_BINANCE_MKT_00025",
+        "P61_BINANCE_MKT_00026",
+        "P61_BINANCE_MKT_00046",
+        "P61_BINANCE_MKT_00051",
+        "P61_BINANCE_MKT_00053",
+        "P61_BINANCE_MKT_00054"
+      ],
+      "perMonth": {
+        "2025-02": {
+          "naturalIntents": 6,
+          "closed": 6,
+          "wins": 2,
+          "losses": 4,
+          "winPct": 33.333333,
+          "sourceNet30NotionalPoints": 4.22066,
+          "sumSourceAbsoluteNet30Pct": 4.22066,
+          "rightCensored": 0
+        },
+        "2025-04": {
+          "naturalIntents": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 5.395106,
+          "sumSourceAbsoluteNet30Pct": 5.395106,
+          "rightCensored": 0
+        },
+        "2025-05": {
+          "naturalIntents": 2,
+          "closed": 2,
+          "wins": 1,
+          "losses": 1,
+          "winPct": 50,
+          "sourceNet30NotionalPoints": -7.108983,
+          "sumSourceAbsoluteNet30Pct": -7.108983,
+          "rightCensored": 0
+        },
+        "2025-06": {
+          "naturalIntents": 5,
+          "closed": 5,
+          "wins": 3,
+          "losses": 2,
+          "winPct": 60,
+          "sourceNet30NotionalPoints": -3.978566,
+          "sumSourceAbsoluteNet30Pct": -3.978566,
+          "rightCensored": 0
+        }
+      }
+    },
+    {
+      "gate": "D3_PRIOR24H_ALL3_SENSITIVITY",
+      "earlierDropPct": 3,
+      "priorHours": 24,
+      "originalSourceNatural53InputMustNotBeMixed": true,
+      "sourceNatural": {
+        "naturalIntents": 9,
+        "closed": 9,
+        "wins": 6,
+        "losses": 3,
+        "winPct": 66.666667,
+        "sourceNet30NotionalPoints": 30.537201,
+        "sumSourceAbsoluteNet30Pct": 30.537201,
+        "rightCensored": 0
+      },
+      "noSlipNaturalSingleSlotPriceProxy": {
+        "trades": 6,
+        "wins": 4,
+        "winPct": 66.666667,
+        "realizedOnlyDDPct": 1.637205,
+        "finalNavYen": 13000.01,
+        "profitFactor": 17.314593,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "extra100bpsCoverSingleSlotPriceProxy": {
+        "trades": 6,
+        "wins": 4,
+        "winPct": 66.666667,
+        "realizedOnlyDDPct": 2.401327,
+        "finalNavYen": 12481.9,
+        "profitFactor": 8.335017,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "sourceSlotOverlapBlocked": 3,
+      "sourceSelectedIDs": [
+        "P61_BINANCE_MKT_00011",
+        "P61_BINANCE_MKT_00023",
+        "P61_BINANCE_MKT_00027",
+        "P61_BINANCE_MKT_00041",
+        "P61_BINANCE_MKT_00049",
+        "P61_BINANCE_MKT_00052"
+      ],
+      "sourceBlockedIDs": [
+        "P61_BINANCE_MKT_00051",
+        "P61_BINANCE_MKT_00053",
+        "P61_BINANCE_MKT_00054"
+      ],
+      "perMonth": {
+        "2025-02": {
+          "naturalIntents": 3,
+          "closed": 3,
+          "wins": 2,
+          "losses": 1,
+          "winPct": 66.666667,
+          "sourceNet30NotionalPoints": 29.12066,
+          "sumSourceAbsoluteNet30Pct": 29.12066,
+          "rightCensored": 0
+        },
+        "2025-04": {
+          "naturalIntents": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 5.395106,
+          "sumSourceAbsoluteNet30Pct": 5.395106,
+          "rightCensored": 0
+        },
+        "2025-06": {
+          "naturalIntents": 5,
+          "closed": 5,
+          "wins": 3,
+          "losses": 2,
+          "winPct": 60,
+          "sourceNet30NotionalPoints": -3.978566,
+          "sumSourceAbsoluteNet30Pct": -3.978566,
+          "rightCensored": 0
+        }
+      }
+    },
+    {
+      "gate": "D3_PRIOR72H_ALL3_SENSITIVITY",
+      "earlierDropPct": 3,
+      "priorHours": 72,
+      "originalSourceNatural53InputMustNotBeMixed": true,
+      "sourceNatural": {
+        "naturalIntents": 14,
+        "closed": 14,
+        "wins": 7,
+        "losses": 7,
+        "winPct": 50,
+        "sourceNet30NotionalPoints": -1.471783,
+        "sumSourceAbsoluteNet30Pct": -1.471783,
+        "rightCensored": 0
+      },
+      "noSlipNaturalSingleSlotPriceProxy": {
+        "trades": 7,
+        "wins": 5,
+        "winPct": 71.428571,
+        "realizedOnlyDDPct": 1.637205,
+        "finalNavYen": 13116.14,
+        "profitFactor": 17.838747,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "extra100bpsCoverSingleSlotPriceProxy": {
+        "trades": 7,
+        "wins": 5,
+        "winPct": 71.428571,
+        "realizedOnlyDDPct": 2.401327,
+        "finalNavYen": 12501.18,
+        "profitFactor": 8.38303,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "sourceSlotOverlapBlocked": 7,
+      "sourceSelectedIDs": [
+        "P61_BINANCE_MKT_00011",
+        "P61_BINANCE_MKT_00023",
+        "P61_BINANCE_MKT_00027",
+        "P61_BINANCE_MKT_00041",
+        "P61_BINANCE_MKT_00045",
+        "P61_BINANCE_MKT_00049",
+        "P61_BINANCE_MKT_00052"
+      ],
+      "sourceBlockedIDs": [
+        "P61_BINANCE_MKT_00024",
+        "P61_BINANCE_MKT_00025",
+        "P61_BINANCE_MKT_00026",
+        "P61_BINANCE_MKT_00046",
+        "P61_BINANCE_MKT_00051",
+        "P61_BINANCE_MKT_00053",
+        "P61_BINANCE_MKT_00054"
+      ],
+      "perMonth": {
+        "2025-02": {
+          "naturalIntents": 6,
+          "closed": 6,
+          "wins": 2,
+          "losses": 4,
+          "winPct": 33.333333,
+          "sourceNet30NotionalPoints": 4.22066,
+          "sumSourceAbsoluteNet30Pct": 4.22066,
+          "rightCensored": 0
+        },
+        "2025-04": {
+          "naturalIntents": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 5.395106,
+          "sumSourceAbsoluteNet30Pct": 5.395106,
+          "rightCensored": 0
+        },
+        "2025-05": {
+          "naturalIntents": 2,
+          "closed": 2,
+          "wins": 1,
+          "losses": 1,
+          "winPct": 50,
+          "sourceNet30NotionalPoints": -7.108983,
+          "sumSourceAbsoluteNet30Pct": -7.108983,
+          "rightCensored": 0
+        },
+        "2025-06": {
+          "naturalIntents": 5,
+          "closed": 5,
+          "wins": 3,
+          "losses": 2,
+          "winPct": 60,
+          "sourceNet30NotionalPoints": -3.978566,
+          "sumSourceAbsoluteNet30Pct": -3.978566,
+          "rightCensored": 0
+        }
+      }
+    },
+    {
+      "gate": "D5_PRIOR48H_ALL3_SENSITIVITY",
+      "earlierDropPct": 5,
+      "priorHours": 48,
+      "originalSourceNatural53InputMustNotBeMixed": true,
+      "sourceNatural": {
+        "naturalIntents": 21,
+        "closed": 21,
+        "wins": 13,
+        "losses": 8,
+        "winPct": 61.904762,
+        "sourceNet30NotionalPoints": 40.669308,
+        "sumSourceAbsoluteNet30Pct": 40.669308,
+        "rightCensored": 0
+      },
+      "noSlipNaturalSingleSlotPriceProxy": {
+        "trades": 9,
+        "wins": 8,
+        "winPct": 88.888889,
+        "realizedOnlyDDPct": 6.225,
+        "finalNavYen": 14423.39,
+        "profitFactor": 7.169102,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "extra100bpsCoverSingleSlotPriceProxy": {
+        "trades": 9,
+        "wins": 8,
+        "winPct": 88.888889,
+        "realizedOnlyDDPct": 7.035,
+        "finalNavYen": 13564.35,
+        "profitFactor": 5.556778,
+        "notM5HighDDAndNotActualAccount": true
+      },
+      "sourceSlotOverlapBlocked": 12,
+      "sourceSelectedIDs": [
+        "P61_BINANCE_MKT_00010",
+        "P61_BINANCE_MKT_00012",
+        "P61_BINANCE_MKT_00027",
+        "P61_BINANCE_MKT_00035",
+        "P61_BINANCE_MKT_00040",
+        "P61_BINANCE_MKT_00045",
+        "P61_BINANCE_MKT_00047",
+        "P61_BINANCE_MKT_00050",
+        "P61_BINANCE_MKT_00052"
+      ],
+      "sourceBlockedIDs": [
+        "P61_BINANCE_MKT_00011",
+        "P61_BINANCE_MKT_00013",
+        "P61_BINANCE_MKT_00014",
+        "P61_BINANCE_MKT_00015",
+        "P61_BINANCE_MKT_00016",
+        "P61_BINANCE_MKT_00041",
+        "P61_BINANCE_MKT_00046",
+        "P61_BINANCE_MKT_00048",
+        "P61_BINANCE_MKT_00049",
+        "P61_BINANCE_MKT_00051",
+        "P61_BINANCE_MKT_00053",
+        "P61_BINANCE_MKT_00054"
+      ],
+      "perMonth": {
+        "2025-02": {
+          "naturalIntents": 8,
+          "closed": 8,
+          "wins": 4,
+          "losses": 4,
+          "winPct": 50,
+          "sourceNet30NotionalPoints": 21.421696,
+          "sumSourceAbsoluteNet30Pct": 21.421696,
+          "rightCensored": 0
+        },
+        "2025-03": {
+          "naturalIntents": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 11.240447,
+          "sumSourceAbsoluteNet30Pct": 11.240447,
+          "rightCensored": 0
+        },
+        "2025-04": {
+          "naturalIntents": 2,
+          "closed": 2,
+          "wins": 2,
+          "losses": 0,
+          "winPct": 100,
+          "sourceNet30NotionalPoints": 7.76979,
+          "sumSourceAbsoluteNet30Pct": 7.76979,
+          "rightCensored": 0
+        },
+        "2025-05": {
+          "naturalIntents": 2,
+          "closed": 2,
+          "wins": 1,
+          "losses": 1,
+          "winPct": 50,
+          "sourceNet30NotionalPoints": -7.108983,
+          "sumSourceAbsoluteNet30Pct": -7.108983,
+          "rightCensored": 0
+        },
+        "2025-06": {
+          "naturalIntents": 8,
+          "closed": 8,
+          "wins": 5,
+          "losses": 3,
+          "winPct": 62.5,
+          "sourceNet30NotionalPoints": 7.346358,
+          "sumSourceAbsoluteNet30Pct": 7.346358,
+          "rightCensored": 0
+        }
+      }
+    }
+  ],
+  "sourceAllNaturalSignalLedger": [
+    {
+      "id": "P61_BINANCE_MKT_00000",
+      "entryTs": 1737259200000,
+      "entryPrice": 0.02877,
+      "entryH1VolumeEXPOST": 493159339,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1737255600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1737342000000,
+        "decisionReferenceTs": 1737338400000,
+        "exitPrice": 0.024261120000000004,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 15.372158498435862,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737162000000,
+            "triggerAvailableAt": 1737165600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737158400000,
+            "priorBTC24Pct": 4.524346,
+            "priorPENGUMinusBTC24Pct": -4.396523,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737162000000,
+            "triggerAvailableAt": 1737165600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737158400000,
+            "priorBTC24Pct": 4.524346,
+            "priorPENGUMinusBTC24Pct": -4.396523,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737162000000,
+            "triggerAvailableAt": 1737165600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737158400000,
+            "priorBTC24Pct": 4.524346,
+            "priorPENGUMinusBTC24Pct": -4.396523,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00001",
+      "entryTs": 1737385200000,
+      "entryPrice": 0.023914,
+      "entryH1VolumeEXPOST": 892171221,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1737381600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1737453600000,
+        "decisionReferenceTs": 1737450000000,
+        "exitPrice": 0.023852,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -0.04073764322154422,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00002",
+      "entryTs": 1737432000000,
+      "entryPrice": 0.023665,
+      "entryH1VolumeEXPOST": 285659107,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1737428400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1737500400000,
+        "decisionReferenceTs": 1737496800000,
+        "exitPrice": 0.023568,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 0.10988802028312233,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737374400000,
+            "triggerAvailableAt": 1737378000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737370800000,
+            "priorBTC24Pct": 3.750414,
+            "priorPENGUMinusBTC24Pct": -4.571625,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00003",
+      "entryTs": 1737680400000,
+      "entryPrice": 0.023677,
+      "entryH1VolumeEXPOST": 258320274,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1737676800000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1737702000000,
+        "decisionReferenceTs": 1737698400000,
+        "exitPrice": 0.025571160000000002,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737644400000,
+            "triggerAvailableAt": 1737648000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737640800000,
+            "priorBTC24Pct": 0.766714,
+            "priorPENGUMinusBTC24Pct": 2.967918,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737644400000,
+            "triggerAvailableAt": 1737648000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737640800000,
+            "priorBTC24Pct": 0.766714,
+            "priorPENGUMinusBTC24Pct": 2.967918,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737644400000,
+            "triggerAvailableAt": 1737648000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737640800000,
+            "priorBTC24Pct": 0.766714,
+            "priorPENGUMinusBTC24Pct": 2.967918,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737658800000,
+            "triggerAvailableAt": 1737662400000,
+            "signalPreconditionsReferenceH1OpenTs": 1737655200000,
+            "priorBTC24Pct": 1.453018,
+            "priorPENGUMinusBTC24Pct": -5.175209,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00004",
+      "entryTs": 1737813600000,
+      "entryPrice": 0.022035,
+      "entryH1VolumeEXPOST": 665613216,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1737810000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1737864000000,
+        "decisionReferenceTs": 1737860400000,
+        "exitPrice": 0.0237978,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737774000000,
+            "triggerAvailableAt": 1737777600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737770400000,
+            "priorBTC24Pct": 1.507359,
+            "priorPENGUMinusBTC24Pct": -4.023955,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737774000000,
+            "triggerAvailableAt": 1737777600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737770400000,
+            "priorBTC24Pct": 1.507359,
+            "priorPENGUMinusBTC24Pct": -4.023955,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737774000000,
+            "triggerAvailableAt": 1737777600000,
+            "signalPreconditionsReferenceH1OpenTs": 1737770400000,
+            "priorBTC24Pct": 1.507359,
+            "priorPENGUMinusBTC24Pct": -4.023955,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737777600000,
+            "triggerAvailableAt": 1737781200000,
+            "signalPreconditionsReferenceH1OpenTs": 1737774000000,
+            "priorBTC24Pct": 1.262777,
+            "priorPENGUMinusBTC24Pct": -4.935479,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00005",
+      "entryTs": 1738159200000,
+      "entryPrice": 0.01572,
+      "entryH1VolumeEXPOST": 823102678,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738155600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738382400000,
+        "decisionReferenceTs": 1738378800000,
+        "exitPrice": 0.016977600000000002,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737950400000,
+            "triggerAvailableAt": 1737954000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737946800000,
+            "priorBTC24Pct": -3.510494,
+            "priorPENGUMinusBTC24Pct": 2.803899,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00006",
+      "entryTs": 1738162800000,
+      "entryPrice": 0.01568,
+      "entryH1VolumeEXPOST": 723551809,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738159200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738382400000,
+        "decisionReferenceTs": 1738378800000,
+        "exitPrice": 0.016934400000000002,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737950400000,
+            "triggerAvailableAt": 1737954000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737946800000,
+            "priorBTC24Pct": -3.510494,
+            "priorPENGUMinusBTC24Pct": 2.803899,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00007",
+      "entryTs": 1738170000000,
+      "entryPrice": 0.015538,
+      "entryH1VolumeEXPOST": 655757967,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738166400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738184400000,
+        "decisionReferenceTs": 1738180800000,
+        "exitPrice": 0.01678104,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1737950400000,
+            "triggerAvailableAt": 1737954000000,
+            "signalPreconditionsReferenceH1OpenTs": 1737946800000,
+            "priorBTC24Pct": -3.510494,
+            "priorPENGUMinusBTC24Pct": 2.803899,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00008",
+      "entryTs": 1738242000000,
+      "entryPrice": 0.015101,
+      "entryH1VolumeEXPOST": 557648696,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738238400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738310400000,
+        "decisionReferenceTs": 1738306800000,
+        "exitPrice": 0.014104,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 6.3022117740547,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738202400000,
+            "triggerAvailableAt": 1738206000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738198800000,
+            "priorBTC24Pct": 2.372942,
+            "priorPENGUMinusBTC24Pct": -2.701847,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738202400000,
+            "triggerAvailableAt": 1738206000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738198800000,
+            "priorBTC24Pct": 2.372942,
+            "priorPENGUMinusBTC24Pct": -2.701847,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738202400000,
+            "triggerAvailableAt": 1738206000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738198800000,
+            "priorBTC24Pct": 2.372942,
+            "priorPENGUMinusBTC24Pct": -2.701847,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738231200000,
+            "triggerAvailableAt": 1738234800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738227600000,
+            "priorBTC24Pct": 3.000196,
+            "priorPENGUMinusBTC24Pct": -6.825674,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00009",
+      "entryTs": 1738285200000,
+      "entryPrice": 0.014497,
+      "entryH1VolumeEXPOST": 627405266,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738281600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738342800000,
+        "decisionReferenceTs": 1738339200000,
+        "exitPrice": 0.01565676,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.299999999999985,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738249200000,
+            "triggerAvailableAt": 1738252800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738245600000,
+            "priorBTC24Pct": 3.814209,
+            "priorPENGUMinusBTC24Pct": -6.461061,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738249200000,
+            "triggerAvailableAt": 1738252800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738245600000,
+            "priorBTC24Pct": 3.814209,
+            "priorPENGUMinusBTC24Pct": -6.461061,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738249200000,
+            "triggerAvailableAt": 1738252800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738245600000,
+            "priorBTC24Pct": 3.814209,
+            "priorPENGUMinusBTC24Pct": -6.461061,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738270800000,
+            "triggerAvailableAt": 1738274400000,
+            "signalPreconditionsReferenceH1OpenTs": 1738267200000,
+            "priorBTC24Pct": 0.653542,
+            "priorPENGUMinusBTC24Pct": -4.628027,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00010",
+      "entryTs": 1738443600000,
+      "entryPrice": 0.014275,
+      "entryH1VolumeEXPOST": 818709752,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738440000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738526400000,
+        "decisionReferenceTs": 1738522800000,
+        "exitPrice": 0.01269632,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 10.759054290718028,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738346400000,
+            "triggerAvailableAt": 1738350000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738342800000,
+            "priorBTC24Pct": -0.666286,
+            "priorPENGUMinusBTC24Pct": 1.39834,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738346400000,
+            "triggerAvailableAt": 1738350000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738342800000,
+            "priorBTC24Pct": -0.666286,
+            "priorPENGUMinusBTC24Pct": 1.39834,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738292400000,
+            "triggerAvailableAt": 1738296000000,
+            "signalPreconditionsReferenceH1OpenTs": 1738288800000,
+            "priorBTC24Pct": -0.328733,
+            "priorPENGUMinusBTC24Pct": -4.050829,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00011",
+      "entryTs": 1738454400000,
+      "entryPrice": 0.013555,
+      "entryH1VolumeEXPOST": 821874132,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738450800000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738551600000,
+        "decisionReferenceTs": 1738548000000,
+        "exitPrice": 0.01054768,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 21.886056805606778,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738440000000,
+            "triggerAvailableAt": 1738443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738436400000,
+            "priorBTC24Pct": -0.64111,
+            "priorPENGUMinusBTC24Pct": -1.961072,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738440000000,
+            "triggerAvailableAt": 1738443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738436400000,
+            "priorBTC24Pct": -0.64111,
+            "priorPENGUMinusBTC24Pct": -1.961072,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738440000000,
+            "triggerAvailableAt": 1738443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738436400000,
+            "priorBTC24Pct": -0.64111,
+            "priorPENGUMinusBTC24Pct": -1.961072,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738447200000,
+            "triggerAvailableAt": 1738450800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738443600000,
+            "priorBTC24Pct": -0.930461,
+            "priorPENGUMinusBTC24Pct": -3.981394,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00012",
+      "entryTs": 1738796400000,
+      "entryPrice": 0.011585,
+      "entryH1VolumeEXPOST": 351070265,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738792800000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738972800000,
+        "decisionReferenceTs": 1738969200000,
+        "exitPrice": 0.01009528,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 12.559041864479925,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738771200000,
+            "triggerAvailableAt": 1738774800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738767600000,
+            "priorBTC24Pct": -1.255959,
+            "priorPENGUMinusBTC24Pct": -2.285421,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00013",
+      "entryTs": 1738839600000,
+      "entryPrice": 0.01154,
+      "entryH1VolumeEXPOST": 1331193334,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738836000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738936800000,
+        "decisionReferenceTs": 1738933200000,
+        "exitPrice": 0.0124632,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738771200000,
+            "triggerAvailableAt": 1738774800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738767600000,
+            "priorBTC24Pct": -1.255959,
+            "priorPENGUMinusBTC24Pct": -2.285421,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00014",
+      "entryTs": 1738854000000,
+      "entryPrice": 0.011162,
+      "entryH1VolumeEXPOST": 1199740962,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738850400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738936800000,
+        "decisionReferenceTs": 1738933200000,
+        "exitPrice": 0.01205496,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738771200000,
+            "triggerAvailableAt": 1738774800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738767600000,
+            "priorBTC24Pct": -1.255959,
+            "priorPENGUMinusBTC24Pct": -2.285421,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00015",
+      "entryTs": 1738872000000,
+      "entryPrice": 0.010909,
+      "entryH1VolumeEXPOST": 348160087,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738868400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738936800000,
+        "decisionReferenceTs": 1738933200000,
+        "exitPrice": 0.01178172,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738771200000,
+            "triggerAvailableAt": 1738774800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738767600000,
+            "priorBTC24Pct": -1.255959,
+            "priorPENGUMinusBTC24Pct": -2.285421,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00016",
+      "entryTs": 1738900800000,
+      "entryPrice": 0.010761,
+      "entryH1VolumeEXPOST": 365923563,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1738897200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1738936800000,
+        "decisionReferenceTs": 1738933200000,
+        "exitPrice": 0.011621880000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738764000000,
+            "triggerAvailableAt": 1738767600000,
+            "signalPreconditionsReferenceH1OpenTs": 1738760400000,
+            "priorBTC24Pct": -0.444792,
+            "priorPENGUMinusBTC24Pct": 2.547393,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1738771200000,
+            "triggerAvailableAt": 1738774800000,
+            "signalPreconditionsReferenceH1OpenTs": 1738767600000,
+            "priorBTC24Pct": -1.255959,
+            "priorPENGUMinusBTC24Pct": -2.285421,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00017",
+      "entryTs": 1739131200000,
+      "entryPrice": 0.009752,
+      "entryH1VolumeEXPOST": 330078719,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739127600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739196000000,
+        "decisionReferenceTs": 1739192400000,
+        "exitPrice": 0.01053216,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739116800000,
+            "triggerAvailableAt": 1739120400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739113200000,
+            "priorBTC24Pct": 0.668072,
+            "priorPENGUMinusBTC24Pct": -3.030427,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739116800000,
+            "triggerAvailableAt": 1739120400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739113200000,
+            "priorBTC24Pct": 0.668072,
+            "priorPENGUMinusBTC24Pct": -3.030427,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739116800000,
+            "triggerAvailableAt": 1739120400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739113200000,
+            "priorBTC24Pct": 0.668072,
+            "priorPENGUMinusBTC24Pct": -3.030427,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739120400000,
+            "triggerAvailableAt": 1739124000000,
+            "signalPreconditionsReferenceH1OpenTs": 1739116800000,
+            "priorBTC24Pct": 0.336585,
+            "priorPENGUMinusBTC24Pct": -4.267789,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00018",
+      "entryTs": 1739343600000,
+      "entryPrice": 0.009664,
+      "entryH1VolumeEXPOST": 238806581,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739340000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739401200000,
+        "decisionReferenceTs": 1739397600000,
+        "exitPrice": 0.010437120000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00019",
+      "entryTs": 1739368800000,
+      "entryPrice": 0.009609,
+      "entryH1VolumeEXPOST": 931367113,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739365200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739401200000,
+        "decisionReferenceTs": 1739397600000,
+        "exitPrice": 0.01037772,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00020",
+      "entryTs": 1739386800000,
+      "entryPrice": 0.009659,
+      "entryH1VolumeEXPOST": 559182304,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739383200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739401200000,
+        "decisionReferenceTs": 1739397600000,
+        "exitPrice": 0.01043172,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739322000000,
+            "triggerAvailableAt": 1739325600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739318400000,
+            "priorBTC24Pct": -1.756203,
+            "priorPENGUMinusBTC24Pct": -0.718184,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00021",
+      "entryTs": 1739671200000,
+      "entryPrice": 0.009966,
+      "entryH1VolumeEXPOST": 247277448,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739667600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739905200000,
+        "decisionReferenceTs": 1739901600000,
+        "exitPrice": 0.00810888,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 18.33455749548464,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739624400000,
+            "triggerAvailableAt": 1739628000000,
+            "signalPreconditionsReferenceH1OpenTs": 1739620800000,
+            "priorBTC24Pct": 1.132154,
+            "priorPENGUMinusBTC24Pct": -5.71188,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00022",
+      "entryTs": 1739692800000,
+      "entryPrice": 0.009884,
+      "entryH1VolumeEXPOST": 282929173,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739689200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1739761200000,
+        "decisionReferenceTs": 1739757600000,
+        "exitPrice": 0.009682,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 1.74370700121409,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739610000000,
+            "triggerAvailableAt": 1739613600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739606400000,
+            "priorBTC24Pct": 0.668918,
+            "priorPENGUMinusBTC24Pct": -1.289917,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739624400000,
+            "triggerAvailableAt": 1739628000000,
+            "signalPreconditionsReferenceH1OpenTs": 1739620800000,
+            "priorBTC24Pct": 1.132154,
+            "priorPENGUMinusBTC24Pct": -5.71188,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00023",
+      "entryTs": 1739880000000,
+      "entryPrice": 0.008816,
+      "entryH1VolumeEXPOST": 312876861,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739876400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1740139200000,
+        "decisionReferenceTs": 1740135600000,
+        "exitPrice": 0.008982,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -2.1829401088929385,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739854800000,
+            "triggerAvailableAt": 1739858400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739851200000,
+            "priorBTC24Pct": 0.057404,
+            "priorPENGUMinusBTC24Pct": -4.429046,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00024",
+      "entryTs": 1739926800000,
+      "entryPrice": 0.008186,
+      "entryH1VolumeEXPOST": 275637386,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739923200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1740132000000,
+        "decisionReferenceTs": 1740128400000,
+        "exitPrice": 0.00884088,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739854800000,
+            "triggerAvailableAt": 1739858400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739851200000,
+            "priorBTC24Pct": 0.057404,
+            "priorPENGUMinusBTC24Pct": -4.429046,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00025",
+      "entryTs": 1739941200000,
+      "entryPrice": 0.008045,
+      "entryH1VolumeEXPOST": 334042623,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739937600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1740056400000,
+        "decisionReferenceTs": 1740052800000,
+        "exitPrice": 0.008688600000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739854800000,
+            "triggerAvailableAt": 1739858400000,
+            "signalPreconditionsReferenceH1OpenTs": 1739851200000,
+            "priorBTC24Pct": 0.057404,
+            "priorPENGUMinusBTC24Pct": -4.429046,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00026",
+      "entryTs": 1739970000000,
+      "entryPrice": 0.008227,
+      "entryH1VolumeEXPOST": 194772765,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1739966400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1740132000000,
+        "decisionReferenceTs": 1740128400000,
+        "exitPrice": 0.008885160000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739808000000,
+            "triggerAvailableAt": 1739811600000,
+            "signalPreconditionsReferenceH1OpenTs": 1739804400000,
+            "priorBTC24Pct": -1.284875,
+            "priorPENGUMinusBTC24Pct": -1.240946,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1739948400000,
+            "triggerAvailableAt": 1739952000000,
+            "signalPreconditionsReferenceH1OpenTs": 1739944800000,
+            "priorBTC24Pct": 0.266146,
+            "priorPENGUMinusBTC24Pct": -5.196047,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00027",
+      "entryTs": 1740427200000,
+      "entryPrice": 0.007718,
+      "entryH1VolumeEXPOST": 479667099,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1740423600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1740474000000,
+        "decisionReferenceTs": 1740470400000,
+        "exitPrice": 0.006968,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 9.417543405027207,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740412800000,
+            "triggerAvailableAt": 1740416400000,
+            "signalPreconditionsReferenceH1OpenTs": 1740409200000,
+            "priorBTC24Pct": -1.14853,
+            "priorPENGUMinusBTC24Pct": -1.694036,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740412800000,
+            "triggerAvailableAt": 1740416400000,
+            "signalPreconditionsReferenceH1OpenTs": 1740409200000,
+            "priorBTC24Pct": -1.14853,
+            "priorPENGUMinusBTC24Pct": -1.694036,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740412800000,
+            "triggerAvailableAt": 1740416400000,
+            "signalPreconditionsReferenceH1OpenTs": 1740409200000,
+            "priorBTC24Pct": -1.14853,
+            "priorPENGUMinusBTC24Pct": -1.694036,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740420000000,
+            "triggerAvailableAt": 1740423600000,
+            "signalPreconditionsReferenceH1OpenTs": 1740416400000,
+            "priorBTC24Pct": -1.029392,
+            "priorPENGUMinusBTC24Pct": -2.166459,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00028",
+      "entryTs": 1741122000000,
+      "entryPrice": 0.006637,
+      "entryH1VolumeEXPOST": 363613228,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1741118400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1741204800000,
+        "decisionReferenceTs": 1741201200000,
+        "exitPrice": 0.006627,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -0.1493295163477512,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740981600000,
+            "triggerAvailableAt": 1740985200000,
+            "signalPreconditionsReferenceH1OpenTs": 1740978000000,
+            "priorBTC24Pct": 8.59119,
+            "priorPENGUMinusBTC24Pct": -9.508414,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1740981600000,
+            "triggerAvailableAt": 1740985200000,
+            "signalPreconditionsReferenceH1OpenTs": 1740978000000,
+            "priorBTC24Pct": 8.59119,
+            "priorPENGUMinusBTC24Pct": -9.508414,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741010400000,
+            "triggerAvailableAt": 1741014000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741006800000,
+            "priorBTC24Pct": 9.1653,
+            "priorPENGUMinusBTC24Pct": -13.840144,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00029",
+      "entryTs": 1741467600000,
+      "entryPrice": 0.006152,
+      "entryH1VolumeEXPOST": 122859828,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1741464000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1741550400000,
+        "decisionReferenceTs": 1741546800000,
+        "exitPrice": 0.00549848,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 10.322886866059822,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00030",
+      "entryTs": 1741474800000,
+      "entryPrice": 0.006054,
+      "entryH1VolumeEXPOST": 177679192,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1741471200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1741658400000,
+        "decisionReferenceTs": 1741654800000,
+        "exitPrice": 0.0053352,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 11.573141724479685,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1741442400000,
+            "triggerAvailableAt": 1741446000000,
+            "signalPreconditionsReferenceH1OpenTs": 1741438800000,
+            "priorBTC24Pct": -3.174352,
+            "priorPENGUMinusBTC24Pct": 2.328247,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00031",
+      "entryTs": 1742608800000,
+      "entryPrice": 0.006283,
+      "entryH1VolumeEXPOST": 139412942,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1742605200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1742727600000,
+        "decisionReferenceTs": 1742724000000,
+        "exitPrice": 0.006296,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -0.5069075282508326,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1742601600000,
+            "triggerAvailableAt": 1742605200000,
+            "signalPreconditionsReferenceH1OpenTs": 1742598000000,
+            "priorBTC24Pct": -0.158344,
+            "priorPENGUMinusBTC24Pct": -0.293228,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1742601600000,
+            "triggerAvailableAt": 1742605200000,
+            "signalPreconditionsReferenceH1OpenTs": 1742598000000,
+            "priorBTC24Pct": -0.158344,
+            "priorPENGUMinusBTC24Pct": -0.293228,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1742601600000,
+            "triggerAvailableAt": 1742605200000,
+            "signalPreconditionsReferenceH1OpenTs": 1742598000000,
+            "priorBTC24Pct": -0.158344,
+            "priorPENGUMinusBTC24Pct": -0.293228,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1742533200000,
+            "triggerAvailableAt": 1742536800000,
+            "signalPreconditionsReferenceH1OpenTs": 1742529600000,
+            "priorBTC24Pct": -1.190323,
+            "priorPENGUMinusBTC24Pct": -1.549403,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00032",
+      "entryTs": 1743217200000,
+      "entryPrice": 0.006197,
+      "entryH1VolumeEXPOST": 310368347,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743213600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743422400000,
+        "decisionReferenceTs": 1743418800000,
+        "exitPrice": 0.00559728,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 9.377585928675169,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743170400000,
+            "triggerAvailableAt": 1743174000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743166800000,
+            "priorBTC24Pct": -1.596624,
+            "priorPENGUMinusBTC24Pct": -2.341429,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00033",
+      "entryTs": 1743228000000,
+      "entryPrice": 0.006155,
+      "entryH1VolumeEXPOST": 185671933,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743224400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743487200000,
+        "decisionReferenceTs": 1743483600000,
+        "exitPrice": 0.005433,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 11.43030056864337,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743170400000,
+            "triggerAvailableAt": 1743174000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743166800000,
+            "priorBTC24Pct": -1.596624,
+            "priorPENGUMinusBTC24Pct": -2.341429,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00034",
+      "entryTs": 1743246000000,
+      "entryPrice": 0.005973,
+      "entryH1VolumeEXPOST": 992861608,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743242400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743505200000,
+        "decisionReferenceTs": 1743501600000,
+        "exitPrice": 0.00527,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 11.46963000167419,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743166800000,
+            "triggerAvailableAt": 1743170400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743163200000,
+            "priorBTC24Pct": -1.982887,
+            "priorPENGUMinusBTC24Pct": -0.456496,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743170400000,
+            "triggerAvailableAt": 1743174000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743166800000,
+            "priorBTC24Pct": -1.596624,
+            "priorPENGUMinusBTC24Pct": -2.341429,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00035",
+      "entryTs": 1743429600000,
+      "entryPrice": 0.005501,
+      "entryH1VolumeEXPOST": 424962327,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743426000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743642000000,
+        "decisionReferenceTs": 1743638400000,
+        "exitPrice": 0.0048661600000000005,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 11.240447191419733,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743418800000,
+            "triggerAvailableAt": 1743422400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743415200000,
+            "priorBTC24Pct": -1.140297,
+            "priorPENGUMinusBTC24Pct": -3.154181,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00036",
+      "entryTs": 1743483600000,
+      "entryPrice": 0.005449,
+      "entryH1VolumeEXPOST": 207834131,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743480000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743642000000,
+        "decisionReferenceTs": 1743638400000,
+        "exitPrice": 0.0048661600000000005,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 10.39627454578821,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743436800000,
+            "triggerAvailableAt": 1743440400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743433200000,
+            "priorBTC24Pct": 0.81439,
+            "priorPENGUMinusBTC24Pct": -4.558249,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00037",
+      "entryTs": 1743505200000,
+      "entryPrice": 0.00527,
+      "entryH1VolumeEXPOST": 520634548,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743501600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743699600000,
+        "decisionReferenceTs": 1743696000000,
+        "exitPrice": 0.004684160000000001,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 10.816508538899427,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743404400000,
+            "triggerAvailableAt": 1743408000000,
+            "signalPreconditionsReferenceH1OpenTs": 1743400800000,
+            "priorBTC24Pct": -1.361187,
+            "priorPENGUMinusBTC24Pct": -0.938046,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743436800000,
+            "triggerAvailableAt": 1743440400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743433200000,
+            "priorBTC24Pct": 0.81439,
+            "priorPENGUMinusBTC24Pct": -4.558249,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00038",
+      "entryTs": 1743573600000,
+      "entryPrice": 0.004942,
+      "entryH1VolumeEXPOST": 577906737,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743570000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743832800000,
+        "decisionReferenceTs": 1743829200000,
+        "exitPrice": 0.004706,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 4.475394577094295,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743552000000,
+            "triggerAvailableAt": 1743555600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743548400000,
+            "priorBTC24Pct": 3.154967,
+            "priorPENGUMinusBTC24Pct": -6.538843,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00039",
+      "entryTs": 1743595200000,
+      "entryPrice": 0.005105,
+      "entryH1VolumeEXPOST": 226169357,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743591600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743854400000,
+        "decisionReferenceTs": 1743850800000,
+        "exitPrice": 0.004636,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 8.887071498530851,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743516000000,
+            "triggerAvailableAt": 1743519600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743512400000,
+            "priorBTC24Pct": 1.403554,
+            "priorPENGUMinusBTC24Pct": -3.112334,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743552000000,
+            "triggerAvailableAt": 1743555600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743548400000,
+            "priorBTC24Pct": 3.154967,
+            "priorPENGUMinusBTC24Pct": -6.538843,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00040",
+      "entryTs": 1743663600000,
+      "entryPrice": 0.004823,
+      "entryH1VolumeEXPOST": 203772271,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743660000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743922800000,
+        "decisionReferenceTs": 1743919200000,
+        "exitPrice": 0.004694,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 2.3746838067592706,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743649200000,
+            "triggerAvailableAt": 1743652800000,
+            "signalPreconditionsReferenceH1OpenTs": 1743645600000,
+            "priorBTC24Pct": -1.116989,
+            "priorPENGUMinusBTC24Pct": -0.389338,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743649200000,
+            "triggerAvailableAt": 1743652800000,
+            "signalPreconditionsReferenceH1OpenTs": 1743645600000,
+            "priorBTC24Pct": -1.116989,
+            "priorPENGUMinusBTC24Pct": -0.389338,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743649200000,
+            "triggerAvailableAt": 1743652800000,
+            "signalPreconditionsReferenceH1OpenTs": 1743645600000,
+            "priorBTC24Pct": -1.116989,
+            "priorPENGUMinusBTC24Pct": -0.389338,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743631200000,
+            "triggerAvailableAt": 1743634800000,
+            "signalPreconditionsReferenceH1OpenTs": 1743627600000,
+            "priorBTC24Pct": -0.432607,
+            "priorPENGUMinusBTC24Pct": -2.937963,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00041",
+      "entryTs": 1743688800000,
+      "entryPrice": 0.004618,
+      "entryH1VolumeEXPOST": 307482597,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1743685200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1743948000000,
+        "decisionReferenceTs": 1743944400000,
+        "exitPrice": 0.004355,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 5.3951061065396155,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743660000000,
+            "triggerAvailableAt": 1743663600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743656400000,
+            "priorBTC24Pct": -0.913707,
+            "priorPENGUMinusBTC24Pct": -1.089531,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743660000000,
+            "triggerAvailableAt": 1743663600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743656400000,
+            "priorBTC24Pct": -0.913707,
+            "priorPENGUMinusBTC24Pct": -1.089531,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743660000000,
+            "triggerAvailableAt": 1743663600000,
+            "signalPreconditionsReferenceH1OpenTs": 1743656400000,
+            "priorBTC24Pct": -0.913707,
+            "priorPENGUMinusBTC24Pct": -1.089531,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1743670800000,
+            "triggerAvailableAt": 1743674400000,
+            "signalPreconditionsReferenceH1OpenTs": 1743667200000,
+            "priorBTC24Pct": -1.160937,
+            "priorPENGUMinusBTC24Pct": -3.805559,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00042",
+      "entryTs": 1747461600000,
+      "entryPrice": 0.012345,
+      "entryH1VolumeEXPOST": 254143483,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1747458000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1747530000000,
+        "decisionReferenceTs": 1747526400000,
+        "exitPrice": 0.012166,
+        "exitReason": "SHORT_V20_DEADLINE_EXIT",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 1.1499797488861876,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747440000000,
+            "triggerAvailableAt": 1747443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747436400000,
+            "priorBTC24Pct": -0.291473,
+            "priorPENGUMinusBTC24Pct": -4.664045,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00043",
+      "entryTs": 1747501200000,
+      "entryPrice": 0.012089,
+      "entryH1VolumeEXPOST": 313667113,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1747497600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1747580400000,
+        "decisionReferenceTs": 1747576800000,
+        "exitPrice": 0.013056120000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747440000000,
+            "triggerAvailableAt": 1747443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747436400000,
+            "priorBTC24Pct": -0.291473,
+            "priorPENGUMinusBTC24Pct": -4.664045,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00044",
+      "entryTs": 1747522800000,
+      "entryPrice": 0.01197,
+      "entryH1VolumeEXPOST": 166162806,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1747519200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1747558800000,
+        "decisionReferenceTs": 1747555200000,
+        "exitPrice": 0.012927600000000001,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747422000000,
+            "triggerAvailableAt": 1747425600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747418400000,
+            "priorBTC24Pct": 0.971176,
+            "priorPENGUMinusBTC24Pct": -2.280134,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1747440000000,
+            "triggerAvailableAt": 1747443600000,
+            "signalPreconditionsReferenceH1OpenTs": 1747436400000,
+            "priorBTC24Pct": -0.291473,
+            "priorPENGUMinusBTC24Pct": -4.664045,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": false
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00045",
+      "entryTs": 1748638800000,
+      "entryPrice": 0.010798,
+      "entryH1VolumeEXPOST": 79700232,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1748635200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1748898000000,
+        "decisionReferenceTs": 1748894400000,
+        "exitPrice": 0.010637,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 1.1910168549731373,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748527200000,
+            "triggerAvailableAt": 1748530800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748523600000,
+            "priorBTC24Pct": -0.409586,
+            "priorPENGUMinusBTC24Pct": -2.538679,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748527200000,
+            "triggerAvailableAt": 1748530800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748523600000,
+            "priorBTC24Pct": -0.409586,
+            "priorPENGUMinusBTC24Pct": -2.538679,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748556000000,
+            "triggerAvailableAt": 1748559600000,
+            "signalPreconditionsReferenceH1OpenTs": 1748552400000,
+            "priorBTC24Pct": -0.976297,
+            "priorPENGUMinusBTC24Pct": -3.277288,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00046",
+      "entryTs": 1748689200000,
+      "entryPrice": 0.009801,
+      "entryH1VolumeEXPOST": 139057102,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1748685600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1748797200000,
+        "decisionReferenceTs": 1748793600000,
+        "exitPrice": 0.010585080000000002,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748527200000,
+            "triggerAvailableAt": 1748530800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748523600000,
+            "priorBTC24Pct": -0.409586,
+            "priorPENGUMinusBTC24Pct": -2.538679,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": null
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748527200000,
+            "triggerAvailableAt": 1748530800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748523600000,
+            "priorBTC24Pct": -0.409586,
+            "priorPENGUMinusBTC24Pct": -2.538679,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748556000000,
+            "triggerAvailableAt": 1748559600000,
+            "signalPreconditionsReferenceH1OpenTs": 1748552400000,
+            "priorBTC24Pct": -0.976297,
+            "priorPENGUMinusBTC24Pct": -3.277288,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00047",
+      "entryTs": 1749038400000,
+      "entryPrice": 0.010196,
+      "entryH1VolumeEXPOST": 245429396,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1749034800000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1749160800000,
+        "decisionReferenceTs": 1749157200000,
+        "exitPrice": 0.009215440000000002,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 9.31710474695957,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748995200000,
+            "triggerAvailableAt": 1748998800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748991600000,
+            "priorBTC24Pct": -0.457594,
+            "priorPENGUMinusBTC24Pct": -3.863053,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00048",
+      "entryTs": 1749060000000,
+      "entryPrice": 0.010309,
+      "entryH1VolumeEXPOST": 122824052,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1749056400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1749160800000,
+        "decisionReferenceTs": 1749157200000,
+        "exitPrice": 0.009215440000000002,
+        "exitReason": "SHORT_TRAILING_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 10.307818411097081,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748984400000,
+            "triggerAvailableAt": 1748988000000,
+            "signalPreconditionsReferenceH1OpenTs": 1748980800000,
+            "priorBTC24Pct": 0.823149,
+            "priorPENGUMinusBTC24Pct": 0.14517,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1748995200000,
+            "triggerAvailableAt": 1748998800000,
+            "signalPreconditionsReferenceH1OpenTs": 1748991600000,
+            "priorBTC24Pct": -0.457594,
+            "priorPENGUMinusBTC24Pct": -3.863053,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00049",
+      "entryTs": 1749070800000,
+      "entryPrice": 0.009968,
+      "entryH1VolumeEXPOST": 222357193,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1749067200000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1749330000000,
+        "decisionReferenceTs": 1749326400000,
+        "exitPrice": 0.009947,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -0.08932584269663008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749056400000,
+            "triggerAvailableAt": 1749060000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749052800000,
+            "priorBTC24Pct": -0.332827,
+            "priorPENGUMinusBTC24Pct": -1.936308,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749056400000,
+            "triggerAvailableAt": 1749060000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749052800000,
+            "priorBTC24Pct": -0.332827,
+            "priorPENGUMinusBTC24Pct": -1.936308,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749056400000,
+            "triggerAvailableAt": 1749060000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749052800000,
+            "priorBTC24Pct": -0.332827,
+            "priorPENGUMinusBTC24Pct": -1.936308,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749056400000,
+            "triggerAvailableAt": 1749060000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749052800000,
+            "priorBTC24Pct": -0.332827,
+            "priorPENGUMinusBTC24Pct": -1.936308,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00050",
+      "entryTs": 1749175200000,
+      "entryPrice": 0.009187,
+      "entryH1VolumeEXPOST": 160014451,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1749171600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1749265200000,
+        "decisionReferenceTs": 1749261600000,
+        "exitPrice": 0.009921960000000002,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749128400000,
+            "triggerAvailableAt": 1749132000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749124800000,
+            "priorBTC24Pct": 0.583495,
+            "priorPENGUMinusBTC24Pct": -0.988193,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749128400000,
+            "triggerAvailableAt": 1749132000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749124800000,
+            "priorBTC24Pct": 0.583495,
+            "priorPENGUMinusBTC24Pct": -0.988193,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": false,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749128400000,
+            "triggerAvailableAt": 1749132000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749124800000,
+            "priorBTC24Pct": 0.583495,
+            "priorPENGUMinusBTC24Pct": -0.988193,
+            "flags": {
+              "btcBear": false,
+              "relativeWeak": false,
+              "emaBear": true
+            },
+            "all3": false,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749135600000,
+            "triggerAvailableAt": 1749139200000,
+            "signalPreconditionsReferenceH1OpenTs": 1749132000000,
+            "priorBTC24Pct": -0.362393,
+            "priorPENGUMinusBTC24Pct": -3.452479,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00051",
+      "entryTs": 1749229200000,
+      "entryPrice": 0.009562,
+      "entryH1VolumeEXPOST": 335526488,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1749225600000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1749268800000,
+        "decisionReferenceTs": 1749265200000,
+        "exitPrice": 0.01032696,
+        "exitReason": "SHORT_HARD_STOP",
+        "exitPriceKind": "RESIDENT_STOP_PRICE_MODEL",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": -8.300000000000008,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749218400000,
+            "triggerAvailableAt": 1749222000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749214800000,
+            "priorBTC24Pct": -0.423258,
+            "priorPENGUMinusBTC24Pct": -2.19816,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749218400000,
+            "triggerAvailableAt": 1749222000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749214800000,
+            "priorBTC24Pct": -0.423258,
+            "priorPENGUMinusBTC24Pct": -2.19816,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749218400000,
+            "triggerAvailableAt": 1749222000000,
+            "signalPreconditionsReferenceH1OpenTs": 1749214800000,
+            "priorBTC24Pct": -0.423258,
+            "priorPENGUMinusBTC24Pct": -2.19816,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1749211200000,
+            "triggerAvailableAt": 1749214800000,
+            "signalPreconditionsReferenceH1OpenTs": 1749207600000,
+            "priorBTC24Pct": -0.865397,
+            "priorPENGUMinusBTC24Pct": -1.888388,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00052",
+      "entryTs": 1750197600000,
+      "entryPrice": 0.009305,
+      "entryH1VolumeEXPOST": 135032562,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1750194000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1750456800000,
+        "decisionReferenceTs": 1750453200000,
+        "exitPrice": 0.009031,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 2.644653412144005,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750165200000,
+            "triggerAvailableAt": 1750168800000,
+            "signalPreconditionsReferenceH1OpenTs": 1750161600000,
+            "priorBTC24Pct": -1.10805,
+            "priorPENGUMinusBTC24Pct": -2.198802,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00053",
+      "entryTs": 1750215600000,
+      "entryPrice": 0.009254,
+      "entryH1VolumeEXPOST": 143393580,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1750212000000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1750474800000,
+        "decisionReferenceTs": 1750471200000,
+        "exitPrice": 0.009147,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 0.8562567538361712,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750165200000,
+            "triggerAvailableAt": 1750168800000,
+            "signalPreconditionsReferenceH1OpenTs": 1750161600000,
+            "priorBTC24Pct": -1.10805,
+            "priorPENGUMinusBTC24Pct": -2.198802,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    },
+    {
+      "id": "P61_BINANCE_MKT_00054",
+      "entryTs": 1750230000000,
+      "entryPrice": 0.00934,
+      "entryH1VolumeEXPOST": 130029406,
+      "pinnedNativeV20ShortSignal": true,
+      "featureReferenceTs": 1750226400000,
+      "nativeReplay": {
+        "status": "NATIVE_EXIT_MODELED",
+        "exitTs": 1750489200000,
+        "decisionReferenceTs": 1750485600000,
+        "exitPrice": 0.009227,
+        "exitReason": "SHORT_MAX_HOLD",
+        "exitPriceKind": "CAUSAL_NEXT_H1_OPEN",
+        "sourceNativeStopPureFunction": true,
+        "venueSignedFill": false
+      },
+      "net30pct": 0.909850107066368,
+      "p44FrozenEarlierCrossing": {
+        "ORIGINAL_PINNED_NATIVE_SOURCE_ALL": {
+          "pass": true,
+          "latestCrossing": null
+        },
+        "P44_FROZEN_D3_PRIOR48H_ALL3": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR24H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D3_PRIOR72H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750154400000,
+            "triggerAvailableAt": 1750158000000,
+            "signalPreconditionsReferenceH1OpenTs": 1750150800000,
+            "priorBTC24Pct": -0.750134,
+            "priorPENGUMinusBTC24Pct": -1.754056,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        },
+        "D5_PRIOR48H_ALL3_SENSITIVITY": {
+          "pass": true,
+          "latestCrossing": {
+            "signalH1OpenTs": 1750165200000,
+            "triggerAvailableAt": 1750168800000,
+            "signalPreconditionsReferenceH1OpenTs": 1750161600000,
+            "priorBTC24Pct": -1.10805,
+            "priorPENGUMinusBTC24Pct": -2.198802,
+            "flags": {
+              "btcBear": true,
+              "relativeWeak": true,
+              "emaBear": true
+            },
+            "all3": true,
+            "futurePriceUsedToChooseFlags": false
+          }
+        }
+      },
+      "sourceMarket": "BINANCE_FUTURES_UM_NOT_ASTER",
+      "instrument": "PENGUUSDT",
+      "sourceNotVenueSignedFill": true
+    }
+  ],
+  "grossResearch": 0.75,
+  "feesBps": 30,
+  "extraCoverSlipBpsStress": 100,
+  "limitations": [
+    "BINANCE FUTURES UM prices and volumes differ from original ASTER historical source; no original Native V20 venue parity. This can only be EXTERNAL market stress test.",
+    "Past native source pinned implementation is imported unmodified; data feed and fill assumptions are new. Cross-venue signals are not original 53, and a passing gate would not validate live Aster.",
+    "Kline event H1 signal and H1 native EXIT prices are price-only, no signed fill, M5 orderbook, funding, live STOP priority, or true multi-runner gross/DD.",
+    "Original Native source code relies on penguFunding empty, identical to P15 previously used; actual exchange funding not replayed.",
+    "P44 prior-drop D3 gate was retrospectively chosen from previously inspected 2025Aug-2026Nov. This new Binance Jan-Jul source is separate dataset, but selection is not fully blind across market venues.",
+    "Single-slot realized DD under H1 source exits is not M5 mark-to-market DD nor production account DD.",
+    "No entry fee/pricing venue-specific spread impact or live operator action; nothing from this report is deployable."
+  ],
+  "sourceProductionModified": false,
+  "runnerLiveModified": false,
+  "ordersOrSTOPModified": false
+}
