@@ -1,0 +1,65 @@
+{
+  "schema": "p107-pengu-corrected-asof-native-117-entry-candidate-tape/v1",
+  "sourceSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "priorHistoricalRawTape": {
+    "path": "native-new-signal-20251001-20261001/native-PENGU-raw-intentions.jsonl",
+    "sha256": "7d2dd287a3fefba44c07a018863fd0a29b6a59452dddc6352e78d4457832a9d6",
+    "oldCandidateCount": 116,
+    "legacyWarmupStart": "2025-09-24T00:00:00Z"
+  },
+  "currentPinnedNativeAsOf": {
+    "completedHours": 1000,
+    "hourGridEvaluated": 8759,
+    "completeSourceEvents": 117,
+    "oldExactKeyMatches": 116,
+    "newSignalsComparedWithTruncatedTape": 1,
+    "repeatedAt999CompletedHoursCandidateCount": 117,
+    "sourceExceptions": 0
+  },
+  "reproducedLegacyTruncatedWarmup": {
+    "legacyBulkSourceCount": 116,
+    "matchedLegacyKeyCount": 116,
+    "newOnlyCount": 0
+  },
+  "correction": {
+    "reason": "Legacy generator started history 2025-09-24 and thereby changed feature/warmup state at 2025-10-10",
+    "addedCount": 1,
+    "addedSourceNativeEvent": {
+      "strategy_id": "PENGU",
+      "source_runtime_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "signalTs": 1760061600000,
+      "entryTs": 1760065200000,
+      "entryReferenceOpenPrice": 0.0301,
+      "requestedGross": 1,
+      "longMaxHoldHours": 120,
+      "shortMaxHoldHours": 72,
+      "longHardStopPct": 0.08,
+      "shortHardStopPct": 0.08,
+      "pengu72h": -0.09570917400847945,
+      "btc24h": -0.003763909070798821,
+      "nativeEvaluationKind": "ENTRY_NATURAL_SIGNAL_BEFORE_STATE_SLOT_AND_SHARED_GROSS",
+      "exclusion": "NO_ORDER_SENT_NO_ACCOUNT_OCCUPANCY_STOP_REPLAY"
+    }
+  },
+  "correctedTape": {
+    "file": "P107_PENGU_PIN_ASOF_117_RAW_ENTRY_CANDIDATES_20261123.jsonl",
+    "sha256": "0d5ad1ab80e5ecc4ebcd8d957393a8dfbe60125f5fcfcea41f739dd1d91f27fa",
+    "count": 117,
+    "byRoute": {
+      "LONG_V64": 25,
+      "RECOVERY_V8": 51,
+      "SHORT_V20": 41
+    }
+  },
+  "sourcePriceAndSignalsOnly": true,
+  "actualVenueOrders": 0,
+  "accountGrossSharedRiskDD21AndExitReplayPerformed": false,
+  "allRunnerP107FullParity": false
+}

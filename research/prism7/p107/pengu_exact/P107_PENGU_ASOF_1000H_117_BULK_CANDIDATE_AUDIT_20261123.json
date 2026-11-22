@@ -1,0 +1,1184 @@
+{
+  "schema": "p107-pengu-117-bulk-candidates-vs-1000h-native-live-provider-asof/v1",
+  "pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "providerLimit": 1000,
+  "sourceCandidates": 117,
+  "asofMatches": 117,
+  "asofMismatches": 0,
+  "mismatched": [],
+  "actualFills": 0,
+  "allHourSourceScan": false,
+  "fullPortfolioBT": false,
+  "events": [
+    {
+      "signalTs": 1759309200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1759312800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1759629600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1759633200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1759910400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1759914000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1760061600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1760065200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1760540400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1760544000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1761152400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1761156000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1761217200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1761220800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1761674400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1761678000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1761890400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1761894000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1761926400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1761930000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762174800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1762178400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762228800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1762232400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762552800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1762556400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762646400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1762650000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762678800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1762682400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1762747200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1762750800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1763010000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1763013600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1763082000000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1763085600000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1764435600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1764439200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1764489600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1764493200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1764684000000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1764687600000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765026000000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1765029600000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765029600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1765033200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765296000000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1765299600000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765303200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1765306800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765483200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1765486800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765576800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1765580400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765767600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1765771200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765778400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1765782000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765890000000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1765893600000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1765980000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1765983600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766008800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1766012400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766055600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1766059200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766073600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1766077200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766077200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1766080800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766098800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1766102400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1766588400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1766592000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767106800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1767110400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767322800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1767326400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767344400000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1767348000000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767391200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1767394800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767405600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1767409200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767513600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1767517200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1767884400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1767888000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1768230000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1768233600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1769389200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1769392800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1769803200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1769806800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1771081200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1771084800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1771545600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1771549200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1772020800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1772024400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1772283600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1772287200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1772290800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1772294400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1773028800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1773032400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1774234800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1774238400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1774263600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1774267200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1774537200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1774540800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1774836000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1774839600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1775149200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1775152800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1775430000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1775433600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1775725200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1775728800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1775746800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1775750400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1776085200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1776088800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1776160800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1776164400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1776603600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1776607200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1776668400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1776672000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1776747600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1776751200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1777251600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1777255200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1777845600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1777849200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1777978800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1777982400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1778230800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1778234400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1778670000000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1778673600000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1778713200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1778716800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1778752800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1778756400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1779134400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1779138000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1779544800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1779548400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1779962400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1779966000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1779994800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1779998400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1781146800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1781150400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1781470800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1781474400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1781827200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1781830800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1781838000000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1781841600000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1782255600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1782259200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1782874800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1782878400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1783353600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1783357200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1783645200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1783648800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1784034000000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1784037600000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1784314800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1784318400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1784998800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1785002400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1785229200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1785232800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1785250800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1785254400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1785376800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1785380400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1785416400000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1785420000000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1785952800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1785956400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1786528800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1786532400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1786611600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1786615200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1787277600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1787281200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1787306400000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1787310000000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1787313600000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1787317200000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1787346000000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1787349600000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1787364000000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1787367600000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788091200000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1788094800000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788364800000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1788368400000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788436800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1788440400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788541200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1788544800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788559200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1788562800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788872400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1788876000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1788940800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1788944400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789023600000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1789027200000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789052400000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1789056000000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789063200000,
+      "bulkRoute": "SHORT_V20",
+      "asofRoute": "SHORT_V20",
+      "asofSide": -1,
+      "asofEntryTs": 1789066800000,
+      "asofEntryVersion": "SHORT_V20",
+      "asofReason": "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789131600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1789135200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789401600000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1789405200000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1789588800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1789592400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1790002800000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1790006400000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1790053200000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1790056800000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1790064000000,
+      "bulkRoute": "LONG_V64",
+      "asofRoute": "LONG_V64",
+      "asofSide": 1,
+      "asofEntryTs": 1790067600000,
+      "asofEntryVersion": "LONG_V2_FINAL",
+      "asofReason": "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed.",
+      "bothEqual": true
+    },
+    {
+      "signalTs": 1790596800000,
+      "bulkRoute": "RECOVERY_V8",
+      "asofRoute": "RECOVERY_V8",
+      "asofSide": 1,
+      "asofEntryTs": 1790600400000,
+      "asofEntryVersion": "RECOVERY_V8",
+      "asofReason": "PENGU Recovery V8 R_BTC3: deduplicated 3% recovery cross plus RSI delta, EMA168 distance, and BTC 6h thresholds passed.",
+      "bothEqual": true
+    }
+  ]
+}

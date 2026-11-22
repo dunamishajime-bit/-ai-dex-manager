@@ -1,0 +1,1095 @@
+{
+  "schema": "p107-pengu-pin-full-history-native-bulk-raw-signal-candidate-comparison/v1",
+  "pinnedSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "inputSources": {
+    "PENGUUSDT": {
+      "first": 1752840000000,
+      "last": 1790809200000,
+      "files": [
+        {
+          "path": "aster-public-v3-h1-early/PENGUUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "1b7f8467db39df935c14c8a1ada1e9d72040cac2efc7b9a7ecd39437ac21adc4"
+        },
+        {
+          "path": "aster-public-v3-h1/PENGUUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        }
+      ],
+      "count": 10548
+    },
+    "BTCUSDT": {
+      "first": 1740787200000,
+      "last": 1790809200000,
+      "files": [
+        {
+          "path": "aster-public-v3-h1-early/BTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+        },
+        {
+          "path": "aster-public-v3-h1/BTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      ],
+      "count": 13896
+    }
+  },
+  "oldTapeSHA256": "7d2dd287a3fefba44c07a018863fd0a29b6a59452dddc6352e78d4457832a9d6",
+  "nativeBulkHistoryBoundary": 1790812800000,
+  "comparedAsBulkSeriesNotIndividual1000HWindows": true,
+  "legacy20250924TruncatedWarmup": true,
+  "dataCausalAssumption": "full-chronology batch evaluation; check per-time sliding-window identity before claiming exact production",
+  "oldCandidateCount": 116,
+  "newBulkCandidateCount": 116,
+  "oldOnlyCount": 0,
+  "newOnlyCount": 0,
+  "oldOnlySamples": [],
+  "newOnlySamples": [],
+  "bulkNativeCandidateEvents": [
+    {
+      "signalTs": 1759309200000,
+      "entryTs": 1759312800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.10795413045066105,
+      "btc24h": 0.03178734074851741
+    },
+    {
+      "signalTs": 1759629600000,
+      "entryTs": 1759633200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.020928629613384375,
+      "btc24h": 0.018165429532614574
+    },
+    {
+      "signalTs": 1759910400000,
+      "entryTs": 1759914000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.07885125184094255,
+      "btc24h": -0.011966184628055099
+    },
+    {
+      "signalTs": 1760540400000,
+      "entryTs": 1760544000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05237466490617382,
+      "btc24h": -0.01862531213503027
+    },
+    {
+      "signalTs": 1761152400000,
+      "entryTs": 1761156000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.07925303788420301,
+      "btc24h": -0.037332111350505404
+    },
+    {
+      "signalTs": 1761217200000,
+      "entryTs": 1761220800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1029665325611212,
+      "btc24h": 0.01597979619457779
+    },
+    {
+      "signalTs": 1761674400000,
+      "entryTs": 1761678000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.01614242228576701,
+      "btc24h": -0.0027833553787106613
+    },
+    {
+      "signalTs": 1761890400000,
+      "entryTs": 1761894000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.12305091114033428,
+      "btc24h": -0.010337233273105095
+    },
+    {
+      "signalTs": 1761926400000,
+      "entryTs": 1761930000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.17299421965317907,
+      "btc24h": 0.006259773671589919
+    },
+    {
+      "signalTs": 1762174800000,
+      "entryTs": 1762178400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1294167958518203,
+      "btc24h": -0.0239009480597836
+    },
+    {
+      "signalTs": 1762228800000,
+      "entryTs": 1762232400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1570697904636199,
+      "btc24h": -0.010836782776818987
+    },
+    {
+      "signalTs": 1762552800000,
+      "entryTs": 1762556400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.13303552732602797,
+      "btc24h": 0.021995639348467266
+    },
+    {
+      "signalTs": 1762646400000,
+      "entryTs": 1762650000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.045544034650216614,
+      "btc24h": -0.008792369166507497
+    },
+    {
+      "signalTs": 1762678800000,
+      "entryTs": 1762682400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.050193307558992095,
+      "btc24h": -0.007320535504059755
+    },
+    {
+      "signalTs": 1762747200000,
+      "entryTs": 1762750800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.11904269259948963,
+      "btc24h": 0.04364871723247976
+    },
+    {
+      "signalTs": 1763010000000,
+      "entryTs": 1763013600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08755129958960328,
+      "btc24h": -0.002407388592964632
+    },
+    {
+      "signalTs": 1763082000000,
+      "entryTs": 1763085600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.16708105420188968,
+      "btc24h": -0.02667552090587888
+    },
+    {
+      "signalTs": 1764435600000,
+      "entryTs": 1764439200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05863929006438151,
+      "btc24h": -0.0026274901013918495
+    },
+    {
+      "signalTs": 1764489600000,
+      "entryTs": 1764493200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.03714285714285703,
+      "btc24h": 0.005938891237706967
+    },
+    {
+      "signalTs": 1764684000000,
+      "entryTs": 1764687600000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.00497833502350864,
+      "btc24h": 0.036855724907884024
+    },
+    {
+      "signalTs": 1765026000000,
+      "entryTs": 1765029600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08907159986296687,
+      "btc24h": -0.008974639676399998
+    },
+    {
+      "signalTs": 1765029600000,
+      "entryTs": 1765033200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05719716606186276,
+      "btc24h": -0.0032409577279390867
+    },
+    {
+      "signalTs": 1765296000000,
+      "entryTs": 1765299600000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.18317653569452141,
+      "btc24h": 0.0465488406435286
+    },
+    {
+      "signalTs": 1765303200000,
+      "entryTs": 1765306800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.20261020352286208,
+      "btc24h": 0.04428109575930228
+    },
+    {
+      "signalTs": 1765483200000,
+      "entryTs": 1765486800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.025907187718073987,
+      "btc24h": -0.007297950968244593
+    },
+    {
+      "signalTs": 1765576800000,
+      "entryTs": 1765580400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.13819095477386945,
+      "btc24h": -0.02200833801791746
+    },
+    {
+      "signalTs": 1765767600000,
+      "entryTs": 1765771200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05599785311745231,
+      "btc24h": -0.011028523419263414
+    },
+    {
+      "signalTs": 1765778400000,
+      "entryTs": 1765782000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.0458177943526904,
+      "btc24h": -0.0046985868728096625
+    },
+    {
+      "signalTs": 1765890000000,
+      "entryTs": 1765893600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08881010817198443,
+      "btc24h": -0.033176007580274613
+    },
+    {
+      "signalTs": 1765980000000,
+      "entryTs": 1765983600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.03449565298681867,
+      "btc24h": 0.027297452489916996
+    },
+    {
+      "signalTs": 1766008800000,
+      "entryTs": 1766012400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.09166987302808782,
+      "btc24h": -0.016573112449661975
+    },
+    {
+      "signalTs": 1766055600000,
+      "entryTs": 1766059200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1420983973164368,
+      "btc24h": 0.0034072686864874413
+    },
+    {
+      "signalTs": 1766073600000,
+      "entryTs": 1766077200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.07875185735512635,
+      "btc24h": 0.011813686026451942
+    },
+    {
+      "signalTs": 1766077200000,
+      "entryTs": 1766080800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.11377065598397607,
+      "btc24h": 0.0005903536218194727
+    },
+    {
+      "signalTs": 1766098800000,
+      "entryTs": 1766102400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.15748415407118477,
+      "btc24h": -0.008495044267498253
+    },
+    {
+      "signalTs": 1766588400000,
+      "entryTs": 1766592000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.0012337371018394938,
+      "btc24h": -0.004523592698184586
+    },
+    {
+      "signalTs": 1767106800000,
+      "entryTs": 1767110400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.005118153109005763,
+      "btc24h": 0.015164792033206975
+    },
+    {
+      "signalTs": 1767322800000,
+      "entryTs": 1767326400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.08264556246466914,
+      "btc24h": 0.012321962950985421
+    },
+    {
+      "signalTs": 1767344400000,
+      "entryTs": 1767348000000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.11877140647442275,
+      "btc24h": 0.01791956400242678
+    },
+    {
+      "signalTs": 1767391200000,
+      "entryTs": 1767394800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.22268156424580998,
+      "btc24h": 0.017486972803434586
+    },
+    {
+      "signalTs": 1767405600000,
+      "entryTs": 1767409200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.22286029817780229,
+      "btc24h": 0.019084650112866752
+    },
+    {
+      "signalTs": 1767513600000,
+      "entryTs": 1767517200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.38586393461494173,
+      "btc24h": 0.019090519569205266
+    },
+    {
+      "signalTs": 1767884400000,
+      "entryTs": 1767888000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.01100478468899524,
+      "btc24h": -0.006273829434643274
+    },
+    {
+      "signalTs": 1768230000000,
+      "entryTs": 1768233600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.02752293577981646,
+      "btc24h": 0.008748519159543111
+    },
+    {
+      "signalTs": 1769389200000,
+      "entryTs": 1769392800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.037780580075661985,
+      "btc24h": -0.016617303895171354
+    },
+    {
+      "signalTs": 1769803200000,
+      "entryTs": 1769806800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.11092029497929079,
+      "btc24h": -0.0035967292095273606
+    },
+    {
+      "signalTs": 1771081200000,
+      "entryTs": 1771084800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.2202390974911601,
+      "btc24h": 0.01595657132536399
+    },
+    {
+      "signalTs": 1771545600000,
+      "entryTs": 1771549200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08142249073184138,
+      "btc24h": 0.011863801927660678
+    },
+    {
+      "signalTs": 1772020800000,
+      "entryTs": 1772024400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.045160319132921956,
+      "btc24h": 0.04900079428117565
+    },
+    {
+      "signalTs": 1772283600000,
+      "entryTs": 1772287200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.062203706364028166,
+      "btc24h": -0.01760093968303822
+    },
+    {
+      "signalTs": 1772290800000,
+      "entryTs": 1772294400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08652222847495783,
+      "btc24h": -0.01915372472215371
+    },
+    {
+      "signalTs": 1773028800000,
+      "entryTs": 1773032400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.06300211416490475,
+      "btc24h": 0.007720349772983859
+    },
+    {
+      "signalTs": 1774234800000,
+      "entryTs": 1774238400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05266786157452086,
+      "btc24h": -0.018136221507489614
+    },
+    {
+      "signalTs": 1774263600000,
+      "entryTs": 1774267200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.04254731316480176,
+      "btc24h": 0.028048884234365135
+    },
+    {
+      "signalTs": 1774537200000,
+      "entryTs": 1774540800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.009742120343839589,
+      "btc24h": -0.024479856030760194
+    },
+    {
+      "signalTs": 1774836000000,
+      "entryTs": 1774839600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05901162790697678,
+      "btc24h": 0.004655878327178398
+    },
+    {
+      "signalTs": 1775149200000,
+      "entryTs": 1775152800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.04439615026389321,
+      "btc24h": -0.023304752539958673
+    },
+    {
+      "signalTs": 1775430000000,
+      "entryTs": 1775433600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.015315170078993967,
+      "btc24h": 0.025601153620301353
+    },
+    {
+      "signalTs": 1775725200000,
+      "entryTs": 1775728800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.016143911439114422,
+      "btc24h": -0.002352885354753864
+    },
+    {
+      "signalTs": 1775746800000,
+      "entryTs": 1775750400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.007533825338253308,
+      "btc24h": 0.011611625094354983
+    },
+    {
+      "signalTs": 1776085200000,
+      "entryTs": 1776088800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.004965392717424022,
+      "btc24h": 0.010663637518167901
+    },
+    {
+      "signalTs": 1776160800000,
+      "entryTs": 1776164400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.07046879665571826,
+      "btc24h": 0.05093629039215175
+    },
+    {
+      "signalTs": 1776603600000,
+      "entryTs": 1776607200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.0010908099263703397,
+      "btc24h": -0.002606446321401279
+    },
+    {
+      "signalTs": 1776668400000,
+      "entryTs": 1776672000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.045004619242444255,
+      "btc24h": -0.0055367628286953074
+    },
+    {
+      "signalTs": 1776747600000,
+      "entryTs": 1776751200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.001028145482585674,
+      "btc24h": 0.02068194371472054
+    },
+    {
+      "signalTs": 1777251600000,
+      "entryTs": 1777255200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.08590831918505937,
+      "btc24h": 0.023589518353216432
+    },
+    {
+      "signalTs": 1777845600000,
+      "entryTs": 1777849200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.02719494805459366,
+      "btc24h": 0.004415204344388579
+    },
+    {
+      "signalTs": 1777978800000,
+      "entryTs": 1777982400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.11888743849784111,
+      "btc24h": 0.02816186022178524
+    },
+    {
+      "signalTs": 1778230800000,
+      "entryTs": 1778234400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.032069700621002895,
+      "btc24h": -0.013068000583547401
+    },
+    {
+      "signalTs": 1778670000000,
+      "entryTs": 1778673600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1131985047445605,
+      "btc24h": -0.003554117947181079
+    },
+    {
+      "signalTs": 1778713200000,
+      "entryTs": 1778716800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.15887239802109587,
+      "btc24h": -0.01469124155906143
+    },
+    {
+      "signalTs": 1778752800000,
+      "entryTs": 1778756400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.1342391828081334,
+      "btc24h": -0.015376539511021137
+    },
+    {
+      "signalTs": 1779134400000,
+      "entryTs": 1779138000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.039876951122251314,
+      "btc24h": -0.017603059445475466
+    },
+    {
+      "signalTs": 1779544800000,
+      "entryTs": 1779548400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.033734939759036076,
+      "btc24h": -0.016194627418020247
+    },
+    {
+      "signalTs": 1779962400000,
+      "entryTs": 1779966000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.13992311916529387,
+      "btc24h": -0.03304078267734589
+    },
+    {
+      "signalTs": 1779994800000,
+      "entryTs": 1779998400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.13210069057696583,
+      "btc24h": -0.02196033067103087
+    },
+    {
+      "signalTs": 1781146800000,
+      "entryTs": 1781150400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.030212341456462788,
+      "btc24h": 0.018582550187191016
+    },
+    {
+      "signalTs": 1781470800000,
+      "entryTs": 1781474400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.02744752678702489,
+      "btc24h": 0.013165796861251744
+    },
+    {
+      "signalTs": 1781827200000,
+      "entryTs": 1781830800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.05350889480319376,
+      "btc24h": -0.022411858638621496
+    },
+    {
+      "signalTs": 1781838000000,
+      "entryTs": 1781841600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08092485549132955,
+      "btc24h": -0.023571853221403538
+    },
+    {
+      "signalTs": 1782255600000,
+      "entryTs": 1782259200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.08092655035918483,
+      "btc24h": -0.020211711979197577
+    },
+    {
+      "signalTs": 1782874800000,
+      "entryTs": 1782878400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.009689922480620172,
+      "btc24h": -0.007137991093451701
+    },
+    {
+      "signalTs": 1783353600000,
+      "entryTs": 1783357200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.007599463567277587,
+      "btc24h": 0.01764496359039147
+    },
+    {
+      "signalTs": 1783645200000,
+      "entryTs": 1783648800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.057886904761904834,
+      "btc24h": 0.029759115193551455
+    },
+    {
+      "signalTs": 1784034000000,
+      "entryTs": 1784037600000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.04485829959514176,
+      "btc24h": 0.024174906896108794
+    },
+    {
+      "signalTs": 1784314800000,
+      "entryTs": 1784318400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.004075394803871535,
+      "btc24h": -0.0018428904740929175
+    },
+    {
+      "signalTs": 1784998800000,
+      "entryTs": 1785002400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.021564615142452337,
+      "btc24h": 0.0013826364554625492
+    },
+    {
+      "signalTs": 1785229200000,
+      "entryTs": 1785232800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.010522799398697269,
+      "btc24h": -0.028589123899489643
+    },
+    {
+      "signalTs": 1785250800000,
+      "entryTs": 1785254400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.01520213832275319,
+      "btc24h": -0.009555502512484937
+    },
+    {
+      "signalTs": 1785376800000,
+      "entryTs": 1785380400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.07078384798099768,
+      "btc24h": 0.003493518069651369
+    },
+    {
+      "signalTs": 1785416400000,
+      "entryTs": 1785420000000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.0680272108843537,
+      "btc24h": 0.004821118852338602
+    },
+    {
+      "signalTs": 1785952800000,
+      "entryTs": 1785956400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.00016183848519180088,
+      "btc24h": 0.007821119512494867
+    },
+    {
+      "signalTs": 1786528800000,
+      "entryTs": 1786532400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.022306597057427657,
+      "btc24h": -0.00141577758741529
+    },
+    {
+      "signalTs": 1786611600000,
+      "entryTs": 1786615200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.04594432804549531,
+      "btc24h": -0.0051587654540602434
+    },
+    {
+      "signalTs": 1787277600000,
+      "entryTs": 1787281200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.24445556111389033,
+      "btc24h": 0.07375344711394849
+    },
+    {
+      "signalTs": 1787306400000,
+      "entryTs": 1787310000000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.30357439733998337,
+      "btc24h": 0.08050862175563989
+    },
+    {
+      "signalTs": 1787313600000,
+      "entryTs": 1787317200000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.3127073656270736,
+      "btc24h": 0.07312278243073389
+    },
+    {
+      "signalTs": 1787346000000,
+      "entryTs": 1787349600000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.43013789666057467,
+      "btc24h": 0.07952208901071534
+    },
+    {
+      "signalTs": 1787364000000,
+      "entryTs": 1787367600000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.4933223413025558,
+      "btc24h": 0.05433286743360943
+    },
+    {
+      "signalTs": 1788091200000,
+      "entryTs": 1788094800000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.032366188331413026,
+      "btc24h": 0.015399769983341693
+    },
+    {
+      "signalTs": 1788364800000,
+      "entryTs": 1788368400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.10838401390095553,
+      "btc24h": -0.005483659262716656
+    },
+    {
+      "signalTs": 1788436800000,
+      "entryTs": 1788440400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.026206896551724035,
+      "btc24h": 0.02664483049541455
+    },
+    {
+      "signalTs": 1788541200000,
+      "entryTs": 1788544800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.03620973430519625,
+      "btc24h": -0.019583929450946336
+    },
+    {
+      "signalTs": 1788559200000,
+      "entryTs": 1788562800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.02136498516320473,
+      "btc24h": -0.018673117492069014
+    },
+    {
+      "signalTs": 1788872400000,
+      "entryTs": 1788876000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.048711943793911194,
+      "btc24h": -0.017367502660285306
+    },
+    {
+      "signalTs": 1788940800000,
+      "entryTs": 1788944400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.04755341144038583,
+      "btc24h": 0.016057044090540984
+    },
+    {
+      "signalTs": 1789023600000,
+      "entryTs": 1789027200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.12251770990593436,
+      "btc24h": -0.014722343863776133
+    },
+    {
+      "signalTs": 1789052400000,
+      "entryTs": 1789056000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.12637620051534315,
+      "btc24h": -0.01715509077764321
+    },
+    {
+      "signalTs": 1789063200000,
+      "entryTs": 1789066800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.13164705882352945,
+      "btc24h": -0.014727647608208438
+    },
+    {
+      "signalTs": 1789131600000,
+      "entryTs": 1789135200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.046036435253569596,
+      "btc24h": 0.026740803351966935
+    },
+    {
+      "signalTs": 1789401600000,
+      "entryTs": 1789405200000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.025842240562846786,
+      "btc24h": 0.019080768045894203
+    },
+    {
+      "signalTs": 1789588800000,
+      "entryTs": 1789592400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.050383351588170755,
+      "btc24h": 0.003180391712536812
+    },
+    {
+      "signalTs": 1790002800000,
+      "entryTs": 1790006400000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.12255090280445624,
+      "btc24h": 0.06202082405896037
+    },
+    {
+      "signalTs": 1790053200000,
+      "entryTs": 1790056800000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.16549069916613202,
+      "btc24h": 0.047243031983994044
+    },
+    {
+      "signalTs": 1790064000000,
+      "entryTs": 1790067600000,
+      "route": "LONG_V64",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": 0.180063897763578,
+      "btc24h": 0.029094852035887353
+    },
+    {
+      "signalTs": 1790596800000,
+      "entryTs": 1790600400000,
+      "route": "RECOVERY_V8",
+      "side": "LONG",
+      "symbol": "PENGUUSDT",
+      "pengu72h": -0.004780876494024033,
+      "btc24h": -0.014269785552048497
+    }
+  ],
+  "fullProductionParity": false,
+  "venueOrdersSent": 0
+}
