@@ -1,0 +1,24 @@
+{
+  "BTCQuarantinedBadBars": 1,
+  "P38": {
+    "DD": 17.03139963,
+    "NAV": 24028.951202,
+    "allCovers100bpsDD": 20.3725519,
+    "allCovers100bpsNAV": 21129.8989,
+    "approved": [],
+    "closed": 19,
+    "scenarios": 64,
+    "wins": 14
+  },
+  "P39": {
+    "allCovers100bpsStandaloneSum": 0.543056,
+    "approved": [],
+    "featuresAvailable": 47,
+    "featuresUnscorableWinningTrades": 5,
+    "native53Winrate": 54.716981,
+    "native53wins": 29,
+    "scenarios": 32,
+    "standaloneSum": 39.776045
+  },
+  "productionPromotion": "REJECTED"
+}
