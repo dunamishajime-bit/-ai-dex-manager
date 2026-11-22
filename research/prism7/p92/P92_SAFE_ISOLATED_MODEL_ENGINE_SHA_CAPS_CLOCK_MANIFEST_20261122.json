@@ -1,0 +1,44 @@
+{
+  "schema": "prism7-p92-canonical-historical-source-replay-reference-isolation-v1",
+  "originalHistoricalEnginePath": "C:\\tmp\\disdex-bt-20251001-20261001\\dd_strict_v2_plus_v4q102_pengu_recovery_reversal_20261109.py",
+  "originalEngineSHA256": "c3b72a5d0ad3ebcbac31f74f4464314d3225820bface8b6225d7eb3ee687caf7",
+  "newOnlyPENGUSHORTBinance5mTapeSHA256": "ce82fe3224bc878f24a9fd73a13467572e254d3c523c09537cdaa397a5763398",
+  "modes": {
+    "PARITY30M": {
+      "scriptPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P92_PORTFOLIO_PARITY30M_REPLAY_20261122.py",
+      "scriptSHA256": "0fdbed89102b30836afafe0c3d57bb9ad2d811f1ca416ab0f95d8a161d065c9c",
+      "outputPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\PARITY30M",
+      "stockCap": 4.0,
+      "totalCap": 3.5,
+      "cryptoCap": 3.0,
+      "modelV52Gross": 2.0,
+      "timeStepMins": 30
+    },
+    "BASE5M_CAPS": {
+      "scriptPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P92_PORTFOLIO_BASE5M_CAPS_REPLAY_20261122.py",
+      "scriptSHA256": "0acf8a38ba1282541c5a5bf02d01284cce435d9dd3a54cc9d1cd08de022ca77a",
+      "outputPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BASE5M_CAPS",
+      "stockCap": 1.5,
+      "totalCap": 3.5,
+      "cryptoCap": 3.0,
+      "modelV52Gross": 1.5,
+      "timeStepMins": 5
+    },
+    "BIN5M_CAPS": {
+      "scriptPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\P92_PORTFOLIO_BIN5M_CAPS_REPLAY_20261122.py",
+      "scriptSHA256": "ea504db667df82c17aea83c1b02c97f6ab76ad20017782f8d470a8738aef5771",
+      "outputPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BIN5M_CAPS",
+      "stockCap": 1.5,
+      "totalCap": 3.5,
+      "cryptoCap": 3.0,
+      "modelV52Gross": 1.5,
+      "timeStepMins": 5
+    }
+  },
+  "noProductionMutation": true,
+  "originalPENGULongAndRecoveryUnchanged": true,
+  "researchOnlyNot20261122Stable4": true,
+  "majorLimitation": "The 2026-11-09 strict engine does NOT implement the 2026-11-22 V4 DD21% hold or Stable4/Q102 fully. Do not infer the 673 V4 DD21-blocked candidate count from this result.",
+  "baseline30MOriginalProof": "Must compare with original archived RUN_MANIFEST before use.",
+  "pair5MInvariant": "Compare BASE5M_CAPS vs BIN5M_CAPS only; 5-minute sampling and cap model identical. Baseline30M cannot be compared to5M for economic difference."
+}
