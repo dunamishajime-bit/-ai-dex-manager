@@ -1,0 +1,11 @@
+{
+  "phase": "P107-E",
+  "engine": "2026-11-13 canonical_generated_sim_ON",
+  "old_model_replay_pass": true,
+  "files_compared": 20,
+  "files_exact": 20,
+  "files_not_identical": [],
+  "replay_source_sha256": "e96d9cdb199e7d1e40f91b13a42569a3a6a83f22729d840c5da0e5bb577d932e",
+  "note": "PASS only proves replay of outdated research engine. It does not reproduce 2026-11-22 Production STABLE4 or PENGU new Binance M5. Historical model DD 56/63 percent is NOT a live forecast.",
+  "production_mutated": false
+}
