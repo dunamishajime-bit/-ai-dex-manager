@@ -1,0 +1,5535 @@
+{
+  "all20ScenarioEvidence": [
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 15.20671,
+        "M5HighStressMarkedDDPct": 15.20671,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 10,
+            "sourceGrossSumEquityPoints": 67.78989,
+            "wins": 10
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": -11.9018,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 5.71263,
+        "conditionalWinPct": 85.71429,
+        "finalNAVYen": 17380.78,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 4.19087,
+        "singleSlotPositions": 14,
+        "sourceRealizedOnlyDDPct": 12.06249,
+        "venueSignedFillProven": false,
+        "wins": 12
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 1,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 90.47619,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 21,
+      "sourceNative53": 53,
+      "sourceWins": 19
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 16.66522,
+        "M5HighStressMarkedDDPct": 16.66522,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 10,
+            "sourceGrossSumEquityPoints": 60.99027,
+            "wins": 9
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": -14.26407,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 4.28146,
+        "conditionalWinPct": 71.42857,
+        "finalNAVYen": 15791.05,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 3.48503,
+        "singleSlotPositions": 14,
+        "sourceRealizedOnlyDDPct": 13.74281,
+        "venueSignedFillProven": false,
+        "wins": 10
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 1,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 90.47619,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 21,
+      "sourceNative53": 53,
+      "sourceWins": 19
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 15.20671,
+        "M5HighStressMarkedDDPct": 15.20671,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 10,
+            "sourceGrossSumEquityPoints": 67.78989,
+            "wins": 10
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": -11.9018,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 5.71263,
+        "conditionalWinPct": 85.71429,
+        "finalNAVYen": 17380.78,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 4.19087,
+        "singleSlotPositions": 14,
+        "sourceRealizedOnlyDDPct": 12.06249,
+        "venueSignedFillProven": false,
+        "wins": 12
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 1,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 90.47619,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 21,
+      "sourceNative53": 53,
+      "sourceWins": 19
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 16.66522,
+        "M5HighStressMarkedDDPct": 16.66522,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 10,
+            "sourceGrossSumEquityPoints": 60.99027,
+            "wins": 9
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": -14.26407,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 4.28146,
+        "conditionalWinPct": 71.42857,
+        "finalNAVYen": 15791.05,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 3.48503,
+        "singleSlotPositions": 14,
+        "sourceRealizedOnlyDDPct": 13.74281,
+        "venueSignedFillProven": false,
+        "wins": 10
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 1,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 90.47619,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 21,
+      "sourceNative53": 53,
+      "sourceWins": 19
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 9.2015,
+        "M5HighStressMarkedDDPct": 9.66449,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 6,
+            "sourceGrossSumEquityPoints": 42.39233,
+            "wins": 5
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -6.225,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 5.2448,
+        "conditionalWinPct": 75.0,
+        "finalNAVYen": 14411.04,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 4.86893,
+        "singleSlotPositions": 8,
+        "sourceRealizedOnlyDDPct": 8.99257,
+        "venueSignedFillProven": false,
+        "wins": 6
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 3,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 80.0,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 2,
+      "sourceCandidates": 10,
+      "sourceNative53": 53,
+      "sourceWins": 8
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 10.70672,
+        "M5HighStressMarkedDDPct": 11.16203,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 6,
+            "sourceGrossSumEquityPoints": 38.32973,
+            "wins": 5
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -7.035,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 4.09925,
+        "conditionalWinPct": 75.0,
+        "finalNAVYen": 13653.23,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 4.16986,
+        "singleSlotPositions": 8,
+        "sourceRealizedOnlyDDPct": 10.50124,
+        "venueSignedFillProven": false,
+        "wins": 6
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 3,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 80.0,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 2,
+      "sourceCandidates": 10,
+      "sourceNative53": 53,
+      "sourceWins": 8
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 7.27869,
+        "M5HighStressMarkedDDPct": 7.27869,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 23.68535,
+            "wins": 3
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 9.02545,
+        "conditionalWinPct": 75.0,
+        "finalNAVYen": 12506.66,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 5.92134,
+        "singleSlotPositions": 4,
+        "sourceRealizedOnlyDDPct": 2.95128,
+        "venueSignedFillProven": false,
+        "wins": 3
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 3,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 75.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 0,
+      "sourceCandidates": 4,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 8.02129,
+        "M5HighStressMarkedDDPct": 8.02129,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 20.93119,
+            "wins": 3
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 6.61376,
+        "conditionalWinPct": 75.0,
+        "finalNAVYen": 12181.97,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 5.2328,
+        "singleSlotPositions": 4,
+        "sourceRealizedOnlyDDPct": 3.72855,
+        "venueSignedFillProven": false,
+        "wins": 3
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 3,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 75.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 0,
+      "sourceCandidates": 4,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 14.52123,
+        "M5HighStressMarkedDDPct": 14.52123,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 7,
+            "sourceGrossSumEquityPoints": 30.01524,
+            "wins": 5
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": -6.55945,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 2.76499,
+        "conditionalWinPct": 60.0,
+        "finalNAVYen": 12734.18,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 2.62399,
+        "singleSlotPositions": 10,
+        "sourceRealizedOnlyDDPct": 12.3566,
+        "venueSignedFillProven": false,
+        "wins": 6
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 6,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 69.23077,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 3,
+      "sourceCandidates": 13,
+      "sourceNative53": 53,
+      "sourceWins": 9
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 16.62463,
+        "M5HighStressMarkedDDPct": 16.62463,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 7,
+            "sourceGrossSumEquityPoints": 25.08115,
+            "wins": 5
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": -8.12054,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 2.05655,
+        "conditionalWinPct": 60.0,
+        "finalNAVYen": 11859.54,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 1.90248,
+        "singleSlotPositions": 10,
+        "sourceRealizedOnlyDDPct": 14.51327,
+        "venueSignedFillProven": false,
+        "wins": 6
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 6,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 69.23077,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 3,
+      "sourceCandidates": 13,
+      "sourceNative53": 53,
+      "sourceWins": 9
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 5.88366,
+        "M5HighStressMarkedDDPct": 5.88366,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 10.10522,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": null,
+        "conditionalWinPct": 100.0,
+        "finalNAVYen": 11010.52,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 10.10522,
+        "singleSlotPositions": 1,
+        "sourceRealizedOnlyDDPct": 0.0,
+        "venueSignedFillProven": false,
+        "wins": 1
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 6,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 100.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 0,
+      "sourceCandidates": 1,
+      "sourceNative53": 53,
+      "sourceWins": 1
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 5.88366,
+        "M5HighStressMarkedDDPct": 5.88366,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 9.45852,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": null,
+        "conditionalWinPct": 100.0,
+        "finalNAVYen": 10945.85,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 9.45852,
+        "singleSlotPositions": 1,
+        "sourceRealizedOnlyDDPct": 0.0,
+        "venueSignedFillProven": false,
+        "wins": 1
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 6,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 100.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 0,
+      "sourceCandidates": 1,
+      "sourceNative53": 53,
+      "sourceWins": 1
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 18.58001,
+        "M5HighStressMarkedDDPct": 19.14114,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": 4.07341,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": -12.45,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 0.67841,
+        "conditionalWinPct": 33.33333,
+        "finalNAVYen": 9372.29,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": -0.93208,
+        "singleSlotPositions": 6,
+        "sourceRealizedOnlyDDPct": 14.65778,
+        "venueSignedFillProven": false,
+        "wins": 2
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 12,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 23.07692,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 13,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 20.62138,
+        "M5HighStressMarkedDDPct": 21.16843,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 3,
+            "sourceGrossSumEquityPoints": 1.87089,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": -14.07,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 0.50694,
+        "conditionalWinPct": 33.33333,
+        "finalNAVYen": 8947.94,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": -1.68915,
+        "singleSlotPositions": 6,
+        "sourceRealizedOnlyDDPct": 16.79748,
+        "venueSignedFillProven": false,
+        "wins": 2
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 12,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 23.07692,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 13,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 10.5348,
+        "M5HighStressMarkedDDPct": 11.15137,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": 7.02469,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -6.225,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 1.09736,
+        "conditionalWinPct": 33.33333,
+        "finalNAVYen": 10019.43,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.26656,
+        "singleSlotPositions": 3,
+        "sourceRealizedOnlyDDPct": 6.225,
+        "venueSignedFillProven": false,
+        "wins": 1
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 12,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 25.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 1,
+      "sourceCandidates": 4,
+      "sourceNative53": 53,
+      "sourceWins": 1
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 11.30757,
+        "M5HighStressMarkedDDPct": 11.91882,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": 5.59944,
+            "wins": 1
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -7.035,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 0.85339,
+        "conditionalWinPct": 33.33333,
+        "finalNAVYen": 9795.64,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": -0.47852,
+        "singleSlotPositions": 3,
+        "sourceRealizedOnlyDDPct": 7.035,
+        "venueSignedFillProven": false,
+        "wins": 1
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 12,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 25.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 1,
+      "sourceCandidates": 4,
+      "sourceNative53": 53,
+      "sourceWins": 1
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 7.17526,
+        "M5HighStressMarkedDDPct": 7.40416,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": 24.54441,
+            "wins": 4
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.7841,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -6.225,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 3.56927,
+        "conditionalWinPct": 71.42857,
+        "finalNAVYen": 12198.82,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 3.01479,
+        "singleSlotPositions": 7,
+        "sourceRealizedOnlyDDPct": 6.225,
+        "venueSignedFillProven": false,
+        "wins": 5
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 24,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 64.28571,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 14,
+      "sourceNative53": 53,
+      "sourceWins": 9
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 7.97705,
+        "M5HighStressMarkedDDPct": 8.20398,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": 21.05111,
+            "wins": 4
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": 2.06419,
+            "wins": 1
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 1,
+            "sourceGrossSumEquityPoints": -7.035,
+            "wins": 0
+          }
+        },
+        "conditionalPF": 2.64228,
+        "conditionalWinPct": 71.42857,
+        "finalNAVYen": 11612.56,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 2.29719,
+        "singleSlotPositions": 7,
+        "sourceRealizedOnlyDDPct": 7.035,
+        "venueSignedFillProven": false,
+        "wins": 5
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 24,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 64.28571,
+      "requireBeforeD3": false,
+      "singleSlotBlocked": 7,
+      "sourceCandidates": 14,
+      "sourceNative53": 53,
+      "sourceWins": 9
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 4.35292,
+        "M5HighStressMarkedDDPct": 4.41255,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": 13.01469,
+            "wins": 2
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": null,
+        "conditionalWinPct": 100.0,
+        "finalNAVYen": 11334.74,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 6.50734,
+        "singleSlotPositions": 2,
+        "sourceRealizedOnlyDDPct": 0.0,
+        "venueSignedFillProven": false,
+        "wins": 2
+      },
+      "extraCoverSlippageBps": 0,
+      "featureLeadHours": 24,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 100.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 1,
+      "sourceCandidates": 3,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    },
+    {
+      "capital": {
+        "M5CloseMarkedDDPct": 4.92707,
+        "M5HighStressMarkedDDPct": 4.92707,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 2,
+            "sourceGrossSumEquityPoints": 11.64934,
+            "wins": 2
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 0,
+            "sourceGrossSumEquityPoints": 0.0,
+            "wins": 0
+          }
+        },
+        "conditionalPF": null,
+        "conditionalWinPct": 100.0,
+        "finalNAVYen": 11189.61,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 5.82467,
+        "singleSlotPositions": 2,
+        "sourceRealizedOnlyDDPct": 0.0,
+        "venueSignedFillProven": false,
+        "wins": 2
+      },
+      "extraCoverSlippageBps": 100,
+      "featureLeadHours": 24,
+      "feeBps": 30,
+      "nativeSourceWinRatePct": 100.0,
+      "requireBeforeD3": true,
+      "singleSlotBlocked": 1,
+      "sourceCandidates": 3,
+      "sourceNative53": 53,
+      "sourceWins": 3
+    }
+  ],
+  "allOriginalNative53CaseFeatureTrace": [
+    {
+      "candidateAtUtc": 1755270000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1755262800000,
+          "all3": true,
+          "btcReturn24Pct": -0.60527,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.74665,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1755223200000,
+          "all3": true,
+          "btcReturn24Pct": -4.07284,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -10.89616,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1755180000000,
+          "all3": false,
+          "btcReturn24Pct": -1.68547,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -7.94408,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1755255600000,
+          "all3": true,
+          "btcReturn24Pct": -1.64342,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -6.70696,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1755244800000,
+          "all3": true,
+          "btcReturn24Pct": -2.19441,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -6.2869,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.031552,
+        "entryTs": 1755284400000,
+        "exitPrice": 0.03407616,
+        "exitTs": 1755450000000,
+        "id": "PENGU_00003",
+        "key": "PRE_2025_AUG_SEP|PENGU_00003|1755284400000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_00350"
+    },
+    {
+      "candidateAtUtc": 1755482400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1755475200000,
+          "all3": false,
+          "btcReturn24Pct": 0.00299,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.06604,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1755435600000,
+          "all3": false,
+          "btcReturn24Pct": 0.67943,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 1.18407,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1755392400000,
+          "all3": false,
+          "btcReturn24Pct": -0.35079,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 3.00158,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1755468000000,
+          "all3": false,
+          "btcReturn24Pct": 0.40017,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.68567,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1755457200000,
+          "all3": true,
+          "btcReturn24Pct": -0.1389,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -3.09534,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.031522,
+        "entryTs": 1755504000000,
+        "exitPrice": 0.031568,
+        "exitTs": 1755763200000,
+        "id": "PENGU_00004",
+        "key": "PRE_2025_AUG_SEP|PENGU_00004|1755504000000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -0.44592982678762744
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_00409"
+    },
+    {
+      "candidateAtUtc": 1755626400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1755619200000,
+          "all3": false,
+          "btcReturn24Pct": -2.15605,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.65473,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1755579600000,
+          "all3": true,
+          "btcReturn24Pct": -0.56535,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.38184,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1755536400000,
+          "all3": true,
+          "btcReturn24Pct": -1.26578,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.47819,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1755612000000,
+          "all3": false,
+          "btcReturn24Pct": -1.39532,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.53575,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1755601200000,
+          "all3": false,
+          "btcReturn24Pct": 0.55994,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 1.72151,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.029527,
+        "entryTs": 1755698400000,
+        "exitPrice": 0.03188916000000001,
+        "exitTs": 1755727200000,
+        "id": "PENGU_00006",
+        "key": "PRE_2025_AUG_SEP|PENGU_00006|1755698400000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.30000000000003
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_00449"
+    },
+    {
+      "candidateAtUtc": 1756688400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1756681200000,
+          "all3": true,
+          "btcReturn24Pct": -0.50441,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.49151,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1756641600000,
+          "all3": false,
+          "btcReturn24Pct": -0.22102,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.0,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1756598400000,
+          "all3": false,
+          "btcReturn24Pct": 0.98821,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 3.08219,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1756674000000,
+          "all3": false,
+          "btcReturn24Pct": 0.40025,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.0,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1756663200000,
+          "all3": false,
+          "btcReturn24Pct": 0.38814,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.87085,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.0287,
+        "entryTs": 1756724400000,
+        "exitPrice": 0.030996000000000003,
+        "exitTs": 1756857600000,
+        "id": "PENGU_00008",
+        "key": "PRE_2025_AUG_SEP|PENGU_00008|1756724400000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_00744"
+    },
+    {
+      "candidateAtUtc": 1756969200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1756962000000,
+          "all3": true,
+          "btcReturn24Pct": -0.07446,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.48852,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1756922400000,
+          "all3": false,
+          "btcReturn24Pct": 1.1808,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 4.74576,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1756879200000,
+          "all3": false,
+          "btcReturn24Pct": 0.29889,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 2.58667,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1756954800000,
+          "all3": false,
+          "btcReturn24Pct": 0.1117,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.30619,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1756944000000,
+          "all3": false,
+          "btcReturn24Pct": 0.70716,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.65574,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.0291,
+        "entryTs": 1757066400000,
+        "exitPrice": 0.0288,
+        "exitTs": 1757134800000,
+        "id": "PENGU_00011",
+        "key": "PRE_2025_AUG_SEP|PENGU_00011|1757066400000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_V20_DEADLINE_EXIT",
+        "sourceNativeNet30Pct": 0.7309278350515538
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_00822"
+    },
+    {
+      "candidateAtUtc": 1758492000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1758484800000,
+          "all3": false,
+          "btcReturn24Pct": -0.38705,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.04487,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1758445200000,
+          "all3": false,
+          "btcReturn24Pct": -0.0287,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.9752,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1758402000000,
+          "all3": false,
+          "btcReturn24Pct": 0.24723,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -1.64397,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1758477600000,
+          "all3": false,
+          "btcReturn24Pct": -0.14535,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.21252,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1758466800000,
+          "all3": false,
+          "btcReturn24Pct": -0.38394,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -1.82997,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.030226,
+        "entryTs": 1758614400000,
+        "exitPrice": 0.029756,
+        "exitTs": 1758682800000,
+        "id": "PENGU_00015",
+        "key": "PRE_2025_AUG_SEP|PENGU_00015|1758614400000",
+        "period": "PRE_2025_AUG_SEP",
+        "sourceExitReason": "SHORT_V20_DEADLINE_EXIT",
+        "sourceNativeNet30Pct": 1.25495268973731
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_01245"
+    },
+    {
+      "candidateAtUtc": 1760425200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1760418000000,
+          "all3": false,
+          "btcReturn24Pct": -1.85754,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.71118,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1760378400000,
+          "all3": false,
+          "btcReturn24Pct": 1.09494,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 0.83257,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1760335200000,
+          "all3": false,
+          "btcReturn24Pct": 3.16637,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 13.94257,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1760410800000,
+          "all3": false,
+          "btcReturn24Pct": -1.16906,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.10269,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1760400000000,
+          "all3": false,
+          "btcReturn24Pct": -0.28414,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 3.95523,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.023665,
+        "entryTs": 1760544000000,
+        "exitPrice": 0.02069184,
+        "exitTs": 1760695200000,
+        "id": "PENGU_00004",
+        "key": "BASE_2025_2026|PENGU_00004|1760544000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 12.263532643143881
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_01782"
+    },
+    {
+      "candidateAtUtc": 1761145200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1761138000000,
+          "all3": false,
+          "btcReturn24Pct": 0.34166,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.42631,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1761098400000,
+          "all3": true,
+          "btcReturn24Pct": -1.18591,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -3.24253,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1761055200000,
+          "all3": false,
+          "btcReturn24Pct": 0.87435,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -0.34076,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1761130800000,
+          "all3": true,
+          "btcReturn24Pct": -0.93888,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.82266,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1761120000000,
+          "all3": false,
+          "btcReturn24Pct": 0.48104,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.47853,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.02066,
+        "entryTs": 1761156000000,
+        "exitPrice": 0.021411,
+        "exitTs": 1761415200000,
+        "id": "PENGU_00005",
+        "key": "BASE_2025_2026|PENGU_00005|1761156000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -3.935043562439488
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_01982"
+    },
+    {
+      "candidateAtUtc": 1761206400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1761199200000,
+          "all3": false,
+          "btcReturn24Pct": 2.0621,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.22063,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1761159600000,
+          "all3": true,
+          "btcReturn24Pct": -3.48889,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -9.70503,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1761116400000,
+          "all3": false,
+          "btcReturn24Pct": 0.22339,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -2.4255,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1761192000000,
+          "all3": false,
+          "btcReturn24Pct": 0.02699,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -6.73303,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1761181200000,
+          "all3": true,
+          "btcReturn24Pct": -0.16249,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -6.56642,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.020186,
+        "entryTs": 1761220800000,
+        "exitPrice": 0.02180088,
+        "exitTs": 1761480000000,
+        "id": "PENGU_00006",
+        "key": "BASE_2025_2026|PENGU_00006|1761220800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_01999"
+    },
+    {
+      "candidateAtUtc": 1761670800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1761663600000,
+          "all3": true,
+          "btcReturn24Pct": -0.28525,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.72699,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1761624000000,
+          "all3": false,
+          "btcReturn24Pct": -1.12992,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -7.51004,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1761580800000,
+          "all3": false,
+          "btcReturn24Pct": 1.747,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 2.37432,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1761656400000,
+          "all3": false,
+          "btcReturn24Pct": 0.21498,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.29982,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1761645600000,
+          "all3": true,
+          "btcReturn24Pct": -0.75158,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.10967,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.021416,
+        "entryTs": 1761678000000,
+        "exitPrice": 0.018466240000000002,
+        "exitTs": 1761865200000,
+        "id": "PENGU_00007",
+        "key": "BASE_2025_2026|PENGU_00007|1761678000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 13.47362719462084
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02128"
+    },
+    {
+      "candidateAtUtc": 1761822000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1761814800000,
+          "all3": false,
+          "btcReturn24Pct": -2.46347,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.85283,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1761775200000,
+          "all3": false,
+          "btcReturn24Pct": -1.90128,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 5.28724,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1761732000000,
+          "all3": true,
+          "btcReturn24Pct": -1.51315,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -2.70785,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1761807600000,
+          "all3": false,
+          "btcReturn24Pct": -1.93558,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.48628,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1761796800000,
+          "all3": false,
+          "btcReturn24Pct": -3.74701,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.41297,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.018742,
+        "entryTs": 1761894000000,
+        "exitPrice": 0.016307,
+        "exitTs": 1762153200000,
+        "id": "PENGU_00008",
+        "key": "BASE_2025_2026|PENGU_00008|1761894000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 12.69221000960411
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02170"
+    },
+    {
+      "candidateAtUtc": 1761822000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1761814800000,
+          "all3": false,
+          "btcReturn24Pct": -2.46347,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.85283,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1761775200000,
+          "all3": false,
+          "btcReturn24Pct": -1.90128,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 5.28724,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1761732000000,
+          "all3": true,
+          "btcReturn24Pct": -1.51315,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -2.70785,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1761807600000,
+          "all3": false,
+          "btcReturn24Pct": -1.93558,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.48628,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1761796800000,
+          "all3": false,
+          "btcReturn24Pct": -3.74701,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.41297,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.017811,
+        "entryTs": 1761930000000,
+        "exitPrice": 0.01554696,
+        "exitTs": 1762189200000,
+        "id": "PENGU_00009",
+        "key": "BASE_2025_2026|PENGU_00009|1761930000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 12.411470439615968
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02170"
+    },
+    {
+      "candidateAtUtc": 1762135200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1762128000000,
+          "all3": true,
+          "btcReturn24Pct": -0.19273,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.82542,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1762088400000,
+          "all3": false,
+          "btcReturn24Pct": 0.56636,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.89628,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1762045200000,
+          "all3": false,
+          "btcReturn24Pct": 0.22343,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -1.45357,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1762120800000,
+          "all3": true,
+          "btcReturn24Pct": -0.15646,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.03654,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1762110000000,
+          "all3": true,
+          "btcReturn24Pct": -0.10121,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -4.9238,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.016364,
+        "entryTs": 1762178400000,
+        "exitPrice": 0.013870480000000001,
+        "exitTs": 1762293600000,
+        "id": "PENGU_00010",
+        "key": "BASE_2025_2026|PENGU_00010|1762178400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 14.937839159129794
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02257"
+    },
+    {
+      "candidateAtUtc": 1762135200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1762128000000,
+          "all3": true,
+          "btcReturn24Pct": -0.19273,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.82542,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1762088400000,
+          "all3": false,
+          "btcReturn24Pct": 0.56636,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.89628,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1762045200000,
+          "all3": false,
+          "btcReturn24Pct": 0.22343,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -1.45357,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1762120800000,
+          "all3": true,
+          "btcReturn24Pct": -0.15646,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.03654,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1762110000000,
+          "all3": true,
+          "btcReturn24Pct": -0.10121,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -4.9238,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.015397,
+        "entryTs": 1762232400000,
+        "exitPrice": 0.013870480000000001,
+        "exitTs": 1762293600000,
+        "id": "PENGU_00011",
+        "key": "BASE_2025_2026|PENGU_00011|1762232400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 9.614398908878341
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02257"
+    },
+    {
+      "candidateAtUtc": 1762621200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1762614000000,
+          "all3": false,
+          "btcReturn24Pct": 0.90575,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.53314,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1762574400000,
+          "all3": false,
+          "btcReturn24Pct": 0.53846,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 8.75233,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1762531200000,
+          "all3": false,
+          "btcReturn24Pct": 0.27303,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 5.81549,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1762606800000,
+          "all3": false,
+          "btcReturn24Pct": 1.48171,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 6.73262,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1762596000000,
+          "all3": false,
+          "btcReturn24Pct": 1.70571,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 7.91256,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.01455,
+        "entryTs": 1762650000000,
+        "exitPrice": 0.015714000000000002,
+        "exitTs": 1762736400000,
+        "id": "PENGU_00013",
+        "key": "BASE_2025_2026|PENGU_00013|1762650000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_02392"
+    },
+    {
+      "candidateAtUtc": 1762621200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1762614000000,
+          "all3": false,
+          "btcReturn24Pct": 0.90575,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.53314,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1762574400000,
+          "all3": false,
+          "btcReturn24Pct": 0.53846,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 8.75233,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1762531200000,
+          "all3": false,
+          "btcReturn24Pct": 0.27303,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 5.81549,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1762606800000,
+          "all3": false,
+          "btcReturn24Pct": 1.48171,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 6.73262,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1762596000000,
+          "all3": false,
+          "btcReturn24Pct": 1.70571,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 7.91256,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.014171,
+        "entryTs": 1762682400000,
+        "exitPrice": 0.015304680000000001,
+        "exitTs": 1762718400000,
+        "id": "PENGU_00014",
+        "key": "BASE_2025_2026|PENGU_00014|1762682400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_02392"
+    },
+    {
+      "candidateAtUtc": 1763056800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1763049600000,
+          "all3": true,
+          "btcReturn24Pct": -0.80571,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.4837,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1763010000000,
+          "all3": false,
+          "btcReturn24Pct": -0.24074,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.09194,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1762966800000,
+          "all3": true,
+          "btcReturn24Pct": -1.53964,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.88933,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1763042400000,
+          "all3": true,
+          "btcReturn24Pct": -1.07626,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.91217,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1763031600000,
+          "all3": true,
+          "btcReturn24Pct": -1.9942,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -5.25699,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.013446,
+        "entryTs": 1763085600000,
+        "exitPrice": 0.012598,
+        "exitTs": 1763344800000,
+        "id": "PENGU_00017",
+        "key": "BASE_2025_2026|PENGU_00017|1763085600000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 6.006708314740439
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02513"
+    },
+    {
+      "candidateAtUtc": 1764421200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1764414000000,
+          "all3": true,
+          "btcReturn24Pct": -0.82248,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.71989,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1764374400000,
+          "all3": false,
+          "btcReturn24Pct": -0.3463,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.25721,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1764331200000,
+          "all3": false,
+          "btcReturn24Pct": 0.57061,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.95937,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1764406800000,
+          "all3": true,
+          "btcReturn24Pct": -1.11486,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -5.26407,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1764396000000,
+          "all3": false,
+          "btcReturn24Pct": -0.82687,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -0.11804,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.01084,
+        "entryTs": 1764439200000,
+        "exitPrice": 0.00972296,
+        "exitTs": 1764630000000,
+        "id": "PENGU_00018",
+        "key": "BASE_2025_2026|PENGU_00018|1764439200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 10.004797047970492
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_02892"
+    },
+    {
+      "candidateAtUtc": 1764936000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1764928800000,
+          "all3": false,
+          "btcReturn24Pct": -2.11425,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.57489,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1764889200000,
+          "all3": false,
+          "btcReturn24Pct": -1.44447,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.7347,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1764846000000,
+          "all3": false,
+          "btcReturn24Pct": -0.06648,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -1.35203,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1764921600000,
+          "all3": false,
+          "btcReturn24Pct": -1.21923,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.19818,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1764910800000,
+          "all3": false,
+          "btcReturn24Pct": -1.11899,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -3.6207,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.010628,
+        "entryTs": 1765029600000,
+        "exitPrice": 0.01147824,
+        "exitTs": 1765069200000,
+        "id": "PENGU_00021",
+        "key": "BASE_2025_2026|PENGU_00021|1765029600000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_03035"
+    },
+    {
+      "candidateAtUtc": 1765735200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1765728000000,
+          "all3": true,
+          "btcReturn24Pct": -1.40374,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69507,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1765688400000,
+          "all3": false,
+          "btcReturn24Pct": -0.13977,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 1.64552,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765645200000,
+          "all3": false,
+          "btcReturn24Pct": -0.02399,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 2.25305,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1765720800000,
+          "all3": true,
+          "btcReturn24Pct": -1.07678,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.54191,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1765710000000,
+          "all3": false,
+          "btcReturn24Pct": -1.1016,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -0.30079,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.010562,
+        "entryTs": 1765771200000,
+        "exitPrice": 0.009259,
+        "exitTs": 1766030400000,
+        "id": "PENGU_00027",
+        "key": "BASE_2025_2026|PENGU_00027|1765771200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 12.036678659344823
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_03257"
+    },
+    {
+      "candidateAtUtc": 1765850400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1765843200000,
+          "all3": false,
+          "btcReturn24Pct": -2.93547,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.63995,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1765803600000,
+          "all3": true,
+          "btcReturn24Pct": -0.06127,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.29316,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765760400000,
+          "all3": true,
+          "btcReturn24Pct": -1.16593,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.95439,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1765836000000,
+          "all3": true,
+          "btcReturn24Pct": -2.41948,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -3.64563,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1765825200000,
+          "all3": true,
+          "btcReturn24Pct": -2.82575,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -6.02126,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.010038,
+        "entryTs": 1765893600000,
+        "exitPrice": 0.00880152,
+        "exitTs": 1766116800000,
+        "id": "PENGU_00029",
+        "key": "BASE_2025_2026|PENGU_00029|1765893600000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 12.017991631799163
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_03289"
+    },
+    {
+      "candidateAtUtc": 1765990800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1765983600000,
+          "all3": true,
+          "btcReturn24Pct": -0.85524,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69032,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1765944000000,
+          "all3": false,
+          "btcReturn24Pct": 1.06991,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.43364,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765900800000,
+          "all3": false,
+          "btcReturn24Pct": 1.36582,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.98118,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1765976400000,
+          "all3": false,
+          "btcReturn24Pct": 1.33516,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.7083,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1765965600000,
+          "all3": true,
+          "btcReturn24Pct": -0.39351,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -4.09024,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.009416,
+        "entryTs": 1766012400000,
+        "exitPrice": 0.009365,
+        "exitTs": 1766271600000,
+        "id": "PENGU_00031",
+        "key": "BASE_2025_2026|PENGU_00031|1766012400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 0.2416312659303424
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_03328"
+    },
+    {
+      "candidateAtUtc": 1765990800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1765983600000,
+          "all3": true,
+          "btcReturn24Pct": -0.85524,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69032,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1765944000000,
+          "all3": false,
+          "btcReturn24Pct": 1.06991,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.43364,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765900800000,
+          "all3": false,
+          "btcReturn24Pct": 1.36582,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.98118,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1765976400000,
+          "all3": false,
+          "btcReturn24Pct": 1.33516,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.7083,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1765965600000,
+          "all3": true,
+          "btcReturn24Pct": -0.39351,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -4.09024,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.009199,
+        "entryTs": 1766059200000,
+        "exitPrice": 0.009154,
+        "exitTs": 1766318400000,
+        "id": "PENGU_00032",
+        "key": "BASE_2025_2026|PENGU_00032|1766059200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 0.18918360691379005
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_03328"
+    },
+    {
+      "candidateAtUtc": 1766070000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1766062800000,
+          "all3": false,
+          "btcReturn24Pct": 1.39384,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69266,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1766023200000,
+          "all3": true,
+          "btcReturn24Pct": -0.90765,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -7.38602,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765980000000,
+          "all3": false,
+          "btcReturn24Pct": 2.72975,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.91435,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1766055600000,
+          "all3": false,
+          "btcReturn24Pct": 0.34073,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -6.55638,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1766044800000,
+          "all3": false,
+          "btcReturn24Pct": 0.6623,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -7.11527,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.009267,
+        "entryTs": 1766077200000,
+        "exitPrice": 0.00902,
+        "exitTs": 1766336400000,
+        "id": "PENGU_00033",
+        "key": "BASE_2025_2026|PENGU_00033|1766077200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 2.365371749217638
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_03350"
+    },
+    {
+      "candidateAtUtc": 1766070000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1766062800000,
+          "all3": false,
+          "btcReturn24Pct": 1.39384,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69266,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1766023200000,
+          "all3": true,
+          "btcReturn24Pct": -0.90765,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -7.38602,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765980000000,
+          "all3": false,
+          "btcReturn24Pct": 2.72975,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.91435,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1766055600000,
+          "all3": false,
+          "btcReturn24Pct": 0.34073,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -6.55638,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1766044800000,
+          "all3": false,
+          "btcReturn24Pct": 0.6623,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -7.11527,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.008888,
+        "entryTs": 1766080800000,
+        "exitPrice": 0.009599040000000001,
+        "exitTs": 1766160000000,
+        "id": "PENGU_00034",
+        "key": "BASE_2025_2026|PENGU_00034|1766080800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_03350"
+    },
+    {
+      "candidateAtUtc": 1766070000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1766062800000,
+          "all3": false,
+          "btcReturn24Pct": 1.39384,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.69266,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1766023200000,
+          "all3": true,
+          "btcReturn24Pct": -0.90765,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -7.38602,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1765980000000,
+          "all3": false,
+          "btcReturn24Pct": 2.72975,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.91435,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1766055600000,
+          "all3": false,
+          "btcReturn24Pct": 0.34073,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -6.55638,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1766044800000,
+          "all3": false,
+          "btcReturn24Pct": 0.6623,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -7.11527,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.008653,
+        "entryTs": 1766102400000,
+        "exitPrice": 0.00934524,
+        "exitTs": 1766156400000,
+        "id": "PENGU_00035",
+        "key": "BASE_2025_2026|PENGU_00035|1766102400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_03350"
+    },
+    {
+      "candidateAtUtc": 1769659200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1769652000000,
+          "all3": true,
+          "btcReturn24Pct": -1.55912,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.97229,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1769612400000,
+          "all3": false,
+          "btcReturn24Pct": 1.62788,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 5.74893,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1769569200000,
+          "all3": false,
+          "btcReturn24Pct": 0.38098,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 3.17682,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1769644800000,
+          "all3": true,
+          "btcReturn24Pct": -0.35383,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.41014,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1769634000000,
+          "all3": false,
+          "btcReturn24Pct": 0.37748,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 2.02819,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.008794,
+        "entryTs": 1769806800000,
+        "exitPrice": 0.007231120000000001,
+        "exitTs": 1769889600000,
+        "id": "PENGU_00046",
+        "key": "BASE_2025_2026|PENGU_00046|1769806800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 17.47211735274049
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_04347"
+    },
+    {
+      "candidateAtUtc": 1772200800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1772193600000,
+          "all3": false,
+          "btcReturn24Pct": -3.2821,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.98065,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1772154000000,
+          "all3": false,
+          "btcReturn24Pct": -1.33198,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -4.35569,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1772110800000,
+          "all3": false,
+          "btcReturn24Pct": 2.51822,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.5946,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1772186400000,
+          "all3": false,
+          "btcReturn24Pct": -2.47912,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.78014,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1772175600000,
+          "all3": false,
+          "btcReturn24Pct": -0.22802,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -0.42088,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.006494,
+        "entryTs": 1772294400000,
+        "exitPrice": 0.0070135200000000005,
+        "exitTs": 1772312400000,
+        "id": "PENGU_00051",
+        "key": "BASE_2025_2026|PENGU_00051|1772294400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_05053"
+    },
+    {
+      "candidateAtUtc": 1774508400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1774501200000,
+          "all3": false,
+          "btcReturn24Pct": -1.5524,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.91901,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1774461600000,
+          "all3": false,
+          "btcReturn24Pct": 2.00093,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 5.70684,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1774418400000,
+          "all3": false,
+          "btcReturn24Pct": 0.63484,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 5.94587,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1774494000000,
+          "all3": false,
+          "btcReturn24Pct": 0.26653,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.11127,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1774483200000,
+          "all3": false,
+          "btcReturn24Pct": 0.66522,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 2.48351,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.006895,
+        "entryTs": 1774540800000,
+        "exitPrice": 0.00628,
+        "exitTs": 1774800000000,
+        "id": "PENGU_00055",
+        "key": "BASE_2025_2026|PENGU_00055|1774540800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 8.619506889050033
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_05694"
+    },
+    {
+      "candidateAtUtc": 1775102400000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1775095200000,
+          "all3": true,
+          "btcReturn24Pct": -1.18482,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.58955,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1775055600000,
+          "all3": false,
+          "btcReturn24Pct": 3.2701,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 4.7943,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1775012400000,
+          "all3": false,
+          "btcReturn24Pct": 0.68832,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 0.69444,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1775088000000,
+          "all3": false,
+          "btcReturn24Pct": 0.40962,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.64269,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1775077200000,
+          "all3": false,
+          "btcReturn24Pct": 0.13292,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 1.80695,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.006203,
+        "entryTs": 1775152800000,
+        "exitPrice": 0.0061,
+        "exitTs": 1775412000000,
+        "id": "PENGU_00057",
+        "key": "BASE_2025_2026|PENGU_00057|1775152800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 1.3604868611961864
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_05859"
+    },
+    {
+      "candidateAtUtc": 1778583600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1778576400000,
+          "all3": true,
+          "btcReturn24Pct": -0.16199,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.97723,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1778536800000,
+          "all3": false,
+          "btcReturn24Pct": -0.26355,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.59532,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1778493600000,
+          "all3": false,
+          "btcReturn24Pct": 0.08882,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -0.34572,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1778569200000,
+          "all3": false,
+          "btcReturn24Pct": 0.11447,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.19598,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1778558400000,
+          "all3": false,
+          "btcReturn24Pct": 0.48465,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.2354,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.00931,
+        "entryTs": 1778673600000,
+        "exitPrice": 0.00832832,
+        "exitTs": 1778922000000,
+        "id": "PENGU_00070",
+        "key": "BASE_2025_2026|PENGU_00070|1778673600000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourceNativeNet30Pct": 10.244360902255645
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_06826"
+    },
+    {
+      "candidateAtUtc": 1778583600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1778576400000,
+          "all3": true,
+          "btcReturn24Pct": -0.16199,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.97723,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1778536800000,
+          "all3": false,
+          "btcReturn24Pct": -0.26355,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.59532,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1778493600000,
+          "all3": false,
+          "btcReturn24Pct": 0.08882,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -0.34572,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1778569200000,
+          "all3": false,
+          "btcReturn24Pct": 0.11447,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.19598,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1778558400000,
+          "all3": false,
+          "btcReturn24Pct": 0.48465,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.2354,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.009011,
+        "entryTs": 1778716800000,
+        "exitPrice": 0.00844,
+        "exitTs": 1778976000000,
+        "id": "PENGU_00071",
+        "key": "BASE_2025_2026|PENGU_00071|1778716800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 6.036699589390749
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_06826"
+    },
+    {
+      "candidateAtUtc": 1778583600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1778576400000,
+          "all3": true,
+          "btcReturn24Pct": -0.16199,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.97723,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1778536800000,
+          "all3": false,
+          "btcReturn24Pct": -0.26355,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.59532,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1778493600000,
+          "all3": false,
+          "btcReturn24Pct": 0.08882,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -0.34572,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1778569200000,
+          "all3": false,
+          "btcReturn24Pct": 0.11447,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.19598,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1778558400000,
+          "all3": false,
+          "btcReturn24Pct": 0.48465,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.2354,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.008873,
+        "entryTs": 1778756400000,
+        "exitPrice": 0.00855,
+        "exitTs": 1779015600000,
+        "id": "PENGU_00072",
+        "key": "BASE_2025_2026|PENGU_00072|1778756400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 3.3402569593147806
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_06826"
+    },
+    {
+      "candidateAtUtc": 1779919200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1779912000000,
+          "all3": false,
+          "btcReturn24Pct": -1.11044,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.72131,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1779872400000,
+          "all3": true,
+          "btcReturn24Pct": -0.99875,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.83861,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1779829200000,
+          "all3": true,
+          "btcReturn24Pct": -1.8944,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.56077,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1779904800000,
+          "all3": false,
+          "btcReturn24Pct": -1.08138,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.75809,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1779894000000,
+          "all3": false,
+          "btcReturn24Pct": -1.54484,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.37849,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007824,
+        "entryTs": 1779966000000,
+        "exitPrice": 0.008008,
+        "exitTs": 1780225200000,
+        "id": "PENGU_00075",
+        "key": "BASE_2025_2026|PENGU_00075|1779966000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -2.651738241308787
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_07197"
+    },
+    {
+      "candidateAtUtc": 1779919200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1779912000000,
+          "all3": false,
+          "btcReturn24Pct": -1.11044,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.72131,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1779872400000,
+          "all3": true,
+          "btcReturn24Pct": -0.99875,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.83861,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1779829200000,
+          "all3": true,
+          "btcReturn24Pct": -1.8944,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.56077,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1779904800000,
+          "all3": false,
+          "btcReturn24Pct": -1.08138,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.75809,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1779894000000,
+          "all3": false,
+          "btcReturn24Pct": -1.54484,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -2.37849,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007741,
+        "entryTs": 1779998400000,
+        "exitPrice": 0.007836,
+        "exitTs": 1780257600000,
+        "id": "PENGU_00076",
+        "key": "BASE_2025_2026|PENGU_00076|1779998400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -1.5272316238212122
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_07197"
+    },
+    {
+      "candidateAtUtc": 1781838000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1781830800000,
+          "all3": false,
+          "btcReturn24Pct": -2.37118,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.34172,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1781791200000,
+          "all3": false,
+          "btcReturn24Pct": -1.95955,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -3.67155,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1781748000000,
+          "all3": false,
+          "btcReturn24Pct": -1.84955,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.62105,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1781823600000,
+          "all3": false,
+          "btcReturn24Pct": -2.41029,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.16917,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1781812800000,
+          "all3": true,
+          "btcReturn24Pct": -2.07942,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -5.39258,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.006501,
+        "entryTs": 1781841600000,
+        "exitPrice": 0.006662,
+        "exitTs": 1782100800000,
+        "id": "PENGU_00080",
+        "key": "BASE_2025_2026|PENGU_00080|1781841600000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -2.7765420704507155
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_07730"
+    },
+    {
+      "candidateAtUtc": 1782198000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1782190800000,
+          "all3": false,
+          "btcReturn24Pct": -1.30567,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.59654,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1782151200000,
+          "all3": false,
+          "btcReturn24Pct": 0.21065,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.30781,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1782108000000,
+          "all3": false,
+          "btcReturn24Pct": -0.48574,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -0.97417,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1782183600000,
+          "all3": false,
+          "btcReturn24Pct": 0.16564,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.38097,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1782172800000,
+          "all3": false,
+          "btcReturn24Pct": 0.39879,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -1.73031,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.006273,
+        "entryTs": 1782259200000,
+        "exitPrice": 0.006158,
+        "exitTs": 1782518400000,
+        "id": "PENGU_00081",
+        "key": "BASE_2025_2026|PENGU_00081|1782259200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 1.5332536266539079
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_07830"
+    },
+    {
+      "candidateAtUtc": 1784296800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1784289600000,
+          "all3": false,
+          "btcReturn24Pct": -1.36645,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.16032,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1784250000000,
+          "all3": false,
+          "btcReturn24Pct": -1.83244,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -2.69706,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1784206800000,
+          "all3": false,
+          "btcReturn24Pct": -1.13589,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 0.51855,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1784282400000,
+          "all3": false,
+          "btcReturn24Pct": -1.61862,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.57283,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1784271600000,
+          "all3": false,
+          "btcReturn24Pct": -2.18644,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.62613,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.005885,
+        "entryTs": 1784318400000,
+        "exitPrice": 0.0063558,
+        "exitTs": 1784548800000,
+        "id": "PENGU_00086",
+        "key": "BASE_2025_2026|PENGU_00086|1784318400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_08413"
+    },
+    {
+      "candidateAtUtc": 1785168000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1785160800000,
+          "all3": false,
+          "btcReturn24Pct": -0.03772,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.13608,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1785121200000,
+          "all3": false,
+          "btcReturn24Pct": 1.15096,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 0.42722,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1785078000000,
+          "all3": false,
+          "btcReturn24Pct": 0.91016,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 5.01169,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1785153600000,
+          "all3": false,
+          "btcReturn24Pct": 0.96092,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.5973,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1785142800000,
+          "all3": false,
+          "btcReturn24Pct": 1.12001,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 1.15625,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.005922,
+        "entryTs": 1785232800000,
+        "exitPrice": 0.006028,
+        "exitTs": 1785492000000,
+        "id": "PENGU_00088",
+        "key": "BASE_2025_2026|PENGU_00088|1785232800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -2.089935832489031
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_08655"
+    },
+    {
+      "candidateAtUtc": 1788300000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788292800000,
+          "all3": false,
+          "btcReturn24Pct": -1.80637,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.74177,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788253200000,
+          "all3": false,
+          "btcReturn24Pct": -0.77485,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.40299,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788210000000,
+          "all3": false,
+          "btcReturn24Pct": 0.39021,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -2.12314,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788285600000,
+          "all3": false,
+          "btcReturn24Pct": -2.37214,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.80192,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788274800000,
+          "all3": false,
+          "btcReturn24Pct": -0.8515,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.58459,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.0082,
+        "entryTs": 1788368400000,
+        "exitPrice": 0.008856000000000001,
+        "exitTs": 1788451200000,
+        "id": "PENGU_00101",
+        "key": "BASE_2025_2026|PENGU_00101|1788368400000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_09525"
+    },
+    {
+      "candidateAtUtc": 1788534000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788526800000,
+          "all3": false,
+          "btcReturn24Pct": 0.65567,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.06332,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788487200000,
+          "all3": false,
+          "btcReturn24Pct": 3.86847,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 3.59643,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788444000000,
+          "all3": false,
+          "btcReturn24Pct": 4.54151,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 6.71994,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788519600000,
+          "all3": false,
+          "btcReturn24Pct": 4.2112,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 5.83523,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788508800000,
+          "all3": false,
+          "btcReturn24Pct": 4.2493,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 5.26882,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.00821,
+        "entryTs": 1788544800000,
+        "exitPrice": 0.008866800000000001,
+        "exitTs": 1788663600000,
+        "id": "PENGU_00103",
+        "key": "BASE_2025_2026|PENGU_00103|1788544800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_09590"
+    },
+    {
+      "candidateAtUtc": 1788534000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788526800000,
+          "all3": false,
+          "btcReturn24Pct": 0.65567,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.06332,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788487200000,
+          "all3": false,
+          "btcReturn24Pct": 3.86847,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 3.59643,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788444000000,
+          "all3": false,
+          "btcReturn24Pct": 4.54151,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 6.71994,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788519600000,
+          "all3": false,
+          "btcReturn24Pct": 4.2112,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 5.83523,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788508800000,
+          "all3": false,
+          "btcReturn24Pct": 4.2493,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 5.26882,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.008248,
+        "entryTs": 1788562800000,
+        "exitPrice": 0.00890784,
+        "exitTs": 1788663600000,
+        "id": "PENGU_00104",
+        "key": "BASE_2025_2026|PENGU_00104|1788562800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourceNativeNet30Pct": -8.300000000000008
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_09590"
+    },
+    {
+      "candidateAtUtc": 1788843600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788836400000,
+          "all3": true,
+          "btcReturn24Pct": -0.84723,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.81641,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788796800000,
+          "all3": false,
+          "btcReturn24Pct": -0.81961,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.79283,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788753600000,
+          "all3": true,
+          "btcReturn24Pct": -0.18014,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -2.30978,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788829200000,
+          "all3": false,
+          "btcReturn24Pct": -0.60048,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 0.22194,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788818400000,
+          "all3": true,
+          "btcReturn24Pct": -1.35087,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -4.75756,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.008144,
+        "entryTs": 1788876000000,
+        "exitPrice": 0.00774,
+        "exitTs": 1789135200000,
+        "id": "PENGU_00105",
+        "key": "BASE_2025_2026|PENGU_00105|1788876000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 4.660707269155207
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_09676"
+    },
+    {
+      "candidateAtUtc": 1788984000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788976800000,
+          "all3": true,
+          "btcReturn24Pct": -0.02475,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.94009,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788937200000,
+          "all3": false,
+          "btcReturn24Pct": 1.01744,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.34995,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788894000000,
+          "all3": true,
+          "btcReturn24Pct": -1.17127,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -6.26237,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788969600000,
+          "all3": false,
+          "btcReturn24Pct": 0.07789,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.03955,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788958800000,
+          "all3": false,
+          "btcReturn24Pct": 1.51186,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.09847,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007581,
+        "entryTs": 1789027200000,
+        "exitPrice": 0.007245,
+        "exitTs": 1789286400000,
+        "id": "PENGU_00107",
+        "key": "BASE_2025_2026|PENGU_00107|1789027200000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 4.132132963988922
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_09715"
+    },
+    {
+      "candidateAtUtc": 1788984000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788976800000,
+          "all3": true,
+          "btcReturn24Pct": -0.02475,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.94009,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788937200000,
+          "all3": false,
+          "btcReturn24Pct": 1.01744,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.34995,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788894000000,
+          "all3": true,
+          "btcReturn24Pct": -1.17127,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -6.26237,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788969600000,
+          "all3": false,
+          "btcReturn24Pct": 0.07789,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.03955,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788958800000,
+          "all3": false,
+          "btcReturn24Pct": 1.51186,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.09847,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007488,
+        "entryTs": 1789056000000,
+        "exitPrice": 0.007238,
+        "exitTs": 1789315200000,
+        "id": "PENGU_00108",
+        "key": "BASE_2025_2026|PENGU_00108|1789056000000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 3.038675213675213
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_09715"
+    },
+    {
+      "candidateAtUtc": 1788984000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1788976800000,
+          "all3": true,
+          "btcReturn24Pct": -0.02475,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.94009,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1788937200000,
+          "all3": false,
+          "btcReturn24Pct": 1.01744,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -0.34995,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1788894000000,
+          "all3": true,
+          "btcReturn24Pct": -1.17127,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -6.26237,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1788969600000,
+          "all3": false,
+          "btcReturn24Pct": 0.07789,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.03955,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1788958800000,
+          "all3": false,
+          "btcReturn24Pct": 1.51186,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.09847,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007452,
+        "entryTs": 1789066800000,
+        "exitPrice": 0.007304,
+        "exitTs": 1789326000000,
+        "id": "PENGU_00109",
+        "key": "BASE_2025_2026|PENGU_00109|1789066800000",
+        "period": "BASE_2025_2026",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 1.686044015029531
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_09715"
+    },
+    {
+      "candidateAtUtc": 1791432000000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1791424800000,
+          "all3": true,
+          "btcReturn24Pct": -0.80008,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -2.32975,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1791385200000,
+          "all3": true,
+          "btcReturn24Pct": -2.65126,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -10.18868,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1791342000000,
+          "all3": true,
+          "btcReturn24Pct": -1.59858,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -4.88558,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1791417600000,
+          "all3": true,
+          "btcReturn24Pct": -2.53717,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -4.6996,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1791406800000,
+          "all3": true,
+          "btcReturn24Pct": -2.87769,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -6.81223,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        }
+      },
+      "source": {
+        "entryPrice": 0.008574,
+        "entryTs": 1791435600000,
+        "exitPrice": 0.00823,
+        "exitTs": 1791694800000,
+        "id": "PENGU_00001",
+        "key": "POST_2026_OCT_NOV|PENGU_00001|1791435600000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 3.7121296944250153
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_10395"
+    },
+    {
+      "candidateAtUtc": 1791475200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1791468000000,
+          "all3": false,
+          "btcReturn24Pct": -0.37699,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -0.32818,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1791428400000,
+          "all3": true,
+          "btcReturn24Pct": -1.63228,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -3.20054,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1791385200000,
+          "all3": true,
+          "btcReturn24Pct": -2.65126,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -10.18868,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1791460800000,
+          "all3": false,
+          "btcReturn24Pct": -1.4137,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.10658,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1791450000000,
+          "all3": false,
+          "btcReturn24Pct": -0.81289,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.20661,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007944,
+        "entryTs": 1791504000000,
+        "exitPrice": 0.008229,
+        "exitTs": 1791763200000,
+        "id": "PENGU_00003",
+        "key": "POST_2026_OCT_NOV|PENGU_00003|1791504000000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -3.8876132930513725
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_10407"
+    },
+    {
+      "candidateAtUtc": 1791475200000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1791468000000,
+          "all3": false,
+          "btcReturn24Pct": -0.37699,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -0.32818,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1791428400000,
+          "all3": true,
+          "btcReturn24Pct": -1.63228,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -3.20054,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1791385200000,
+          "all3": true,
+          "btcReturn24Pct": -2.65126,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": -10.18868,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": true
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1791460800000,
+          "all3": false,
+          "btcReturn24Pct": -1.4137,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -1.10658,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1791450000000,
+          "all3": false,
+          "btcReturn24Pct": -0.81289,
+          "flags": {
+            "btcBear": true,
+            "emaBear": true,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 0.20661,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.00808,
+        "entryTs": 1791522000000,
+        "exitPrice": 0.00835,
+        "exitTs": 1791781200000,
+        "id": "PENGU_00004",
+        "key": "POST_2026_OCT_NOV|PENGU_00004|1791522000000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -3.6415841584158333
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_10407"
+    },
+    {
+      "candidateAtUtc": 1792821600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1792814400000,
+          "all3": false,
+          "btcReturn24Pct": -0.83781,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.26034,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1792774800000,
+          "all3": false,
+          "btcReturn24Pct": 0.54173,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 3.72093,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1792731600000,
+          "all3": false,
+          "btcReturn24Pct": -1.17346,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 1.23709,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1792807200000,
+          "all3": false,
+          "btcReturn24Pct": -1.18609,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -2.1148,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1792796400000,
+          "all3": false,
+          "btcReturn24Pct": -0.28543,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -0.46154,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.00756,
+        "entryTs": 1792875600000,
+        "exitPrice": 0.007698,
+        "exitTs": 1793134800000,
+        "id": "PENGU_00006",
+        "key": "POST_2026_OCT_NOV|PENGU_00006|1792875600000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -2.1253968253968187
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_10781"
+    },
+    {
+      "candidateAtUtc": 1793307600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1793300400000,
+          "all3": false,
+          "btcReturn24Pct": -0.91858,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.97869,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1793260800000,
+          "all3": false,
+          "btcReturn24Pct": -1.74468,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.72148,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1793217600000,
+          "all3": false,
+          "btcReturn24Pct": 0.68488,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 3.2804,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1793293200000,
+          "all3": false,
+          "btcReturn24Pct": 0.02437,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 1.55039,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1793282400000,
+          "all3": false,
+          "btcReturn24Pct": 0.69369,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 2.56077,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007134,
+        "entryTs": 1793347200000,
+        "exitPrice": 0.007203,
+        "exitTs": 1793606400000,
+        "id": "PENGU_00008",
+        "key": "POST_2026_OCT_NOV|PENGU_00008|1793347200000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": -1.267199327165691
+      },
+      "sourceWin": false,
+      "triggerId": "P42_D3_10916"
+    },
+    {
+      "candidateAtUtc": 1793307600000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1793300400000,
+          "all3": false,
+          "btcReturn24Pct": -0.91858,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.97869,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1793260800000,
+          "all3": false,
+          "btcReturn24Pct": -1.74468,
+          "flags": {
+            "btcBear": true,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": -1.72148,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1793217600000,
+          "all3": false,
+          "btcReturn24Pct": 0.68488,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 3.2804,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1793293200000,
+          "all3": false,
+          "btcReturn24Pct": 0.02437,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": 1.55039,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1793282400000,
+          "all3": false,
+          "btcReturn24Pct": 0.69369,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": 2.56077,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.007236,
+        "entryTs": 1793383200000,
+        "exitPrice": 0.00703,
+        "exitTs": 1793642400000,
+        "id": "PENGU_00009",
+        "key": "POST_2026_OCT_NOV|PENGU_00009|1793383200000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 2.5468767274737463
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_10916"
+    },
+    {
+      "candidateAtUtc": 1793890800000,
+      "leads": {
+        "1": {
+          "H1FeatureReferenceTs": 1793883600000,
+          "all3": false,
+          "btcReturn24Pct": 1.66028,
+          "flags": {
+            "btcBear": false,
+            "emaBear": true,
+            "relativeWeak": true
+          },
+          "leadHours": 1,
+          "penguReturn24Pct": -1.27671,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "12": {
+          "H1FeatureReferenceTs": 1793844000000,
+          "all3": false,
+          "btcReturn24Pct": 5.75982,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 12,
+          "penguReturn24Pct": 7.12101,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "24": {
+          "H1FeatureReferenceTs": 1793800800000,
+          "all3": false,
+          "btcReturn24Pct": 2.49503,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": false
+          },
+          "leadHours": 24,
+          "penguReturn24Pct": 4.82955,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "3": {
+          "H1FeatureReferenceTs": 1793876400000,
+          "all3": false,
+          "btcReturn24Pct": 2.44957,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 3,
+          "penguReturn24Pct": -0.68776,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        },
+        "6": {
+          "H1FeatureReferenceTs": 1793865600000,
+          "all3": false,
+          "btcReturn24Pct": 2.5724,
+          "flags": {
+            "btcBear": false,
+            "emaBear": false,
+            "relativeWeak": true
+          },
+          "leadHours": 6,
+          "penguReturn24Pct": -1.30081,
+          "strictlyBeforeCrossingH1": true,
+          "wasAlreadyBelowD3AtPreconditionTime": false
+        }
+      },
+      "source": {
+        "entryPrice": 0.006599,
+        "entryTs": 1793937600000,
+        "exitPrice": 0.006252,
+        "exitTs": 1794196800000,
+        "id": "PENGU_00011",
+        "key": "POST_2026_OCT_NOV|PENGU_00011|1793937600000",
+        "period": "POST_2026_OCT_NOV",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourceNativeNet30Pct": 4.958372480678897
+      },
+      "sourceWin": true,
+      "triggerId": "P42_D3_11078"
+    }
+  ],
+  "asofPriorH1FlagsP42Parity": true,
+  "baseP44NativeSourceSingleSlotParity": true,
+  "crossingLookbackNativeHours": 48,
+  "crossingThresholdD3Pct": -3,
+  "gross": 0.75,
+  "hashes": {
+    "BTCH1": {
+      "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+      "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+    },
+    "Native53": "e30c3dfa389c97db6b47351a03dbadd4ec1f8f2d421a69c59b1f742fde04c337",
+    "P42SourceCrosses": "6d952a4b5279bd779dea443dc4f284e4c695a7cc20de6a398094c7a7353263d2",
+    "P44": "64b55b30705ffffa412887e6f464de68b902f3443b31bedd90fb76e86eda6887",
+    "PENGUH1": {
+      "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+    },
+    "PENGUM5": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    }
+  },
+  "limitations": [
+    "All PRE/BASE/POST have previously been examined, not genuine untouched out-of-sample.",
+    "A filter from 1h before -3 crossing is not necessarily from before the ENTIRE price downleg; require-before-D3 flag tests multi-cross history.",
+    "Small selected Native53 source cohort and 20 scenarios can severely overfit.",
+    "Source Native53 has overlapping natural candidates and no production signed fill proofs. Single-slot is a hypothetical gross0.75 accounting model.",
+    "Earlier H1 indicators may reflect the decline already underway: cannot assert pre-trend predictive power.",
+    "M5 mark-to-market against source H1 entries/exits may be incoherent; no funding, shared Gross, other Runner impact.",
+    "No live adoption regardless of positive in-sample scores."
+  ],
+  "preFeatureLeadHours": [
+    1,
+    3,
+    6,
+    12,
+    24
+  ],
+  "scenarios": 20,
+  "schema": "prism7-p46-real-pre-downleg-3flag-hours-before-d3-native53/v1",
+  "status": "IN_SAMPLE_LEAD_HOUR_SENSITIVITY_RESEARCH_ONLY"
+}
