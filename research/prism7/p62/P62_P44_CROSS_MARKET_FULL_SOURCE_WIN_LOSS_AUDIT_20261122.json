@@ -1,0 +1,213 @@
+{
+  "AsterSourceNativeTotal53AndBinanceSourceNative55NotSameTrades": true,
+  "AsterWins19of21SelectedOriginallyWasSampleChosen": true,
+  "BinanceCrossVenueWinsOnly7of14FrozenSelected": true,
+  "BinanceVenuePriceOHLCVDoesNotMatchAsterOnJuly2025Overlap": true,
+  "crossMarketIdenticalNativeSignalCodeNotMarketData": true,
+  "doNotTuneNext3pctThresholdFromObservedP61AlternativeD5": true,
+  "exactFixedP44Rule": "last strictly earlier PENGU 24h -3% H1 downcross within48h; previous completed H1 BTC24<=0, PENGU24-BTC24<=-1pp, EMA72<EMA168 and PENGUclose<EMA72",
+  "limitations": [
+    "Binance external historical market is NOT original Aster venue; differing prices and volume mean this is robustness check, not strict out-of-time Aster.",
+    "P44 D3 condition had previously been selected based on original Aster historical 53 outcomes; Aster Fisher p-value is discovery-selected and not independently inferential.",
+    "Binance 14 selected events occur in 2025 Feb, Apr, May, Jun and are source natural overlapping intents; Fisher treats as independent for descriptive convenience only.",
+    "Source 53 and 55 original Native short signals are H1 synthetic price events, not exchange confirmed signed order fills.",
+    "No 5m high-stress drawdown, funding, true native venue STOP priority, or cross-runner portfolio account risk available from Binance historical H1.",
+    "Do not confuse high 5/7 overlapping-filter one-slot win rate with 7/14 entire source natural signal win rate, or compare slot NAVs directly as same trades.",
+    "Alternative 5% downcross results were viewed in P61 sensitivity and may not be promoted without new unseen venue OOS."
+  ],
+  "marketSourceComparison": [
+    {
+      "allNativeSourceIntents": 53,
+      "allSourceLosers": 24,
+      "allSourceWinners": 29,
+      "excludedOriginalLosers": 22,
+      "excludedOriginalWinners": 10,
+      "excludedWilson95Pct": [
+        17.95,
+        48.57
+      ],
+      "excludedWinPct": 31.25,
+      "fisherExactTwoSidedPWithinVenue": 2e-05,
+      "keptLosingNativeSource": 2,
+      "keptWilson95Pct": [
+        71.09,
+        97.35
+      ],
+      "keptWinPct": 90.47619,
+      "keptWinningNativeSource": 19,
+      "market": "ASTER_REFERENCE_2025AUG_2026NOV",
+      "perMonth": {
+        "2025-08": {
+          "keptByFrozenP44": 1,
+          "signals": 3,
+          "sourceKeptWins": 0,
+          "sourceWins": 0
+        },
+        "2025-09": {
+          "keptByFrozenP44": 2,
+          "signals": 3,
+          "sourceKeptWins": 1,
+          "sourceWins": 2
+        },
+        "2025-10": {
+          "keptByFrozenP44": 1,
+          "signals": 6,
+          "sourceKeptWins": 1,
+          "sourceWins": 4
+        },
+        "2025-11": {
+          "keptByFrozenP44": 4,
+          "signals": 6,
+          "sourceKeptWins": 4,
+          "sourceWins": 4
+        },
+        "2025-12": {
+          "keptByFrozenP44": 3,
+          "signals": 8,
+          "sourceKeptWins": 3,
+          "sourceWins": 5
+        },
+        "2026-01": {
+          "keptByFrozenP44": 1,
+          "signals": 1,
+          "sourceKeptWins": 1,
+          "sourceWins": 1
+        },
+        "2026-02": {
+          "keptByFrozenP44": 0,
+          "signals": 1,
+          "sourceKeptWins": 0,
+          "sourceWins": 0
+        },
+        "2026-03": {
+          "keptByFrozenP44": 0,
+          "signals": 1,
+          "sourceKeptWins": 0,
+          "sourceWins": 1
+        },
+        "2026-04": {
+          "keptByFrozenP44": 1,
+          "signals": 1,
+          "sourceKeptWins": 1,
+          "sourceWins": 1
+        },
+        "2026-05": {
+          "keptByFrozenP44": 3,
+          "signals": 5,
+          "sourceKeptWins": 3,
+          "sourceWins": 3
+        },
+        "2026-06": {
+          "keptByFrozenP44": 0,
+          "signals": 2,
+          "sourceKeptWins": 0,
+          "sourceWins": 1
+        },
+        "2026-07": {
+          "keptByFrozenP44": 0,
+          "signals": 2,
+          "sourceKeptWins": 0,
+          "sourceWins": 0
+        },
+        "2026-09": {
+          "keptByFrozenP44": 4,
+          "signals": 7,
+          "sourceKeptWins": 4,
+          "sourceWins": 4
+        },
+        "2026-10": {
+          "keptByFrozenP44": 1,
+          "signals": 6,
+          "sourceKeptWins": 1,
+          "sourceWins": 2
+        },
+        "2026-11": {
+          "keptByFrozenP44": 0,
+          "signals": 1,
+          "sourceKeptWins": 0,
+          "sourceWins": 1
+        }
+      },
+      "relativeConditionalWinPctDeltaKeptMinusExcluded": 59.22619,
+      "sourceCasesOverlapPossible": true,
+      "sourceExcludedByFrozenP44": 32,
+      "sourceKeptByFrozenP44": 21,
+      "ungatedWinPct": 54.71698
+    },
+    {
+      "allNativeSourceIntents": 55,
+      "allSourceLosers": 27,
+      "allSourceWinners": 28,
+      "excludedOriginalLosers": 20,
+      "excludedOriginalWinners": 21,
+      "excludedWilson95Pct": [
+        36.48,
+        65.75
+      ],
+      "excludedWinPct": 51.21951,
+      "fisherExactTwoSidedPWithinVenue": 1.0,
+      "keptLosingNativeSource": 7,
+      "keptWilson95Pct": [
+        26.8,
+        73.2
+      ],
+      "keptWinPct": 50.0,
+      "keptWinningNativeSource": 7,
+      "market": "BINANCE_EXTERNAL_2025JAN_JUL",
+      "perMonth": {
+        "2025-01": {
+          "keptByFrozenP44": 0,
+          "signals": 10,
+          "sourceKeptWins": 0,
+          "sourceWins": 3
+        },
+        "2025-02": {
+          "keptByFrozenP44": 6,
+          "signals": 18,
+          "sourceKeptWins": 2,
+          "sourceWins": 6
+        },
+        "2025-03": {
+          "keptByFrozenP44": 0,
+          "signals": 8,
+          "sourceKeptWins": 0,
+          "sourceWins": 6
+        },
+        "2025-04": {
+          "keptByFrozenP44": 1,
+          "signals": 6,
+          "sourceKeptWins": 1,
+          "sourceWins": 6
+        },
+        "2025-05": {
+          "keptByFrozenP44": 2,
+          "signals": 5,
+          "sourceKeptWins": 1,
+          "sourceWins": 2
+        },
+        "2025-06": {
+          "keptByFrozenP44": 5,
+          "signals": 8,
+          "sourceKeptWins": 3,
+          "sourceWins": 5
+        }
+      },
+      "relativeConditionalWinPctDeltaKeptMinusExcluded": -1.21951,
+      "sourceCasesOverlapPossible": true,
+      "sourceExcludedByFrozenP44": 41,
+      "sourceKeptByFrozenP44": 14,
+      "ungatedWinPct": 50.90909
+    }
+  ],
+  "originalNative53NeverMutated": true,
+  "researchRecommendation": "Keep original Native V20 unchanged. Do not deploy P44 or optimize D5 on these observed results. Acquire future ASTER native source plus signed fills & STOP/account risk, prespecify comprehensive candidate mechanism before independent tests.",
+  "schema": "prism7-p62-p44-frozen-predrop-gate-cross-market-negative-transfer-evidence/v1",
+  "sourceSHA256": {
+    "Native53Aster": "e30c3dfa389c97db6b47351a03dbadd4ec1f8f2d421a69c59b1f742fde04c337",
+    "P44Aster": "64b55b30705ffffa412887e6f464de68b902f3443b31bedd90fb76e86eda6887",
+    "P61Binance": "092aeb6564aac9d6618119ef17450441979445ad362a1db338bc518276de36da",
+    "P61BinancePublishedChecksums": "895ee1801fd0ee84e71d3b4215fa156427579c374c3f83ea5526aafa8ea6e9e3"
+  },
+  "statsFisherAreDescriptiveNotProofOfIndependentOutOfSample": true,
+  "status": "REJECT_FROZEN_P44_AS_DEPLOYABLE_GATE"
+}
