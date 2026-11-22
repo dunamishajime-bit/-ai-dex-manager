@@ -1,0 +1,12 @@
+# P107 candidate concurrency: outstanding portfolio order-admission parity
+
+Independent candidate-only pass over the six pinned crypto Runner sources, period 2025-10-01 00:00 UTC inclusive through 2026-10-01 00:00 UTC exclusive. Source registry SHA-256 is checked against the previous immutable concurrency manifest. This is **NOT** a complete STABLE4 portfolio backtest.
+
+- Six-source entry intentions: **1,790** across **1,295** distinct entry timestamps. 449 timestamps have 2+ source candidates; 51 timestamps have candidates from different Runners, and 398 are multi-candidate within one Runner. Same-symbol same-timestamp candidate clash: **0**.
+- Largest co-timestamp request if *all* admitted: **3.0x**. No timestamp's *new* requested Gross exceeds either hypothetical 3.5x user target or archived 4.25x source config. **This does not prove even one order is admissible.** Previously opened positions, working orders, reservations, individual runner caps, cash availability, cooldown, source freshness, equity and cumulative DD21% latch all affect the actual result.
+- V52 currently has no source-native candidate lane. Old 87 modeled H1 price-proxy fills must not silently become V52-native fills. A running systemd unit is not signed execution proof.
+- No signed fills, cost/Funding/STOP exit evidence, full account NAV, H48 policy alignment or full ownership chronology were newly simulated. No Production/venue changes.
+
+Artifact: [candidate slot ownership / admission gap JSON](./P107_SIX_RUNNER_ENTRY_SLOT_OWNERSHIP_GAP_20261123.json). Reproduce with python p107_audit_candidate_admission_boundary.py and python -m unittest test_p107_audit_candidate_admission_boundary.py. The regression tests require a fail-closed status, verify 51 cross-Runner slots, and reject silent conversion from candidates to fills.
+
+**Next exactness proof:** load pinned Runner exits and signed or source-based venue fill model; globally sort entry, exit, STOP, funding and account mark events with explicit ties; replay existing positions and reservations at every one of the 1,295 candidate times; resolve active runtime/env risk caps, DD21% latch and owner resets; then independently replay V52's historical synchronized ASTER depth/reference-quote receipts. If historical V52 data cannot be substantiated, keep the 87 approximations in a separately named model and fail the full native-parity gate. Both 10bps and 30bps must receive independent NAV, DD, win-rate, fills, and reject-reason ledgers.
