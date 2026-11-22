@@ -3,7 +3,7 @@
 ## 実施した修正
 
 1. p107_manifest_gate.py の固定Gross判定を修正。旧コードは Stock 1.5x / Total 3.5x をLIVE一致条件と誤認していた。VPS固定ソースの Crypto 3.0x / Stock 4.0x / Total 4.25x を研究用SOURCE_PROFILEとして分離し、1.5/3.5は感応度シナリオ扱いに変更。不明値はfail closed。
-2. VPSのQ102起動環境を読み取り専用で点検し、QUALITY102_CAUSAL_V1_MAX_GROSS=0.50を確認。現行稼働状態ではQ102・V52・Shared Riskがrunning、V4はfailed、HYPEはinactive。これは「全Runnerを仮稼働するBT」とは別。
+2. **2026-11-23訂正：**0.50xはsystemd EnvironmentFile上の値で、稼働プロセスの実効値ではなかった。稼働PIDとsystemd Unit EnvironmentのMAX_GROSSは3.0で、固定SHAのソース上限も3.0。プロセスのENABLED／LIVE_TRADING_ENABLED／LIVE_EXECUTION_ENABLED／OPERATOR_ARMEDはすべてfalse。旧0.50x再計算は比較研究に限定する。
 3. 2026-11-13旧基準研究エンジンの注文受理直前にQ102 gross 0.50 capを組み込んで、10/30bps両方を完全再実行。fills・decisions・funding・equityを作成し、Q102全fillのgross<=0.50をテストした。
 
 ## 計算結果 (あくまで旧SHA研究エンジンの感応度。現行STABLE4のFULL PARITYではない)

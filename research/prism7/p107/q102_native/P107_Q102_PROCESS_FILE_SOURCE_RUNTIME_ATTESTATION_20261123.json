@@ -1,0 +1,42 @@
+{
+  "observedAtUtc": "2026-11-22T17:12:59.831044+00:00",
+  "unitName": "disdex-quality102-causal-v1@c7310d34ba1b6de07071d8883a2ed0de8dcce2a7.service",
+  "service": {
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "pidPresent": true,
+  "processEnvironmentWhitelisted": {
+    "QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED": "false",
+    "QUALITY102_CAUSAL_V1_SYMBOLS": "SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT",
+    "QUALITY102_CAUSAL_V1_MODE": "LIVE",
+    "QUALITY102_CAUSAL_V1_MAX_GROSS": "3.0",
+    "QUALITY102_CAUSAL_V1_ENABLED": "false",
+    "QUALITY102_CAUSAL_V1_OPERATOR_ARMED": "false",
+    "QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED": "false"
+  },
+  "systemdUnitEnvironmentWhitelisted": {
+    "QUALITY102_CAUSAL_V1_MODE": "LIVE",
+    "QUALITY102_CAUSAL_V1_ENABLED": "false",
+    "QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED": "false",
+    "QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED": "false",
+    "QUALITY102_CAUSAL_V1_OPERATOR_ARMED": "false",
+    "QUALITY102_CAUSAL_V1_SYMBOLS": "SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT",
+    "QUALITY102_CAUSAL_V1_MAX_GROSS": "3.0"
+  },
+  "environmentFilesWhitelisted": {
+    "QUALITY102_CAUSAL_V1_MODE": "LIVE",
+    "QUALITY102_CAUSAL_V1_ENABLED": "true",
+    "QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED": "true",
+    "QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED": "true",
+    "QUALITY102_CAUSAL_V1_OPERATOR_ARMED": "true",
+    "QUALITY102_CAUSAL_V1_SYMBOLS": "SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,TIAUSDT,JUPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,RENDERUSDT,TAOUSDT,TRXUSDT",
+    "QUALITY102_CAUSAL_V1_MAX_GROSS": "0.50"
+  },
+  "environmentFileCount": 1,
+  "environmentFileBasenames": [
+    "disdex-quality102-causal-v1.env"
+  ],
+  "envFileConflictingKeys": [],
+  "processVsEnvironmentFilesGrossDiffer": true
+}

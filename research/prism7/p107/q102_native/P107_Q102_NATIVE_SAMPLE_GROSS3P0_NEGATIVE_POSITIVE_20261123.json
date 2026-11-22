@@ -1,0 +1,27 @@
+{
+  "expectedNegativeAndPositiveControlsPass": true,
+  "pin": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "results": [
+    {
+      "decisionTs": 1759280400000,
+      "status": "SOURCE_THROW",
+      "error": "QUALITY102_INVALID_CANDLE",
+      "delayMillis": 13
+    },
+    {
+      "decisionTs": 1785718800000,
+      "status": "PIN_SOURCE_CALLED",
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "side": 0,
+      "symbol": null,
+      "route": null,
+      "layer": null,
+      "family": null,
+      "sourceRequestedGross": 0,
+      "effectiveGross": 0,
+      "dataCutoffTs": 1785715200000,
+      "delayMillis": 3
+    }
+  ],
+  "p107FullParity": false
+}

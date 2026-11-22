@@ -1,0 +1,1406 @@
+{
+  "schema": "p107-q102-21-symbol-current-sha-full-eligible-period-native-raw-entry-scan/v1",
+  "sourceSha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "dateWindow": [
+    "2025-10-01T01:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "highVolUniverseFromActualRunningProcess": [
+    "SUIUSDT",
+    "SEIUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "OPUSDT",
+    "ENAUSDT",
+    "ONDOUSDT",
+    "FILUSDT",
+    "TRXUSDT"
+  ],
+  "s34UniverseFromPinnedSource": [
+    "AAVEUSDT",
+    "APTUSDT",
+    "AVAXUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "FETUSDT",
+    "LDOUSDT",
+    "NEARUSDT",
+    "RENDERUSDT",
+    "SOLUSDT",
+    "UNIUSDT"
+  ],
+  "sourceInputUniverse": [
+    "AAVEUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "AVAXUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "ENAUSDT",
+    "FETUSDT",
+    "FILUSDT",
+    "LDOUSDT",
+    "NEARUSDT",
+    "ONDOUSDT",
+    "OPUSDT",
+    "RENDERUSDT",
+    "SEIUSDT",
+    "SOLUSDT",
+    "SUIUSDT",
+    "TRXUSDT",
+    "UNIUSDT"
+  ],
+  "inputSources": {
+    "AAVEUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1",
+          "bytes": 107285
+        },
+        {
+          "file": "aster-public-v3-h1/AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+          "bytes": 301819
+        }
+      ]
+    },
+    "APTUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/APTUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "3a937531ab57dae81d492af93680a6f4fddf8c3bde594e240e04f460c1544729",
+          "bytes": 102412
+        },
+        {
+          "file": "aster-public-v3-h1/APTUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e",
+          "bytes": 276565
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/APTUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "38380069cdfcd467516ce1579a2221f76ecee8515d7a58744701d99a28f09cfc",
+          "bytes": 377596
+        }
+      ]
+    },
+    "ARBUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/ARBUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "64c14297f5e4c15ce7f72102e755c926a8374e29b6af5de9f4e315b7692ac814",
+          "bytes": 117606
+        },
+        {
+          "file": "aster-public-v3-h1/ARBUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "6c8dd74b981ea182a08eb9ed685e81f92deaeefe3b80254036cbfadf1b5e0a8d",
+          "bytes": 284739
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/ARBUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "dd446b5f461ba133e6e326f9af0da745ebd86e7705f71d9dd74fd5f2f050ea73",
+          "bytes": 400788
+        }
+      ]
+    },
+    "AVAXUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c",
+          "bytes": 101353
+        },
+        {
+          "file": "aster-public-v3-h1/AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+          "bytes": 279405
+        }
+      ]
+    },
+    "BTCUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/BTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3",
+          "bytes": 224859
+        },
+        {
+          "file": "aster-public-v3-h1/BTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+          "bytes": 446907
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/BTCUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0",
+          "bytes": 670075
+        }
+      ]
+    },
+    "DOGEUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff",
+          "bytes": 189409
+        },
+        {
+          "file": "aster-public-v3-h1/DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+          "bytes": 413532
+        }
+      ]
+    },
+    "DOTUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/DOTUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695",
+          "bytes": 99960
+        },
+        {
+          "file": "aster-public-v3-h1/DOTUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e",
+          "bytes": 260849
+        }
+      ]
+    },
+    "ENAUSDT": {
+      "first": "2025-05-27T13:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 11795,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/ENAUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "434c65c1fc4d07374a8201f3d4e31e13176e60caca552abe396fdf3bbaafb99b",
+          "bytes": 105945
+        },
+        {
+          "file": "aster-public-v3-h1/ENAUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "318787f0dc48498ce97c8b814316bd14716e0dc3d6516fb0df17a32d2d3f011c",
+          "bytes": 337586
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/ENAUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "755639e19659250b6293a85a917248fec79f254e2bad87c835d3eff53dc29fa3",
+          "bytes": 442158
+        }
+      ]
+    },
+    "FETUSDT": {
+      "first": "2026-01-09T18:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 6342,
+      "files": [
+        {
+          "file": "aster-public-v3-h1/FETUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477",
+          "bytes": 169553
+        }
+      ]
+    },
+    "FILUSDT": {
+      "first": "2025-11-07T15:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 7857,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-q102-warmup/FILUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "5a0f23003dd43d2601090c9c0b383f33cc787f7b1330d882efbdb391a1a2903e",
+          "bytes": 196110
+        }
+      ]
+    },
+    "LDOUSDT": {
+      "first": "2026-01-09T18:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 6342,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/LDOUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "b42d032b44a0a2bd6a0c790ed5451e9c796a793c0355e5f39b1e8b699dda6e58",
+          "bytes": 60
+        },
+        {
+          "file": "aster-public-v3-h1/LDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0",
+          "bytes": 137734
+        }
+      ]
+    },
+    "NEARUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/NEARUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231",
+          "bytes": 94635
+        },
+        {
+          "file": "aster-public-v3-h1/NEARUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+          "bytes": 280118
+        }
+      ]
+    },
+    "ONDOUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/ONDOUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "e1101ca566744a1acc732d46acce105fed1b9bab600b72eb18ac06a9e06300a8",
+          "bytes": 36597
+        },
+        {
+          "file": "aster-public-v3-h1/ONDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263",
+          "bytes": 294606
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/ONDOUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "1d8c5ca42f471deb803429ca13210da0ea81881b01600f62d63e8e0a970e963c",
+          "bytes": 329782
+        }
+      ]
+    },
+    "OPUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/OPUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "e3e640488aab5e74a84367d5c7dbd698c508964f34d7f68ae59717d6613c1c9f",
+          "bytes": 113347
+        },
+        {
+          "file": "aster-public-v3-h1/OPUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "bc19af06abb844d3aa84dad726d19281f6e33f37cf8c87ca9eb4575345918411",
+          "bytes": 262206
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/OPUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "7b9dbd39aabed32c590389e9bcc43e019a44d7267a7a7768bf060fc8f5847239",
+          "bytes": 374656
+        }
+      ]
+    },
+    "RENDERUSDT": {
+      "first": "2026-01-06T13:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 6419,
+      "files": [
+        {
+          "file": "aster-public-v3-h1/RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02",
+          "bytes": 177581
+        }
+      ]
+    },
+    "SEIUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/SEIUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "49a78a2894b52936af9f41e6fc4c2ddf0ebcc12e0812caba755072e933477363",
+          "bytes": 116586
+        },
+        {
+          "file": "aster-public-v3-h1/SEIUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "e736f602afb91583bebd848f0630271277b1a7f3e4aa8a522a96aa97152764ed",
+          "bytes": 239862
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/SEIUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "d498d40d05d0472ef8a4b680940dc145c9ff87f46d1f4eb3b30e4ab85fa6a46e",
+          "bytes": 355120
+        }
+      ]
+    },
+    "SOLUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/SOLUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d",
+          "bytes": 207990
+        },
+        {
+          "file": "aster-public-v3-h1/SOLUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+          "bytes": 424986
+        }
+      ]
+    },
+    "SUIUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/SUIUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "750a231b0a0decb0fd27fd5b6e104e619cae6376a1cec20845d4c31bb15931f4",
+          "bytes": 164829
+        },
+        {
+          "file": "aster-public-v3-h1/SUIUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c",
+          "bytes": 376606
+        },
+        {
+          "file": "aster-public-v3-h1-q102-warmup/SUIUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "d674f88c0b39070a9068342e3a3b06ae4daf5bdf6959c14a3f15ef559a58621c",
+          "bytes": 538871
+        }
+      ]
+    },
+    "TRXUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-q102-warmup/TRXUSDT-1h-20250301-20261001.jsonl.gz",
+          "sha256": "1489b0f8e5d9e0031fb4fa1223cb9279a42684c142896e78f8a2581b893c8e59",
+          "bytes": 395551
+        }
+      ]
+    },
+    "UNIUSDT": {
+      "first": "2025-03-01T00:00:00.000Z",
+      "last": "2026-09-30T23:00:00.000Z",
+      "bars": 13896,
+      "files": [
+        {
+          "file": "aster-public-v3-h1-early/UNIUSDT-1h-20250301-20250924.jsonl.gz",
+          "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462",
+          "bytes": 134537
+        },
+        {
+          "file": "aster-public-v3-h1/UNIUSDT-1h-20250924-20261001.jsonl.gz",
+          "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e",
+          "bytes": 287571
+        }
+      ]
+    }
+  },
+  "runtimeFlags": {
+    "enabled": false,
+    "mode": "LIVE",
+    "liveExecutionEnabled": false,
+    "liveTradingEnabled": false,
+    "operatorArmed": false,
+    "maximumGross": 3
+  },
+  "sourceNativeAssumptions": {
+    "sleeveOccupancyAlwaysFlat": true,
+    "liveEnabledOverridden": false,
+    "entryPriceSource": "actual ASTER public H1 entry open",
+    "portfolioGatesApplied": false,
+    "venueOrdersSent": 0
+  },
+  "sourceEvaluated": 499,
+  "preflightBlocked": 1691,
+  "gridTotal": 2190,
+  "preflightRejections": {
+    "BTCUSDT:NATIVE_QUALITY102_INVALID_CANDLE": 982,
+    "ENAUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": 327,
+    "FETUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": 1691,
+    "FILUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": 1312,
+    "LDOUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": 1691,
+    "RENDERUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": 1671
+  },
+  "reasonCounts": {
+    "QUALITY102_CAUSAL_V4_NO_SIGNAL": 425,
+    "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL": 49,
+    "Q102_BRK_FET_SHORT_EXHAUSTION": 1,
+    "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL": 24
+  },
+  "examples": {
+    "BTCUSDT:NATIVE_QUALITY102_INVALID_CANDLE": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "BTCUSDT",
+        "issue": "NATIVE_QUALITY102_INVALID_CANDLE"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "BTCUSDT",
+        "issue": "NATIVE_QUALITY102_INVALID_CANDLE"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "BTCUSDT",
+        "issue": "NATIVE_QUALITY102_INVALID_CANDLE"
+      }
+    ],
+    "ENAUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "ENAUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2025-11-24T13:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "ENAUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2025-11-24T13:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "ENAUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2025-11-24T13:00:00.000Z"
+      }
+    ],
+    "FETUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "FETUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "FETUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "FETUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      }
+    ],
+    "FILUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "FILUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-05-07T15:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "FILUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-05-07T15:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "FILUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-05-07T15:00:00.000Z"
+      }
+    ],
+    "LDOUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "LDOUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "LDOUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "LDOUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-09T18:00:00.000Z"
+      }
+    ],
+    "RENDERUSDT:INSUFFICIENT_OR_NO_ENTRY_BAR": [
+      {
+        "decisionTs": "2025-10-01T01:00:00.000Z",
+        "symbol": "RENDERUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-06T13:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T05:00:00.000Z",
+        "symbol": "RENDERUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-06T13:00:00.000Z"
+      },
+      {
+        "decisionTs": "2025-10-01T09:00:00.000Z",
+        "symbol": "RENDERUSDT",
+        "issue": "INSUFFICIENT_OR_NO_ENTRY_BAR",
+        "earliestEligibleUTC": "2026-07-06T13:00:00.000Z"
+      }
+    ]
+  },
+  "selectedUnconstrainedSignalCandidates": [
+    {
+      "decisionTs": 1783659600000,
+      "decisionUtc": "2026-07-10T05:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1783656000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1783674000000,
+      "decisionUtc": "2026-07-10T09:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR24_Z1.5_H24",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1783670400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1783688400000,
+      "decisionUtc": "2026-07-10T13:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1783684800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1783789200000,
+      "decisionUtc": "2026-07-11T17:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1783785600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1784552400000,
+      "decisionUtc": "2026-07-20T13:00:00.000Z",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK48_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784548800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1784566800000,
+      "decisionUtc": "2026-07-20T17:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784563200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1784581200000,
+      "decisionUtc": "2026-07-20T21:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784577600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1784595600000,
+      "decisionUtc": "2026-07-21T01:00:00.000Z",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK48_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784592000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1784610000000,
+      "decisionUtc": "2026-07-21T05:00:00.000Z",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK48_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784606400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1784653200000,
+      "decisionUtc": "2026-07-21T17:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784649600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1784797200000,
+      "decisionUtc": "2026-07-23T09:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1784793600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1785330000000,
+      "decisionUtc": "2026-07-29T13:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1785326400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1785402000000,
+      "decisionUtc": "2026-07-30T09:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "REV",
+      "variant": "REV24_T0.05_H8",
+      "layer": "S3",
+      "requestedGross": 1.25,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 1.25,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1785398400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 8,
+      "hardStop": 0.045
+    },
+    {
+      "decisionTs": 1787173200000,
+      "decisionUtc": "2026-08-19T21:00:00.000Z",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK48_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787169600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1787216400000,
+      "decisionUtc": "2026-08-20T09:00:00.000Z",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z2.0_H12",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787212800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1787230800000,
+      "decisionUtc": "2026-08-20T13:00:00.000Z",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H12",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787227200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1787259600000,
+      "decisionUtc": "2026-08-20T21:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR24_Z1.5_H24",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787256000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1787302800000,
+      "decisionUtc": "2026-08-21T09:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK24_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787299200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1787374800000,
+      "decisionUtc": "2026-08-22T05:00:00.000Z",
+      "symbol": "RENDERUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK168_H12_V1.2",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787371200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1787403600000,
+      "decisionUtc": "2026-08-22T13:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB72_0.1_P12_0.04_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787400000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1787461200000,
+      "decisionUtc": "2026-08-23T05:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.04_H24",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787457600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1787504400000,
+      "decisionUtc": "2026-08-23T17:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787500800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1787518800000,
+      "decisionUtc": "2026-08-23T21:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787515200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1787720400000,
+      "decisionUtc": "2026-08-26T05:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.04_H24",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787716800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1787821200000,
+      "decisionUtc": "2026-08-27T09:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR24_Z1.5_H24",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1787817600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1788224400000,
+      "decisionUtc": "2026-09-01T01:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK24_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788220800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1788238800000,
+      "decisionUtc": "2026-09-01T05:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788235200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788411600000,
+      "decisionUtc": "2026-09-03T05:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR24_Z1.5_H24",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788408000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1788440400000,
+      "decisionUtc": "2026-09-03T13:00:00.000Z",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z2.0_H12",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788436800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788469200000,
+      "decisionUtc": "2026-09-03T21:00:00.000Z",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR48_Z2.0_H12",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788465600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788584400000,
+      "decisionUtc": "2026-09-05T05:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "SHORT",
+      "family": "REV",
+      "variant": "REV12_T0.05_H12",
+      "layer": "S3",
+      "requestedGross": 1.25,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 1.25,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788580800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.045
+    },
+    {
+      "decisionTs": 1788901200000,
+      "decisionUtc": "2026-09-08T21:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788897600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788915600000,
+      "decisionUtc": "2026-09-09T01:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788912000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788930000000,
+      "decisionUtc": "2026-09-09T05:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788926400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788973200000,
+      "decisionUtc": "2026-09-09T17:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788969600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1788987600000,
+      "decisionUtc": "2026-09-09T21:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788984000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1789002000000,
+      "decisionUtc": "2026-09-10T01:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1788998400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1789650000000,
+      "decisionUtc": "2026-09-17T13:00:00.000Z",
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H24",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1789646400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1789722000000,
+      "decisionUtc": "2026-09-18T09:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK24_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1789718400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1789779600000,
+      "decisionUtc": "2026-09-19T01:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR24_Z1.5_H24",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1789776000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.07
+    },
+    {
+      "decisionTs": 1789981200000,
+      "decisionUtc": "2026-09-21T09:00:00.000Z",
+      "symbol": "RENDERUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK168_H12_V1.2",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1789977600000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1790024400000,
+      "decisionUtc": "2026-09-21T21:00:00.000Z",
+      "symbol": "RENDERUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK168_H12_V1.2",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790020800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1790038800000,
+      "decisionUtc": "2026-09-22T01:00:00.000Z",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "family": "MR",
+      "variant": "MR72_Z1.5_H12",
+      "layer": "S4",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790035200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1790067600000,
+      "decisionUtc": "2026-09-22T09:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "BRK",
+      "variant": "BRK24_H48_V1.2",
+      "layer": "S3",
+      "requestedGross": 0.75,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 0.75,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790064000000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 48,
+      "hardStop": 0.08
+    },
+    {
+      "decisionTs": 1790154000000,
+      "decisionUtc": "2026-09-23T09:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790150400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1790168400000,
+      "decisionUtc": "2026-09-23T13:00:00.000Z",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "family": "PB",
+      "variant": "PB168_0.1_P24_0.02_H12",
+      "layer": "S3",
+      "requestedGross": 2,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 2,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790164800000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.05
+    },
+    {
+      "decisionTs": 1790182800000,
+      "decisionUtc": "2026-09-23T17:00:00.000Z",
+      "symbol": "AVAXUSDT",
+      "side": "LONG",
+      "family": "REV",
+      "variant": "REV12_T0.03_H12",
+      "layer": "S3",
+      "requestedGross": 1.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 1.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790179200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 12,
+      "hardStop": 0.045
+    },
+    {
+      "decisionTs": 1790226000000,
+      "decisionUtc": "2026-09-24T05:00:00.000Z",
+      "symbol": "APTUSDT",
+      "side": "LONG",
+      "family": "REV",
+      "variant": "REV24_T0.05_H24",
+      "layer": "S3",
+      "requestedGross": 1.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 1.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790222400000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.06
+    },
+    {
+      "decisionTs": 1790254800000,
+      "decisionUtc": "2026-09-24T13:00:00.000Z",
+      "symbol": "APTUSDT",
+      "side": "LONG",
+      "family": "REV",
+      "variant": "REV24_T0.05_H24",
+      "layer": "S3",
+      "requestedGross": 1.5,
+      "sourceRuntimeGrossLimit": 3,
+      "effectiveGross": 1.5,
+      "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+      "dataCutoffTs": 1790251200000,
+      "exitPolicy": "FIXED_HOLD_STOP",
+      "maxHoldHours": 24,
+      "hardStop": 0.06
+    }
+  ],
+  "selectedUnconstrainedCandidateCount": 49,
+  "fullSTABLE4AccountBT": false,
+  "signedVenueFills": 0,
+  "status": "Q102_PINNED_SOURCE_RAW_SIGNAL_SCAN_ONLY_NOT_ORDER_OR_PORTFOLIO_PARITY"
+}

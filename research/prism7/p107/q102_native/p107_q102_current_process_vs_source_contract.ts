@@ -1,0 +1,14 @@
+import {resolveQuality102CausalV1Runtime} from "./q102-pin-source-c7310d34/config/disdexQuality102CausalV1Runtime";
+import {INTEGRATED_PRODUCTION_RISK_POLICY,quality102GrossForFamily} from "./q102-pin-source-c7310d34/config/integratedProductionRiskPolicy";
+import * as fs from "node:fs";
+const flags={QUALITY102_CAUSAL_V1_MAX_GROSS:"3.0",QUALITY102_CAUSAL_V1_MODE:"LIVE",QUALITY102_CAUSAL_V1_ENABLED:"false",QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED:"false",QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED:"false",QUALITY102_CAUSAL_V1_OPERATOR_ARMED:"false"};
+const runtime=resolveQuality102CausalV1Runtime(flags);
+const sensitivity=resolveQuality102CausalV1Runtime({...flags,QUALITY102_CAUSAL_V1_MAX_GROSS:"0.50"});
+if(runtime.maximumGross!==3||runtime.enabled||runtime.liveTradingEnabled||runtime.liveExecutionEnabled||runtime.operatorArmed)throw Error("SOURCE_AND_LIVE_ENV_INCONSISTENT");
+if(sensitivity.maximumGross!==0.5)throw Error("HISTORIC_0_5_SCENARIO_INVALID");
+if(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross!==3)throw Error("EXACT_Q102_PIN_POLICY_CHANGED");
+const examples=Object.fromEntries(["HIGH_VOL","MR","BRK","REV","PB"].map(family=>[family,Object.fromEntries(([1,-1] as const).map(side=>[side===1?"LONG":"SHORT",quality102GrossForFamily(family,side)]))]));
+const obj={schema:"p107-q102-pid-effective-vs-systemd-file-cap-v1",pinnedSha:"c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",sourcePolicyQ102MaximumGross:3.0,liveProcessObservedMaxGross:"3.0",historicalSystemdConfigFilePreviouslyObservedMaxGross:"0.50",sourceResolvedRuntime:runtime,old_0p5_sensitivityResolvedRuntime:sensitivity,pinnedSourceFamilySideGross:examples,activeService:true,realExecutionEnabled:false,sourceAndLiveGrossMatch:true,previousResearchMislabelledLiveAs0p5:true,allRunnerBTComplete:false,prodMutations:false};
+const dest=process.argv[2];if(!dest)throw Error("OUTPUT_REQUIRED");
+fs.writeFileSync(dest,JSON.stringify(obj,null,2)+"\n");
+console.log(JSON.stringify({PASS:true,liveMaximumGross:runtime.maximumGross,mode:runtime.mode,enabled:runtime.enabled,liveTradingEnabled:runtime.liveTradingEnabled,liveExecutionEnabled:runtime.liveExecutionEnabled,operatorArmed:runtime.operatorArmed,sensitivityMaximumGross:sensitivity.maximumGross,families:examples}));

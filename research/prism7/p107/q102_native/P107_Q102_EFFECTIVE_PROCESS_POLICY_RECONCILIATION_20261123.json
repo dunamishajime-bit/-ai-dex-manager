@@ -1,0 +1,63 @@
+{
+  "schema": "p107-q102-pid-effective-vs-systemd-file-cap-v1",
+  "pinnedSha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "sourcePolicyQ102MaximumGross": 3,
+  "liveProcessObservedMaxGross": "3.0",
+  "historicalSystemdConfigFilePreviouslyObservedMaxGross": "0.50",
+  "sourceResolvedRuntime": {
+    "strategyId": "QUALITY102_CAUSAL_V1",
+    "mode": "LIVE",
+    "enabled": false,
+    "liveTradingEnabled": false,
+    "liveExecutionEnabled": false,
+    "operatorArmed": false,
+    "maximumGross": 3,
+    "cryptoGrossCap": 3,
+    "totalGrossCap": 4.25,
+    "maximumPositions": 1,
+    "historicalSelectorParity": false,
+    "brkEnabled": false
+  },
+  "old_0p5_sensitivityResolvedRuntime": {
+    "strategyId": "QUALITY102_CAUSAL_V1",
+    "mode": "LIVE",
+    "enabled": false,
+    "liveTradingEnabled": false,
+    "liveExecutionEnabled": false,
+    "operatorArmed": false,
+    "maximumGross": 0.5,
+    "cryptoGrossCap": 3,
+    "totalGrossCap": 4.25,
+    "maximumPositions": 1,
+    "historicalSelectorParity": false,
+    "brkEnabled": false
+  },
+  "pinnedSourceFamilySideGross": {
+    "HIGH_VOL": {
+      "LONG": 1,
+      "SHORT": 0.6
+    },
+    "MR": {
+      "LONG": 0.75,
+      "SHORT": 0.75
+    },
+    "BRK": {
+      "LONG": 0.75,
+      "SHORT": 0.75
+    },
+    "REV": {
+      "LONG": 1.5,
+      "SHORT": 1.25
+    },
+    "PB": {
+      "LONG": 2,
+      "SHORT": 2.5
+    }
+  },
+  "activeService": true,
+  "realExecutionEnabled": false,
+  "sourceAndLiveGrossMatch": true,
+  "previousResearchMislabelledLiveAs0p5": true,
+  "allRunnerBTComplete": false,
+  "prodMutations": false
+}
