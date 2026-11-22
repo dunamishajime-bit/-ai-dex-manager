@@ -1,0 +1,213 @@
+{
+  "frozenGross0p75BetterAverageThanConditionedGrossHalfOrSkipInSynthetic": [
+    {
+      "conditionalGross0p25None": true,
+      "conditionalMeanNAVJPY": 10199.34,
+      "conditionalSourceVetoCount": 84,
+      "conditionalWins": 72,
+      "conditionalWorstDDPct": 18.891,
+      "fixed075MeanNAVJPY": 10237.17,
+      "fixed075Wins": 85,
+      "fixed075WorstDDPct": 18.891,
+      "mode": "EITHER_OR_ASTER_ONCE"
+    }
+  ],
+  "furtherAction": "Stop tuning on this data; test market-specific ranking or OR confidence gate on *new* artificial seeds and independent Aster/Binance unseen real period, native stop signed fill & Shared Risk",
+  "nativeSignalSources": "Aster53/Binance57 actual source earlier P83 but P84 synthetic distinct 192 paths",
+  "noLiveProductionTradingChanges": true,
+  "ownerORmode": "Aster OR Binance Native V20, one actual candidate at exact same UTC; one position slot on ASTER; conditional Gross0.5 else0.75 or reject; never0.25",
+  "pairedBootstrapORvsASTER": {
+    "ORDominated": 27,
+    "ORWorse": 16,
+    "bootstrapPathIidCI95JPY": [
+      23.451,
+      137.437
+    ],
+    "bootstrapRegimeClusterCI95JPY": [
+      4.03,
+      170.076
+    ],
+    "bootstrapStratified8RegimesCI95JPY": [
+      23.587,
+      132.788
+    ],
+    "clusterBootstrapFrequencyORPositive": 0.983,
+    "largestORGainerJPY": 2080.27,
+    "leaveOneRegimeOutMeanDeltaJPY": {
+      "BTC_PENGU_DIVERGENCE": 72.08,
+      "DOWN_THEN_SQUEEZE": 77.46,
+      "HIGH_VOL_CHOP": 70.18,
+      "ILLIQUID_ZERO_PRINT": 91.19,
+      "PERSISTENT_DOWN": 36.35,
+      "PERSISTENT_UP": 90.67,
+      "SIDEWAYS": 91.27,
+      "UP_THEN_DUMP": 88.2
+    },
+    "meanORMinusOtherJPY": 77.18,
+    "nonzeroOnlyMeanORMinusOtherJPY": 344.6,
+    "pairs": 192,
+    "regimeContributionTo192PathMeanJPY": {
+      "BTC_PENGU_DIVERGENCE": 14.1,
+      "DOWN_THEN_SQUEEZE": 9.39,
+      "HIGH_VOL_CHOP": 15.77,
+      "ILLIQUID_ZERO_PRINT": -2.61,
+      "PERSISTENT_DOWN": 45.37,
+      "PERSISTENT_UP": -2.16,
+      "SIDEWAYS": -2.69,
+      "UP_THEN_DUMP": 0.0
+    },
+    "sameNAV": 149,
+    "stratifiedPosteriorFrequencyORPositive": 0.9991,
+    "worstORDownsideJPY": -741.29
+  },
+  "pairedBootstrapORvsBIN": {
+    "ORDominated": 24,
+    "ORWorse": 17,
+    "bootstrapPathIidCI95JPY": [
+      -7.865,
+      111.061
+    ],
+    "bootstrapRegimeClusterCI95JPY": [
+      -16.825,
+      123.171
+    ],
+    "bootstrapStratified8RegimesCI95JPY": [
+      -6.902,
+      108.008
+    ],
+    "clusterBootstrapFrequencyORPositive": 0.9172,
+    "largestORGainerJPY": 2390.98,
+    "leaveOneRegimeOutMeanDeltaJPY": {
+      "BTC_PENGU_DIVERGENCE": 39.35,
+      "DOWN_THEN_SQUEEZE": 47.32,
+      "HIGH_VOL_CHOP": 59.12,
+      "ILLIQUID_ZERO_PRINT": 63.73,
+      "PERSISTENT_DOWN": 17.3,
+      "PERSISTENT_UP": 67.63,
+      "SIDEWAYS": 49.28,
+      "UP_THEN_DUMP": 46.98
+    },
+    "meanORMinusOtherJPY": 48.84,
+    "nonzeroOnlyMeanORMinusOtherJPY": 228.71,
+    "pairs": 192,
+    "regimeContributionTo192PathMeanJPY": {
+      "BTC_PENGU_DIVERGENCE": 14.41,
+      "DOWN_THEN_SQUEEZE": 7.44,
+      "HIGH_VOL_CHOP": -2.89,
+      "ILLIQUID_ZERO_PRINT": -6.93,
+      "PERSISTENT_DOWN": 33.7,
+      "PERSISTENT_UP": -10.34,
+      "SIDEWAYS": 5.72,
+      "UP_THEN_DUMP": 7.73
+    },
+    "sameNAV": 151,
+    "stratifiedPosteriorFrequencyORPositive": 0.9563,
+    "worstORDownsideJPY": -1013.22
+  },
+  "pinnedSourceSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "resamplingLimits": "8 constructed regime categories and 4 seeds each liquidity/correlation are not live prospective OOS",
+  "riskFailSynthetic100Cover": [
+    {
+      "M5HighDDPct": 20.293183,
+      "coupling": "HIGH_CORR",
+      "liquidity": "STRESSED_PRINT",
+      "regime": "HIGH_VOL_CHOP",
+      "seed": 2026112284,
+      "selectedTrueClosed": 2,
+      "tag": "HIGH_VOL_CHOP_STRESSED_PRINT_HIGH_CORR_2026112284",
+      "wins": 0
+    }
+  ],
+  "riskyRegimes": {
+    "BTC_PENGU_DIVERGENCE": "OR gains over Binance-only",
+    "HIGH_VOL_CHOP": "OR losses versus Binance-only",
+    "ILLIQUID_ZERO_PRINT": "OR losses versus Binance-only",
+    "PERSISTENT_DOWN": "OR gains over Binance-only",
+    "PERSISTENT_UP": "OR losses versus Binance-only"
+  },
+  "schema": "prism7-p84-p86-192-dummy-markets-dual-venue-OR-owner-no025-final-decision/v1",
+  "signalsCounts": {
+    "AND": 70,
+    "ASTER": 211,
+    "BINANCE": 235,
+    "OR": 376,
+    "noTriggerInEither": 83
+  },
+  "sourceSHA256": {
+    "P83Historic": "9107288a3b5957f9dea8ee9f3a770729d3635d313884ecf0ee072e54ccafa155",
+    "P84": "ea3b5c8d081a147ae73fb7e37ecc2a238d1a56ee3b14f53028d69fd34ae5909f",
+    "P85": "7287a2633c68b45561676b186b4495ce18361179a56709e0d0ed1d281ffafe34",
+    "P85Full192x72Ledger": "3aa22f0ff6eafc3afe90e895f72ecf62f41b1223d5a2d51831c9c2c514a5995a",
+    "P86": "5394ec39e04d1de74cb177b250e09484930bd675d798c91eabc68d9460da57ea"
+  },
+  "status": "P84_P85_P86_SYNTHETIC_RESEARCH_FINISHED__NO_LIVE_ADOPTION",
+  "syntheticGrid": "8 market regimes * 3 liquidity * 2 cross-market price-coupling * 4 seeds = 192",
+  "syntheticPrimary5Min30Bps": [
+    {
+      "P95M5DDPct": 11.21242,
+      "closed": 92,
+      "maxDD20ExceededPaths": 0,
+      "mean10kNAVJPY": 10122.16,
+      "mode": "ASTER_ONLY",
+      "winratePct": 52.174,
+      "wins": 48,
+      "worstM5DDPct": 19.60281
+    },
+    {
+      "P95M5DDPct": 11.45591,
+      "closed": 104,
+      "maxDD20ExceededPaths": 0,
+      "mean10kNAVJPY": 10150.5,
+      "mode": "BINANCE_TO_ASTER",
+      "winratePct": 57.692,
+      "wins": 60,
+      "worstM5DDPct": 19.36884
+    },
+    {
+      "P95M5DDPct": 9.04473,
+      "closed": 44,
+      "maxDD20ExceededPaths": 0,
+      "mean10kNAVJPY": 10057.02,
+      "mode": "BOTH_REQUIRED",
+      "winratePct": 56.818,
+      "wins": 25,
+      "worstM5DDPct": 14.277
+    },
+    {
+      "P95M5DDPct": 12.17084,
+      "closed": 130,
+      "maxDD20ExceededPaths": 0,
+      "mean10kNAVJPY": 10199.34,
+      "mode": "EITHER_OR_ASTER_ONCE",
+      "winratePct": 55.385,
+      "wins": 72,
+      "worstM5DDPct": 18.8911
+    }
+  ],
+  "syntheticPrimary5Min30BpsPlus100Cover": [
+    {
+      "maxDD20ExceededPaths": 1,
+      "mean10kNAVJPY": 10088.6,
+      "mode": "ASTER_ONLY",
+      "worstM5DDPct": 20.9857
+    },
+    {
+      "maxDD20ExceededPaths": 2,
+      "mean10kNAVJPY": 10111.63,
+      "mode": "BINANCE_TO_ASTER",
+      "worstM5DDPct": 21.40212
+    },
+    {
+      "maxDD20ExceededPaths": 0,
+      "mean10kNAVJPY": 10040.56,
+      "mode": "BOTH_REQUIRED",
+      "worstM5DDPct": 15.01745
+    },
+    {
+      "maxDD20ExceededPaths": 1,
+      "mean10kNAVJPY": 10151.52,
+      "mode": "EITHER_OR_ASTER_ONCE",
+      "worstM5DDPct": 20.29318
+    }
+  ]
+}
