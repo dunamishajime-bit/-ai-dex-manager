@@ -1,0 +1,83 @@
+{
+  "P51": {
+    "firstH1CleanCandidates": 107,
+    "matchedWin70DD20N20Count": 0,
+    "zeroVolumeEntryPriceProxyForImmediateH1Early": 29
+  },
+  "P52": {
+    "bestNegativeControlBuyRatio60OneSlotClosed": 23,
+    "firstRaw24HBreaks": 142,
+    "insufficientIndependentProof": true,
+    "rawBreakOnlyDD": 48.83126,
+    "rawBreakOnlyOneSlotClosed": 94,
+    "rawBreakOnlyWins": 51,
+    "rawM5Events": 846,
+    "wins": 17
+  },
+  "P53": {
+    "individualBUY60CasesNoEarlier3pct": 10,
+    "individualBUY60WinsNoEarlier3pct": 7,
+    "individualSELL55CasesNoEarlier3pct": 24,
+    "individualSELL55WinsNoEarlier3pct": 10,
+    "notAlreadyDropped3PctBeforeEvent": 39,
+    "prior24HoursAlreadyContain3PctMaxClosedDownlegInFirst142": 103
+  },
+  "P54": {
+    "buy60DD": 17.79283,
+    "buy60Extra100bpsDD": 20.43775,
+    "buy60OneSlotClosed": 10,
+    "buy60Wins": 7,
+    "buy60ZeroVolumeAtScheduledEntry": 3,
+    "followthroughBuy60SelectedAfter5M": 2,
+    "immediateAllDD": 31.71079,
+    "immediateAllOneSlot": 32,
+    "immediateAllWins": 16,
+    "strictCleanM5FirstSource": 39,
+    "validatedW70DD20N20": 0
+  },
+  "P55": {
+    "newAfterFullPrintedBarNextOpenClosed": 97,
+    "newDD": 44.88667,
+    "newPriceProxyZeroVolumeEXPOST": 38,
+    "newWins": 55,
+    "notClaimingLiveNativeRunnerUsesP20ResearchFill": true,
+    "oldDD": 41.12012,
+    "oldH1AllFirst149OneSlotClosed": 97,
+    "oldWins": 56,
+    "priorP20ResearchModelNoncausalOwnBarVolumeToOpenSelection": true
+  },
+  "anyProductionOrLiveChanges": false,
+  "inputSHA256": {
+    "P51": "7f0c9a26c60639a52ad31f0e5e85fbc5320a4f62f5a3266abbe42605ba5da4de",
+    "P52": "47f1a6903831c0b26fc9af1c1c66d6effbec009608c8b86426e4936d9358f718",
+    "P53": "8d0b3d94e829cafd1be8bc8a678809dc3ca9bb5349ec55dbd385da6299edf8e7",
+    "P54": "f3c8621c46dcd998e2cb51d86e4c975d15a11fd870a5fe1addd8b62e3675b0ac",
+    "P55": "87491f0b7b6ebc66e65f28bce3953df1cc96891702e335f52da29a3d7cb769fc"
+  },
+  "nextResearchGate": [
+    "independent time-forward venue PENGU M5 and orderbook",
+    "native pinned phase STOP EXIT parity under competing candidate slots",
+    "full 0.75x shared gross realistic cost model and 100bps cover stress",
+    "preserve original Native V20 until Owner approves source-proven candidate"
+  ],
+  "nonadoptionReasons": [
+    "no unseen OOS",
+    "up to 44.89% DD in genuine early H1 route",
+    "negative control ratio BUY60 weak sample size",
+    "M5 quote/venue signed-fill absent",
+    "old source P20 entry fill timing uses not-yet-completed M5 volume",
+    "new source P20 72h reference STOP differs Native V20 source exit",
+    "other LIVE Runners and Shared Risk portfolio DD absent"
+  ],
+  "originalNative53UnchangedWins29Losses24": true,
+  "researchBranch": "research/prism7-p37-audit-20261122",
+  "researchStages": {
+    "P51": 120,
+    "P52": 104,
+    "P53": 16,
+    "P54": 60,
+    "P55": 16
+  },
+  "schema": "prism7-p51-p55-native53-initial-short-empirical-audit-gate/v1",
+  "sourcePinnedNativeV20SHA": "1657e173d250ad58f53e62f7bb0a3428fb405496"
+}
