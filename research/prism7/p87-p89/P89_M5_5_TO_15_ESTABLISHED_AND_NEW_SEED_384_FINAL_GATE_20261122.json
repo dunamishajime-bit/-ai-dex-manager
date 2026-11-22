@@ -1,0 +1,391 @@
+{
+  "ProductionMasterGrossRunStopOrdersModified": false,
+  "frozenScoreBeforeP88IndependentSeedGeneration": true,
+  "gross0p25Prohibited": true,
+  "headlinesEstablishedVsFreshSeedSynthetic192Each": {
+    "P87_PREVIOUSLY_STUDIED": {
+      "all192": 192,
+      "originalMarketIndexSHA256": "ea3b5c8d081a147ae73fb7e37ecc2a238d1a56ee3b14f53028d69fd34ae5909f",
+      "pairedSameSyntheticPathNAVDelta": {
+        "BASE15_NO_CONFIRM": {
+          "higherNAVPaths": 34,
+          "lowerNAVPaths": 27,
+          "meanChangeFromBaseline5minJPY": 12.86,
+          "unchangedNAVPaths": 131,
+          "worstDrawdownVs5minBaselineDeltaJPY": -1208.49
+        },
+        "CONFIRM_15M": {
+          "higherNAVPaths": 32,
+          "lowerNAVPaths": 47,
+          "meanChangeFromBaseline5minJPY": -83.06,
+          "unchangedNAVPaths": 113,
+          "worstDrawdownVs5minBaselineDeltaJPY": -2630.33
+        },
+        "CONFIRM_5M": {
+          "higherNAVPaths": 29,
+          "lowerNAVPaths": 34,
+          "meanChangeFromBaseline5minJPY": -66.93,
+          "unchangedNAVPaths": 129,
+          "worstDrawdownVs5minBaselineDeltaJPY": -2390.98
+        },
+        "CONFIRM_5_THEN_15": {
+          "higherNAVPaths": 29,
+          "lowerNAVPaths": 33,
+          "meanChangeFromBaseline5minJPY": -48.77,
+          "unchangedNAVPaths": 130,
+          "worstDrawdownVs5minBaselineDeltaJPY": -2390.98
+        }
+      },
+      "perPathFullNativeEvidenceSHA256": "2a1486f8c39db3c2a6818bfe189c831c60463887d86daa867ec45e1f43d5e0a5",
+      "policies30bpsAnd100stress": [
+        {
+          "acceptedSourceBeforeSlot": 267,
+          "afterNativeGrossM5AdditionalVetoed": 0,
+          "entryGrossP73Vetoed": 84,
+          "meanNAVJPYPerOne10kSeedMarket": 10199.34,
+          "naturalSourceNativeORSignals": 376,
+          "pathsFinalNAVBelow10k": 39,
+          "policy": "BASE5_NO_CONFIRM",
+          "selectedOneSlot": 130,
+          "selectedWinPct": 55.3846,
+          "selectedWins": 72,
+          "stressExtra100bpsMarketsDDover20": 1,
+          "stressExtra100bpsMeanNAVJPY": 10151.52,
+          "stressExtra100bpsWorstDDPct": 20.29318,
+          "worstM5HighDDPct": 18.8911
+        },
+        {
+          "acceptedSourceBeforeSlot": 261,
+          "afterNativeGrossM5AdditionalVetoed": 0,
+          "entryGrossP73Vetoed": 84,
+          "meanNAVJPYPerOne10kSeedMarket": 10212.2,
+          "naturalSourceNativeORSignals": 376,
+          "pathsFinalNAVBelow10k": 37,
+          "policy": "BASE15_NO_CONFIRM",
+          "selectedOneSlot": 130,
+          "selectedWinPct": 59.2308,
+          "selectedWins": 77,
+          "stressExtra100bpsMarketsDDover20": 1,
+          "stressExtra100bpsMeanNAVJPY": 10164.27,
+          "stressExtra100bpsWorstDDPct": 20.17345,
+          "worstM5HighDDPct": 18.77152
+        },
+        {
+          "acceptedSourceBeforeSlot": 122,
+          "afterNativeGrossM5AdditionalVetoed": 169,
+          "entryGrossP73Vetoed": 84,
+          "meanNAVJPYPerOne10kSeedMarket": 10132.41,
+          "naturalSourceNativeORSignals": 376,
+          "pathsFinalNAVBelow10k": 20,
+          "policy": "CONFIRM_5M",
+          "selectedOneSlot": 77,
+          "selectedWinPct": 61.039,
+          "selectedWins": 47,
+          "stressExtra100bpsMarketsDDover20": 0,
+          "stressExtra100bpsMeanNAVJPY": 10104.48,
+          "stressExtra100bpsWorstDDPct": 15.5259,
+          "worstM5HighDDPct": 14.29988
+        },
+        {
+          "acceptedSourceBeforeSlot": 121,
+          "afterNativeGrossM5AdditionalVetoed": 169,
+          "entryGrossP73Vetoed": 84,
+          "meanNAVJPYPerOne10kSeedMarket": 10116.28,
+          "naturalSourceNativeORSignals": 376,
+          "pathsFinalNAVBelow10k": 24,
+          "policy": "CONFIRM_15M",
+          "selectedOneSlot": 78,
+          "selectedWinPct": 55.1282,
+          "selectedWins": 43,
+          "stressExtra100bpsMarketsDDover20": 0,
+          "stressExtra100bpsMeanNAVJPY": 10088.12,
+          "stressExtra100bpsWorstDDPct": 15.2459,
+          "worstM5HighDDPct": 14.49682
+        },
+        {
+          "acceptedSourceBeforeSlot": 159,
+          "afterNativeGrossM5AdditionalVetoed": 132,
+          "entryGrossP73Vetoed": 84,
+          "meanNAVJPYPerOne10kSeedMarket": 10150.57,
+          "naturalSourceNativeORSignals": 376,
+          "pathsFinalNAVBelow10k": 25,
+          "policy": "CONFIRM_5_THEN_15",
+          "selectedOneSlot": 94,
+          "selectedWinPct": 58.5106,
+          "selectedWins": 55,
+          "stressExtra100bpsMarketsDDover20": 0,
+          "stressExtra100bpsMeanNAVJPY": 10116.33,
+          "stressExtra100bpsWorstDDPct": 15.2459,
+          "worstM5HighDDPct": 14.49682
+        }
+      ],
+      "portableFilename": "PRISM7_P89_PREVIOUS_192_OR_ENTRY_5_15_MIN_NATIVE_SELECTED_TRADE_EVIDENCE_20261122.json",
+      "sourceFixedSyntheticSeeds": [
+        2026112284,
+        2026112285,
+        2026112286,
+        2026112287
+      ],
+      "sourceNativeSignalCounts": {
+        "A": 211,
+        "AND": 70,
+        "B": 235,
+        "OR": 376,
+        "firstBarStopIntrabarAmbiguous": 0,
+        "noSignalPaths": 83,
+        "paths": 192
+      },
+      "sourceSelectedTradeEvidencePortableSHA256": "30e7001c37b4a70c572eb60b167da22223c1634f9f9b174fe35bde81a054c0ae",
+      "sourceSummarySHA256": "423ecf6880d261b678e56ffd7d1f34e71928ed03415fd48f9b0c6557ac90c5d7",
+      "worstSynthetic100bpsLossByPolicy": [
+        {
+          "coupling": "HIGH_CORR",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "BASE5_NO_CONFIRM",
+          "regime": "HIGH_VOL_CHOP",
+          "selected": 2,
+          "worstExtra100bpsHighDDPct": 20.293183,
+          "worstPathTag": "HIGH_VOL_CHOP_STRESSED_PRINT_HIGH_CORR_2026112284"
+        },
+        {
+          "coupling": "HIGH_CORR",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "BASE15_NO_CONFIRM",
+          "regime": "HIGH_VOL_CHOP",
+          "selected": 2,
+          "worstExtra100bpsHighDDPct": 20.173451,
+          "worstPathTag": "HIGH_VOL_CHOP_STRESSED_PRINT_HIGH_CORR_2026112284"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "CONFIRM_5M",
+          "regime": "SIDEWAYS",
+          "selected": 2,
+          "worstExtra100bpsHighDDPct": 15.525902,
+          "worstPathTag": "SIDEWAYS_STRESSED_PRINT_BASIS_DISLOCATION_2026112287"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "THIN_PRINT",
+          "policy": "CONFIRM_15M",
+          "regime": "DOWN_THEN_SQUEEZE",
+          "selected": 1,
+          "worstExtra100bpsHighDDPct": 15.245902,
+          "worstPathTag": "DOWN_THEN_SQUEEZE_THIN_PRINT_BASIS_DISLOCATION_2026112287"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "THIN_PRINT",
+          "policy": "CONFIRM_5_THEN_15",
+          "regime": "DOWN_THEN_SQUEEZE",
+          "selected": 1,
+          "worstExtra100bpsHighDDPct": 15.245902,
+          "worstPathTag": "DOWN_THEN_SQUEEZE_THIN_PRINT_BASIS_DISLOCATION_2026112287"
+        }
+      ]
+    },
+    "P88_PREDECLARED_FRESH_SEED_ARTIFICIAL_HOLDOUT": {
+      "all192": 192,
+      "originalMarketIndexSHA256": "eb67d6e5240b16216f69543f638210e53b2d6f42abeef2dda3bc7cd74d9f9e36",
+      "pairedSameSyntheticPathNAVDelta": {
+        "BASE15_NO_CONFIRM": {
+          "higherNAVPaths": 27,
+          "lowerNAVPaths": 28,
+          "meanChangeFromBaseline5minJPY": -5.89,
+          "unchangedNAVPaths": 137,
+          "worstDrawdownVs5minBaselineDeltaJPY": -3045.22
+        },
+        "CONFIRM_15M": {
+          "higherNAVPaths": 29,
+          "lowerNAVPaths": 42,
+          "meanChangeFromBaseline5minJPY": -77.34,
+          "unchangedNAVPaths": 121,
+          "worstDrawdownVs5minBaselineDeltaJPY": -3045.22
+        },
+        "CONFIRM_5M": {
+          "higherNAVPaths": 15,
+          "lowerNAVPaths": 34,
+          "meanChangeFromBaseline5minJPY": -129.06,
+          "unchangedNAVPaths": 143,
+          "worstDrawdownVs5minBaselineDeltaJPY": -2994.36
+        },
+        "CONFIRM_5_THEN_15": {
+          "higherNAVPaths": 15,
+          "lowerNAVPaths": 33,
+          "meanChangeFromBaseline5minJPY": -73.84,
+          "unchangedNAVPaths": 144,
+          "worstDrawdownVs5minBaselineDeltaJPY": -2994.36
+        }
+      },
+      "perPathFullNativeEvidenceSHA256": "09dc5477bc2b4b1c2a6812aaa17b7fcdcb44d501d5cbb8853bfe82bcc97e8fb8",
+      "policies30bpsAnd100stress": [
+        {
+          "acceptedSourceBeforeSlot": 254,
+          "afterNativeGrossM5AdditionalVetoed": 0,
+          "entryGrossP73Vetoed": 70,
+          "meanNAVJPYPerOne10kSeedMarket": 10225.33,
+          "naturalSourceNativeORSignals": 356,
+          "pathsFinalNAVBelow10k": 30,
+          "policy": "BASE5_NO_CONFIRM",
+          "selectedOneSlot": 116,
+          "selectedWinPct": 55.1724,
+          "selectedWins": 64,
+          "stressExtra100bpsMarketsDDover20": 2,
+          "stressExtra100bpsMeanNAVJPY": 10183.16,
+          "stressExtra100bpsWorstDDPct": 22.84068,
+          "worstM5HighDDPct": 21.43328
+        },
+        {
+          "acceptedSourceBeforeSlot": 250,
+          "afterNativeGrossM5AdditionalVetoed": 0,
+          "entryGrossP73Vetoed": 70,
+          "meanNAVJPYPerOne10kSeedMarket": 10219.44,
+          "naturalSourceNativeORSignals": 356,
+          "pathsFinalNAVBelow10k": 30,
+          "policy": "BASE15_NO_CONFIRM",
+          "selectedOneSlot": 118,
+          "selectedWinPct": 57.6271,
+          "selectedWins": 68,
+          "stressExtra100bpsMarketsDDover20": 3,
+          "stressExtra100bpsMeanNAVJPY": 10176.39,
+          "stressExtra100bpsWorstDDPct": 28.23194,
+          "worstM5HighDDPct": 26.8227
+        },
+        {
+          "acceptedSourceBeforeSlot": 110,
+          "afterNativeGrossM5AdditionalVetoed": 174,
+          "entryGrossP73Vetoed": 70,
+          "meanNAVJPYPerOne10kSeedMarket": 10096.27,
+          "naturalSourceNativeORSignals": 356,
+          "pathsFinalNAVBelow10k": 24,
+          "policy": "CONFIRM_5M",
+          "selectedOneSlot": 66,
+          "selectedWinPct": 51.5152,
+          "selectedWins": 34,
+          "stressExtra100bpsMarketsDDover20": 0,
+          "stressExtra100bpsMeanNAVJPY": 10072.44,
+          "stressExtra100bpsWorstDDPct": 15.95973,
+          "worstM5HighDDPct": 15.07134
+        },
+        {
+          "acceptedSourceBeforeSlot": 129,
+          "afterNativeGrossM5AdditionalVetoed": 155,
+          "entryGrossP73Vetoed": 70,
+          "meanNAVJPYPerOne10kSeedMarket": 10147.99,
+          "naturalSourceNativeORSignals": 356,
+          "pathsFinalNAVBelow10k": 23,
+          "policy": "CONFIRM_15M",
+          "selectedOneSlot": 75,
+          "selectedWinPct": 57.3333,
+          "selectedWins": 43,
+          "stressExtra100bpsMarketsDDover20": 1,
+          "stressExtra100bpsMeanNAVJPY": 10120.98,
+          "stressExtra100bpsWorstDDPct": 27.38509,
+          "worstM5HighDDPct": 25.95922
+        },
+        {
+          "acceptedSourceBeforeSlot": 158,
+          "afterNativeGrossM5AdditionalVetoed": 126,
+          "entryGrossP73Vetoed": 70,
+          "meanNAVJPYPerOne10kSeedMarket": 10151.48,
+          "naturalSourceNativeORSignals": 356,
+          "pathsFinalNAVBelow10k": 26,
+          "policy": "CONFIRM_5_THEN_15",
+          "selectedOneSlot": 84,
+          "selectedWinPct": 54.7619,
+          "selectedWins": 46,
+          "stressExtra100bpsMarketsDDover20": 1,
+          "stressExtra100bpsMeanNAVJPY": 10120.97,
+          "stressExtra100bpsWorstDDPct": 26.53441,
+          "worstM5HighDDPct": 25.10961
+        }
+      ],
+      "portableFilename": "PRISM7_P89_NEW_SEED_192_OR_ENTRY_5_15_MIN_NATIVE_SELECTED_TRADE_EVIDENCE_20261122.json",
+      "sourceFixedSyntheticSeeds": [
+        2026112388,
+        2026112389,
+        2026112390,
+        2026112391
+      ],
+      "sourceNativeSignalCounts": {
+        "A": 205,
+        "AND": 60,
+        "B": 211,
+        "OR": 356,
+        "firstBarStopIntrabarAmbiguous": 0,
+        "noSignalPaths": 87,
+        "paths": 192
+      },
+      "sourceSelectedTradeEvidencePortableSHA256": "f22019448f5734c7fb09e633196de7ed5bd5f6e791c9497c0c44d56d5e5cf155",
+      "sourceSummarySHA256": "2eb361d1719c83fdd337080023e332dc413f84bbe0ef7983a2c01e5e40592b1a",
+      "worstSynthetic100bpsLossByPolicy": [
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "BASE5_NO_CONFIRM",
+          "regime": "ILLIQUID_ZERO_PRINT",
+          "selected": 3,
+          "worstExtra100bpsHighDDPct": 22.840677,
+          "worstPathTag": "ILLIQUID_ZERO_PRINT_STRESSED_PRINT_BASIS_DISLOCATION_2026112391"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "BASE15_NO_CONFIRM",
+          "regime": "ILLIQUID_ZERO_PRINT",
+          "selected": 3,
+          "worstExtra100bpsHighDDPct": 28.231939,
+          "worstPathTag": "ILLIQUID_ZERO_PRINT_STRESSED_PRINT_BASIS_DISLOCATION_2026112391"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "CONFIRM_5M",
+          "regime": "ILLIQUID_ZERO_PRINT",
+          "selected": 1,
+          "worstExtra100bpsHighDDPct": 15.959728,
+          "worstPathTag": "ILLIQUID_ZERO_PRINT_STRESSED_PRINT_BASIS_DISLOCATION_2026112391"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "CONFIRM_15M",
+          "regime": "ILLIQUID_ZERO_PRINT",
+          "selected": 2,
+          "worstExtra100bpsHighDDPct": 27.38509,
+          "worstPathTag": "ILLIQUID_ZERO_PRINT_STRESSED_PRINT_BASIS_DISLOCATION_2026112391"
+        },
+        {
+          "coupling": "BASIS_DISLOCATION",
+          "liquidity": "STRESSED_PRINT",
+          "policy": "CONFIRM_5_THEN_15",
+          "regime": "ILLIQUID_ZERO_PRINT",
+          "selected": 2,
+          "worstExtra100bpsHighDDPct": 26.534407,
+          "worstPathTag": "ILLIQUID_ZERO_PRINT_STRESSED_PRINT_BASIS_DISLOCATION_2026112391"
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "No new actual market out-of-sample: P88 is a deterministic synthetic NEW-SEED holdout with the same model generator, not independent exchange environment.",
+    "Native source and five-minute candle asof gating are causal only for synthetic OHLC; Aster actual quote timestamps and exchange M5 close confirmation lag may differ.",
+    "No real signed stops or venue orderbook or funding or multi-Runner account DD, therefore cannot guarantee future real DD20 target.",
+    "Historical P84 data had been inspected; P87 results are backtest of newly chosen conceptual filter on known generated paths, not unseen real market.",
+    "Fresh-seed 192 cases are also 7d artificial regimes, not full-year compounding or stress against actual sudden 10-20% gaps.",
+    "5m price-action gate losses vs baseline may reflect over-rejection of profitable shorts in sustained decline; must audit lost winners before fitting thresholds.",
+    "No new production orders/runner/gross/master/pengushort V20 source changes."
+  ],
+  "nativeH1AsterBaselineParityP87exact4608ComparedScenarioMetrics": true,
+  "nativeM5StopOriginalPinnedRepricedPer5and15MinEntryClock": true,
+  "oldSynthetic192PlusNewSeed192Total384": true,
+  "ownerP73GrossSizing0p5Or0p75OrVetoUnchanged": true,
+  "ownerSelectedNativeORFromASTERorBinanceSingleASTEROrder": true,
+  "pinnedOriginalV20SHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "researchDecision": "Strict 5m filtering reduced worst DD in both artificial samples but worsened fresh-seed win rate and mean equity; 15m and 5-then-15 lose <=20% high-stress DD on new-seed holdout; NO production adoption. Need source blind real data and true fills before promotion.",
+  "researchOnlyTrue": true,
+  "schema": "prism7-p89-source-native-OR-added-post-trigger-M5-M15-entry-score-new-seed-robustness-final/v1",
+  "scoreDefinition": "ASTER post-trigger first COMPLETED 5min or first three COMPLETED 5min candles; no formed current M5 or future source; price-action sign +1 down candle/+1 prior H1 relative weakness/+1 wick rejection and -negative points for bullish rebound or overextension, cutoff>=2. 15min needs >=2 printed M5 bars. Stage first accept 5 else 15, no hindsight selection.",
+  "sourceEventHistoriesNotPastDataFuture": true
+}
