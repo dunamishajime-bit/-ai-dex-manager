@@ -1,0 +1,157 @@
+{
+  "all34ContentFilesSHA256": {
+    "P102_PLACEBO_FROZEN_SHA_RUN_MANIFEST_20261122.json": {
+      "bytes": 27901,
+      "sha256": "620d684763a3582a5e44975958faa8976d792dfe941e965200094f2e23abd104"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_01_20261122.json": {
+      "bytes": 20686,
+      "sha256": "14787359c40920a36ae3e76328d4bc90dac0cf156674a455c7ed1dcb1d0c53cb"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_02_20261122.json": {
+      "bytes": 20686,
+      "sha256": "91c58ec75cee047aea3f3d253ace18082d888cfd7b2e8a04a6c0875f0c2f50b2"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_03_20261122.json": {
+      "bytes": 20686,
+      "sha256": "93e9faf60253afeb410f4f4b3f5820c48e346eb44ae9357b01f231632a3f426a"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_04_20261122.json": {
+      "bytes": 20686,
+      "sha256": "7d705cd4e72b0d1685ce9a5c3c4d9202604a8bd730d7e324bbebf0049406e9b7"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_05_20261122.json": {
+      "bytes": 20686,
+      "sha256": "09c18e0b80e7bcc9a806687d1093c855a0d1a6df0d58c1998290f9eaed77a82b"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_06_20261122.json": {
+      "bytes": 20686,
+      "sha256": "61ebc6afa9f637d21e2016604edbe452a1d4efd3d376cae26b302c35cc42384f"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_07_20261122.json": {
+      "bytes": 20686,
+      "sha256": "7e1a9a508b4dbb5fae5ae4fadffe26107364adf0bdb11ffa1f2e4218140db49f"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_08_20261122.json": {
+      "bytes": 20686,
+      "sha256": "ebb71a71147a4ecb2d68d603aa7d97fef97f875d00c8052a2124976ec4b008ab"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_09_20261122.json": {
+      "bytes": 20686,
+      "sha256": "c3da33310b613430b9828bf80072b9a5793b04a1ffb74efce43b9887994cad89"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_10_20261122.json": {
+      "bytes": 20686,
+      "sha256": "d5f45229a177f60660a8b2960337578a812035c25f368af6fc6e9355f124922c"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_11_20261122.json": {
+      "bytes": 20686,
+      "sha256": "fca601370868d27a30cd9fc8cada2541e624d33cda2607ddc58728aacecb6963"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_12_20261122.json": {
+      "bytes": 20686,
+      "sha256": "ab302601f9152df2f0468f1695f09dcf9e96e57a967e8e85ab9aab7083825720"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_13_20261122.json": {
+      "bytes": 20686,
+      "sha256": "2c51a2d52f6337bf6087eea5501efcc476223b3015bb020e5ea8af9adddab4f7"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_14_20261122.json": {
+      "bytes": 20686,
+      "sha256": "f75f101b166f15b6ad9c274d803dc02a71830d19fd54ac3d254d21c675e73470"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_15_20261122.json": {
+      "bytes": 20686,
+      "sha256": "2f64e27b4022c79c8e601cac28371214e9cf1e0640fd10dc64679caa06968ae1"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_16_20261122.json": {
+      "bytes": 20686,
+      "sha256": "5777c99783e37a17018c8cb27c4b524fbfe9228522564a825394333170bcb5bd"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_17_20261122.json": {
+      "bytes": 20686,
+      "sha256": "e742f732d452d8f5acadda339d7ebae05ea72e6a0ee924b2aea1b77cfcf9cb22"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_18_20261122.json": {
+      "bytes": 20686,
+      "sha256": "b2f1b1e2f9ebba353aa729ca659caafd37725d4b5f395acf355109da07389181"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_19_20261122.json": {
+      "bytes": 20686,
+      "sha256": "0c7c7fbff3a61d2430778f2075c95688a1b734082bc9093ca00258cc8c687b28"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_20_20261122.json": {
+      "bytes": 20686,
+      "sha256": "d2e5664841ca6d2efa96b8ae01135db2e5b78c97a25186fa7a7001dc764a0ed7"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_21_20261122.json": {
+      "bytes": 20686,
+      "sha256": "1f59e3f525a6e198cdd7503540c66d0722e8bc4ffcc47c8708af64482ff0b14d"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_22_20261122.json": {
+      "bytes": 20686,
+      "sha256": "10ca1e9da3c4231e5f40314f77cad710e14fa5f1a376ac5ae61f3de81256b2fe"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_23_20261122.json": {
+      "bytes": 20686,
+      "sha256": "06c275d45713b007b59b759329ac9fb4df84fe318370ea5d30fca9fe14d54549"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_24_20261122.json": {
+      "bytes": 20686,
+      "sha256": "e0f84bb78d176f2840ff2094aef2dd0c9aac57cd622ee40a59a4dec29539c971"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_25_20261122.json": {
+      "bytes": 20686,
+      "sha256": "bf7966474a4b203483aa7c233e189c17dd0499d46ce91134bd28a52548b6237c"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_26_20261122.json": {
+      "bytes": 20686,
+      "sha256": "b09000bc6251d242df6f8c71c451ecf19e9a72ff01ac195a91f93f9094fba1ce"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_27_20261122.json": {
+      "bytes": 20686,
+      "sha256": "2015b97f002bcb4b42e76cf71d13c215230f21fb7fdcf483da7d45691517eeff"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_28_20261122.json": {
+      "bytes": 20686,
+      "sha256": "e0507d6eba088ed8091442254fdbbba1676d6998dc61c9a9b37a6ffc5c7b8f76"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_29_20261122.json": {
+      "bytes": 20686,
+      "sha256": "d24bf462ebe51ae8900c4dc0d8eb42b8c4764de5fe43705b28454b51a6efb177"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_30_20261122.json": {
+      "bytes": 20686,
+      "sha256": "15296d4cc1e8f439ae33360ec2fa662ef6ac12d4032b947bf23bd20b254b5f2b"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_31_20261122.json": {
+      "bytes": 20686,
+      "sha256": "e64e7cbfcc3d37348c84f0592b8d1d58f867ea238a2a4bc34a3e92d5b6543fcd"
+    },
+    "P102_RANDOMIZED_PER_SOURCE_ROUTE_SCORE_GATE_32_20261122.json": {
+      "bytes": 20686,
+      "sha256": "ca96bfc0f36003c03abb5ff0f0ccd32eb3c51aace47c46e459e86e9b5563a512"
+    },
+    "PRISM7_P104_ALLRUNNER_DIRECTIONAL_POINT_SCORE_32_PLACEBOS_OUTCOME_20261122.md": {
+      "bytes": 2570,
+      "sha256": "25f8f523ddf9613779772ae9e110faadb62806a5369fd576746fc32e6c591660"
+    },
+    "PRISM7_P104_THIRTYTWO_MARCHED_PER_ROUTE_RANDOM_VETO_PLACEBO_FALSIFICATION_20261122.json": {
+      "bytes": 35720,
+      "sha256": "4157387955eb8bfa45706ad0d737fe0d982bbbd479a896404957f7ab87ffe125"
+    }
+  },
+  "base64Bytes": 135186,
+  "base64SHA256": "e4e39bc5039f605f372e4fc27a00e93b260ac0f3075d993266cdadd43ed115b1",
+  "compressedBytes": 101388,
+  "filename": "P105_32_ROUTE_MATCHED_RANDOM_FILTER_MASKS_AND_FALSIFICATION_20261122.zip.b64",
+  "noProductionOrTradingCodeChanged": true,
+  "originCode": "research/prism7/p102/prism7_p102_extend_thirtytwo_route_preserved_placebos_20261122.py",
+  "originalMasksSourcePC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P102_BINANCE_TF_RANDOM_VETO_PLACEBO",
+  "reproduction": "Decode .zip.b64 ASCII base64 to ZIP, verify zipSHA256, unzip, hash each named file to all34ContentFilesSHA256.",
+  "routeSideSymbolCountsPreserved": true,
+  "schema": "prism7-p105-32-fixed-route-matched-random-veto-masks-source-verification/v1",
+  "sourceMode": "RESEARCH_ONLY_NOT_CAUSALLY_TRADEABLE",
+  "thirtyTwoCompleteMasks": true,
+  "zipSHA256": "cc176da8d6c8deb476da269633f0376c10ff6bb0af85edc9bc551f065532e3ae"
+}
