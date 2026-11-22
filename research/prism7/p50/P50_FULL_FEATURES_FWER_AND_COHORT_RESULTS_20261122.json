@@ -1,0 +1,311 @@
+{
+  "allStrictCleanH1OnsetCandidates": 107,
+  "allWithKnownRef72Exit": 101,
+  "familywiseNegativeControl": {
+    "maxAbsoluteAUCDepartureFrom0p5Null95": 0.13961,
+    "method": "within-month nonzero circular shift of labels (preserves per-month class mix and serial block, but not full risk autocorrelation)",
+    "notIndependentBlindedExperiment": true,
+    "permutations": 500,
+    "seed": 20261122
+  },
+  "features": [
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 0.998,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "btc24",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.53406,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.67532,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.47917,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.48571,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.60606,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.52,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.52863,
+      "signAcrossThreeModelTrainingFolds": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 1.0,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "rel24",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.47059,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.63636,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.47917,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.61905,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.72727,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.56,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.51922,
+      "signAcrossThreeModelTrainingFolds": [
+        -1,
+        -1,
+        -1
+      ]
+    },
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 1.0,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "ema72_168",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.48762,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.25974,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.70833,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.46667,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.60606,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.76,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.51569,
+      "signAcrossThreeModelTrainingFolds": [
+        1,
+        -1,
+        -1
+      ]
+    },
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 1.0,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "sellerShare6",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.54721,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.53247,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.55208,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.34286,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.36364,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.6,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.51608,
+      "signAcrossThreeModelTrainingFolds": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 1.0,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "lowerHighShare6",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.49768,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.44805,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.375,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.35714,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.51515,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.45,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.49804,
+      "signAcrossThreeModelTrainingFolds": [
+        1,
+        1,
+        -1
+      ]
+    },
+    {
+      "FWER_monthwiseCircularShiftMaxNullP": 0.82435,
+      "allRawCandidatesKnownLosses": 51,
+      "allRawCandidatesKnownWins": 50,
+      "asOfFeature": "pCloseVsEMA72",
+      "aucByCohortAndChronologicalFold": {
+        "BASE_2025_2026": {
+          "auc": 0.52864,
+          "cases": 72,
+          "wins": 34
+        },
+        "FOLD1_MAR_MAY": {
+          "auc": 0.4026,
+          "cases": 18,
+          "wins": 7
+        },
+        "FOLD2_JUN_AUG": {
+          "auc": 0.52083,
+          "cases": 14,
+          "wins": 6
+        },
+        "FOLD3_SEP_NOV": {
+          "auc": 0.59048,
+          "cases": 22,
+          "wins": 15
+        },
+        "POST_2026_OCT_NOV": {
+          "auc": 0.87879,
+          "cases": 14,
+          "wins": 11
+        },
+        "PRE_2025_AUG_SEP": {
+          "auc": 0.54,
+          "cases": 15,
+          "wins": 5
+        }
+      },
+      "notCausalEffectOrDeployableEntryRule": true,
+      "originalAUC": 0.55569,
+      "signAcrossThreeModelTrainingFolds": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "featuresFirstObservedSixCompletedH1BeforeOnset": [
+    "btc24",
+    "rel24",
+    "ema72_168",
+    "sellerShare6",
+    "lowerHighShare6",
+    "pCloseVsEMA72"
+  ],
+  "limits": [
+    "All candidate periods previously seen in P8-P49. Even low p after correction would be discovery, not independent confirmation.",
+    "Within-month circular shifts are limited null controls, and H1 first-break episodes are serially dependent.",
+    "Feature values are known at pre-arm6 but labels depend on post-entry P20 reference Stop72 outcomes, not Native V20 exact exit.",
+    "AUC can be inverted and wins selected, but we explicitly DO NOT choose directions/thresholds from this study.",
+    "Effective sample 107 small, especially pre and post cohorts, and event labels can overlap source M5 paths.",
+    "None of the feature statistics certifies LIVE execution, real fill, funding, actual portfolio DD or a future 80% win rate.",
+    "Do not promote failed Layer A prediction or replace source PENGU Native V20 on these correlations."
+  ],
+  "parentP49LabelPurgingPreserved": true,
+  "passingFamilywiseP0p05": [],
+  "reference30bpsLossLabels": 51,
+  "reference30bpsWinLabels": 50,
+  "schema": "prism7-p50-multi-comparison-feature-stability-negative-control/v1",
+  "sourceHash": {
+    "P49PerCandidate": "487f31cbceac26582aef89143dd29a2d90275b34d292d7a37f656ac85e4cf763",
+    "P49Report": "686af29167e81ff16e7cc3412e343d603cc71f5196f820314588e68bd6a23abf"
+  },
+  "sourceOriginalNative53Preserved": true,
+  "status": "OBSERVATIONAL_HINDSIGHT_RESEARCH_NOT_UNSEEN_OOS"
+}
