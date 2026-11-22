@@ -1,0 +1,712 @@
+{
+  "cohortLossCounts": {
+    "BASE_2025_2026": {
+      "completed": 13,
+      "losers": 2,
+      "winners": 11
+    },
+    "POST_2026_OCT_NOV": {
+      "completed": 5,
+      "losers": 2,
+      "winners": 3
+    },
+    "PRE_2025_AUG_SEP": {
+      "completed": 1,
+      "losers": 1,
+      "winners": 0
+    }
+  },
+  "duplicateScenarioGroups": [
+    {
+      "count": 7,
+      "models": [
+        [
+          "P25_SHOCK_ONLY",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TP_20",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TP_40",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TP_20_PLUS_P25",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TP_40_PLUS_P25",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TRAIL_20_25_PLUS_P25",
+          "SECOND_PRINT"
+        ],
+        [
+          "MFE_TRAIL_20_50_PLUS_P25",
+          "SECOND_PRINT"
+        ]
+      ]
+    },
+    {
+      "count": 7,
+      "models": [
+        [
+          "P25_SHOCK_ONLY",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TP_20",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TP_40",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TP_20_PLUS_P25",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TP_40_PLUS_P25",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TRAIL_20_25_PLUS_P25",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TRAIL_20_50_PLUS_P25",
+          "THIRD_PRINT"
+        ]
+      ]
+    },
+    {
+      "count": 7,
+      "models": [
+        [
+          "P25_SHOCK_ONLY",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_20",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_40",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_20_PLUS_P25",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_40_PLUS_P25",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TRAIL_20_25_PLUS_P25",
+          "SECOND_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TRAIL_20_50_PLUS_P25",
+          "SECOND_PRINT_1000BPS"
+        ]
+      ]
+    },
+    {
+      "count": 7,
+      "models": [
+        [
+          "P25_SHOCK_ONLY",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_20",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_40",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_20_PLUS_P25",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TP_40_PLUS_P25",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TRAIL_20_25_PLUS_P25",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TRAIL_20_50_PLUS_P25",
+          "THIRD_PRINT_1000BPS"
+        ]
+      ]
+    },
+    {
+      "count": 2,
+      "models": [
+        [
+          "MFE_TRAIL_20_25",
+          "THIRD_PRINT"
+        ],
+        [
+          "MFE_TRAIL_20_50",
+          "SECOND_PRINT"
+        ]
+      ]
+    },
+    {
+      "count": 2,
+      "models": [
+        [
+          "MFE_TRAIL_20_25",
+          "THIRD_PRINT_1000BPS"
+        ],
+        [
+          "MFE_TRAIL_20_50",
+          "SECOND_PRINT_1000BPS"
+        ]
+      ]
+    }
+  ],
+  "fiveLosingTrades": [
+    {
+      "BTC6ReturnPct": -0.033099,
+      "PENGUMinusBTC6Pct": -0.949438,
+      "cohort": "PRE_2025_AUG_SEP",
+      "dateUTC": "2025-09-26",
+      "emaDown24Below72": true,
+      "exitReason": "SHORT_HARD_STOP",
+      "id": "S3_01348",
+      "returnOnEquityPct": -6.225,
+      "route": "SELLER_PULLBACK_REJECTION"
+    },
+    {
+      "BTC6ReturnPct": -4.17156,
+      "PENGUMinusBTC6Pct": -2.091624,
+      "cohort": "BASE_2025_2026",
+      "dateUTC": "2026-06-24",
+      "emaDown24Below72": true,
+      "exitReason": "SHORT_HARD_STOP",
+      "id": "S3_07864",
+      "returnOnEquityPct": -6.380933,
+      "route": "BREAKDOWN_RETEST_FAILURE"
+    },
+    {
+      "BTC6ReturnPct": -0.812795,
+      "PENGUMinusBTC6Pct": -2.536878,
+      "cohort": "BASE_2025_2026",
+      "dateUTC": "2026-09-28",
+      "emaDown24Below72": true,
+      "exitReason": "SHORT_HARD_STOP",
+      "id": "S3_10161",
+      "returnOnEquityPct": -6.225,
+      "route": "SELLER_PULLBACK_REJECTION"
+    },
+    {
+      "BTC6ReturnPct": -1.818582,
+      "PENGUMinusBTC6Pct": -1.69384,
+      "cohort": "POST_2026_OCT_NOV",
+      "dateUTC": "2026-10-22",
+      "emaDown24Below72": false,
+      "exitReason": "SHORT_V20_DEADLINE_EXIT",
+      "id": "S3_10732",
+      "returnOnEquityPct": -0.454709,
+      "route": "BREAKDOWN_RETEST_FAILURE"
+    },
+    {
+      "BTC6ReturnPct": -2.780035,
+      "PENGUMinusBTC6Pct": -8.268514,
+      "cohort": "POST_2026_OCT_NOV",
+      "dateUTC": "2026-10-30",
+      "emaDown24Below72": true,
+      "exitReason": "SHORT_MAX_HOLD",
+      "id": "S3_10918",
+      "returnOnEquityPct": -1.469423,
+      "route": "SELLER_PULLBACK_REJECTION"
+    }
+  ],
+  "modelAudit": {
+    "conditionSelectionWasHistoricallyExamined": true,
+    "freshIndependentHoldout": false,
+    "noEntryGateWasDesignedFromObservedLosers": true,
+    "portfolioDD20Certified": false,
+    "positiveM5OpenProxyNotExecutable": true,
+    "sampleIsNot53IndependentTrades": true,
+    "sourceNativeSTOPPriorityAuditedAtRowLevel": true,
+    "trueProductionEntryParity": false,
+    "venueSignedFillVerified": false
+  },
+  "nextTest": "New independent data with true native V20 signal/exit and venue ask, evaluate preregistered entry state machine per cohort, shared gross/daily loss portfolio DD",
+  "p25EventCount": 1,
+  "p25NativeWinCountUnchanged": true,
+  "p25OnlyChangedTradeId": "S3_01700",
+  "p25OnlyChangedTradeNetReturnOnEquityPct": {
+    "delta": 32.8525,
+    "native": 8.429994,
+    "p25": 41.282494
+  },
+  "p25OtherPositionExitsIdentical": true,
+  "p25SecondPrint": {
+    "conditionalMeanNetReturnPctOnEquity": 5.19455672,
+    "conditionalProfitFactor": 5.75530091,
+    "conditionalWinCount": 14,
+    "conditionalWinratePct": 73.68421053,
+    "notActualPortfolioDD": true,
+    "originalSourceCompletedTradeCount": 19,
+    "originalSourceStructuralSetups": 120,
+    "sourceCensoredOpenPositionCount": 1,
+    "sourceGross": 0.75,
+    "sourceM5CloseMarkedDDPct": 17.03139963,
+    "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+    "sourceRealizedOnlyDDPct": 12.20871973,
+    "sourceReferenceFinalEquityInclCensoredMarkYen": 24028.951202,
+    "sourceRoundtripFeeBps": 30,
+    "sourceSingleSlotTotalReturnPointsOnEquity": 98.6965776,
+    "worstChronologicalHighEvent": {
+      "equity": 20602.24139842019,
+      "id": "S3_10918",
+      "priorCompletedPeak": 24831.37151451174,
+      "sourceHigh": 0.007548,
+      "time": 1793403300000
+    },
+    "worstMarkEvent": {
+      "equity": 20602.24139842019,
+      "id": "S3_10918",
+      "priorPeak": 24831.37151451174,
+      "sourceCloseMark": 0.007548,
+      "time": 1793403300000
+    }
+  },
+  "p25SecondPrint1000bps": {
+    "conditionalMeanNetReturnPctOnEquity": 5.01828037,
+    "conditionalProfitFactor": 5.59393064,
+    "conditionalWinCount": 14,
+    "conditionalWinratePct": 73.68421053,
+    "notActualPortfolioDD": true,
+    "originalSourceCompletedTradeCount": 19,
+    "originalSourceStructuralSetups": 120,
+    "sourceCensoredOpenPositionCount": 1,
+    "sourceGross": 0.75,
+    "sourceM5CloseMarkedDDPct": 17.03139963,
+    "sourcePrevCompletedM5PeakHighStressDDPct": 17.03139963,
+    "sourceRealizedOnlyDDPct": 12.20871973,
+    "sourceReferenceFinalEquityInclCensoredMarkYen": 23459.319566,
+    "sourceRoundtripFeeBps": 30,
+    "sourceSingleSlotTotalReturnPointsOnEquity": 95.34732704,
+    "worstChronologicalHighEvent": {
+      "equity": 20113.843533354528,
+      "id": "S3_10918",
+      "priorCompletedPeak": 24242.717658855538,
+      "sourceHigh": 0.007548,
+      "time": 1793403300000
+    },
+    "worstMarkEvent": {
+      "equity": 20113.843533354528,
+      "id": "S3_10918",
+      "priorPeak": 24242.717658855538,
+      "sourceCloseMark": 0.007548,
+      "time": 1793403300000
+    }
+  },
+  "parity": {
+    "originalP35Native53": 53,
+    "originalP35Native53Wins": 29,
+    "p36Closed": 19,
+    "p36Losses": 5,
+    "p36RightCensored": 1,
+    "p36SourcePositionLedgerRows": 1060,
+    "p36SourceScenarioLedgerRows": 6360,
+    "p36StructuralSourceIntents": 120,
+    "p36UniqueCases": 53,
+    "p36Wins": 14,
+    "selectedP36Positions": 20
+  },
+  "preEntryFeatureConfusionAmongClosedP36": {
+    "btcWeak6h": {
+      "loss_False": 0,
+      "loss_True": 5,
+      "winner_False": 0,
+      "winner_True": 14
+    },
+    "emaDown24Below72": {
+      "loss_False": 1,
+      "loss_True": 4,
+      "winner_False": 1,
+      "winner_True": 13
+    },
+    "relativeWeak6h": {
+      "loss_False": 0,
+      "loss_True": 5,
+      "winner_False": 2,
+      "winner_True": 12
+    }
+  },
+  "preference": "fixed gross 0.75, original source intact, no live changes",
+  "scenarioFamilyStressTable": {
+    "MFE_TP_20": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TP_20_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TP_40": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TP_40_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TRAIL_12_25": {
+      "extreme1000bps": {
+        "exits": 4,
+        "highStressDD": 21.98020605,
+        "m5DD": 21.92712405,
+        "nav": 15010.329395,
+        "winnerFlips": 3,
+        "winrate": 57.89473684,
+        "wins": 11
+      },
+      "normal": {
+        "exits": 4,
+        "highStressDD": 18.06912851,
+        "m5DD": 18.01338554,
+        "nav": 19357.714953,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700",
+        "S3_02261",
+        "S3_04533",
+        "S3_07302"
+      ]
+    },
+    "MFE_TRAIL_12_25_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 4,
+        "highStressDD": 21.80273351,
+        "m5DD": 21.80273351,
+        "nav": 18378.492563,
+        "winnerFlips": 3,
+        "winrate": 57.89473684,
+        "wins": 11
+      },
+      "normal": {
+        "exits": 4,
+        "highStressDD": 16.48341402,
+        "m5DD": 16.48341402,
+        "nav": 23118.006596,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700",
+        "S3_02261",
+        "S3_04533",
+        "S3_07302"
+      ]
+    },
+    "MFE_TRAIL_12_50": {
+      "extreme1000bps": {
+        "exits": 2,
+        "highStressDD": 31.06420603,
+        "m5DD": 22.1647521,
+        "nav": 17816.810865,
+        "winnerFlips": 1,
+        "winrate": 68.42105263,
+        "wins": 13
+      },
+      "normal": {
+        "exits": 2,
+        "highStressDD": 31.06420603,
+        "m5DD": 18.22941104,
+        "nav": 20139.260995,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700",
+        "S3_04533"
+      ]
+    },
+    "MFE_TRAIL_12_50_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 2,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 21881.319048,
+        "winnerFlips": 1,
+        "winrate": 68.42105263,
+        "wins": 13
+      },
+      "normal": {
+        "exits": 2,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24114.91027,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700",
+        "S3_04533"
+      ]
+    },
+    "MFE_TRAIL_20_25": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 21.98020605,
+        "m5DD": 21.92712405,
+        "nav": 19160.010696,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 18.06912851,
+        "m5DD": 18.01338554,
+        "nav": 20120.488592,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TRAIL_20_25_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TRAIL_20_50": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 31.06420603,
+        "m5DD": 22.1647521,
+        "nav": 19101.693952,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 31.06420603,
+        "m5DD": 18.22941104,
+        "nav": 20067.473371,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "MFE_TRAIL_20_50_PLUS_P25": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    },
+    "P25_SHOCK_ONLY": {
+      "extreme1000bps": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 23459.319566,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "normal": {
+        "exits": 1,
+        "highStressDD": 17.03139963,
+        "m5DD": 17.03139963,
+        "nav": 24028.951202,
+        "winnerFlips": 0,
+        "winrate": 73.68421053,
+        "wins": 14
+      },
+      "sourceUnderlyingChanges": [
+        "S3_01700"
+      ]
+    }
+  },
+  "schema": "prism7-p37-independent-audit-p36-source120/v1",
+  "sourceBaseline": {
+    "conditionalMeanNetReturnPctOnEquity": 3.46547775,
+    "conditionalProfitFactor": 4.17243423,
+    "conditionalWinCount": 14,
+    "conditionalWinratePct": 73.68421053,
+    "notActualPortfolioDD": true,
+    "originalSourceCompletedTradeCount": 19,
+    "originalSourceStructuralSetups": 120,
+    "sourceCensoredOpenPositionCount": 1,
+    "sourceGross": 0.75,
+    "sourceM5CloseMarkedDDPct": 24.85495896,
+    "sourcePrevCompletedM5PeakHighStressDDPct": 31.06420603,
+    "sourceRealizedOnlyDDPct": 12.20871973,
+    "sourceReferenceFinalEquityInclCensoredMarkYen": 18441.485246,
+    "sourceRoundtripFeeBps": 30,
+    "sourceSingleSlotTotalReturnPointsOnEquity": 65.84407727,
+    "worstChronologicalHighEvent": {
+      "equity": 9242.897922386921,
+      "id": "S3_01700",
+      "priorCompletedPeak": 13407.980658824114,
+      "sourceHigh": 0.022982,
+      "time": 1760132100000
+    },
+    "worstMarkEvent": {
+      "equity": 10075.432568187145,
+      "id": "S3_02173",
+      "priorPeak": 13407.980658824114,
+      "sourceCloseMark": 0.019098,
+      "time": 1761873900000
+    }
+  },
+  "sourceHashes": {
+    "PRISM7_P34_SELLER_ALL120_CAUSAL_PREENTRY_FEATURES_20261122.json": "03ec71e582de76411a4733903e233b0bdb03d0b7c0fbd01b9d1743a177e82aca",
+    "PRISM7_P35_ORIGINAL_NATIVE53_075_ALL53_H1_CONTEXT_AND_POSITIONS_20261122.json": "e30c3dfa389c97db6b47351a03dbadd4ec1f8f2d421a69c59b1f742fde04c337",
+    "PRISM7_P36_FIXED075_ALL120_INTENTS_53_SCENARIOS_20261122.jsonl.gz": "d1724e9ba7151e39b2aa055eb67307fe97ffb245cf5133ed22fe854646bdfec7",
+    "PRISM7_P36_FIXED075_NATIVE_MFE_PROFIT_LOCK_53_SCENARIOS_20261122.json": "f7d82a0ebd911de7030d30904d59c1dca9d4fdd8ac4c38630c1d994997e22ffd",
+    "PRISM7_P36_FIXED075_SELECTED_NATIVE_POSITION_53_SCENARIOS_20261122.jsonl": "97f9d7bac18144bcd88e54480a2681d97c6348233f427d78135079264912636e"
+  },
+  "status": "RESEARCH_ONLY__NO_PROMOTION",
+  "uniquePositionOutcomeSignatures": 27,
+  "winrate": {
+    "additionalLosersToAvoidIfNoWinnersRemoved": 2,
+    "forAtLeast80PctMinWinsAt19": 16,
+    "sampleWinPct": 73.684211,
+    "wilson95Pct": [
+      51.208,
+      88.194
+    ]
+  }
+}
