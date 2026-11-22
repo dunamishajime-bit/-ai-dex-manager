@@ -1,0 +1,64 @@
+{
+  "AsterBTCBothWeeklyAndDailyStrictlyUP": 0,
+  "AsterNative53PointsLax": {
+    "closed": 28,
+    "m5DD": 13.712705,
+    "navJPY": 14935.33,
+    "wins": 17
+  },
+  "AsterOriginalNative53Gross075": {
+    "closed": 33,
+    "m5DD": 25.100289,
+    "navJPY": 14193.07,
+    "wins": 18
+  },
+  "BinanceBTCBothWeeklyAndDailyStrictlyUP": 1,
+  "BinanceExternalNative55Gross075": {
+    "closed": 23,
+    "navJPY": 14397.7,
+    "realizedOnlyDD": 17.561799,
+    "wins": 13
+  },
+  "BinanceExternalNative55SameFrozenLax": {
+    "closed": 20,
+    "navJPY": 11438.31,
+    "realizedOnlyDD": 21.169727,
+    "wins": 11
+  },
+  "P67ComboStop5And8DidNotImproveAsterLax": true,
+  "allocationLax": {
+    "score0to3": 0,
+    "score11to15": 1,
+    "score4to6": 0.5,
+    "score7to10": 0.75
+  },
+  "highScoreAsterOriginalSources": {
+    "n": 4,
+    "wins": 2
+  },
+  "highScoreBinanceOriginalSources": {
+    "n": 18,
+    "wins": 6
+  },
+  "notExactSameMarketCrossVenue": true,
+  "notProductionAccountDD": true,
+  "originalNativePinnedSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "predeclaredWeights": {
+    "12H": 3,
+    "1H": 1,
+    "4H": 2,
+    "D": 4,
+    "W": 5
+  },
+  "productionMasterStopRunnerGrossOrdersChanged": false,
+  "researchNext": "Separate BTC/ETH W/D global market regime from PENGU long-term trend; 12H downleg continuation and 4H/1H pullback rejection. Freeze before unseen original Aster source, control winner retention and 0.75/1.0 gross with M5 signed fills and full STOP priority.",
+  "schema": "prism7-p66-p69-native-v20-points-score-decision/v1",
+  "sourceSHA256": {
+    "P66": "d547a7a44622179395edcf1d6118c39c400883f99af934a05dfcb96adfbcafa3",
+    "P67": "e434c794f7ca11857c8adc75f318bd0d5d5522f2110a5e170f830c03e56740e4",
+    "P68": "6d57718d4bb0d910cb975ba896f8a639e925ec418aa0763784c86aa8f8806cbb",
+    "P69": "316efc9ba9377e2f4539ba02db6ad94e14f412501525d79c2051bdfd523d896a"
+  },
+  "status": "SCORE_CONCEPT_RESEARCH_WORTHY_BUT_FIXED_WEIGHTS_NOT_ACCEPTED_EXTERNAL_FALSI",
+  "validationFixedOriginalSlots": true
+}
