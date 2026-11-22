@@ -1,0 +1,114 @@
+{
+  "P47FirstOnsetModel": {
+    "A6BeforeFirstBreak": {
+      "DDpct": 12.13258,
+      "closed": 18,
+      "stress100bpsDDpct": 14.82045,
+      "stress100bpsWinPct": 66.66667,
+      "winRatePct": 72.22222,
+      "wins": 13
+    },
+    "first24hEpisodes": {
+      "B_FIRST_24H_MINUS3_CROSS": 164,
+      "B_FIRST_H1_MINUS1_BREAK": 149
+    },
+    "rawCandidates": {
+      "B_FIRST_24H_MINUS3_CROSS": 410,
+      "B_FIRST_H1_MINUS1_BREAK": 340
+    },
+    "scenarioCount": 64,
+    "ungated": {
+      "DDpct": 41.12012,
+      "closed": 97,
+      "winRatePct": 57.73196,
+      "wins": 56
+    }
+  },
+  "P48MisidentifiedEarlierDrop": {
+    "A6SampleAlreadyBelow24hMinus3BeforeTheSupposedFirstLeg": 11,
+    "A6SampleNotYetBelow24hMinus3": 7,
+    "excludeEarlierH1StructuralBreaks": {
+      "closed": 6,
+      "winRatePct": 50.0,
+      "wins": 3
+    },
+    "strictCleanFirstEvents": {
+      "DDpct": 11.43516,
+      "closed": 7,
+      "winRatePct": 57.14286,
+      "wins": 4
+    }
+  },
+  "P49PreOnsetWalkForwardFalsification": {
+    "allThreeFoldsFailedProbabilityCalibrationAgainstTrainBaseRate": true,
+    "folds": [
+      {
+        "baselineBrier": 0.24223,
+        "controlClosed": 13,
+        "controlWins": 5,
+        "fold": "2026_MAR_TO_MAY",
+        "modelBrier": 0.28653,
+        "modelCandidateSelected": 4,
+        "modelClosed": 3,
+        "modelWins": 1,
+        "test": 18,
+        "train": 46
+      },
+      {
+        "baselineBrier": 0.2449,
+        "controlClosed": 10,
+        "controlWins": 4,
+        "fold": "2026_JUN_TO_AUG",
+        "modelBrier": 0.26092,
+        "modelCandidateSelected": 3,
+        "modelClosed": 3,
+        "modelWins": 0,
+        "test": 17,
+        "train": 63
+      },
+      {
+        "baselineBrier": 0.28108,
+        "controlClosed": 15,
+        "controlWins": 11,
+        "fold": "2026_SEP_TO_NOV",
+        "modelBrier": 0.31177,
+        "modelCandidateSelected": 1,
+        "modelClosed": 1,
+        "modelWins": 1,
+        "test": 24,
+        "train": 77
+      }
+    ],
+    "learningBasedSourcePreconditionNotValidated": true,
+    "strictFirstInitialEligibleSignals": 107
+  },
+  "auditRows": {
+    "P47ScenarioCount": 64,
+    "P48ScenarioCount": 12,
+    "P49FoldEmbargoHours": 72,
+    "P49ModelFoldCount": 12,
+    "invariantChecks": "PASS"
+  },
+  "criticalInterpetation": [
+    "Do not mistake post-7pct downturn/rebreak success for truly anticipating the first price decline.",
+    "A prearm that occurs after a 24h-3pct fall is contaminated by earlier bearish price action and must be a rebound/continuation strategy, not the first-leg model.",
+    "The 18-trade 72.22pct P47 is not valid clean first-leg success; genuine pre-drop subset has 4 wins in 7 trades.",
+    "The six-hour-pre-event 6-feature logistic does not beat base-rate probability forecasts in any of three chronological already-viewed test periods.",
+    "Trading the first -1pct decline unqualified is unsafe under historical research DD. Do not deploy.",
+    "Conditional source native rebound P44 14-source-slot/12 wins is distinct, must be treated as retrospective selected historical set and not true out-of-sample.",
+    "All result sample August2025-November2026 has been repeatedly examined in older checkpoints; independent future feed or untouched regime required.",
+    "M5 execution reference stop72 is not exact native V20 phase exit; missing signed fills, funding, venue STOP, true multi-Runner shared DD."
+  ],
+  "findingsStatus": "RESEARCH_ONLY__NO_LIVE_PROMOTION",
+  "gatingPolicy": "Fail-closed for new early route unless independent out-of-time and full native execution parity",
+  "gross": 0.75,
+  "pinNativeSource": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "productionOperation": "NONE",
+  "schema": "prism7-p47-p49-true-preonset-layerA-negative-evidence-checkpoint/v1",
+  "sourceBaselineFeeBps": 30,
+  "sourceHashes": {
+    "P47": "b8bd20fafdb900907e9d8e5814fb2c6c056b5b279b10882b9dd622f986551e06",
+    "P48": "4affaa2855ec8588aaef1ad67119af0d5c9427878dd9cadd07af7b0f125b69b2",
+    "P49": "686af29167e81ff16e7cc3412e343d603cc71f5196f820314588e68bd6a23abf"
+  }
+}
