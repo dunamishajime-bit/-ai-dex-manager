@@ -1,0 +1,190 @@
+{
+  "calendarFullContiguousAndAligned": true,
+  "derivedSource": {
+    "BTCUSDT": {
+      "calendarFirst": 1734480000000,
+      "calendarLastExclusive": 1754006400000,
+      "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\p61_new_prebaseline_archive_futures_um_202412_202507\\BTCUSDT-1h-20241218-20250801-VERIFIED_FUTURES_UM.jsonl.gz",
+      "rows": 5424,
+      "sourceGzSha256": "738f673d12fbdb41e9c7f036ca686e37710ef1ac423bbc73e641d1afb9e7b342"
+    },
+    "PENGUUSDT": {
+      "calendarFirst": 1734480000000,
+      "calendarLastExclusive": 1754006400000,
+      "path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\p61_new_prebaseline_archive_futures_um_202412_202507\\PENGUUSDT-1h-20241218-20250801-VERIFIED_FUTURES_UM.jsonl.gz",
+      "rows": 5424,
+      "sourceGzSha256": "a0cb86ff8c52a49007365f3363c00efe9bcbc2571b395abb1f061066799e5559"
+    }
+  },
+  "endExclusiveUTC": "2025-08-01T00:00:00Z",
+  "historicalSourcePriorResearchInspectionNotGuaranteedNew": true,
+  "monthlyOfficialChecksumVerified": true,
+  "noAuthOrSignedVenueFills": true,
+  "originalPinnedSignalRuntimeStillToReproduce": true,
+  "originalSource53AlreadyStudiedAug2025Nov2026": true,
+  "previouslySourceH1DatasetIncludedDatesPriorTo2025AugUnknown": true,
+  "schema": "prism7-p61-binance-official-h1-archive-public-checksum-source/v1",
+  "source": "Binance Data Vision Futures USD-M monthly PENGUUSDT & BTCUSDT",
+  "sourceLiveOrdersAndProductionChanged": false,
+  "sourceManifest": [
+    {
+      "actualSHA256": "764f0761c4dde587aa067d8581b9e746e4f5545ade40aebfacaf464c08d14a32",
+      "month": "2024-12",
+      "publishedSHA256": "764f0761c4dde587aa067d8581b9e746e4f5545ade40aebfacaf464c08d14a32",
+      "sourceRows": 344,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2024-12.zip",
+      "zipLength": 18680
+    },
+    {
+      "actualSHA256": "0c40fd0bb1d7e9b2e27d10015d8dcec6177f9b3cb2c912b404ad53a9baabd8f0",
+      "month": "2025-01",
+      "publishedSHA256": "0c40fd0bb1d7e9b2e27d10015d8dcec6177f9b3cb2c912b404ad53a9baabd8f0",
+      "sourceRows": 744,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-01.zip",
+      "zipLength": 38899
+    },
+    {
+      "actualSHA256": "9b3b73a6adbf8ce951fe37963d5b3e7123e76847c6794c4722f56f6516036ea1",
+      "month": "2025-02",
+      "publishedSHA256": "9b3b73a6adbf8ce951fe37963d5b3e7123e76847c6794c4722f56f6516036ea1",
+      "sourceRows": 672,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-02.zip",
+      "zipLength": 34259
+    },
+    {
+      "actualSHA256": "10863c5eff72de022deeff2c33f386ad4a7dd5451125977185da60dd9df7978f",
+      "month": "2025-03",
+      "publishedSHA256": "10863c5eff72de022deeff2c33f386ad4a7dd5451125977185da60dd9df7978f",
+      "sourceRows": 744,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-03.zip",
+      "zipLength": 36712
+    },
+    {
+      "actualSHA256": "1e19ea25a113559a92429b18b3bc529be64fce658ee509a22bf8c2ccfec85840",
+      "month": "2025-04",
+      "publishedSHA256": "1e19ea25a113559a92429b18b3bc529be64fce658ee509a22bf8c2ccfec85840",
+      "sourceRows": 720,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-04.zip",
+      "zipLength": 35647
+    },
+    {
+      "actualSHA256": "d714bcb8a3145ba1c0cdfe53a4d78697dace30995a373238a798a50436a121f3",
+      "month": "2025-05",
+      "publishedSHA256": "d714bcb8a3145ba1c0cdfe53a4d78697dace30995a373238a798a50436a121f3",
+      "sourceRows": 744,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-05.zip",
+      "zipLength": 37665
+    },
+    {
+      "actualSHA256": "07c4d1825f2f3fcb48bc4ae90aa30d376ca31334da4959bab797561a13079d47",
+      "month": "2025-06",
+      "publishedSHA256": "07c4d1825f2f3fcb48bc4ae90aa30d376ca31334da4959bab797561a13079d47",
+      "sourceRows": 720,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-06.zip",
+      "zipLength": 35954
+    },
+    {
+      "actualSHA256": "e7f3325693c40ec7d96aee3c3edb212435b86649a00d131cde1956a1e7f7cd73",
+      "month": "2025-07",
+      "publishedSHA256": "e7f3325693c40ec7d96aee3c3edb212435b86649a00d131cde1956a1e7f7cd73",
+      "sourceRows": 744,
+      "symbol": "PENGUUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/PENGUUSDT/1h/PENGUUSDT-1h-2025-07.zip",
+      "zipLength": 39655
+    },
+    {
+      "actualSHA256": "b072f3147b3e390c81dcbf35830a12ff7d53a73236aa44a9eea78199502529cb",
+      "month": "2024-12",
+      "publishedSHA256": "b072f3147b3e390c81dcbf35830a12ff7d53a73236aa44a9eea78199502529cb",
+      "sourceRows": 744,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2024-12.zip",
+      "zipLength": 38950
+    },
+    {
+      "actualSHA256": "9ebc05c9b3d5ab3591edf65bc5c7e5dbc2f96c1efc4adc4ea198c651a99a41b1",
+      "month": "2025-01",
+      "publishedSHA256": "9ebc05c9b3d5ab3591edf65bc5c7e5dbc2f96c1efc4adc4ea198c651a99a41b1",
+      "sourceRows": 744,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-01.zip",
+      "zipLength": 38915
+    },
+    {
+      "actualSHA256": "077d761098eb5f2dbde65457833b9edab41ea6475284a77fcce0d4bec1bfb5cf",
+      "month": "2025-02",
+      "publishedSHA256": "077d761098eb5f2dbde65457833b9edab41ea6475284a77fcce0d4bec1bfb5cf",
+      "sourceRows": 672,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-02.zip",
+      "zipLength": 34861
+    },
+    {
+      "actualSHA256": "08043384c3336b0fa3eeee06e113a6f1eceb6d3fbe7b2971e9b9fa83625fdfb9",
+      "month": "2025-03",
+      "publishedSHA256": "08043384c3336b0fa3eeee06e113a6f1eceb6d3fbe7b2971e9b9fa83625fdfb9",
+      "sourceRows": 744,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-03.zip",
+      "zipLength": 38723
+    },
+    {
+      "actualSHA256": "2adf7c1be412e43b04a128e997f4cb1e5e7f895f55b6e1bf66621807f221f274",
+      "month": "2025-04",
+      "publishedSHA256": "2adf7c1be412e43b04a128e997f4cb1e5e7f895f55b6e1bf66621807f221f274",
+      "sourceRows": 720,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-04.zip",
+      "zipLength": 37389
+    },
+    {
+      "actualSHA256": "2e736b9e792d5ae9d4607d7426e4530020762cb898d580b18d3fb0faf9d2ba8e",
+      "month": "2025-05",
+      "publishedSHA256": "2e736b9e792d5ae9d4607d7426e4530020762cb898d580b18d3fb0faf9d2ba8e",
+      "sourceRows": 744,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-05.zip",
+      "zipLength": 38805
+    },
+    {
+      "actualSHA256": "d1d9d5dbc540c19dd882305937f864f59ffffe3f5449a6b05b3f95efe7ca4fbc",
+      "month": "2025-06",
+      "publishedSHA256": "d1d9d5dbc540c19dd882305937f864f59ffffe3f5449a6b05b3f95efe7ca4fbc",
+      "sourceRows": 720,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-06.zip",
+      "zipLength": 37374
+    },
+    {
+      "actualSHA256": "3f471677b97cd3c5c21e9c1420bd7d58c1fe4041a3d2e195369277298ca01ea2",
+      "month": "2025-07",
+      "publishedSHA256": "3f471677b97cd3c5c21e9c1420bd7d58c1fe4041a3d2e195369277298ca01ea2",
+      "sourceRows": 744,
+      "symbol": "BTCUSDT",
+      "url": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-07.zip",
+      "zipLength": 38443
+    }
+  ],
+  "sourceMonths": [
+    "2024-12",
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07"
+  ],
+  "startUTC": "2024-12-18T00:00:00Z",
+  "symbols": [
+    "PENGUUSDT",
+    "BTCUSDT"
+  ]
+}
