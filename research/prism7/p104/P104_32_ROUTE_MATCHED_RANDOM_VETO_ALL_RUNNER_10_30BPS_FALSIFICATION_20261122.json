@@ -1,0 +1,961 @@
+{
+  "NoIndependentNewMarketOOS": true,
+  "PENGUOwnerApprovedV20SourceUnchanged": true,
+  "V52NeverFiltered": true,
+  "all32ReplayedSourceResults": [
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 820896.84,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.624886,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "c4f47e86c97ccddae9322a8d8a96dc7fa32b6401c14fc1b80f11b97691a97710",
+        "winRatePct": 63.549161
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 264419.38,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 32.021801,
+        "modeledFills": 832,
+        "sourceManifestSHA256": "c4f47e86c97ccddae9322a8d8a96dc7fa32b6401c14fc1b80f11b97691a97710",
+        "winRatePct": 60.817308
+      },
+      "replicate": 1,
+      "runSourceSHA256": "e7b21a4d580b445968e9b45d012b46648ec030cbb12a5d7abefe555e6a7f5255",
+      "sourceMaskSHA256": "14787359c40920a36ae3e76328d4bc90dac0cf156674a455c7ed1dcb1d0c53cb"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1265102.36,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 23.172305,
+        "modeledFills": 844,
+        "sourceManifestSHA256": "34ce08deeb6f3ba646b0b9f6f1c34e38e145d3f0a8f508c20e9d4f860b980dd1",
+        "winRatePct": 63.981043
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 397120.04,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.685566,
+        "modeledFills": 843,
+        "sourceManifestSHA256": "34ce08deeb6f3ba646b0b9f6f1c34e38e145d3f0a8f508c20e9d4f860b980dd1",
+        "winRatePct": 60.972716
+      },
+      "replicate": 2,
+      "runSourceSHA256": "ef66a14e5927110115f0f453b9177a1fa547f48932cc23a85903ecef6d438eb7",
+      "sourceMaskSHA256": "91c58ec75cee047aea3f3d253ace18082d888cfd7b2e8a04a6c0875f0c2f50b2"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1882809.2,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.47365,
+        "modeledFills": 842,
+        "sourceManifestSHA256": "0d871926c67c53df37828bdddc70e7bcd9ec198823c00e14613e974501ff2db6",
+        "winRatePct": 63.657957
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 598806.5,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 35.543682,
+        "modeledFills": 842,
+        "sourceManifestSHA256": "0d871926c67c53df37828bdddc70e7bcd9ec198823c00e14613e974501ff2db6",
+        "winRatePct": 60.451306
+      },
+      "replicate": 3,
+      "runSourceSHA256": "547f8a586b3e30d2110c92a9733900c789eaa1b1b86a9410a403ece7f864db13",
+      "sourceMaskSHA256": "93e9faf60253afeb410f4f4b3f5820c48e346eb44ae9357b01f231632a3f426a"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1254093.09,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 24.186086,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "6f6ceea91ee7e0d98d566dc58ff55861d119c65b710970df4141ff2acef2783d",
+        "winRatePct": 63.189448
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 400810.84,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.816292,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "6f6ceea91ee7e0d98d566dc58ff55861d119c65b710970df4141ff2acef2783d",
+        "winRatePct": 60.071942
+      },
+      "replicate": 4,
+      "runSourceSHA256": "65ee394594ca43f27255ae30b61b406b93f75b90f13bc84976a25450f03d2b04",
+      "sourceMaskSHA256": "7d705cd4e72b0d1685ce9a5c3c4d9202604a8bd730d7e324bbebf0049406e9b7"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1410274.72,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 24.617137,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "4f40b1efb9fa317aa3e2b0931295a13cd44580cecbfcb51e153149908856b1fe",
+        "winRatePct": 63.592814
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 448795.79,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.831984,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "4f40b1efb9fa317aa3e2b0931295a13cd44580cecbfcb51e153149908856b1fe",
+        "winRatePct": 60.479042
+      },
+      "replicate": 5,
+      "runSourceSHA256": "6a3d41d6c7fde87c564c4ab2b186aa17b7e88eb3c0404b5ee277eac5cf0b6904",
+      "sourceMaskSHA256": "09c18e0b80e7bcc9a806687d1093c855a0d1a6df0d58c1998290f9eaed77a82b"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1274759.12,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 23.072143,
+        "modeledFills": 836,
+        "sourceManifestSHA256": "ef96dd6fbd1b1cabbdfab1ebbd83ce757144ab58b588ef6278af4ac19112977c",
+        "winRatePct": 63.755981
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 406748.46,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 25.467144,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "ef96dd6fbd1b1cabbdfab1ebbd83ce757144ab58b588ef6278af4ac19112977c",
+        "winRatePct": 60.791367
+      },
+      "replicate": 6,
+      "runSourceSHA256": "d1e2eefd073ee0f8a10b513e4c7dcf7ccdf2efd477e748d840d642af133c10bd",
+      "sourceMaskSHA256": "61ebc6afa9f637d21e2016604edbe452a1d4efd3d376cae26b302c35cc42384f"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1321392.53,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.760519,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "9ce871a03f4e8429f07fbb8a338b9fed50ea182ff940d49133c8ae388a79987a",
+        "winRatePct": 63.52801
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 416031.92,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.849172,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "9ce871a03f4e8429f07fbb8a338b9fed50ea182ff940d49133c8ae388a79987a",
+        "winRatePct": 60.429082
+      },
+      "replicate": 7,
+      "runSourceSHA256": "b852345327701735c1499325eeab76a45acc0ceb0bd4af9fbc67f49e81c87ad8",
+      "sourceMaskSHA256": "7e1a9a508b4dbb5fae5ae4fadffe26107364adf0bdb11ffa1f2e4218140db49f"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1334677.84,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.45974,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "3dcc4ff76b87b51b5cb61e9eb9cf42f87c9f036cb386754014bf713a0e70e668",
+        "winRatePct": 63.885578
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 424037.75,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 34.055764,
+        "modeledFills": 837,
+        "sourceManifestSHA256": "3dcc4ff76b87b51b5cb61e9eb9cf42f87c9f036cb386754014bf713a0e70e668",
+        "winRatePct": 60.454002
+      },
+      "replicate": 8,
+      "runSourceSHA256": "e998274e20ddb86f1c2126445ef492be2ba4bace3a77420019b51420e83d24fd",
+      "sourceMaskSHA256": "ebb71a71147a4ecb2d68d603aa7d97fef97f875d00c8052a2124976ec4b008ab"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1322021.07,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 23.072143,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "4e5d0f2ca4c54b118debbb63dacab6073d37641aef47536792fcb054d5e20482",
+        "winRatePct": 63.549161
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 419156.94,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 36.803888,
+        "modeledFills": 832,
+        "sourceManifestSHA256": "4e5d0f2ca4c54b118debbb63dacab6073d37641aef47536792fcb054d5e20482",
+        "winRatePct": 60.456731
+      },
+      "replicate": 9,
+      "runSourceSHA256": "ebb5f1015f411b4494101a34fff1f34a513bbec8468fbb9713b22008f953595c",
+      "sourceMaskSHA256": "c3da33310b613430b9828bf80072b9a5793b04a1ffb74efce43b9887994cad89"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1230299.05,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.980681,
+        "modeledFills": 831,
+        "sourceManifestSHA256": "d1a21061ca99d6d8e702a5a4ceb43e6bc5c50af4edf86dbe0b933f0fc748379c",
+        "winRatePct": 64.259928
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 396051.26,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 34.337245,
+        "modeledFills": 831,
+        "sourceManifestSHA256": "d1a21061ca99d6d8e702a5a4ceb43e6bc5c50af4edf86dbe0b933f0fc748379c",
+        "winRatePct": 61.131167
+      },
+      "replicate": 10,
+      "runSourceSHA256": "77382ef410374207b6a160fccc88c0b2400e06e9e57f98456b5fc6997830ad9e",
+      "sourceMaskSHA256": "d5f45229a177f60660a8b2960337578a812035c25f368af6fc6e9355f124922c"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1427183.25,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 26.900075,
+        "modeledFills": 829,
+        "sourceManifestSHA256": "c367aae49c499ac33e28792d5b14457545c84b7b8b07dc4aba181bf2ce92cefd",
+        "winRatePct": 63.932449
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 464254.48,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 31.356984,
+        "modeledFills": 829,
+        "sourceManifestSHA256": "c367aae49c499ac33e28792d5b14457545c84b7b8b07dc4aba181bf2ce92cefd",
+        "winRatePct": 60.79614
+      },
+      "replicate": 11,
+      "runSourceSHA256": "0ff8a931108186a425f448c3436bf4a98cc74c36a442ca2ad79876ee84010716",
+      "sourceMaskSHA256": "fca601370868d27a30cd9fc8cada2541e624d33cda2607ddc58728aacecb6963"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1109638.61,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.760519,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "ea73a13f19d7e6abbe457bfc274bb5908aab93d005869f2613053cb9a2a245c1",
+        "winRatePct": 63.473054
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 352039.2,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.849172,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "ea73a13f19d7e6abbe457bfc274bb5908aab93d005869f2613053cb9a2a245c1",
+        "winRatePct": 60.239521
+      },
+      "replicate": 12,
+      "runSourceSHA256": "9e9b51739c776ad5e278eef92f6743158586b16bf4ea39817de316bb97a8cb1f",
+      "sourceMaskSHA256": "ab302601f9152df2f0468f1695f09dcf9e96e57a967e8e85ab9aab7083825720"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1745788.98,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 24.617137,
+        "modeledFills": 838,
+        "sourceManifestSHA256": "f37d084ad81da16da0c3f9185f70995a90cc78135c42694fef371c552747555c",
+        "winRatePct": 63.961814
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 551457.44,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.385256,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "f37d084ad81da16da0c3f9185f70995a90cc78135c42694fef371c552747555c",
+        "winRatePct": 60.718563
+      },
+      "replicate": 13,
+      "runSourceSHA256": "e72302eceb95664f1a859cdc2aa44b2208114ca2b71fe23597904469c060a736",
+      "sourceMaskSHA256": "2c51a2d52f6337bf6087eea5501efcc476223b3015bb020e5ea8af9adddab4f7"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1346605.88,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 20.392497,
+        "modeledFills": 836,
+        "sourceManifestSHA256": "5c6f59705c20e03851b4aeaa08370e69aae0403cff0efab9fe985860642088a3",
+        "winRatePct": 63.277512
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 427280.24,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 25.755415,
+        "modeledFills": 833,
+        "sourceManifestSHA256": "5c6f59705c20e03851b4aeaa08370e69aae0403cff0efab9fe985860642088a3",
+        "winRatePct": 60.144058
+      },
+      "replicate": 14,
+      "runSourceSHA256": "7b61b977cc7ff6173b9f6225a55acf6481f0745c45645367fd461847b2406d99",
+      "sourceMaskSHA256": "f75f101b166f15b6ad9c274d803dc02a71830d19fd54ac3d254d21c675e73470"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 995323.19,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.724728,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "64252ef2edfd978d48328dff4fe668c0ef01a7b9f0bfcf4e8547a18d33272cab",
+        "winRatePct": 63.051251
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 315806.08,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 32.322304,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "64252ef2edfd978d48328dff4fe668c0ef01a7b9f0bfcf4e8547a18d33272cab",
+        "winRatePct": 59.833135
+      },
+      "replicate": 15,
+      "runSourceSHA256": "01ad9a3e8ffdc76b9686ebf62379f22a5740ae7e1acf951e9538b390c381a8e2",
+      "sourceMaskSHA256": "2f64e27b4022c79c8e601cac28371214e9cf1e0640fd10dc64679caa06968ae1"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1393827.84,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.357844,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "b4730da8791539577afce7de7a4358ad4249f74dc7e2a467decb4601f3863113",
+        "winRatePct": 64.004768
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 443588.4,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 31.724572,
+        "modeledFills": 839,
+        "sourceManifestSHA256": "b4730da8791539577afce7de7a4358ad4249f74dc7e2a467decb4601f3863113",
+        "winRatePct": 60.786651
+      },
+      "replicate": 16,
+      "runSourceSHA256": "9bd851610ab84dbf6e11d255bafa79a520606193d40aa362eb2dd72a29ca22dc",
+      "sourceMaskSHA256": "5777c99783e37a17018c8cb27c4b524fbfe9228522564a825394333170bcb5bd"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1637508.84,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 24.617137,
+        "modeledFills": 826,
+        "sourceManifestSHA256": "0376d8893dc858811f254632306f4d825b4a6bcaed8cd825921a22d89a1019ae",
+        "winRatePct": 63.680387
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 529586.52,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.810075,
+        "modeledFills": 826,
+        "sourceManifestSHA256": "0376d8893dc858811f254632306f4d825b4a6bcaed8cd825921a22d89a1019ae",
+        "winRatePct": 60.532688
+      },
+      "replicate": 17,
+      "runSourceSHA256": "0d564292327e7a928a8ee1720ebbdf348ee553cd0de3f25066f79e889cc5ba80",
+      "sourceMaskSHA256": "e742f732d452d8f5acadda339d7ebae05ea72e6a0ee924b2aea1b77cfcf9cb22"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1738739.4,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.263873,
+        "modeledFills": 843,
+        "sourceManifestSHA256": "106d638c410d3d6b8f2419ae96fa9968e3d8f61bf471460184296088cee198b6",
+        "winRatePct": 63.819692
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 544436.59,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 31.780265,
+        "modeledFills": 840,
+        "sourceManifestSHA256": "106d638c410d3d6b8f2419ae96fa9968e3d8f61bf471460184296088cee198b6",
+        "winRatePct": 60.714286
+      },
+      "replicate": 18,
+      "runSourceSHA256": "2c0779621f910236dc3c847dab2816268532b9f7e71f051d8a3b5a8964985412",
+      "sourceMaskSHA256": "b2f1b1e2f9ebba353aa729ca659caafd37725d4b5f395acf355109da07389181"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1471747.21,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 27.402118,
+        "modeledFills": 836,
+        "sourceManifestSHA256": "233b9742f695ef1ff1348389f12c33b965171824d68de884c379cdb71c1d6291",
+        "winRatePct": 63.397129
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 469466.92,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 32.873406,
+        "modeledFills": 836,
+        "sourceManifestSHA256": "233b9742f695ef1ff1348389f12c33b965171824d68de884c379cdb71c1d6291",
+        "winRatePct": 60.167464
+      },
+      "replicate": 19,
+      "runSourceSHA256": "6913966c7b349821df4e9bbab48f8a9efdbc2f840a36ff2ae6e2e8542659c61e",
+      "sourceMaskSHA256": "0c7c7fbff3a61d2430778f2075c95688a1b734082bc9093ca00258cc8c687b28"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1097027.36,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.950973,
+        "modeledFills": 838,
+        "sourceManifestSHA256": "95d12221aa353c9b8861bd744550761c53d36ff758e97dfea66bbfbf0454e677",
+        "winRatePct": 63.961814
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 348449.37,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 33.221491,
+        "modeledFills": 836,
+        "sourceManifestSHA256": "95d12221aa353c9b8861bd744550761c53d36ff758e97dfea66bbfbf0454e677",
+        "winRatePct": 60.645933
+      },
+      "replicate": 20,
+      "runSourceSHA256": "d399a9791598a97edb89f7d18732c672c54076c695560f4810c94da53e57db13",
+      "sourceMaskSHA256": "d2e5664841ca6d2efa96b8ae01135db2e5b78c97a25186fa7a7001dc764a0ed7"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 939360.56,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.166825,
+        "modeledFills": 827,
+        "sourceManifestSHA256": "e07f3e5d312bef7ef374955d410a9efb2fb4504c3f9bacc67c8dc25f779bdf2c",
+        "winRatePct": 63.361548
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 305210.59,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 32.803339,
+        "modeledFills": 827,
+        "sourceManifestSHA256": "e07f3e5d312bef7ef374955d410a9efb2fb4504c3f9bacc67c8dc25f779bdf2c",
+        "winRatePct": 60.459492
+      },
+      "replicate": 21,
+      "runSourceSHA256": "047e254c93bb99a9a12b271287e21e37f068fee67c5981757ce16b65408e9de6",
+      "sourceMaskSHA256": "1f59e3f525a6e198cdd7503540c66d0722e8bc4ffcc47c8708af64482ff0b14d"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1429883.46,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 25.777855,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "7243b37de9f311f8a04a0f61b91cc826e332a97e1827b7822462d17f76499940",
+        "winRatePct": 63.592814
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 456600.04,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 32.882164,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "7243b37de9f311f8a04a0f61b91cc826e332a97e1827b7822462d17f76499940",
+        "winRatePct": 60.479042
+      },
+      "replicate": 22,
+      "runSourceSHA256": "4b7ea3ae68c2011308aff9a3db36172bc1b3e5992ef5f47ac606c8aa0db047c6",
+      "sourceMaskSHA256": "10ca1e9da3c4231e5f40314f77cad710e14fa5f1a376ac5ae61f3de81256b2fe"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1353040.7,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 24.186086,
+        "modeledFills": 830,
+        "sourceManifestSHA256": "e7bfa585073a41fb3c8a9a6c21462fe2a8a424ecb96f1494506fe5b0b6a1b511",
+        "winRatePct": 63.373494
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 437123.89,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 31.695971,
+        "modeledFills": 830,
+        "sourceManifestSHA256": "e7bfa585073a41fb3c8a9a6c21462fe2a8a424ecb96f1494506fe5b0b6a1b511",
+        "winRatePct": 60.240964
+      },
+      "replicate": 23,
+      "runSourceSHA256": "4dec3f32c953fee2c565be954142adde52811b66716b1d49f0b63a3539b23cb8",
+      "sourceMaskSHA256": "06c275d45713b007b59b759329ac9fb4df84fe318370ea5d30fca9fe14d54549"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1471187.99,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 34.939254,
+        "modeledFills": 829,
+        "sourceManifestSHA256": "6feaf57f430ce7c925b8cc34899d2a7ccec2369e1d15cb52c20851598ebe88c2",
+        "winRatePct": 63.570567
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 472401.41,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 43.204898,
+        "modeledFills": 829,
+        "sourceManifestSHA256": "6feaf57f430ce7c925b8cc34899d2a7ccec2369e1d15cb52c20851598ebe88c2",
+        "winRatePct": 60.313631
+      },
+      "replicate": 24,
+      "runSourceSHA256": "990c03eff527e63d9a174f97899df6d7ecbe7a5f81a92c198d6d53436d7d7a1f",
+      "sourceMaskSHA256": "e0f84bb78d176f2840ff2094aef2dd0c9aac57cd622ee40a59a4dec29539c971"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 770351.6,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 23.171591,
+        "modeledFills": 830,
+        "sourceManifestSHA256": "381e3bb411f5e2573c7345e30b0d08c424daaaa64bcaa82dfc667a81c6f06d48",
+        "winRatePct": 62.53012
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 247977.27,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.294786,
+        "modeledFills": 830,
+        "sourceManifestSHA256": "381e3bb411f5e2573c7345e30b0d08c424daaaa64bcaa82dfc667a81c6f06d48",
+        "winRatePct": 59.518072
+      },
+      "replicate": 25,
+      "runSourceSHA256": "da09de824ab90043a45fda568cff4202d26d87809c8e81514c41b0a29a3a8e14",
+      "sourceMaskSHA256": "bf7966474a4b203483aa7c233e189c17dd0499d46ce91134bd28a52548b6237c"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1248224.29,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 23.072143,
+        "modeledFills": 826,
+        "sourceManifestSHA256": "0ce0a262aa3d6f99968525db4002903d18653ca5d1ff9a4e3b27d595a19f63b8",
+        "winRatePct": 63.801453
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 401578.83,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 25.351432,
+        "modeledFills": 824,
+        "sourceManifestSHA256": "0ce0a262aa3d6f99968525db4002903d18653ca5d1ff9a4e3b27d595a19f63b8",
+        "winRatePct": 60.92233
+      },
+      "replicate": 26,
+      "runSourceSHA256": "fbabbfd0ab41ff200383908fe7a4a530e78d8718472a273fb2e1e4d593336d68",
+      "sourceMaskSHA256": "b09000bc6251d242df6f8c71c451ecf19e9a72ff01ac195a91f93f9094fba1ce"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1258197.86,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 26.925953,
+        "modeledFills": 825,
+        "sourceManifestSHA256": "905c05a9decd05a30735e6b7511e8a5870e53946d0addbf2853aa7ed4da9d861",
+        "winRatePct": 63.878788
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 408634.78,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 33.652714,
+        "modeledFills": 825,
+        "sourceManifestSHA256": "905c05a9decd05a30735e6b7511e8a5870e53946d0addbf2853aa7ed4da9d861",
+        "winRatePct": 60.848485
+      },
+      "replicate": 27,
+      "runSourceSHA256": "22cf5872a95d2aae143f804607f6eb83f67e1425c970506e27ae5f036fbcf802",
+      "sourceMaskSHA256": "2015b97f002bcb4b42e76cf71d13c215230f21fb7fdcf483da7d45691517eeff"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 2131535.41,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 20.392497,
+        "modeledFills": 835,
+        "sourceManifestSHA256": "c4fbff289ca7abf6a38d2d302d152398f22947cafed88d09c237f9fb0fd5f14e",
+        "winRatePct": 63.952096
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 683217.89,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 21.768585,
+        "modeledFills": 833,
+        "sourceManifestSHA256": "c4fbff289ca7abf6a38d2d302d152398f22947cafed88d09c237f9fb0fd5f14e",
+        "winRatePct": 60.744298
+      },
+      "replicate": 28,
+      "runSourceSHA256": "7f069412fcaa45ea5d00191a710a2967c63e9eb5fe85e24e0f797d83db088cae",
+      "sourceMaskSHA256": "e0507d6eba088ed8091442254fdbbba1676d6998dc61c9a9b37a6ffc5c7b8f76"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1522488.79,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 21.358706,
+        "modeledFills": 833,
+        "sourceManifestSHA256": "1ef6c5943fd41609f6f8a93ebabd62d4483e5e838fa2035d1df4fc3086cb7bd4",
+        "winRatePct": 63.745498
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 487909.41,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 26.145587,
+        "modeledFills": 833,
+        "sourceManifestSHA256": "1ef6c5943fd41609f6f8a93ebabd62d4483e5e838fa2035d1df4fc3086cb7bd4",
+        "winRatePct": 60.504202
+      },
+      "replicate": 29,
+      "runSourceSHA256": "b59f307bfca651fb14232387deed951432a639fb4e37ad5f17b5870f938097fd",
+      "sourceMaskSHA256": "d24bf462ebe51ae8900c4dc0d8eb42b8c4764de5fe43705b28454b51a6efb177"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 861220.18,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 30.948418,
+        "modeledFills": 830,
+        "sourceManifestSHA256": "b6dabaa17ef7804a8af4bce504f1e6c5f9518789a25996fc3771d743c7dce993",
+        "winRatePct": 63.373494
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 281648.32,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 39.541493,
+        "modeledFills": 828,
+        "sourceManifestSHA256": "b6dabaa17ef7804a8af4bce504f1e6c5f9518789a25996fc3771d743c7dce993",
+        "winRatePct": 60.2657
+      },
+      "replicate": 30,
+      "runSourceSHA256": "ab140cea3f1ed947f932a15c3207f448f6c6a98bd99dbda10c7f919cdddf0386",
+      "sourceMaskSHA256": "15296d4cc1e8f439ae33360ec2fa662ef6ac12d4032b947bf23bd20b254b5f2b"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1122478.1,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 25.616959,
+        "modeledFills": 834,
+        "sourceManifestSHA256": "527502a59916e77c55ee195ea02dea3ab57bce275ee349c2ecee6073c5f3477e",
+        "winRatePct": 63.669065
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 358676.48,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 33.188218,
+        "modeledFills": 832,
+        "sourceManifestSHA256": "527502a59916e77c55ee195ea02dea3ab57bce275ee349c2ecee6073c5f3477e",
+        "winRatePct": 60.576923
+      },
+      "replicate": 31,
+      "runSourceSHA256": "cf2f560825ede87c0566d63f1a99154cada593d78921572dd68df562e405e084",
+      "sourceMaskSHA256": "e64e7cbfcc3d37348c84f0592b8d1d58f867ea238a2a4bc34a3e92d5b6543fcd"
+    },
+    {
+      "10": {
+        "feeBps": 10,
+        "finalNAVJPY": 1296155.3,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 28.760519,
+        "modeledFills": 832,
+        "sourceManifestSHA256": "1b71425bdae2c52253dc3d2b55699840a155c47bf8b258392aec76af293b79b7",
+        "winRatePct": 63.581731
+      },
+      "30": {
+        "feeBps": 30,
+        "finalNAVJPY": 414969.34,
+        "grossCryptoCap": 3.0,
+        "grossStockCap": 1.5,
+        "grossTotalCap": 3.5,
+        "maxDDPct": 29.849172,
+        "modeledFills": 832,
+        "sourceManifestSHA256": "1b71425bdae2c52253dc3d2b55699840a155c47bf8b258392aec76af293b79b7",
+        "winRatePct": 60.817308
+      },
+      "replicate": 32,
+      "runSourceSHA256": "986836a725353508e15c86a0cf96c93a874e7dbb5d59c33c378d99431231123c",
+      "sourceMaskSHA256": "ca96bfc0f36003c03abb5ff0f0ccd32eb3c51aace47c46e459e86e9b5563a512"
+    }
+  ],
+  "benchmarksByFee": {
+    "10": {
+      "baselineDD": 24.617137,
+      "baselineNAV": 1807111.07,
+      "placeboBeatsScoreNAVAndDD": 1,
+      "placeboBestLowestDD": 20.392497,
+      "placeboBestNAV": 2131535.41,
+      "placeboBothMoreProfitableAndLowerDDReplicates": [
+        28
+      ],
+      "placeboCount": 32,
+      "placeboExceedsScoreNAV": 1,
+      "placeboLowerScoreDD": 2,
+      "placeboMeanNAV": 1327620.02,
+      "placeboMedianDD": 26.913014,
+      "placeboMedianNAV": 1321706.8,
+      "placeboMedianWinPct": 63.625386,
+      "placeboWorstHighestDD": 34.939254,
+      "placeboWorstNAV": 770351.6,
+      "scoreSelectedBeatsMedianPlaceboInNAVAndDD": true,
+      "scoreSelectedDD": 21.124831,
+      "scoreSelectedDDOver20": true,
+      "scoreSelectedNAV": 1893662.05,
+      "scoreSelectedWinRate": 63.788969
+    },
+    "30": {
+      "baselineDD": 29.949168,
+      "baselineNAV": 551075.35,
+      "placeboBeatsScoreNAVAndDD": 1,
+      "placeboBestLowestDD": 21.768585,
+      "placeboBestNAV": 683217.89,
+      "placeboBothMoreProfitableAndLowerDDReplicates": [
+        28
+      ],
+      "placeboCount": 32,
+      "placeboExceedsScoreNAV": 1,
+      "placeboLowerScoreDD": 1,
+      "placeboMeanNAV": 424196.64,
+      "placeboMedianDD": 31.710271,
+      "placeboMedianNAV": 417594.43,
+      "placeboMedianWinPct": 60.491622,
+      "placeboWorstHighestDD": 43.204898,
+      "placeboWorstNAV": 247977.27,
+      "scoreSelectedBeatsMedianPlaceboInNAVAndDD": true,
+      "scoreSelectedDD": 23.168995,
+      "scoreSelectedDDOver20": true,
+      "scoreSelectedNAV": 607455.88,
+      "scoreSelectedWinRate": 60.336538
+    }
+  },
+  "monthlySelectedScoreAdvantageVsBase": {
+    "monthsBetter": 5,
+    "monthsTie": 1,
+    "monthsWorse": 6
+  },
+  "officialSHAValidatedBinanceArchives315": true,
+  "placeboByRouteAndSideMatchedRejectionCountsAll32": true,
+  "placeboN": 32,
+  "placeboVetoMasksNotValidRealtimeDecisionRules": true,
+  "referencePolicySelectedFromKnownTargetPeriod": true,
+  "safetyAndLimits": [
+    "Even though score-selected portfolio beat median random placebo on in-sample base, some matched random veto masks can equal/better both NAV/DD (30bps at least one). This does not substantiate predictive edge vs risk reduction alone.",
+    "Placebo masks use hindsight to permute vetoes within an entire one-year series; impossible to trade causally; only a negative control, not an implementable replacement strategy.",
+    "Only 32 structured randomizations, no formal significance test and no untouched independent real market; selection made after observing P99 native results; severe multiple-testing/overfitting risk.",
+    "All included source code is older strict V2, lacks 2026-11-22 Stable4/H48 and V4 DD21% HOLD, cannot establish account DD below owner 20% or the earlier 673 V4 gate block recoveries.",
+    "No actual signed exchange fills or STOP, funding is modeled; PENGU owner-approved independent Binance native source is unchanged, whereas other Runner Binance is only preentry directional confirmation, not independent original native signal generation.",
+    "V52 gross1.5 research cap and older original strategy gross0.25 retained for parity only, no new 0.25 allocation, current production not changed.",
+    "No deployment, order, STOP, Runner, Gross, Kill Switch, margin or position modification."
+  ],
+  "schema": "prism7-p104-nonV52-5TF-asof-aster-binance-signed-score-veto-versus-32-route-matched-random-placebos/v1",
+  "selectedFamilyForHardGate": [
+    "IDLE",
+    "Q102|BRK",
+    "Q102|PB",
+    "RESIDUAL"
+  ],
+  "sourceAllNativeScoreCandidates": 2715,
+  "sourceCausalTFClosedWeekDay12h4h1h": true,
+  "sourceProvenanceSHA256": {
+    "P10119ModelsAndCandidateScoreFullAudit": "1946afcf58ef9f3a9733b93e6c2e665f9345cebe70b2fc9968935d35997ca68f",
+    "P102PlaceboGeneratorManifest": "620d684763a3582a5e44975958faa8976d792dfe941e965200094f2e23abd104",
+    "sourceSelected10bps": "ea852a044e68dd05a391bf1626e34cb7299cb808cc58f130413474f2a23ff594",
+    "sourceSelected30bps": "ea852a044e68dd05a391bf1626e34cb7299cb808cc58f130413474f2a23ff594"
+  },
+  "status": "P100_CANDIDATE_SOURCE_PROMISING_BUT_RANDOM_PLACEBO_CAN_BEAT_BOTH_METRICS__NO_ADOPTION",
+  "totalSourceGroupEligible966Rejected218BeforeOtherGates": true,
+  "yearBTUTC": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z_EXCLUSIVE"
+  ]
+}
