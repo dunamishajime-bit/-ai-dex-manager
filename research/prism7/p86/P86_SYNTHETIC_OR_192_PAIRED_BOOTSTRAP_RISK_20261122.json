@@ -1,0 +1,238 @@
+{
+  "ORExtra100bpsWorstRiskPathOverDD20": [
+    {
+      "M5HighDDPct": 20.293183,
+      "coupling": "HIGH_CORR",
+      "liquidity": "STRESSED_PRINT",
+      "regime": "HIGH_VOL_CHOP",
+      "seed": 2026112284,
+      "selectedTrueClosed": 2,
+      "tag": "HIGH_VOL_CHOP_STRESSED_PRINT_HIGH_CORR_2026112284",
+      "wins": 0
+    }
+  ],
+  "ORPairedAgainstAllThreeAlternatives": {
+    "ASTER_ONLY": {
+      "ORDominated": 27,
+      "ORWorse": 16,
+      "bootstrapPathIidCI95JPY": [
+        23.451,
+        137.437
+      ],
+      "bootstrapRegimeClusterCI95JPY": [
+        4.03,
+        170.076
+      ],
+      "bootstrapStratified8RegimesCI95JPY": [
+        23.587,
+        132.788
+      ],
+      "clusterBootstrapFrequencyORPositive": 0.983,
+      "largestORGainerJPY": 2080.27,
+      "leaveOneRegimeOutMeanDeltaJPY": {
+        "BTC_PENGU_DIVERGENCE": 72.08,
+        "DOWN_THEN_SQUEEZE": 77.46,
+        "HIGH_VOL_CHOP": 70.18,
+        "ILLIQUID_ZERO_PRINT": 91.19,
+        "PERSISTENT_DOWN": 36.35,
+        "PERSISTENT_UP": 90.67,
+        "SIDEWAYS": 91.27,
+        "UP_THEN_DUMP": 88.2
+      },
+      "meanORMinusOtherJPY": 77.18,
+      "nonzeroOnlyMeanORMinusOtherJPY": 344.6,
+      "pairs": 192,
+      "regimeContributionTo192PathMeanJPY": {
+        "BTC_PENGU_DIVERGENCE": 14.1,
+        "DOWN_THEN_SQUEEZE": 9.39,
+        "HIGH_VOL_CHOP": 15.77,
+        "ILLIQUID_ZERO_PRINT": -2.61,
+        "PERSISTENT_DOWN": 45.37,
+        "PERSISTENT_UP": -2.16,
+        "SIDEWAYS": -2.69,
+        "UP_THEN_DUMP": 0.0
+      },
+      "sameNAV": 149,
+      "stratifiedPosteriorFrequencyORPositive": 0.9991,
+      "worstORDownsideJPY": -741.29
+    },
+    "BINANCE_TO_ASTER": {
+      "ORDominated": 24,
+      "ORWorse": 17,
+      "bootstrapPathIidCI95JPY": [
+        -7.865,
+        111.061
+      ],
+      "bootstrapRegimeClusterCI95JPY": [
+        -16.825,
+        123.171
+      ],
+      "bootstrapStratified8RegimesCI95JPY": [
+        -6.902,
+        108.008
+      ],
+      "clusterBootstrapFrequencyORPositive": 0.9172,
+      "largestORGainerJPY": 2390.98,
+      "leaveOneRegimeOutMeanDeltaJPY": {
+        "BTC_PENGU_DIVERGENCE": 39.35,
+        "DOWN_THEN_SQUEEZE": 47.32,
+        "HIGH_VOL_CHOP": 59.12,
+        "ILLIQUID_ZERO_PRINT": 63.73,
+        "PERSISTENT_DOWN": 17.3,
+        "PERSISTENT_UP": 67.63,
+        "SIDEWAYS": 49.28,
+        "UP_THEN_DUMP": 46.98
+      },
+      "meanORMinusOtherJPY": 48.84,
+      "nonzeroOnlyMeanORMinusOtherJPY": 228.71,
+      "pairs": 192,
+      "regimeContributionTo192PathMeanJPY": {
+        "BTC_PENGU_DIVERGENCE": 14.41,
+        "DOWN_THEN_SQUEEZE": 7.44,
+        "HIGH_VOL_CHOP": -2.89,
+        "ILLIQUID_ZERO_PRINT": -6.93,
+        "PERSISTENT_DOWN": 33.7,
+        "PERSISTENT_UP": -10.34,
+        "SIDEWAYS": 5.72,
+        "UP_THEN_DUMP": 7.73
+      },
+      "sameNAV": 151,
+      "stratifiedPosteriorFrequencyORPositive": 0.9563,
+      "worstORDownsideJPY": -1013.22
+    },
+    "BOTH_REQUIRED": {
+      "ORDominated": 42,
+      "ORWorse": 32,
+      "bootstrapPathIidCI95JPY": [
+        57.561,
+        232.673
+      ],
+      "bootstrapRegimeClusterCI95JPY": [
+        -30.055,
+        377.712
+      ],
+      "bootstrapStratified8RegimesCI95JPY": [
+        65.38,
+        220.861
+      ],
+      "clusterBootstrapFrequencyORPositive": 0.9271,
+      "largestORGainerJPY": 2681.46,
+      "leaveOneRegimeOutMeanDeltaJPY": {
+        "BTC_PENGU_DIVERGENCE": 119.56,
+        "DOWN_THEN_SQUEEZE": 141.54,
+        "HIGH_VOL_CHOP": 154.79,
+        "ILLIQUID_ZERO_PRINT": 183.32,
+        "PERSISTENT_DOWN": 41.33,
+        "PERSISTENT_UP": 180.64,
+        "SIDEWAYS": 163.54,
+        "UP_THEN_DUMP": 153.81
+      },
+      "meanORMinusOtherJPY": 142.32,
+      "nonzeroOnlyMeanORMinusOtherJPY": 369.25,
+      "pairs": 192,
+      "regimeContributionTo192PathMeanJPY": {
+        "BTC_PENGU_DIVERGENCE": 37.7,
+        "DOWN_THEN_SQUEEZE": 18.47,
+        "HIGH_VOL_CHOP": 6.88,
+        "ILLIQUID_ZERO_PRINT": -18.09,
+        "PERSISTENT_DOWN": 106.15,
+        "PERSISTENT_UP": -15.74,
+        "SIDEWAYS": -0.78,
+        "UP_THEN_DUMP": 7.73
+      },
+      "sameNAV": 118,
+      "stratifiedPosteriorFrequencyORPositive": 0.9999,
+      "worstORDownsideJPY": -1206.25
+    }
+  },
+  "assumedNetworkDelayMinutes": 5,
+  "bootstrapSamples": 10000,
+  "conditionalRiskSizeVsFixed075OnSame192SyntheticPaths": [
+    {
+      "conditionalGross0p25None": true,
+      "conditionalMeanNAVJPY": 10122.16,
+      "conditionalSourceVetoCount": 48,
+      "conditionalWins": 48,
+      "conditionalWorstDDPct": 19.603,
+      "fixed075MeanNAVJPY": 10152.56,
+      "fixed075Wins": 57,
+      "fixed075WorstDDPct": 19.603,
+      "mode": "ASTER_ONLY"
+    },
+    {
+      "conditionalGross0p25None": true,
+      "conditionalMeanNAVJPY": 10150.5,
+      "conditionalSourceVetoCount": 52,
+      "conditionalWins": 60,
+      "conditionalWorstDDPct": 19.369,
+      "fixed075MeanNAVJPY": 10187.38,
+      "fixed075Wins": 72,
+      "fixed075WorstDDPct": 19.369,
+      "mode": "BINANCE_TO_ASTER"
+    },
+    {
+      "conditionalGross0p25None": true,
+      "conditionalMeanNAVJPY": 10057.02,
+      "conditionalSourceVetoCount": 16,
+      "conditionalWins": 25,
+      "conditionalWorstDDPct": 14.277,
+      "fixed075MeanNAVJPY": 10061.83,
+      "fixed075Wins": 29,
+      "fixed075WorstDDPct": 14.277,
+      "mode": "BOTH_REQUIRED"
+    },
+    {
+      "conditionalGross0p25None": true,
+      "conditionalMeanNAVJPY": 10199.34,
+      "conditionalSourceVetoCount": 84,
+      "conditionalWins": 72,
+      "conditionalWorstDDPct": 18.891,
+      "fixed075MeanNAVJPY": 10237.17,
+      "fixed075Wins": 85,
+      "fixed075WorstDDPct": 18.891,
+      "mode": "EITHER_OR_ASTER_ONCE"
+    }
+  ],
+  "fixedBootstrapSeed": 2026112286,
+  "limitations": [
+    "Monte Carlo uncertainty is conditional on deliberately constructed 8 regimes and synthetic returns, not genuine out-of-sample real market uncertainty.",
+    "Eight distinct high-level synthetic regimes are not independent exchange history years. Cluster-by-regime bootstrap uses eight resampled clusters and can have very wide or unstable uncertainty.",
+    "Synthetic STOP/5m first printed volume models contain no executable orderbook fills, signed STOP or funding, and network delay 5min is a proxy.",
+    "Censored entries and forced MTM are tracked in P85; no source terminalMTM selected in primary 5min normal results.",
+    "Prior live DD20 cap may be violated with 100bps stress in one synthetic path; stop selection must be risk-first before deployment.",
+    "No selected parameter optimization from synthetic 15min or market regime subsets; owner OR mode and frozen gross P73 intact.",
+    "No production master/Runner STOP/position/order/Gross/kill switch changes."
+  ],
+  "normalCostBps": 30,
+  "ownerPolicy": "OR entry, conditional 0.5 if bullish macro and PENGU weak confirmed both, otherwise 0.75 or skip, never 0.25",
+  "regimes": [
+    "BTC_PENGU_DIVERGENCE",
+    "DOWN_THEN_SQUEEZE",
+    "HIGH_VOL_CHOP",
+    "ILLIQUID_ZERO_PRINT",
+    "PERSISTENT_DOWN",
+    "PERSISTENT_UP",
+    "SIDEWAYS",
+    "UP_THEN_DUMP"
+  ],
+  "researchOnly": true,
+  "schema": "prism7-p86-synthetic-eight-regime-192-path-paired-or-entry-bootstrap-no025/v1",
+  "selectedNativeSlotPreemptionAcross192Paths": {
+    "ORvsAster5min": {
+      "ComparatorOnlyBlockedByOR": 22,
+      "ExactSelectedOverlap": 70,
+      "ORonly": 60
+    },
+    "ORvsBinance5min": {
+      "ComparatorOnlyBlockedByOR": 30,
+      "ExactSelectedOverlap": 74,
+      "ORonly": 56
+    }
+  },
+  "sourceP84P85AllNativeV20PurityAndCausalAsOf": true,
+  "sourceSHA256": {
+    "P85": "7287a2633c68b45561676b186b4495ce18361179a56709e0d0ed1d281ffafe34",
+    "P85All192PathEconomics": "3aa22f0ff6eafc3afe90e895f72ecf62f41b1223d5a2d51831c9c2c514a5995a"
+  },
+  "syntheticPathCount": 192
+}
