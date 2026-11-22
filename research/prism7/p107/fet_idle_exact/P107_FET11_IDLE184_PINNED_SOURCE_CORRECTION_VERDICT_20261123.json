@@ -1,0 +1,53 @@
+{
+  "schema": "p107-fet-idle-native-pin-11-fet-and-184-idle-entry-source-correction/v1",
+  "sourceSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+  "FET": {
+    "oldRawCount": 11,
+    "currentSourceRawCount": 11,
+    "allEntryAndFeatureComparisonsMatch": true,
+    "missingEarlyASTERHistory": true
+  },
+  "IDLE": {
+    "priorRawCount": 183,
+    "correctedNativeRawCount": 184,
+    "oldMatched": 183,
+    "oneAdded": {
+      "strategy_id": "IDLE",
+      "source_runtime_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "source": "NATIVE_ACTUAL_IDLE_PINNED_SOURCE",
+      "symbol": "JUPUSDT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "side": "SHORT",
+      "signalTs": 1768240800000,
+      "entryTs": 1768244400000,
+      "entryReferenceOpenPrice": 0.209,
+      "requestedGross": 1,
+      "holdHours": 12,
+      "stopPct": 0.1,
+      "takeProfitPct": 0.25,
+      "features": {
+        "ret12": -0.023310023310023298,
+        "ret24": -0.030989824236817842,
+        "btc24": 0.008851418142270084,
+        "rel24": -0.03984124237908793,
+        "atrRatio": 0.009717013296965582,
+        "volumeRatio": 10.247502413127414
+      },
+      "exit": "UNMODELED_NATIVE_RUNNER_EXIT_REQUIRES_M5_AND_STATEFUL_LIVE_OVERLAY",
+      "accountAdmission": "UNVERIFIED_BASELINE_OCCUPANCY_SHARED_RISK_GROSS_PENDING"
+    },
+    "missedSourceGate": "Original 2026-11-08 replay sliced symbol history as arr.slice(i-80,i) for i=74..79. Negative index references end of full array and returns no completed warmup rows, silently skipping otherwise valid early source candidates.",
+    "legacySimulated80BarWarmup": 183,
+    "correctedRawTapeFile": "P107_IDLE_PIN_ASOF_184_RAW_ENTRY_CANDIDATES_20261123.jsonl",
+    "correctedRawTapeSHA256": "7f0c17112e7e648bef4b10873303bf9bc7db8f3326c0762cff80922a713e3ca9",
+    "bySymbol": {
+      "DOTUSDT": 16,
+      "JUPUSDT": 59,
+      "RENDERUSDT": 45,
+      "TAOUSDT": 29,
+      "TIAUSDT": 35
+    }
+  },
+  "actualVenueOrders": 0,
+  "fullP107STABLE4AccountParity": false
+}
