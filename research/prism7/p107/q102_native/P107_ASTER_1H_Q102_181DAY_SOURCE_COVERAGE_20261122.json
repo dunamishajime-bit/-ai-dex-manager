@@ -1,0 +1,1141 @@
+{
+  "schema": "p107-aster-h1-q102-181d-source-audit/v1",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "warmup_hours": 4344,
+  "claim": "Input inventory only, not full native-signal reconstruction",
+  "all_runner_parity_verified": false,
+  "data_volumes": 38,
+  "missing_initial_Q102_181d_history_symbols": [
+    "AMZNUSDT",
+    "ENAUSDT",
+    "FETUSDT",
+    "FILUSDT",
+    "HYPEUSDT",
+    "JUPUSDT",
+    "LDOUSDT",
+    "METAUSDT",
+    "MSFTUSDT",
+    "NVDAUSDT",
+    "PENGUUSDT",
+    "RENDERUSDT",
+    "TAOUSDT",
+    "TIAUSDT",
+    "TSLAUSDT"
+  ],
+  "incomplete_BT_price_coverage_symbols": [
+    "FETUSDT",
+    "FILUSDT",
+    "JUPUSDT",
+    "LDOUSDT",
+    "RENDERUSDT",
+    "TAOUSDT",
+    "TIAUSDT"
+  ],
+  "sources": [
+    {
+      "symbol": "AAVEUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d"
+        }
+      ]
+    },
+    {
+      "symbol": "ADAUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ADAUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "16333557a90dd6bac94465d49527396ff816df94dc43a9e2db152d82d67726de"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ADAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29"
+        }
+      ]
+    },
+    {
+      "symbol": "AMZNUSDT",
+      "observedUniqueH1": 10620,
+      "earliestH1": "2025-07-15T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-12T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "AMZNUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1692,
+          "first": 1752580800000,
+          "last": 1758668400000,
+          "sha256": "9d75d1e3c82883bc2910fe8cea1d2d2a37b39cafd27a3906d2abc8ab727d17bd"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "AMZNUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "374141d594fcd482f1ab7c997c0ee3300b6194f67f1afbe7fc4aae5c84c078f8"
+        }
+      ]
+    },
+    {
+      "symbol": "APTUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "APTUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "3a937531ab57dae81d492af93680a6f4fddf8c3bde594e240e04f460c1544729"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "APTUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "APTUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "38380069cdfcd467516ce1579a2221f76ecee8515d7a58744701d99a28f09cfc"
+        }
+      ]
+    },
+    {
+      "symbol": "ARBUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ARBUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "64c14297f5e4c15ce7f72102e755c926a8374e29b6af5de9f4e315b7692ac814"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ARBUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "6c8dd74b981ea182a08eb9ed685e81f92deaeefe3b80254036cbfadf1b5e0a8d"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "ARBUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "dd446b5f461ba133e6e326f9af0da745ebd86e7705f71d9dd74fd5f2f050ea73"
+        }
+      ]
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ATOMUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "75b195cf7eba220ca9277deed05609626963b9c3b8c1aeefbe8e860e98c42112"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ATOMUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e"
+        }
+      ]
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1"
+        }
+      ]
+    },
+    {
+      "symbol": "BNBUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "BNBUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "3c40a959a8e3c68b66f36d8babe31cc262556cbe4d0c40ea9e1884d18b887f8d"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "BNBUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc"
+        }
+      ]
+    },
+    {
+      "symbol": "BTCUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "BTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "BTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "BTCUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+        }
+      ]
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149"
+        }
+      ]
+    },
+    {
+      "symbol": "DOTUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "DOTUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "DOTUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e"
+        }
+      ]
+    },
+    {
+      "symbol": "ENAUSDT",
+      "observedUniqueH1": 11795,
+      "earliestH1": "2025-05-27T13:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2025-11-24T13:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ENAUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 2867,
+          "first": 1748350800000,
+          "last": 1758668400000,
+          "sha256": "434c65c1fc4d07374a8201f3d4e31e13176e60caca552abe396fdf3bbaafb99b"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ENAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "318787f0dc48498ce97c8b814316bd14716e0dc3d6516fb0df17a32d2d3f011c"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "ENAUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 11795,
+          "first": 1748350800000,
+          "last": 1790809200000,
+          "sha256": "755639e19659250b6293a85a917248fec79f254e2bad87c835d3eff53dc29fa3"
+        }
+      ]
+    },
+    {
+      "symbol": "ETHUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ETHUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "6ec736aa3ce259ce795ab47695bf3a12b454ab07e3f28f1d48858d1e20d6d24f"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ETHUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13"
+        }
+      ]
+    },
+    {
+      "symbol": "FETUSDT",
+      "observedUniqueH1": 6342,
+      "earliestH1": "2026-01-09T18:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T18:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "FETUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6342,
+          "first": 1767981600000,
+          "last": 1790809200000,
+          "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+        }
+      ]
+    },
+    {
+      "symbol": "FILUSDT",
+      "observedUniqueH1": 7857,
+      "earliestH1": "2025-11-07T15:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-05-07T15:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "FILUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 7857,
+          "first": 1762527600000,
+          "last": 1790809200000,
+          "sha256": "5a0f23003dd43d2601090c9c0b383f33cc787f7b1330d882efbdb391a1a2903e"
+        }
+      ]
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "observedUniqueH1": 8963,
+      "earliestH1": "2025-09-22T13:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-03-22T13:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "HYPEUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 35,
+          "first": 1758546000000,
+          "last": 1758668400000,
+          "sha256": "89a0f6104f166ba9c87a42d1c54c99f702532ffeae34186fcbfb4e61f08b638e"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "HYPEUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc"
+        }
+      ]
+    },
+    {
+      "symbol": "INJUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "INJUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "9de4b5b0bbc9ec089f91234a7ff10e51d794740728cb6ed9ff63c8421d98f8d7"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "INJUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42"
+        }
+      ]
+    },
+    {
+      "symbol": "JUPUSDT",
+      "observedUniqueH1": 6346,
+      "earliestH1": "2026-01-09T14:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T14:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "JUPUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6346,
+          "first": 1767967200000,
+          "last": 1790809200000,
+          "sha256": "8ff145ed07cd872ce4cc8845d780ea8a094bd963ad6accd534f745a97644e908"
+        }
+      ]
+    },
+    {
+      "symbol": "LDOUSDT",
+      "observedUniqueH1": 6342,
+      "earliestH1": "2026-01-09T18:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T18:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "LDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6342,
+          "first": 1767981600000,
+          "last": 1790809200000,
+          "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0"
+        }
+      ]
+    },
+    {
+      "symbol": "LINKUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "LINKUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "a329fd68e24826077d55143ee3e0dfc0a02961c413828dd03b2d42c5504a5412"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "LINKUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb"
+        }
+      ]
+    },
+    {
+      "symbol": "LTCUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "LTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "32f07b6911ab9640dc8cbedc4f8ca9c071690e670bdf1170ea2ba674b77dae24"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "LTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53"
+        }
+      ]
+    },
+    {
+      "symbol": "METAUSDT",
+      "observedUniqueH1": 10620,
+      "earliestH1": "2025-07-15T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-12T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "METAUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1692,
+          "first": 1752580800000,
+          "last": 1758668400000,
+          "sha256": "2f1eafd81a92cfde922794bbf2caddbd10f11a9e44c879b273dc58bf6d5f0a83"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "METAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "0e1511dcc60e40a9e3000faffedffcfd918d4700e7bdce7813759516cfc63a67"
+        }
+      ]
+    },
+    {
+      "symbol": "MSFTUSDT",
+      "observedUniqueH1": 10620,
+      "earliestH1": "2025-07-15T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-12T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "MSFTUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1692,
+          "first": 1752580800000,
+          "last": 1758668400000,
+          "sha256": "b4167d894657209c5f94da36a949c4cd0df74a334172cdbbfeda2bf4b8daac9c"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "MSFTUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "8a7ff7005a0b96e5163d48c1048a5244f97972847488bda4ee1d73b9f0147ba3"
+        }
+      ]
+    },
+    {
+      "symbol": "NEARUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "NEARUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "NEARUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85"
+        }
+      ]
+    },
+    {
+      "symbol": "NVDAUSDT",
+      "observedUniqueH1": 10620,
+      "earliestH1": "2025-07-15T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-12T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "NVDAUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1692,
+          "first": 1752580800000,
+          "last": 1758668400000,
+          "sha256": "9f6f86317d5794b74ee2e1b5382f51036b2061ab2abc2b8eb242284a559be29c"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "NVDAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "710d12c72a9e802e2d40da146631ec38b63aecafa0c3e7851db987dabb18f37f"
+        }
+      ]
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "ONDOUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "e1101ca566744a1acc732d46acce105fed1b9bab600b72eb18ac06a9e06300a8"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "ONDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "ONDOUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "1d8c5ca42f471deb803429ca13210da0ea81881b01600f62d63e8e0a970e963c"
+        }
+      ]
+    },
+    {
+      "symbol": "OPUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "OPUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "e3e640488aab5e74a84367d5c7dbd698c508964f34d7f68ae59717d6613c1c9f"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "OPUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "bc19af06abb844d3aa84dad726d19281f6e33f37cf8c87ca9eb4575345918411"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "OPUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "7b9dbd39aabed32c590389e9bcc43e019a44d7267a7a7768bf060fc8f5847239"
+        }
+      ]
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "observedUniqueH1": 10548,
+      "earliestH1": "2025-07-18T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-15T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "PENGUUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1620,
+          "first": 1752840000000,
+          "last": 1758668400000,
+          "sha256": "1b7f8467db39df935c14c8a1ada1e9d72040cac2efc7b9a7ecd39437ac21adc4"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "PENGUUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        }
+      ]
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "observedUniqueH1": 6419,
+      "earliestH1": "2026-01-06T13:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-06T13:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6419,
+          "first": 1767704400000,
+          "last": 1790809200000,
+          "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02"
+        }
+      ]
+    },
+    {
+      "symbol": "SEIUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "SEIUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "49a78a2894b52936af9f41e6fc4c2ddf0ebcc12e0812caba755072e933477363"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "SEIUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "e736f602afb91583bebd848f0630271277b1a7f3e4aa8a522a96aa97152764ed"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "SEIUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "d498d40d05d0472ef8a4b680940dc145c9ff87f46d1f4eb3b30e4ab85fa6a46e"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "SOLUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "SOLUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993"
+        }
+      ]
+    },
+    {
+      "symbol": "SUIUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "SUIUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "750a231b0a0decb0fd27fd5b6e104e619cae6376a1cec20845d4c31bb15931f4"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "SUIUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c"
+        },
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "SUIUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "d674f88c0b39070a9068342e3a3b06ae4daf5bdf6959c14a3f15ef559a58621c"
+        }
+      ]
+    },
+    {
+      "symbol": "TAOUSDT",
+      "observedUniqueH1": 6346,
+      "earliestH1": "2026-01-09T14:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T14:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "TAOUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6346,
+          "first": 1767967200000,
+          "last": 1790809200000,
+          "sha256": "f8e0ab84c87a112ff052ed6d1175b9a0a5a7b61c3db7a24e7e01b592caacc35b"
+        }
+      ]
+    },
+    {
+      "symbol": "TIAUSDT",
+      "observedUniqueH1": 6342,
+      "earliestH1": "2026-01-09T18:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T18:00:00Z",
+      "covers_entire_BT_prices": false,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "TIAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 6342,
+          "first": 1767981600000,
+          "last": 1790809200000,
+          "sha256": "09916a5857d775a904976e150bc653aa35cea8fdc0a03f5a1b435e052ca6feb6"
+        }
+      ]
+    },
+    {
+      "symbol": "TRXUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-q102-warmup",
+          "file": "TRXUSDT-1h-20250301-20261001.jsonl.gz",
+          "count": 13896,
+          "first": 1740787200000,
+          "last": 1790809200000,
+          "sha256": "1489b0f8e5d9e0031fb4fa1223cb9279a42684c142896e78f8a2581b893c8e59"
+        }
+      ]
+    },
+    {
+      "symbol": "TSLAUSDT",
+      "observedUniqueH1": 10620,
+      "earliestH1": "2025-07-15T12:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-01-12T12:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "TSLAUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 1692,
+          "first": 1752580800000,
+          "last": 1758668400000,
+          "sha256": "ccdb1e1ccb7d032b77a241457fb1b63da31f7d7d2f4c4fa1619df329d5a0aa0f"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "TSLAUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "bc304b9c736e6a1c2786437603f20d9cac4d9e31f276f07791559ae081560abe"
+        }
+      ]
+    },
+    {
+      "symbol": "UNIUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "UNIUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "UNIUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e"
+        }
+      ]
+    },
+    {
+      "symbol": "XRPUSDT",
+      "observedUniqueH1": 13896,
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "continuityBreakCount": 0,
+      "gaps": [],
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "inputFiles": [
+        {
+          "folder": "aster-public-v3-h1-early",
+          "file": "XRPUSDT-1h-20250301-20250924.jsonl.gz",
+          "count": 4968,
+          "first": 1740787200000,
+          "last": 1758668400000,
+          "sha256": "9f5a5bc8b9df118404db89219cd74a145dd5b874ecd8ed344024a811833cf3c8"
+        },
+        {
+          "folder": "aster-public-v3-h1",
+          "file": "XRPUSDT-1h-20250924-20261001.jsonl.gz",
+          "count": 8928,
+          "first": 1758672000000,
+          "last": 1790809200000,
+          "sha256": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03"
+        }
+      ]
+    }
+  ]
+}

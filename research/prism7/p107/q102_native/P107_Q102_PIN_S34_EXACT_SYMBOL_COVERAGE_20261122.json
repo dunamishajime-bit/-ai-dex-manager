@@ -1,0 +1,117 @@
+{
+  "schema": "p107-q102-pin-s34-11-symbol-181d-source-coverage/v1",
+  "sourceCommit": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "modelSourceFile": "config/disdexQuality102CausalV4Model.ts",
+  "marketDataCoverageShaSource": "P107_ASTER_1H_Q102_181DAY_SOURCE_COVERAGE_20261122.json",
+  "S34_symbols": [
+    "AAVEUSDT",
+    "APTUSDT",
+    "AVAXUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "FETUSDT",
+    "LDOUSDT",
+    "NEARUSDT",
+    "RENDERUSDT",
+    "SOLUSDT",
+    "UNIUSDT"
+  ],
+  "count": 11,
+  "S34_missing_required_181d_prewarm_asof_2025_10_01": [
+    "FETUSDT",
+    "LDOUSDT",
+    "RENDERUSDT"
+  ],
+  "data": {
+    "AAVEUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "APTUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "AVAXUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "DOGEUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "DOTUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "FETUSDT": {
+      "earliestH1": "2026-01-09T18:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T18:00:00Z",
+      "covers_entire_BT_prices": false,
+      "continuityBreakCount": 0
+    },
+    "LDOUSDT": {
+      "earliestH1": "2026-01-09T18:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-09T18:00:00Z",
+      "covers_entire_BT_prices": false,
+      "continuityBreakCount": 0
+    },
+    "NEARUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "RENDERUSDT": {
+      "earliestH1": "2026-01-06T13:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": false,
+      "q102_earliest_theoretical_entry_utc": "2026-07-06T13:00:00Z",
+      "covers_entire_BT_prices": false,
+      "continuityBreakCount": 0
+    },
+    "SOLUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    },
+    "UNIUSDT": {
+      "earliestH1": "2025-03-01T00:00:00Z",
+      "latestH1": "2026-09-30T23:00:00Z",
+      "q102_181d_warmup_available_at_start": true,
+      "q102_earliest_theoretical_entry_utc": "2025-10-01T00:00:00Z",
+      "covers_entire_BT_prices": true,
+      "continuityBreakCount": 0
+    }
+  },
+  "highVol_symbols_not_yet_included": true,
+  "full_STABLE4_parity": false
+}

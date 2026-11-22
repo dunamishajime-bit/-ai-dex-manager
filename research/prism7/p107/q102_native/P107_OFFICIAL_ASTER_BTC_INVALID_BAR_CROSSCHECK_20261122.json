@@ -1,0 +1,50 @@
+{
+  "schema": "p107-official-aster-h1-source-btc-open-over-high-v1",
+  "observed_utc": "2026-11-22T13:25:38.517384+00:00",
+  "instrument": "BTCUSDT",
+  "bar_ts": 1757768400000,
+  "http_get_only": true,
+  "authorization_used": false,
+  "endpoints": [
+    {
+      "endpoint": "https://fapi.asterdex.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&startTime=1757768400000&endTime=1757772000000&limit=2",
+      "http_status": 200,
+      "response_sha256": "e5d84f66ab0f4e94d8a6ada3fae26815efd27f8bf5f51517d05afcf3785a5458",
+      "first_bar": [
+        1757768400000,
+        "115941.8",
+        "115916.1",
+        "115580.7",
+        "115707.3",
+        "285.980",
+        1757771999999,
+        "33122242.5797",
+        504,
+        "135.227",
+        "15662208.9872",
+        "0"
+      ],
+      "ohlc_valid": false
+    },
+    {
+      "endpoint": "https://fapi.asterdex.com/fapi/v3/klines?symbol=BTCUSDT&interval=1h&startTime=1757768400000&endTime=1757772000000&limit=2",
+      "http_status": 200,
+      "response_sha256": "e5d84f66ab0f4e94d8a6ada3fae26815efd27f8bf5f51517d05afcf3785a5458",
+      "first_bar": [
+        1757768400000,
+        "115941.8",
+        "115916.1",
+        "115580.7",
+        "115707.3",
+        "285.980",
+        1757771999999,
+        "33122242.5797",
+        504,
+        "135.227",
+        "15662208.9872",
+        "0"
+      ],
+      "ohlc_valid": false
+    }
+  ]
+}

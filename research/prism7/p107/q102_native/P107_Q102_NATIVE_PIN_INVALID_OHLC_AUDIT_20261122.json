@@ -1,0 +1,527 @@
+{
+  "schema": "p107-Q102-S34+BTC-aster-H1-data-invalid-OHLC/v1",
+  "nativeSourceSha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+  "sourceReaderCandleValidation": "lib/disdex-quality102-causal-v1-signal.ts:assertClosedCausalHistory",
+  "symbols": [
+    "AAVEUSDT",
+    "APTUSDT",
+    "AVAXUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "FETUSDT",
+    "LDOUSDT",
+    "NEARUSDT",
+    "RENDERUSDT",
+    "SOLUSDT",
+    "UNIUSDT"
+  ],
+  "badSymbols": [
+    "BTCUSDT"
+  ],
+  "currentNativeFullParity": false,
+  "all": [
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1"
+        },
+        {
+          "name": "AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "APTUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "3a937531ab57dae81d492af93680a6f4fddf8c3bde594e240e04f460c1544729"
+        },
+        {
+          "name": "APTUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c"
+        },
+        {
+          "name": "AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 1,
+      "invalidOHLC_examples": [
+        {
+          "timestamp": "2025-09-13T13:00:00Z",
+          "open": 115941.8,
+          "high": 115916.1,
+          "low": 115580.7,
+          "close": 115707.3
+        }
+      ],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "BTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+        },
+        {
+          "name": "BTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff"
+        },
+        {
+          "name": "DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "DOTUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695"
+        },
+        {
+          "name": "DOTUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e"
+        }
+      ]
+    },
+    {
+      "barCount": 6342,
+      "earliest": "2026-01-09T18:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "FETUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+        }
+      ]
+    },
+    {
+      "barCount": 6342,
+      "earliest": "2026-01-09T18:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "LDOUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b42d032b44a0a2bd6a0c790ed5451e9c796a793c0355e5f39b1e8b699dda6e58"
+        },
+        {
+          "name": "LDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "NEARUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231"
+        },
+        {
+          "name": "NEARUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85"
+        }
+      ]
+    },
+    {
+      "barCount": 6419,
+      "earliest": "2026-01-06T13:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "SOLUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d"
+        },
+        {
+          "name": "SOLUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993"
+        }
+      ]
+    },
+    {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "UNIUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462"
+        },
+        {
+          "name": "UNIUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e"
+        }
+      ]
+    }
+  ],
+  "rowsBySymbol": {
+    "AAVEUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1"
+        },
+        {
+          "name": "AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d"
+        }
+      ]
+    },
+    "APTUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "APTUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "3a937531ab57dae81d492af93680a6f4fddf8c3bde594e240e04f460c1544729"
+        },
+        {
+          "name": "APTUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e"
+        }
+      ]
+    },
+    "AVAXUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c"
+        },
+        {
+          "name": "AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1"
+        }
+      ]
+    },
+    "BTCUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 1,
+      "invalidOHLC_examples": [
+        {
+          "timestamp": "2025-09-13T13:00:00Z",
+          "open": 115941.8,
+          "high": 115916.1,
+          "low": 115580.7,
+          "close": 115707.3
+        }
+      ],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "BTCUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+        },
+        {
+          "name": "BTCUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      ]
+    },
+    "DOGEUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff"
+        },
+        {
+          "name": "DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149"
+        }
+      ]
+    },
+    "DOTUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "DOTUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695"
+        },
+        {
+          "name": "DOTUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e"
+        }
+      ]
+    },
+    "FETUSDT": {
+      "barCount": 6342,
+      "earliest": "2026-01-09T18:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "FETUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+        }
+      ]
+    },
+    "LDOUSDT": {
+      "barCount": 6342,
+      "earliest": "2026-01-09T18:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "LDOUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b42d032b44a0a2bd6a0c790ed5451e9c796a793c0355e5f39b1e8b699dda6e58"
+        },
+        {
+          "name": "LDOUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0"
+        }
+      ]
+    },
+    "NEARUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "NEARUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231"
+        },
+        {
+          "name": "NEARUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85"
+        }
+      ]
+    },
+    "RENDERUSDT": {
+      "barCount": 6419,
+      "earliest": "2026-01-06T13:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02"
+        }
+      ]
+    },
+    "SOLUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "SOLUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d"
+        },
+        {
+          "name": "SOLUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993"
+        }
+      ]
+    },
+    "UNIUSDT": {
+      "barCount": 13896,
+      "earliest": "2025-03-01T00:00:00Z",
+      "latest": "2026-09-30T23:00:00Z",
+      "invalidOHLCCount": 0,
+      "invalidOHLC_examples": [],
+      "nonHourlyGapCount": 0,
+      "gapExamples": [],
+      "inputFiles": [
+        {
+          "name": "UNIUSDT-1h-20250301-20250924.jsonl.gz",
+          "folder": "aster-public-v3-h1-early",
+          "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462"
+        },
+        {
+          "name": "UNIUSDT-1h-20250924-20261001.jsonl.gz",
+          "folder": "aster-public-v3-h1",
+          "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e"
+        }
+      ]
+    }
+  }
+}

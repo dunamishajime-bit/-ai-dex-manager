@@ -1,0 +1,68 @@
+{
+  "schema": "p107-official-aster-q102-three-symbol-early-h1-availability-probe-v1",
+  "read_only": true,
+  "no_private_auth": true,
+  "checked_at": "2026-11-22T13:27:10.426506+00:00",
+  "rows": [
+    {
+      "symbol": "FETUSDT",
+      "time": "2025-04-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=FETUSDT&interval=1h&startTime=1743465600000&endTime=1743472800000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    },
+    {
+      "symbol": "FETUSDT",
+      "time": "2025-10-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=FETUSDT&interval=1h&startTime=1759276800000&endTime=1759284000000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "time": "2025-04-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=LDOUSDT&interval=1h&startTime=1743465600000&endTime=1743472800000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "time": "2025-10-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=LDOUSDT&interval=1h&startTime=1759276800000&endTime=1759284000000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "time": "2025-04-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=RENDERUSDT&interval=1h&startTime=1743465600000&endTime=1743472800000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "time": "2025-10-01T00:00:00Z",
+      "request_url": "https://fapi.asterdex.com/fapi/v3/klines?symbol=RENDERUSDT&interval=1h&startTime=1759276800000&endTime=1759284000000&limit=3",
+      "httpCode": 200,
+      "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0,
+      "firstCandle": null,
+      "dataType": "list"
+    }
+  ]
+}
