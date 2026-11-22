@@ -1,0 +1,99 @@
+{
+  "ASTEROriginalNative53EntriesExitsCovered": true,
+  "UTCmatchingInterval": [
+    "2025-08-01T00:00:00+00:00",
+    "2026-11-18T00:00:00+00:00"
+  ],
+  "baseline100bpsCoverStress": {
+    "M5HighStressDDPct": 29.119242,
+    "closed": 33,
+    "finalNAVYen": 11136.43,
+    "sourceRejectedBeforeSlot": 0,
+    "sourceRejectedWinningSignals": 0,
+    "winPct": 48.484848,
+    "wins": 16
+  },
+  "baselineGross075": {
+    "M5HighStressDDPct": 25.100289,
+    "closed": 33,
+    "finalNAVYen": 14193.07,
+    "sourceRejectedBeforeSlot": 0,
+    "sourceRejectedWinningSignals": 0,
+    "winPct": 54.545455,
+    "wins": 18
+  },
+  "bullCap100bpsCoverStress": {
+    "M5HighStressDDPct": 23.028864,
+    "closed": 33,
+    "finalNAVYen": 11565.01,
+    "sourceRejectedBeforeSlot": 0,
+    "sourceRejectedWinningSignals": 0,
+    "winPct": 48.484848,
+    "wins": 16
+  },
+  "bullMarketFullReject": {
+    "M5HighStressDDPct": 17.024286,
+    "closed": 27,
+    "finalNAVYen": 14314.22,
+    "sourceRejectedBeforeSlot": 14,
+    "sourceRejectedWinningSignals": 8,
+    "winPct": 55.555556,
+    "wins": 15
+  },
+  "bullMarketGrossCap025Else075": {
+    "M5HighStressDDPct": 19.182401,
+    "closed": 33,
+    "finalNAVYen": 14298.98,
+    "sourceRejectedBeforeSlot": 0,
+    "sourceRejectedWinningSignals": 0,
+    "winPct": 54.545455,
+    "wins": 18
+  },
+  "evidenceSHA256": {
+    "P70": "e98897db4eeaed924606f494fe35450c12bfe8935d5823a6a8c75b733945ab5e",
+    "P71": "f8f01c02404fbac390b089e42b2b7a5d75e77c2f0e6e9a626c6cceb6cecbdb33",
+    "P72": "6bfac4100af1b89c384c4bc269cf996696984793042597ce904c61765645fba7"
+  },
+  "jointMarketScore": {
+    "Binance": "as-of indicator only, ASTER source EXIT preserved",
+    "downtrend": "positive points ASTER and Binance PENGU W D 12H 4H 1H",
+    "uptrend": "negative points, including contemporaneous BTC/ETH macro"
+  },
+  "macroBullNative53SourceCountAndWins": [
+    14,
+    8
+  ],
+  "macroBullOriginal33SelectedCountAndWins": [
+    6,
+    3
+  ],
+  "negativePointFullReject": {
+    "M5HighStressDDPct": 22.174978,
+    "closed": 27,
+    "finalNAVYen": 12434.64,
+    "sourceRejectedBeforeSlot": 13,
+    "sourceRejectedWinningSignals": 8,
+    "winPct": 51.851852,
+    "wins": 14
+  },
+  "negativePointsLotSizingNoReject": {
+    "M5HighStressDDPct": 20.656751,
+    "closed": 33,
+    "finalNAVYen": 14035.32,
+    "sourceRejectedBeforeSlot": 0,
+    "sourceRejectedWinningSignals": 0,
+    "winPct": 54.545455,
+    "wins": 18
+  },
+  "newOriginalASTERUnseenOOS": false,
+  "officialArchiveFileChecksumsPass": 165,
+  "pinnedOriginalNativeSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "productionCodeRunnerRiskSTOPGrossOrdersChanged": false,
+  "randomSameSizeGrossCaps": {
+    "jointRandomFractionAtLeastAsGoodDDandNAV": 0.053,
+    "repeats": 1000,
+    "seed": 20261122
+  },
+  "schema": "prism7-p70-p72-dual-venue-signed-score-risk-cap-final-decision/v1",
+  "status": "EXPLORATORY_SCORE_NEGATIVE_PTS_WITHOUT_ACCEPTED_PRODUCTION_RULE"
+}
