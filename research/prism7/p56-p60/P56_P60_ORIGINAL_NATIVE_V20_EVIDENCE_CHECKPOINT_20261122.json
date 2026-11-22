@@ -1,0 +1,84 @@
+{
+  "Native53": {
+    "intents": 53,
+    "lossMFE1ToLt3": 5,
+    "lossMFEge3GivenBack": 7,
+    "lossNoFavorable1Pct": 12,
+    "losses": 24,
+    "preEntryM5FeatureMissing6IncludesWinners5": true,
+    "sourcePriceParity53": true,
+    "wins": 29
+  },
+  "P57TPFullEarly": {
+    "TP1": {
+      "DD": 29.21112,
+      "NAVJPY": 7389.05,
+      "closed": 49,
+      "wins": 38
+    },
+    "TP2": {
+      "DD": 19.28001,
+      "NAVJPY": 9569.19,
+      "closed": 49,
+      "wins": 37
+    },
+    "TP3": {
+      "DD": 18.50044,
+      "NAVJPY": 10600.23,
+      "closed": 45,
+      "wins": 32
+    }
+  },
+  "P58Partial": {
+    "TP3Cover75pct": {
+      "DD": 19.24048,
+      "NAVJPY": 11817.36,
+      "fixedOriginal33": 33,
+      "wins": 24
+    }
+  },
+  "P59NoProgress12h": {
+    "DD": 17.55119,
+    "NAVJPY": 13388.75,
+    "reslotClosed": 34,
+    "wins": 17
+  },
+  "P60NativeEntryWalkForward": {
+    "firstBaselineBrier": 0.25,
+    "firstBrier": 0.31113,
+    "pastP44GateNotIndependent": true,
+    "secondBaselineBrier": 0.25411,
+    "secondBrier": 0.28515
+  },
+  "adoption": "NOT_APPROVED",
+  "gitResearchBranch": "research/prism7-p37-audit-20261122",
+  "importantInterpretation": [
+    "NO model simultaneously improved native win rate to80pct, M5 DD to20pct or below, and preserved or improved baseline compound NAV.",
+    "Aggressive early profit exits can increase win rate but truncate Native V20 strong winners and reduce NAV; unsuitable without an independently validated direction/regime model.",
+    "No-progress after 6h or 1pct adverse prematurely exits many original winners, so naive small stops harm accuracy despite DD reduction.",
+    "Native source 53 are overlapping natural signals, not 53 unique venue fills; original single-slot has only 33 selected.",
+    "All existing Aug2025-Nov2026 market evidence repeatedly viewed; train/test splits are chronological but not untouched independent OOS.",
+    "Pre-entry market predictor failed baseline Brier in two retrospective fold tests.",
+    "P44 previously discovered D3 prior48 all3 entry context may be promising, but selected from observed outcomes, with PRE1/3 vs BASE17/17; not valid deployment evidence.",
+    "M5 positive volume required by historic proxy can be a future timing leak, see P55; new fill gating must avoid it."
+  ],
+  "liveOrdersOrStopsOrKillSwitchChanged": false,
+  "nativePinnedSourceSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "nextMilestone": "New independent time range with pinned native source signal+STOP parity, positive-volume fills/quote, cross-runner DD 0.75, preregistered two failure families.",
+  "productionMasterOrVpsChanged": false,
+  "researchPathsSHA256": {
+    "P56": "b86e0cf2ba408543367e1adfe954de5bd7a403081b99fde1fe1dd1297fd4c86f",
+    "P57": "a8471606dc9b5dd0936c4459e10c83c1698c053b1fec029b2073a89a4eac4aec",
+    "P58": "c0a919fb3bc1627c5e4232baf9de95d9e1588ca29d6154d8b1ee7491f7e5a77d",
+    "P59": "c26d6a63d534646116c3232456cd85f75e1a5a6405fa8862272a876eb1bc085c",
+    "P60": "c1bbd0985c180202ffe9691907c36b9fbd6536e11d85be8e70e487b1d2324c97"
+  },
+  "schema": "prism7-p56-p60-native-v20-0p75-rebuild-evidence-gate/v1",
+  "singleSlotP44OriginalFixed": {
+    "DDpct": 25.10029,
+    "NAVJPY": 14193.07,
+    "n": 33,
+    "wins": 18
+  },
+  "status": "RESEARCH_EVIDENCE_NO_ACCEPTED_NATIVE_CHANGE"
+}
