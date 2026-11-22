@@ -1618,8 +1618,21 @@ export class Quality102CausalV1Runner {
                 ? this.reconcilePending(state)
                 : this.manualReview(state, "Q102 pending phase is invalid.", state.pending.idempotencyKey);
 
-            const history = preloadedHistory ?? await this.dependencies.marketData.load();
+            // The H1 signal feed is required to open exposure, but a failed
+            // feed must not suppress a live position's resident STOP, quote-
+            // driven hard stop, trailing exit or shared-risk reduction.
+            let history: Quality102CausalV1History | undefined;
+            try {
+                history = preloadedHistory ?? await this.dependencies.marketData.load();
+            } catch (error) {
+                if (!state.position) throw error;
+                this.log.warn("Q102 existing-position H1 history unavailable; entry remains prohibited while quote-based risk exits continue.", {
+                    reason: error instanceof Error ? error.message : String(error),
+                    newOrdersAllowed: false,
+                });
+            }
             if (this.dependencies.config.mode === "SHADOW") {
+                if (!history) return { status: "blocked-local", message: "Q102_SHADOW_HISTORY_UNAVAILABLE", ordersSent: 0 };
                 const signal = this.buildSignal(history, this.now(), false, false);
                 state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
                 await this.dependencies.stateStore.save(state);
@@ -1670,7 +1683,11 @@ export class Quality102CausalV1Runner {
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };
                 await this.updateTrailingState(state, quote);
-                const adoptedReason = await this.updateAdoptedPolicyState(state, history, quote);
+                // Never synthesize a missing H1 confirmation. Native quote-
+                // based exits and existing venue STOP stay authoritative.
+                const adoptedReason = history
+                    ? await this.updateAdoptedPolicyState(state, history, quote)
+                    : undefined;
                 const reason = sharedRisk?.flattenExisting
                     ? "shared_risk_flatten"
                     : profitFloorReason || quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt) || adoptedReason;
@@ -1691,6 +1708,7 @@ export class Quality102CausalV1Runner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "blocked-local", message: sharedRisk.reason, ordersSent: 0 };
             }
+            if (!history) return { status: "blocked-local", message: "Q102_ENTRY_HISTORY_UNAVAILABLE", ordersSent: 0 };
             const baseSignal = this.buildSignal(history, this.now(), false, false, live.positions.some(nonZero));
             let signal = baseSignal;
             if (baseSignal.side !== 0 && baseSignal.symbol) {

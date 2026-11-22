@@ -7,12 +7,14 @@ import type {AsterV3Client,AsterBalanceRow,AsterPositionRiskRow,AsterOrderRespon
 import type {AccountLockHandle,FileAccountOrderLock} from "./disdex-account-order-lock";
 import {readPendingExposureRegistry,type PendingExposureRegistry} from "./disdex-pending-exposure-registry";
 import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4OrderIntent,type V4ProtectionPhase} from "./v12-v4-execution-store";
-import {V4SharedReservations,bindV4SharedDispatchGuards} from "./v12-v4-shared-reservations";
+import {V4SharedReservations,bindV4SharedDispatchGuards,hasFreshV4SharedAccountLedger} from "./v12-v4-shared-reservations";
+import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
+import {isV4LocalSlippageRejection,isV4LocalEntryRejection} from "./v12-v4-local-entry-rejection";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
-import {planV4RetiredStops} from "./v12-v4-stop-retirement";
+import {planV4RetiredStops,attestV4CompletedExitMissingStop} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {createV4FourRuleState,desiredV4FourRuleStop} from "./v12-v4-four-rule-policy";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput,type ExitDecision} from "./v12-v4-production-lifecycle";
@@ -20,6 +22,7 @@ import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import {classifyAsterRateBudgetFailure} from "./disdex-aster-rate-budget-policy";
+import {SharedKillSwitchActiveError} from "./disdex-shared-kill-switch";
 export type V4PreparedDecision =
  | {kind:"READY";preparedAtMs:number;decision:V4LiveDecisionSnapshot}
  | {kind:"FAILED";preparedAtMs:number;reason:string};
@@ -73,9 +76,13 @@ export function classifyV4MarketDataReadFailure(error:unknown,eventTs=Date.now()
 }
 export function classifyV4RecoverableExitFeedFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
  const reason=safeDecisionFailureReason(error);
- if(!/^V4_EXIT_FEED_(?:M5_)?GAP:/.test(reason))return;
- return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
-  candidateCount:0,orderEnabled:false};
+ if(/^V4_EXIT_FEED_(?:M5_)?GAP:/.test(reason))
+  return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
+   candidateCount:0,orderEnabled:false};
+ if(reason==="EXIT_NEXT_OPEN_MISSING"||reason==="NATIVE_NEXT_OPEN_REQUIRED")
+  return {status:"blocked",reason:"V4_EXIT_FEED_NEXT_OPEN_RETRY:"+reason,eventTs,
+   candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+ return;
 }
 /**
  * A planned exit that is older than the bounded execution window requires an
@@ -97,7 +104,7 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
 export interface V4RunnerDependencies{
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
- client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory">;
+ client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory"|"getOrder">;
  pendingRegistryPath:string;
  fetchDecision:()=>Promise<V4LiveDecisionSnapshot>;
  fetchExitFeed:(symbol:string,fromTs?:number,untilTs?:number)=>Promise<V4ExitFeed>;
@@ -261,6 +268,14 @@ export class V4RunnerEngine{
  }
  private async reconcileEntriesAndProtection(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
   const d=this.deps;
+  // Resume a crash between the atomic local rejection and shared release.
+  const rejectionDocument=d.store.read();
+  const rejected=Object.keys(rejectionDocument.intents).filter(cid=>isV4LocalEntryRejection(rejectionDocument,cid));
+  if(rejected.length){
+   const registry=await readPendingExposureRegistry(d.pendingRegistryPath);
+   for(const cid of rejected)if(registry.entries.some(row=>row.reservationId===cid&&row.status!=="RELEASED"))
+    await cycle.reservations.synchronize(cid);
+  }
   for(const snapshot of Object.values(d.store.read().intents).filter(isReconciliableV4EntryIntent)){
    let intent=d.store.read().intents[snapshot.clientOrderId];
    if(intent.stage==="PREPARED"){this.abandonPreparedEntry(intent.clientOrderId);continue;}
@@ -296,27 +311,20 @@ export class V4RunnerEngine{
    }
   }
  }
- private async underLease(lease:AccountLockHandle,prepared?:V4PreparedDecision):Promise<V4TickResult>{
-  const at=this.now(), d=this.deps;
-  const reserv=new V4SharedReservations(d.store,lease,d.pendingRegistryPath,this.now);
-  const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
-   bindV4SharedDispatchGuards(reserv,d.assertAuthority));
-  const cycle=new V4OrderCycle(d.store,dispatcher,reserv,d.client);
-  // Protection recovery runs before ordinary account/market reads. A newly
-  // reconciled ENTRY fill is never allowed to reach signal processing without
-  // first attempting to establish its resident STOP.
-  await this.reconcileEntriesAndProtection(dispatcher,cycle);
-  // Funding for an in-flight or stop-closed position must be signed and
-  // journalled before applying a venue close to the virtual owner.
-  await cycle.reconcileFundingUpTo(this.now());
-  await this.reconcileReductions(dispatcher,cycle);
-  // A partial ENTRY may have accumulated additional fills while reduction
-  // reconciliation was running. Re-evaluate exact STOP quantity/trigger.
-  await this.reconcileEntriesAndProtection(dispatcher,cycle);
-  let [positions,openOrders,balances,peers,registry]=await Promise.all([
-   d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
-   d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
-  ]);
+ private async refreshSignedAccountLedger():Promise<void>{
+  const d=this.deps;
+  let captured:number[]=[];
+  const signed=async<T>(read:()=>Promise<T>):Promise<T>=>{
+   const value=await read();captured.push(this.now());return value;
+  };
+  const readAccount=()=>{
+   captured=[];
+   return Promise.all([
+    signed(()=>d.client.getPositions()),signed(()=>d.client.getOpenOrders()),signed(()=>d.client.getBalances()),
+    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
+   ]);
+  };
+  let [positions,openOrders,balances,peers,registry]=await readAccount();
   // After a crash between signed EXIT fill and STOP cancellation, retire only
   // the proven CLOSED leg's reduce-only STOP while preserving all surviving
   // same-symbol virtual legs and their independently verified STOPs.
@@ -324,10 +332,7 @@ export class V4RunnerEngine{
    intents:d.store.read().intents,openOrders,positions});
   if(toRetire.length){
    for(const cid of toRetire)await d.adapter.cancel(cid);
-   const refreshed=await Promise.all([
-    d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
-    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
-   ]);
+   const refreshed=await readAccount();
    [positions,openOrders,balances,peers,registry]=refreshed;
    if(toRetire.some(cid=>openOrders.some(o=>o.clientOrderId===cid)))
     throw Error("V4_RETIRED_STOP_CANCEL_NOT_CONFIRMED");
@@ -350,17 +355,39 @@ export class V4RunnerEngine{
   const equityUsd=walletUsd+unrealizedUsd;
   if(!(equityUsd>0)||!Number.isFinite(Number(usdt?.availableBalance)))
    throw Error("V4_SIGNED_USDT_ACCOUNT_UNAVAILABLE");
-  const mark:V4SignedMark={capturedAt:this.now(),equityUsd,
+  const observedAt=this.now(),signedCapturedAt=Math.min(...captured);
+  if(captured.length!==3||signedCapturedAt>observedAt||observedAt-signedCapturedAt>V4_SIGNED_ACCOUNT_MAX_AGE_MS)
+   throw Error("V4_SIGNED_ACCOUNT_READ_WINDOW_STALE");
+  const mark:V4SignedMark={capturedAt:signedCapturedAt,equityUsd,
    positions:positions.map(p=>({symbol:String(p.symbol).toUpperCase(),
     quantity:Number(p.positionAmt),markPrice:Number(p.markPrice)}))};
   const base=d.store.read(),accountMark=buildV4AccountMark({sources:peers,venue:mark,
-   registry,state:base.state,expectedPeerSha:base.releaseSha,now:mark.capturedAt,
-   eventId:"signed-account:"+mark.capturedAt,peerLineageMode:d.peerLineageMode});
-  this.commitEvent(accountMark.event);
+   registry,state:base.state,expectedPeerSha:base.releaseSha,now:observedAt,
+   eventId:"signed-account:"+observedAt,peerLineageMode:d.peerLineageMode});
+  this.commitEvent(Object.assign(accountMark.event,{signedCapturedAt}));
   const current=d.store.read();
   // Each virtual leg must own exactly one signed Aster resident STOP. Merely
   // finding one symbol-level aggregate STOP misses unprotected sub-legs.
   verifyV4ResidentStops(current.state,current.intents,openOrders);
+ }
+ private async underLease(lease:AccountLockHandle,prepared?:V4PreparedDecision):Promise<V4TickResult>{
+  const at=this.now(), d=this.deps;
+  const reserv=new V4SharedReservations(d.store,lease,d.pendingRegistryPath,this.now);
+  const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
+   bindV4SharedDispatchGuards(reserv,d.assertAuthority));
+  const cycle=new V4OrderCycle(d.store,dispatcher,reserv,d.client);
+  // Protection recovery runs before ordinary account/market reads. A newly
+  // reconciled ENTRY fill is never allowed to reach signal processing without
+  // first attempting to establish its resident STOP.
+  await this.reconcileEntriesAndProtection(dispatcher,cycle);
+  // Funding for an in-flight or stop-closed position must be signed and
+  // journalled before applying a venue close to the virtual owner.
+  await cycle.reconcileFundingUpTo(this.now());
+  await this.reconcileReductions(dispatcher,cycle);
+  // A partial ENTRY may have accumulated additional fills while reduction
+  // reconciliation was running. Re-evaluate exact STOP quantity/trigger.
+  await this.reconcileEntriesAndProtection(dispatcher,cycle);
+  await this.refreshSignedAccountLedger();
   const exit=await this.processExitBars(dispatcher,cycle);
   if(exit)return exit;
   const afterExit=d.store.read();
@@ -370,7 +397,7 @@ export class V4RunnerEngine{
   // and protective STOP reconciliation. Never carry a pre-lock candidate across
   // an H2 boundary or a newly nonflat/unknown V4 state.
   const boundary=(ms:number)=>Math.floor(ms/7_200_000);
-  const stillFlat=Object.keys(d.store.read().intents).length===0&&
+  const stillFlat=Object.values(d.store.read().intents).every(intent=>intent.stage==="TERMINAL")&&
    Object.values(d.store.read().state.legs).every(leg=>leg.qty<=0&&leg.status!=="PENDING_ENTRY");
   const reusable=Boolean(prepared&&stillFlat&&prepared.preparedAtMs<=this.now()&&
    boundary(prepared.preparedAtMs)===boundary(this.now()));
@@ -381,8 +408,9 @@ export class V4RunnerEngine{
     eventTs:this.now(),candidateCount:0,orderEnabled:false};
   }
   let decision:V4LiveDecisionSnapshot;
+  const preparedDecision=reusable&&prepared?.kind==="READY"?prepared.decision:undefined;
   try{
-   decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
+   decision=preparedDecision??await d.fetchDecision();
   }catch(error){
    const readFailure=classifyV4MarketDataReadFailure(error,this.now(),d.store.read());
    if(readFailure)return readFailure;
@@ -399,6 +427,10 @@ export class V4RunnerEngine{
     eventTs:this.now(),candidateCount:0,orderEnabled:false};
   if(!decision.candidates.length)
    return {status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES",eventTs:this.now(),candidateCount:0,orderEnabled:false};
+  if(!preparedDecision||!hasFreshV4SharedAccountLedger(d.store.read(),this.now())){
+   await reserv.assertAccountLease();
+   await this.refreshSignedAccountLedger();
+  }
   return await this.tryCandidate(decision,dispatcher,cycle);
  }
  private async processExitBars(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle):Promise<V4TickResult|null>{
@@ -465,8 +497,13 @@ export class V4RunnerEngine{
    assertNet(beforePositions);
    const activeStops=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP"&&
     beforeOrders.some(o=>o.clientOrderId===i.clientOrderId));
-   if(activeStops.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
-   const stopCid=activeStops[0].clientOrderId;
+   if(activeStops.length>1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   const stopCid=activeStops[0]?.clientOrderId??after.protections[leg.id]?.stopClientOrderId;
+   if(!stopCid)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   if(activeStops.length===0){
+    const proof=await d.client.getOrder(leg.candidate.symbol,stopCid);
+    attestV4CompletedExitMissingStop({state:after.state,intents:after.intents,legId:leg.id,stopClientOrderId:stopCid,proof});
+   }
    const pendingRetire=planV4RetiredStops({state:after.state,intents:after.intents,
     openOrders:beforeOrders,positions:beforePositions});
    if(beforeOrders.some(o=>o.clientOrderId===stopCid)){
@@ -492,9 +529,18 @@ export class V4RunnerEngine{
   const d=this.deps,now=this.now();
   // Existing positions are reconciled and exited before this point. These
   // global controls gate new ENTRY only and therefore never strand protection.
-  await d.assertEntrySafety();
+  try{
+   await d.assertEntrySafety();
+  }catch(error){
+   if(!(error instanceof SharedKillSwitchActiveError))throw error;
+   return {status:"blocked",reason:error.message,eventTs:this.now(),
+    candidateCount:decision.candidateCount,orderEnabled:false};
+  }
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
+  const executionReview=d.store.read().state.executionReview;
+  if(executionReview)return {status:"blocked",reason:"V4_EXECUTION_REVIEW_REQUIRED:"+executionReview,
+   eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
   // A Production canary is deliberately one-entry-only. Historical durable
   // ENTRY intents remain the consumption marker even after the canary closes.
   if(d.canaryEntry&&Object.values(d.store.read().intents).some(i=>i.action==="ENTRY"))
@@ -525,7 +571,16 @@ export class V4RunnerEngine{
     quantityNormalizer:d.quantityNormalizer};
    // The natural candidate must be admissible under ordinary strategy/risk rules.
    // Canary mode changes only size, never route eligibility or ownership rules.
-   const ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});
+   let ordinaryPlan:Awaited<ReturnType<typeof planProductionEntry>>;
+   try{ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});}
+   catch(error){
+    const reason=error instanceof Error?error.message:String(error);
+    if(!["ENTRY_LIVE_OBSERVATION_EXPIRED","COOLDOWN","OPPOSITE_SYMBOL_ACTIVE","PREEMPT_CLOSE_FILL_REQUIRED","RECOVERY_ROUTE_SLOT_OCCUPIED",
+     "MIN_LIFT_BLOCKED","RECOVERY_FAMILY_GROSS_CAP","V12_GROSS_CAP","CRYPTO_GROSS_CAP","TOTAL_GROSS_CAP"].includes(reason))throw error;
+    // This boundary precedes durable intent preparation and every order send.
+    // A normal admission hold must not stop reconciliation of existing legs.
+    return {status:"blocked",reason:"V4_ENTRY_ADMISSION_HOLD:"+reason,eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+   }
    let plan=ordinaryPlan;
    if(d.canaryEntry){
     if(min>d.canaryEntry.maxNotionalUsd+1e-8)
@@ -542,10 +597,19 @@ export class V4RunnerEngine{
     symbol:candidate.symbol,positionSide:candidate.effectiveSide,
     quantity:plan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
    await d.assertAuthority(command);
+   if(!hasFreshV4SharedAccountLedger(d.store.read(),this.now()))
+    return {status:"blocked",reason:"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED",
+     eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
    this.commitEvent(plan);
    this.commitProtection(plan.leg.id,"ENTRY_PREPARED",0);
    const cid=dispatcher.prepare(command,this.now());
-   await dispatcher.submit(cid,this.now());
+   const submission=await dispatcher.submit(cid,this.now());
+   if(isV4LocalEntryRejection(d.store.read(),cid)){
+    await cycle.reservations.synchronize(cid);
+    const slippage=isV4LocalSlippageRejection(d.store.read(),cid);
+    return {status:slippage?"observing":"blocked",reason:slippage?"V4_ENTRY_SLIPPAGE_REJECTED":"V4_ENTRY_PRE_SUBMIT_REJECTED"+(submission&&"reason" in submission?":"+submission.reason:""),eventTs:this.now(),
+     candidateCount:decision.candidateCount,orderEnabled:false};
+   }
    this.commitProtection(plan.leg.id,"ENTRY_SENT",0);
    await cycle.reconcileEntry(cid,this.now());
    const proof=await dispatcher.reconcile(cid,this.now());

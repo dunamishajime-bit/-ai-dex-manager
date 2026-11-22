@@ -11,7 +11,18 @@ import {V4ExecutionStore,type V4ExecutionDocument} from "./v12-v4-execution-stor
 import type {V4DurableOrderCommand,V4DispatchGuards} from "./v12-v4-durable-orders";
 import {productionGross} from "./v12-v4-production-lifecycle";
 import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
+import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
+import {isV4LocalEntryRejection} from "./v12-v4-local-entry-rejection";
 export const V4_SHARED_OWNER="V12_V4";
+/** The journal append time cannot make an older signed response fresh. */
+export function hasFreshV4SharedAccountLedger(doc:V4ExecutionDocument,now:number):boolean{
+ const mark=[...doc.state.journal].reverse().find(x=>x.type==="ACCOUNT_MARK");
+ if(!mark||!Number.isFinite(now)||mark.ts>now)return false;
+ const signed=(mark as typeof mark&{signedCapturedAt?:unknown});
+ const capturedAt="signedCapturedAt" in signed?signed.signedCapturedAt:mark.ts;
+ return typeof capturedAt==="number"&&Number.isFinite(capturedAt)&&capturedAt>0&&
+  capturedAt<=mark.ts&&capturedAt<=now&&now-capturedAt<=V4_SIGNED_ACCOUNT_MAX_AGE_MS;
+}
 const active=(x:PendingExposureEntry)=>x.status!=="RELEASED";
 function bucket(symbol:string,side:string,crypto:boolean){return [symbol,side,crypto?"CRYPTO":"STOCK"].join("|");}
 // One complete registry read/write transaction at a time for a held account lease.
@@ -59,8 +70,7 @@ export class V4SharedReservations{
   if(intent.stage!=="PREPARED"||JSON.stringify(intent.command)!==JSON.stringify(command)||
     leg.status!=="PENDING_ENTRY"||leg.qty!==0||command.symbol!==leg.candidate.symbol||command.positionSide!==leg.candidate.effectiveSide||
     Math.abs(command.quantity-leg.requestedQty)>1e-12||command.signalTs!==leg.entryTs)throw Error("V4_SHARED_RESERVATION_COMMAND_CONFLICT");
-  const mark=[...doc.state.journal].reverse().find(x=>x.type==="ACCOUNT_MARK");
-  if(!mark||mark.ts>now||now-mark.ts>30000)throw Error("FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED");
+  if(!hasFreshV4SharedAccountLedger(doc,now))throw Error("FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED");
   if(doc.state.initial.holdProtected||doc.state.executionReview||doc.state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("V4_SHARED_RESERVATION_HOLD");
   const registry=await readPendingExposureRegistry(this.path);
   if(registry.accountScope!=="ASTER_FUTURES")throw Error("V4_SHARED_ACCOUNT_SCOPE_CONFLICT");
@@ -103,7 +113,7 @@ export class V4SharedReservations{
   if(intent.stage==="TERMINAL"){
    const terminal=doc.state.journal.find(x=>x.type==="ENTRY_TERMINAL"&&x.id===leg.id&&
     x.eventId==="venue-terminal:"+leg.candidate.symbol+":"+intent.venueOrderId);
-   if(!intent.venueOrderId||!terminal||leg.status==="PENDING_ENTRY"||leg.reservationUsd!==0)throw Error("VERIFIED_TERMINAL_FILL_JOURNAL_REQUIRED");
+   if(!isV4LocalEntryRejection(doc,cid)&&(!intent.venueOrderId||!terminal||leg.status==="PENDING_ENTRY"||leg.reservationUsd!==0))throw Error("VERIFIED_TERMINAL_FILL_JOURNAL_REQUIRED");
    if(row.status!=="RELEASED"){await releasePendingExposure(cid,this.path);await this.flush();}
    return;
   }

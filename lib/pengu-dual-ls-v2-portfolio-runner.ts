@@ -189,6 +189,18 @@ function validLiveAccount(account: DirectAccountSnapshot, now: number, maxAgeMs 
         && account.updatedAt <= now && now - account.updatedAt <= maxAgeMs;
 }
 
+/** Foreign open orders block entries globally, but a reduce-only exit only
+ * conflicts with a foreign order on its own symbol. Managed resident STOPs
+ * are filtered separately and must remain protected. */
+export function penguForeignOrderConflictsWithAction(
+    openOrders: readonly Pick<DirectOpenOrder, "symbol">[],
+    targetSymbol: string,
+    reduceOnly: boolean,
+): boolean {
+    if (!reduceOnly) return openOrders.length > 0;
+    return openOrders.some((order) => String(order.symbol).toUpperCase() === targetSymbol.toUpperCase());
+}
+
 function unmanagedCrossSleeveOpenOrders(
     openOrders: readonly DirectOpenOrder[],
     positions: readonly DirectPosition[],
@@ -763,7 +775,10 @@ export class PenguDualLsV2PortfolioRunner {
                 // never against the pre-request time.
                 now = this.now();
                 if (!validLiveAccount(account, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID");
-                if (unmanagedCrossSleeveOpenOrders(openOrders, positions).length > 0) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
+                const unmanagedOrders = unmanagedCrossSleeveOpenOrders(openOrders, positions);
+                if (penguForeignOrderConflictsWithAction(unmanagedOrders, SYMBOL, pending.reduceOnly)) {
+                    throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
+                }
                 const actual = actualPosition(positions);
                 if (pending.reduceOnly) {
                     if (!state.position || !actual || positionSide(actual) !== state.position.side || Math.abs(Math.abs(actual.quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.02)) {
@@ -887,7 +902,11 @@ export class PenguDualLsV2PortfolioRunner {
                 this.dependencies.executor.getOpenOrders(),
             ]);
             let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
-            if (quality102Ownership?.pending) {
+            // Another strategy's pending order is an ENTRY admission blocker,
+            // not permission to disable an already-protected PENGU exit.
+            // Existing PENGU positions are still reconciled against the venue
+            // and all same-symbol unmanaged orders remain strict conflicts.
+            if (quality102Ownership?.pending && !state.position) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
             }
@@ -945,13 +964,23 @@ export class PenguDualLsV2PortfolioRunner {
             }
             const protectionBlocked = await this.protectOrdinaryPosition(state);
             if (protectionBlocked) return protectionBlocked;
-            if (quality102OpenOrder) {
+            // Unmanaged PENGUUSDT orders may race a reduce-only close and are
+            // never bypassed. Orders on other symbols must not prevent an
+            // already-open PENGU position from evaluating protective exits.
+            const conflictingSameSymbolOrder =
+                penguForeignOrderConflictsWithAction(nonQuality102OpenOrders, SYMBOL, true)
+                || openOrders.some((order) => order.symbol === SYMBOL && quality102OwnsOrder(quality102Ownership, order));
+            if (state.position && conflictingSameSymbolOrder) {
+                await this.dependencies.stateStore.save(state);
+                return this.manualReview(state, "PENGU_EXIT_SAME_SYMBOL_UNKNOWN_ORDER_CONFLICT");
+            }
+            if (!state.position && quality102OpenOrder) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "Quality102 causal-v1 has an in-flight order; PENGU waits for reconciliation." };
             }
-            if (nonQuality102OpenOrders.length > 0) {
+            if (!state.position && nonQuality102OpenOrders.length > 0) {
                 await this.dependencies.stateStore.save(state);
-                return { status: "held", message: "PENGU Dual LS will not create an order while any account open order exists." };
+                return { status: "held", message: "PENGU Dual LS will not create an entry while any account unmanaged open order exists." };
             }
 
             let timedStopAction: PenguShortV20TimedStopAction | undefined;

@@ -1,0 +1,76 @@
+name: STABLE4 offline protected exit preparation (no LIVE cutover)
+
+on:
+  push:
+    branches:
+      - prep/stable4-exit-integration-20261123
+  pull_request:
+    branches:
+      - fix/stable4-v52-q102-safety-repair-20261120-candidate
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-exit-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install test toolchain without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify all pinned exit sources and prohibit LIVE claim
+        run: |
+          python3 scripts/ops/stable4_pre_live_exit_source_guard.py
+          python3 -m unittest -v tests/test_stable4_pre_live_exit_source_guard.py
+
+      - name: Verify TypeScript parity compilation
+        run: npx tsc --noEmit --pretty false
+
+      - name: Test V4 signed STOP, retirement, account freshness, recovery
+        run: |
+          node --import tsx --test --test-concurrency=1 \
+            tests/v12-v4-completed-exit-stop.test.ts \
+            tests/v12-v4-recoverable-safety.test.ts \
+            tests/v12-v4-monitor-only.test.ts \
+            tests/v12-v4-shared-reservations.test.ts \
+            tests/v12-v4-stop-retirement.test.ts \
+            tests/v12-v4-stop-fill-cycle.test.ts \
+            tests/v12-v4-resident-stop-owners.test.ts \
+            tests/v12-v4-venue-exit.test.ts \
+            tests/v12-v4-runner-engine.test.ts \
+            tests/v12-v4-recoverable-exit-feed-gap.test.ts \
+            tests/v12-v4-entry-safety.test.ts \
+            tests/v12-v4-execution-foundation.test.ts
+
+      - name: Test PENGU protected EXIT with foreign order
+        run: |
+          npx tsx scripts/pengu-existing-exit-foreign-order-gate-selftest.ts
+          npx tsx scripts/pengu-dual-ls-v2-selftest.ts
+
+      - name: Test Q102 protected STOP with unavailable H1
+        run: |
+          npx tsx scripts/q102-existing-exit-history-failclosed-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
+
+      - name: Test V52 existing exits during daily strategy-loss HOLD
+        run: |
+          python3 scripts/disdex-v52-existing-exit-latch-selftest.py
+          python3 -m py_compile scripts/disdex_v52_aster_only_legacy_engine.py
+
+      - name: Evidence is pre-LIVE only
+        run: |
+          echo "SOURCE_SAFETY_CHECKS_COMPLETE=TRUE"
+          echo "PRODUCTION_DEPLOYED=FALSE"
+          echo "REAL_ORDERS_SENT=0"
+          echo "OWNER_APPROVAL_OR_LIVE_TRADING_NOT_GRANTED=TRUE"
