@@ -1,0 +1,88 @@
+{
+  "P57FullTP1Pct": {
+    "M5DD": 29.21112,
+    "NAVYen": 7389.05,
+    "closed": 49,
+    "wins": 38
+  },
+  "P57FullTP2Pct": {
+    "M5DD": 19.28001,
+    "NAVYen": 9569.19,
+    "closed": 49,
+    "wins": 37
+  },
+  "P57FullTP3Pct": {
+    "M5DD": 18.50044,
+    "NAVYen": 10600.23,
+    "closed": 45,
+    "wins": 32
+  },
+  "P58Partial75PctAtFavorable3Pct": {
+    "M5DD": 19.24048,
+    "NAVYen": 11817.36,
+    "fixedClosed": 33,
+    "wins": 24
+  },
+  "P59NoProgressAfter12H": {
+    "M5DD": 17.55119,
+    "NAVYen": 13388.75,
+    "closed": 34,
+    "wins": 17
+  },
+  "P60ChronologicalEntryScoreWorseThanBaseInBothFolds": true,
+  "P61VerifiedBinanceFuturesUM": {
+    "asterOverlapOHLCVNotEquivalent": true,
+    "hoursPerCoin": 5424,
+    "nativeSource55Wins28": true,
+    "publishedSHA256ZipFiles": 16
+  },
+  "P62FrozenP44CrossVenue": {
+    "AsterSourceSelected21Wins19": true,
+    "BinanceExcluded41Wins21": true,
+    "BinanceSourceSelected14Wins7": true,
+    "gateFailedExternalDiscrimination": true
+  },
+  "adoption": "DO_NOT_PROMOTE_P44_OR_P57_P58_P59_P60",
+  "limitations": [
+    "Original53 are overlapping source natural intents, not independent production fills",
+    "Binance external source is not Aster venue or exactly comparable original Native53 executions",
+    "P44 was selected on already inspected Aster outcome data",
+    "M5 intrabar source STOP and funding, actual shared account DD not verified"
+  ],
+  "originalOneSlot33": {
+    "M5HighStressDDPct": 25.10029,
+    "NAVYen": 14193.07,
+    "feeBps": 30,
+    "gross": 0.75,
+    "wins": 18
+  },
+  "originalSourceNatural53": {
+    "favorable1To3PctButLoss": 5,
+    "favorable3PlusButLoss": 7,
+    "losses": 24,
+    "noFavorable1PctLosses": 12,
+    "wins": 29
+  },
+  "pinnedNativeV20SHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "productionOrdersStopsKillSwitchChanged": false,
+  "researchBranch": "research/prism7-p37-audit-20261122",
+  "researchNextGate": [
+    "Independent ASTER venue source period unavailable in prior study with market H1 M5 data and original pin native signal parity",
+    "Venue signed fills/orderbook and exact native STOP execution priority, funding, fees and price gap slippage",
+    "Multi-runner shared risk 0.75x capital DD with 10/30bps plus extra100bps stress",
+    "Prespecified causal market-regime and failed-rebound mechanism, not posthoc price thresholds",
+    "Independent chronological blind period, winner retention and NAV noninferiority to Native source"
+  ],
+  "schema": "prism7-p56-p62-pengu-native-v20-study-adoption-gate/v1",
+  "sourceSHA256": {
+    "P56": "b86e0cf2ba408543367e1adfe954de5bd7a403081b99fde1fe1dd1297fd4c86f",
+    "P57": "a8471606dc9b5dd0936c4459e10c83c1698c053b1fec029b2073a89a4eac4aec",
+    "P58": "c0a919fb3bc1627c5e4232baf9de95d9e1588ca29d6154d8b1ee7491f7e5a77d",
+    "P59": "c26d6a63d534646116c3232456cd85f75e1a5a6405fa8862272a876eb1bc085c",
+    "P60": "c1bbd0985c180202ffe9691907c36b9fbd6536e11d85be8e70e487b1d2324c97",
+    "P61_NATIVE": "092aeb6564aac9d6618119ef17450441979445ad362a1db338bc518276de36da",
+    "P61_SOURCE": "895ee1801fd0ee84e71d3b4215fa156427579c374c3f83ea5526aafa8ea6e9e3",
+    "P62": "978e1e03ee936d01bf3a9a13c0082282cc16e362171b18c8a387622cab852aa3"
+  },
+  "status": "COMPLETE_RESEARCH_NO_VALIDATED_ADOPTION"
+}
