@@ -1,0 +1,77 @@
+{
+  "OR15min": {
+    "note": "Outcome after 15min not proof that waiting 15min improves causal strategy. Early entry opportunities lost and historical data inspected.",
+    "selected": 30
+  },
+  "ORvsBinance5minSlotSubstitution": {
+    "BinanceOnlyModeTradesLostByORPriority": [
+      "BINANCE_ONLY|1761681600000",
+      "BINANCE_ONLY|1766062800000",
+      "BINANCE_ONLY|1775167200000",
+      "BOTH_AGREE|1762232400000",
+      "BOTH_AGREE|1779998400000"
+    ],
+    "selectedOnlyInBinance": 5,
+    "selectedOnlyInOR": 11,
+    "sharedSelected": 21
+  },
+  "P83SimulatorSourceAndReportSHA256": {
+    "fullP83Source": "9107288a3b5957f9dea8ee9f3a770729d3635d313884ecf0ee072e54ccafa155",
+    "portable": "4f877b9a209ff814914514405f24feb4f0c8d34cef664aa77248b20104e2c260"
+  },
+  "decision": "Owner OR entry intent is implemented as research counterfactual. Not yet better than Binance-only in default 5min model. Future priority comparison/policy cannot be selected from post-hoc historical 15min peak.",
+  "fee30bps_5min_lat_M5_native_Stop": {
+    "ASTER_ONLY": {
+      "M5HighDDPct": 17.472907,
+      "NAVJPY": 15668.14,
+      "extra100bpsDD": 19.487936,
+      "extra100bpsNAVJPY": 12784.9,
+      "selected": 29,
+      "selectedSignalCategories": {
+        "ASTER_ONLY": 13,
+        "BOTH_AGREE": 16
+      },
+      "wins": 18
+    },
+    "BINANCE_ONLY": {
+      "M5HighDDPct": 13.019858,
+      "NAVJPY": 16940.7,
+      "extra100bpsDD": 14.316468,
+      "extra100bpsNAVJPY": 14159.67,
+      "selected": 26,
+      "selectedSignalCategories": {
+        "BINANCE_ONLY": 9,
+        "BOTH_AGREE": 17
+      },
+      "wins": 16
+    },
+    "BOTH_REQUIRED": {
+      "M5HighDDPct": 10.660623,
+      "NAVJPY": 15085.26,
+      "extra100bpsDD": 12.251662,
+      "extra100bpsNAVJPY": 13231.66,
+      "selected": 19,
+      "selectedSignalCategories": {
+        "BOTH_AGREE": 19
+      },
+      "wins": 12
+    },
+    "EITHER_OR_SINGLE_ASTER_ORDER": {
+      "M5HighDDPct": 16.532208,
+      "NAVJPY": 16131.5,
+      "extra100bpsDD": 19.077361,
+      "extra100bpsNAVJPY": 12906.28,
+      "selected": 32,
+      "selectedSignalCategories": {
+        "ASTER_ONLY": 11,
+        "BINANCE_ONLY": 6,
+        "BOTH_AGREE": 15
+      },
+      "wins": 19
+    }
+  },
+  "jointNativeCandidates": "53 Aster + 57 Binance - 27 exact same hour = 83 unique",
+  "nextValidation": "Unseen new ASTER period with same-time Binance candles, timestamped orderbook feasible bid/ask, network latency and 0/5/15min M5 price; native signed STOP & Shared gross.",
+  "noLiveChanges": true,
+  "owner": "OR either ASTER or Binance signal => exactly one ASTER order"
+}
