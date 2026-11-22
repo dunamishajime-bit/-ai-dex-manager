@@ -1,0 +1,1056 @@
+{
+  "schema": "p107-stable4-full-parity-exclusion-audit/v1",
+  "status": "P107_NOT_FULL_PARITY",
+  "asof_date": "2026-11-22",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "current_pins_observed_on_VPS": {
+    "V4": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+    "PENGU": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+    "Q102": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+    "V52": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+    "HYPE": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+    "FET": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "IDLE": "7688ed7c93a1918d8b44837339b7da5584a868f5"
+  },
+  "scenario_checks": [
+    {
+      "case": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111",
+      "manifest_sha256": "53589d9e5c3bd6ddee9655b589af41d1e0d0ca5be8467157e237c5fbd649a302",
+      "declared_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+      "period": [
+        "2025-10-01T00:00:00Z",
+        "2026-10-01T00:00:00Z"
+      ],
+      "research_caveats": [
+        "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+        "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+        "IDLE direction candidates excluded because no adopted LONG exit contract",
+        "PENGU unchanged because no strict causal separator survived",
+        "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+      ],
+      "runs": [
+        {
+          "bps": 10,
+          "manifest_final_jpy": 887336.0597493979,
+          "manifest_max_drawdown_pct": -56.31352272678358,
+          "manifest_win_rate_pct": 57.35567970204841,
+          "manifest_fills": 537,
+          "observed_fills": 537,
+          "fills_count_match": true,
+          "source_intents": 2811,
+          "decisions_rows": 2811,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 538,
+            "BLOCK": 2273
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 47,
+            "IDLE": 106,
+            "PENGU": 63,
+            "Q102": 106,
+            "V4": 131,
+            "V52": 76
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 107,
+            "V52": 76,
+            "V4": 131,
+            "PENGU": 63,
+            "IDLE": 106,
+            "HYPE": 47,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 76,
+            "Q102": 106,
+            "V4": 131,
+            "HYPE": 47
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "PINNED_HYPE_HARD_STOP": 34,
+            "PINNED_HYPE_TAKE_PROFIT": 13
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 76
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 76,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 300,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 161
+          },
+          "missing_real_order_id_count": 537,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 1185,
+          "v4_dd21_manifest_count": 1185,
+          "funding_event_rows": 2773,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_FILLS.csv": "63275c38f59fdebe99407ba9ac2cba23cc472151a7a0af47b6020caf58034828",
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "0d84ef051eb1b0971c7f8e54bbe19d9ce39d17be3ed1174815ef23caf44ca1d3",
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_FUNDING.csv": "a08496640b7e29578c3b54c3dbdeb1ae577d389e5d55c579b083b3e21a0fde1e"
+          },
+          "research_only_not_full_live_pin_parity": true
+        },
+        {
+          "bps": 30,
+          "manifest_final_jpy": 321161.9638593054,
+          "manifest_max_drawdown_pct": -63.195789231699905,
+          "manifest_win_rate_pct": 56.23836126629422,
+          "manifest_fills": 537,
+          "observed_fills": 537,
+          "fills_count_match": true,
+          "source_intents": 2811,
+          "decisions_rows": 2811,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 538,
+            "BLOCK": 2273
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 47,
+            "IDLE": 107,
+            "PENGU": 62,
+            "Q102": 107,
+            "V4": 130,
+            "V52": 76
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 108,
+            "V52": 76,
+            "V4": 130,
+            "PENGU": 62,
+            "IDLE": 107,
+            "HYPE": 47,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 76,
+            "Q102": 107,
+            "V4": 130,
+            "HYPE": 47
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "PINNED_HYPE_HARD_STOP": 34,
+            "PINNED_HYPE_TAKE_PROFIT": 13
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 76
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 76,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 299,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 162
+          },
+          "missing_real_order_id_count": 537,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 1185,
+          "v4_dd21_manifest_count": 1185,
+          "funding_event_rows": 2780,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_FILLS.csv": "f007adf8045a43446c2140c46b761968750cf0de8cce5c6b86a6d6fe5f6c6521",
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "1d6bae080753959b7371274c519fed9b6a52f7b565fac77f00de999980b189b8",
+            "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_FUNDING.csv": "9515c20b569d34ad6527f917944027ef59603e144898c26cf7da95a84a246305"
+          },
+          "research_only_not_full_live_pin_parity": true
+        }
+      ],
+      "parity": false
+    },
+    {
+      "case": "STABLE4_OPPORTUNITY_PROD_CAPS_20261114",
+      "manifest_sha256": "55e6756a30c1d08f4e5cdbef1c40297de145015b800af96c6e630bcc95612fa2",
+      "declared_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+      "period": [
+        "2025-10-01T00:00:00Z",
+        "2026-10-01T00:00:00Z"
+      ],
+      "research_caveats": [
+        "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+        "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+        "IDLE direction candidates excluded because no adopted LONG exit contract",
+        "PENGU unchanged because no strict causal separator survived",
+        "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+      ],
+      "runs": [
+        {
+          "bps": 10,
+          "manifest_final_jpy": 12442421.055039534,
+          "manifest_max_drawdown_pct": -22.5950788661174,
+          "manifest_win_rate_pct": 63.1937682570594,
+          "manifest_fills": 1027,
+          "observed_fills": 1027,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 1028,
+            "BLOCK": 1043
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 5,
+            "IDLE": 10,
+            "PENGU": 45,
+            "Q102": 106,
+            "V4": 801,
+            "V52": 52
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 107,
+            "PENGU": 45,
+            "V52": 52,
+            "V4": 801,
+            "IDLE": 10,
+            "HYPE": 5,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 52,
+            "Q102": 106,
+            "V4": 801,
+            "HYPE": 5
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 3,
+            "FORMAL_PRIORITY": 2
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 952,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 21,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "missing_real_order_id_count": 1027,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 206,
+          "v4_dd21_manifest_count": 206,
+          "funding_event_rows": 3445,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv": "279984fd33983c4e9888635a7e987853489990af6aade272a70a2efb16d6afe9",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "731bd729cb219d9e2aae9a2afd0df6ec4eaa5f85bac1a2b7840a2712788969f1",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FUNDING.csv": "3867dfbafcd11b05b02db4dbfdc661aa2258c8dee89333ff5353e9879a88d90c"
+          },
+          "research_only_not_full_live_pin_parity": true
+        },
+        {
+          "bps": 30,
+          "manifest_final_jpy": 4660537.640054364,
+          "manifest_max_drawdown_pct": -23.219482096692147,
+          "manifest_win_rate_pct": 60.410557184750736,
+          "manifest_fills": 1023,
+          "observed_fills": 1023,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 1024,
+            "BLOCK": 1047
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 5,
+            "IDLE": 11,
+            "PENGU": 44,
+            "Q102": 106,
+            "V4": 797,
+            "V52": 52
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 107,
+            "PENGU": 44,
+            "V52": 52,
+            "V4": 797,
+            "IDLE": 11,
+            "HYPE": 5,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 52,
+            "Q102": 106,
+            "V4": 797,
+            "HYPE": 5
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 3,
+            "FORMAL_PRIORITY": 2
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 52,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 947,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 22,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "missing_real_order_id_count": 1023,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 209,
+          "v4_dd21_manifest_count": 209,
+          "funding_event_rows": 3435,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv": "2a86adb0387d78f92173a18409afca873273c2d55ed7502108eeeda550efdd84",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "2e4d771b85493baeded1506399aa3859e497059d734d4171bde4ef3b1296352e",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FUNDING.csv": "e2f0f97ee7bf7913e6a75dda57912d34e771276f87247a87cb7cbbdbde2342fd"
+          },
+          "research_only_not_full_live_pin_parity": true
+        }
+      ],
+      "parity": false
+    },
+    {
+      "case": "STABLE4_NORMALGROSS_3P5_V4_475_EXPLORATORY_20261116_V2",
+      "manifest_sha256": "0fea015ecf14b8c8d673aac7c0e81cb61ccdde0cd22d80655de10bcfc5eca5ba",
+      "declared_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+      "period": [
+        "2025-10-01T00:00:00Z",
+        "2026-10-01T00:00:00Z"
+      ],
+      "research_caveats": [
+        "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+        "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+        "IDLE direction candidates excluded because no adopted LONG exit contract",
+        "PENGU unchanged because no strict causal separator survived",
+        "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+      ],
+      "runs": [
+        {
+          "bps": 10,
+          "manifest_final_jpy": 11093070.70250459,
+          "manifest_max_drawdown_pct": -21.571152025921158,
+          "manifest_win_rate_pct": 64.22250316055626,
+          "manifest_fills": 791,
+          "observed_fills": 791,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 792,
+            "BLOCK": 1279
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 8,
+            "IDLE": 34,
+            "PENGU": 46,
+            "Q102": 113,
+            "V4": 498,
+            "V52": 84
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 114,
+            "PENGU": 46,
+            "V52": 84,
+            "V4": 498,
+            "IDLE": 34,
+            "HYPE": 8,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 84,
+            "Q102": 113,
+            "V4": 498,
+            "HYPE": 8
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 7,
+            "FORMAL_PRIORITY": 1
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 657,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 49,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "missing_real_order_id_count": 791,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 683,
+          "v4_dd21_manifest_count": 683,
+          "funding_event_rows": 2871,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv": "90fe852ecece8a912bde99fe653451179ddb8e33b4c0fdd0ee295af88de4ce30",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "9564866aa5acceb2107e04d47a14918b930034835addd2e995357f6dfd6d0605",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FUNDING.csv": "24bb601eb116e6ba90e6097fbe2c235ea3533bb0bb12cd68b65061646fad1efb"
+          },
+          "research_only_not_full_live_pin_parity": true
+        },
+        {
+          "bps": 30,
+          "manifest_final_jpy": 4187854.708665395,
+          "manifest_max_drawdown_pct": -22.281590510182504,
+          "manifest_win_rate_pct": 61.97718631178707,
+          "manifest_fills": 789,
+          "observed_fills": 789,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 790,
+            "BLOCK": 1281
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 8,
+            "IDLE": 34,
+            "PENGU": 45,
+            "Q102": 113,
+            "V4": 497,
+            "V52": 84
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 114,
+            "PENGU": 45,
+            "V52": 84,
+            "V4": 497,
+            "IDLE": 34,
+            "HYPE": 8,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 84,
+            "Q102": 113,
+            "V4": 497,
+            "HYPE": 8
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 7,
+            "FORMAL_PRIORITY": 1
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 655,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 49,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "missing_real_order_id_count": 789,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 683,
+          "v4_dd21_manifest_count": 683,
+          "funding_event_rows": 2870,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv": "d49bb0652bcbe7e7a279c4dfc21ad23f7e5dc1c2a6eb094cae77134c9458fff0",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "278c11fa3c0f58e912903c5341726d8e5208ec6b62efa94242685a5004a2ca0f",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FUNDING.csv": "ec4803aa327b054768fa2c242896825104ad37a73ce9e3adb78948f40556100c"
+          },
+          "research_only_not_full_live_pin_parity": true
+        }
+      ],
+      "parity": false
+    },
+    {
+      "case": "STABLE4_GROSS425_V4_475_L3_Q102_DUALH48_RESEARCH_20261116_V1",
+      "manifest_sha256": "36229cf7f8b399339e09fc6c0c3c6a74a219f91e84324313f460a41eadcff7a2",
+      "declared_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+      "period": [
+        "2025-10-01T00:00:00Z",
+        "2026-10-01T00:00:00Z"
+      ],
+      "research_caveats": [
+        "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+        "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+        "IDLE direction candidates excluded because no adopted LONG exit contract",
+        "PENGU unchanged because no strict causal separator survived",
+        "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+      ],
+      "runs": [
+        {
+          "bps": 10,
+          "manifest_final_jpy": 13541227.416992147,
+          "manifest_max_drawdown_pct": -21.571152025921148,
+          "manifest_win_rate_pct": 63.899371069182386,
+          "manifest_fills": 795,
+          "observed_fills": 795,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 796,
+            "BLOCK": 1275
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 8,
+            "IDLE": 35,
+            "PENGU": 47,
+            "Q102": 117,
+            "V4": 496,
+            "V52": 84
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 118,
+            "PENGU": 47,
+            "V52": 84,
+            "V4": 496,
+            "IDLE": 35,
+            "HYPE": 8,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 84,
+            "Q102": 117,
+            "V4": 496,
+            "HYPE": 8
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 7,
+            "FORMAL_PRIORITY": 1
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 660,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 50,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "missing_real_order_id_count": 795,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 683,
+          "v4_dd21_manifest_count": 683,
+          "funding_event_rows": 2878,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv": "cd492d4c847f812b6fd89711a8d86ce3f5ecb6b307e140ea6f52f17ac69a8676",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "644f9f8617c8b18103b87dda25600550040929661d03756ac62ccc88e48671a9",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FUNDING.csv": "8373b3436e0e7d0c867ef9afb140d1049b058f57d33809f80c86ffdc3593f322"
+          },
+          "research_only_not_full_live_pin_parity": true
+        },
+        {
+          "bps": 30,
+          "manifest_final_jpy": 4923411.540923881,
+          "manifest_max_drawdown_pct": -22.281590510182536,
+          "manifest_win_rate_pct": 61.820480404551205,
+          "manifest_fills": 791,
+          "observed_fills": 791,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 792,
+            "BLOCK": 1279
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 8,
+            "IDLE": 34,
+            "PENGU": 46,
+            "Q102": 117,
+            "V4": 494,
+            "V52": 84
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 118,
+            "PENGU": 46,
+            "V52": 84,
+            "V4": 494,
+            "IDLE": 34,
+            "HYPE": 8,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 84,
+            "Q102": 117,
+            "V4": 494,
+            "HYPE": 8
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 7,
+            "FORMAL_PRIORITY": 1
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 84,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 657,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 49,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "missing_real_order_id_count": 791,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 683,
+          "v4_dd21_manifest_count": 683,
+          "funding_event_rows": 2876,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv": "6d884fe3d200faf9715a0bd4f8f5531550d3ce443cd273d38a89380aeb764f24",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "620c802b5473be2d256a787056930992934c6096bce80a4cb08a008a01ecd444",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FUNDING.csv": "32c7b89e19d7d9d95b5e8942cd6077561f55fad2373c09ed0057a5d3132af484"
+          },
+          "research_only_not_full_live_pin_parity": true
+        }
+      ],
+      "parity": false
+    },
+    {
+      "case": "DD_STUDY_EXIT_INDEPENDENT_STOCK15_TOTAL35_V52_100_20261121",
+      "manifest_sha256": "e54f847351dcbff97bd7c62b048c731ba9ab45ab82a7cb1b20e30fb843d7a411",
+      "declared_status": "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+      "period": [
+        "2025-10-01T00:00:00Z",
+        "2026-10-01T00:00:00Z"
+      ],
+      "research_caveats": [
+        "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+        "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+        "IDLE direction candidates excluded because no adopted LONG exit contract",
+        "PENGU unchanged because no strict causal separator survived",
+        "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+      ],
+      "runs": [
+        {
+          "bps": 10,
+          "manifest_final_jpy": 15052838.88951262,
+          "manifest_max_drawdown_pct": -23.188789650870735,
+          "manifest_win_rate_pct": 64.0,
+          "manifest_fills": 1075,
+          "observed_fills": 1075,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 1076,
+            "BLOCK": 995
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 5,
+            "IDLE": 18,
+            "PENGU": 47,
+            "Q102": 107,
+            "V4": 803,
+            "V52": 87
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 108,
+            "PENGU": 47,
+            "V52": 87,
+            "V4": 803,
+            "IDLE": 18,
+            "HYPE": 5,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 87,
+            "Q102": 107,
+            "V4": 803,
+            "HYPE": 5
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 3,
+            "FORMAL_PRIORITY": 2
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 87,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 87,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 957,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 29,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 2
+          },
+          "missing_real_order_id_count": 1075,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 206,
+          "v4_dd21_manifest_count": 206,
+          "funding_event_rows": 3579,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FILLS.csv": "312ccf0235f778d9f639ce72fb4c1726f6a60c79476f9622aceb9d601525341d",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "6c5bed1a6efb72baa4ad69b8830a435d94ab2dbab06f5e419956ab024257fa32",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_10BPS_FUNDING.csv": "b7e8123d31789487874cd410ecba65106d6d1257c6483942e3366d8362bb9d90"
+          },
+          "research_only_not_full_live_pin_parity": true
+        },
+        {
+          "bps": 30,
+          "manifest_final_jpy": 2626290.4034784655,
+          "manifest_max_drawdown_pct": -21.293398764910698,
+          "manifest_win_rate_pct": 61.76836861768369,
+          "manifest_fills": 803,
+          "observed_fills": 803,
+          "fills_count_match": true,
+          "source_intents": 2071,
+          "decisions_rows": 2071,
+          "decisions_count_by_outcome": {
+            "MODEL_ENTER": 804,
+            "BLOCK": 1267
+          },
+          "modeled_fills_by_runner": {
+            "FET": 8,
+            "HYPE": 8,
+            "IDLE": 38,
+            "PENGU": 47,
+            "Q102": 118,
+            "V4": 497,
+            "V52": 87
+          },
+          "manifest_admitted_by_runner": {
+            "Q102": 119,
+            "PENGU": 47,
+            "V52": 87,
+            "V4": 497,
+            "IDLE": 38,
+            "HYPE": 8,
+            "FET": 8
+          },
+          "distinct_source_sha_by_runner": {
+            "FET": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "HYPE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "IDLE": [
+              "7688ed7c93a1918d8b44837339b7da5584a868f5"
+            ],
+            "PENGU": [
+              "1657e173d250ad58f53e62f7bb0a3428fb405496"
+            ],
+            "Q102": [
+              "ef1ab178e26a7bf5bddb6473467765edba242e1d"
+            ],
+            "V4": [
+              "53a0be396719f0284af4e11b35c66a4ac7d58f79"
+            ],
+            "V52": [
+              "8495daf24e53a6cf0dd5e38f022008fa8f78c688"
+            ]
+          },
+          "fills_not_matching_VPS_current_pin_by_runner": {
+            "V52": 87,
+            "Q102": 118,
+            "V4": 497,
+            "HYPE": 8
+          },
+          "runtime_sha_mismatch_runners": [
+            "HYPE",
+            "Q102",
+            "V4",
+            "V52"
+          ],
+          "HYPE_exit_reasons": {
+            "HYPE_REDESIGN_TIME48_NEXTOPEN": 7,
+            "FORMAL_PRIORITY": 1
+          },
+          "V52_model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 87,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "model_classes": {
+            "V52_H1_BASIS_PRICE_ONLY": 87,
+            "PINNED_ENTRY_H1_APPROX_EXIT": 662,
+            "PINNED_ENTRY_M5_PRICE_EXIT": 53,
+            "PRIORITY_PREEMPT_M5_H1_QUOTE_PROXY": 1
+          },
+          "missing_real_order_id_count": 803,
+          "signed_verified_fills_count": 0,
+          "missing_exit_utc_count": 0,
+          "v4_dd21_decision_rows": 673,
+          "v4_dd21_manifest_count": 673,
+          "funding_event_rows": 2917,
+          "ledger_sha256": {
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FILLS.csv": "b2cef54988307d754d3a8ce795db34ad4fe7e3090d3adfd06d6a7ff9b2d55385",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "f197665dfe45dcbcb4c5c0fed46784b170d1153d5a8c8d81433601da09578b3a",
+            "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_30BPS_FUNDING.csv": "a4ae532deaa1d42f37c2fbf056363e4b5b874a22ddd2827093568502ab6fc5d8"
+          },
+          "research_only_not_full_live_pin_parity": true
+        }
+      ],
+      "parity": false
+    }
+  ],
+  "passing_current_production_exact_entry_exit_fills_shared_risk_gross_h48_dd21": false,
+  "production_changed": false,
+  "orders_sent": 0,
+  "required_next_gate": "Full source-native engine on current pinned SHA for all routes, H48 policy proof, exact orders/STOP/Funding/Aster venue model, daily Gross/Shared Risk/HOLD chronological fill replay"
+}
+
