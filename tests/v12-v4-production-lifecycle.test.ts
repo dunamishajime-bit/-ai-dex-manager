@@ -151,10 +151,10 @@ test("reversal preemption waits for actual closes and cannot delete an opposing 
  assert.equal(state.legs[r.leg.id].status,"PENDING_ENTRY");
  assert.equal(state.legs[r.leg.id].reservationUsd,100);
 });
-test("DD21 is a research measurement, not a live entry kill switch",async()=>{
+test("DD30 remains a shared ENTRY reservation gate, not a pure lifecycle planner stop",async()=>{
  let state=createProductionState(initial);
- state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:780,prices:{}});
- assert.ok(state.maxDrawdown>0.21);
+ state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:690,prices:{}});
+ assert.ok(state.maxDrawdown>0.30);
  const r=await reserve(state);
  assert.doesNotThrow(()=>applyProductionEvent(state,r));
 });

@@ -40,10 +40,15 @@ test("fresh pending gross uses refreshed equity rather than startup equity",asyn
  await assert.rejects(()=>plan(state),/CRYPTO_GROSS_CAP/);
 });
 
-test("DD21 is a research benchmark and does not block live entry by itself",async()=>{
+test("DD30 entry boundary is enforced by shared reservation, not by raw planProductionEntry",async()=>{
  let state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false});
  state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"within-dd-limit",ts:T,equityUsd:795,prices:{}});
  await plan(state);
  state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"over-dd-limit",ts:T,equityUsd:789,prices:{}});
+ await assert.doesNotReject(()=>plan(state));
+ state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"over-v4-dd30",ts:T,equityUsd:690,prices:{}});
+ assert.ok(state.maxDrawdown>0.30);
+ // The shared durable reservation, tested independently, enforces DD30.
+ // This pure planning function must not claim order authority.
  await assert.doesNotReject(()=>plan(state));
 });

@@ -10,6 +10,7 @@ import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent} from "../lib/v12-v4-ex
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {readPendingExposureRegistry,upsertPendingExposure} from "../lib/disdex-pending-exposure-registry";
 import {V4SharedReservations} from "../lib/v12-v4-shared-reservations";
+import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 async function setup(withSecond=false){
  const dir=mkdtempSync(join(tmpdir(),"v4-shared-")),pending=join(dir,"pending.json"),lockPath=join(dir,"account.lock"),sha="a".repeat(40);
  const at=Date.now(),ts=Math.floor(at/HOUR)*HOUR;
@@ -127,4 +128,38 @@ test("concurrent managers sharing one account lease preserve both reservations",
  const rows=(await readPendingExposureRegistry(x.pending)).entries;
  assert.equal(rows.length,2);assert.equal(rows.reduce((n,row)=>n+row.notionalUsd,0),1000);
  }finally{await x.handle.release();rmSync(x.dir,{recursive:true,force:true});}
+});
+
+
+test("DD30 adopted: V4 accepts below/at 30%, blocks above 30%, without touching existing STOPs",async()=>{
+ assert.equal(V12_V4_MAXIMUM_DRAWDOWN,0.30);
+ for(const vector of [
+  {equityUsd:790,dd:0.21,blocked:false},
+  {equityUsd:701,dd:0.299,blocked:false},
+  {equityUsd:700,dd:0.30,blocked:false},
+  {equityUsd:699,dd:0.301,blocked:true},
+  {equityUsd:680,dd:0.32,blocked:true},
+ ]){
+  const x=await setup();
+  try{
+   const prior=x.store.read();
+   const next=applyProductionEvent(prior.state,{
+    type:"ACCOUNT_MARK",eventId:"dd30-adverse-account-"+vector.equityUsd,
+    ts:x.at+1,equityUsd:vector.equityUsd,prices:{},foreign:[]
+   });
+   assert.ok(Math.abs(next.maxDrawdown-vector.dd)<1e-10);
+   x.store.commit(prior.revision,{...prior,state:next});
+   const governor=new V4SharedReservations(x.store,x.handle,x.pending,()=>x.at+2);
+   if(vector.blocked){
+    await assert.rejects(()=>governor.reserve(x.cid,x.command),/V4_SHARED_RESERVATION_HOLD/);
+    assert.equal((await readPendingExposureRegistry(x.pending)).entries.length,0);
+   }else{
+    const row=await governor.reserve(x.cid,x.command);
+    assert.equal(row.reservationId,x.cid);
+   }
+  }finally{
+   await x.handle.release();
+   rmSync(x.dir,{recursive:true,force:true});
+  }
+ }
 });

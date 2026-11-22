@@ -29,6 +29,18 @@ class Stable4ExitGuardTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "STABLE4_PINNED_SOURCE_CHANGED"):
             module.assert_pre_live_source(ROOT, x)
 
+    def test_dd30_without_manifest_authority_fails_closed(self):
+        x = copy.deepcopy(MANIFEST)
+        x["adoptedTargetRiskContract"]["v4EntryDdHoldThreshold"] = 0.21
+        with self.assertRaisesRegex(AssertionError, "STABLE4_V4_DD30_CONTRACT_UNPROVEN"):
+            module.assert_pre_live_source(ROOT, x)
+
+    def test_dd30_cannot_weaken_stop_or_global_hold(self):
+        x = copy.deepcopy(MANIFEST)
+        x["adoptedTargetRiskContract"]["existingStopExitRulesUnchanged"] = False
+        with self.assertRaisesRegex(AssertionError, "STABLE4_DD30_MUST_NOT_WEAKEN_PROTECTION"):
+            module.assert_pre_live_source(ROOT, x)
+
     def test_unauthorized_live_flag_fails_closed(self):
         x = copy.deepcopy(MANIFEST)
         x["liveOrderAuthorizationGranted"] = True

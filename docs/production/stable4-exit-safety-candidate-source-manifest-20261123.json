@@ -40,12 +40,6 @@
     "Q102_B8D": "AUTO_RESTART",
     "SHARED_2737": "RUNNING"
   },
-  "unchangedResearchRiskContract": {
-    "v4DdHoldThreshold": 0.21,
-    "cryptoGrossCap": 3.0,
-    "totalGrossCap": 4.25,
-    "sharedCryptoDailyLossPct": 7.5
-  },
   "expectedSourceNormalizedSha256": {
     "lib/v12-v4-runner-engine.ts": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
     "lib/v12-v4-venue-exit.ts": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd",
@@ -56,7 +50,7 @@
     "lib/disdex-quality102-causal-v1-runner.ts": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2",
     "lib/pengu-dual-ls-v2-portfolio-runner.ts": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a",
     "scripts/disdex_v52_aster_only_legacy_engine.py": "df0adba284c1aa3af26e6f8e06e4349c3155326831902abd4e6a469b1937fe9c",
-    "config/v12V4AdoptionRiskPolicy.ts": "d550cfbc44601300dd29d6a67400a36d8cff29fd61b601155eb920be7b68b0bf",
+    "config/v12V4AdoptionRiskPolicy.ts": "97ddd1beef1e75f1a38b2f62b436a45b8e59c6b95d0e936f720b854e9260f672",
     "config/integratedProductionRiskPolicy.ts": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
     "config/sharedCryptoRiskPolicy.ts": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
     "lib/fet-brk48-live-runner.ts": "3149db499dd7b7912569c89d347da652fb38e471b391f80208f4cd819b0e9394",
@@ -70,8 +64,27 @@
     "IDLE extra independent RENDER handling in candidate; do not enable without independent certified approval",
     "historical candidate Margin Guard/Q102 auto restart processes require explicit Codex/operator resolution",
     "H48 and full STABLE4 BT-to-runtime economic matching not yet independently certified",
-    "stock historical L2/quote receipts not validated for historic V52 fill parity"
+    "stock historical L2/quote receipts not validated for historic V52 fill parity",
+    "Owner 2026-11-23 explicitly adopts V4 entry DD30 instead of DD21; original historical research STABLE4 DD21 is preserved as baseline, live V4/GLOBAL cutover remains blocked",
+    "Offline DD30 STABLE4 research max portfolio DD ~32.00% (10bps) / 31.62% (30bps): not a DD30 portfolio hard stop"
   ],
   "sourceChangesOnlyProtectiveExits": false,
-  "sourceRestorationIncludesV4SignedReadAndMonitorSafety": true
+  "sourceRestorationIncludesV4SignedReadAndMonitorSafety": true,
+  "adoptedTargetRiskContract": {
+    "v4EntryDdHoldThreshold": 0.3,
+    "historicalBaselineV4DdThreshold": 0.21,
+    "scope": "V4_NEW_ENTRY_ONLY_AND_V4_CERTIFICATION",
+    "globalHoldAuthorityUnchanged": true,
+    "existingStopExitRulesUnchanged": true,
+    "otherRunnerDrawdownAndSharedRiskUnchanged": true,
+    "cryptoGrossCap": 3.0,
+    "stockGrossCap": 4.0,
+    "totalGrossCap": 4.25,
+    "sharedCryptoDailyLossPct": 7.5,
+    "researchMaximumPortfolioDd10bpsPct": 31.996254915828892,
+    "researchMaximumPortfolioDd30bpsPct": 31.62462200559768,
+    "portfolioDDBelow30NotGuaranteed": true
+  },
+  "riskEconomicsChangedForOwnerDD30": true,
+  "dd30SourceReadyForCodexReview": true
 }

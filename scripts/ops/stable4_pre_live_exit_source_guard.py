@@ -20,6 +20,12 @@ def assert_pre_live_source(root: pathlib.Path = ROOT, manifest: dict | None = No
         raise AssertionError("STABLE4_OWNER_CUTOVER_MUST_BE_SEPARATE")
     if info.get("stable4EconomicParityVersusResearchBtFullyCertified") is not False:
         raise AssertionError("STABLE4_ECONOMIC_PARITY_UNPROVEN_CANNOT_BE_CERTIFIED")
+    # DD30 changes V4 entry/certification only, never global kill authority.
+    risk = info.get("adoptedTargetRiskContract") or {}
+    if risk.get("v4EntryDdHoldThreshold") != 0.30 or risk.get("historicalBaselineV4DdThreshold") != 0.21:
+        raise AssertionError("STABLE4_V4_DD30_CONTRACT_UNPROVEN")
+    if risk.get("globalHoldAuthorityUnchanged") is not True or risk.get("existingStopExitRulesUnchanged") is not True:
+        raise AssertionError("STABLE4_DD30_MUST_NOT_WEAKEN_PROTECTION")
     source_hashes = info["expectedSourceNormalizedSha256"]
     if len(source_hashes) < 15:
         raise AssertionError("STABLE4_SOURCE_MANIFEST_INCOMPLETE")
@@ -53,7 +59,7 @@ def assert_pre_live_source(root: pathlib.Path = ROOT, manifest: dict | None = No
             "strategy_daily_loss_held = self.enforce_daily_loss()",
             "v52-strategy-daily-loss-exit-management-continues",
             "self.manage_positions("),
-        "config/v12V4AdoptionRiskPolicy.ts": ("V12_V4_MAXIMUM_DRAWDOWN = 0.21",),
+        "config/v12V4AdoptionRiskPolicy.ts": ("V12_V4_MAXIMUM_DRAWDOWN = 0.30",),
         "config/integratedProductionRiskPolicy.ts": (
             "cryptoGrossCap: 3.0", "totalGrossCap: 4.25", "cryptoDailyLossPct: 7.5"),
         "config/sharedCryptoRiskPolicy.ts": ("SHARED_CRYPTO_DAILY_LOSS_PCT = 7.5",),
