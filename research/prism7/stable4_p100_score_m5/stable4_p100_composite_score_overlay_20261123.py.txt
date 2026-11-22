@@ -1,0 +1,31 @@
+# STABLE4 selective dual-venue signed five-timeframe score:
+# port old P100 chosen candidate family to updated STABLE4 IDs by exact identity.
+_p97_path=pathlib.Path(r"C:\Users\dis\Documents\DisDex_Research\WINRATE_DEEP_20261122\results\PRISM7_P97_ALLRUNNER_2715_RAW_CANDIDATE_ASOF_BINANCE_AST_SIGNED_SCORE_20261122.jsonl")
+_p97_sha=hashlib.sha256(_p97_path.read_bytes()).hexdigest()
+assert _p97_sha=="08ad43d82cc05355825f3108eaaad361312cdc0c28e92a8a7ac37ca60514b527",_p97_sha
+_p97={(_z["strategy"],_z["symbol"],_z["side"],_z["route"],int(_z["entryTs"])):_z for _z in jlines(_p97_path)}
+assert len(_p97)==2715
+_score_count=collections.Counter()
+_veto_count=collections.Counter()
+_score_missing=collections.Counter()
+_score_missing_examples=[]
+for _c in raw:
+ _c["p100_gate_pass"]=True
+ _sel=(_c["s"] in ("IDLE","RESIDUAL") or (_c["s"]=="Q102" and ("|BRK" in _c["route"] or "|PB" in _c["route"])))
+ if not _sel:continue
+ _key=(_c["s"],_c["symbol"],_c["side"],_c["route"],int(_c["t"]))
+ _z=_p97.get(_key)
+ if _z is None:
+  _score_missing[_c["s"]]+=1
+  _score_missing_examples.append(_key)
+  _c["p100_no_matching_legacy_source"]=True
+  continue
+ assert _z["usesOnlyCompletedAsterAndBinanceCandles"] is True
+ assert int(_z["lastInputTsExclusive"])<=int(_c["t"]),("LOOKAHEAD",_key)
+ _c["p100_gate_pass"]=bool(_z["policies"]["BINANCE_NONNEGATIVE"])
+ _c["p100_points"]=int(_z["asOfScore"]["binanceScore"])
+ _score_count[_c["s"]]+=1
+ if not _c["p100_gate_pass"]:_veto_count[_c["s"]]+=1
+print("STABLE4_P100_COMPOSITE_JOIN","SHA",_p97_sha,
+ "matched",dict(_score_count),"candidate_veto",dict(_veto_count),
+ "unmatched",dict(_score_missing),"unmatched_examples",_score_missing_examples[:8],flush=True)
