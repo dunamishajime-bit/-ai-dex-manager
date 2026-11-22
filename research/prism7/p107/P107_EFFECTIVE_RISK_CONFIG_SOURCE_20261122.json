@@ -1,0 +1,131 @@
+{
+  "rows": [
+    {
+      "runner": "FET_BRK48_RESIDUAL",
+      "pin_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "HYPE_TREND_LONG",
+      "pin_sha": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "cryptoGrossExistingExposureCap": "3.5",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": [
+        "authoritySha256",
+        "certificateSha256",
+        "contractSha256",
+        "schema",
+        "sourceSha"
+      ]
+    },
+    {
+      "runner": "IDLE_PRIORITY_SHORT",
+      "pin_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "MARGIN_GUARD",
+      "pin_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "PENGU_V8",
+      "pin_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "QUALITY102_CAUSAL_V1",
+      "pin_sha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "SHARED_CRYPTO_RISK",
+      "pin_sha": "2737c30e1f6d014d24a2c6d025e7f91332bf7962",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "V12_V4",
+      "pin_sha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "cryptoGrossExistingExposureCap": "3.5",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    },
+    {
+      "runner": "V52",
+      "pin_sha": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+      "integrated_risk_policy": {
+        "hypeLongMaximumGross": "1.5",
+        "cryptoGrossCap": "3.0",
+        "stockGrossCap": "Number(v52V50Runtime.stockAggregateGross)",
+        "totalGrossCap": "4.25",
+        "cryptoDailyLossPct": "7.5",
+        "stockDailyLossPct": "3.5"
+      },
+      "h48_record_keys": []
+    }
+  ],
+  "source": "read-only VPS pinned release configs",
+  "live_env_effective_values_verified": false
+}
