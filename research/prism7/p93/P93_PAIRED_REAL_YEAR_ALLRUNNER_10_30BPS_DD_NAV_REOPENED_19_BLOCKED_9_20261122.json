@@ -1,0 +1,263 @@
+{
+  "PENGU_3RoutesAllOthersIntact": true,
+  "baselineANDcandidateReplayedWithSame5mClock": true,
+  "doesNotModelLatestDD21HoldGate": true,
+  "doesNotModelLatestWholeFleetStopsAtM5IntrabarExactly": true,
+  "limitations": [
+    "P92 is based on 2026-11-09 STRICT_V2 source and original pinned candidate tapes, NOT the 2026-11-22 DD_PRISM3 result and NOT currently deployed STABLE4 or latest Production SHA.",
+    "P92 does not model V4_MAX_DRAWDOWN_21PCT_HOLD. The previously observed 673 gate-blocked candidates MUST NOT be claimed restored from P92. Only 19 existing other intake candidates changed from BLOCK to MODEL_ENTER in this older model.",
+    "The 5min source calendar uses last completed ASTER H1 for every unrealized mark, not intrabar 5m high risk; actual DD could be larger.",
+    "Changing source funding and exposure timing across a different gross setting, modeled V52 gross reduced from 2 to 1.5 in BOTH baseline and changed; they are comparable only to each other, not historical stock4 run.",
+    "PENGU old native 40 candidates at gross1.0 vs new four candidates gross.75: stronger DD compression may be from *stopping many profitable trades* rather than improved native direction discrimination.",
+    "Real Binance H1 signal to Aster execution used P80 model Aster first positive printed M5 OPEN at/after t+5; signed venue fill, orderbook, actual STOP/partial fills unavailable.",
+    "Q102 HIGH_VOL gap, V52 modeled price, static HYPE/IDLE and other original research-only limitations remain.",
+    "Consequence is falsification of guaranteed improvement, not authorization to deploy; global DD20 requirement fails even in the more optimistic old replay.",
+    "No Runner/Production/GitHub master/Gross/STOP/positions/orders changed."
+  ],
+  "notCurrentSTABLE4OrCurrentProd": true,
+  "original30MinuteBaselineSanityOnlyNotComparableTo5Minute": true,
+  "ownerGross0p25NeverUsed": true,
+  "ownerSelectedChange": "Replace only PENGU SHORT_V20 original ASTER native source40 by Binance native original 41->P73 macro 33->frozen ASTER completed5m score 4, on Aster native exits 5m. Other 7 runner source signals unchanged.",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z exclusive"
+  ],
+  "resultsByFeeBps": {
+    "10": {
+      "NAVRelativeChangePct": -35.8281,
+      "absoluteNAVDeltaJPY": -1008936.1612871857,
+      "maxDDImprovementPercentagePoints": 8.86558,
+      "newAfterCandidateCount": 2769,
+      "newAllRunnerFills": 857,
+      "newBinanceNativeSourceAcceptedBeforeRisk": 4,
+      "newCombinedWRPct": 63.710618436406065,
+      "newGateReason": {
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "CRYPTO_GROSS_CAP": 52,
+        "DAILY_LOSS_7P5_GATE": 96,
+        "PENGU_ROUTE_QUARANTINE_60H": 8,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 565,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13,
+        "RUNNER_SLOT_BUSY": 469,
+        "SYMBOL_BUSY": 617,
+        "TOTAL_GROSS_CAP": 13
+      },
+      "newMaxDDPct": 24.61713722688633,
+      "newNAVJPY": 1807111.0658318764,
+      "newPENGUOtherRoutesSelected": {
+        "LONG_V64": 10,
+        "RECOVERY_V8": 37
+      },
+      "newPENGUShortSelected": 2,
+      "newRunnerAdmissions": {
+        "FET": 7,
+        "HYPE": 45,
+        "IDLE": 128,
+        "PENGU": 49,
+        "Q102": 105,
+        "RESIDUAL": 16,
+        "V4": 428,
+        "V52": 79
+      },
+      "newV4DD21GatePresent": false,
+      "newlyBlockedByRunner": {
+        "PENGU": 1,
+        "V4": 8
+      },
+      "newlyBlockedOldSignalCount": 9,
+      "newlyBlockedReason": {
+        "RUNNER_SLOT_BUSY": 1,
+        "SYMBOL_BUSY": 7,
+        "TOTAL_GROSS_CAP": 1
+      },
+      "oldAllRunnerFills": 864,
+      "oldCombinedWRPct": 64.12037037037037,
+      "oldGateReason": {
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "CRYPTO_GROSS_CAP": 56,
+        "DAILY_LOSS_7P5_GATE": 101,
+        "PENGU_ROUTE_QUARANTINE_60H": 12,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 566,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13,
+        "RUNNER_SLOT_BUSY": 478,
+        "SYMBOL_BUSY": 624,
+        "TOTAL_GROSS_CAP": 12
+      },
+      "oldMaxDDPct": 33.482720060676044,
+      "oldNAVJPY": 2816047.227119062,
+      "oldOriginalBeforeCandidateCount": 2805,
+      "oldOriginalV20SourceNative": 40,
+      "oldPENGUOtherRoutesSelected": {
+        "LONG_V64": 10,
+        "RECOVERY_V8": 33
+      },
+      "oldPENGUShortSelected": 19,
+      "oldRunnerAdmissions": {
+        "FET": 7,
+        "HYPE": 45,
+        "IDLE": 126,
+        "PENGU": 62,
+        "Q102": 105,
+        "RESIDUAL": 13,
+        "V4": 428,
+        "V52": 78
+      },
+      "oldV4DD21GatePresent": false,
+      "originalAllPENGUNativeYear": 116,
+      "reopen673LastResearchV4DD21Gate": null,
+      "reopenedByRunner": {
+        "IDLE": 2,
+        "PENGU": 5,
+        "RESIDUAL": 3,
+        "V4": 8,
+        "V52": 1
+      },
+      "reopenedOldGateReason": {
+        "CRYPTO_GROSS_CAP": 3,
+        "DAILY_LOSS_7P5_GATE": 1,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 3,
+        "RUNNER_SLOT_BUSY": 6,
+        "SYMBOL_BUSY": 5,
+        "TOTAL_GROSS_CAP": 1
+      },
+      "reopenedOldSignalCount": 19,
+      "sourceSchemaNotSignedProductionParity": true,
+      "stillViolates20DD": true
+    },
+    "30": {
+      "NAVRelativeChangePct": -35.19299,
+      "absoluteNAVDeltaJPY": -299257.59688852774,
+      "maxDDImprovementPercentagePoints": 14.16788,
+      "newAfterCandidateCount": 2769,
+      "newAllRunnerFills": 857,
+      "newBinanceNativeSourceAcceptedBeforeRisk": 4,
+      "newCombinedWRPct": 60.67677946324388,
+      "newGateReason": {
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "CRYPTO_GROSS_CAP": 52,
+        "DAILY_LOSS_7P5_GATE": 99,
+        "PENGU_ROUTE_QUARANTINE_60H": 8,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 564,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13,
+        "RUNNER_SLOT_BUSY": 467,
+        "SYMBOL_BUSY": 617,
+        "TOTAL_GROSS_CAP": 13
+      },
+      "newMaxDDPct": 29.94916817092762,
+      "newNAVJPY": 551075.3488281738,
+      "newPENGUOtherRoutesSelected": {
+        "LONG_V64": 10,
+        "RECOVERY_V8": 37
+      },
+      "newPENGUShortSelected": 2,
+      "newRunnerAdmissions": {
+        "FET": 7,
+        "HYPE": 45,
+        "IDLE": 128,
+        "PENGU": 49,
+        "Q102": 105,
+        "RESIDUAL": 16,
+        "V4": 428,
+        "V52": 79
+      },
+      "newV4DD21GatePresent": false,
+      "newlyBlockedByRunner": {
+        "PENGU": 1,
+        "V4": 8
+      },
+      "newlyBlockedOldSignalCount": 9,
+      "newlyBlockedReason": {
+        "RUNNER_SLOT_BUSY": 1,
+        "SYMBOL_BUSY": 7,
+        "TOTAL_GROSS_CAP": 1
+      },
+      "oldAllRunnerFills": 864,
+      "oldCombinedWRPct": 61.111111111111114,
+      "oldGateReason": {
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "CRYPTO_GROSS_CAP": 56,
+        "DAILY_LOSS_7P5_GATE": 104,
+        "PENGU_ROUTE_QUARANTINE_60H": 12,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 565,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13,
+        "RUNNER_SLOT_BUSY": 476,
+        "SYMBOL_BUSY": 624,
+        "TOTAL_GROSS_CAP": 12
+      },
+      "oldMaxDDPct": 44.117051576562105,
+      "oldNAVJPY": 850332.9457167016,
+      "oldOriginalBeforeCandidateCount": 2805,
+      "oldOriginalV20SourceNative": 40,
+      "oldPENGUOtherRoutesSelected": {
+        "LONG_V64": 10,
+        "RECOVERY_V8": 33
+      },
+      "oldPENGUShortSelected": 19,
+      "oldRunnerAdmissions": {
+        "FET": 7,
+        "HYPE": 45,
+        "IDLE": 126,
+        "PENGU": 62,
+        "Q102": 105,
+        "RESIDUAL": 13,
+        "V4": 428,
+        "V52": 78
+      },
+      "oldV4DD21GatePresent": false,
+      "originalAllPENGUNativeYear": 116,
+      "reopen673LastResearchV4DD21Gate": null,
+      "reopenedByRunner": {
+        "IDLE": 2,
+        "PENGU": 5,
+        "RESIDUAL": 3,
+        "V4": 8,
+        "V52": 1
+      },
+      "reopenedOldGateReason": {
+        "CRYPTO_GROSS_CAP": 3,
+        "DAILY_LOSS_7P5_GATE": 1,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 3,
+        "RUNNER_SLOT_BUSY": 6,
+        "SYMBOL_BUSY": 5,
+        "TOTAL_GROSS_CAP": 1
+      },
+      "reopenedOldSignalCount": 19,
+      "sourceSchemaNotSignedProductionParity": true,
+      "stillViolates20DD": true
+    }
+  },
+  "sameTimeGridFirstDivergence": {
+    "commonFiveMinMarks": 105120,
+    "firstEconomicDivergence": {
+      "baselineEquityJPY": 19474.217150019358,
+      "candidateEquityJPY": 19503.472358557196,
+      "utc": "2025-10-15T16:05:00Z"
+    },
+    "maxAbsoluteEquityDifference": {
+      "absoluteDifferenceJPY": 784148.8734563492,
+      "utc": "2026-07-12T01:05:00Z"
+    }
+  },
+  "schema": "prism7-p93-isolated-allrunner-tradeable-aster-binance5m-nativeV20-rerun5min-paired-bt/v1",
+  "selectedGrossSizingOriginalPENGUV20Gross1ToGross0p75": true,
+  "simulatedFiveMinEquityAndSharedDailyGrossFundsDynamicallyRecomputed": true,
+  "sourceOriginalStrictBaseline30minRerunAgainstHistoricalArchivedPASS": true,
+  "sourceSHA256": {
+    "baseline5m10Bps": "fe417d647fc335923c2cfa935853d772b9b18cfbf3988346400318921ff1036a",
+    "baseline5m30Bps": "0a7d85e9b87fcfe3e9909a4b014496b6f6a3919626ffa1285eaf4889c8023a9b",
+    "candidate5m10Bps": "07a021ecd479872fd48e503a6a11b388b79c4673f6b8281db9441a43a6432d76",
+    "candidate5m30Bps": "b3fdcbc19340aed051aef5140ce860a9e14e4db56e2c8de44977f96ab5c1856f",
+    "caseManifest": "f514782def6eb4001fb35204e77117f75533fa5b9c9b9785a66b5e0a694f2290",
+    "new30bpsDecisions": "a6864a5c7bfdbe9b2272cc7d8ade74e6da81d99c70626eb99ad1a807b78d488f",
+    "old30bpsDecisions": "59288a966007159daceed8ad5ad424e154e8fdbe6055a0e796c223d0a576c958",
+    "original20261109StrictCore": "c3b72a5d0ad3ebcbac31f74f4464314d3225820bface8b6225d7eb3ee687caf7",
+    "originalArchived30min": "4a93839f2bb934760cb310e18d8f2cd2c2a284a1bae86bde011648250d75ac93",
+    "reopenedAndNewlyBlockedSignalCsv": "8d4e4e7dd076c637c5a7857a6abdc5e077c93718369e3bef6f4494265bec1cc2",
+    "sourceBinanceEntryAsterNative5mTape": "ce82fe3224bc878f24a9fd73a13467572e254d3c523c09537cdaa397a5763398"
+  },
+  "status": "OWNER_STRATEGY_CHOSEN__ISOLATED_OLDER_RISK_REPLAY__NOT_PRODUCTION_COMPLETE"
+}
