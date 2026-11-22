@@ -1,0 +1,2282 @@
+{
+  "S3_00273": {
+    "BTCret6": -0.003764673008733732,
+    "EMA24": 0.03686005781108865,
+    "EMA72": 0.03776595004915187,
+    "PENGUminusBTC6": -0.04228795857021361,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_00273",
+    "intentTs": 1754992800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "RELATIVE_WEAKNESS_DOWNSHIFT",
+    "signalReferenceTs": 1754989200000,
+    "valid": true
+  },
+  "S3_00338": {
+    "BTCret6": 0.005087592829933429,
+    "EMA24": 0.03435261586311957,
+    "EMA72": 0.03588303427844286,
+    "PENGUminusBTC6": 0.04239389092801882,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_00338",
+    "intentTs": 1755226800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1755223200000,
+    "valid": true
+  },
+  "S3_01088": {
+    "BTCret6": -0.004881543636385599,
+    "EMA24": 0.03479141525357803,
+    "EMA72": 0.03523586165864779,
+    "PENGUminusBTC6": -0.05533492641286408,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01088",
+    "intentTs": 1757926800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "RELATIVE_WEAKNESS_DOWNSHIFT",
+    "signalReferenceTs": 1757923200000,
+    "valid": true
+  },
+  "S3_01257": {
+    "BTCret6": -0.019955805039482133,
+    "EMA24": 0.032643433298999484,
+    "EMA72": 0.034211646897151046,
+    "PENGUminusBTC6": -0.02054087013621364,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01257",
+    "intentTs": 1758535200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758531600000,
+    "valid": true
+  },
+  "S3_01259": {
+    "BTCret6": -0.006938453575213832,
+    "EMA24": 0.03229646434427317,
+    "EMA72": 0.03400502946303967,
+    "PENGUminusBTC6": -0.031129222292996306,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01259",
+    "intentTs": 1758542400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758538800000,
+    "valid": true
+  },
+  "S3_01270": {
+    "BTCret6": 0.00011014076700610609,
+    "EMA24": 0.03104439534164561,
+    "EMA72": 0.03300520086362807,
+    "PENGUminusBTC6": 0.024118047152456912,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_01270",
+    "intentTs": 1758582000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758578400000,
+    "valid": true
+  },
+  "S3_01342": {
+    "BTCret6": -0.014355287276974438,
+    "EMA24": 0.028102346671361245,
+    "EMA72": 0.029483340273108588,
+    "PENGUminusBTC6": -0.010413298201764398,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01342",
+    "intentTs": 1758841200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758837600000,
+    "valid": true
+  },
+  "S3_01348": {
+    "BTCret6": -0.00033098746727844297,
+    "EMA24": 0.027669582320104052,
+    "EMA72": 0.029103355848791427,
+    "PENGUminusBTC6": -0.009494380520560286,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01348",
+    "intentTs": 1758862800000,
+    "nativeEntryTs": 1758875700000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758859200000,
+    "valid": true
+  },
+  "S3_01350": {
+    "BTCret6": -0.0007914313392188843,
+    "EMA24": 0.027542692875736074,
+    "EMA72": 0.02898129608439812,
+    "PENGUminusBTC6": -0.016301331746281567,
+    "cohort": "PRE_2025_AUG_SEP",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01350",
+    "intentTs": 1758870000000,
+    "nativeEntryTs": 1758875700000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1758866400000,
+    "valid": true
+  },
+  "S3_01634": {
+    "BTCret6": 0.0008408310856482526,
+    "EMA24": 0.03136884035391468,
+    "EMA72": 0.031696167992113417,
+    "PENGUminusBTC6": -0.013733008538877711,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01634",
+    "intentTs": 1759892400000,
+    "nativeEntryTs": 1759913400000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1759888800000,
+    "valid": true
+  },
+  "S3_01700": {
+    "BTCret6": -0.051598020056676464,
+    "EMA24": 0.02961512950034655,
+    "EMA72": 0.030580645250302848,
+    "PENGUminusBTC6": -0.1190381952777444,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01700",
+    "intentTs": 1760130000000,
+    "nativeEntryTs": 1760130900000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1760126400000,
+    "valid": true
+  },
+  "S3_01713": {
+    "BTCret6": -0.0062354905786677906,
+    "EMA24": 0.025645747068800722,
+    "EMA72": 0.028441744734108577,
+    "PENGUminusBTC6": 0.017624051402018615,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_01713",
+    "intentTs": 1760176800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760173200000,
+    "valid": true
+  },
+  "S3_01719": {
+    "BTCret6": 0.0012092407490842394,
+    "EMA24": 0.024779880924541173,
+    "EMA72": 0.02767974629063602,
+    "PENGUminusBTC6": -0.03636646820758782,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01719",
+    "intentTs": 1760198400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760194800000,
+    "valid": true
+  },
+  "S3_01792": {
+    "BTCret6": 0.015357471325696537,
+    "EMA24": 0.024699592340145696,
+    "EMA72": 0.025121953584163966,
+    "PENGUminusBTC6": 0.013365888386232427,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_01792",
+    "intentTs": 1760461200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760457600000,
+    "valid": true
+  },
+  "S3_01798": {
+    "BTCret6": 0.007905497420203522,
+    "EMA24": 0.02469835254596018,
+    "EMA72": 0.02505784807606826,
+    "PENGUminusBTC6": -0.0067658498969018765,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01798",
+    "intentTs": 1760482800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760479200000,
+    "valid": true
+  },
+  "S3_01860": {
+    "BTCret6": -0.01331045418422283,
+    "EMA24": 0.021680641643625986,
+    "EMA72": 0.02295172097685161,
+    "PENGUminusBTC6": -0.0015817545903611396,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01860",
+    "intentTs": 1760706000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760702400000,
+    "valid": true
+  },
+  "S3_01864": {
+    "BTCret6": 0.015438079130899007,
+    "EMA24": 0.021463489459696488,
+    "EMA72": 0.022737417045681153,
+    "PENGUminusBTC6": 0.005194590893058404,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_01864",
+    "intentTs": 1760720400000,
+    "nativeEntryTs": 1760746200000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1760716800000,
+    "valid": true
+  },
+  "S3_01948": {
+    "BTCret6": -0.027098239923716738,
+    "EMA24": 0.02228505616558612,
+    "EMA72": 0.02221851546888199,
+    "PENGUminusBTC6": -0.02550995344694007,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01948",
+    "intentTs": 1761022800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1761019200000,
+    "valid": true
+  },
+  "S3_01950": {
+    "BTCret6": -0.022910416394915645,
+    "EMA24": 0.02216614833855209,
+    "EMA72": 0.022180277064859092,
+    "PENGUminusBTC6": -0.019687286801024828,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01950",
+    "intentTs": 1761030000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1761026400000,
+    "valid": true
+  },
+  "S3_01957": {
+    "BTCret6": 0.0033559035203196697,
+    "EMA24": 0.02188530511735013,
+    "EMA72": 0.02206611899803347,
+    "PENGUminusBTC6": -0.012180112344528538,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01957",
+    "intentTs": 1761055200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1761051600000,
+    "valid": true
+  },
+  "S3_01968": {
+    "BTCret6": -0.03579967193312872,
+    "EMA24": 0.02208979783152903,
+    "EMA72": 0.022139708346804187,
+    "PENGUminusBTC6": -0.049858737454094304,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_01968",
+    "intentTs": 1761094800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1761091200000,
+    "valid": true
+  },
+  "S3_01983": {
+    "BTCret6": 0.004569180921028204,
+    "EMA24": 0.021341034123365996,
+    "EMA72": 0.0217696543639076,
+    "PENGUminusBTC6": 0.0027448408285628556,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_01983",
+    "intentTs": 1761148800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1761145200000,
+    "valid": true
+  },
+  "S3_02173": {
+    "BTCret6": -0.03360660670641069,
+    "EMA24": 0.020600774037303624,
+    "EMA72": 0.021004412427474733,
+    "PENGUminusBTC6": -0.04818152035985346,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02173",
+    "intentTs": 1761832800000,
+    "nativeEntryTs": 1761837000000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1761829200000,
+    "valid": true
+  },
+  "S3_02261": {
+    "BTCret6": -0.02660353646167435,
+    "EMA24": 0.017341164926761625,
+    "EMA72": 0.018058537716511367,
+    "PENGUminusBTC6": -0.0600776984797724,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02261",
+    "intentTs": 1762149600000,
+    "nativeEntryTs": 1762162200000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1762146000000,
+    "valid": true
+  },
+  "S3_02266": {
+    "BTCret6": -0.008726335087559933,
+    "EMA24": 0.01699262814845007,
+    "EMA72": 0.017833366223247615,
+    "PENGUminusBTC6": -0.009646209176325637,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02266",
+    "intentTs": 1762167600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1762164000000,
+    "valid": true
+  },
+  "S3_02291": {
+    "BTCret6": 0.0035023328089593964,
+    "EMA24": 0.01542712762447752,
+    "EMA72": 0.0165964415298643,
+    "PENGUminusBTC6": 0.006475268494237518,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_02291",
+    "intentTs": 1762257600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1762254000000,
+    "valid": true
+  },
+  "S3_02365": {
+    "BTCret6": -0.016510252713953788,
+    "EMA24": 0.01450422800585896,
+    "EMA72": 0.014925343441701853,
+    "PENGUminusBTC6": -0.03473890326173834,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02365",
+    "intentTs": 1762524000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1762520400000,
+    "valid": true
+  },
+  "S3_02456": {
+    "BTCret6": -0.013713408707986319,
+    "EMA24": 0.015899403642060984,
+    "EMA72": 0.015566150897332888,
+    "PENGUminusBTC6": -0.04140901789695939,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02456",
+    "intentTs": 1762851600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1762848000000,
+    "valid": true
+  },
+  "S3_02457": {
+    "BTCret6": -0.013936794302352062,
+    "EMA24": 0.015864331350696106,
+    "EMA72": 0.015563270050830616,
+    "PENGUminusBTC6": -0.04755403973916783,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02457",
+    "intentTs": 1762855200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1762851600000,
+    "valid": true
+  },
+  "S3_02520": {
+    "BTCret6": 0.0038618069725604443,
+    "EMA24": 0.013993192507058364,
+    "EMA72": 0.014580952897872328,
+    "PENGUminusBTC6": 0.0016775298041444842,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_02520",
+    "intentTs": 1763082000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1763078400000,
+    "valid": true
+  },
+  "S3_02586": {
+    "BTCret6": -0.017567800550659096,
+    "EMA24": 0.012867544818381723,
+    "EMA72": 0.01328536508442845,
+    "PENGUminusBTC6": -0.03210671897816919,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02586",
+    "intentTs": 1763319600000,
+    "nativeEntryTs": 1763323500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1763316000000,
+    "valid": true
+  },
+  "S3_02656": {
+    "BTCret6": -0.015301035044235523,
+    "EMA24": 0.012086136305844134,
+    "EMA72": 0.012361391787323464,
+    "PENGUminusBTC6": -0.03920699295082408,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02656",
+    "intentTs": 1763571600000,
+    "nativeEntryTs": 1763572800000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1763568000000,
+    "valid": true
+  },
+  "S3_02658": {
+    "BTCret6": -0.02749580308282651,
+    "EMA24": 0.011972457769266476,
+    "EMA72": 0.012306660911971775,
+    "PENGUminusBTC6": -0.042723114719734445,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02658",
+    "intentTs": 1763578800000,
+    "nativeEntryTs": 1763581500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1763575200000,
+    "valid": true
+  },
+  "S3_02699": {
+    "BTCret6": -0.044973738428948695,
+    "EMA24": 0.011255273262330431,
+    "EMA72": 0.011808669619959156,
+    "PENGUminusBTC6": -0.05023052444849363,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02699",
+    "intentTs": 1763726400000,
+    "nativeEntryTs": 1763731800000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1763722800000,
+    "valid": true
+  },
+  "S3_02701": {
+    "BTCret6": 0.000835714285714273,
+    "EMA24": 0.011117564089236478,
+    "EMA72": 0.011730336940179041,
+    "PENGUminusBTC6": -0.029119871399038932,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02701",
+    "intentTs": 1763733600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1763730000000,
+    "valid": true
+  },
+  "S3_02707": {
+    "BTCret6": 0.00120970331936876,
+    "EMA24": 0.01090262336069877,
+    "EMA72": 0.011551758389437717,
+    "PENGUminusBTC6": 0.01948462024701758,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_02707",
+    "intentTs": 1763755200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1763751600000,
+    "valid": true
+  },
+  "S3_02930": {
+    "BTCret6": -0.04964475291565551,
+    "EMA24": 0.010735142974993308,
+    "EMA72": 0.010958416348465536,
+    "PENGUminusBTC6": -0.06658608567767166,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_02930",
+    "intentTs": 1764558000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1764554400000,
+    "valid": true
+  },
+  "S3_02941": {
+    "BTCret6": -0.006186246236180026,
+    "EMA24": 0.010148482621677113,
+    "EMA72": 0.010640016563719799,
+    "PENGUminusBTC6": 0.0057748928836501845,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_02941",
+    "intentTs": 1764597600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1764594000000,
+    "valid": true
+  },
+  "S3_03049": {
+    "BTCret6": -0.0035048906619220555,
+    "EMA24": 0.010986257754022703,
+    "EMA72": 0.011275988343824461,
+    "PENGUminusBTC6": -0.005454512044564264,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03049",
+    "intentTs": 1764986400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1764982800000,
+    "valid": true
+  },
+  "S3_03052": {
+    "BTCret6": 0.004698945763718765,
+    "EMA24": 0.01093654182996443,
+    "EMA72": 0.011234738091462729,
+    "PENGUminusBTC6": 0.005515654554901772,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_03052",
+    "intentTs": 1764997200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1764993600000,
+    "valid": true
+  },
+  "S3_03178": {
+    "BTCret6": -0.0012821604902080175,
+    "EMA24": 0.011535568241719614,
+    "EMA72": 0.011736615220256612,
+    "PENGUminusBTC6": -0.020258776227704,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03178",
+    "intentTs": 1765450800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1765447200000,
+    "valid": true
+  },
+  "S3_03182": {
+    "BTCret6": -0.006917102383099838,
+    "EMA24": 0.011372726984527515,
+    "EMA72": 0.011655395489421537,
+    "PENGUminusBTC6": -0.0005707982652428667,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03182",
+    "intentTs": 1765465200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1765461600000,
+    "valid": true
+  },
+  "S3_03184": {
+    "BTCret6": -0.0063270948532538895,
+    "EMA24": 0.011283901719704087,
+    "EMA72": 0.011608940263121406,
+    "PENGUminusBTC6": -0.011942750766550714,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03184",
+    "intentTs": 1765472400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1765468800000,
+    "valid": true
+  },
+  "S3_03187": {
+    "BTCret6": 0.008127445450629045,
+    "EMA24": 0.011191537038312938,
+    "EMA72": 0.011549355181172147,
+    "PENGUminusBTC6": -0.015049751671596279,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03187",
+    "intentTs": 1765483200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1765479600000,
+    "valid": true
+  },
+  "S3_03280": {
+    "BTCret6": -0.0383659108243376,
+    "EMA24": 0.010601857907610979,
+    "EMA72": 0.01084857581252298,
+    "PENGUminusBTC6": -0.023262644669248655,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03280",
+    "intentTs": 1765818000000,
+    "nativeEntryTs": 1765821900000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1765814400000,
+    "valid": true
+  },
+  "S3_03330": {
+    "BTCret6": -0.013755071212527059,
+    "EMA24": 0.009898818278213392,
+    "EMA72": 0.01018775887912953,
+    "PENGUminusBTC6": -0.030664526266635406,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03330",
+    "intentTs": 1765998000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1765994400000,
+    "valid": true
+  },
+  "S3_03462": {
+    "BTCret6": -0.015318502456347582,
+    "EMA24": 0.00911208838119204,
+    "EMA72": 0.009182759019376905,
+    "PENGUminusBTC6": -0.02021779223487674,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03462",
+    "intentTs": 1766473200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1766469600000,
+    "valid": true
+  },
+  "S3_03527": {
+    "BTCret6": -0.010345320768509692,
+    "EMA24": 0.009039342485399407,
+    "EMA72": 0.009018172637408556,
+    "PENGUminusBTC6": -0.02149132430778855,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03527",
+    "intentTs": 1766707200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1766703600000,
+    "valid": true
+  },
+  "S3_03528": {
+    "BTCret6": -0.012515732541131364,
+    "EMA24": 0.009016275086567455,
+    "EMA72": 0.00901085283912339,
+    "PENGUminusBTC6": -0.028680717551998858,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03528",
+    "intentTs": 1766710800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1766707200000,
+    "valid": true
+  },
+  "S3_03848": {
+    "BTCret6": -0.008255246139633132,
+    "EMA24": 0.012211007869046409,
+    "EMA72": 0.012378914921887356,
+    "PENGUminusBTC6": -0.009198637556288913,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_03848",
+    "intentTs": 1767862800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1767859200000,
+    "valid": true
+  },
+  "S3_04116": {
+    "BTCret6": 0.005052174833773071,
+    "EMA24": 0.0106840205227712,
+    "EMA72": 0.011369202716687912,
+    "PENGUminusBTC6": 0.0017271531284983599,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_04116",
+    "intentTs": 1768827600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1768824000000,
+    "valid": true
+  },
+  "S3_04145": {
+    "BTCret6": -0.01589390464973195,
+    "EMA24": 0.010100496746325821,
+    "EMA72": 0.010683442853509395,
+    "PENGUminusBTC6": -0.0029095141536870095,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04145",
+    "intentTs": 1768932000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1768928400000,
+    "valid": true
+  },
+  "S3_04267": {
+    "BTCret6": -0.027271346522734552,
+    "EMA24": 0.009638282204253255,
+    "EMA72": 0.009831038766663374,
+    "PENGUminusBTC6": -0.04562065388908454,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04267",
+    "intentTs": 1769371200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1769367600000,
+    "valid": true
+  },
+  "S3_04361": {
+    "BTCret6": -0.04080860912669493,
+    "EMA24": 0.009610237424091986,
+    "EMA72": 0.00974898486392892,
+    "PENGUminusBTC6": -0.003146287511434087,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04361",
+    "intentTs": 1769709600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1769706000000,
+    "valid": true
+  },
+  "S3_04381": {
+    "BTCret6": -0.0007647929440903756,
+    "EMA24": 0.008996579528825703,
+    "EMA72": 0.009378964838015914,
+    "PENGUminusBTC6": 0.0028165426306285823,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_04381",
+    "intentTs": 1769781600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1769778000000,
+    "valid": true
+  },
+  "S3_04400": {
+    "BTCret6": -0.012588892852895772,
+    "EMA24": 0.008809268433782047,
+    "EMA72": 0.009136672321692022,
+    "PENGUminusBTC6": -0.029275246167641322,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04400",
+    "intentTs": 1769850000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1769846400000,
+    "valid": true
+  },
+  "S3_04401": {
+    "BTCret6": -0.010889015619177211,
+    "EMA24": 0.008781806959079484,
+    "EMA72": 0.009118297737536077,
+    "PENGUminusBTC6": -0.02399470531105541,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04401",
+    "intentTs": 1769853600000,
+    "nativeEntryTs": 1769854500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1769850000000,
+    "valid": true
+  },
+  "S3_04404": {
+    "BTCret6": -0.012037906089764294,
+    "EMA24": 0.008693523665351685,
+    "EMA72": 0.009059713286409784,
+    "PENGUminusBTC6": -0.031440354779800894,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04404",
+    "intentTs": 1769864400000,
+    "nativeEntryTs": 1769865300000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1769860800000,
+    "valid": true
+  },
+  "S3_04406": {
+    "BTCret6": -0.019033763130574588,
+    "EMA24": 0.008601062430353665,
+    "EMA72": 0.009007640584873657,
+    "PENGUminusBTC6": -0.04680064977721021,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04406",
+    "intentTs": 1769871600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1769868000000,
+    "valid": true
+  },
+  "S3_04533": {
+    "BTCret6": -0.06307262760356047,
+    "EMA24": 0.006734059396054362,
+    "EMA72": 0.007206029592034557,
+    "PENGUminusBTC6": -0.010386723864089786,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04533",
+    "intentTs": 1770328800000,
+    "nativeEntryTs": 1770330600000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1770325200000,
+    "valid": true
+  },
+  "S3_04661": {
+    "BTCret6": -0.02086963598762359,
+    "EMA24": 0.006142619319322862,
+    "EMA72": 0.0063011528983251625,
+    "PENGUminusBTC6": 0.00044479938631647453,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_04661",
+    "intentTs": 1770789600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1770786000000,
+    "valid": true
+  },
+  "S3_04665": {
+    "BTCret6": -0.019062769193743168,
+    "EMA24": 0.00607974255856289,
+    "EMA72": 0.006261379723359079,
+    "PENGUminusBTC6": -0.019631108357277327,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_04665",
+    "intentTs": 1770804000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1770800400000,
+    "valid": true
+  },
+  "S3_04980": {
+    "BTCret6": -0.0016984606015817416,
+    "EMA24": 0.0063139786327423685,
+    "EMA72": 0.00647928630603421,
+    "PENGUminusBTC6": 0.015072614646054916,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_04980",
+    "intentTs": 1771938000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1771934400000,
+    "valid": true
+  },
+  "S3_05222": {
+    "BTCret6": -0.033524204229502974,
+    "EMA24": 0.007080214488732086,
+    "EMA72": 0.007091454649815757,
+    "PENGUminusBTC6": -0.025858218573347358,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05222",
+    "intentTs": 1772809200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1772805600000,
+    "valid": true
+  },
+  "S3_05514": {
+    "BTCret6": -0.017401980778457338,
+    "EMA24": 0.007673445712377681,
+    "EMA72": 0.0077004279409667205,
+    "PENGUminusBTC6": 0.008841253116606107,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_05514",
+    "intentTs": 1773860400000,
+    "nativeEntryTs": 1773872400000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1773856800000,
+    "valid": true
+  },
+  "S3_05693": {
+    "BTCret6": -0.018432048564892334,
+    "EMA24": 0.0072477810157729914,
+    "EMA72": 0.0071487632685147615,
+    "PENGUminusBTC6": -0.013543901148143966,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05693",
+    "intentTs": 1774504800000,
+    "nativeEntryTs": 1774510500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1774501200000,
+    "valid": true
+  },
+  "S3_05697": {
+    "BTCret6": -0.018912089260997966,
+    "EMA24": 0.007175783104601421,
+    "EMA72": 0.007132802225039729,
+    "PENGUminusBTC6": -0.02021350249617271,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05697",
+    "intentTs": 1774519200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1774515600000,
+    "valid": true
+  },
+  "S3_05707": {
+    "BTCret6": -0.01591542417190961,
+    "EMA24": 0.007008488914820565,
+    "EMA72": 0.007073528938123256,
+    "PENGUminusBTC6": -0.01824827689570596,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05707",
+    "intentTs": 1774555200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1774551600000,
+    "valid": true
+  },
+  "S3_05722": {
+    "BTCret6": -0.030428680227485683,
+    "EMA24": 0.006863864133530203,
+    "EMA72": 0.006987160112543699,
+    "PENGUminusBTC6": -0.009062324599192761,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05722",
+    "intentTs": 1774609200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1774605600000,
+    "valid": true
+  },
+  "S3_05726": {
+    "BTCret6": -0.025344294992568295,
+    "EMA24": 0.006772792849897538,
+    "EMA72": 0.006940651066658833,
+    "PENGUminusBTC6": -0.022874963398168968,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05726",
+    "intentTs": 1774623600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1774620000000,
+    "valid": true
+  },
+  "S3_05744": {
+    "BTCret6": 0.005320462045704577,
+    "EMA24": 0.00652608740728453,
+    "EMA72": 0.0067551261057097085,
+    "PENGUminusBTC6": -0.006253007895875573,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_05744",
+    "intentTs": 1774688400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1774684800000,
+    "valid": true
+  },
+  "S3_06830": {
+    "BTCret6": -0.0035593090287144857,
+    "EMA24": 0.010055857258808984,
+    "EMA72": 0.010279685574932404,
+    "PENGUminusBTC6": -0.038211202385900145,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_06830",
+    "intentTs": 1778598000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "RELATIVE_WEAKNESS_DOWNSHIFT",
+    "signalReferenceTs": 1778594400000,
+    "valid": true
+  },
+  "S3_07174": {
+    "BTCret6": -0.010513826348072297,
+    "EMA24": 0.008680618914117661,
+    "EMA72": 0.008838457020707891,
+    "PENGUminusBTC6": -0.015328351778369775,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07174",
+    "intentTs": 1779836400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1779832800000,
+    "valid": true
+  },
+  "S3_07302": {
+    "BTCret6": -0.010091408965417159,
+    "EMA24": 0.007875115958408093,
+    "EMA72": 0.00795019996221216,
+    "PENGUminusBTC6": -0.024265500171255394,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07302",
+    "intentTs": 1780297200000,
+    "nativeEntryTs": 1780302600000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1780293600000,
+    "valid": true
+  },
+  "S3_07304": {
+    "BTCret6": -0.01209596521003553,
+    "EMA24": 0.00783287734719661,
+    "EMA72": 0.007931276038564741,
+    "PENGUminusBTC6": -0.026350980534241786,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07304",
+    "intentTs": 1780304400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1780300800000,
+    "valid": true
+  },
+  "S3_07307": {
+    "BTCret6": -0.011923418428514743,
+    "EMA24": 0.007788387499733835,
+    "EMA72": 0.007907413532670153,
+    "PENGUminusBTC6": -0.003768450330401074,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07307",
+    "intentTs": 1780315200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1780311600000,
+    "valid": true
+  },
+  "S3_07309": {
+    "BTCret6": -0.01484516590888163,
+    "EMA24": 0.007746420779774718,
+    "EMA72": 0.007886281031748966,
+    "PENGUminusBTC6": -0.001477066551299977,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07309",
+    "intentTs": 1780322400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1780318800000,
+    "valid": true
+  },
+  "S3_07341": {
+    "BTCret6": 0.0038335875184691837,
+    "EMA24": 0.007280887404639094,
+    "EMA72": 0.007558371518153235,
+    "PENGUminusBTC6": -0.009648365564136507,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07341",
+    "intentTs": 1780437600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1780434000000,
+    "valid": true
+  },
+  "S3_07398": {
+    "BTCret6": -0.023384784275128467,
+    "EMA24": 0.006761781794740766,
+    "EMA72": 0.0070002379613160505,
+    "PENGUminusBTC6": -0.028749317039300726,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07398",
+    "intentTs": 1780642800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1780639200000,
+    "valid": true
+  },
+  "S3_07417": {
+    "BTCret6": 0.012448112127577016,
+    "EMA24": 0.006452138170687655,
+    "EMA72": 0.006750966593456896,
+    "PENGUminusBTC6": -0.02228001824873138,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07417",
+    "intentTs": 1780711200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1780707600000,
+    "valid": true
+  },
+  "S3_07831": {
+    "BTCret6": -0.020027503710818073,
+    "EMA24": 0.006618690429458528,
+    "EMA72": 0.006690948520482031,
+    "PENGUminusBTC6": 0.003284733543390317,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_07831",
+    "intentTs": 1782201600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1782198000000,
+    "valid": true
+  },
+  "S3_07864": {
+    "BTCret6": -0.04171559949051118,
+    "EMA24": 0.006194984284146773,
+    "EMA72": 0.006407587685000578,
+    "PENGUminusBTC6": -0.020916235654710347,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07864",
+    "intentTs": 1782320400000,
+    "nativeEntryTs": 1782322200000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1782316800000,
+    "valid": true
+  },
+  "S3_07961": {
+    "BTCret6": -0.012578397385841877,
+    "EMA24": 0.006213786079810904,
+    "EMA72": 0.006184181638309387,
+    "PENGUminusBTC6": -0.01057714397474585,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_07961",
+    "intentTs": 1782669600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1782666000000,
+    "valid": true
+  },
+  "S3_08187": {
+    "BTCret6": -0.010454011340425784,
+    "EMA24": 0.006517631924362292,
+    "EMA72": 0.00660207757139894,
+    "PENGUminusBTC6": -0.027995648943700213,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_08187",
+    "intentTs": 1783483200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1783479600000,
+    "valid": true
+  },
+  "S3_08664": {
+    "BTCret6": -0.02160868418658235,
+    "EMA24": 0.006177248560302142,
+    "EMA72": 0.006218595805015069,
+    "PENGUminusBTC6": -0.010548821966001709,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_08664",
+    "intentTs": 1785200400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1785196800000,
+    "valid": true
+  },
+  "S3_08665": {
+    "BTCret6": -0.027170323706950272,
+    "EMA24": 0.006154748675477971,
+    "EMA72": 0.006209757563781779,
+    "PENGUminusBTC6": -0.011159475673248709,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_08665",
+    "intentTs": 1785204000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1785200400000,
+    "valid": true
+  },
+  "S3_08703": {
+    "BTCret6": -0.011142229280943439,
+    "EMA24": 0.005899298895091367,
+    "EMA72": 0.006012974996723145,
+    "PENGUminusBTC6": -0.004119768344968189,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_08703",
+    "intentTs": 1785340800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1785337200000,
+    "valid": true
+  },
+  "S3_08704": {
+    "BTCret6": -0.010060786830192625,
+    "EMA24": 0.005890474983484058,
+    "EMA72": 0.0060068386954430595,
+    "PENGUminusBTC6": -0.007086921149433878,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_08704",
+    "intentTs": 1785344400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1785340800000,
+    "valid": true
+  },
+  "S3_09429": {
+    "BTCret6": -0.012494269415984749,
+    "EMA24": 0.009322405695035531,
+    "EMA72": 0.009388049223964468,
+    "PENGUminusBTC6": -0.046562491852796595,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_09429",
+    "intentTs": 1787954400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1787950800000,
+    "valid": true
+  },
+  "S3_09589": {
+    "BTCret6": -0.016169982647997405,
+    "EMA24": 0.008595838417152637,
+    "EMA72": 0.00857562753159817,
+    "PENGUminusBTC6": -0.018993568753871704,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_09589",
+    "intentTs": 1788530400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1788526800000,
+    "valid": true
+  },
+  "S3_09844": {
+    "BTCret6": -0.01245519873040768,
+    "EMA24": 0.00714219456687251,
+    "EMA72": 0.007231325654810243,
+    "PENGUminusBTC6": 0.0008142450137176294,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_09844",
+    "intentTs": 1789448400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1789444800000,
+    "valid": true
+  },
+  "S3_09847": {
+    "BTCret6": -0.012686881448726095,
+    "EMA24": 0.007111588306888822,
+    "EMA72": 0.0072133056253037495,
+    "PENGUminusBTC6": -0.011994088962155924,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_09847",
+    "intentTs": 1789459200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1789455600000,
+    "valid": true
+  },
+  "S3_10161": {
+    "BTCret6": -0.008127953750730832,
+    "EMA24": 0.009908987856558393,
+    "EMA72": 0.009948378891627536,
+    "PENGUminusBTC6": -0.02536877827541295,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10161",
+    "intentTs": 1790589600000,
+    "nativeEntryTs": 1790596500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1790586000000,
+    "valid": true
+  },
+  "S3_10173": {
+    "BTCret6": -0.0019054658552037917,
+    "EMA24": 0.009681976321124391,
+    "EMA72": 0.009842890347378664,
+    "PENGUminusBTC6": -0.020616108550184586,
+    "cohort": "BASE_2025_2026",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10173",
+    "intentTs": 1790632800000,
+    "nativeEntryTs": 1790641500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1790629200000,
+    "valid": true
+  },
+  "S3_10370": {
+    "BTCret6": -0.02075947473831552,
+    "EMA24": 0.009316584349314807,
+    "EMA72": 0.0094391219854943,
+    "PENGUminusBTC6": -0.0043551791162378395,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10370",
+    "intentTs": 1791342000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1791338400000,
+    "valid": true
+  },
+  "S3_10381": {
+    "BTCret6": -0.011439482025199621,
+    "EMA24": 0.008973010911108921,
+    "EMA72": 0.009262647745027065,
+    "PENGUminusBTC6": -0.027302797592992367,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10381",
+    "intentTs": 1791381600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1791378000000,
+    "valid": true
+  },
+  "S3_10382": {
+    "BTCret6": -0.011204381649696948,
+    "EMA24": 0.008937730038220208,
+    "EMA72": 0.009242629998587968,
+    "PENGUminusBTC6": -0.017705247305459082,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10382",
+    "intentTs": 1791385200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1791381600000,
+    "valid": true
+  },
+  "S3_10384": {
+    "BTCret6": -0.004387856401336543,
+    "EMA24": 0.008875739504349585,
+    "EMA72": 0.00920438953328616,
+    "PENGUminusBTC6": -0.01791868608457814,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10384",
+    "intentTs": 1791392400000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1791388800000,
+    "valid": true
+  },
+  "S3_10500": {
+    "BTCret6": -0.017264052211492742,
+    "EMA24": 0.008183593448631562,
+    "EMA72": 0.008253035725470238,
+    "PENGUminusBTC6": -0.008501625960602333,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10500",
+    "intentTs": 1791810000000,
+    "nativeEntryTs": 1791814800000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1791806400000,
+    "valid": true
+  },
+  "S3_10602": {
+    "BTCret6": -0.011044334627000607,
+    "EMA24": 0.00762192653341896,
+    "EMA72": 0.007668274279467691,
+    "PENGUminusBTC6": -0.020794521773259245,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10602",
+    "intentTs": 1792177200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1792173600000,
+    "valid": true
+  },
+  "S3_10732": {
+    "BTCret6": -0.01818582477158126,
+    "EMA24": 0.008074059310245326,
+    "EMA72": 0.007894994724165048,
+    "PENGUminusBTC6": -0.016938395030156483,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10732",
+    "intentTs": 1792645200000,
+    "nativeEntryTs": 1792648500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1792641600000,
+    "valid": true
+  },
+  "S3_10734": {
+    "BTCret6": -0.020308434422041888,
+    "EMA24": 0.008037861400191644,
+    "EMA72": 0.00789193965181385,
+    "PENGUminusBTC6": -0.016564721920141023,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": false,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10734",
+    "intentTs": 1792652400000,
+    "nativeEntryTs": 1792658100000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1792648800000,
+    "valid": true
+  },
+  "S3_10791": {
+    "BTCret6": -0.010059503426781857,
+    "EMA24": 0.007717827413157301,
+    "EMA72": 0.007815261458396177,
+    "PENGUminusBTC6": -0.015097729277620542,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10791",
+    "intentTs": 1792857600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1792854000000,
+    "valid": true
+  },
+  "S3_10918": {
+    "BTCret6": -0.02780034665800024,
+    "EMA24": 0.007645286005497625,
+    "EMA72": 0.007676360623569816,
+    "PENGUminusBTC6": -0.0826851388274854,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_10918",
+    "intentTs": 1793314800000,
+    "nativeEntryTs": 1793336400000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793311200000,
+    "valid": true
+  },
+  "S3_10925": {
+    "BTCret6": 0.007165314030854741,
+    "EMA24": 0.007380195481632983,
+    "EMA72": 0.007563295452971495,
+    "PENGUminusBTC6": 0.004134120997393742,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_10925",
+    "intentTs": 1793340000000,
+    "nativeEntryTs": 1793359500000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793336400000,
+    "valid": true
+  },
+  "S3_10936": {
+    "BTCret6": -0.006117937381111549,
+    "EMA24": 0.0073001034841770765,
+    "EMA72": 0.007476880390636718,
+    "PENGUminusBTC6": 0.016035292753012298,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_10936",
+    "intentTs": 1793379600000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793376000000,
+    "valid": true
+  },
+  "S3_11012": {
+    "BTCret6": -0.013576137243994202,
+    "EMA24": 0.007138740259524301,
+    "EMA72": 0.007251015815770421,
+    "PENGUminusBTC6": -0.010266780007057719,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11012",
+    "intentTs": 1793653200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1793649600000,
+    "valid": true
+  },
+  "S3_11084": {
+    "BTCret6": -0.02624865710040991,
+    "EMA24": 0.006922537603378361,
+    "EMA72": 0.00708231363620475,
+    "PENGUminusBTC6": -0.021280412667031956,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11084",
+    "intentTs": 1793912400000,
+    "nativeEntryTs": 1793937000000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793908800000,
+    "valid": true
+  },
+  "S3_11090": {
+    "BTCret6": -0.0008828857902615228,
+    "EMA24": 0.006782545432617146,
+    "EMA72": 0.007002320001894442,
+    "PENGUminusBTC6": 0.013548840314906774,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_11090",
+    "intentTs": 1793934000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793930400000,
+    "valid": true
+  },
+  "S3_11096": {
+    "BTCret6": -0.006550682773109218,
+    "EMA24": 0.006719891187230184,
+    "EMA72": 0.006944154699458776,
+    "PENGUminusBTC6": 0.004139591754423244,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_11096",
+    "intentTs": 1793955600000,
+    "nativeEntryTs": 1793979300000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793952000000,
+    "valid": true
+  },
+  "S3_11100": {
+    "BTCret6": 0.004425205569231538,
+    "EMA24": 0.006708130651457747,
+    "EMA72": 0.006916091786082711,
+    "PENGUminusBTC6": 0.005535555070671938,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_11100",
+    "intentTs": 1793970000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1793966400000,
+    "valid": true
+  },
+  "S3_11200": {
+    "BTCret6": -0.018192941392074724,
+    "EMA24": 0.006281393925250385,
+    "EMA72": 0.006347509299702301,
+    "PENGUminusBTC6": -0.00862698197957279,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11200",
+    "intentTs": 1794330000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1794326400000,
+    "valid": true
+  },
+  "S3_11245": {
+    "BTCret6": -0.015508698345086946,
+    "EMA24": 0.006201234640516566,
+    "EMA72": 0.00626422908224578,
+    "PENGUminusBTC6": -0.0029379035966605738,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11245",
+    "intentTs": 1794492000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1794488400000,
+    "valid": true
+  },
+  "S3_11246": {
+    "BTCret6": -0.0265298826497532,
+    "EMA24": 0.006189135869275241,
+    "EMA72": 0.006258359792321238,
+    "PENGUminusBTC6": 0.012192965087029162,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_11246",
+    "intentTs": 1794495600000,
+    "nativeEntryTs": 1794497100000,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1794492000000,
+    "valid": true
+  },
+  "S3_11298": {
+    "BTCret6": -0.021894224452009836,
+    "EMA24": 0.005678779655716269,
+    "EMA72": 0.005958276059687762,
+    "PENGUminusBTC6": -0.08080468897245563,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11298",
+    "intentTs": 1794682800000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1794679200000,
+    "valid": true
+  },
+  "S3_11300": {
+    "BTCret6": -0.017397849854006053,
+    "EMA24": 0.005547607100598251,
+    "EMA72": 0.005897169753590919,
+    "PENGUminusBTC6": -0.09787161122383814,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11300",
+    "intentTs": 1794690000000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "BREAKDOWN_RETEST_FAILURE",
+    "signalReferenceTs": 1794686400000,
+    "valid": true
+  },
+  "S3_11302": {
+    "BTCret6": -0.027711271271026017,
+    "EMA24": 0.00541821464994636,
+    "EMA72": 0.005832816049512446,
+    "PENGUminusBTC6": -0.06277234807374776,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11302",
+    "intentTs": 1794697200000,
+    "nativeEntryTs": 1794703200000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1794693600000,
+    "valid": true
+  },
+  "S3_11315": {
+    "BTCret6": 0.013397629542742928,
+    "EMA24": 0.005071800355521576,
+    "EMA72": 0.005546712217150063,
+    "PENGUminusBTC6": -0.01462062179712531,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11315",
+    "intentTs": 1794744000000,
+    "nativeEntryTs": 1794771000000,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1794740400000,
+    "valid": true
+  },
+  "S3_11317": {
+    "BTCret6": 0.022342422314916233,
+    "EMA24": 0.005053187820913463,
+    "EMA72": 0.00551451084380812,
+    "PENGUminusBTC6": 0.0004224783473354421,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": false,
+      "emaDown24Below72": true,
+      "relativeWeak6h": false
+    },
+    "id": "S3_11317",
+    "intentTs": 1794751200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "SELLER_PULLBACK_REJECTION",
+    "signalReferenceTs": 1794747600000,
+    "valid": true
+  },
+  "S3_11367": {
+    "BTCret6": -0.0038982537129002015,
+    "EMA24": 0.004784610228346593,
+    "EMA72": 0.004999410224774364,
+    "PENGUminusBTC6": -0.04140375970991861,
+    "cohort": "POST_2026_OCT_NOV",
+    "flags": {
+      "btcWeak6h": true,
+      "emaDown24Below72": true,
+      "relativeWeak6h": true
+    },
+    "id": "S3_11367",
+    "intentTs": 1794931200000,
+    "nativeEntryTs": null,
+    "originalP20SourceUsesFuture": false,
+    "route": "RELATIVE_WEAKNESS_DOWNSHIFT",
+    "signalReferenceTs": 1794927600000,
+    "valid": true
+  }
+}

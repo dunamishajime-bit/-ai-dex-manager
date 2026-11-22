@@ -1,0 +1,53 @@
+{
+  "confusion": {
+    "sourceLoserNotFlagged": 17,
+    "sourceWinnerIncorrectlyFlagged": 6,
+    "sourceWinnerUnflagged": 22,
+    "trueLoseFlagged": 7
+  },
+  "falsePositiveRateAmongSourceWinners": 0.21428571428571427,
+  "flagPositivePredictiveLossFraction": 0.5384615384615384,
+  "frozenScoreThreshold": 3,
+  "limitations": [
+    "Original 53 labels, original new feature hypotheses and source data were already seen in research; this is not independent OOS.",
+    "Permutation is conditional on fixed 53 scores and original cohort labels, not a posterior strategy profitability proof.",
+    "Flagging an original winner is harmful if converted to a blocked/closed trade; no orders are changed.",
+    "Loss recall 7/24 cannot support PENGU winrate >=80 without economic reentry and return modeling."
+  ],
+  "lossRecall": 0.2916666666666667,
+  "observedAsOf2h": 52,
+  "originalSourceWinsTotal": 29,
+  "periodMetrics": {
+    "BASE_2025_2026": {
+      "flaggedLosers": 3,
+      "flaggedWinners": 6,
+      "n": 39,
+      "scoreLossAuc": 0.43478260869565216,
+      "sourceLosers": 16,
+      "sourceWinners": 23
+    },
+    "POST_2026_OCT_NOV": {
+      "flaggedLosers": 2,
+      "flaggedWinners": 0,
+      "n": 7,
+      "scoreLossAuc": 0.5,
+      "sourceLosers": 4,
+      "sourceWinners": 3
+    },
+    "PRE_2025_AUG_SEP": {
+      "flaggedLosers": 2,
+      "flaggedWinners": 0,
+      "n": 6,
+      "scoreLossAuc": 0.875,
+      "sourceLosers": 4,
+      "sourceWinners": 2
+    }
+  },
+  "permutationSeed": 20261122,
+  "permutationTestsWithinPeriod": 5000,
+  "schema": "prism7-p16-frozen-score-stratified-label-permutation-v1",
+  "sourceLoserScoreAuc": 0.49107142857142855,
+  "sourceNative53": 53,
+  "twoSidedPByCohortLabelPermutation": 0.9064187162567486,
+  "unobservedNoPriceH1": 1
+}

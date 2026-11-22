@@ -1,0 +1,289 @@
+{
+  "schema": "prism7-p14-native-immutable-real53-m5-clock-event-proxy/v1",
+  "pinnedSourceSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "nativeEntryAndExitPrecondition": "PASS_53_53",
+  "sourceOriginalIntents": 53,
+  "sourceOriginalWins": 29,
+  "sourceOriginalNet30MeanPct": 1.0006552252716996,
+  "sourceNativeStopPolicy": {
+    "hardStopPct": 0.08,
+    "trailingActivationPct": 0.15,
+    "trailingRetracePct": 0.04,
+    "maxHoldHours": 72
+  },
+  "sourceInputs": {
+    "originalSourceTapesAndH1": {
+      "PRE_2025_AUG_SEP": {
+        "rawNativeTapeSha256": "0c677cc6c4c20b9a5334c25a2b4d3ea1b15401dcef77e9839fe5f1ff9e20ee1d",
+        "penguH1": {
+          "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        },
+        "btcH1": {
+          "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      },
+      "BASE_2025_2026": {
+        "rawNativeTapeSha256": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+        "penguH1": {
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+        },
+        "btcH1": {
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+        }
+      },
+      "POST_2026_OCT_NOV": {
+        "rawNativeTapeSha256": "f4bae44aee5c6f61587f230840f1dfe992e7cf77cdc43bd6025ee92d82e1d57e",
+        "penguH1": {
+          "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+          "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+        },
+        "btcH1": {
+          "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+          "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+        }
+      }
+    },
+    "m5GzipSha256": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    }
+  },
+  "modelStatusCounts": {
+    "PRICE_PROXY_CLOSED": 52,
+    "NO_ENTRY_POSITIVE_PRINT_IN_H1": 1
+  },
+  "observedProxyReasons": {
+    "SHORT_HARD_STOP": 14,
+    "SHORT_MAX_HOLD": 27,
+    "SHORT_V20_DEADLINE_EXIT": 2,
+    "SHORT_TRAILING_STOP": 9,
+    "NO_ENTRY_POSITIVE_PRINT_IN_H1": 1
+  },
+  "sourceReasonCount": {
+    "SHORT_HARD_STOP": [
+      "PENGU_00003",
+      "PENGU_00006",
+      "PENGU_00008",
+      "PENGU_00006",
+      "PENGU_00013",
+      "PENGU_00014",
+      "PENGU_00021",
+      "PENGU_00034",
+      "PENGU_00035",
+      "PENGU_00051",
+      "PENGU_00086",
+      "PENGU_00101",
+      "PENGU_00103",
+      "PENGU_00104"
+    ],
+    "SHORT_MAX_HOLD": [
+      "PENGU_00004",
+      "PENGU_00005",
+      "PENGU_00008",
+      "PENGU_00017",
+      "PENGU_00027",
+      "PENGU_00031",
+      "PENGU_00032",
+      "PENGU_00033",
+      "PENGU_00055",
+      "PENGU_00057",
+      "PENGU_00071",
+      "PENGU_00072",
+      "PENGU_00075",
+      "PENGU_00076",
+      "PENGU_00080",
+      "PENGU_00081",
+      "PENGU_00088",
+      "PENGU_00105",
+      "PENGU_00107",
+      "PENGU_00108",
+      "PENGU_00109",
+      "PENGU_00001",
+      "PENGU_00003",
+      "PENGU_00004",
+      "PENGU_00006",
+      "PENGU_00008",
+      "PENGU_00009",
+      "PENGU_00011"
+    ],
+    "SHORT_V20_DEADLINE_EXIT": [
+      "PENGU_00011",
+      "PENGU_00015"
+    ],
+    "SHORT_TRAILING_STOP": [
+      "PENGU_00004",
+      "PENGU_00007",
+      "PENGU_00009",
+      "PENGU_00010",
+      "PENGU_00011",
+      "PENGU_00018",
+      "PENGU_00029",
+      "PENGU_00046",
+      "PENGU_00070"
+    ]
+  },
+  "economic": [
+    {
+      "feeBps": 10,
+      "extraExitSlippageBps": 0,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 29,
+      "proxyWinRateConditionalPct": 55.76923076923077,
+      "proxyMeanNetConditionalPct": 1.0587786422254633,
+      "proxyPfConditional": 1.400201586159609,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    {
+      "feeBps": 10,
+      "extraExitSlippageBps": 10,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 29,
+      "proxyWinRateConditionalPct": 55.76923076923077,
+      "proxyMeanNetConditionalPct": 0.9587786422254638,
+      "proxyPfConditional": 1.356443947938248,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    {
+      "feeBps": 10,
+      "extraExitSlippageBps": 25,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 29,
+      "proxyWinRateConditionalPct": 55.76923076923077,
+      "proxyMeanNetConditionalPct": 0.8087786422254631,
+      "proxyPfConditional": 1.2934407912440289,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    {
+      "feeBps": 30,
+      "extraExitSlippageBps": 0,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 29,
+      "proxyWinRateConditionalPct": 55.76923076923077,
+      "proxyMeanNetConditionalPct": 0.8587786422254624,
+      "proxyPfConditional": 1.3141020968528965,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    {
+      "feeBps": 30,
+      "extraExitSlippageBps": 10,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 29,
+      "proxyWinRateConditionalPct": 55.76923076923077,
+      "proxyMeanNetConditionalPct": 0.7587786422254632,
+      "proxyPfConditional": 1.2731084146900609,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    {
+      "feeBps": 30,
+      "extraExitSlippageBps": 25,
+      "sourceIntentCount": 53,
+      "sourceWinsAllIntents": 29,
+      "modelProxyComplete": 52,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 28,
+      "proxyWinRateConditionalPct": 53.84615384615385,
+      "proxyMeanNetConditionalPct": 0.6087786422254624,
+      "proxyPfConditional": 1.2139960359377642,
+      "sameSubsetSourceWinCount": 28,
+      "sameSubsetSourceMean30Pct": 0.9038082182694102,
+      "sameSubsetSourcePf30": 1.334390781340193,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 1
+    }
+  ],
+  "byPeriod": {
+    "PRE_2025_AUG_SEP": {
+      "sourceIntentCount": 6,
+      "sourceWinsAllIntents": 2,
+      "modelProxyComplete": 6,
+      "unfilledOrCensored": 0,
+      "proxyWinCountConditional": 3,
+      "proxyWinRateConditionalPct": 50,
+      "proxyMeanNetConditionalPct": -3.646335515203677,
+      "proxyPfConditional": 0.12224085759036722,
+      "sameSubsetSourceWinCount": 2,
+      "sameSubsetSourceMean30Pct": -3.893341550333135,
+      "sameSubsetSourcePf30": 0.07835106221630983,
+      "newWinnersFromSourceLosers": 1,
+      "sourceWinnersNowLose": 0
+    },
+    "BASE_2025_2026": {
+      "sourceIntentCount": 40,
+      "sourceWinsAllIntents": 24,
+      "modelProxyComplete": 39,
+      "unfilledOrCensored": 1,
+      "proxyWinCountConditional": 23,
+      "proxyWinRateConditionalPct": 58.97435897435897,
+      "proxyMeanNetConditionalPct": 1.6927535619106016,
+      "proxyPfConditional": 1.6206687392360477,
+      "sameSubsetSourceWinCount": 23,
+      "sameSubsetSourceMean30Pct": 1.7964741372682103,
+      "sameSubsetSourcePf30": 1.6718657580103096,
+      "newWinnersFromSourceLosers": 0,
+      "sourceWinnersNowLose": 0
+    },
+    "POST_2026_OCT_NOV": {
+      "sourceIntentCount": 7,
+      "sourceWinsAllIntents": 3,
+      "modelProxyComplete": 7,
+      "unfilledOrCensored": 0,
+      "proxyWinCountConditional": 3,
+      "proxyWinRateConditionalPct": 42.857142857142854,
+      "proxyMeanNetConditionalPct": 0.07387336749037551,
+      "proxyPfConditional": 1.0475196006891379,
+      "sameSubsetSourceWinCount": 3,
+      "sameSubsetSourceMean30Pct": 0.04222647122113481,
+      "sameSubsetSourcePf30": 1.0270638055675108,
+      "newWinnersFromSourceLosers": 0,
+      "sourceWinnersNowLose": 0
+    }
+  },
+  "limitations": [
+    "M5 OHLCV is not source venue signed fills, order queue or executable bid/ask.",
+    "Resident STOP M5 high touch is detectable but price and intrabar order are not known.",
+    "H1 source features from provider are reused (except high/low since entry); PENGU H1/M5 source mismatch remains.",
+    "H1-native V20 economic progression is evaluated after completed H1; no fill at same H1 open on such a decision.",
+    "Research entry at first positive-volume M5 open is a proxy, not proof the order queue filled at this price.",
+    "Original production concurrent gross, owner admission, funding and shared risk not modeled.",
+    "Already seen natural53 is not independent OOS. No compound portfolio risk/DD."
+  ]
+}

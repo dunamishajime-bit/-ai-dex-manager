@@ -1,0 +1,399 @@
+{
+  "S3_00273": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_00338": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01088": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01257": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01259": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01270": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01342": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01348": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_01350": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_01634": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_01700": {
+    "btc5mDropPct": -6.636875752984528,
+    "btcM5Close": 104694.7,
+    "btcPreviousPositivePrintClose": 112137.1,
+    "entryPrice": 0.022617,
+    "entryTs": 1760130900000,
+    "eventCloseTs": 1760131200000,
+    "eventM5OpenTs": 1760130900000,
+    "first3AfterSignalPositiveM5OpenProxies": [
+      {
+        "positiveVolumeNotionalUSDT": 1320.633046,
+        "positiveVolumeUnits": 211606.0,
+        "px": 0.006241,
+        "ts": 1760131200000
+      },
+      {
+        "positiveVolumeNotionalUSDT": 1705.4253999999999,
+        "positiveVolumeUnits": 168854.0,
+        "px": 0.0101,
+        "ts": 1760131500000
+      },
+      {
+        "positiveVolumeNotionalUSDT": 3790.4200000000005,
+        "positiveVolumeUnits": 239900.0,
+        "px": 0.0158,
+        "ts": 1760131800000
+      }
+    ],
+    "pengu5mDropPct": -55.695361304328564,
+    "penguM5Close": 0.01,
+    "penguPreviousPositivePrintClose": 0.022571,
+    "penguTakerBuyVolumeRatio": 0.09308675257928534,
+    "penguTradeGrossShortGainAtSignalPct": 55.785471105805364,
+    "signalUsesFutureM5Bars": false,
+    "sourceBaselineExitPrice": 0.020007,
+    "sourceBaselineExitReason": "SHORT_TRAILING_STOP",
+    "sourceBaselineExitTs": 1760133600000,
+    "state": "CROSS_ASSET_CAPITULATION_CONFIRMED",
+    "venueSignedFillProven": false
+  },
+  "S3_01713": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01719": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01792": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01798": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01860": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01864": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_01948": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01950": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01957": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01968": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_01983": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02173": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02261": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02266": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02291": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02365": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02456": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02457": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02520": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02586": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02656": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02658": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02699": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_02701": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02707": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02930": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_02941": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03049": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03052": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03178": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03182": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03184": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03187": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03280": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_03330": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03462": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03527": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03528": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_03848": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04116": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04145": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04267": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04361": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04381": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04400": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04401": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_04404": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_04406": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04533": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_04661": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04665": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_04980": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05222": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05514": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_05693": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_05697": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05707": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05722": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05726": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_05744": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_06830": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07174": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07302": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_07304": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07307": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07309": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07341": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07398": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07417": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07831": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_07864": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_07961": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_08187": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_08664": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_08665": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_08703": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_08704": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_09429": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_09589": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_09844": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_09847": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10161": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10173": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10370": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10381": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10382": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10384": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10500": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10602": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10732": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10734": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10791": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_10918": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10925": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_10936": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11012": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11084": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_11090": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11096": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_11100": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11200": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11245": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11246": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_11298": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11300": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11302": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_11315": {
+    "state": "NO_P25_CROSS_ASSET_CAPITULATION_BEFORE_SOURCE_EXIT"
+  },
+  "S3_11317": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  },
+  "S3_11367": {
+    "state": "NEVER_ENTERED_SOURCE_CANDIDATE"
+  }
+}

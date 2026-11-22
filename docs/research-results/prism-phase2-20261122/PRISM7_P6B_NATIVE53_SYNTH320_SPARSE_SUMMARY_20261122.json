@@ -1,0 +1,365 @@
+{
+  "btc_m5_sha256": {
+    "BTCUSDT-5m-20250801-20250924.jsonl.gz": "81ea647df8c2afaaf8eca477d36d6e8493d0da66469ce1498500bccfa7e3eb0a",
+    "BTCUSDT-5m-20250924-20260803.jsonl.gz": "5e08252032828062d7047daceddad1ab69e4343174bf7163e5242085b92d1e07",
+    "BTCUSDT-5m-20260803-20261001.jsonl.gz": "9e12516a68ff1058c42982001fb7f86c74e606f27f86db201570362d567f48f5",
+    "BTCUSDT-5m-20261001-20261118.jsonl.gz": "e9795e2ea033f7373baf12442ad9f6614149baa5c31a0c0e0a55f65525161b38"
+  },
+  "btc_quarantine": [
+    {
+      "OHLC": [
+        115777.0,
+        115774.3,
+        115580.7,
+        115693.4
+      ],
+      "source_file": "BTCUSDT-5m-20250801-20250924.jsonl.gz",
+      "taker_buy": 21.32,
+      "ts": 1757771400000,
+      "volume": 37.653
+    }
+  ],
+  "input_sha256": {
+    "entries": "26292b73421583c552f49fed6d2065aa22af7867bdf7c89085d04348984bb902",
+    "original_p6_csv": "c0ab98a0d9e4fd7c80d4051e42f6a25b955e37cfe69b7fb467bb943353dd3cca"
+  },
+  "limitations": [
+    "Sparse trade-aware ATR is a research feature, not native H1 ATR parity.",
+    "P6B does not modify, reprice, veto or execute any of the 53 native trades.",
+    "Synthetic hourly observations are NOT actual native PENGU signals or STOP model.",
+    "One previously inspected real source 53 and one fixed generator; NOT independent OOS.",
+    "Independent OOS, synthetic native entry/STOP, funding, fills and portfolio DD untested."
+  ],
+  "native_prefix_invariance_count": 53,
+  "native_state_groups": [
+    {
+      "n": 7,
+      "no_favorable_1pct_11": 1,
+      "original_losses": 3,
+      "original_native_net30_sum_pct": 10.48671,
+      "original_winners": 4,
+      "source_natural_intents_retained": 7,
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "n": 1,
+      "no_favorable_1pct_11": 0,
+      "original_losses": 0,
+      "original_native_net30_sum_pct": 12.036679,
+      "original_winners": 1,
+      "source_natural_intents_retained": 1,
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "n": 43,
+      "no_favorable_1pct_11": 10,
+      "original_losses": 21,
+      "original_native_net30_sum_pct": 21.134382,
+      "original_winners": 22,
+      "source_natural_intents_retained": 43,
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "n": 2,
+      "no_favorable_1pct_11": 0,
+      "original_losses": 0,
+      "original_native_net30_sum_pct": 9.376957,
+      "original_winners": 2,
+      "source_natural_intents_retained": 2,
+      "state": "DATA_INSUFFICIENT"
+    }
+  ],
+  "native_winner_parity": 29,
+  "natural_signal_count": 53,
+  "original_11_no_favorable_count": 11,
+  "p6_to_p6b_state_transitions": [
+    {
+      "n": 1,
+      "p6": "DATA_INSUFFICIENT",
+      "p6b": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "n": 2,
+      "p6": "DATA_INSUFFICIENT",
+      "p6b": "DATA_INSUFFICIENT"
+    },
+    {
+      "n": 3,
+      "p6": "DATA_INSUFFICIENT",
+      "p6b": "SELLER_CONTINUATION"
+    },
+    {
+      "n": 29,
+      "p6": "DATA_INSUFFICIENT",
+      "p6b": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "n": 3,
+      "p6": "SELLER_CONTINUATION",
+      "p6b": "SELLER_CONTINUATION"
+    },
+    {
+      "n": 1,
+      "p6": "TRANSITION_OR_CONFLICT",
+      "p6b": "SELLER_CONTINUATION"
+    },
+    {
+      "n": 14,
+      "p6": "TRANSITION_OR_CONFLICT",
+      "p6b": "TRANSITION_OR_CONFLICT"
+    }
+  ],
+  "schema": "prism7-p6b-trade-aware-sparse-structure-real53-synthetic320/v1",
+  "source_m5_sha256": {
+    "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+    "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+    "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+    "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+  },
+  "source_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "synthetic_hourly_checks": 13440,
+  "synthetic_paths": 320,
+  "synthetic_prefix_invariance_count": 8,
+  "synthetic_regime_states": [
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.08309,
+      "future6h_short_mean_gross_pct": 2.18388,
+      "future6h_short_positive_frac": 0.829446,
+      "hourly_checks": 686,
+      "observed_6h_labels": 686,
+      "regime": "PERSISTENT_DOWN",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.181818,
+      "future6h_short_mean_gross_pct": 0.558194,
+      "future6h_short_positive_frac": 0.636364,
+      "hourly_checks": 11,
+      "observed_6h_labels": 11,
+      "regime": "PERSISTENT_DOWN",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.113937,
+      "future6h_short_mean_gross_pct": 1.815941,
+      "future6h_short_positive_frac": 0.788403,
+      "hourly_checks": 983,
+      "observed_6h_labels": 983,
+      "regime": "PERSISTENT_DOWN",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.614286,
+      "future6h_short_mean_gross_pct": -1.916519,
+      "future6h_short_positive_frac": 0.271429,
+      "hourly_checks": 70,
+      "observed_6h_labels": 70,
+      "regime": "PERSISTENT_UP",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.777778,
+      "future6h_short_mean_gross_pct": -2.509997,
+      "future6h_short_positive_frac": 0.142857,
+      "hourly_checks": 63,
+      "observed_6h_labels": 63,
+      "regime": "PERSISTENT_UP",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.679379,
+      "future6h_short_mean_gross_pct": -2.109125,
+      "future6h_short_positive_frac": 0.18746,
+      "hourly_checks": 1547,
+      "observed_6h_labels": 1547,
+      "regime": "PERSISTENT_UP",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.423208,
+      "future6h_short_mean_gross_pct": -0.45255,
+      "future6h_short_positive_frac": 0.450512,
+      "hourly_checks": 293,
+      "observed_6h_labels": 293,
+      "regime": "SIDEWAYS",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.138889,
+      "future6h_short_mean_gross_pct": 1.184749,
+      "future6h_short_positive_frac": 0.75,
+      "hourly_checks": 36,
+      "observed_6h_labels": 36,
+      "regime": "SIDEWAYS",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.341969,
+      "future6h_short_mean_gross_pct": 0.164015,
+      "future6h_short_positive_frac": 0.521836,
+      "hourly_checks": 1351,
+      "observed_6h_labels": 1351,
+      "regime": "SIDEWAYS",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.794118,
+      "future6h_short_mean_gross_pct": -3.509283,
+      "future6h_short_positive_frac": 0.137255,
+      "hourly_checks": 102,
+      "observed_6h_labels": 102,
+      "regime": "DOWN_THEN_SQUEEZE",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.617284,
+      "future6h_short_mean_gross_pct": -2.564225,
+      "future6h_short_positive_frac": 0.234568,
+      "hourly_checks": 81,
+      "observed_6h_labels": 81,
+      "regime": "DOWN_THEN_SQUEEZE",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.775551,
+      "future6h_short_mean_gross_pct": -3.365767,
+      "future6h_short_positive_frac": 0.144289,
+      "hourly_checks": 1497,
+      "observed_6h_labels": 1497,
+      "regime": "DOWN_THEN_SQUEEZE",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.079877,
+      "future6h_short_mean_gross_pct": 3.226851,
+      "future6h_short_positive_frac": 0.84639,
+      "hourly_checks": 651,
+      "observed_6h_labels": 651,
+      "regime": "UP_THEN_DUMP",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.264706,
+      "future6h_short_mean_gross_pct": 1.560004,
+      "future6h_short_positive_frac": 0.676471,
+      "hourly_checks": 34,
+      "observed_6h_labels": 34,
+      "regime": "UP_THEN_DUMP",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.141709,
+      "future6h_short_mean_gross_pct": 2.711222,
+      "future6h_short_positive_frac": 0.792965,
+      "hourly_checks": 995,
+      "observed_6h_labels": 995,
+      "regime": "UP_THEN_DUMP",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.533333,
+      "future6h_short_mean_gross_pct": -1.556632,
+      "future6h_short_positive_frac": 0.426667,
+      "hourly_checks": 300,
+      "observed_6h_labels": 300,
+      "regime": "HIGH_VOL_CHOP",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.487805,
+      "future6h_short_mean_gross_pct": -0.390979,
+      "future6h_short_positive_frac": 0.487805,
+      "hourly_checks": 41,
+      "observed_6h_labels": 41,
+      "regime": "HIGH_VOL_CHOP",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.434653,
+      "future6h_short_mean_gross_pct": 0.263429,
+      "future6h_short_positive_frac": 0.511576,
+      "hourly_checks": 1339,
+      "observed_6h_labels": 1339,
+      "regime": "HIGH_VOL_CHOP",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.327273,
+      "future6h_short_mean_gross_pct": 0.300091,
+      "future6h_short_positive_frac": 0.581818,
+      "hourly_checks": 330,
+      "observed_6h_labels": 330,
+      "regime": "ILLIQUID_ZERO_PRINT",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.195122,
+      "future6h_short_mean_gross_pct": 1.189421,
+      "future6h_short_positive_frac": 0.658537,
+      "hourly_checks": 41,
+      "observed_6h_labels": 41,
+      "regime": "ILLIQUID_ZERO_PRINT",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.338426,
+      "future6h_short_mean_gross_pct": 0.546853,
+      "future6h_short_positive_frac": 0.55233,
+      "hourly_checks": 1309,
+      "observed_6h_labels": 1309,
+      "regime": "ILLIQUID_ZERO_PRINT",
+      "state": "TRANSITION_OR_CONFLICT"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.575472,
+      "future6h_short_mean_gross_pct": -1.492534,
+      "future6h_short_positive_frac": 0.311321,
+      "hourly_checks": 106,
+      "observed_6h_labels": 106,
+      "regime": "BTC_PENGU_DIVERGENCE",
+      "state": "SELLER_CONTINUATION"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.5,
+      "future6h_short_mean_gross_pct": -1.687411,
+      "future6h_short_positive_frac": 0.291667,
+      "hourly_checks": 24,
+      "observed_6h_labels": 24,
+      "regime": "BTC_PENGU_DIVERGENCE",
+      "state": "BUYER_ABSORPTION_REVERSAL"
+    },
+    {
+      "censored_6h_labels": 0,
+      "future6h_short_loss_more_than1pct_frac": 0.548387,
+      "future6h_short_mean_gross_pct": -1.353274,
+      "future6h_short_positive_frac": 0.310323,
+      "hourly_checks": 1550,
+      "observed_6h_labels": 1550,
+      "regime": "BTC_PENGU_DIVERGENCE",
+      "state": "TRANSITION_OR_CONFLICT"
+    }
+  ]
+}

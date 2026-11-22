@@ -1,0 +1,176 @@
+{
+  "files": {
+    "config/integratedProductionRiskPolicy.ts": {
+      "adapted_sha256": "3d66abdbbc7ce5156785fb404dbb915bbb96d5c112c12997b5a7364dd317161b",
+      "adapter_bytes": 4678,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "./q102FamilySideGross.json",
+          "original": "./q102FamilySideGross.json"
+        },
+        {
+          "converted": "./v52V50Runtime.json",
+          "original": "./v52V50Runtime.json"
+        }
+      ],
+      "original_sha256": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+      "pinned_git_blob_sha1": "a1180a3c68fa0f8701e5e6d3f3ef052fcc596acf",
+      "raw_bytes": 4634
+    },
+    "config/penguDualLsV2Runtime.ts": {
+      "adapted_sha256": "805d0a399ed4a7184aa9c9bcb712b4b08d52d4d7815f3a96683703b5debc167c",
+      "adapter_bytes": 6116,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "./sharedCryptoRiskPolicy.ts",
+          "original": "./sharedCryptoRiskPolicy"
+        },
+        {
+          "converted": "./integratedProductionRiskPolicy.ts",
+          "original": "./integratedProductionRiskPolicy"
+        }
+      ],
+      "original_sha256": "18ed5fee4f5f40cb012285a76f5bf9215d03961153df493a362d09aa4dcf26d0",
+      "pinned_git_blob_sha1": "87fb2e0df27d739f50ebc5b924af8ce6b694e6e8",
+      "raw_bytes": 6110
+    },
+    "config/penguRecoveryV8.ts": {
+      "adapted_sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+      "adapter_bytes": 2070,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [],
+      "original_sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+      "pinned_git_blob_sha1": "5691802c42b94692b9fe26067c4674e794099bb6",
+      "raw_bytes": 2070
+    },
+    "config/q102FamilySideGross.json": {
+      "adapted_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+      "adapter_bytes": 187,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [],
+      "original_sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+      "pinned_git_blob_sha1": "dd67d31f9302995dbca122dab6ac4592b55f78d3",
+      "raw_bytes": 187
+    },
+    "config/sharedCryptoRiskPolicy.ts": {
+      "adapted_sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+      "adapter_bytes": 546,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [],
+      "original_sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+      "pinned_git_blob_sha1": "f4091fd0b0165b9511bac0384ae3f34e0dbe0755",
+      "raw_bytes": 546
+    },
+    "config/v52V50Runtime.json": {
+      "adapted_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+      "adapter_bytes": 450,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [],
+      "original_sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+      "pinned_git_blob_sha1": "e38cdd5357744ff2a780de639bfeb83231d88178",
+      "raw_bytes": 450
+    },
+    "lib/disdex-resilient-profit-main-v35.ts": {
+      "adapted_sha256": "9131e880654e1ea62970d17b8099df94a098c60b4bfccee90649cecb2eb18c9b",
+      "adapter_bytes": 6879,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [],
+      "original_sha256": "9131e880654e1ea62970d17b8099df94a098c60b4bfccee90649cecb2eb18c9b",
+      "pinned_git_blob_sha1": "f1d770ad14106d2f2c39e8cdf5db9c6e419a0710",
+      "raw_bytes": 6879
+    },
+    "lib/disdex-v35-signal-engine.ts": {
+      "adapted_sha256": "38d89872bc602a11004879a03c7fb550f29eaf4e977c2bbeb935911a90dcd462",
+      "adapter_bytes": 23555,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "./disdex-resilient-profit-main-v35.ts",
+          "original": "@/lib/disdex-resilient-profit-main-v35"
+        }
+      ],
+      "original_sha256": "2477c966213c86fa8719e76de0995b716df3a8fb4d40b26896c7854e521718ac",
+      "pinned_git_blob_sha1": "b6615e6df25ad90fefb503e6b0f3bcd24ddffb5e",
+      "raw_bytes": 23556
+    },
+    "lib/pengu-dual-ls-v2.ts": {
+      "adapted_sha256": "48beaf59943db8de16dd24d66c66a0b6bf0eb2a7502c1719e9a793394fafdce9",
+      "adapter_bytes": 34472,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "../config/penguDualLsV2Runtime.ts",
+          "original": "@/config/penguDualLsV2Runtime"
+        },
+        {
+          "converted": "../config/penguRecoveryV8.ts",
+          "original": "@/config/penguRecoveryV8"
+        },
+        {
+          "converted": "./disdex-v35-signal-engine.ts",
+          "original": "@/lib/disdex-v35-signal-engine"
+        },
+        {
+          "converted": "./pengu-short-v20.ts",
+          "original": "@/lib/pengu-short-v20"
+        },
+        {
+          "converted": "./pengu-recovery-v8.ts",
+          "original": "@/lib/pengu-recovery-v8"
+        }
+      ],
+      "original_sha256": "5e1f1fe0c709927100758f21dfde39dab4914ce94fcf561a0e6368ad1c0e191a",
+      "pinned_git_blob_sha1": "06476fed9985a165cf73971e790322ef3d03bd90",
+      "raw_bytes": 34467
+    },
+    "lib/pengu-recovery-v8.ts": {
+      "adapted_sha256": "2925911279a1d85b74caba47c78a10f1add9cc6f7e81cec10ab2bf63ee5d509b",
+      "adapter_bytes": 10116,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "../config/penguRecoveryV8.ts",
+          "original": "@/config/penguRecoveryV8"
+        },
+        {
+          "converted": "./pengu-dual-ls-v2.ts",
+          "original": "@/lib/pengu-dual-ls-v2"
+        }
+      ],
+      "original_sha256": "5eae34015f3b06ad2ecdd98c0f2366e46513eb7577d6c2c2c1cdca20a827b5ad",
+      "pinned_git_blob_sha1": "b42013283aa1fedc7b289bca883e95b10684c30a",
+      "raw_bytes": 10113
+    },
+    "lib/pengu-short-v20.ts": {
+      "adapted_sha256": "2fc2fa1d8895640bb003d6addbd919a6bf1ca34c7c4bbe2ff7e8e91e0ed91af0",
+      "adapter_bytes": 5698,
+      "economic_logic_changes": "NONE_IMPORT_PATHS_ONLY",
+      "module_specifier_changes": [
+        {
+          "converted": "../config/penguDualLsV2Runtime.ts",
+          "original": "@/config/penguDualLsV2Runtime"
+        },
+        {
+          "converted": "./pengu-dual-ls-v2.ts",
+          "original": "@/lib/pengu-dual-ls-v2"
+        }
+      ],
+      "original_sha256": "b1cc8d66decba4f7ddcdd13330d31df42f8460722e17c0fea296b43c36ef9e46",
+      "pinned_git_blob_sha1": "b2e599f006331db1402f00a071baeb6d6cb3a340",
+      "raw_bytes": 5695
+    }
+  },
+  "limitations": [
+    "Native TypeScript source was copied from immutable Git; current worktree not modified.",
+    "Adapter import rewriting changes bytes but not economic logic.",
+    "The adapter has to PASS source-native parity before any synthetic native claim.",
+    "Source blob Git SHA-1 verified against Git object database independently.",
+    "No actual venue fills or signed STOP reconstruction."
+  ],
+  "node_adapter_only": true,
+  "pinned_commit": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "schema": "prism7-p8-pinned-source-import-only-adapter/v1",
+  "source_repository_identity": "dunamishajime-bit/-ai-dex-manager"
+}

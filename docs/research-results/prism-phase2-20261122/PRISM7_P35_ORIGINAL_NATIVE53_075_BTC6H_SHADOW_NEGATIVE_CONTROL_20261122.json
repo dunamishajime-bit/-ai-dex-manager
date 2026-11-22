@@ -1,0 +1,1313 @@
+{
+  "allFourRetrospectiveShadowModels": [
+    {
+      "allOriginalSource53ExitsUnchanged": true,
+      "conditionalMeanNetPctOnCapital": 0.75049142,
+      "conditionalWinRatePct": 54.71698113,
+      "grossExposureIfConceptuallyExecuted": 0.75,
+      "keptLosses": 24,
+      "keptWins": 29,
+      "model": "NATIVE53_UNMODIFIED",
+      "nativeAvoidedLoserIds": [],
+      "nativeLostWinnerIds": [],
+      "nativeOriginalLosingGrossReturnPctPointsAvoidedAt0p75": 0,
+      "nativeOriginalWinningGrossReturnPctPointsLostAt0p75": 0,
+      "nativeRetrospectiveShadowProfitFactor": 1.37734188,
+      "netPctPointSumPer53OriginalOpportunitiesAtFixedGross": 39.7760452,
+      "originalPinnedNativeV20Intents": 53,
+      "originalSourceNativePnLAndExitForKept": [
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755284400000,
+          "exitTs": 1755450000000,
+          "id": "PENGU_00003",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -0.33444737,
+          "entryTs": 1755504000000,
+          "exitTs": 1755763200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": -0.44592982678762744,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755698400000,
+          "exitTs": 1755727200000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -8.30000000000003,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1756724400000,
+          "exitTs": 1756857600000,
+          "id": "PENGU_00008",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.54819588,
+          "entryTs": 1757066400000,
+          "exitTs": 1757134800000,
+          "id": "PENGU_00011",
+          "originalSourceNet30Pct": 0.7309278350515538,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.94121452,
+          "entryTs": 1758614400000,
+          "exitTs": 1758682800000,
+          "id": "PENGU_00015",
+          "originalSourceNet30Pct": 1.25495268973731,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.19764948,
+          "entryTs": 1760544000000,
+          "exitTs": 1760695200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": 12.263532643143881,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.95128267,
+          "entryTs": 1761156000000,
+          "exitTs": 1761415200000,
+          "id": "PENGU_00005",
+          "originalSourceNet30Pct": -3.935043562439488,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1761220800000,
+          "exitTs": 1761480000000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 10.1052204,
+          "entryTs": 1761678000000,
+          "exitTs": 1761865200000,
+          "id": "PENGU_00007",
+          "originalSourceNet30Pct": 13.47362719462084,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.51915751,
+          "entryTs": 1761894000000,
+          "exitTs": 1762153200000,
+          "id": "PENGU_00008",
+          "originalSourceNet30Pct": 12.69221000960411,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.30860283,
+          "entryTs": 1761930000000,
+          "exitTs": 1762189200000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 12.411470439615968,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 11.20337937,
+          "entryTs": 1762178400000,
+          "exitTs": 1762293600000,
+          "id": "PENGU_00010",
+          "originalSourceNet30Pct": 14.937839159129794,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.21079918,
+          "entryTs": 1762232400000,
+          "exitTs": 1762293600000,
+          "id": "PENGU_00011",
+          "originalSourceNet30Pct": 9.614398908878341,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762650000000,
+          "exitTs": 1762736400000,
+          "id": "PENGU_00013",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762682400000,
+          "exitTs": 1762718400000,
+          "id": "PENGU_00014",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 4.50503124,
+          "entryTs": 1763085600000,
+          "exitTs": 1763344800000,
+          "id": "PENGU_00017",
+          "originalSourceNet30Pct": 6.006708314740439,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.50359779,
+          "entryTs": 1764439200000,
+          "exitTs": 1764630000000,
+          "id": "PENGU_00018",
+          "originalSourceNet30Pct": 10.004797047970492,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1765029600000,
+          "exitTs": 1765069200000,
+          "id": "PENGU_00021",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.02750899,
+          "entryTs": 1765771200000,
+          "exitTs": 1766030400000,
+          "id": "PENGU_00027",
+          "originalSourceNet30Pct": 12.036678659344823,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.01349372,
+          "entryTs": 1765893600000,
+          "exitTs": 1766116800000,
+          "id": "PENGU_00029",
+          "originalSourceNet30Pct": 12.017991631799163,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.18122345,
+          "entryTs": 1766012400000,
+          "exitTs": 1766271600000,
+          "id": "PENGU_00031",
+          "originalSourceNet30Pct": 0.2416312659303424,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.14188771,
+          "entryTs": 1766059200000,
+          "exitTs": 1766318400000,
+          "id": "PENGU_00032",
+          "originalSourceNet30Pct": 0.18918360691379005,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.77402881,
+          "entryTs": 1766077200000,
+          "exitTs": 1766336400000,
+          "id": "PENGU_00033",
+          "originalSourceNet30Pct": 2.365371749217638,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766080800000,
+          "exitTs": 1766160000000,
+          "id": "PENGU_00034",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766102400000,
+          "exitTs": 1766156400000,
+          "id": "PENGU_00035",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 13.10408801,
+          "entryTs": 1769806800000,
+          "exitTs": 1769889600000,
+          "id": "PENGU_00046",
+          "originalSourceNet30Pct": 17.47211735274049,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1772294400000,
+          "exitTs": 1772312400000,
+          "id": "PENGU_00051",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 6.46463017,
+          "entryTs": 1774540800000,
+          "exitTs": 1774800000000,
+          "id": "PENGU_00055",
+          "originalSourceNet30Pct": 8.619506889050033,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.02036515,
+          "entryTs": 1775152800000,
+          "exitTs": 1775412000000,
+          "id": "PENGU_00057",
+          "originalSourceNet30Pct": 1.3604868611961864,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.68327068,
+          "entryTs": 1778673600000,
+          "exitTs": 1778922000000,
+          "id": "PENGU_00070",
+          "originalSourceNet30Pct": 10.244360902255645,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 4.52752469,
+          "entryTs": 1778716800000,
+          "exitTs": 1778976000000,
+          "id": "PENGU_00071",
+          "originalSourceNet30Pct": 6.036699589390749,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.50519272,
+          "entryTs": 1778756400000,
+          "exitTs": 1779015600000,
+          "id": "PENGU_00072",
+          "originalSourceNet30Pct": 3.3402569593147806,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.98880368,
+          "entryTs": 1779966000000,
+          "exitTs": 1780225200000,
+          "id": "PENGU_00075",
+          "originalSourceNet30Pct": -2.651738241308787,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.14542372,
+          "entryTs": 1779998400000,
+          "exitTs": 1780257600000,
+          "id": "PENGU_00076",
+          "originalSourceNet30Pct": -1.5272316238212122,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.08240655,
+          "entryTs": 1781841600000,
+          "exitTs": 1782100800000,
+          "id": "PENGU_00080",
+          "originalSourceNet30Pct": -2.7765420704507155,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.14994022,
+          "entryTs": 1782259200000,
+          "exitTs": 1782518400000,
+          "id": "PENGU_00081",
+          "originalSourceNet30Pct": 1.5332536266539079,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1784318400000,
+          "exitTs": 1784548800000,
+          "id": "PENGU_00086",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.56745187,
+          "entryTs": 1785232800000,
+          "exitTs": 1785492000000,
+          "id": "PENGU_00088",
+          "originalSourceNet30Pct": -2.089935832489031,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788368400000,
+          "exitTs": 1788451200000,
+          "id": "PENGU_00101",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788544800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00103",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788562800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00104",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.49553045,
+          "entryTs": 1788876000000,
+          "exitTs": 1789135200000,
+          "id": "PENGU_00105",
+          "originalSourceNet30Pct": 4.660707269155207,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.09909972,
+          "entryTs": 1789027200000,
+          "exitTs": 1789286400000,
+          "id": "PENGU_00107",
+          "originalSourceNet30Pct": 4.132132963988922,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.27900641,
+          "entryTs": 1789056000000,
+          "exitTs": 1789315200000,
+          "id": "PENGU_00108",
+          "originalSourceNet30Pct": 3.038675213675213,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.26453301,
+          "entryTs": 1789066800000,
+          "exitTs": 1789326000000,
+          "id": "PENGU_00109",
+          "originalSourceNet30Pct": 1.686044015029531,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.78409727,
+          "entryTs": 1791435600000,
+          "exitTs": 1791694800000,
+          "id": "PENGU_00001",
+          "originalSourceNet30Pct": 3.7121296944250153,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.91570997,
+          "entryTs": 1791504000000,
+          "exitTs": 1791763200000,
+          "id": "PENGU_00003",
+          "originalSourceNet30Pct": -3.8876132930513725,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.73118812,
+          "entryTs": 1791522000000,
+          "exitTs": 1791781200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": -3.6415841584158333,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.59404762,
+          "entryTs": 1792875600000,
+          "exitTs": 1793134800000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -2.1253968253968187,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -0.9503995,
+          "entryTs": 1793347200000,
+          "exitTs": 1793606400000,
+          "id": "PENGU_00008",
+          "originalSourceNet30Pct": -1.267199327165691,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.91015755,
+          "entryTs": 1793383200000,
+          "exitTs": 1793642400000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 2.5468767274737463,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.71877936,
+          "entryTs": 1793937600000,
+          "exitTs": 1794196800000,
+          "id": "PENGU_00011",
+          "originalSourceNet30Pct": 4.958372480678897,
+          "period": "POST_2026_OCT_NOV"
+        }
+      ],
+      "preBasePostCohortOutcome": [
+        {
+          "cohort": "PRE_2025_AUG_SEP",
+          "originSourceCount": 6,
+          "shadowKeptCount": 6,
+          "shadowLossNetPctPointSumOnCapital": -19.009447370090754,
+          "shadowWinCount": 2,
+          "shadowWonNetPctPointSumOnCapital": 1.4894103935916478
+        },
+        {
+          "cohort": "BASE_2025_2026",
+          "originSourceCount": 40,
+          "shadowKeptCount": 40,
+          "shadowLossNetPctPointSumOnCapital": -78.21036849788199,
+          "shadowWinCount": 24,
+          "shadowWonNetPctPointSumOnCapital": 135.2847617050202
+        },
+        {
+          "cohort": "POST_2026_OCT_NOV",
+          "originSourceCount": 7,
+          "shadowKeptCount": 7,
+          "shadowLossNetPctPointSumOnCapital": -8.191345203022287,
+          "shadowWinCount": 3,
+          "shadowWonNetPctPointSumOnCapital": 8.413034176933245
+        }
+      ],
+      "recreateSingleSlotDDPermitted": false,
+      "retrospectiveShadowKept": 53,
+      "retrospectiveShadowRejected": 0,
+      "sourceNativeRoundtripFeeBps": 30
+    },
+    {
+      "allOriginalSource53ExitsUnchanged": true,
+      "conditionalMeanNetPctOnCapital": 0.14849699,
+      "conditionalWinRatePct": 52.38095238,
+      "grossExposureIfConceptuallyExecuted": 0.75,
+      "keptLosses": 10,
+      "keptWins": 11,
+      "model": "NATIVE53_SHADOW_BTC6H_NONPOSITIVE",
+      "nativeAvoidedLoserIds": [
+        "PENGU_00008@1756724400000",
+        "PENGU_00005@1761156000000",
+        "PENGU_00006@1761220800000",
+        "PENGU_00021@1765029600000",
+        "PENGU_00051@1772294400000",
+        "PENGU_00075@1779966000000",
+        "PENGU_00076@1779998400000",
+        "PENGU_00086@1784318400000",
+        "PENGU_00088@1785232800000",
+        "PENGU_00101@1788368400000",
+        "PENGU_00003@1791504000000",
+        "PENGU_00004@1791522000000",
+        "PENGU_00006@1792875600000",
+        "PENGU_00008@1793347200000"
+      ],
+      "nativeLostWinnerIds": [
+        "PENGU_00011@1757066400000",
+        "PENGU_00015@1758614400000",
+        "PENGU_00007@1761678000000",
+        "PENGU_00008@1761894000000",
+        "PENGU_00010@1762178400000",
+        "PENGU_00011@1762232400000",
+        "PENGU_00017@1763085600000",
+        "PENGU_00027@1765771200000",
+        "PENGU_00029@1765893600000",
+        "PENGU_00032@1766059200000",
+        "PENGU_00033@1766077200000",
+        "PENGU_00046@1769806800000",
+        "PENGU_00057@1775152800000",
+        "PENGU_00072@1778756400000",
+        "PENGU_00081@1782259200000",
+        "PENGU_00107@1789027200000",
+        "PENGU_00109@1789066800000",
+        "PENGU_00011@1793937600000"
+      ],
+      "nativeOriginalLosingGrossReturnPctPointsAvoidedAt0p75": 53.19430715,
+      "nativeOriginalWinningGrossReturnPctPointsLostAt0p75": 89.85191551,
+      "nativeRetrospectiveShadowProfitFactor": 1.05972089,
+      "netPctPointSumPer53OriginalOpportunitiesAtFixedGross": 3.11843684,
+      "originalPinnedNativeV20Intents": 53,
+      "originalSourceNativePnLAndExitForKept": [
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755284400000,
+          "exitTs": 1755450000000,
+          "id": "PENGU_00003",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -0.33444737,
+          "entryTs": 1755504000000,
+          "exitTs": 1755763200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": -0.44592982678762744,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755698400000,
+          "exitTs": 1755727200000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -8.30000000000003,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.19764948,
+          "entryTs": 1760544000000,
+          "exitTs": 1760695200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": 12.263532643143881,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.30860283,
+          "entryTs": 1761930000000,
+          "exitTs": 1762189200000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 12.411470439615968,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762650000000,
+          "exitTs": 1762736400000,
+          "id": "PENGU_00013",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762682400000,
+          "exitTs": 1762718400000,
+          "id": "PENGU_00014",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.50359779,
+          "entryTs": 1764439200000,
+          "exitTs": 1764630000000,
+          "id": "PENGU_00018",
+          "originalSourceNet30Pct": 10.004797047970492,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.18122345,
+          "entryTs": 1766012400000,
+          "exitTs": 1766271600000,
+          "id": "PENGU_00031",
+          "originalSourceNet30Pct": 0.2416312659303424,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766080800000,
+          "exitTs": 1766160000000,
+          "id": "PENGU_00034",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766102400000,
+          "exitTs": 1766156400000,
+          "id": "PENGU_00035",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 6.46463017,
+          "entryTs": 1774540800000,
+          "exitTs": 1774800000000,
+          "id": "PENGU_00055",
+          "originalSourceNet30Pct": 8.619506889050033,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.68327068,
+          "entryTs": 1778673600000,
+          "exitTs": 1778922000000,
+          "id": "PENGU_00070",
+          "originalSourceNet30Pct": 10.244360902255645,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 4.52752469,
+          "entryTs": 1778716800000,
+          "exitTs": 1778976000000,
+          "id": "PENGU_00071",
+          "originalSourceNet30Pct": 6.036699589390749,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.08240655,
+          "entryTs": 1781841600000,
+          "exitTs": 1782100800000,
+          "id": "PENGU_00080",
+          "originalSourceNet30Pct": -2.7765420704507155,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788544800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00103",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788562800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00104",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.49553045,
+          "entryTs": 1788876000000,
+          "exitTs": 1789135200000,
+          "id": "PENGU_00105",
+          "originalSourceNet30Pct": 4.660707269155207,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.27900641,
+          "entryTs": 1789056000000,
+          "exitTs": 1789315200000,
+          "id": "PENGU_00108",
+          "originalSourceNet30Pct": 3.038675213675213,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.78409727,
+          "entryTs": 1791435600000,
+          "exitTs": 1791694800000,
+          "id": "PENGU_00001",
+          "originalSourceNet30Pct": 3.7121296944250153,
+          "period": "POST_2026_OCT_NOV"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.91015755,
+          "entryTs": 1793383200000,
+          "exitTs": 1793642400000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 2.5468767274737463,
+          "period": "POST_2026_OCT_NOV"
+        }
+      ],
+      "preBasePostCohortOutcome": [
+        {
+          "cohort": "PRE_2025_AUG_SEP",
+          "originSourceCount": 6,
+          "shadowKeptCount": 3,
+          "shadowLossNetPctPointSumOnCapital": -12.784447370090747,
+          "shadowWinCount": 0,
+          "shadowWonNetPctPointSumOnCapital": 0
+        },
+        {
+          "cohort": "BASE_2025_2026",
+          "originSourceCount": 40,
+          "shadowKeptCount": 16,
+          "shadowLossNetPctPointSumOnCapital": -39.432406552838074,
+          "shadowWinCount": 9,
+          "shadowWonNetPctPointSumOnCapital": 50.64103594514065
+        },
+        {
+          "cohort": "POST_2026_OCT_NOV",
+          "originSourceCount": 7,
+          "shadowKeptCount": 2,
+          "shadowLossNetPctPointSumOnCapital": 0,
+          "shadowWinCount": 2,
+          "shadowWonNetPctPointSumOnCapital": 4.6942548164240705
+        }
+      ],
+      "recreateSingleSlotDDPermitted": false,
+      "retrospectiveShadowKept": 21,
+      "retrospectiveShadowRejected": 32,
+      "sourceNativeRoundtripFeeBps": 30
+    },
+    {
+      "allOriginalSource53ExitsUnchanged": true,
+      "conditionalMeanNetPctOnCapital": 1.23460598,
+      "conditionalWinRatePct": 57.57575758,
+      "grossExposureIfConceptuallyExecuted": 0.75,
+      "keptLosses": 14,
+      "keptWins": 19,
+      "model": "NATIVE53_SHADOW_PENGU_REL_WEAK6H",
+      "nativeAvoidedLoserIds": [
+        "PENGU_00008@1756724400000",
+        "PENGU_00006@1761220800000",
+        "PENGU_00014@1762682400000",
+        "PENGU_00051@1772294400000",
+        "PENGU_00076@1779998400000",
+        "PENGU_00088@1785232800000",
+        "PENGU_00101@1788368400000",
+        "PENGU_00003@1791504000000",
+        "PENGU_00004@1791522000000",
+        "PENGU_00008@1793347200000"
+      ],
+      "nativeLostWinnerIds": [
+        "PENGU_00015@1758614400000",
+        "PENGU_00017@1763085600000",
+        "PENGU_00029@1765893600000",
+        "PENGU_00055@1774540800000",
+        "PENGU_00071@1778716800000",
+        "PENGU_00072@1778756400000",
+        "PENGU_00107@1789027200000",
+        "PENGU_00001@1791435600000",
+        "PENGU_00009@1793383200000",
+        "PENGU_00011@1793937600000"
+      ],
+      "nativeOriginalLosingGrossReturnPctPointsAvoidedAt0p75": 40.43517318,
+      "nativeOriginalWinningGrossReturnPctPointsLostAt0p75": 39.46922096,
+      "nativeRetrospectiveShadowProfitFactor": 1.6270316,
+      "netPctPointSumPer53OriginalOpportunitiesAtFixedGross": 40.74199743,
+      "originalPinnedNativeV20Intents": 53,
+      "originalSourceNativePnLAndExitForKept": [
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755284400000,
+          "exitTs": 1755450000000,
+          "id": "PENGU_00003",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -0.33444737,
+          "entryTs": 1755504000000,
+          "exitTs": 1755763200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": -0.44592982678762744,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755698400000,
+          "exitTs": 1755727200000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -8.30000000000003,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.54819588,
+          "entryTs": 1757066400000,
+          "exitTs": 1757134800000,
+          "id": "PENGU_00011",
+          "originalSourceNet30Pct": 0.7309278350515538,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.19764948,
+          "entryTs": 1760544000000,
+          "exitTs": 1760695200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": 12.263532643143881,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.95128267,
+          "entryTs": 1761156000000,
+          "exitTs": 1761415200000,
+          "id": "PENGU_00005",
+          "originalSourceNet30Pct": -3.935043562439488,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 10.1052204,
+          "entryTs": 1761678000000,
+          "exitTs": 1761865200000,
+          "id": "PENGU_00007",
+          "originalSourceNet30Pct": 13.47362719462084,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.51915751,
+          "entryTs": 1761894000000,
+          "exitTs": 1762153200000,
+          "id": "PENGU_00008",
+          "originalSourceNet30Pct": 12.69221000960411,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.30860283,
+          "entryTs": 1761930000000,
+          "exitTs": 1762189200000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 12.411470439615968,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 11.20337937,
+          "entryTs": 1762178400000,
+          "exitTs": 1762293600000,
+          "id": "PENGU_00010",
+          "originalSourceNet30Pct": 14.937839159129794,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.21079918,
+          "entryTs": 1762232400000,
+          "exitTs": 1762293600000,
+          "id": "PENGU_00011",
+          "originalSourceNet30Pct": 9.614398908878341,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762650000000,
+          "exitTs": 1762736400000,
+          "id": "PENGU_00013",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.50359779,
+          "entryTs": 1764439200000,
+          "exitTs": 1764630000000,
+          "id": "PENGU_00018",
+          "originalSourceNet30Pct": 10.004797047970492,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1765029600000,
+          "exitTs": 1765069200000,
+          "id": "PENGU_00021",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.02750899,
+          "entryTs": 1765771200000,
+          "exitTs": 1766030400000,
+          "id": "PENGU_00027",
+          "originalSourceNet30Pct": 12.036678659344823,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.18122345,
+          "entryTs": 1766012400000,
+          "exitTs": 1766271600000,
+          "id": "PENGU_00031",
+          "originalSourceNet30Pct": 0.2416312659303424,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.14188771,
+          "entryTs": 1766059200000,
+          "exitTs": 1766318400000,
+          "id": "PENGU_00032",
+          "originalSourceNet30Pct": 0.18918360691379005,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.77402881,
+          "entryTs": 1766077200000,
+          "exitTs": 1766336400000,
+          "id": "PENGU_00033",
+          "originalSourceNet30Pct": 2.365371749217638,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766080800000,
+          "exitTs": 1766160000000,
+          "id": "PENGU_00034",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766102400000,
+          "exitTs": 1766156400000,
+          "id": "PENGU_00035",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 13.10408801,
+          "entryTs": 1769806800000,
+          "exitTs": 1769889600000,
+          "id": "PENGU_00046",
+          "originalSourceNet30Pct": 17.47211735274049,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.02036515,
+          "entryTs": 1775152800000,
+          "exitTs": 1775412000000,
+          "id": "PENGU_00057",
+          "originalSourceNet30Pct": 1.3604868611961864,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.68327068,
+          "entryTs": 1778673600000,
+          "exitTs": 1778922000000,
+          "id": "PENGU_00070",
+          "originalSourceNet30Pct": 10.244360902255645,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.98880368,
+          "entryTs": 1779966000000,
+          "exitTs": 1780225200000,
+          "id": "PENGU_00075",
+          "originalSourceNet30Pct": -2.651738241308787,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.08240655,
+          "entryTs": 1781841600000,
+          "exitTs": 1782100800000,
+          "id": "PENGU_00080",
+          "originalSourceNet30Pct": -2.7765420704507155,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.14994022,
+          "entryTs": 1782259200000,
+          "exitTs": 1782518400000,
+          "id": "PENGU_00081",
+          "originalSourceNet30Pct": 1.5332536266539079,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1784318400000,
+          "exitTs": 1784548800000,
+          "id": "PENGU_00086",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788544800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00103",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788562800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00104",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.49553045,
+          "entryTs": 1788876000000,
+          "exitTs": 1789135200000,
+          "id": "PENGU_00105",
+          "originalSourceNet30Pct": 4.660707269155207,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.27900641,
+          "entryTs": 1789056000000,
+          "exitTs": 1789315200000,
+          "id": "PENGU_00108",
+          "originalSourceNet30Pct": 3.038675213675213,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 1.26453301,
+          "entryTs": 1789066800000,
+          "exitTs": 1789326000000,
+          "id": "PENGU_00109",
+          "originalSourceNet30Pct": 1.686044015029531,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -1.59404762,
+          "entryTs": 1792875600000,
+          "exitTs": 1793134800000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -2.1253968253968187,
+          "period": "POST_2026_OCT_NOV"
+        }
+      ],
+      "preBasePostCohortOutcome": [
+        {
+          "cohort": "PRE_2025_AUG_SEP",
+          "originSourceCount": 6,
+          "shadowKeptCount": 4,
+          "shadowLossNetPctPointSumOnCapital": -12.784447370090747,
+          "shadowWinCount": 1,
+          "shadowWonNetPctPointSumOnCapital": 0.5481958762886654
+        },
+        {
+          "cohort": "BASE_2025_2026",
+          "originSourceCount": 40,
+          "shadowKeptCount": 28,
+          "shadowLossNetPctPointSumOnCapital": -50.59749290564928,
+          "shadowWinCount": 18,
+          "shadowWonNetPctPointSumOnCapital": 105.16978944380715
+        },
+        {
+          "cohort": "POST_2026_OCT_NOV",
+          "originSourceCount": 7,
+          "shadowKeptCount": 1,
+          "shadowLossNetPctPointSumOnCapital": -1.594047619047614,
+          "shadowWinCount": 0,
+          "shadowWonNetPctPointSumOnCapital": 0
+        }
+      ],
+      "recreateSingleSlotDDPermitted": false,
+      "retrospectiveShadowKept": 33,
+      "retrospectiveShadowRejected": 20,
+      "sourceNativeRoundtripFeeBps": 30
+    },
+    {
+      "allOriginalSource53ExitsUnchanged": true,
+      "conditionalMeanNetPctOnCapital": -0.3964358,
+      "conditionalWinRatePct": 43.75,
+      "grossExposureIfConceptuallyExecuted": 0.75,
+      "keptLosses": 9,
+      "keptWins": 7,
+      "model": "NATIVE53_SHADOW_BOTH",
+      "nativeAvoidedLoserIds": [
+        "PENGU_00008@1756724400000",
+        "PENGU_00005@1761156000000",
+        "PENGU_00006@1761220800000",
+        "PENGU_00014@1762682400000",
+        "PENGU_00021@1765029600000",
+        "PENGU_00051@1772294400000",
+        "PENGU_00075@1779966000000",
+        "PENGU_00076@1779998400000",
+        "PENGU_00086@1784318400000",
+        "PENGU_00088@1785232800000",
+        "PENGU_00101@1788368400000",
+        "PENGU_00003@1791504000000",
+        "PENGU_00004@1791522000000",
+        "PENGU_00006@1792875600000",
+        "PENGU_00008@1793347200000"
+      ],
+      "nativeLostWinnerIds": [
+        "PENGU_00011@1757066400000",
+        "PENGU_00015@1758614400000",
+        "PENGU_00007@1761678000000",
+        "PENGU_00008@1761894000000",
+        "PENGU_00010@1762178400000",
+        "PENGU_00011@1762232400000",
+        "PENGU_00017@1763085600000",
+        "PENGU_00027@1765771200000",
+        "PENGU_00029@1765893600000",
+        "PENGU_00032@1766059200000",
+        "PENGU_00033@1766077200000",
+        "PENGU_00046@1769806800000",
+        "PENGU_00055@1774540800000",
+        "PENGU_00057@1775152800000",
+        "PENGU_00071@1778716800000",
+        "PENGU_00072@1778756400000",
+        "PENGU_00081@1782259200000",
+        "PENGU_00107@1789027200000",
+        "PENGU_00109@1789066800000",
+        "PENGU_00001@1791435600000",
+        "PENGU_00009@1793383200000",
+        "PENGU_00011@1793937600000"
+      ],
+      "nativeOriginalLosingGrossReturnPctPointsAvoidedAt0p75": 59.41930715,
+      "nativeOriginalWinningGrossReturnPctPointsLostAt0p75": 105.53832519,
+      "nativeRetrospectiveShadowProfitFactor": 0.86208486,
+      "netPctPointSumPer53OriginalOpportunitiesAtFixedGross": -6.34297284,
+      "originalPinnedNativeV20Intents": 53,
+      "originalSourceNativePnLAndExitForKept": [
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755284400000,
+          "exitTs": 1755450000000,
+          "id": "PENGU_00003",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -0.33444737,
+          "entryTs": 1755504000000,
+          "exitTs": 1755763200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": -0.44592982678762744,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1755698400000,
+          "exitTs": 1755727200000,
+          "id": "PENGU_00006",
+          "originalSourceNet30Pct": -8.30000000000003,
+          "period": "PRE_2025_AUG_SEP"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.19764948,
+          "entryTs": 1760544000000,
+          "exitTs": 1760695200000,
+          "id": "PENGU_00004",
+          "originalSourceNet30Pct": 12.263532643143881,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 9.30860283,
+          "entryTs": 1761930000000,
+          "exitTs": 1762189200000,
+          "id": "PENGU_00009",
+          "originalSourceNet30Pct": 12.411470439615968,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1762650000000,
+          "exitTs": 1762736400000,
+          "id": "PENGU_00013",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.50359779,
+          "entryTs": 1764439200000,
+          "exitTs": 1764630000000,
+          "id": "PENGU_00018",
+          "originalSourceNet30Pct": 10.004797047970492,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 0.18122345,
+          "entryTs": 1766012400000,
+          "exitTs": 1766271600000,
+          "id": "PENGU_00031",
+          "originalSourceNet30Pct": 0.2416312659303424,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766080800000,
+          "exitTs": 1766160000000,
+          "id": "PENGU_00034",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1766102400000,
+          "exitTs": 1766156400000,
+          "id": "PENGU_00035",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 7.68327068,
+          "entryTs": 1778673600000,
+          "exitTs": 1778922000000,
+          "id": "PENGU_00070",
+          "originalSourceNet30Pct": 10.244360902255645,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -2.08240655,
+          "entryTs": 1781841600000,
+          "exitTs": 1782100800000,
+          "id": "PENGU_00080",
+          "originalSourceNet30Pct": -2.7765420704507155,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788544800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00103",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": -6.225,
+          "entryTs": 1788562800000,
+          "exitTs": 1788663600000,
+          "id": "PENGU_00104",
+          "originalSourceNet30Pct": -8.300000000000008,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 3.49553045,
+          "entryTs": 1788876000000,
+          "exitTs": 1789135200000,
+          "id": "PENGU_00105",
+          "originalSourceNet30Pct": 4.660707269155207,
+          "period": "BASE_2025_2026"
+        },
+        {
+          "conceptualGross0p75ReturnOnPortfolioAllocationPctPoints": 2.27900641,
+          "entryTs": 1789056000000,
+          "exitTs": 1789315200000,
+          "id": "PENGU_00108",
+          "originalSourceNet30Pct": 3.038675213675213,
+          "period": "BASE_2025_2026"
+        }
+      ],
+      "preBasePostCohortOutcome": [
+        {
+          "cohort": "PRE_2025_AUG_SEP",
+          "originSourceCount": 6,
+          "shadowKeptCount": 3,
+          "shadowLossNetPctPointSumOnCapital": -12.784447370090747,
+          "shadowWinCount": 0,
+          "shadowWonNetPctPointSumOnCapital": 0
+        },
+        {
+          "cohort": "BASE_2025_2026",
+          "originSourceCount": 40,
+          "shadowKeptCount": 13,
+          "shadowLossNetPctPointSumOnCapital": -33.207406552838066,
+          "shadowWinCount": 7,
+          "shadowWonNetPctPointSumOnCapital": 39.64888108631006
+        },
+        {
+          "cohort": "POST_2026_OCT_NOV",
+          "originSourceCount": 7,
+          "shadowKeptCount": 0,
+          "shadowLossNetPctPointSumOnCapital": 0,
+          "shadowWinCount": 0,
+          "shadowWonNetPctPointSumOnCapital": 0
+        }
+      ],
+      "recreateSingleSlotDDPermitted": false,
+      "retrospectiveShadowKept": 16,
+      "retrospectiveShadowRejected": 37,
+      "sourceNativeRoundtripFeeBps": 30
+    }
+  ],
+  "causalSignalReferenceHour": "native entryTs - H, not bar of entryTs and no future bars",
+  "feeBps": 30,
+  "grossFixed": 0.75,
+  "limitations": [
+    "Original pinned native V20 signals have different meaning and entry/exit than S4 SELLER research route. A global BTC6h gate on all original53 is a negative-control shadow, NOT a proposed V20 live filter.",
+    "Native source53 intervals overlap and cannot be stacked into real single-slot compounding or portfolio M5 mark DD. P35 reports per-opportunity raw native PnL scaled by gross0.75 only.",
+    "Historical source53 was previously used in research, so this is neither independent time OOS nor blind statistical corroboration.",
+    "No new signal or exit, no actual order book or venue signed fills, funding or actual Shared Runner Risk. Production not touched."
+  ],
+  "models": [
+    "NATIVE53_UNMODIFIED",
+    "NATIVE53_SHADOW_BTC6H_NONPOSITIVE",
+    "NATIVE53_SHADOW_PENGU_REL_WEAK6H",
+    "NATIVE53_SHADOW_BOTH"
+  ],
+  "native53OverlapCaveat": {
+    "neverInterpret53AsRealOneSlotCapitalAllocation": true,
+    "sourceOriginal53MaximumConcurrentReferencePositions": 6,
+    "sourceOriginal53PairwiseOverlappingWindows": 38
+  },
+  "original53NaturalEntryAndExitUntouched": true,
+  "originalNativePinnedSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "originalSource53Parity": "EXACT_53_53_WINS29",
+  "schema": "prism7-p35-pengu-original-native53-0p75-btc6h-shadow-negative-control/v1",
+  "sourceH1PriceAlignment": "PENGU_BTC_H1_EXACT_FULL_CALENDAR",
+  "sourceHashes": {
+    "BTCH1": {
+      "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+      "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+    },
+    "PENGUH1": {
+      "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+    },
+    "originalNative53Json": "3aba930fd754fe9acb6bcedc7318f75f74a44a80b00a163ca68cc3c2221b601c"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "cohorts": {
+    "MODEST_FAVORABLE_BUT_NET_LOSS": {
+      "median_oracle_downswing_pct": 3.58286,
+      "median_original_source_mfe_pct": 2.0261,
+      "n": 6,
+      "oracle_close_to_close_ge1pct": 6,
+      "oracle_close_to_close_ge3pct": 4,
+      "oracle_close_to_close_ge5pct": 1
+    },
+    "NO_FAVORABLE_ONE_PERCENT": {
+      "median_oracle_downswing_pct": 2.06055,
+      "median_original_source_mfe_pct": 0.03637,
+      "n": 11,
+      "oracle_close_to_close_ge1pct": 11,
+      "oracle_close_to_close_ge3pct": 4,
+      "oracle_close_to_close_ge5pct": 1
+    },
+    "PROFIT_GIVEBACK_AFTER_MFE3": {
+      "median_oracle_downswing_pct": 5.22956,
+      "median_original_source_mfe_pct": 4.18777,
+      "n": 7,
+      "oracle_close_to_close_ge1pct": 7,
+      "oracle_close_to_close_ge3pct": 7,
+      "oracle_close_to_close_ge5pct": 4
+    },
+    "WIN_NATIVE_EXIT_PRICE_MODEL": {
+      "median_oracle_downswing_pct": 11.73785,
+      "median_original_source_mfe_pct": 10.24398,
+      "n": 29,
+      "oracle_close_to_close_ge1pct": 29,
+      "oracle_close_to_close_ge3pct": 29,
+      "oracle_close_to_close_ge5pct": 29
+    }
+  },
+  "intents": 53,
+  "native_win": 29,
+  "schema": "prism7-v20-native53-future-downswing-oracle-feasibility/v1",
+  "source_anatomy_sha256": "162162b5215321904211ebe09f286ee92ff666a81f00d8d3921e649342513001",
+  "source_pin": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "warning": [
+    "ORACLE ONLY: best sell-then-later-buy chosen with knowledge of whole future path.",
+    "Market trajectory from original entry to original native exit, not a new native position/STOP replay.",
+    "Printed CLOSE-to-CLOSE profit opportunity is not executable fill probability.",
+    "This upper bound is not evidence that any causal strategy can realize or choose the best price.",
+    "Even a 3% future downswing may be too small after real costs, queue/STOP, funding and slippage.",
+    "Loss category and all source periods already inspected; no untouched OOS or synthetic market."
+  ]
+}

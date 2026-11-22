@@ -1,0 +1,124 @@
+{
+  "by_period": {
+    "BASE_2025_2026": {
+      "count": 40,
+      "native_wins": 24,
+      "nonstop_next_h1_immediate_trade": 7,
+      "nonstop_next_h1_later_trade": 11,
+      "nonstop_next_h1_no_trade": 2,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 20,
+      "stops": 20
+    },
+    "POST_2026_OCT_NOV": {
+      "count": 7,
+      "native_wins": 3,
+      "nonstop_next_h1_immediate_trade": 4,
+      "nonstop_next_h1_later_trade": 3,
+      "nonstop_next_h1_no_trade": 0,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 0,
+      "stops": 0
+    },
+    "PRE_2025_AUG_SEP": {
+      "count": 6,
+      "native_wins": 2,
+      "nonstop_next_h1_immediate_trade": 1,
+      "nonstop_next_h1_later_trade": 1,
+      "nonstop_next_h1_no_trade": 1,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 3,
+      "stops": 3
+    }
+  },
+  "by_reason": {
+    "SHORT_HARD_STOP": {
+      "count": 14,
+      "native_wins": 0,
+      "nonstop_next_h1_immediate_trade": 0,
+      "nonstop_next_h1_later_trade": 0,
+      "nonstop_next_h1_no_trade": 0,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 14,
+      "stops": 14
+    },
+    "SHORT_MAX_HOLD": {
+      "count": 28,
+      "native_wins": 18,
+      "nonstop_next_h1_immediate_trade": 11,
+      "nonstop_next_h1_later_trade": 14,
+      "nonstop_next_h1_no_trade": 3,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 0,
+      "stops": 0
+    },
+    "SHORT_TRAILING_STOP": {
+      "count": 9,
+      "native_wins": 9,
+      "nonstop_next_h1_immediate_trade": 0,
+      "nonstop_next_h1_later_trade": 0,
+      "nonstop_next_h1_no_trade": 0,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 9,
+      "stops": 9
+    },
+    "SHORT_V20_DEADLINE_EXIT": {
+      "count": 2,
+      "native_wins": 2,
+      "nonstop_next_h1_immediate_trade": 1,
+      "nonstop_next_h1_later_trade": 1,
+      "nonstop_next_h1_no_trade": 0,
+      "stop_trade_touch_no": 0,
+      "stop_trade_touch_yes": 0,
+      "stops": 0
+    }
+  },
+  "limitations": [
+    "STOP touch uses M5 HIGH in native decision H1 only; no bid/ask or signed order fill.",
+    "Native STOP timestamp is decisionH1+60min, not verified real order execution time.",
+    "Positive M5 trade could print at a price above STOP; actual fill price may be worse.",
+    "Source H1 high and M5 public archive may differ; touched is not fill-proven.",
+    "Nonresident exit H1 first M5 open is observable only after its print; no auto-fill at hour boundary.",
+    "Original native ENTRY/STOP parameters, win count and economic PnL are intentionally unchanged.",
+    "Funding/price impact/orderbook/shared risk/portfolio DD and unseen OOS not evaluated."
+  ],
+  "native_source_winners": 29,
+  "natural_source_short_count": 53,
+  "overall": {
+    "count": 53,
+    "native_wins": 29,
+    "nonstop_next_h1_immediate_trade": 12,
+    "nonstop_next_h1_later_trade": 15,
+    "nonstop_next_h1_no_trade": 3,
+    "stop_trade_touch_no": 0,
+    "stop_trade_touch_yes": 23,
+    "stops": 23
+  },
+  "schema": "prism7-p12-native-short-v20-source53-stop-positive-print-touch-timing/v1",
+  "source_fixed_pinned_sha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "source_sha256": {
+    "PENGU_H1_archives": {
+      "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+      "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+    },
+    "PENGU_M5_archives": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    },
+    "original_53_source_cases": "3aba930fd754fe9acb6bcedc7318f75f74a44a80b00a163ca68cc3c2221b601c",
+    "raw_native_exit_tape": {
+      "BASE_2025_2026": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+      "POST_2026_OCT_NOV": "f4bae44aee5c6f61587f230840f1dfe992e7cf77cdc43bd6025ee92d82e1d57e",
+      "PRE_2025_AUG_SEP": "0c677cc6c4c20b9a5334c25a2b4d3ea1b15401dcef77e9839fe5f1ff9e20ee1d"
+    }
+  },
+  "stop_print_touch_source_exit_latency_minutes": {
+    "maximum": 60.0,
+    "median": 50.0,
+    "minimum": 5.0,
+    "n": 23
+  }
+}

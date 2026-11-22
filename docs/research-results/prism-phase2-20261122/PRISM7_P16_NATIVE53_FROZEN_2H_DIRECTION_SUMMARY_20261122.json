@@ -1,0 +1,111 @@
+{
+  "schema": "prism7-p16-frozen-six-factor-asof-twoH-short-direction-diagnostic/v1",
+  "pinnedRuntimeSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "sourceNaturalIntents": 53,
+  "decisionLagHoursFromSourceIntent": 2,
+  "fixedVotesRequired": 3,
+  "fixedFeatures": [
+    "A_PENGU_UP_ATR",
+    "B_BTC_UP_025PCT",
+    "C_RELATIVE_UP_1PP",
+    "D_VOLUME_RATIO_1_5",
+    "E_PRIOR3H_HIGH_BREAK",
+    "F_NO_FAVORABLE_HALF_ATR"
+  ],
+  "resultGroups": {
+    "ALL": {
+      "originalSourceCount": 53,
+      "sourceWins": 29,
+      "sourceLosses": 24,
+      "noNewPrintTwoH": 1,
+      "validDiagnostic": 52,
+      "flaggedForDirectionRecheck": 13,
+      "flaggedSourceLosers": 7,
+      "flaggedSourceWinners": 6,
+      "originalSourceLosersNotFlagged": 17,
+      "originalSourceWinnersNotFlagged": 22,
+      "sourceWinsPreservedInOriginalModel": 29,
+      "strategyPnlUnaffected": true
+    },
+    "PRE_2025_AUG_SEP": {
+      "originalSourceCount": 6,
+      "sourceWins": 2,
+      "sourceLosses": 4,
+      "noNewPrintTwoH": 0,
+      "validDiagnostic": 6,
+      "flaggedForDirectionRecheck": 2,
+      "flaggedSourceLosers": 2,
+      "flaggedSourceWinners": 0,
+      "originalSourceLosersNotFlagged": 2,
+      "originalSourceWinnersNotFlagged": 2,
+      "sourceWinsPreservedInOriginalModel": 2,
+      "strategyPnlUnaffected": true
+    },
+    "BASE_2025_2026": {
+      "originalSourceCount": 40,
+      "sourceWins": 24,
+      "sourceLosses": 16,
+      "noNewPrintTwoH": 1,
+      "validDiagnostic": 39,
+      "flaggedForDirectionRecheck": 9,
+      "flaggedSourceLosers": 3,
+      "flaggedSourceWinners": 6,
+      "originalSourceLosersNotFlagged": 13,
+      "originalSourceWinnersNotFlagged": 17,
+      "sourceWinsPreservedInOriginalModel": 24,
+      "strategyPnlUnaffected": true
+    },
+    "POST_2026_OCT_NOV": {
+      "originalSourceCount": 7,
+      "sourceWins": 3,
+      "sourceLosses": 4,
+      "noNewPrintTwoH": 0,
+      "validDiagnostic": 7,
+      "flaggedForDirectionRecheck": 2,
+      "flaggedSourceLosers": 2,
+      "flaggedSourceWinners": 0,
+      "originalSourceLosersNotFlagged": 2,
+      "originalSourceWinnersNotFlagged": 3,
+      "sourceWinsPreservedInOriginalModel": 3,
+      "strategyPnlUnaffected": true
+    }
+  },
+  "sourceH1Hashes": {
+    "PRE_2025_AUG_SEP": {
+      "penguH1": {
+        "PENGUUSDT-1h-20250801-20250924.jsonl.gz": "683f83be5f87d77468cba4a14caa333208706ec7faf3afaf8475beb8015acffc",
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      },
+      "btcH1": {
+        "BTCUSDT-1h-20250801-20250924-RESEARCH_M5QA.jsonl.gz": "cc5b67fe7ed3f3375dc04775a2a13ad6eea00f41d2b7df686458e94074abed23",
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      }
+    },
+    "BASE_2025_2026": {
+      "penguH1": {
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8"
+      },
+      "btcH1": {
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c"
+      }
+    },
+    "POST_2026_OCT_NOV": {
+      "penguH1": {
+        "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+        "PENGUUSDT-1h-20261001-20261118.jsonl.gz": "c850a986cfb42f0ca9c69ac89110edeb8aa96a5ca7a11eadfc253a9f7db92433"
+      },
+      "btcH1": {
+        "BTCUSDT-1h-20250924-20261001.jsonl.gz": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+        "BTCUSDT-1h-20261001-20261118.jsonl.gz": "13740cdb4508c4058e279e2328bd32a37a0236be3b6ad9871e83abed9b56d7ba"
+      }
+    }
+  },
+  "limitations": [
+    "Classification is diagnostic only and does not change source ENTRY, EXIT, STOP or cost.",
+    "This 53-outcome period was previously observed; all predictive values are in-sample diagnostics.",
+    "H1 source candles, not source M5 or executable bid/ask; no signed fill proof.",
+    "The next two H1 bars are only available after the source intent; using them at entry would be future leak.",
+    "A print volume ratio with zero historical denominator is UNKNOWN and cannot vote true.",
+    "No user order modifications, no new LONG trades, no trading winrate improvement can be inferred."
+  ]
+}

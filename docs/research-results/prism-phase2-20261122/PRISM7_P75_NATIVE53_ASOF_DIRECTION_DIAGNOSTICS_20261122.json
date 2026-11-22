@@ -1,0 +1,93 @@
+{
+  "fixed_features_not_thresholds": 8,
+  "limitations": [
+    "All three data periods and many feature statistics are previously observed; this is explicitly NOT preregistered/OOS.",
+    "No entry gate, no dropped candidates, no alternative native entry/exit, no portfolio DD.",
+    "Multiple candidate features and multiple losses make apparently favorable comparisons optimistic.",
+    "Permutation is stratified by period but overlapping trade windows violate independence.",
+    "AUC high for retrospective cases cannot be deployed without independent forward validation.",
+    "11 no-favorable cases are negative *native outcome*; cannot infer true future market regime from signal alone."
+  ],
+  "n_total_native_intents": 53,
+  "native_no_favorable_1pct": 11,
+  "native_wins": 29,
+  "permutation_seed": 20261122,
+  "permutations_per_feature": 5000,
+  "permuted_within_period": true,
+  "results": [
+    {
+      "auc": 0.595611,
+      "feature": "flow_buy_share3",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.5673168,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.390922,
+      "win_native29_median": 0.4053211
+    },
+    {
+      "auc": 0.514107,
+      "feature": "flow_buy_share6",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.4677856,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.912418,
+      "win_native29_median": 0.4333072
+    },
+    {
+      "auc": 0.583072,
+      "feature": "p_return_3h",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": -0.0033501,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.454909,
+      "win_native29_median": -0.0050941
+    },
+    {
+      "auc": 0.561129,
+      "feature": "p_return_6h",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.0020394,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.55189,
+      "win_native29_median": -0.0041865
+    },
+    {
+      "auc": 0.539185,
+      "feature": "btc_return_6h",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.00105,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.731854,
+      "win_native29_median": 0.0025335
+    },
+    {
+      "auc": 0.592476,
+      "feature": "prior_low6_distance_atr",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.8400393,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.403919,
+      "win_native29_median": 0.735798
+    },
+    {
+      "auc": 0.38558,
+      "feature": "efficiency6",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.4877246,
+      "orientation": "low_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.282743,
+      "win_native29_median": 0.2655889
+    },
+    {
+      "auc": 0.54232,
+      "feature": "atr24_ratio",
+      "holm_8_features_p_descriptive": 1.0,
+      "no_favorable11_median": 0.0140691,
+      "orientation": "high_means_failure",
+      "stratified_period_permutation_p_descriptive": 0.682663,
+      "win_native29_median": 0.0146848
+    }
+  ],
+  "sample_11_failure_vs_29_win": 40,
+  "schema": "prism7-native-short-v20-11failure-29winner-asof-exploratory-discriminability/v1"
+}
