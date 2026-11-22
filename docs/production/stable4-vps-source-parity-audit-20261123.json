@@ -1,0 +1,537 @@
+{
+  "auditUtc": null,
+  "readOnly": true,
+  "vpsIdentity": "professional-dismanager.net",
+  "vpsReleases": {
+    "FET": {
+      "files": {
+        "lib/fet-brk48-live-runner.ts": {
+          "bytes": 48484,
+          "exists": true,
+          "normalizedSha256": "3149db499dd7b7912569c89d347da652fb38e471b391f80208f4cd819b0e9394",
+          "sha256": "d973980419ef37b175b934ab12ecedba3697fa41443d487bd5792bb56b406545"
+        },
+        "lib/fet-brk48-trailing-stop.ts": {
+          "bytes": 4202,
+          "exists": true,
+          "normalizedSha256": "bc88196cb5dce8bf3955544c49d1873467e1db5065e0085aaf13dc4770d8dc06",
+          "sha256": "7d731151a40b1cb455752077b12edaa0821fe25894cb753ffaf82deaea40de67"
+        }
+      },
+      "release": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseDirectoryExists": true
+    },
+    "HYPE": {
+      "files": {
+        "config/hypeTrendLongPolicy.ts": {
+          "bytes": 1004,
+          "exists": true,
+          "normalizedSha256": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad",
+          "sha256": "030179519336d588c629b4122268ad378a71a6626a4084fbdfe184f865d81515"
+        },
+        "lib/hype-trend-long-runner.ts": {
+          "bytes": 2520,
+          "exists": true,
+          "normalizedSha256": "9a62729e55767d89f7fc34ba7d6a44e3920f4f3354ecaf03d6aaf7adf6b446a2",
+          "sha256": "7e27950c81f57f3bbae6fd3cd3bba081a76b165d23d87e24f872e285fa358c8c"
+        }
+      },
+      "release": "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+      "releaseDirectoryExists": true
+    },
+    "IDLE": {
+      "files": {
+        "config/idlePriorityShortPolicy.ts": {
+          "bytes": 1646,
+          "exists": true,
+          "normalizedSha256": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+          "sha256": "4faf0c02fcfad787305da17b75ca4ae8cfc9144681cea631cdfa7b340f8fe760"
+        },
+        "lib/idle-priority-short-runner.ts": {
+          "bytes": 67353,
+          "exists": true,
+          "normalizedSha256": "a6bb652dc93d2fd8fcff298ee806c11079c1ce15f6d97dd626fbe4391b8d9c8f",
+          "sha256": "89bafaa70457072210ae00279343a8cecf81d28f258fd814811ee954968ea430"
+        }
+      },
+      "release": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseDirectoryExists": true
+    },
+    "MARGIN": {
+      "files": {
+        "scripts/disdex_v96_v52_margin_guard.py": {
+          "bytes": 32841,
+          "exists": true,
+          "normalizedSha256": "f34a6c300c874e79701598ac7261a658cb7c4ac8ed997e36f0abf939910bcb5d",
+          "sha256": "51379f7f1b64ae85fa474e06dba3becbc63a1ac33506e1cf87cc2c2701d3bc7b"
+        },
+        "scripts/disdex_v96_v52_margin_risk_policy.py": {
+          "bytes": 9581,
+          "exists": true,
+          "normalizedSha256": "9aa809c589a18a434a527192c681381b9e35d2889987c5543eb01c653f556e69",
+          "sha256": "524ebe7451b95b525247e05a42b1e4c574aecf656108a671ba4b0c87f66aab29"
+        }
+      },
+      "release": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseDirectoryExists": true
+    },
+    "PENGU": {
+      "files": {
+        "lib/pengu-dual-ls-v2-portfolio-runner.ts": {
+          "bytes": 92461,
+          "exists": true,
+          "normalizedSha256": "2a7daeae50b3aaed7e77e06efea06768771db97eebea3814f2f59bb31bab9467",
+          "sha256": "ebe44cc894741a355fdf06da569b5f3e29622ec18b274a568642ac641260ed69"
+        },
+        "lib/pengu-short-v20-timed-stop.ts": {
+          "bytes": 5206,
+          "exists": true,
+          "normalizedSha256": "5ef6fc34d5ceb1c2a528488c02e07ed6401e9337de3e556145b2817f600820ba",
+          "sha256": "c0965fd15b95680ffc744e9cc42b688fe356a9a15474c99c7537de9e5aa4eb67"
+        }
+      },
+      "release": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "releaseDirectoryExists": true
+    },
+    "Q102": {
+      "files": {
+        "lib/disdex-quality102-causal-v1-runner.ts": {
+          "bytes": 101075,
+          "exists": true,
+          "normalizedSha256": "9ee30087b1928dab4c2ae14300ac4a56bd0339a23d74eae7b725b12d26b4e1d3",
+          "sha256": "9ee30087b1928dab4c2ae14300ac4a56bd0339a23d74eae7b725b12d26b4e1d3"
+        }
+      },
+      "release": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+      "releaseDirectoryExists": true
+    },
+    "SHARED": {
+      "files": {
+        "config/sharedCryptoRiskPolicy.ts": {
+          "bytes": 558,
+          "exists": true,
+          "normalizedSha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+          "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494"
+        },
+        "lib/disdex-shared-crypto-daily-risk.ts": {
+          "bytes": 6733,
+          "exists": true,
+          "normalizedSha256": "6dfe3fe275e8eec281e5b6d5cec5c5d9c14786a1cc3d5bee783162d19f360170",
+          "sha256": "cde6ed7b706ab800cf1647fabde25510b80fae7c6ff4d21a83d40c01c676758b"
+        }
+      },
+      "release": "2737c30e1f6d014d24a2c6d025e7f91332bf7962",
+      "releaseDirectoryExists": true
+    },
+    "V4": {
+      "files": {
+        "lib/v12-v4-native-source.ts": {
+          "bytes": 3021,
+          "exists": true,
+          "normalizedSha256": "8220063dcd0ae2a738632b271b86dcfe7d0eb58affa6df2eaf9fdd2c578bcddb",
+          "sha256": "e5e60ebc79a42ecc280e4f2a6381c5f927e4939825637bfd1c97f1f693ed473d"
+        },
+        "lib/v12-v4-runner-engine.ts": {
+          "bytes": 40174,
+          "exists": true,
+          "normalizedSha256": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
+          "sha256": "e3a7215d005413ac183accab66bdf80e8cdde634f04c0686b7e501e0bf06caa6"
+        },
+        "lib/v12-v4-venue-exit.ts": {
+          "bytes": 8736,
+          "exists": true,
+          "normalizedSha256": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd",
+          "sha256": "440e6447f1594fe71dd395e74054a2e5fcbcd7483a930f67af8d211c6bf32fc2"
+        },
+        "scripts/v12-v4-production-runner.ts": {
+          "bytes": 35473,
+          "exists": true,
+          "normalizedSha256": "607b69cea06c6a4a17e6cd34a020de930224024d0e3fb279ec1192b59ac24df6",
+          "sha256": "2dbd403ce093f08881a2351d4801428dc240d6aaf4501e80a6c54cbe424424e1"
+        }
+      },
+      "release": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+      "releaseDirectoryExists": true
+    },
+    "V52": {
+      "files": {
+        "scripts/disdex_v52_aster_only_legacy_engine.py": {
+          "bytes": 85527,
+          "exists": true,
+          "normalizedSha256": "7f0ac140e34224ada9ecc0391410535b3c2109a903eb75d4060b6ff12afcfdea",
+          "sha256": "7f0ac140e34224ada9ecc0391410535b3c2109a903eb75d4060b6ff12afcfdea"
+        }
+      },
+      "release": "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7",
+      "releaseDirectoryExists": true
+    }
+  },
+  "localCandidateBranch": "prep/stable4-exit-integration-20261123",
+  "comparisonBeforeV4PinRestore": {
+    "FET": {
+      "lib/fet-brk48-live-runner.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 48484,
+          "sha256": "d973980419ef37b175b934ab12ecedba3697fa41443d487bd5792bb56b406545",
+          "normalizedSha256": "3149db499dd7b7912569c89d347da652fb38e471b391f80208f4cd819b0e9394"
+        }
+      },
+      "lib/fet-brk48-trailing-stop.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 4202,
+          "sha256": "7d731151a40b1cb455752077b12edaa0821fe25894cb753ffaf82deaea40de67",
+          "normalizedSha256": "bc88196cb5dce8bf3955544c49d1873467e1db5065e0085aaf13dc4770d8dc06"
+        }
+      }
+    },
+    "HYPE": {
+      "config/hypeTrendLongPolicy.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 1004,
+          "sha256": "030179519336d588c629b4122268ad378a71a6626a4084fbdfe184f865d81515",
+          "normalizedSha256": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad"
+        }
+      },
+      "lib/hype-trend-long-runner.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 2520,
+          "sha256": "7e27950c81f57f3bbae6fd3cd3bba081a76b165d23d87e24f872e285fa358c8c",
+          "normalizedSha256": "9a62729e55767d89f7fc34ba7d6a44e3920f4f3354ecaf03d6aaf7adf6b446a2"
+        }
+      }
+    },
+    "IDLE": {
+      "config/idlePriorityShortPolicy.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 1646,
+          "sha256": "4faf0c02fcfad787305da17b75ca4ae8cfc9144681cea631cdfa7b340f8fe760",
+          "normalizedSha256": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8"
+        }
+      },
+      "lib/idle-priority-short-runner.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 79511,
+          "sha256": "8d7876b82ecbdcc6af9439d7f564347855d4d87e813a3a1c40584574e02b2ffd",
+          "normalizedSha256": "465e89f1a274f2ea11141643bf6b7d52ca6a3abafe812b0971f45ecd85b578e1"
+        }
+      }
+    },
+    "MARGIN": {
+      "scripts/disdex_v96_v52_margin_guard.py": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 32841,
+          "sha256": "51379f7f1b64ae85fa474e06dba3becbc63a1ac33506e1cf87cc2c2701d3bc7b",
+          "normalizedSha256": "f34a6c300c874e79701598ac7261a658cb7c4ac8ed997e36f0abf939910bcb5d"
+        }
+      },
+      "scripts/disdex_v96_v52_margin_risk_policy.py": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 9581,
+          "sha256": "524ebe7451b95b525247e05a42b1e4c574aecf656108a671ba4b0c87f66aab29",
+          "normalizedSha256": "9aa809c589a18a434a527192c681381b9e35d2889987c5543eb01c653f556e69"
+        }
+      }
+    },
+    "PENGU": {
+      "lib/pengu-dual-ls-v2-portfolio-runner.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 94158,
+          "sha256": "deeebd8f95960c178051240b428e6aea914ed265e33be024554c9798685b46d8",
+          "normalizedSha256": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a"
+        }
+      },
+      "lib/pengu-short-v20-timed-stop.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 5206,
+          "sha256": "c0965fd15b95680ffc744e9cc42b688fe356a9a15474c99c7537de9e5aa4eb67",
+          "normalizedSha256": "5ef6fc34d5ceb1c2a528488c02e07ed6401e9337de3e556145b2817f600820ba"
+        }
+      }
+    },
+    "Q102": {
+      "lib/disdex-quality102-causal-v1-runner.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 104012,
+          "sha256": "5d3e92f053bdb84ef857d9c7cc465c23c33fd888f9a0d0bbcecad33608a07655",
+          "normalizedSha256": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2"
+        }
+      }
+    },
+    "SHARED": {
+      "config/sharedCryptoRiskPolicy.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 558,
+          "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494",
+          "normalizedSha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490"
+        }
+      },
+      "lib/disdex-shared-crypto-daily-risk.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 6733,
+          "sha256": "cde6ed7b706ab800cf1647fabde25510b80fae7c6ff4d21a83d40c01c676758b",
+          "normalizedSha256": "6dfe3fe275e8eec281e5b6d5cec5c5d9c14786a1cc3d5bee783162d19f360170"
+        }
+      }
+    },
+    "V4": {
+      "lib/v12-v4-native-source.ts": {
+        "vpsMatchesCandidateNormalized": true,
+        "candidate": {
+          "exists": true,
+          "bytes": 3021,
+          "sha256": "e5e60ebc79a42ecc280e4f2a6381c5f927e4939825637bfd1c97f1f693ed473d",
+          "normalizedSha256": "8220063dcd0ae2a738632b271b86dcfe7d0eb58affa6df2eaf9fdd2c578bcddb"
+        }
+      },
+      "lib/v12-v4-runner-engine.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 36051,
+          "sha256": "6473a1c5e253693ca9329110f7a1b192b8072d134b83f3aa2061178e032ceaf1",
+          "normalizedSha256": "9ab0c49db8d841dfee8481085f0a31aa7377506cf68b98283924e74040551f6d"
+        }
+      },
+      "lib/v12-v4-venue-exit.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 3992,
+          "sha256": "71865aa79c5f9632d591b2620a3ac222b34a076cbad4c8e5051ab873cd959e91",
+          "normalizedSha256": "270f16d0521678b74d5100018888b4846e6341f4c6b8341e2168d2f6ed1d4b3d"
+        }
+      },
+      "scripts/v12-v4-production-runner.ts": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 31113,
+          "sha256": "13edd877d3a8b4eac41d6fc8b92973f7a7947f34c2555c8338801b02594d1ebd",
+          "normalizedSha256": "df7bd34e3b17931783b54fa83193a9635cf0e7a102f0d54a3fcc38145464850c"
+        }
+      }
+    },
+    "V52": {
+      "scripts/disdex_v52_aster_only_legacy_engine.py": {
+        "vpsMatchesCandidateNormalized": false,
+        "candidate": {
+          "exists": true,
+          "bytes": 87973,
+          "sha256": "c0905c30d3182002d70d3f2404fdfdb52a944634074e090027b8612e23e7b056",
+          "normalizedSha256": "df0adba284c1aa3af26e6f8e06e4349c3155326831902abd4e6a469b1937fe9c"
+        }
+      }
+    }
+  },
+  "comparisonAfterExitSafetyIntegration": {
+    "FET": {
+      "lib/fet-brk48-live-runner.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 48484,
+          "sha256": "d973980419ef37b175b934ab12ecedba3697fa41443d487bd5792bb56b406545",
+          "normalizedSha256": "3149db499dd7b7912569c89d347da652fb38e471b391f80208f4cd819b0e9394"
+        }
+      },
+      "lib/fet-brk48-trailing-stop.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 4202,
+          "sha256": "7d731151a40b1cb455752077b12edaa0821fe25894cb753ffaf82deaea40de67",
+          "normalizedSha256": "bc88196cb5dce8bf3955544c49d1873467e1db5065e0085aaf13dc4770d8dc06"
+        }
+      }
+    },
+    "HYPE": {
+      "config/hypeTrendLongPolicy.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 1004,
+          "sha256": "030179519336d588c629b4122268ad378a71a6626a4084fbdfe184f865d81515",
+          "normalizedSha256": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad"
+        }
+      },
+      "lib/hype-trend-long-runner.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 2520,
+          "sha256": "7e27950c81f57f3bbae6fd3cd3bba081a76b165d23d87e24f872e285fa358c8c",
+          "normalizedSha256": "9a62729e55767d89f7fc34ba7d6a44e3920f4f3354ecaf03d6aaf7adf6b446a2"
+        }
+      }
+    },
+    "IDLE": {
+      "config/idlePriorityShortPolicy.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 1646,
+          "sha256": "4faf0c02fcfad787305da17b75ca4ae8cfc9144681cea631cdfa7b340f8fe760",
+          "normalizedSha256": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8"
+        }
+      },
+      "lib/idle-priority-short-runner.ts": {
+        "vpsMatchesPreparedNormalized": false,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 79511,
+          "sha256": "8d7876b82ecbdcc6af9439d7f564347855d4d87e813a3a1c40584574e02b2ffd",
+          "normalizedSha256": "465e89f1a274f2ea11141643bf6b7d52ca6a3abafe812b0971f45ecd85b578e1"
+        }
+      }
+    },
+    "MARGIN": {
+      "scripts/disdex_v96_v52_margin_guard.py": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 32841,
+          "sha256": "51379f7f1b64ae85fa474e06dba3becbc63a1ac33506e1cf87cc2c2701d3bc7b",
+          "normalizedSha256": "f34a6c300c874e79701598ac7261a658cb7c4ac8ed997e36f0abf939910bcb5d"
+        }
+      },
+      "scripts/disdex_v96_v52_margin_risk_policy.py": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 9581,
+          "sha256": "524ebe7451b95b525247e05a42b1e4c574aecf656108a671ba4b0c87f66aab29",
+          "normalizedSha256": "9aa809c589a18a434a527192c681381b9e35d2889987c5543eb01c653f556e69"
+        }
+      }
+    },
+    "PENGU": {
+      "lib/pengu-dual-ls-v2-portfolio-runner.ts": {
+        "vpsMatchesPreparedNormalized": false,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 94158,
+          "sha256": "deeebd8f95960c178051240b428e6aea914ed265e33be024554c9798685b46d8",
+          "normalizedSha256": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a"
+        }
+      },
+      "lib/pengu-short-v20-timed-stop.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 5206,
+          "sha256": "c0965fd15b95680ffc744e9cc42b688fe356a9a15474c99c7537de9e5aa4eb67",
+          "normalizedSha256": "5ef6fc34d5ceb1c2a528488c02e07ed6401e9337de3e556145b2817f600820ba"
+        }
+      }
+    },
+    "Q102": {
+      "lib/disdex-quality102-causal-v1-runner.ts": {
+        "vpsMatchesPreparedNormalized": false,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 104012,
+          "sha256": "5d3e92f053bdb84ef857d9c7cc465c23c33fd888f9a0d0bbcecad33608a07655",
+          "normalizedSha256": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2"
+        }
+      }
+    },
+    "SHARED": {
+      "config/sharedCryptoRiskPolicy.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 558,
+          "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494",
+          "normalizedSha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490"
+        }
+      },
+      "lib/disdex-shared-crypto-daily-risk.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 6733,
+          "sha256": "cde6ed7b706ab800cf1647fabde25510b80fae7c6ff4d21a83d40c01c676758b",
+          "normalizedSha256": "6dfe3fe275e8eec281e5b6d5cec5c5d9c14786a1cc3d5bee783162d19f360170"
+        }
+      }
+    },
+    "V4": {
+      "lib/v12-v4-native-source.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 3021,
+          "sha256": "e5e60ebc79a42ecc280e4f2a6381c5f927e4939825637bfd1c97f1f693ed473d",
+          "normalizedSha256": "8220063dcd0ae2a738632b271b86dcfe7d0eb58affa6df2eaf9fdd2c578bcddb"
+        }
+      },
+      "lib/v12-v4-runner-engine.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 40174,
+          "sha256": "e3a7215d005413ac183accab66bdf80e8cdde634f04c0686b7e501e0bf06caa6",
+          "normalizedSha256": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f"
+        }
+      },
+      "lib/v12-v4-venue-exit.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 8736,
+          "sha256": "440e6447f1594fe71dd395e74054a2e5fcbcd7483a930f67af8d211c6bf32fc2",
+          "normalizedSha256": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd"
+        }
+      },
+      "scripts/v12-v4-production-runner.ts": {
+        "vpsMatchesPreparedNormalized": true,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 35473,
+          "sha256": "2dbd403ce093f08881a2351d4801428dc240d6aaf4501e80a6c54cbe424424e1",
+          "normalizedSha256": "607b69cea06c6a4a17e6cd34a020de930224024d0e3fb279ec1192b59ac24df6"
+        }
+      }
+    },
+    "V52": {
+      "scripts/disdex_v52_aster_only_legacy_engine.py": {
+        "vpsMatchesPreparedNormalized": false,
+        "localPrepared": {
+          "exists": true,
+          "bytes": 87973,
+          "sha256": "c0905c30d3182002d70d3f2404fdfdb52a944634074e090027b8612e23e7b056",
+          "normalizedSha256": "df0adba284c1aa3af26e6f8e06e4349c3155326831902abd4e6a469b1937fe9c"
+        }
+      }
+    }
+  },
+  "auditObservationTimestamp": "2026-11-22T22:44:48Z",
+  "comparisonGeneratedAtUtc": "2026-11-22T22:53:55.082505+00:00",
+  "beforeComparisonIsPreV4SafetyRestore": true
+}

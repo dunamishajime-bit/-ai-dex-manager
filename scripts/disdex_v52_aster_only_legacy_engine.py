@@ -1299,8 +1299,25 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             return
         if not kill:
             self._clear_kill_flatten_latch()
-        if self.enforce_daily_loss():
-            return
+        # Daily strategy loss is an ENTRY latch, not an EXIT latch. An open
+        # position must continue to reach manage_positions() for BASIS_STOP,
+        # missed-checkpoint, and time/session exits. Keep the original
+        # FLATTEN_MANAGED and HOLD_PROTECTED decisions above unchanged.
+        strategy_daily_loss_held = self.enforce_daily_loss()
+        if strategy_daily_loss_held:
+            soft_hold = True
+            if not self.positions():
+                self.log(
+                    "v52-strategy-daily-loss-flat-entry-held",
+                    newOrdersAllowed=False,
+                    existingPosition=False,
+                )
+                return
+            self.log(
+                "v52-strategy-daily-loss-exit-management-continues",
+                newOrdersAllowed=False,
+                existingPosition=True,
+            )
         if self.live:
             risk_path = os.getenv("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH", ".runtime-state/shared/crypto-daily-risk.json")
             ok, reason, _ = read_shared_crypto_daily_risk(risk_path)
