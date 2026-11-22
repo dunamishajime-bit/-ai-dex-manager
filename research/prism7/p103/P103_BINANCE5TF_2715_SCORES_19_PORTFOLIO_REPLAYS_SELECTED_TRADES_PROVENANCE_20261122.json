@@ -1,0 +1,180 @@
+{
+  "all19ModesAndSelected10_30BpsResultsArchived": true,
+  "allNativeSignalScores2715FromAsOfBothVenues": true,
+  "archives": [
+    {
+      "downloadB64Bytes": 24446,
+      "name": "P96_OFFICIAL_315_ZIP_SHA",
+      "portableBase64Path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P103_REUSABLE_ALL_RUNNER_DUAL_MARKET_SCORE_EVIDENCE\\P103_P96_OFFICIAL_315_ZIP_SHA_20261122.zip.b64",
+      "portableBase64SHA256": "fe90e7abcf03b9a93d42e690df7db149cefa04ef4eeaf810b3f521021b5642d7",
+      "rawTotalBytes": 177218,
+      "sourceFilesSHA256": {
+        "PRISM7_P96_NONV52_ALL_SOURCES_BINANCE_USDM_H1_202507_202610_OFFICIAL_SHA_MANIFEST_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P96_NONV52_ALL_SOURCES_BINANCE_USDM_H1_202507_202610_OFFICIAL_SHA_MANIFEST_20261122.json",
+          "sha256": "8afbd8903cbbf7242c7d7a32ff349100bc3883d577748aa4191b5230a9ef9a1a",
+          "sizeBytes": 177218
+        }
+      },
+      "zipDecodedBytes": 18331,
+      "zipSHA256": "b592c7f22dff515db4153d420f37d25df397ce8665348192e84f844ee9a60bc3"
+    },
+    {
+      "downloadB64Bytes": 261946,
+      "name": "P97_ALL2715_COMPLETE_FIVE_TF_SCORE",
+      "portableBase64Path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P103_REUSABLE_ALL_RUNNER_DUAL_MARKET_SCORE_EVIDENCE\\P103_P97_ALL2715_COMPLETE_FIVE_TF_SCORE_20261122.zip.b64",
+      "portableBase64SHA256": "57d67f3aa09865e6e8d977c736e87f0875d810a9a9142b0b3dadaf4da8b8b2ed",
+      "rawTotalBytes": 5532209,
+      "sourceFilesSHA256": {
+        "PRISM7_P97_ALLRUNNER_2715_RAW_CANDIDATE_ASOF_BINANCE_AST_SIGNED_SCORE_20261122.jsonl": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P97_ALLRUNNER_2715_RAW_CANDIDATE_ASOF_BINANCE_AST_SIGNED_SCORE_20261122.jsonl",
+          "sha256": "08ad43d82cc05355825f3108eaaad361312cdc0c28e92a8a7ac37ca60514b527",
+          "sizeBytes": 4768457
+        },
+        "PRISM7_P97_ALLRUNNER_NONV52_WEEK_D_12H_4H_1H_AST_BIN_SIGNED_SCORE_SHADOW_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P97_ALLRUNNER_NONV52_WEEK_D_12H_4H_1H_AST_BIN_SIGNED_SCORE_SHADOW_20261122.json",
+          "sha256": "9e9c19112259ba678532d7872a4cbe4dbc791f22edc01f346d7d6b80542e1fe3",
+          "sizeBytes": 763752
+        }
+      },
+      "zipDecodedBytes": 196457,
+      "zipSHA256": "4949f7a5512e083696d6a491ae998eca257c295ffbb13e73c068f8c4db48c871"
+    },
+    {
+      "downloadB64Bytes": 55058,
+      "name": "P101_19_PAIRED_SCENARIOS_AND_GATE_DIFFERENCES",
+      "portableBase64Path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P103_REUSABLE_ALL_RUNNER_DUAL_MARKET_SCORE_EVIDENCE\\P103_P101_19_PAIRED_SCENARIOS_AND_GATE_DIFFERENCES_20261122.zip.b64",
+      "portableBase64SHA256": "1c9c702ed1897ac899ee2c10a6405c3d94a2669857acf52b4685815d0c7064d2",
+      "rawTotalBytes": 862347,
+      "sourceFilesSHA256": {
+        "P100_FAMILY_COMBO_SOURCE_SHA_MANIFEST_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\P100_FAMILY_COMBO_SOURCE_SHA_MANIFEST_20261122.json",
+          "sha256": "360aa689fcd3ff844bb75cbaa9b70fa67427d52aa5b9d5f3d2bb914bef4143a2",
+          "sizeBytes": 2867
+        },
+        "P98_SOURCE_COMPETITION_MODELS_SHA_MANIFEST_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P98_NONV52_DUAL_MARKET_ALLRUNNER_PAIRED\\P98_SOURCE_COMPETITION_MODELS_SHA_MANIFEST_20261122.json",
+          "sha256": "0a4a2adefa896f5e294e8f2773aa8e322e3e06c39acaf94c06df3ca370f3395c",
+          "sizeBytes": 3577
+        },
+        "P99_SOURCE_FAMILY_ABLATION_SHA_MANIFEST_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P99_NONV52_ROUTE_FAMILY_ABLATION_BTC_BINANCE_MARKET\\P99_SOURCE_FAMILY_ABLATION_SHA_MANIFEST_20261122.json",
+          "sha256": "220ea6b997c36b499f24987d7a7f5ac4aab0248221f1484c90cea5952f1fcf6d",
+          "sizeBytes": 5484
+        },
+        "PRISM7_P101_30BPS_SELECTED_FLEET_GATE_ADMISSION_REOPENED_NEWLY_BLOCKED_IDS_20261122.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P101_30BPS_SELECTED_FLEET_GATE_ADMISSION_REOPENED_NEWLY_BLOCKED_IDS_20261122.csv",
+          "sha256": "a9578fd5aa5b753af6ca1b409b8404ecb7c2fdeab6685cac71d313be491fb2c3",
+          "sizeBytes": 12588
+        },
+        "PRISM7_P101_NONV52_ALLRUNNER_5TF_BINANCE_TREND_NEGATIVE_POINTS_RESEARCH_REPORT_20261122.md": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P101_NONV52_ALLRUNNER_5TF_BINANCE_TREND_NEGATIVE_POINTS_RESEARCH_REPORT_20261122.md",
+          "sha256": "53058aba4b929859fa3ebe82480b46ee481513e96531cfcbb11056bff99a8950",
+          "sizeBytes": 5745
+        },
+        "PRISM7_P101_NONV52_ASTER_BINANCE_5TF_SCORE_6_UNIFORM_9_FAMILY_4_COMBO_FULLBT_AUDIT_20261122.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\results\\PRISM7_P101_NONV52_ASTER_BINANCE_5TF_SCORE_6_UNIFORM_9_FAMILY_4_COMBO_FULLBT_AUDIT_20261122.json",
+          "sha256": "1946afcf58ef9f3a9733b93e6c2e665f9345cebe70b2fc9968935d35997ca68f",
+          "sizeBytes": 832086
+        }
+      },
+      "zipDecodedBytes": 41292,
+      "zipSHA256": "3a934536b24314cd407ff3d62cd9944f3eaa02c56dc93107022133087ddcf74c"
+    },
+    {
+      "downloadB64Bytes": 237890,
+      "name": "P100_TRIPLE_SELECTED_NATIVE_10_30BPS_10BPS_ALL_FILLS_FUNDING_DECISIONS",
+      "portableBase64Path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P103_REUSABLE_ALL_RUNNER_DUAL_MARKET_SCORE_EVIDENCE\\P103_P100_TRIPLE_SELECTED_NATIVE_10_30BPS_10BPS_ALL_FILLS_FUNDING_DECISIONS_20261122.zip.b64",
+      "portableBase64SHA256": "c0bf9145867f780ce0da15f5e6228a242d095c75e96eee6e40760ea8ac900bad",
+      "rawTotalBytes": 1014682,
+      "sourceFilesSHA256": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_DECISIONS.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_DECISIONS.csv",
+          "sha256": "ac460b1088bd1c2f243b78db58089c1143f6b6043c293ef09115403ff2e7c5a4",
+          "sizeBytes": 217379
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FILLS.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FILLS.csv",
+          "sha256": "214e441ce33cb631cca598ee8c1680c6e3ef1bd481b1055f84022fd15e6d14ae",
+          "sizeBytes": 349415
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FUNDING.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_FUNDING.csv",
+          "sha256": "08b6b93f1b3f6ff01144885aedd925f1f0d513401ad6cce6531fa9aae9d9b1cf",
+          "sizeBytes": 446666
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_SUMMARY.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_SUMMARY.json",
+          "sha256": "939530b8b5bb4d6ec9144530328cdcd3adc9531abc29bb671cb716ab27db0c1e",
+          "sizeBytes": 1222
+        }
+      },
+      "zipDecodedBytes": 178415,
+      "zipSHA256": "aaec2ea0ea7fd17fd618ee3fab204e09f6ca102fff3693841e33ccc8d2b2e19d"
+    },
+    {
+      "downloadB64Bytes": 237530,
+      "name": "P100_TRIPLE_SELECTED_NATIVE_10_30BPS_30BPS_ALL_FILLS_FUNDING_DECISIONS",
+      "portableBase64Path": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P103_REUSABLE_ALL_RUNNER_DUAL_MARKET_SCORE_EVIDENCE\\P103_P100_TRIPLE_SELECTED_NATIVE_10_30BPS_30BPS_ALL_FILLS_FUNDING_DECISIONS_20261122.zip.b64",
+      "portableBase64SHA256": "e77ef9cbe1d71b3035e2e7432e42b4e5cb3f8ddaa223577790b127a21c383cfb",
+      "rawTotalBytes": 1012394,
+      "sourceFilesSHA256": {
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_DECISIONS.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_DECISIONS.csv",
+          "sha256": "d17fa3b0ccdb8644f11299c881102df7208c3c29982c30fe98abc4520166584c",
+          "sizeBytes": 217351
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FILLS.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FILLS.csv",
+          "sha256": "fa969b6b5637016759f2c1e4e74a199f5cc8a581fdc96c61c618bcbb8985beb5",
+          "sizeBytes": 348402
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FUNDING.csv": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_FUNDING.csv",
+          "sha256": "b7e51eb9369df2b6e953b7e44360dce9beabe9c98b75bad5fed42727a4046d4c",
+          "sizeBytes": 445422
+        },
+        "STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_SUMMARY.json": {
+          "ownerPC": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_SUMMARY.json",
+          "sha256": "2766498f4736a788d30418812d1cb2286f95b5a237496712a1e4cea03055c3b5",
+          "sizeBytes": 1219
+        }
+      },
+      "zipDecodedBytes": 178144,
+      "zipSHA256": "01ec65a8523de1ab326121f8e2ca7e7d327b87c0971124fdd90b971b46729d87"
+    }
+  ],
+  "decodeInstruction": "base64 decode ASCII .zip.b64 to .zip, verify zipSHA256, extract all source files, verify sourceFilesSHA256. Full 5-minute equity stored on owner PC, SHA file here, rebuild with P92/P100 scripts from GitHub research branch.",
+  "fullFiveMinuteEquityRetainedLocallySHA": {
+    "P100_SELECTED_TRIPLE_10": {
+      "fileBytes": 12539986,
+      "ownerPCPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv",
+      "reproducibleFromGitHubNativeScript": true,
+      "sha256": "1773fee3f4fde1c89366f8a534027ebf390408eb464044cde7119731814fa129"
+    },
+    "P100_SELECTED_TRIPLE_30": {
+      "fileBytes": 12512825,
+      "ownerPCPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P100_SELECTED_FAMILY_COMBINATION_SHADOW_RISK\\IDLE_Q102BRKPB_RESIDUAL\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv",
+      "reproducibleFromGitHubNativeScript": true,
+      "sha256": "8e8fc2e63fdbffc73e4b2403c0fff685035d91737307ce9ff8757a2e6fb343e5"
+    },
+    "ownerPENGU5m_BASE_10": {
+      "fileBytes": 12564464,
+      "ownerPCPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BIN5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_10BPS_EQUITY_5MIN.csv",
+      "reproducibleFromGitHubNativeScript": true,
+      "sha256": "566949ea1027e69d69b90b9ac43911945ddea00f38ace093a5140da131639fd9"
+    },
+    "ownerPENGU5m_BASE_30": {
+      "fileBytes": 12534494,
+      "ownerPCPath": "C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122\\P92_PAIRED_PORTFOLIO_REPLAY\\BIN5M_CAPS\\STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_30BPS_EQUITY_5MIN.csv",
+      "reproducibleFromGitHubNativeScript": true,
+      "sha256": "ff4867eac1bf7f78c9a4c300e3dc599136c04f16d9de39718c5f57705af0c56e"
+    }
+  },
+  "insampleCombinationDoesNotEstablishFutureDD20OrWinRate": true,
+  "noV52Scoring": true,
+  "officialBinanceUSDMSHA315AlreadyVerified": true,
+  "previousPENGUOwnerV20EntryUnchanged": true,
+  "researchOnlyAndNoProductionMutation": true,
+  "schema": "prism7-p103-portable-5TF-signed-crossvenue-2715-signals-19-paired-model-allrunner-source-funding-fills/v1",
+  "sourcePortfolioTimePeriod": "2025-10-01T00:00:00Z to 2026-10-01T00:00:00Z exclusive"
+}
