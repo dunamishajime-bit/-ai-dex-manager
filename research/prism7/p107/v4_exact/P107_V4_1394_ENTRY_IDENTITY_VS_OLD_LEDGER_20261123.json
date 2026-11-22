@@ -1,0 +1,24 @@
+{
+  "schema": "p107-v4-native-pin-vs-20261109-legacy-entry-identity-v1",
+  "pinned_new_SHA": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
+  "old_tape_source_shas": [
+    "3ad65403013b701db5d9e53e8814e6ab827a28e8"
+  ],
+  "new_current_count": 1394,
+  "old_research_count": 1394,
+  "matching_key_occurrences": 1394,
+  "new_not_old_occurrences": 0,
+  "old_not_new_occurrences": 0,
+  "new_not_old_examples": [],
+  "old_not_new_examples": [],
+  "sourceFingerprintMismatches": 0,
+  "sourceFingerprintMismatchExamples": [],
+  "commonDecisionTimestamps": 955,
+  "current_pin_source_native_entry_production_parity": true,
+  "live_order_and_exit_parity": false,
+  "old_source_sha_of_legacy_tape": [
+    "3ad65403013b701db5d9e53e8814e6ab827a28e8"
+  ],
+  "sourceInputHash": "e46e5f0b9e89be273def8207f0479c34373fb3ff8e32a19b43819cd98e44577e",
+  "legacyInputHash": "d95c93bcaea37aeee51d6ac88f81675bd1100220e7613f5e57047c605e1c2a37"
+}
