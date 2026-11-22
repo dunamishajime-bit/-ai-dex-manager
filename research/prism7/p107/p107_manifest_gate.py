@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 
 EXPECTED_PERIOD = ["2025-10-01T00:00:00Z", "2026-10-01T00:00:00Z"]
+EFFECTIVE_SOURCE_CAPS = {"crypto_cap": 3.0, "stock_cap": 4.0, "total_cap": 4.25}
+SENSITIVITY_CAPS = {"crypto_cap": 3.0, "stock_cap": 1.5, "total_cap": 3.5}
+
 P106_30BPS = {
     "baseline_final_jpy": 551075,
     "baseline_max_dd_pct": 29.95,
@@ -38,12 +41,22 @@ def assess(manifest_path):
         reasons.append("INITIAL_CAPITAL_MISMATCH")
     if not any("V4_MAX_DRAWDOWN_21PCT_HOLD" in r.get("blocked_by_reason", {}) for r in results):
         reasons.append("NO_REPLAYED_DD21_HOLD_EVENT_EVIDENCE")
-    if any(float(r.get("stock_cap", 1e6)) > 1.5 + 1e-8 for r in results):
-        reasons.append("STOCK_GROSS_ABOVE_1P5")
-    if any(float(r.get("total_cap", 1e6)) > 3.5 + 1e-8 for r in results):
-        reasons.append("TOTAL_GROSS_ABOVE_3P5")
-    if any(float(r.get("crypto_cap", 1e6)) > 3.0 + 1e-8 for r in results):
-        reasons.append("CRYPTO_GROSS_ABOVE_3P0")
+    # A stock 1.5x / total 3.5x scenario is a sensitivity model, not the pinned-source baseline.
+    # Do not accept absent or silent fallback Gross caps as production parity.
+    for label, expected in EFFECTIVE_SOURCE_CAPS.items():
+        for r in results:
+            bps = r.get("cost_bps_roundtrip", "UNKNOWN")
+            value = r.get(label)
+            if value is None:
+                reasons.append(f"{label.upper()}_NOT_ATTESTED_{bps}BPS")
+                continue
+            try:
+                actual = float(value)
+            except (TypeError, ValueError):
+                reasons.append(f"{label.upper()}_INVALID_{bps}BPS")
+                continue
+            if not abs(actual - expected) <= 1e-8:
+                reasons.append(f"{label.upper()}_MISMATCH_EFFECTIVE_SOURCE_{bps}BPS")
     joined = " ".join(str(x) for x in caveats)
     if "HIGH_VOL missing" in joined or "66 fail-closed" in joined:
         reasons.append("Q102_HIGH_VOL_OR_66_UNRESOLVED")
