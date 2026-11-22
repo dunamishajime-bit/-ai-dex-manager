@@ -1,0 +1,285 @@
+{
+  "BinanceOriginalNative_EXIT_PriceNotUsedToCloseAster": true,
+  "M5Delay0_5_15GoodUnderBothNormalAnd100bpsStress": true,
+  "asterSignedVenueOrdersAndSTOPS": false,
+  "eventTimeGrossPolicySourceM5DelayComparisons": [
+    {
+      "ASTERnative": {
+        "M5DDPlus100bps": 18.133889,
+        "M5HighDDPct": 14.548984,
+        "NAVJPY": 15001.01,
+        "NAVPlus100bps": 12140.3,
+        "closed": 30,
+        "noPositiveM5Print": 0,
+        "wins": 18
+      },
+      "BINANCEtriggerASTERexecute": {
+        "M5DDPlus100bps": 14.316468,
+        "M5HighDDPct": 13.019858,
+        "NAVJPY": 17700.9,
+        "NAVPlus100bps": 14696.4,
+        "closed": 27,
+        "noPositiveM5Print": 2,
+        "wins": 18
+      },
+      "baseNAVImprovementJPY": 2699.89,
+      "sourceM5EntryDelayMin": 0,
+      "with100bpsCoverImprovementJPY": 2556.1
+    },
+    {
+      "ASTERnative": {
+        "M5DDPlus100bps": 19.487936,
+        "M5HighDDPct": 17.472907,
+        "NAVJPY": 15668.14,
+        "NAVPlus100bps": 12784.9,
+        "closed": 29,
+        "noPositiveM5Print": 1,
+        "wins": 18
+      },
+      "BINANCEtriggerASTERexecute": {
+        "M5DDPlus100bps": 14.316468,
+        "M5HighDDPct": 13.019858,
+        "NAVJPY": 16940.7,
+        "NAVPlus100bps": 14159.67,
+        "closed": 26,
+        "noPositiveM5Print": 3,
+        "wins": 16
+      },
+      "baseNAVImprovementJPY": 1272.56,
+      "sourceM5EntryDelayMin": 5,
+      "with100bpsCoverImprovementJPY": 1374.77
+    },
+    {
+      "ASTERnative": {
+        "M5DDPlus100bps": 15.399004,
+        "M5HighDDPct": 12.869257,
+        "NAVJPY": 16967.51,
+        "NAVPlus100bps": 13969.43,
+        "closed": 28,
+        "noPositiveM5Print": 4,
+        "wins": 18
+      },
+      "BINANCEtriggerASTERexecute": {
+        "M5DDPlus100bps": 17.890228,
+        "M5HighDDPct": 16.585072,
+        "NAVJPY": 17871.18,
+        "NAVPlus100bps": 15065.43,
+        "closed": 25,
+        "noPositiveM5Print": 4,
+        "wins": 15
+      },
+      "baseNAVImprovementJPY": 903.67,
+      "sourceM5EntryDelayMin": 15,
+      "with100bpsCoverImprovementJPY": 1096.0
+    }
+  ],
+  "extraBuyCoverSlippageBps": 100,
+  "fiveMinuteLatencyCompoundedCohortAndWinnerConcentration": {
+    "ASTER_NATIVE_SOURCE": {
+      "actual30bpsNAV": 15668.14,
+      "cohortCompoundedNAVFactors": {
+        "BASE_2025_2026": {
+          "closed": 21,
+          "cumulative30bpsGrossWeightedEquityRetPct": 68.947216,
+          "grossFactor": 1.689472,
+          "wins": 14
+        },
+        "POST_2026_OCT_NOV": {
+          "closed": 4,
+          "cumulative30bpsGrossWeightedEquityRetPct": 3.128862,
+          "grossFactor": 1.031289,
+          "wins": 2
+        },
+        "PRE_2025_AUG_SEP": {
+          "closed": 4,
+          "cumulative30bpsGrossWeightedEquityRetPct": -10.073822,
+          "grossFactor": 0.899262,
+          "wins": 2
+        }
+      },
+      "highestWinnerSourceKey": "BASE_2025_2026|PENGU_00046|1769806800000",
+      "highestWinnerWeightedEquityRetPct": 12.752357,
+      "largestWinners": [
+        {
+          "equityRetPct": 12.752357,
+          "key": "BASE_2025_2026|PENGU_00046|1769806800000"
+        },
+        {
+          "equityRetPct": 11.068082,
+          "key": "BASE_2025_2026|PENGU_00010|1762178400000"
+        },
+        {
+          "equityRetPct": 10.071987,
+          "key": "BASE_2025_2026|PENGU_00007|1761678000000"
+        },
+        {
+          "equityRetPct": 9.251457,
+          "key": "BASE_2025_2026|PENGU_00027|1765771200000"
+        },
+        {
+          "equityRetPct": 9.186058,
+          "key": "BASE_2025_2026|PENGU_00008|1761894000000"
+        }
+      ],
+      "lossMagnitudeTop5": [
+        {
+          "equityRetPct": -6.237842,
+          "key": "PRE_2025_AUG_SEP|PENGU_00011|1757066400000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "PRE_2025_AUG_SEP|PENGU_00008|1756724400000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BASE_2025_2026|PENGU_00013|1762650000000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BASE_2025_2026|PENGU_00021|1765029600000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BASE_2025_2026|PENGU_00051|1772294400000"
+        }
+      ],
+      "nonReAdmissionFixedSelectedNAVIfHighestTwoWinnersRemoved": 12511.3,
+      "nonReAdmissionFixedSelectedNAVIfHighestWinnerRemoved": 13896.06,
+      "selected": 29,
+      "wins": 18
+    },
+    "BINANCE_NATIVE_SOURCE_EXECUTE_ASTER": {
+      "actual30bpsNAV": 16940.7,
+      "cohortCompoundedNAVFactors": {
+        "BASE_2025_2026": {
+          "closed": 20,
+          "cumulative30bpsGrossWeightedEquityRetPct": 69.365856,
+          "grossFactor": 1.693659,
+          "wins": 13
+        },
+        "POST_2026_OCT_NOV": {
+          "closed": 3,
+          "cumulative30bpsGrossWeightedEquityRetPct": 5.334042,
+          "grossFactor": 1.05334,
+          "wins": 2
+        },
+        "PRE_2025_AUG_SEP": {
+          "closed": 3,
+          "cumulative30bpsGrossWeightedEquityRetPct": -5.040846,
+          "grossFactor": 0.949592,
+          "wins": 1
+        }
+      },
+      "highestWinnerSourceKey": "BINANCE_SIGNAL|P74_BINANCE_MKT_00035|1769806800000",
+      "highestWinnerWeightedEquityRetPct": 12.752357,
+      "largestWinners": [
+        {
+          "equityRetPct": 12.752357,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00035|1769806800000"
+        },
+        {
+          "equityRetPct": 9.251457,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00026|1765771200000"
+        },
+        {
+          "equityRetPct": 9.186058,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00017|1761894000000"
+        },
+        {
+          "equityRetPct": 9.042102,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00014|1760544000000"
+        },
+        {
+          "equityRetPct": 7.999606,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00007|1758589200000"
+        }
+      ],
+      "lossMagnitudeTop5": [
+        {
+          "equityRetPct": -6.237842,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00006|1757066400000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00009|1758834000000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00020|1762650000000"
+        },
+        {
+          "equityRetPct": -6.225,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00025|1765029600000"
+        },
+        {
+          "equityRetPct": -3.887875,
+          "key": "BINANCE_SIGNAL|P74_BINANCE_MKT_00015|1761156000000"
+        }
+      ],
+      "nonReAdmissionFixedSelectedNAVIfHighestTwoWinnersRemoved": 13752.4,
+      "nonReAdmissionFixedSelectedNAVIfHighestWinnerRemoved": 15024.7,
+      "selected": 26,
+      "wins": 16
+    }
+  },
+  "fullP81All36ScenariosConsistent": true,
+  "limitations": [
+    "Input Aster Native53 and cross-market period 2025Aug-2026Nov are repeatedly inspected, so this is not untouched out-of-sample despite source parity and 5m positive M5 print.",
+    "Native quote window PENGU/BTC from Aster and Binance has highly correlated price moves and H1 candle provider divergence, no independent PnL replication of actual signed orders.",
+    "5m bar OPEN is not proved executable after Binance H1 close; intra-M5 latency, spread, maker/taker, market impact, funding, network jitter and real STOP orders remain unknown.",
+    "Native H1 exit source P78 and repriced M5 exit source P80/P81 are different order-price models: their DD levels should be compared only within respective model; P80 recalculates stop and V20 state.",
+    "Cross-runner portfolio gross and shared DD are not in isolated one-slot results; an isolated strategy DD under20 does not guarantee live account DD under20.",
+    "Gross1 not approved by research. 0.25 explicitly prohibited; 0.5 accepted only for as-of high-confidence weakness, otherwise reject.",
+    "Leave-one-or-two-winner-out does not re-admit new trades after removed entry; it illustrates concentration, not a new strategy backtest.",
+    "No live implementation, owner authentication, production, Runner, STOP, order, position, kill switch or master changes."
+  ],
+  "lowGross0p25Prohibited": true,
+  "newAsterIndependentUnseenHoldout": false,
+  "normalFeeBps": 30,
+  "originalASTER53PinEntryAndExitParityPASS": true,
+  "originalH1PurePinComparison30bps": [
+    {
+      "DDPlus100bps": 17.569858,
+      "H1SourceNativeExitNAVJPY": 15683.87,
+      "M5DDPct": 15.490302,
+      "NAVPlus100bps": 12702.33,
+      "oneSlot": 30,
+      "signalToAsterSourceModel": "ASTER_NATIVE_SOURCE_ONLY",
+      "wins": 18
+    },
+    {
+      "DDPlus100bps": 14.27951,
+      "H1SourceNativeExitNAVJPY": 17986.14,
+      "M5DDPct": 12.984259,
+      "NAVPlus100bps": 14714.5,
+      "oneSlot": 29,
+      "signalToAsterSourceModel": "BINANCE_TRIGGER_ASTER_EXECUTION",
+      "wins": 18
+    },
+    {
+      "DDPlus100bps": 12.031082,
+      "H1SourceNativeExitNAVJPY": 16568.55,
+      "M5DDPct": 10.624058,
+      "NAVPlus100bps": 14557.88,
+      "oneSlot": 19,
+      "signalToAsterSourceModel": "ASTER_AND_BINANCE_SIMULTANEOUS_SIGNAL",
+      "wins": 13
+    }
+  ],
+  "productionMasterRunnerRiskGrossStopOrdersChanged": false,
+  "riskPolicy": "V20 native entry either ASTER or Binance; 0.5 if only exceptional macro bull and both PENGU weaker, skip if bull without that validation; else 0.75. No 0.25.",
+  "schema": "prism7-p82-owner-proposed-binance-native-signal-aster-exec-tested-source53-parity-M5-native0-5-15-latency-v1",
+  "sourceAsterOriginalNative53TriggerCount": 53,
+  "sourceBinanceNativeTriggeredASTERcounterfactual57": true,
+  "sourceBinanceOnly30WinsAsterNativeExit17": true,
+  "sourceOriginalNativeSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "sourceSHA256": {
+    "P73": "76a8874c5a632f2d7a2f43596e1368c48ca54a01e0944a0e5c243fdfea2e5aa6",
+    "P78": "4821e9feced1f55b5404b91e6fbbd41547661952a4ff01d1346a69aa3198d799",
+    "P79": "0a0a1d4d4fbdfe3003aa7965fa5581372849bc13aa5d0617ed0ea3d6504ffe12",
+    "P80": "a26a68a007cb1b578f720ce54bbf2b61db119f2f66f97b27f458ea37954bea45",
+    "P81": "630c6057d0494058bf5d48d6b04c439edf4afdd14f231408ba3620a886b50470"
+  },
+  "sourceSameOriginalHour27": true,
+  "status": "PROMISING_RESEARCH_BUT_NO_ACTUAL_FILL_OR_FRESH_ASTER_OOS_DO_NOT_DEPLOY"
+}
