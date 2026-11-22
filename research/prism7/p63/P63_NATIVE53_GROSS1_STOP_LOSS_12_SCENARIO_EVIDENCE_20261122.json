@@ -1,0 +1,668 @@
+{
+  "allSourceNativeOriginalProfitExitsRetained": true,
+  "baselineGross075": {
+    "econ": {
+      "M5CloseMarkedDDPct": 25.10029,
+      "M5HighStressMarkedDDPct": 25.10029,
+      "cohorts": {
+        "BASE_2025_2026": {
+          "closed": 24,
+          "sourceGrossSumEquityPoints": 48.18133,
+          "wins": 14
+        },
+        "POST_2026_OCT_NOV": {
+          "closed": 4,
+          "sourceGrossSumEquityPoints": 3.95843,
+          "wins": 2
+        },
+        "PRE_2025_AUG_SEP": {
+          "closed": 5,
+          "sourceGrossSumEquityPoints": -11.29504,
+          "wins": 2
+        }
+      },
+      "conditionalPF": 1.66665,
+      "conditionalWinPct": 54.54545,
+      "finalNAVYen": 14193.07,
+      "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+      "meanEntryEquityReturnPct": 1.23772,
+      "singleSlotPositions": 33,
+      "sourceRealizedOnlyDDPct": 21.20439,
+      "venueSignedFillProven": false,
+      "wins": 18
+    },
+    "extraBuyCoverSlipBps": 0,
+    "feeBps": 30,
+    "gross": 0.75,
+    "nativeSourceExitPricesAndTimesUnchanged": true,
+    "originalSource53NaturalSignals": 53,
+    "originalSourceStop8PctNeverChanged": true,
+    "sourceSingleSlotClosed": 33
+  },
+  "chronologicalOriginalOneSlot33LossConcentration": {
+    "allSingleSlotLossNet30PctPoints": -81.691786,
+    "hardStopLossNet30PctPoints": -66.4,
+    "hardStopShareOfLossMagnitudePct": 81.281122,
+    "hardStops": 8,
+    "losers": 15,
+    "oneSlotPositionCount": 33,
+    "replayOriginalNativeSource53Retained": true,
+    "sourceGross0p75ClaimDoesNotAutomaticallyExtendTo1p0": true,
+    "sourceHardStopLossIds": [
+      "PRE_2025_AUG_SEP|PENGU_00003|1755284400000",
+      "PRE_2025_AUG_SEP|PENGU_00008|1756724400000",
+      "BASE_2025_2026|PENGU_00013|1762650000000",
+      "BASE_2025_2026|PENGU_00021|1765029600000",
+      "BASE_2025_2026|PENGU_00051|1772294400000",
+      "BASE_2025_2026|PENGU_00086|1784318400000",
+      "BASE_2025_2026|PENGU_00101|1788368400000",
+      "BASE_2025_2026|PENGU_00103|1788544800000"
+    ],
+    "wins": 18
+  },
+  "dataSHA256": {
+    "M5": {
+      "PENGUUSDT-5m-20250801-20250924.jsonl.gz": "7aa46e364edd7e5426815f3d2b130019365446f2d63026a67a31851050d7355c",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "PENGUUSDT-5m-20261001-20261118.jsonl.gz": "0fb1f6dd92a9526a7dd338562b9d67cbe1e74286435deba8e87c5f8fa36e6905"
+    },
+    "Native53": "e30c3dfa389c97db6b47351a03dbadd4ec1f8f2d421a69c59b1f742fde04c337",
+    "P40": "ac2ee57b8b3604fa92b54aff1adf815034ddd18dfda4365032c7cd81c9eb3542",
+    "P44": "64b55b30705ffffa412887e6f464de68b902f3443b31bedd90fb76e86eda6887"
+  },
+  "fixedSource53OriginalNativeEntriesAndExitsExactNet30Parity53of53": true,
+  "grossAndFeeStressGrid": [
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 17.01952,
+        "M5HighStressMarkedDDPct": 17.01952,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 34.52087,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 3.03895,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -7.03002,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.77593,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 13216.72,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.92515,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 13.94602,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 10,
+      "gross": 0.5,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 17.44914,
+        "M5HighStressMarkedDDPct": 17.44914,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 32.12087,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 2.63895,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -7.53002,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.66665,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 12790.72,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.82515,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 14.55969,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.5,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 20.31214,
+        "M5HighStressMarkedDDPct": 20.31214,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 20.47808,
+            "wins": 13
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 0.67134,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -10.09782,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 1.22433,
+        "conditionalWinPct": 48.48485,
+        "finalNAVYen": 10882.09,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.3349,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 17.69597,
+        "venueSignedFillProven": false,
+        "wins": 16
+      },
+      "extraBuyCoverSlipBps": 100,
+      "feeBps": 30,
+      "gross": 0.5,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 24.5037,
+        "M5HighStressMarkedDDPct": 24.5037,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 51.78133,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 4.55843,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -10.54504,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.77593,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 14906.19,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 1.38772,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 20.34405,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 10,
+      "gross": 0.75,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 25.10029,
+        "M5HighStressMarkedDDPct": 25.10029,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 48.18133,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 3.95843,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -11.29504,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.66665,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 14193.07,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 1.23772,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 21.20439,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 30,
+      "gross": 0.75,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 29.11924,
+        "M5HighStressMarkedDDPct": 29.11924,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 30.71712,
+            "wins": 13
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 1.00702,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -15.14673,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 1.22433,
+        "conditionalWinPct": 48.48485,
+        "finalNAVYen": 11136.43,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.50235,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 25.55974,
+        "venueSignedFillProven": false,
+        "wins": 16
+      },
+      "extraBuyCoverSlipBps": 100,
+      "feeBps": 30,
+      "gross": 0.75,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 31.37732,
+        "M5HighStressMarkedDDPct": 31.37732,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 69.04176,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 6.0779,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -14.06005,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.77593,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 16606.42,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 1.85029,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 26.37826,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.0,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 32.11305,
+        "M5HighStressMarkedDDPct": 32.11305,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 64.24176,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 5.2779,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -15.06005,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.66665,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 15557.46,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 1.65029,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 27.44908,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.0,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 37.11247,
+        "M5HighStressMarkedDDPct": 37.11247,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 40.95617,
+            "wins": 13
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 1.34269,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -20.19565,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 1.22433,
+        "conditionalWinPct": 48.48485,
+        "finalNAVYen": 11254.4,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.66979,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 32.8174,
+        "venueSignedFillProven": false,
+        "wins": 16
+      },
+      "extraBuyCoverSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.0,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 37.68908,
+        "M5HighStressMarkedDDPct": 37.68908,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 86.3022,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 7.59738,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -17.57506,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.77593,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 18280.18,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 2.31286,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 32.06287,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 10,
+      "gross": 1.25,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 38.53887,
+        "M5HighStressMarkedDDPct": 38.53887,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 80.3022,
+            "wins": 14
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 6.59738,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -18.82506,
+            "wins": 2
+          }
+        },
+        "conditionalPF": 1.66665,
+        "conditionalWinPct": 54.54545,
+        "finalNAVYen": 16849.87,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 2.06286,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 33.31077,
+        "venueSignedFillProven": false,
+        "wins": 18
+      },
+      "extraBuyCoverSlipBps": 0,
+      "feeBps": 30,
+      "gross": 1.25,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    },
+    {
+      "econ": {
+        "M5CloseMarkedDDPct": 44.35176,
+        "M5HighStressMarkedDDPct": 44.35176,
+        "cohorts": {
+          "BASE_2025_2026": {
+            "closed": 24,
+            "sourceGrossSumEquityPoints": 51.19522,
+            "wins": 13
+          },
+          "POST_2026_OCT_NOV": {
+            "closed": 4,
+            "sourceGrossSumEquityPoints": 1.67836,
+            "wins": 2
+          },
+          "PRE_2025_AUG_SEP": {
+            "closed": 5,
+            "sourceGrossSumEquityPoints": -25.24456,
+            "wins": 1
+          }
+        },
+        "conditionalPF": 1.22433,
+        "conditionalWinPct": 48.48485,
+        "finalNAVYen": 11232.63,
+        "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+        "meanEntryEquityReturnPct": 0.83724,
+        "singleSlotPositions": 33,
+        "sourceRealizedOnlyDDPct": 39.50461,
+        "venueSignedFillProven": false,
+        "wins": 16
+      },
+      "extraBuyCoverSlipBps": 100,
+      "feeBps": 30,
+      "gross": 1.25,
+      "nativeSourceExitPricesAndTimesUnchanged": true,
+      "originalSource53NaturalSignals": 53,
+      "originalSourceStop8PctNeverChanged": true,
+      "sourceSingleSlotClosed": 33
+    }
+  ],
+  "limitations": [
+    "Source original 53 cases overlap and do not represent 53 actual independent fills; original one-slot admits 33 proxy positions.",
+    "Native53 hard-stop -8.3% represents source configured 8% protective hard exit plus 30bps fee. Cannot treat stops as defect without verifying their trigger and preventing worse tail losses.",
+    "Gross change may alter shared gross, other runners, account margin, liquidation risk, daily loss thresholds: ALL ABSENT FROM RESEARCH MODEL.",
+    "Research M5 prior high/close DD marks and source native H1 exits are not actual signed fills, exchange STOP sequencing or true portfolio DD.",
+    "Slippage +100bps is applied to hypothetical cover price for every source exit as severe stress, not measured actual market impact.",
+    "A model that avoids hindsight-labeled hard-stop losses will leak the future outcome; design a prospective, as-of state machine then independently validate.",
+    "Earlier P59 6h/12h no-progress thresholds had low winner retention; automatic early exit cannot be promoted from the historical source.",
+    "No new unseen original Aster venue data available and no future non-overfit verification.",
+    "Original production Runner, positions, orders, STOP, Kill Switch, GitHub master, gross policy were not accessed or changed."
+  ],
+  "newGross1LiveAllowed": false,
+  "riskGateDD20FailedAtGross1": true,
+  "scenarioGross1": {
+    "econ": {
+      "M5CloseMarkedDDPct": 32.11305,
+      "M5HighStressMarkedDDPct": 32.11305,
+      "cohorts": {
+        "BASE_2025_2026": {
+          "closed": 24,
+          "sourceGrossSumEquityPoints": 64.24176,
+          "wins": 14
+        },
+        "POST_2026_OCT_NOV": {
+          "closed": 4,
+          "sourceGrossSumEquityPoints": 5.2779,
+          "wins": 2
+        },
+        "PRE_2025_AUG_SEP": {
+          "closed": 5,
+          "sourceGrossSumEquityPoints": -15.06005,
+          "wins": 2
+        }
+      },
+      "conditionalPF": 1.66665,
+      "conditionalWinPct": 54.54545,
+      "finalNAVYen": 15557.46,
+      "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+      "meanEntryEquityReturnPct": 1.65029,
+      "singleSlotPositions": 33,
+      "sourceRealizedOnlyDDPct": 27.44908,
+      "venueSignedFillProven": false,
+      "wins": 18
+    },
+    "extraBuyCoverSlipBps": 0,
+    "feeBps": 30,
+    "gross": 1.0,
+    "nativeSourceExitPricesAndTimesUnchanged": true,
+    "originalSource53NaturalSignals": 53,
+    "originalSourceStop8PctNeverChanged": true,
+    "sourceSingleSlotClosed": 33
+  },
+  "scenarioGross1AdditionalCover100bps": {
+    "econ": {
+      "M5CloseMarkedDDPct": 37.11247,
+      "M5HighStressMarkedDDPct": 37.11247,
+      "cohorts": {
+        "BASE_2025_2026": {
+          "closed": 24,
+          "sourceGrossSumEquityPoints": 40.95617,
+          "wins": 13
+        },
+        "POST_2026_OCT_NOV": {
+          "closed": 4,
+          "sourceGrossSumEquityPoints": 1.34269,
+          "wins": 2
+        },
+        "PRE_2025_AUG_SEP": {
+          "closed": 5,
+          "sourceGrossSumEquityPoints": -20.19565,
+          "wins": 1
+        }
+      },
+      "conditionalPF": 1.22433,
+      "conditionalWinPct": 48.48485,
+      "finalNAVYen": 11254.4,
+      "independentlyOverlapCorrectedInSimpleSingleSlot": true,
+      "meanEntryEquityReturnPct": 0.66979,
+      "singleSlotPositions": 33,
+      "sourceRealizedOnlyDDPct": 32.8174,
+      "venueSignedFillProven": false,
+      "wins": 16
+    },
+    "extraBuyCoverSlipBps": 100,
+    "feeBps": 30,
+    "gross": 1.0,
+    "nativeSourceExitPricesAndTimesUnchanged": true,
+    "originalSource53NaturalSignals": 53,
+    "originalSourceStop8PctNeverChanged": true,
+    "sourceSingleSlotClosed": 33
+  },
+  "schema": "prism7-p63-pinned-native53-original-stop-loss-concentration-vs-1gross/v1",
+  "sourceNativeLossConcentration": {
+    "allLossNet30NotionalPctPoints": -140.548215,
+    "hardStopNaturalSourceKeys": [
+      "PRE_2025_AUG_SEP|PENGU_00003|1755284400000",
+      "PRE_2025_AUG_SEP|PENGU_00006|1755698400000",
+      "PRE_2025_AUG_SEP|PENGU_00008|1756724400000",
+      "BASE_2025_2026|PENGU_00006|1761220800000",
+      "BASE_2025_2026|PENGU_00013|1762650000000",
+      "BASE_2025_2026|PENGU_00014|1762682400000",
+      "BASE_2025_2026|PENGU_00021|1765029600000",
+      "BASE_2025_2026|PENGU_00034|1766080800000",
+      "BASE_2025_2026|PENGU_00035|1766102400000",
+      "BASE_2025_2026|PENGU_00051|1772294400000",
+      "BASE_2025_2026|PENGU_00086|1784318400000",
+      "BASE_2025_2026|PENGU_00101|1788368400000",
+      "BASE_2025_2026|PENGU_00103|1788544800000",
+      "BASE_2025_2026|PENGU_00104|1788562800000"
+    ],
+    "hardStopNet30NotionalPctPoints": -116.2,
+    "hardStopNet30PercentPerOriginalNotional": -8.3,
+    "hardStopShareOfLossMagnitudePct": 82.676255,
+    "losers": 24,
+    "losingHardStops": 14,
+    "losingMaxHold": 10,
+    "mustNotLoosenHardStop": true,
+    "naturalSource53": 53,
+    "winners": 29
+  },
+  "sourceNativePinnedSHA": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+  "status": "RESEARCH_ONLY_NO_PRODUCTION_GROSS_CHANGE",
+  "stopBeforeMaxLossMechanismRequiredNotStopRelaxation": true
+}
