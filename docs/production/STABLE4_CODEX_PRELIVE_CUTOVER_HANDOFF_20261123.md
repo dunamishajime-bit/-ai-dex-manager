@@ -31,6 +31,7 @@ V4保護ソース固定SHA：e788abc82e80f9fc7ab0e1ba83fdb8be267eb513
 ローカル検証実績：
 - TypeScript全体 tsc --noEmit --pretty false PASS
 - V4 STOP/exit/復元/署名台帳/保護：12ファイル、計63テストPASS
+- V4 heartbeat/watchdog整合の既存テスト：23件PASS。VPS固定版のlastCompletedTickAt伝播を正確に検証するよう更新。
 - V52 daily lossでも既存出口稼働：6ケースPASS
 - PENGU exit vs foreign open order、既存PENGU selftest PASS
 - Q102 H1欠損時exit、既存Q102 selftest PASS

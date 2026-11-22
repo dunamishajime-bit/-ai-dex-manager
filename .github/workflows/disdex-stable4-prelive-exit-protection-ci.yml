@@ -51,7 +51,8 @@ jobs:
             tests/v12-v4-runner-engine.test.ts \
             tests/v12-v4-recoverable-exit-feed-gap.test.ts \
             tests/v12-v4-entry-safety.test.ts \
-            tests/v12-v4-execution-foundation.test.ts
+            tests/v12-v4-execution-foundation.test.ts \
+            tests/v12-v4-monitor-coherence.test.ts
 
       - name: Test PENGU protected EXIT with foreign order
         run: |
