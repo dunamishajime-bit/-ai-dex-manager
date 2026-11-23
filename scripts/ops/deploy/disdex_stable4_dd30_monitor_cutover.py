@@ -238,7 +238,34 @@ def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
             "--no-pager",
             timeout=20,
         )
-        recovered = parse_unit_health_snapshot(single, {missing})
+        try:
+            recovered = parse_unit_health_snapshot(single, {missing})
+        except ContractError as single_exc:
+            if _missing_health_unit(str(single_exc)) != missing:
+                raise
+            identity = run(
+                "/usr/bin/systemctl",
+                "show",
+                missing,
+                "--property=Id,ActiveState",
+                "--no-pager",
+                timeout=20,
+            )
+            n_restarts = run(
+                "/usr/bin/systemctl",
+                "show",
+                missing,
+                "--property=NRestarts",
+                "--value",
+                "--no-pager",
+                timeout=20,
+            ).strip()
+            if "=" in n_restarts:
+                key, value = n_restarts.split("=", 1)
+                if key.strip() == "NRestarts":
+                    n_restarts = value.strip()
+            require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + missing)
+            recovered = parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {missing})
         partial: dict[str, dict[str, str]] = {}
         current: str | None = None
         for raw_line in output.splitlines():
