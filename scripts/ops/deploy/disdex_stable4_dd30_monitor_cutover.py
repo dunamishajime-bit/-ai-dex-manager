@@ -311,7 +311,13 @@ def dropin_text(runner: str, target: str, unit: str) -> str:
     root = f"/home/deploy/disdex-trading/releases/{target}"
     common = ["[Unit]", "Requires=", "Wants=", "Wants=network-online.target", "After=", "After=network-online.target", "[Service]", f"WorkingDirectory={root}", f"Environment=DISDEX_RELEASE_SHA={target}", f"Environment=DISDEX_RUNTIME_COMMIT_SHA={target}", f"Environment=DISDEX_RELEASE_ROOT={root}", "ExecStartPre=", f"ExecStartPre=/usr/bin/test -f {root}/.disdex-release-sha", f"ExecStartPre=/usr/bin/grep -Fxq {target} {root}/.disdex-release-sha", "ExecStart="]
     if runner == "V12_V4":
-        common += ["Environment=V12_V4_OPERATION_MODE=MONITOR_ONLY", "Environment=V12_V4_ORDERS_ENABLED=false", f"Environment=V12_V4_SERVICE_UNIT={unit}", "Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json", f"ExecStart={root}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --monitor-only --daemon", "ReadWritePaths=/var/lib/disdex/v12-v4 /var/lib/disdex/shared /var/lib/disdex/runner-health"]
+        # The installed V4 template has a required per-release current-runtime
+        # EnvironmentFile. The audited VPS does not provision that file for a
+        # fresh immutable candidate, so clear inherited EnvironmentFile entries
+        # and retain only the three reviewed, present shared V4 inputs. This is
+        # fail-closed for missing files while preserving the base credentials,
+        # risk settings, and V4 path configuration; no secret file is created.
+        common += ["EnvironmentFile=", "EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", "EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", "EnvironmentFile=/etc/disdex/disdex-v12-v4.env", "Environment=V12_V4_OPERATION_MODE=MONITOR_ONLY", "Environment=V12_V4_ORDERS_ENABLED=false", f"Environment=V12_V4_SERVICE_UNIT={unit}", "Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json", f"ExecStart={root}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --monitor-only --daemon", "ReadWritePaths=/var/lib/disdex/v12-v4 /var/lib/disdex/shared /var/lib/disdex/runner-health"]
     elif runner == "PENGU_V8":
         common += ["Environment=PENGU_DUAL_LS_V2_MODE=SHADOW", "Environment=PENGU_DUAL_LS_V2_ENABLED=true", "Environment=PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_STATE_DIR=" + str(MONITOR_ROOT / target / "pengu"), "Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5", f"ExecStart={root}/node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'pengu'} /var/lib/disdex/shared"]
     elif runner == "QUALITY102_CAUSAL_V1":
