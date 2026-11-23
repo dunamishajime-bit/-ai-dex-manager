@@ -209,6 +209,51 @@ def _missing_health_unit(reason: str) -> str | None:
     return unit or None
 
 
+def _single_unit_health(unit: str) -> dict[str, str]:
+    try:
+        single = run(
+            "/usr/bin/systemctl",
+            "show",
+            unit,
+            "--property=Id,ActiveState,NRestarts",
+            "--no-pager",
+            timeout=20,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
+    try:
+        return parse_unit_health_snapshot(single, {unit})[unit]
+    except ContractError as single_exc:
+        if _missing_health_unit(str(single_exc)) != unit:
+            raise
+        try:
+            identity = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState",
+                "--no-pager",
+                timeout=20,
+            )
+            n_restarts = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=NRestarts",
+                "--value",
+                "--no-pager",
+                timeout=20,
+            ).strip()
+        except subprocess.TimeoutExpired as exc:
+            raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
+        if "=" in n_restarts:
+            key, value = n_restarts.split("=", 1)
+            if key.strip() == "NRestarts":
+                n_restarts = value.strip()
+        require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+        return parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {unit})[unit]
+
+
 def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
     """Read all target ActiveState/NRestarts values in one bounded systemd call."""
     expected_units = set(units.values())
@@ -222,50 +267,15 @@ def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
             "--no-pager",
             timeout=30,
         )
-    except subprocess.TimeoutExpired as exc:
-        raise ContractError("SYSTEMD_HEALTH_SNAPSHOT_TIMEOUT") from exc
+    except subprocess.TimeoutExpired:
+        return {unit: _single_unit_health(unit) for unit in sorted(expected_units)}
     try:
         return parse_unit_health_snapshot(output, expected_units)
     except ContractError as exc:
         missing = _missing_health_unit(str(exc))
         if missing is None:
             raise
-        single = run(
-            "/usr/bin/systemctl",
-            "show",
-            missing,
-            "--property=Id,ActiveState,NRestarts",
-            "--no-pager",
-            timeout=20,
-        )
-        try:
-            recovered = parse_unit_health_snapshot(single, {missing})
-        except ContractError as single_exc:
-            if _missing_health_unit(str(single_exc)) != missing:
-                raise
-            identity = run(
-                "/usr/bin/systemctl",
-                "show",
-                missing,
-                "--property=Id,ActiveState",
-                "--no-pager",
-                timeout=20,
-            )
-            n_restarts = run(
-                "/usr/bin/systemctl",
-                "show",
-                missing,
-                "--property=NRestarts",
-                "--value",
-                "--no-pager",
-                timeout=20,
-            ).strip()
-            if "=" in n_restarts:
-                key, value = n_restarts.split("=", 1)
-                if key.strip() == "NRestarts":
-                    n_restarts = value.strip()
-            require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + missing)
-            recovered = parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {missing})
+        recovered = _single_unit_health(missing)
         partial: dict[str, dict[str, str]] = {}
         current: str | None = None
         for raw_line in output.splitlines():
@@ -282,7 +292,7 @@ def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
         require(set(partial) == expected_units - {missing}, "SYSTEMD_HEALTH_SNAPSHOT_INCOMPLETE")
         for unit in partial:
             require(set(partial[unit]) == {"ActiveState", "NRestarts"}, "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
-        partial[missing] = recovered[missing]
+        partial[missing] = recovered
         return partial
 
 
