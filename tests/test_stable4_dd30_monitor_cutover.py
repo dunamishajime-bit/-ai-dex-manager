@@ -135,9 +135,9 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
     def test_systemd_health_snapshot_recovers_nrestarts_with_property_only_query(self):
         unit = "disdex-hype-long@sha.service"
         with patch.object(cutover, "run", side_effect=[
-            "Id=" + unit + "\\nActiveState=active\\n",
-            "Id=" + unit + "\\nActiveState=active\\n",
-            "Id=" + unit + "\\nActiveState=active\\n",
+            "Id=" + unit + "\nActiveState=active\n",
+            "Id=" + unit + "\nActiveState=active\n",
+            "Id=" + unit + "\nActiveState=active\n",
             "0",
         ]) as mocked:
             parsed = cutover.unit_health_snapshot({"HYPE_TREND_LONG": unit})
