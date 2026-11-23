@@ -50,6 +50,7 @@ PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 MONITOR_ROOT = Path("/var/lib/disdex/stable4-dd30-monitor")
 STALE_Q102 = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
 STALE_MARGIN = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
+STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
 V4_OVERLAY_SCHEMA = "disdex-v4-staged-overlay/v1"
@@ -705,9 +706,15 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         require(not q102_before.get("position") and not q102_before.get("pending"), "Q102_STATE_NOT_FLAT")
         prepare_q102_state_access(q102_path)
         q102_access_meta = file_meta(q102_path)
-        # Stop all old runner instances plus the two known stale restart-loop
-        # units.  This is the only systemd quiesce; no order endpoint is used.
-        stale_units = [f"disdex-quality102-causal-v1@{STALE_Q102}.service", f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service"]
+        # Stop all old runner instances plus the three audited stale
+        # restart-loop units.  This is the only systemd quiesce; no order
+        # endpoint is used.  The PENGU instance is a missing-release CHDIR
+        # loop and is explicitly pinned here so the repair remains auditable.
+        stale_units = [
+            f"disdex-quality102-causal-v1@{STALE_Q102}.service",
+            f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service",
+            f"disdex-pengu-dual-ls-v2@{STALE_PENGU}.service",
+        ]
         for unit in (*old_units.values(), *stale_units):
             stop_unit(unit)
             run("/usr/bin/systemctl", "disable", unit, check=False, timeout=30)
