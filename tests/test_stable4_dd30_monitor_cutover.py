@@ -16,6 +16,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PLAN = ROOT / "docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json"
 GOAL = ROOT / "docs/implementation/goal-campaigns/8b007d5a-f46c-4752-9f71-70d3967712c0.json"
+WORKFLOW = ROOT / ".github/workflows/disdex-stable4-dd30-monitor-cutover.yml"
 PLAN_SHA = "728045e7a741ee451c0f7236a1d1ede45052c15aaf002268b38effb3bc830c63"
 
 
@@ -57,6 +58,11 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertTrue(hold_metadata_valid(1000, 0o600))
         self.assertFalse(hold_metadata_valid(1001, 0o600))
         self.assertFalse(hold_metadata_valid(1000, 0o640))
+
+    def test_workflow_preserves_all_remote_mode_arguments(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("printf -v remote_command '%q '", workflow)
+        self.assertIn('"exec $remote_command"', workflow)
 
 
 if __name__ == "__main__":
