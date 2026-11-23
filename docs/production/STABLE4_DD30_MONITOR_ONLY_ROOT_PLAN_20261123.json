@@ -21,7 +21,7 @@
     {"id": "PENGU_V8", "unitPrefix": "disdex-pengu-dual-ls-v2@", "ordersEnabled": false},
     {"id": "QUALITY102_CAUSAL_V1", "unitPrefix": "disdex-quality102-causal-v1@", "ordersEnabled": false},
     {"id": "V52", "unitPrefix": "disdex-v52-aster-only@", "ordersEnabled": false},
-    {"id": "FET_BRK48_RESIDUAL", "unitPrefix": "disdex-fet-brk48-shadow@", "ordersEnabled": false},
+    {"id": "FET_BRK48_RESIDUAL", "unitPrefix": "disdex-fet-brk48@", "ordersEnabled": false},
     {"id": "IDLE_PRIORITY_SHORT", "unitPrefix": "disdex-idle-priority-short@", "ordersEnabled": false},
     {"id": "HYPE_TREND_LONG", "unitPrefix": "disdex-hype-long@", "ordersEnabled": false}
   ],

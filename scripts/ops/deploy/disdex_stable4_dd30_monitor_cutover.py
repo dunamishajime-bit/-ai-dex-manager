@@ -226,6 +226,16 @@ def validate_plan(plan: dict, execution_plan_sha256: str) -> None:
     require(str(plan.get("ownerGoalId")) and HASH_RE.fullmatch(str(plan.get("ownerGoalFingerprint"))), "PLAN_GOAL_BINDING_INVALID")
     ids = {str(row.get("id")) for row in (plan.get("runnerTargets") or []) if isinstance(row, dict)}
     require(ids == {"V12_V4", "PENGU_V8", "QUALITY102_CAUSAL_V1", "V52", "FET_BRK48_RESIDUAL", "IDLE_PRIORITY_SHORT", "HYPE_TREND_LONG"}, "PLAN_RUNNER_SCOPE_INVALID")
+    prefixes = {str(row.get("id")): str(row.get("unitPrefix")) for row in (plan.get("runnerTargets") or []) if isinstance(row, dict)}
+    require(prefixes == {
+        "V12_V4": "disdex-v12-v4@",
+        "PENGU_V8": "disdex-pengu-dual-ls-v2@",
+        "QUALITY102_CAUSAL_V1": "disdex-quality102-causal-v1@",
+        "V52": "disdex-v52-aster-only@",
+        "FET_BRK48_RESIDUAL": "disdex-fet-brk48@",
+        "IDLE_PRIORITY_SHORT": "disdex-idle-priority-short@",
+        "HYPE_TREND_LONG": "disdex-hype-long@",
+    }, "PLAN_UNIT_PREFIX_INVALID")
     economics = plan.get("economics") or {}
     require(economics.get("v4NewEntryDrawdownHold") == 0.3 and economics.get("cryptoGrossCap") == 3.0 and economics.get("stockGrossCap") == 4.0 and economics.get("totalGrossCap") == 4.25 and economics.get("sharedCryptoDailyLoss") == 0.075 and economics.get("penguDrawdownProtection") == 0.17, "PLAN_ECONOMICS_INVALID")
     hold = plan.get("globalHold") or {}
@@ -249,7 +259,7 @@ def target_units(target: str) -> dict[str, str]:
         "PENGU_V8": f"disdex-pengu-dual-ls-v2@{target}.service",
         "QUALITY102_CAUSAL_V1": f"disdex-quality102-causal-v1@{target}.service",
         "V52": f"disdex-v52-aster-only@{target}.service",
-        "FET_BRK48_RESIDUAL": f"disdex-fet-brk48-shadow@{target}.service",
+        "FET_BRK48_RESIDUAL": f"disdex-fet-brk48@{target}.service",
         "IDLE_PRIORITY_SHORT": f"disdex-idle-priority-short@{target}.service",
         "HYPE_TREND_LONG": f"disdex-hype-long@{target}.service",
     }
