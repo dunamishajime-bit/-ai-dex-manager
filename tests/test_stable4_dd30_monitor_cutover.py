@@ -7,6 +7,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     HOLD_DIGEST,
     RUNNER_IDS,
     dropin_text,
+    hold_metadata_valid,
     target_units,
     validate_plan,
 )
@@ -50,6 +51,12 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
     def test_goal_campaign_covers_all_monitor_runners(self):
         goal = json.loads(GOAL.read_text(encoding="utf-8"))
         self.assertEqual(set(goal["monitorOnlyContract"]["runnerScopes"]), set(RUNNER_IDS))
+
+    def test_hold_metadata_accepts_only_root_or_deploy_private_file(self):
+        self.assertTrue(hold_metadata_valid(0, 0o600))
+        self.assertTrue(hold_metadata_valid(1000, 0o600))
+        self.assertFalse(hold_metadata_valid(1001, 0o600))
+        self.assertFalse(hold_metadata_valid(1000, 0o640))
 
 
 if __name__ == "__main__":
