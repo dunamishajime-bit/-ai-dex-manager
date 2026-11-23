@@ -144,6 +144,15 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertEqual(parsed[unit], {"ActiveState": "active", "NRestarts": "0"})
         self.assertEqual(mocked.call_count, 4)
 
+    def test_systemd_health_snapshot_recovers_after_batched_timeout(self):
+        unit = "disdex-hype-long@sha.service"
+        with patch.object(cutover, "run", side_effect=[
+            cutover.subprocess.TimeoutExpired(["/usr/bin/systemctl"], 30),
+            "Id=" + unit + "\nActiveState=active\nNRestarts=0\n",
+        ]):
+            parsed = cutover.unit_health_snapshot({"HYPE_TREND_LONG": unit})
+        self.assertEqual(parsed[unit], {"ActiveState": "active", "NRestarts": "0"})
+
     def test_known_missing_release_pengu_restart_loop_is_quiesced_formally(self):
         source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
         self.assertIn('STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"', source)
