@@ -8,6 +8,7 @@
   "target": "professional-dismanager.net",
   "sourceBinding": "GITHUB_RUN_HEAD_SHA",
   "ordersEnabled": false,
+  "executionPlanSha256": "15dc92d58dbced738cf57dd7a91396f73bd3875a3e6bd2cd100a3ee649ce4f5b",
   "campaign": "STABLE4_DD30_MONITOR_ONLY_20261123",
   "candidateLineage": {
     "pullRequest": 598,
