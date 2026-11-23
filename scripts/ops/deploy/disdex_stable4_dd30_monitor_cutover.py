@@ -201,6 +201,14 @@ def parse_unit_health_snapshot(output: str, expected_units: set[str]) -> dict[st
     return rows
 
 
+def _missing_health_unit(reason: str) -> str | None:
+    prefix = "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:"
+    if not reason.startswith(prefix):
+        return None
+    unit = reason[len(prefix):].strip()
+    return unit or None
+
+
 def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
     """Read all target ActiveState/NRestarts values in one bounded systemd call."""
     expected_units = set(units.values())
@@ -216,7 +224,45 @@ def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
         )
     except subprocess.TimeoutExpired as exc:
         raise ContractError("SYSTEMD_HEALTH_SNAPSHOT_TIMEOUT") from exc
-    return parse_unit_health_snapshot(output, expected_units)
+    try:
+        return parse_unit_health_snapshot(output, expected_units)
+    except ContractError as exc:
+        # Some systemd versions can omit a service's NRestarts field in a
+        # multi-unit show while the unit is transitioning state.  Re-read only
+        # the affected unit once, preserving the batched fast path and the
+        # fail-closed requirement that both fields exist before proceeding.
+        missing = _missing_health_unit(str(exc))
+        if missing is None:
+            raise
+        single = run(
+            "/usr/bin/systemctl",
+            "show",
+            missing,
+            "--property=Id,ActiveState,NRestarts",
+            "--no-pager",
+            timeout=20,
+        )
+        recovered = parse_unit_health_snapshot(single, {missing})
+        # Re-parse the original output without the incomplete unit so that the
+        # recovered row can be merged without weakening coverage checks.
+        partial: dict[str, dict[str, str]] = {}
+        current: str | None = None
+        for raw_line in output.splitlines():
+            line = raw_line.strip()
+            if not line or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            if key == "Id":
+                current = value.strip()
+                if current != missing:
+                    partial[current] = {}
+            elif current is not None and current != missing and key in {"ActiveState", "NRestarts"}:
+                partial[current][key] = value.strip()
+        require(set(partial) == expected_units - {missing}, "SYSTEMD_HEALTH_SNAPSHOT_INCOMPLETE")
+        for unit in expected_units - {missing}:
+            require(set(partial[unit]) == {"ActiveState", "NRestarts"}, "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+        partial[missing] = recovered[missing]
+        return partial
 
 
 def unit_state(unit: str) -> tuple[str, str]:
@@ -795,3 +841,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
