@@ -1,0 +1,1235 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 022
+
+: "${FROM_SHA:?FROM_SHA required}"
+: "${TARGET_SHA:?TARGET_SHA required}"
+: "${REQUEST_ID:?REQUEST_ID required}"
+ROLLBACK_ONLY="${DISDEX_ROLLBACK_ONLY:-false}"
+if [[ "$ROLLBACK_ONLY" != true ]]; then
+  : "${SOURCE_SHA256:?SOURCE_SHA256 required}"
+  : "${CERT_SHA256:?CERT_SHA256 required}"
+  : "${RESIDUAL_CERT_SHA256:?RESIDUAL_CERT_SHA256 required}"
+  : "${WIRING_SHA256:?WIRING_SHA256 required}"
+fi
+V12_ACTIVE_MIGRATION_CODE_PARITY="${V12_ACTIVE_MIGRATION_CODE_PARITY:-0}"
+
+ROOT=/home/deploy/disdex-trading
+RELEASES="$ROOT/releases"
+CURRENT="$ROOT/current"
+OLD_RELEASE="$RELEASES/$FROM_SHA"
+RELEASE="$RELEASES/$TARGET_SHA"
+STAGE="$RELEASES/.${TARGET_SHA}.stage-$REQUEST_ID"
+SOURCE_FILE="/tmp/disdex-source-$REQUEST_ID.tgz"
+CERT_FILE="/tmp/idle-parity-v3-$REQUEST_ID.json"
+RESIDUAL_CERT_FILE="/tmp/idle-residual-long-parity-$REQUEST_ID.json"
+SHARED=/var/lib/disdex/shared
+BACKUP="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID"
+PREFLIGHT_BACKUP="/var/lib/disdex/deploy-backups/idle-preflight-$REQUEST_ID"
+LOCK=/run/lock/disdex-idle-production-redeploy.lock
+
+[[ "$FROM_SHA" =~ ^[a-f0-9]{40}$ ]]
+[[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
+[[ "$REQUEST_ID" =~ ^[0-9]+$ ]]
+[[ "$V12_ACTIVE_MIGRATION_CODE_PARITY" =~ ^[01]$ ]]
+
+exec 9>"$LOCK"
+flock -n 9 || { echo "DEPLOY_CONCURRENT_LOCK"; exit 40; }
+
+if [[ "$ROLLBACK_ONLY" != true ]]; then
+  [[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$FROM_SHA" ]]
+  [[ "$(readlink -f "$CURRENT")" == "$OLD_RELEASE" ]]
+  [[ -f "$SOURCE_FILE" && -f "$CERT_FILE" && -f "$RESIDUAL_CERT_FILE" ]]
+  echo "$SOURCE_SHA256  $SOURCE_FILE" | sha256sum -c -
+  echo "$CERT_SHA256  $CERT_FILE" | sha256sum -c -
+  echo "$RESIDUAL_CERT_SHA256  $RESIDUAL_CERT_FILE" | sha256sum -c -
+  [[ ! -e "$RELEASE" && ! -e "$STAGE" ]]
+  echo "$WIRING_SHA256  /tmp/disdex-wiring-$REQUEST_ID.sh" | sha256sum -c -
+fi
+
+NAMES=(
+  disdex-v12-x1-all
+  disdex-pengu-dual-ls-v2
+  disdex-quality102-causal-v1
+  disdex-v52-aster-only
+  disdex-fet-brk48
+  disdex-hype-long
+  disdex-idle-priority-short
+  disdex-shared-crypto-risk
+  disdex-v12-v52-margin-guard
+)
+CORE=(
+  disdex-v12-x1-all
+  disdex-pengu-dual-ls-v2
+  disdex-quality102-causal-v1
+  disdex-v52-aster-only
+  disdex-fet-brk48
+)
+STATE_PATHS=(
+  /var/lib/disdex/v12-x1-all/runner.json
+  /var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+  /var/lib/disdex/quality102-causal-v1/state.json
+  /var/lib/disdex/v52-aster-only/runner-live.json
+  /var/lib/disdex/fet-brk48-residual/state.json
+  /var/lib/disdex/hype-zec-long/runner.json
+  /var/lib/disdex/idle-priority/state.json
+  /var/lib/disdex/shared/operator-activation/current.json
+  /var/lib/disdex/shared/operator-activation/runtime.json
+  /var/lib/disdex/shared/idle-priority-parity-cert.json
+  /var/lib/disdex/shared/idle-residual-long-parity-cert.json
+  /var/lib/disdex/idle-priority/residual-long-state.json
+  /var/lib/disdex/idle-priority/decision-details.json
+)
+SYSTEMD_TEMPLATE_PATHS=(
+  /etc/systemd/system/disdex-v12-x1-all@.service
+  /etc/systemd/system/disdex-pengu-dual-ls-v2@.service
+  /etc/systemd/system/disdex-idle-priority-short@.service
+  /etc/systemd/system/disdex-runner-health-alert.timer
+  /etc/systemd/system/disdex-runner-position-recovery.timer
+  /etc/systemd/system/disdex-trade-fill-notifier.timer
+)
+
+load_runtime_env() {
+  set -a
+  for f in \
+    /etc/disdex/disdex-v13d-v11eq-v96.env \
+    /etc/disdex/disdex-v12-pengu-v2-v52.env \
+    /etc/disdex/disdex-v12-x1-all.env \
+    /etc/disdex/disdex-quality102-causal-v1.env \
+    "/etc/disdex/current-runtime/$FROM_SHA.env"; do
+    [[ -f "$f" ]] && . "$f"
+  done
+  set +a
+}
+
+require_shared_safe() {
+  python3 - <<'PY'
+import json
+def load(p):
+    with open(p,encoding="utf-8") as f:
+        return json.load(f)
+kill=load("/var/lib/disdex/shared/kill-switch.json")
+if kill.get("active") is not False:
+    raise SystemExit("CUTOVER_KILL_SWITCH_ACTIVE")
+guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit("CUTOVER_MARGIN_NOT_HEALTHY")
+now=int(__import__("time").time()*1000)
+guard_at=int(guard.get("checkedAt") or 0)
+if guard_at<=0 or guard_at>now+60_000 or now-guard_at>360_000:
+    raise SystemExit("CUTOVER_MARGIN_STALE")
+risk=load("/var/lib/disdex/shared/crypto-daily-risk.json")
+updated=int(risk.get("updatedAt") or 0)
+if risk.get("tripped") is not False:
+    raise SystemExit("CUTOVER_SHARED_RISK_TRIPPED_OR_UNKNOWN")
+if risk.get("sourceComplete") is not True:
+    raise SystemExit("CUTOVER_SHARED_RISK_SOURCE_INCOMPLETE")
+if updated<=0 or updated>now+60_000 or now-updated>90_000:
+    raise SystemExit("CUTOVER_SHARED_RISK_STALE")
+try:
+    pending=load("/var/lib/disdex/shared/pending-exposure.json")
+except FileNotFoundError:
+    pending={"schema":"disdex-pending-exposure/v1","entries":[]}
+if not isinstance(pending,dict) or pending.get("schema")!="disdex-pending-exposure/v1":
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+entries=pending.get("entries")
+if not isinstance(entries,list):
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+active_statuses={"PENDING","SUBMITTED","UNKNOWN"}
+valid_statuses=active_statuses|{"RELEASED"}
+for row in entries:
+    if not isinstance(row,dict) or str(row.get("status") or "").upper() not in valid_statuses:
+        raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+active=[row for row in entries if str(row.get("status") or "").upper() in active_statuses]
+if active:
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_PRESENT")
+idle=load("/var/lib/disdex/idle-priority/state.json")
+if idle.get("positions") or idle.get("pending") or idle.get("manualReview"):
+    raise SystemExit("CUTOVER_IDLE_NOT_FLAT")
+try:
+    residual=load("/var/lib/disdex/idle-priority/residual-long-state.json")
+except FileNotFoundError:
+    residual=None
+if residual and (residual.get("position") or residual.get("pending") or residual.get("manualReview")):
+    raise SystemExit("CUTOVER_IDLE_RESIDUAL_NOT_FLAT")
+print("CUTOVER_SHARED_STATE=PASS")
+PY
+}
+
+require_flat_account() {
+  local runner_root="$1"
+  local tmp budget_tmp
+  tmp="$(mktemp)" || return 1
+  budget_tmp="/tmp/disdex-aster-readonly-budget-cutover-$RANDOM-$.json"
+  DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp" \
+    "$runner_root/node_modules/.bin/tsx" \
+    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp" || { rm -f "$tmp"; return 1; }
+  python3 - "$tmp" <<'PY'
+import json,sys
+rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
+x=json.loads(rows[-1])
+assert x["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+if x.get("positions"):
+    raise SystemExit("CUTOVER_ASTER_POSITIONS_PRESENT")
+if x.get("openOrders"):
+    raise SystemExit("CUTOVER_ASTER_OPEN_ORDERS_PRESENT")
+assert x.get("ordersSent")==0 and x.get("cancelsSent")==0 and x.get("positionChangesSent")==0
+print("CUTOVER_ASTER_FLAT=PASS")
+PY
+  local validation_rc=$?
+  rm -f "$tmp"
+  rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
+  return "$validation_rc"
+}
+
+CUTOVER_ACCOUNT_MODE="UNKNOWN"
+TRADING_TARGET_STARTED=0
+classify_cutover_account_mode() {
+  local runner_root="$1"
+  local tmp budget_tmp mode
+  tmp="$(mktemp)"
+  budget_tmp="/tmp/disdex-aster-readonly-budget-cutover-mode-$RANDOM-$.json"
+  DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp" \
+    "$runner_root/node_modules/.bin/tsx" \
+    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp"
+  mode="$(python3 - "$tmp" "$FROM_SHA" "$V12_ACTIVE_MIGRATION_CODE_PARITY" <<'PY'
+import json,math,sys
+diag_path,from_sha,code_parity=sys.argv[1:]
+rows=[x for x in open(diag_path,encoding="utf-8") if x.lstrip().startswith("{")]
+x=json.loads(rows[-1])
+if x.get("status")!="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":
+    raise SystemExit("CUTOVER_ACCOUNT_MODE_DIAGNOSTIC_FAILED")
+if x.get("ordersSent")!=0 or x.get("cancelsSent")!=0 or x.get("positionChangesSent")!=0:
+    raise SystemExit("CUTOVER_ACCOUNT_MODE_DIAGNOSTIC_MUTATED")
+positions=x.get("positions") or []
+orders=x.get("openOrders") or []
+if not positions and not orders:
+    print("FLAT")
+    raise SystemExit(0)
+if code_parity!="1":
+    raise SystemExit("CUTOVER_V12_ACTIVE_CODE_PARITY_BLOCKED")
+state=json.load(open("/var/lib/disdex/v12-x1-all/runner.json",encoding="utf-8"))
+if state.get("schema") not in {"v12-x1-all-runner-state/v1","v12-x1-all-runner-state/v2"}:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_SCHEMA")
+if state.get("strategyId")!="V12_X1.00_ALL" or state.get("mode")!="LIVE":
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_IDENTITY")
+if str(state.get("runtimeCommitSha") or "").lower()!=from_sha:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_SHA_MISMATCH")
+if state.get("pending") or state.get("manualReview") or (state.get("killSwitch") or {}).get("active") is True:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_NOT_MIGRATABLE")
+managed=state.get("activePositions")
+if not isinstance(managed,list) or not managed:
+    managed=[state["active"]] if isinstance(state.get("active"),dict) else []
+if not managed:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_POSITION_MISSING")
+if sum(float(p.get("gross") or 0) for p in managed) > 2.0+1e-9:
+    raise SystemExit("CUTOVER_V12_ACTIVE_GROSS_INVALID")
+actual=[p for p in positions if abs(float(p.get("positionAmt") or 0))>1e-12]
+if len(actual)!=len(managed):
+    raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_COUNT_MISMATCH")
+managed_symbols={str(p.get("symbol") or "").upper() for p in managed}
+order_ids=set()
+for p in managed:
+    symbol=str(p.get("symbol") or "").upper()
+    qty=float(p.get("quantity") or 0)
+    side=str(p.get("side") or "")
+    protection=p.get("protection") or {}
+    if protection.get("positionId")!=p.get("positionId"):
+        raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ID_MISMATCH")
+    if abs(float(protection.get("quantity") or 0)-qty)>max(1e-8,qty*0.001):
+        raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_QTY_MISMATCH")
+    row=next((r for r in actual if str(r.get("symbol") or "").upper()==symbol),None)
+    if row is None:
+        raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_SYMBOL_MISMATCH")
+    actual_qty=float(row.get("positionAmt") or 0)
+    actual_side="LONG" if actual_qty>=0 else "SHORT"
+    if actual_side!=side or abs(abs(actual_qty)-qty)>max(1e-8,qty*0.01):
+        raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_MISMATCH")
+    for key in ("stopClientOrderId","takeProfitClientOrderId"):
+        cid=str(protection.get(key) or "")
+        if not cid:
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_ID_MISSING")
+        order_ids.add(cid)
+        order=next((o for o in orders if str(o.get("clientOrderId") or "")==cid),None)
+        if order is None or order.get("reduceOnly") is not True or str(order.get("status") or "").upper() not in {"NEW","OPEN"}:
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_MISMATCH")
+        if abs(float(order.get("origQty") or 0)-qty)>max(1e-8,qty*0.001):
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_QTY_MISMATCH")
+if any(str(r.get("symbol") or "").upper() not in managed_symbols for r in actual):
+    raise SystemExit("CUTOVER_V12_ACTIVE_UNKNOWN_POSITION")
+if any(str(o.get("clientOrderId") or "") not in order_ids for o in orders):
+    raise SystemExit("CUTOVER_V12_ACTIVE_UNKNOWN_OPEN_ORDER")
+q102=json.load(open("/var/lib/disdex/quality102-causal-v1/state.json",encoding="utf-8"))
+if str(q102.get("runtimeCommitSha") or "").lower()!=from_sha or q102.get("pending") or q102.get("position"):
+    raise SystemExit("CUTOVER_V12_ACTIVE_Q102_NOT_FLAT_CURRENT")
+print("V12_ACTIVE")
+PY
+)"
+  rm -f "$tmp"
+  rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
+  case "$mode" in
+    FLAT)
+      CUTOVER_ACCOUNT_MODE="FLAT"
+      echo "CUTOVER_ACCOUNT_MODE=FLAT"
+      ;;
+    V12_ACTIVE)
+      CUTOVER_ACCOUNT_MODE="V12_ACTIVE"
+      echo "CUTOVER_ACCOUNT_MODE=V12_ACTIVE"
+      ;;
+    *)
+      echo "CUTOVER_ACCOUNT_MODE_UNKNOWN=$mode"
+      return 1
+      ;;
+  esac
+}
+
+recover_old_idle_known_rate_budget_state() {
+  local state_path="/var/lib/disdex/idle-priority/state.json"
+  local backup_path="$PREFLIGHT_BACKUP/state.json"
+  install -d -o root -g root -m 0700 "$PREFLIGHT_BACKUP"
+  python3 - "$state_path" "$FROM_SHA" "$backup_path" <<'PY'
+import json,os,re,stat,sys,tempfile,time
+state_path,expected_sha,backup_path=sys.argv[1:]
+with open(state_path,"rb") as f:
+    before_bytes=f.read()
+before=json.loads(before_bytes.decode("utf-8"))
+if before.get("schema")!="disdex-idle-priority-state/v2":
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_SCHEMA_MISMATCH")
+if str(before.get("runtimeSha") or "").lower()!=expected_sha:
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_SHA_MISMATCH")
+positions=before.get("positions")
+if not isinstance(positions,list) or positions:
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_POSITION_PRESENT")
+if before.get("pending"):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_PENDING_PRESENT")
+review=before.get("manualReview")
+if not review:
+    print("NOOP")
+    raise SystemExit(0)
+if not re.fullmatch(r"IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+",str(review)):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_UNKNOWN_MANUAL_REVIEW")
+st=os.stat(state_path,follow_symlinks=False)
+if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_STATE_NOT_REGULAR")
+os.makedirs(os.path.dirname(backup_path),exist_ok=True)
+fd=os.open(backup_path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,stat.S_IMODE(st.st_mode))
+try:
+    with os.fdopen(fd,"wb",closefd=True) as f:
+        f.write(before_bytes); f.flush(); os.fsync(f.fileno())
+except:
+    try: os.close(fd)
+    except OSError: pass
+    raise
+os.chown(backup_path,st.st_uid,st.st_gid)
+os.chmod(backup_path,stat.S_IMODE(st.st_mode))
+with open(backup_path,"rb") as f:
+    if f.read()!=before_bytes:
+        raise SystemExit("CUTOVER_IDLE_PREFLIGHT_BACKUP_MISMATCH")
+now=int(time.time()*1000)
+after=dict(before)
+after["updatedAt"]=now
+after["manualReview"]=None
+after["lastDecision"]={"decisionTs":now,"accepted":False,"reason":"IDLE_BENIGN_RATE_BUDGET_RECOVERY"}
+failures=list(before.get("failures") or [])
+failures.append({"message":"IDLE_BENIGN_RATE_BUDGET_RECOVERY","occurredAt":now})
+after["failures"]=failures[-100:]
+parent=os.path.dirname(state_path)
+tmp=f"{state_path}.{os.getpid()}.{now}.preflight-recovery.tmp"
+fd=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL,stat.S_IMODE(st.st_mode))
+try:
+    with os.fdopen(fd,"w",encoding="utf-8",closefd=True) as f:
+        json.dump(after,f,ensure_ascii=False,indent=2); f.write("\n"); f.flush(); os.fsync(f.fileno())
+except:
+    try: os.close(fd)
+    except OSError: pass
+    raise
+os.chown(tmp,st.st_uid,st.st_gid)
+os.chmod(tmp,stat.S_IMODE(st.st_mode))
+os.replace(tmp,state_path)
+dirfd=os.open(parent,os.O_RDONLY)
+try: os.fsync(dirfd)
+finally: os.close(dirfd)
+with open(state_path,encoding="utf-8") as f:
+    readback=json.load(f)
+if readback.get("manualReview") is not None or readback.get("positions") or readback.get("pending"):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_READBACK_MISMATCH")
+if (readback.get("lastDecision") or {}).get("reason")!="IDLE_BENIGN_RATE_BUDGET_RECOVERY":
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_REASON_MISMATCH")
+print("PASS:"+backup_path)
+PY
+}
+
+restart_stock_reference_current() {
+  local phase="${1:-CUTOVER}"
+  local expected pid cwd attempt
+  if ! systemctl is-active --quiet disdex-stock-reference-free.service; then
+    echo "${phase}_STOCK_REFERENCE_INACTIVE=SKIP"
+    return 0
+  fi
+  expected="$(readlink -f "$CURRENT")"
+  # Restarting this required unit stops V52. Switch it while trading writers
+  # are stopped; POSTDEPLOY verifies ownership without restarting dependents.
+  if [[ "$phase" != POSTDEPLOY ]]; then
+    systemctl restart disdex-stock-reference-free.service
+  fi
+  cwd=""
+  pid=""
+  for attempt in $(seq 1 15); do
+    pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value 2>/dev/null || true)"
+    if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+      cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
+      if [[ "$cwd" == "$expected" ]]; then
+        echo "${phase}_STOCK_REFERENCE_CURRENT=PASS pid=$pid cwd=$cwd"
+        return 0
+      fi
+    fi
+    sleep 1
+  done
+  echo "${phase}_STOCK_REFERENCE_CWD_MISMATCH pid=${pid:-unknown} expected=$expected actual=${cwd:-unknown}"
+  return 1
+}
+
+if [[ "$ROLLBACK_ONLY" != true ]]; then
+load_runtime_env
+classify_cutover_account_mode "$OLD_RELEASE"
+if [[ "$CUTOVER_ACCOUNT_MODE" == V12_ACTIVE ]]; then
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=true
+else
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=false
+fi
+IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"
+echo "CUTOVER_IDLE_PREFLIGHT_RECOVERY=$IDLE_PREFLIGHT_RECOVERY_STATUS"
+require_shared_safe
+
+for name in "${NAMES[@]}"; do
+  unit="$name@$FROM_SHA.service"
+  active_state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+  if [[ "$active_state" != active ]]; then
+    if [[ "$name" == disdex-idle-priority-short && "$active_state" == inactive && "$IDLE_PREFLIGHT_RECOVERY_STATUS" == PASS:* ]]; then
+      echo "CUTOVER_KNOWN_IDLE_BENIGN_INACTIVE_ACCEPTED unit=$unit recovery=$IDLE_PREFLIGHT_RECOVERY_STATUS"
+      continue
+    fi
+    echo "CUTOVER_OLD_UNIT_NOT_ACTIVE=$unit state=$active_state"
+    exit 41
+  fi
+  restart_count="$(systemctl show "$unit" -p NRestarts --value)"
+  if [[ "$restart_count" != 0 ]]; then
+    if [[ "$name" == disdex-shared-crypto-risk && "$restart_count" == 1 ]]; then
+      echo "CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count currentRiskFresh=true"
+    elif [[ "$name" == disdex-v12-x1-all && "$restart_count" == 1 ]]; then
+      pid="$(systemctl show "$unit" -p MainPID --value)"
+      result="$(systemctl show "$unit" -p Result --value)"
+      [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 && "$result" == success ]] || {
+        echo "CUTOVER_KNOWN_V12_RESTART_NOT_CURRENTLY_HEALTHY unit=$unit pid=$pid result=$result"
+        exit 42
+      }
+      python3 - "$FROM_SHA" "$pid" <<'PY'
+import json,sys,time
+sha=sys.argv[1]
+pid=int(sys.argv[2])
+now=int(time.time()*1000)
+state=json.load(open("/var/lib/disdex/v12-x1-all/runner.json",encoding="utf-8"))
+runtime=str(state.get("runtimeSha") or state.get("runtimeCommitSha") or "")
+updated=int(state.get("updatedAt") or 0)
+if runtime!=sha:
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_STATE_SHA_MISMATCH")
+if updated<=0 or updated>now+60000 or now-updated>3*60*60*1000:
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_STATE_STALE")
+if state.get("manualReview"):
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_MANUAL_REVIEW_ACTIVE")
+if state.get("pending"):
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_PENDING_ACTIVE")
+print("CUTOVER_KNOWN_V12_RESTART_STATE_HEALTHY=PASS")
+PY
+      echo "CUTOVER_KNOWN_V12_SINGLE_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count pid=$pid result=$result"
+    elif [[ "$name" == disdex-quality102-causal-v1 && "$restart_count" == 1 ]]; then
+      pid="$(systemctl show "$unit" -p MainPID --value)"
+      result="$(systemctl show "$unit" -p Result --value)"
+      [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 && "$result" == success ]] || {
+        echo "CUTOVER_KNOWN_Q102_RESTART_NOT_CURRENTLY_HEALTHY unit=$unit pid=$pid result=$result"
+        exit 42
+      }
+      python3 - "$FROM_SHA" <<'PY'
+import json,sys,time
+sha=sys.argv[1]
+now=int(time.time()*1000)
+state=json.load(open("/var/lib/disdex/quality102-causal-v1/state.json",encoding="utf-8"))
+runtime=str(state.get("runtimeSha") or state.get("runtimeCommitSha") or "")
+updated=int(state.get("updatedAt") or 0)
+if runtime!=sha:
+    raise SystemExit("CUTOVER_KNOWN_Q102_RESTART_STATE_SHA_MISMATCH")
+if updated<=0 or updated>now+60000 or now-updated>3*60*60*1000:
+    raise SystemExit("CUTOVER_KNOWN_Q102_RESTART_STATE_STALE")
+if state.get("manualReview"):
+    raise SystemExit("CUTOVER_KNOWN_Q102_RESTART_MANUAL_REVIEW_ACTIVE")
+if state.get("pending"):
+    raise SystemExit("CUTOVER_KNOWN_Q102_RESTART_PENDING_ACTIVE")
+print("CUTOVER_KNOWN_Q102_RESTART_STATE_HEALTHY=PASS")
+PY
+      echo "CUTOVER_KNOWN_Q102_SINGLE_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count pid=$pid result=$result"
+    else
+      echo "CUTOVER_OLD_UNIT_RESTARTED=$unit nRestarts=$restart_count"
+      exit 42
+    fi
+  fi
+done
+
+install -d -o root -g root -m 0700 "$BACKUP"
+install -o root -g root -m 0700 "$0" "$BACKUP/cutover.sh"
+install -o root -g root -m 0700 "/tmp/disdex-wiring-$REQUEST_ID.sh" "$BACKUP/runtime-wiring.sh"
+for p in "${STATE_PATHS[@]}"; do
+  if [[ -f "$p" && ! -L "$p" ]]; then
+    dest="$BACKUP$p"
+    install -d -m 0700 "$(dirname "$dest")"
+    cp -a -- "$p" "$dest"
+  fi
+done
+for p in "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
+  [[ -f "$p" && ! -L "$p" ]] || {
+    echo "CUTOVER_SYSTEMD_TEMPLATE_MISSING=$p"
+    exit 43
+  }
+  dest="$BACKUP$p"
+  install -d -m 0700 "$(dirname "$dest")"
+  cp -a -- "$p" "$dest"
+  echo "CUTOVER_SYSTEMD_TEMPLATE_BACKED_UP=$p"
+done
+
+fi # normal preflight; rollback-only reuses its durable backup
+
+quiesce_rollback_writers() {
+  local unit name sha state
+  for unit in disdex-current-runtime-coherence-guard.timer disdex-runner-watchdog.timer disdex-runner-position-recovery.timer disdex-v12-kill-switch-auto-repair.path disdex-v12-three-hour-health-check.timer; do
+    systemctl stop "$unit" || return 1
+  done
+  for unit in disdex-current-runtime-coherence-guard.service disdex-runner-watchdog.service disdex-runner-position-recovery.service disdex-v12-kill-switch-auto-repair.service disdex-v12-three-hour-health-check.service; do
+    systemctl stop "$unit" || return 1
+  done
+  for sha in "$TARGET_SHA" "$FROM_SHA"; do
+    for name in "${NAMES[@]}"; do
+      unit="$name@$sha.service"
+      state="$(systemctl show "$unit" -p LoadState --value)"
+      [[ "$state" == not-found ]] && continue
+      systemctl stop "$unit" || return 1
+      [[ "$(systemctl show "$unit" -p MainPID --value)" == 0 ]] || return 1
+    done
+  done
+  echo ROLLBACK_WRITERS_QUIESCED
+}
+
+migrate_rollback_state_lineage() {
+  # Writers are stopped, venue state was independently checked, and the workflow
+  # proved identical strategy/sizing bytes. Preserve accounting and ownership;
+  # only change top-level release identity. Never restore old financial snapshots.
+  python3 - "$FROM_SHA" "$TARGET_SHA" "$rollback_mode" "$BACKUP" <<'PY'
+import json,os,pathlib,sys,tempfile,shutil
+old,target,mode,backup=sys.argv[1:]
+paths=[
+ '/var/lib/disdex/v12-x1-all/runner.json',
+ '/var/lib/disdex/pengu-dual-ls-v2/runner-live.json',
+ '/var/lib/disdex/quality102-causal-v1/state.json',
+ '/var/lib/disdex/v52-aster-only/runner-live.json',
+ '/var/lib/disdex/fet-brk48-residual/state.json',
+ '/var/lib/disdex/hype-zec-long/runner.json',
+ '/var/lib/disdex/idle-priority/state.json',
+ '/var/lib/disdex/idle-priority/residual-long-state.json',
+]
+pending=json.load(open('/var/lib/disdex/shared/pending-exposure.json'))
+assert pending.get('schema')=='disdex-pending-exposure/v1' and isinstance(pending.get('entries'),list)
+assert all(isinstance(r,dict) and r.get('status')=='RELEASED' for r in pending['entries']), 'ROLLBACK_PENDING_EXPOSURE_UNVERIFIED'
+planned=[]
+for value in paths:
+ p=pathlib.Path(value)
+ if not p.is_file() or p.is_symlink():
+  raise RuntimeError('ROLLBACK_STATE_NOT_REGULAR:'+value)
+ before=json.loads(p.read_bytes())
+ for key in ['runtimeCommitSha','runtimeSha']:
+  if key in before and before[key] not in [old,target]:
+   raise RuntimeError('ROLLBACK_STATE_SHA_UNVERIFIED:'+value)
+ for key in ['pending','pendingOrder','pendingEntry']:
+  if before.get(key): raise RuntimeError('ROLLBACK_PENDING_STATE_UNVERIFIED:'+value)
+ allow_active=mode=='V12_ACTIVE' and value==paths[0]
+ for key in ['active','activePositions','position','positions','core','recovery','base']:
+  if before.get(key) and not allow_active:
+   raise RuntimeError('ROLLBACK_NONFLAT_STATE_UNVERIFIED:'+value+':'+key)
+ after=dict(before)
+ for key in ['runtimeCommitSha','runtimeSha']:
+  if key in after: after[key]=old
+ assert {k:v for k,v in after.items() if k not in ['runtimeCommitSha','runtimeSha']}=={k:v for k,v in before.items() if k not in ['runtimeCommitSha','runtimeSha']}
+ planned.append((p,before,after))
+audit=pathlib.Path(backup)/'rollback-latest'
+audit.mkdir(mode=0o700,exist_ok=True)
+for p,before,after in planned:
+ dest=audit/p.relative_to('/')
+ dest.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+ if not dest.exists(): shutil.copy2(p,dest)
+ if before==after: continue
+ st=p.stat()
+ fd,tmp=tempfile.mkstemp(prefix='.rollback-lineage-',dir=p.parent)
+ with os.fdopen(fd,'w') as f:
+  json.dump(after,f,indent=2);f.write('\n');f.flush();os.fsync(f.fileno())
+ os.chown(tmp,st.st_uid,st.st_gid);os.chmod(tmp,st.st_mode&0o777)
+ os.replace(tmp,p)
+ assert json.loads(p.read_bytes())==after
+print('ROLLBACK_CURRENT_FINANCIAL_STATE_PRESERVED')
+PY
+}
+
+verify_rollback_runtime() {
+  local unit name pid attempt
+  for name in "${NAMES[@]}"; do
+    unit="$name@$FROM_SHA.service"
+    [[ "$(systemctl is-active "$unit")" == active ]] || return 1
+    pid="$(systemctl show "$unit" -p MainPID --value)"
+    [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]] || return 1
+    [[ "$(readlink -f "/proc/$pid/cwd")" == "$OLD_RELEASE" ]] || return 1
+  done
+  for attempt in $(seq 1 24); do
+    systemctl start disdex-runner-health-snapshot.service || return 1
+    if python3 - "$FROM_SHA" <<'PY'
+import json,pathlib,sys
+sha=sys.argv[1]
+rows=list(pathlib.Path('/var/lib/disdex/runner-health/heartbeats').glob('*.json'))
+assert len(rows)==7
+for p in rows:
+ d=json.loads(p.read_text())
+ assert d.get('runtimeSha')==sha and d.get('expectedSha')==sha and d.get('safetyState')=='HEALTHY',p.name
+ assert int(d.get('mainPid') or 0)>0
+print('ROLLBACK_RESTORED_RUNTIME_VERIFIED')
+PY
+    then return 0; fi
+    sleep 5
+  done
+  return 1
+}
+
+rollback_hold() {
+  local reason="$1" failure_rc="$2"
+  echo "$reason"
+  quiesce_rollback_writers || echo ROLLBACK_HOLD_WRITER_STOP_FAILED
+  echo ROLLBACK_INCOMPLETE_RUNNERS_HELD
+  exit "$failure_rc"
+}
+
+rollback() {
+  rc="${1:-$?}"
+  trap - ERR EXIT
+  set +e
+  echo "DEPLOY_ROLLBACK_TRIGGERED rc=$rc"
+  if ! quiesce_rollback_writers; then
+    echo ROLLBACK_BLOCKED_WRITER_STOP_FAILED
+    exit "$rc"
+  fi
+  load_runtime_env
+  runner_root="$RELEASE"
+  [[ -x "$runner_root/node_modules/.bin/tsx" ]] || runner_root="$OLD_RELEASE"
+  rollback_mode=""
+  if require_flat_account "$runner_root" >"$BACKUP/rollback-account.log" 2>&1; then
+    rollback_mode=FLAT
+  elif [[ "$V12_ACTIVE_MIGRATION_CODE_PARITY" == 1 ]]; then
+    state_sha="$(/usr/bin/jq -r '.runtimeCommitSha // ""' /var/lib/disdex/v12-x1-all/runner.json)"
+    if [[ "$state_sha" == "$TARGET_SHA" ]]; then other_sha="$FROM_SHA"; else other_sha="$TARGET_SHA"; fi
+    if "$runner_root/node_modules/.bin/tsx" "$runner_root/scripts/disdex-v12-active-state-sha-migrate.ts" \
+      --from-sha "$state_sha" --to-sha "$other_sha" --state-path /var/lib/disdex/v12-x1-all/runner.json \
+      --verify-only --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION; then
+      rollback_mode=V12_ACTIVE
+    fi
+  fi
+  # Only restore control-plane authorization/certificates/templates, never the
+  # accounting snapshots captured before startup. Unknown exposure stays stopped.
+  for p in "$SHARED/operator-activation/current.json" "$SHARED/operator-activation/runtime.json" "$SHARED/idle-priority-parity-cert.json" "$SHARED/idle-residual-long-parity-cert.json" "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
+    src="$BACKUP$p"
+    if [[ -f "$src" ]]; then cp -a -- "$src" "$p" || { echo ROLLBACK_CONTROL_RESTORE_FAILED; exit "$rc"; }; fi
+  done
+  tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
+  rm -f -- "$tmp_link"
+  ln -s "$OLD_RELEASE" "$tmp_link" && mv -Tf "$tmp_link" "$CURRENT" || { echo ROLLBACK_POINTER_RESTORE_FAILED; exit "$rc"; }
+  if [[ -z "$rollback_mode" ]]; then
+    echo ROLLBACK_RELEASE_RESTORED_EXPOSURE_UNVERIFIED_RUNNERS_STOPPED
+    exit "$rc"
+  fi
+  if ! migrate_rollback_state_lineage; then
+    echo ROLLBACK_RELEASE_RESTORED_STATE_UNVERIFIED_RUNNERS_STOPPED
+    exit "$rc"
+  fi
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=true
+  if ! (cd "$OLD_RELEASE" && DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true bash "$BACKUP/runtime-wiring.sh" --apply); then
+    echo ROLLBACK_RELEASE_RESTORED_WIRING_FAILED_RUNNERS_STOPPED
+    exit "$rc"
+  fi
+  systemctl stop disdex-current-runtime-coherence-guard.timer || rollback_hold ROLLBACK_COHERENCE_STOP_FAILED "$rc"
+  if ! restart_stock_reference_current ROLLBACK; then rollback_hold ROLLBACK_STOCK_REFERENCE_FAILED "$rc"; fi
+  for name in disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+    systemctl enable --now "$name@$FROM_SHA.service" || rollback_hold ROLLBACK_SAFETY_START_FAILED "$rc"
+  done
+  safety_ready=0
+  for attempt in $(seq 1 45); do
+    if require_shared_safe; then safety_ready=1; break; fi
+    sleep 2
+  done
+  [[ "$safety_ready" == 1 ]] || rollback_hold ROLLBACK_SAFETY_NOT_READY "$rc"
+  for name in "${CORE[@]}" disdex-hype-long disdex-idle-priority-short; do
+    systemctl enable --now "$name@$FROM_SHA.service" || rollback_hold ROLLBACK_TRADER_START_FAILED "$rc"
+    sleep 6
+  done
+  if ! verify_rollback_runtime; then rollback_hold ROLLBACK_RESTORED_RUNTIME_NOT_HEALTHY "$rc"; fi
+  (cd "$OLD_RELEASE" && bash "$BACKUP/runtime-wiring.sh" --apply) || rollback_hold ROLLBACK_AUTOMATION_RESTORE_FAILED "$rc"
+  echo "DEPLOY_ROLLBACK_MODE=$rollback_mode VERIFIED"
+  # Preserve failed release and all evidence; retention owns deletion after
+  # checking current, previous, dependency, systemd, process and state references.
+  exit "$rc"
+}
+
+if [[ "$ROLLBACK_ONLY" == true ]]; then
+  current_sha="$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")"
+  if [[ "$current_sha" == "$FROM_SHA" ]]; then echo ROLLBACK_ALREADY_AT_SOURCE; exit 0; fi
+  [[ "$current_sha" == "$TARGET_SHA" && -f "$BACKUP/cutover.sh" ]] || { echo ROLLBACK_SOURCE_UNVERIFIED; exit 1; }
+  rollback 1
+fi
+trap 'rc=$?; if [[ "$rc" -ne 0 ]]; then rollback "$rc"; fi' EXIT
+
+systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
+systemctl stop disdex-current-runtime-coherence-guard.timer
+systemctl stop disdex-current-runtime-coherence-guard.service
+systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-runner-position-recovery.timer >/dev/null 2>&1 || true
+systemctl stop disdex-runner-position-recovery.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+systemctl stop disdex-v12-kill-switch-auto-repair.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-v12-three-hour-health-check.timer >/dev/null 2>&1 || true
+systemctl stop disdex-v12-three-hour-health-check.service >/dev/null 2>&1 || true
+
+for name in "${NAMES[@]}"; do
+  systemctl stop "$name@$FROM_SHA.service"
+done
+for name in "${NAMES[@]}"; do
+  [[ "$(systemctl is-active "$name@$FROM_SHA.service" 2>/dev/null || true)" != active ]]
+done
+
+if [[ "$CUTOVER_ACCOUNT_MODE" == FLAT ]]; then
+  require_flat_account "$OLD_RELEASE"
+else
+  expected_cutover_mode="$CUTOVER_ACCOUNT_MODE"
+  classify_cutover_account_mode "$OLD_RELEASE"
+  [[ "$CUTOVER_ACCOUNT_MODE" == "$expected_cutover_mode" ]] || {
+    echo "CUTOVER_ACCOUNT_MODE_CHANGED_AFTER_STOP expected=$expected_cutover_mode actual=$CUTOVER_ACCOUNT_MODE"
+    false
+  }
+  echo "CUTOVER_V12_ACTIVE_REVERIFY_AFTER_STOP=PASS"
+fi
+
+echo "CUTOVER_RELEASE_PREP_BEGIN"
+echo "CUTOVER_RELEASE_PREP_STEP=stage_dir"
+install -d -o deploy -g deploy -m 0755 "$STAGE"
+echo "CUTOVER_RELEASE_PREP_STEP=extract"
+tar --no-same-owner -xzf "$SOURCE_FILE" -C "$STAGE"
+echo "CUTOVER_RELEASE_PREP_STEP=manifest_check"
+[[ -f "$STAGE/package.json" && -f "$STAGE/package-lock.json" ]]
+old_lock_sha="$(sha256sum "$OLD_RELEASE/package-lock.json" | awk '{print $1}')"
+stage_lock_sha="$(sha256sum "$STAGE/package-lock.json" | awk '{print $1}')"
+echo "CUTOVER_OLD_PACKAGE_LOCK_SHA256=$old_lock_sha"
+echo "CUTOVER_STAGE_PACKAGE_LOCK_SHA256=$stage_lock_sha"
+python3 - "$OLD_RELEASE/package-lock.json" "$STAGE/package-lock.json" <<'PY'
+import json,sys
+old_path,new_path=sys.argv[1:]
+old=json.load(open(old_path,encoding="utf-8"))
+new=json.load(open(new_path,encoding="utf-8"))
+if old.get("lockfileVersion") != new.get("lockfileVersion"):
+    raise SystemExit("CUTOVER_LOCKFILE_VERSION_MISMATCH")
+def resolved_graph(doc):
+    packages=doc.get("packages")
+    if not isinstance(packages,dict):
+        raise SystemExit("CUTOVER_PACKAGE_LOCK_PACKAGES_MISSING")
+    # The root package entry contains requested semver ranges. Runtime reuse is
+    # safe only when every resolved node_modules package entry is byte-equivalent
+    # as parsed JSON; a root range-only relaxation is allowed.
+    return {k:v for k,v in packages.items() if k}
+if resolved_graph(old) != resolved_graph(new):
+    raise SystemExit("CUTOVER_RESOLVED_DEPENDENCY_GRAPH_MISMATCH")
+print("CUTOVER_RESOLVED_DEPENDENCY_GRAPH=PASS")
+PY
+echo "CUTOVER_RELEASE_PREP_STEP=release_marker"
+printf '%s\n' "$TARGET_SHA" > "$STAGE/.disdex-release-sha"
+echo "CUTOVER_RELEASE_PREP_STEP=ownership"
+chown -R deploy:deploy "$STAGE"
+echo "CUTOVER_RELEASE_PREP_STEP=dependency_targets"
+node_modules_target="$(readlink -f "$OLD_RELEASE/node_modules" 2>/dev/null || true)"
+venv_target="$(readlink -f "$OLD_RELEASE/.venv2" 2>/dev/null || true)"
+echo "CUTOVER_NODE_MODULES_TARGET=$node_modules_target"
+echo "CUTOVER_VENV_TARGET=$venv_target"
+[[ -n "$node_modules_target" && -d "$node_modules_target" ]] || {
+  echo "CUTOVER_NODE_MODULES_TARGET_INVALID"
+  false
+}
+[[ -n "$venv_target" && -d "$venv_target" ]] || {
+  echo "CUTOVER_VENV_TARGET_INVALID"
+  false
+}
+echo "CUTOVER_RELEASE_PREP_STEP=dependency_links"
+ln -s "$node_modules_target" "$STAGE/node_modules"
+ln -s "$venv_target" "$STAGE/.venv2"
+chown -h deploy:deploy "$STAGE/node_modules" "$STAGE/.venv2"
+echo "CUTOVER_RELEASE_PREP_STEP=publish"
+mv -- "$STAGE" "$RELEASE"
+echo "CUTOVER_RELEASE_PREP_PASS release=$RELEASE"
+
+install -o root -g root -m 0644 "$CERT_FILE" "$SHARED/idle-priority-parity-cert.json"
+install -o root -g root -m 0644 "$RESIDUAL_CERT_FILE" "$SHARED/idle-residual-long-parity-cert.json"
+
+staged_operator_activation="$SHARED/operator-activation/approved-$TARGET_SHA.json"
+[[ -f "$staged_operator_activation" && ! -L "$staged_operator_activation" ]] || {
+  echo "OPERATOR_STAGED_ACTIVATION_REQUIRED=$staged_operator_activation"
+  false
+}
+[[ "$(stat -c '%U:%G:%a' "$staged_operator_activation")" == "root:root:600" ]] || {
+  echo "OPERATOR_STAGED_ACTIVATION_METADATA_INVALID=$(stat -c '%U:%G:%a' "$staged_operator_activation")"
+  false
+}
+/usr/bin/node "$RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs" \
+  --release-root "$RELEASE" \
+  --sha "$TARGET_SHA" \
+  --all \
+  --activation-path "$staged_operator_activation"
+/usr/bin/python3 "$RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py" \
+  --approved-ready \
+  --sha "$TARGET_SHA" \
+  --activation-path "$staged_operator_activation" | grep -qx true
+activation_tmp="$SHARED/operator-activation/.current-$REQUEST_ID"
+rm -f -- "$activation_tmp"
+install -o root -g root -m 0600 "$staged_operator_activation" "$activation_tmp"
+mv -Tf "$activation_tmp" "$SHARED/operator-activation/current.json"
+echo "OPERATOR_STAGED_ACTIVATION_PROMOTED=PASS sha=$TARGET_SHA"
+
+tmp_link="$ROOT/.current-$REQUEST_ID"
+ln -s "$RELEASE" "$tmp_link"
+mv -Tf "$tmp_link" "$CURRENT"
+[[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$TARGET_SHA" ]]
+[[ "$(readlink -f "$CURRENT")" == "$RELEASE" ]]
+
+for state_dir in /var/lib/disdex/pengu-dual-ls-v2 /var/lib/disdex/idle-priority; do
+  [[ -d "$state_dir" && ! -L "$state_dir" ]] || {
+    echo "CUTOVER_STATE_DIR_INVALID=$state_dir"
+    false
+  }
+  chown deploy:deploy "$state_dir"
+  chmod 0700 "$state_dir"
+  [[ "$(stat -c '%U:%G:%a' "$state_dir")" == "deploy:deploy:700" ]] || {
+    echo "CUTOVER_STATE_DIR_MODE_FAILED=$state_dir"
+    false
+  }
+  echo "CUTOVER_STATE_DIR_NORMALIZED=$state_dir:deploy:deploy:700"
+done
+
+echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
+(cd "$RELEASE" && DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+echo "CUTOVER_WIRING_PASS automation=deferred"
+restart_stock_reference_current CUTOVER
+
+wait_safety_daemons_ready() {
+  local required_consecutive=2
+  local consecutive=0
+  local attempts=0
+  while (( attempts < 45 )); do
+    attempts=$((attempts + 1))
+    if python3 - <<'PY'
+import json,time
+now=int(time.time()*1000)
+with open("/var/lib/disdex/shared/crypto-daily-risk.json",encoding="utf-8") as f:
+    risk=json.load(f)
+with open("/var/lib/disdex/shared/margin-risk/guard-live.json",encoding="utf-8") as f:
+    guard=json.load(f)
+risk_at=int(risk.get("updatedAt") or 0)
+guard_at=int(guard.get("checkedAt") or 0)
+if risk.get("tripped") is True or risk.get("sourceComplete") is not True:
+    raise SystemExit(1)
+expected_strategies={
+    "V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL","QUALITY102_CAUSAL_V1",
+    "FET_BRK48_RESIDUAL","HYPE_LONG","IDLE_PRIORITY_SHORT",
+}
+if set(risk.get("strategyIds") or []) != expected_strategies:
+    raise SystemExit(1)
+if risk_at<=0 or now-risk_at>120000 or risk_at>now+60000:
+    raise SystemExit(1)
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit(1)
+if guard_at<=0 or now-guard_at>120000 or guard_at>now+60000:
+    raise SystemExit(1)
+PY
+    then
+      consecutive=$((consecutive + 1))
+      echo "CUTOVER_SAFETY_DAEMONS_HEALTHY attempt=$attempts consecutive=$consecutive"
+      if (( consecutive >= required_consecutive )); then
+        return 0
+      fi
+    else
+      consecutive=0
+      echo "CUTOVER_SAFETY_DAEMONS_WAIT attempt=$attempts"
+    fi
+    sleep 2
+  done
+  echo "CUTOVER_SAFETY_DAEMONS_NOT_READY"
+  return 1
+}
+
+# Start safety daemons first.  Wants/After only orders unit startup; it does not
+# guarantee their persisted safety snapshots are already fresh when a trader's
+# ExecStartPre or first tick reads them.
+systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
+systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
+wait_safety_daemons_ready
+
+CUTOVER_TRADING_START_EPOCH="$(date +%s)"
+TRADING_TARGET_STARTED=1
+CUTOVER_TRADING_START_OBSERVE_SEC=6
+CUTOVER_RATE_BUDGET_PATH="$SHARED/aster-rate-budget.json"
+CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS=500
+CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE=3
+CUTOVER_RATE_BUDGET_QUIET_MAX_ATTEMPTS=40
+
+wait_aster_rate_budget_quiet() {
+  local label="$1"
+  local consecutive=0
+  local attempt=0
+  while (( attempt < CUTOVER_RATE_BUDGET_QUIET_MAX_ATTEMPTS )); do
+    attempt=$((attempt + 1))
+    if python3 - "$CUTOVER_RATE_BUDGET_PATH" "$CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS" <<'PY'
+import json,math,os,sys,time
+path=sys.argv[1]
+quiet_horizon_ms=int(sys.argv[2])
+lock_path=path+".lock"
+recovery_lock_path=lock_path+".recovery"
+if os.path.exists(lock_path) or os.path.exists(recovery_lock_path):
+    raise SystemExit(2)
+try:
+    with open(path,encoding="utf-8") as handle:
+        state=json.load(handle)
+except FileNotFoundError:
+    raise SystemExit(3)
+except Exception:
+    raise SystemExit(3)
+if not isinstance(state,dict) or state.get("schema")!="disdex-aster-rate-budget/v1":
+    raise SystemExit(3)
+if "nextAllowedAt" not in state:
+    raise SystemExit(3)
+try:
+    next_allowed_at=float(state["nextAllowedAt"])
+    cooldown_until=float(state["cooldownUntil"]) if "cooldownUntil" in state else 0.0
+except (TypeError,ValueError):
+    raise SystemExit(3)
+if (not math.isfinite(next_allowed_at) or next_allowed_at < 0
+        or not math.isfinite(cooldown_until) or cooldown_until < 0):
+    raise SystemExit(3)
+now_ms=time.time()*1000
+blocked_until=max(next_allowed_at,cooldown_until)
+horizon_ms=max(0,blocked_until-now_ms)
+raise SystemExit(0 if horizon_ms <= quiet_horizon_ms else 2)
+PY
+    then
+      consecutive=$((consecutive + 1))
+      echo "CUTOVER_RATE_BUDGET_QUIET label=$label attempt=$attempt consecutive=$consecutive"
+      if (( consecutive >= CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE )); then
+        return 0
+      fi
+    else
+      rc=$?
+      if (( rc == 3 )); then
+        echo "CUTOVER_RATE_BUDGET_INVALID label=$label attempt=$attempt path=$CUTOVER_RATE_BUDGET_PATH"
+        return 1
+      fi
+      consecutive=0
+      echo "CUTOVER_RATE_BUDGET_BUSY label=$label attempt=$attempt"
+    fi
+    sleep 1
+  done
+  echo "CUTOVER_RATE_BUDGET_NOT_QUIET label=$label"
+  return 1
+}
+
+start_trading_unit_rate_budget_gated() {
+  local name="$1"
+  systemctl enable --now "$name@$TARGET_SHA.service"
+  echo "CUTOVER_TRADING_UNIT_STARTED unit=$name@$TARGET_SHA.service observeSec=$CUTOVER_TRADING_START_OBSERVE_SEC"
+  # Give the unit enough time to enter its first authenticated tick, then require
+  # actual shared-budget headroom rather than assuming a fixed sleep was enough.
+  sleep "$CUTOVER_TRADING_START_OBSERVE_SEC"
+  wait_aster_rate_budget_quiet "$name"
+}
+
+# Safety daemons are already fresh; make sure their own initial account reads
+# have drained before the first trader is admitted.
+wait_aster_rate_budget_quiet "safety-daemons"
+for name in "${CORE[@]}"; do
+  start_trading_unit_rate_budget_gated "$name"
+done
+start_trading_unit_rate_budget_gated "disdex-hype-long"
+start_trading_unit_rate_budget_gated "disdex-idle-priority-short"
+
+# The first wiring pass intentionally keeps operator automation deferred. Refresh
+# every trading heartbeat against the new release before enabling watchdog or
+# recovery timers. Idle now evaluates seven symbols (five SHORT routes plus
+# DOGE/AVAX residual LONG), so its first completed market-data tick can exceed
+# the former fixed 8-second window. Poll only for a bounded 120 seconds and
+# require a genuinely HEALTHY heartbeat; otherwise fail closed and roll back.
+heartbeat_ready=0
+for heartbeat_attempt in $(seq 1 24); do
+  systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+  systemctl start disdex-runner-health-snapshot.service
+  sleep 5
+  if python3 - "$TARGET_SHA" "$heartbeat_attempt" <<'PY'
+import json,sys
+sha=sys.argv[1]
+attempt=int(sys.argv[2])
+expected={
+    "v12-x1-all.json":f"disdex-v12-x1-all@{sha}.service",
+    "pengu-v8.json":f"disdex-pengu-dual-ls-v2@{sha}.service",
+    "quality102-causal-v1.json":f"disdex-quality102-causal-v1@{sha}.service",
+    "v52.json":f"disdex-v52-aster-only@{sha}.service",
+    "fet-brk48-residual.json":f"disdex-fet-brk48@{sha}.service",
+    "hype-trend-long.json":f"disdex-hype-long@{sha}.service",
+    "idle-priority-short.json":f"disdex-idle-priority-short@{sha}.service",
+}
+root="/var/lib/disdex/runner-health/heartbeats"
+blocked=[]
+for name,unit in expected.items():
+    try:
+        row=json.load(open(f"{root}/{name}",encoding="utf-8"))
+    except Exception as exc:
+        blocked.append(f"CUTOVER_HEARTBEAT_UNAVAILABLE:{name}:{type(exc).__name__}")
+        continue
+    if row.get("runtimeSha")!=sha or row.get("expectedSha")!=sha:
+        blocked.append(f"CUTOVER_HEARTBEAT_SHA_MISMATCH:{name}")
+        continue
+    if row.get("serviceUnit")!=unit:
+        blocked.append(f"CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH:{name}")
+        continue
+    if row.get("safetyState")!="HEALTHY":
+        blocked.append(f"CUTOVER_HEARTBEAT_NOT_HEALTHY:{name}:{row.get('safetyState')}:{row.get('healthReason','')}")
+if blocked:
+    print(f"CUTOVER_HEARTBEAT_WAIT attempt={attempt} blocked={'|'.join(blocked)}")
+    raise SystemExit(1)
+print(f"CUTOVER_HEARTBEAT_ALL_HEALTHY attempt={attempt}")
+PY
+  then
+    heartbeat_ready=1
+    break
+  fi
+done
+[[ "$heartbeat_ready" == 1 ]] || { echo "CUTOVER_HEARTBEAT_TIMEOUT"; exit 47; }
+echo "CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS"
+
+# A healthy final heartbeat is not enough: the previous Production cutover
+# recovered from startup saturation and still passed the end-state audit.
+# Reject the cutover if any target trading unit actually hit the canonical
+# shared-budget saturation during this startup window.
+wait_aster_rate_budget_quiet "post-heartbeat"
+for name in "${CORE[@]}" disdex-hype-long disdex-idle-priority-short; do
+  unit="$name@$TARGET_SHA.service"
+  startup_rate_log="$(journalctl -u "$unit" --since "@$CUTOVER_TRADING_START_EPOCH" --no-pager -o cat 2>/dev/null || true)"
+  if grep -Eq 'ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+' <<<"$startup_rate_log"; then
+    echo "CUTOVER_STARTUP_RATE_BUDGET_SATURATION=$unit"
+    grep -E 'ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+' <<<"$startup_rate_log" | tail -20
+    exit 48
+  fi
+done
+echo "CUTOVER_STARTUP_RATE_BUDGET_SATURATION=0"
+
+echo "CUTOVER_POSTSTART_WIRING_BEGIN"
+(cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+echo "CUTOVER_POSTSTART_WIRING_PASS"
+
+for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2; do
+  unit="$name@$TARGET_SHA.service"
+  requires="$(systemctl show "$unit" -p Requires --value)"
+  wants="$(systemctl show "$unit" -p Wants --value)"
+  [[ " $requires " != *" disdex-shared-crypto-risk@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT=$unit"
+    false
+  }
+  [[ " $wants " == *" disdex-shared-crypto-risk@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING=$unit"
+    false
+  }
+  [[ " $requires " != *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_PRESENT=$unit"
+    false
+  }
+  [[ " $wants " == *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_MARGIN_GUARD_SOFT_DEPENDENCY_MISSING=$unit"
+    false
+  }
+  echo "POSTDEPLOY_SAFETY_DAEMON_LIFECYCLE_DECOUPLED unit=$unit"
+done
+
+for name in "${NAMES[@]}"; do
+  systemctl disable "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
+done
+
+# The stock reference proxy resolves /home/deploy/disdex-trading/current only at
+# process start. It was switched before trading startup. Verify current
+# ownership here without stopping the already healthy V52 dependency.
+restart_stock_reference_current POSTDEPLOY
+
+for name in "${NAMES[@]}"; do
+  unit="$name@$TARGET_SHA.service"
+  [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || {
+    echo "POSTDEPLOY_RUNNER_NOT_ACTIVE=$unit"
+    if [[ "$name" == disdex-idle-priority-short ]]; then
+      echo "POSTDEPLOY_IDLE_FAILURE_DIAGNOSTIC_BEGIN"
+      systemctl status "$unit" --no-pager -l || true
+      journalctl -u "$unit" --since "-5 min" --no-pager -n 160 -o short-iso || true
+      python3 - <<'PY'
+import json
+for label,path in [
+    ("idle","/var/lib/disdex/idle-priority/state.json"),
+    ("residual","/var/lib/disdex/idle-priority/residual-long-state.json"),
+]:
+    try:
+        with open(path,encoding="utf-8") as f: value=json.load(f)
+        print("POSTDEPLOY_IDLE_STATE "+label+"="+json.dumps(value,separators=(",",":"),ensure_ascii=False))
+    except Exception as exc:
+        print("POSTDEPLOY_IDLE_STATE "+label+"="+json.dumps({"error":type(exc).__name__},separators=(",",":")))
+PY
+      echo "POSTDEPLOY_IDLE_FAILURE_DIAGNOSTIC_END"
+    fi
+    false
+  }
+  pid="$(systemctl show "$unit" -p MainPID --value)"
+  [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]
+  [[ "$(readlink -f "/proc/$pid/cwd")" == "$RELEASE" ]] || {
+    echo "POSTDEPLOY_CWD_MISMATCH=$unit"
+    false
+  }
+  [[ "$(systemctl show "$unit" -p NRestarts --value)" == 0 ]] || {
+    echo "POSTDEPLOY_RESTART_COUNT_NONZERO=$unit"
+    false
+  }
+  echo "POSTDEPLOY_RUNNER unit=$unit pid=$pid nRestarts=0"
+done
+
+idle_activation_projection="$SHARED/operator-activation/runtime.json"
+idle_activation_projection_meta="$(stat -c '%u:%g:%a' "$idle_activation_projection")"
+[[ "$idle_activation_projection_meta" == "0:0:644" ]] || {
+  echo "POSTDEPLOY_IDLE_ACTIVATION_PROJECTION_INVALID=$idle_activation_projection_meta"
+  false
+}
+echo "POSTDEPLOY_IDLE_ACTIVATION_PROJECTION_ROOT_OWNED=PASS meta=$idle_activation_projection_meta"
+
+/usr/bin/node "$RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs" \
+  --release-root "$RELEASE" --sha "$TARGET_SHA" --all \
+  --activation-path "$SHARED/operator-activation/current.json"
+
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys
+sha=sys.argv[1]
+cert=json.load(open("/var/lib/disdex/shared/idle-priority-parity-cert.json"))
+assert cert["schema"]=="disdex-idle-priority-parity-cert/v3"
+assert cert["runtimeSha"]==sha
+assert cert["genericCandidateRows"]==393
+assert cert["genericSourceGapRows"]==2
+assert cert["filteredRows"]==63 and cert["admittedRows"]==61
+assert cert["wins"]==48 and cert["losses"]==13
+assert cert["roundtripBps"]==10 and cert["integratedTradeCount"]==1339
+residual_cert=json.load(open("/var/lib/disdex/shared/idle-residual-long-parity-cert.json"))
+assert residual_cert["schema"]=="disdex-idle-residual-long-parity-cert/v1"
+assert residual_cert["runtimeSha"]==sha
+assert residual_cert["priority"]==["FORMAL_EXISTING","IDLE_PRIORITY_SHORT","DOGE_REL_VOL","AVAX_REL_LONG"]
+assert residual_cert["integratedTradeCount"]==1390
+assert residual_cert["idleTrades"]==61 and residual_cert["dogeTrades"]==11 and residual_cert["avaxTrades"]==16
+assert abs(residual_cert["finalJpy"]-1319918378.8124561)<1
+hb=json.load(open("/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json"))
+assert hb["runtimeSha"]==sha and hb["expectedSha"]==sha
+assert hb["serviceUnit"]==f"disdex-idle-priority-short@{sha}.service"
+assert hb["mode"]=="LIVE" and hb["liveEnabled"] is True and hb["safetyState"]=="HEALTHY"
+assert int(hb.get("mainPid",0))>0 and int(hb.get("nRestarts",0))==0
+state=json.load(open("/var/lib/disdex/idle-priority/state.json"))
+assert state["schema"]=="disdex-idle-priority-state/v2"
+assert state["runtimeSha"]==sha
+assert state.get("manualReview") in (None,"")
+print("POSTDEPLOY_IDLE_PARITY_HEARTBEAT_STATE=PASS")
+PY
+
+python3 - <<'PY'
+import json
+kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
+if kill.get("active") is not False:
+    raise SystemExit("POSTDEPLOY_KILL_SWITCH_ACTIVE")
+guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit("POSTDEPLOY_MARGIN_NOT_HEALTHY")
+print("POSTDEPLOY_SHARED_SAFETY=PASS")
+PY
+
+set -a
+for f in \
+  /etc/disdex/disdex-v13d-v11eq-v96.env \
+  /etc/disdex/disdex-v12-pengu-v2-v52.env \
+  /etc/disdex/disdex-v12-x1-all.env \
+  /etc/disdex/disdex-quality102-causal-v1.env \
+  "/etc/disdex/current-runtime/$TARGET_SHA.env"; do
+  [[ -f "$f" ]] && . "$f"
+done
+set +a
+post_budget="/tmp/disdex-aster-readonly-budget-postdeploy-$RANDOM-$.json"
+DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$post_budget" \
+  "$RELEASE/node_modules/.bin/tsx" "$RELEASE/scripts/disdex-aster-readonly-account-diagnostic.ts"
+rm -rf -- "$post_budget" "$post_budget.lock" "$post_budget.lock.recovery"
+
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys,urllib.request
+sha=sys.argv[1]
+base="http://127.0.0.1:3001"
+def get(path):
+    req=urllib.request.Request(base+path,headers={
+        "Cookie":"disdex_auth=1",
+        "User-Agent":"DisDex-Production-Cutover-Verify",
+    })
+    with urllib.request.urlopen(req,timeout=30) as r:
+        if r.status!=200:
+            raise RuntimeError("HP_HTTP_"+path+"_"+str(r.status))
+        return json.loads(r.read(1500000))
+live=get("/api/system/live-runtime")
+if live.get("releaseSha")!=sha:
+    raise RuntimeError("HP_LIVE_RUNTIME_SHA_MISMATCH")
+lineage=live.get("runtimeLineage") or {}
+if lineage.get("synchronized") is not True:
+    raise RuntimeError("HP_RUNTIME_LINEAGE_UNSYNCHRONIZED")
+for name in ["v12","pengu","quality102","v52","fet","hype"]:
+    r=(lineage.get("units") or {}).get(name) or {}
+    if r.get("runtimeSha")!=sha or r.get("expectedSha")!=sha or r.get("matchesCurrent") is not True:
+        raise RuntimeError("HP_RUNTIME_LINEAGE_INVALID:"+name)
+idle=get("/api/system/idle-priority-status")
+hb=idle.get("heartbeat") or {}
+if idle.get("releaseSha")!=sha or idle.get("status")!="HEALTHY" or hb.get("runtimeSha")!=sha or hb.get("expectedSha")!=sha or hb.get("mode")!="LIVE" or hb.get("liveEnabled") is not True or hb.get("safetyState")!="HEALTHY" or int(hb.get("mainPid") or 0)<=0:
+    raise RuntimeError("HP_IDLE_NOT_LIVE")
+decision=get("/api/system/decision-status?refresh=1")
+units=(decision.get("runtime") or {}).get("units",[])
+row=[x for x in units if x.get("id")=="IDLE_PRIORITY_SHORT"]
+# The deployed overview lists the six formal strategies. Idle is verified
+# through its dedicated status endpoint and exact-SHA LIVE heartbeat above.
+for name in ["V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL","QUALITY102_CAUSAL_V1","FET_BRK48_RESIDUAL","HYPE_TREND_LONG","DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"]:
+    matches=[x for x in units if x.get("id")==name]
+    if len(matches)!=1 or matches[0].get("releaseSha")!=sha:
+        raise RuntimeError("HP_OVERVIEW_RUNTIME_INVALID:"+name)
+if row and (len(row)!=1 or row[0].get("releaseSha")!=sha or row[0].get("status")!="LIVE"):
+    raise RuntimeError("HP_IDLE_OVERVIEW_NOT_LIVE")
+if not row:
+    print("POSTDEPLOY_HP_IDLE_DEDICATED_HEARTBEAT_VERIFIED overviewFormalStrategies=6")
+print("POSTDEPLOY_HP_IDLE_LIVE=PASS")
+PY
+
+previous_tmp="$ROOT/.previous-$REQUEST_ID"
+rm -f "$previous_tmp"
+ln -s "$OLD_RELEASE" "$previous_tmp"
+mv -Tf "$previous_tmp" "$ROOT/previous"
+[[ "$(readlink -f "$ROOT/previous")" == "$OLD_RELEASE" ]]
+echo "POSTDEPLOY_PREVIOUS_UPDATED=PASS target=$OLD_RELEASE"
+
+trap - ERR EXIT
+rm -f -- "$SOURCE_FILE" "$CERT_FILE" "$RESIDUAL_CERT_FILE"
+rm -f -- "$staged_operator_activation"
+echo "OPERATOR_STAGED_ACTIVATION_CONSUMED=PASS sha=$TARGET_SHA"
+echo "STATUS=LIVE_ACTIVATED_VERIFIED"
+echo "PRODUCTION_SHA=$TARGET_SHA"
+echo "ROLLBACK_SHA=$FROM_SHA"
+echo "IDLE_PARITY_SCHEMA=disdex-idle-priority-parity-cert/v3"
+echo "TRADING_MUTATION_DURING_PREFLIGHT=0"

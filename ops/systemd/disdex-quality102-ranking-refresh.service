@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh current Q102 ranking details after a decision update
+After=network-online.target
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/node /usr/local/libexec/disdex-quality102-ranking-refresh.mjs
+TimeoutStartSec=120
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only

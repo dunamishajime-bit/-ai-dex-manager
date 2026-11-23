@@ -1,0 +1,85 @@
+{
+  "schema": "disdex-stable4-dd30-monitor-only-root-plan/v1",
+  "target": "professional-dismanager.net",
+  "operator": "dunamishajime-bit",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+  "route": "GITHUB_ACTIONS",
+  "scope": "FULL_PROJECT",
+  "sourceBinding": "GITHUB_RUN_HEAD_SHA",
+  "ordersEnabled": false,
+  "ownerGoalId": "8b007d5a-f46c-4752-9f71-70d3967712c0",
+  "ownerGoalFingerprint": "6d71ee73617c574a7018878d803df5c1cca5ef4b5ac70498aca408ee11037be8",
+  "candidate": {
+    "integratedSourceSha": "672316e4d6f4a9e3a6977a8094048a5c170e80c2",
+    "pullRequest": 598,
+    "releaseMustBeImmutable": true,
+    "releaseMustCarryShaMarker": true,
+    "releaseMustNotBeCurrentBeforeCutover": true
+  },
+  "runnerTargets": [
+    {"id": "V12_V4", "unitPrefix": "disdex-v12-v4@", "ordersEnabled": false},
+    {"id": "PENGU_V8", "unitPrefix": "disdex-pengu-dual-ls-v2@", "ordersEnabled": false},
+    {"id": "QUALITY102_CAUSAL_V1", "unitPrefix": "disdex-quality102-causal-v1@", "ordersEnabled": false},
+    {"id": "V52", "unitPrefix": "disdex-v52-aster-only@", "ordersEnabled": false},
+    {"id": "FET_BRK48_RESIDUAL", "unitPrefix": "disdex-fet-brk48-shadow@", "ordersEnabled": false},
+    {"id": "IDLE_PRIORITY_SHORT", "unitPrefix": "disdex-idle-priority-short@", "ordersEnabled": false},
+    {"id": "HYPE_TREND_LONG", "unitPrefix": "disdex-hype-long@", "ordersEnabled": false}
+  ],
+  "economics": {
+    "v4NewEntryDrawdownHold": 0.3,
+    "cryptoGrossCap": 3.0,
+    "stockGrossCap": 4.0,
+    "totalGrossCap": 4.25,
+    "sharedCryptoDailyLoss": 0.075,
+    "penguDrawdownProtection": 0.17,
+    "h48AndFunding": "PRESERVE_EXISTING_POLICY"
+  },
+  "globalHold": {
+    "active": true,
+    "action": "HOLD_PROTECTED",
+    "scope": "GLOBAL",
+    "mustRemainByteIdentical": true,
+    "digestSha256": "928a1c83b08c6445211639631ed69ccf7ea935741cb21786c41fc63e294322cf",
+    "clearGlobalHold": false
+  },
+  "venuePreflight": {
+    "signedAsterGets": 3,
+    "requireFlatPositions": true,
+    "requireNoOpenOrders": true,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0,
+    "protectExistingStops": true,
+    "stopOwnershipMustMatchPins": true
+  },
+  "staleRepair": {
+    "q102LegacyB8d": "RETIRE_VIA_FORMAL_ROOT_TRANSACTION",
+    "marginGuardLegacyC731": "RETIRE_VIA_FORMAL_ROOT_TRANSACTION",
+    "oldV4StopDiagnosticPin": "MUST_NOT_BE_PRESENT",
+    "manualSystemdCommands": false,
+    "dualRunnerForbidden": true
+  },
+  "verification": {
+    "postCutoverCycles": 3,
+    "requireFreshHeartbeat": true,
+    "requireStableRestartCounts": true,
+    "requireQ102Freshness": true,
+    "requireGlobalHoldDigestUnchanged": true,
+    "requireTradingMutationZero": true,
+    "requireRollbackEvidence": true
+  },
+  "rollback": {
+    "automaticOnFailure": true,
+    "requireFreshVenueReconciliationBeforeRestart": true,
+    "restoreCapturedPinsAndPlan": true,
+    "preserveGlobalHold": true
+  },
+  "safeguards": {
+    "failClosed": true,
+    "signedVenueReconciliation": true,
+    "protectExistingStops": true,
+    "noTestOrders": true,
+    "enforceSharedRisk": true,
+    "rollbackOnFailure": true
+  }
+}

@@ -1,0 +1,324 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const V12 = "deploy/systemd/disdex-v12-x1-all@.service";
+const PENGU = "deploy/systemd/disdex-pengu-dual-ls-v2@.service";
+const WIRING = "scripts/ops/root/disdex-current-runtime-wiring";
+const CUTOVER = "scripts/ops/root/disdex-idle-production-redeploy-20261001";
+const DIRECT_EXECUTOR = "lib/direct-trade-executor.ts";
+const V12_ENGINE = "lib/v12-live-execution-engine.ts";
+const PENGU_RUNNER = "lib/pengu-dual-ls-v2-portfolio-runner.ts";
+
+async function read(path) {
+  return readFile(path, "utf8");
+}
+
+function assertSoftSharedRiskHardMargin(source, label) {
+  assert.match(
+    source,
+    /^Wants=.*\bdisdex-shared-crypto-risk@%i\.service\b/m,
+    `${label} must pull Shared Risk in as a soft dependency`,
+  );
+  assert.match(
+    source,
+    /^After=.*\bdisdex-shared-crypto-risk@%i\.service\b.*\bdisdex-v12-v52-margin-guard@%i\.service\b/m,
+    `${label} must preserve start ordering behind Shared Risk and Margin Guard`,
+  );
+  assert.match(
+    source,
+    /^Wants=.*\bdisdex-v12-v52-margin-guard@%i\.service\b/m,
+    `${label} must pull Margin Guard in as a soft dependency`,
+  );
+  assert.doesNotMatch(
+    source,
+    /^Requires=.*\bdisdex-shared-crypto-risk@%i\.service\b/m,
+    `${label} must not stop/restart when Shared Risk transiently restarts`,
+  );
+  assert.doesNotMatch(
+    source,
+    /^Requires=.*\bdisdex-v12-v52-margin-guard@%i\.service\b/m,
+    `${label} must not hard-couple process lifecycle to Margin Guard`,
+  );
+}
+
+test("V12 and PENGU do not hard-couple process lifecycle to Shared Risk", async () => {
+  const [v12, pengu] = await Promise.all([read(V12), read(PENGU)]);
+  assertSoftSharedRiskHardMargin(v12, "V12");
+  assertSoftSharedRiskHardMargin(pengu, "PENGU");
+});
+
+test("runtime wiring installs the managed V12 and PENGU templates before daemon reload", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /prepare_managed_unit_templates_for_apply\(\)/);
+  assert.match(wiring, /deploy\/systemd\/disdex-v12-x1-all@\.service/);
+  assert.match(wiring, /\/etc\/systemd\/system\/disdex-v12-x1-all@\.service/);
+  assert.match(wiring, /deploy\/systemd\/disdex-pengu-dual-ls-v2@\.service/);
+  assert.match(wiring, /DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true/);
+  assert.match(wiring, /\/etc\/systemd\/system\/disdex-pengu-dual-ls-v2@\.service/);
+  const prepareStart = wiring.indexOf("prepare_managed_unit_templates_for_apply()");
+  const reload = wiring.indexOf("systemctl daemon-reload", prepareStart);
+  assert.ok(prepareStart >= 0 && reload > prepareStart, "managed templates must be installed before daemon-reload");
+});
+
+test("Shared Risk transient handling and lifecycle decoupling are both release artifacts", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /validate_release_artifacts/);
+  assert.match(wiring, /deploy\/systemd\/disdex-v12-x1-all@\.service/);
+  assert.match(wiring, /deploy\/systemd\/disdex-pengu-dual-ls-v2@\.service/);
+});
+
+
+test("cutover verifies the effective dependency graph and can restore prior templates", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /SYSTEMD_TEMPLATE_PATHS=/);
+  assert.match(cutover, /CUTOVER_SYSTEMD_TEMPLATE_BACKED_UP/);
+  assert.match(cutover, /"\$\{SYSTEMD_TEMPLATE_PATHS\[@\]\}"/);
+  assert.match(cutover, /cp -a -- "\$src" "\$p" \|\|.*ROLLBACK_CONTROL_RESTORE_FAILED/);
+  assert.match(cutover, /POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT/);
+  assert.match(cutover, /POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING/);
+  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_PRESENT/);
+  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_SOFT_DEPENDENCY_MISSING/);
+  assert.match(cutover, /CUTOVER_SHARED_RISK_SOURCE_INCOMPLETE/);
+  assert.match(cutover, /CUTOVER_SHARED_RISK_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED/);
+  assert.match(cutover, /name" == disdex-shared-crypto-risk && "\$restart_count" == 1/);
+});
+
+
+test("soft lifecycle dependencies preserve independent fail-closed order gates", async () => {
+  const [executor, v12, pengu, wiring] = await Promise.all([
+    read(DIRECT_EXECUTOR),
+    read(V12_ENGINE),
+    read(PENGU_RUNNER),
+    read(WIRING),
+  ]);
+  assert.match(wiring, /DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true/);
+  assert.match(executor, /runFreshMarginGuardBeforeExposureOrder\(symbol\)/);
+  assert.match(executor, /Margin Guard did not return a HEALTHY order-time result/);
+  assert.match(v12, /readSharedCryptoDailyRisk\(/);
+  assert.match(v12, /SHARED_CRYPTO_RISK:/);
+  assert.match(pengu, /readSharedCryptoDailyRisk\(/);
+  assert.match(pengu, /Shared crypto daily-risk state blocked PENGU entry/);
+});
+
+
+test("managed Production templates preserve the existing sandbox and launch contract", async () => {
+  const [v12, pengu] = await Promise.all([read(V12), read(PENGU)]);
+  for (const [label, source] of [["V12", v12], ["PENGU", pengu]]) {
+    assert.match(source, /^User=deploy$/m, `${label} user`);
+    assert.match(source, /^Group=deploy$/m, `${label} group`);
+    assert.match(source, /^NoNewPrivileges=true$/m, `${label} no-new-privileges`);
+    assert.match(source, /^PrivateTmp=true$/m, `${label} private tmp`);
+    assert.match(source, /^ProtectSystem=strict$/m, `${label} protect system`);
+    assert.match(source, /^ProtectHome=read-only$/m, `${label} protect home`);
+    assert.match(source, /^UMask=0077$/m, `${label} umask`);
+    assert.match(source, /^Restart=on-failure$/m, `${label} restart policy`);
+  }
+  assert.match(v12, /disdex-v12-mutual-exclusion-preflight\.sh %i runtime/);
+  assert.match(v12, /tsx scripts\/disdex-v12-x1-all-live-runner\.ts --daemon/);
+  assert.match(v12, /^RestartPreventExitStatus=2$/m);
+  assert.match(pengu, /tsx scripts\/disdex-pengu-dual-ls-v2-live-runner\.ts --daemon/);
+});
+
+
+test("cutover waits for fresh safety daemons before starting trading runners", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /wait_safety_daemons_ready\(\)/);
+  assert.match(cutover, /risk\.get\("sourceComplete"\) is not True/);
+  assert.match(cutover, /now-risk_at>120000/);
+  assert.match(cutover, /guard\.get\("stage"\)!="HEALTHY"/);
+  assert.match(cutover, /guard\.get\("ordersAllowed"\) is not True/);
+  assert.match(cutover, /now-guard_at>120000/);
+  assert.match(cutover, /required_consecutive=2/);
+
+  const sharedStart = cutover.indexOf('systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"');
+  const marginStart = cutover.indexOf('systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"');
+  const safetyWait = cutover.indexOf("wait_safety_daemons_ready", Math.max(sharedStart, marginStart));
+  const coreStart = cutover.indexOf('for name in "${CORE[@]}"', safetyWait);
+  assert.ok(sharedStart >= 0 && marginStart >= 0, "safety daemons must be explicitly started");
+  assert.ok(safetyWait > sharedStart && safetyWait > marginStart, "freshness gate must run after both safety daemons start");
+  assert.ok(coreStart > safetyWait, "core trading runners must start only after safety snapshots are fresh and HEALTHY");
+});
+
+
+test("cutover refreshes current runner heartbeats before enabling watchdog automation", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_NOT_HEALTHY/);
+  assert.match(cutover, /for heartbeat_attempt in \$\(seq 1 24\)/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_TIMEOUT/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_ALL_HEALTHY/);
+  for (const heartbeat of [
+    "v12-x1-all.json",
+    "pengu-v8.json",
+    "quality102-causal-v1.json",
+    "v52.json",
+    "fet-brk48-residual.json",
+    "hype-trend-long.json",
+    "idle-priority-short.json",
+  ]) assert.match(cutover, new RegExp(heartbeat.replaceAll(".", "\\.")));
+
+  const refresh = cutover.indexOf('CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS');
+  const automation = cutover.indexOf('CUTOVER_POSTSTART_WIRING_BEGIN');
+  assert.ok(refresh >= 0 && automation > refresh, "runner heartbeats must be current before watchdog/recovery automation is enabled");
+});
+
+
+test("cutover permits only one diagnosed healthy historical V12 restart", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /name" == disdex-v12-x1-all && "\$restart_count" == 1/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_NOT_CURRENTLY_HEALTHY/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_STATE_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_STATE_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_MANUAL_REVIEW_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_PENDING_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_SINGLE_RESTART_ACCEPTED/);
+  assert.doesNotMatch(cutover, /restart_count" -le [2-9]/);
+});
+
+
+test("cutover permits only one diagnosed healthy historical Q102 restart", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /name" == disdex-quality102-causal-v1 && "\$restart_count" == 1/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_NOT_CURRENTLY_HEALTHY/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_STATE_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_STATE_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_MANUAL_REVIEW_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_PENDING_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_SINGLE_RESTART_ACCEPTED/);
+});
+
+
+test("cutover waits for the exact six-sleeve shared-risk contract before trader startup", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  for (const strategy of [
+    "V12_X1.00_ALL",
+    "PENGU_DUAL_LS_V2_FINAL",
+    "QUALITY102_CAUSAL_V1",
+    "FET_BRK48_RESIDUAL",
+    "HYPE_LONG",
+    "IDLE_PRIORITY_SHORT",
+  ]) {
+    assert.match(cutover, new RegExp(strategy));
+  }
+  assert.match(cutover, /set\(risk\.get\("strategyIds"\) or \[\]\) != expected_strategies/);
+  const safety = cutover.indexOf("wait_safety_daemons_ready");
+  const traders = cutover.indexOf('systemctl enable --now "$name@$TARGET_SHA.service"');
+  assert.ok(safety >= 0 && traders > safety);
+});
+
+
+test("cutover blocks only active pending reservations and fails closed on malformed registry", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /pending\.get\("entries"\)/);
+  assert.match(cutover, /if not isinstance\(entries,list\)/);
+  assert.match(cutover, /active_statuses=\{"PENDING","SUBMITTED","UNKNOWN"\}/);
+  assert.match(cutover, /valid_statuses=active_statuses\|\{"RELEASED"\}/);
+  assert.match(cutover, /CUTOVER_PENDING_EXPOSURE_MALFORMED/);
+  assert.match(cutover, /CUTOVER_PENDING_EXPOSURE_PRESENT/);
+  assert.doesNotMatch(cutover, /isinstance\(entries,dict\) and entries/);
+});
+
+
+test("pre-cutover Margin Guard state must be fresh within one poll plus grace", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /guard_at=int\(guard\.get\("checkedAt"\) or 0\)/);
+  assert.match(cutover, /now-guard_at>360_000/);
+  assert.match(cutover, /CUTOVER_MARGIN_STALE/);
+});
+
+
+test("cutover rebinds stock reference to current release and preserves target on rollback mismatch", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /restart_stock_reference_current\(\)/);
+  assert.match(cutover, /for attempt in \$\(seq 1 15\)/);
+  assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /restart_stock_reference_current POSTDEPLOY/);
+  assert.match(cutover, /restart_stock_reference_current ROLLBACK/);
+  const rollback = cutover.slice(cutover.indexOf("rollback() {"), cutover.indexOf('if [[ "$ROLLBACK_ONLY" == true ]]'));
+  assert.match(rollback, /rollback_hold ROLLBACK_STOCK_REFERENCE_FAILED/);
+  assert.doesNotMatch(rollback, /rm -rf .*RELEASE/);
+});
+
+test("runtime wiring removes the obsolete fixed V56 stock-reference release pin", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /disdex-stock-reference-free\.service\.d\/zzzz-v56-release\.conf/);
+  assert.match(wiring, /DISDEX_STOCK_REFERENCE_LEGACY_RELEASE_PIN_REMOVED/);
+});
+
+
+test("successful cutover repoints previous to the immediate prior Production release", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /previous_tmp="\$ROOT\/\.previous-\$REQUEST_ID"/);
+  assert.match(cutover, /ln -s "\$OLD_RELEASE" "\$previous_tmp"/);
+  assert.match(cutover, /POSTDEPLOY_PREVIOUS_UPDATED=PASS/);
+});
+
+
+test("cutover recovers only a flat known Idle rate-budget review after venue-flat proof", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /recover_old_idle_known_rate_budget_state\(\)/);
+  assert.match(cutover, /IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\\d\+/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_UNKNOWN_MANUAL_REVIEW/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_POSITION_PRESENT/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_PENDING_PRESENT/);
+  assert.match(cutover, /CUTOVER_KNOWN_IDLE_BENIGN_INACTIVE_ACCEPTED/);
+  const accountMode = cutover.indexOf('classify_cutover_account_mode "$OLD_RELEASE"');
+  const recovery = cutover.indexOf('IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"');
+  const sharedSafe = cutover.indexOf("require_shared_safe", recovery);
+  assert.ok(accountMode >= 0 && recovery > accountMode, "read-only account classification must precede any Idle state recovery");
+  assert.ok(sharedSafe > recovery, "shared safety must be rechecked after the exact benign state recovery");
+});
+
+test("cutover gates every trading startup on observed shared Aster rate-budget headroom", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_PATH="\$SHARED\/aster-rate-budget\.json"/);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS=500/);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE=3/);
+  assert.match(cutover, /state\.get\("schema"\)!="disdex-aster-rate-budget\/v1"/);
+  assert.match(cutover, /if "nextAllowedAt" not in state:/);
+  assert.match(cutover, /next_allowed_at=float\(state\["nextAllowedAt"\]\)/);
+  assert.match(cutover, /cooldown_until=float\(state\["cooldownUntil"\]\) if "cooldownUntil" in state else 0\.0/);
+  assert.match(cutover, /math\.isfinite\(next_allowed_at\)/);
+  assert.match(cutover, /math\.isfinite\(cooldown_until\)/);
+  assert.match(cutover, /blocked_until=max\(next_allowed_at,cooldown_until\)/);
+  assert.match(cutover, /os\.path\.exists\(lock_path\) or os\.path\.exists\(recovery_lock_path\)/);
+  assert.match(cutover, /wait_aster_rate_budget_quiet "safety-daemons"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "\$name"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "disdex-hype-long"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "disdex-idle-priority-short"/);
+  assert.match(cutover, /CUTOVER_TRADING_START_EPOCH="\$\(date \+%s\)"/);
+  assert.match(cutover, /journalctl -u "\$unit" --since "@\$CUTOVER_TRADING_START_EPOCH"/);
+  assert.match(cutover, /CUTOVER_STARTUP_RATE_BUDGET_SATURATION=0/);
+  assert.match(cutover, /exit 48/);
+  assert.doesNotMatch(cutover, /start_trading_unit_staggered/);
+});
+
+
+test("monitor timers tolerate the transient active/running window but fail closed if they never re-arm", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /for attempt in \$\(seq 1 15\)/);
+  assert.match(wiring, /DISDEX_MONITOR_TIMER_BUSY_WAIT/);
+  assert.match(wiring, /DISDEX_MONITOR_TIMER_ACTIVATING_WAIT/);
+  assert.match(wiring, /required monitor timer failed to arm/);
+});
+
+
+test("active V12 cutover and rollback require code parity and read-only exchange/state reconciliation", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /V12_ACTIVE_MIGRATION_CODE_PARITY/);
+  assert.match(cutover, /CUTOVER_ACCOUNT_MODE=V12_ACTIVE/);
+  assert.match(cutover, /scripts\/disdex-v12-active-state-sha-migrate\.ts/);
+  assert.match(cutover, /--verify-only/);
+  assert.match(cutover, /TRADING_TARGET_STARTED=1/);
+  const rollback = cutover.slice(cutover.indexOf("rollback() {"), cutover.indexOf('if [[ "$ROLLBACK_ONLY" == true ]]'));
+  assert.match(rollback, /--verify-only[\s\S]*?rollback_mode=V12_ACTIVE/);
+  assert.match(rollback, /if ! migrate_rollback_state_lineage/);
+  assert.match(cutover, /ROLLBACK_CURRENT_FINANCIAL_STATE_PRESERVED/);
+  assert.match(rollback, /ROLLBACK_RELEASE_RESTORED_EXPOSURE_UNVERIFIED_RUNNERS_STOPPED/);
+  assert.match(rollback, /ROLLBACK_RELEASE_RESTORED_STATE_UNVERIFIED_RUNNERS_STOPPED/);
+  assert.match(rollback, /if ! verify_rollback_runtime/);
+});

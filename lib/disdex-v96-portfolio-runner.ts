@@ -197,6 +197,11 @@ export class DisDexV96PortfolioRunner {
             };
         }
         if (killSwitch) {
+            // Legacy V96 never opts in to the STABLE4 protective HOLD parser.
+            // Guard that strict historical FLATTEN-only state schema at runtime.
+            if (killSwitch.action !== "FLATTEN_MANAGED") {
+                throw new Error("V96_KILL_ACTION_NOT_LEGACY_FLATTEN");
+            }
             state.killSwitch = {
                 active: true,
                 action: killSwitch.action,

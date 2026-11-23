@@ -1,0 +1,115 @@
+import json, os, time, urllib.parse, urllib.request
+from pathlib import Path
+HOUR=3_600_000; WARM=1778803200000; START=1780272000000; END=1786320000000
+VENUE=os.environ['PENGU_CROSS_VENUE'].upper(); OUT=Path(os.environ.get('PENGU_LOCAL_DATA_DIR','.research-state/cross-input')); OUT.mkdir(parents=True,exist_ok=True)
+def get(url,params,tries=6):
+    q=url+'?'+urllib.parse.urlencode(params); last=None
+    for i in range(tries):
+        try:
+            req=urllib.request.Request(q,headers={'Accept':'application/json','User-Agent':'DisDex-PENGU-CrossVenue/3.2'})
+            with urllib.request.urlopen(req,timeout=30) as r:return json.loads(r.read().decode())
+        except Exception as e:last=e;time.sleep(.5*(i+1))
+    raise RuntimeError(f'{VENUE} request failed {q}: {last}')
+def cobj(r):
+    ts=int(r[0]); return {'openTime':ts,'open':float(r[1]),'high':float(r[2]),'low':float(r[3]),'close':float(r[4]),'volume':float(r[5]),'closeTime':ts+HOUR-1}
+def okx_candles(inst):
+    by={};cursor=END
+    for _ in range(150):
+        p=get('https://www.okx.com/api/v5/market/history-candles',{'instId':inst,'bar':'1H','after':str(cursor),'limit':'100'}); rows=p.get('data') or []
+        if not rows:break
+        vals=[]
+        for r in rows:
+            c=cobj(r);vals.append(c['openTime'])
+            if WARM<=c['openTime']<END and (len(r)<9 or str(r[8])=='1'):by[c['openTime']]=c
+        old=min(vals);cursor=old-1
+        if old<=WARM:break
+        time.sleep(.05)
+    return sorted(by.values(),key=lambda x:x['openTime'])
+def okx_funding(inst):
+    by={};cursor=END
+    for _ in range(20):
+        p=get('https://www.okx.com/api/v5/public/funding-rate-history',{'instId':inst,'after':str(cursor),'limit':'400'}); rows=p.get('data') or []
+        if not rows:break
+        vals=[]
+        for r in rows:
+            ts=int(r['fundingTime']);vals.append(ts)
+            if START<=ts<END:by[ts]={'fundingTime':ts,'fundingRate':float(r.get('realizedRate') or r['fundingRate'])}
+        old=min(vals);cursor=old-1
+        if old<=START:break
+    return sorted(by.values(),key=lambda x:x['fundingTime'])
+def bitget_page(symbol,start,end,limit=200):
+    p=get('https://api.bitget.com/api/v2/mix/market/history-candles',{'symbol':symbol,'productType':'USDT-FUTURES','granularity':'1H','startTime':str(start),'endTime':str(end),'limit':str(limit)})
+    if p.get('code')!='00000':raise RuntimeError(str(p)[:500])
+    return p.get('data') or []
+def bitget_candles(symbol):
+    by={};cursor=END-1
+    for _ in range(120):
+        chunk_start=max(WARM,cursor-199*HOUR); rows=bitget_page(symbol,chunk_start,cursor,200)
+        if not rows:
+            cursor=chunk_start-1
+            if cursor<WARM:break
+            continue
+        vals=[]
+        for r in rows:
+            c=cobj(r);vals.append(c['openTime'])
+            if WARM<=c['openTime']<END:by[c['openTime']]=c
+        old=min(vals);cursor=old-1
+        if old<=WARM:break
+        time.sleep(.05)
+    required=range(WARM,END,HOUR); missing=[t for t in required if t not in by]
+    for t in missing:
+        found=False
+        for pad in (2,4,12,24):
+            rows=bitget_page(symbol,max(WARM,t-pad*HOUR),t+pad*HOUR,min(100,2*pad+5))
+            for r in rows:
+                c=cobj(r)
+                if WARM<=c['openTime']<END:by[c['openTime']]=c
+                if c['openTime']==t:found=True
+            if found:break
+            time.sleep(.05)
+        if not found:
+            rows=bitget_page(symbol,t,t+HOUR,20)
+            for r in rows:
+                c=cobj(r)
+                if WARM<=c['openTime']<END:by[c['openTime']]=c
+                if c['openTime']==t:found=True
+        if not found: raise RuntimeError(f'exact Bitget candle unavailable at {t}')
+    return sorted(by.values(),key=lambda x:x['openTime'])
+def bitget_funding(symbol):
+    by={}
+    for page in range(1,80):
+        p=get('https://api.bitget.com/api/v2/mix/market/history-fund-rate',{'symbol':symbol,'productType':'USDT-FUTURES','pageSize':'100','pageNo':str(page)});rows=p.get('data') or []
+        if not rows:break
+        oldest=min(int(r['fundingTime']) for r in rows)
+        for r in rows:
+            ts=int(r['fundingTime'])
+            if START<=ts<END:by[ts]={'fundingTime':ts,'fundingRate':float(r['fundingRate'])}
+        if oldest<=START:break
+        time.sleep(.05)
+    return sorted(by.values(),key=lambda x:x['fundingTime'])
+def gate_candles(contract):
+    by={};cursor=WARM;max_span=1900*HOUR
+    while cursor<END:
+        chunk_end=min(END,cursor+max_span)
+        rows=get('https://api.gateio.ws/api/v4/futures/usdt/candlesticks',{'contract':contract,'from':str(cursor//1000),'to':str((chunk_end-1)//1000),'interval':'1h','timezone':'utc0'})
+        for r in rows:
+            ts=int(float(r['t']))*1000
+            if WARM<=ts<END:by[ts]={'openTime':ts,'open':float(r['o']),'high':float(r['h']),'low':float(r['l']),'close':float(r['c']),'volume':float(r.get('v') or r.get('sum') or 0),'closeTime':ts+HOUR-1}
+        cursor=chunk_end;time.sleep(.1)
+    return sorted(by.values(),key=lambda x:x['openTime'])
+def gate_funding(contract):
+    rows=get('https://api.gateio.ws/api/v4/futures/usdt/funding_rate',{'contract':contract,'from':str(START//1000),'to':str((END-1)//1000),'limit':'1000'})
+    by={}
+    for r in rows:
+        ts=int(r['t'])*1000
+        if START<=ts<END:by[ts]={'fundingTime':ts,'fundingRate':float(r['r'])}
+    return sorted(by.values(),key=lambda x:x['fundingTime'])
+if VENUE=='OKX':pengu=okx_candles('PENGU-USDT-SWAP');btc=okx_candles('BTC-USDT-SWAP');funding=okx_funding('PENGU-USDT-SWAP')
+elif VENUE=='BITGET':pengu=bitget_candles('PENGUUSDT');btc=bitget_candles('BTCUSDT');funding=bitget_funding('PENGUUSDT')
+elif VENUE=='GATE':pengu=gate_candles('PENGU_USDT');btc=gate_candles('BTC_USDT');funding=gate_funding('PENGU_USDT')
+else:raise SystemExit('unsupported venue')
+ps={x['openTime'] for x in pengu};bs={x['openTime'] for x in btc};missing=[t for t in range(START,END,HOUR) if t not in ps or t not in bs]
+if missing:raise RuntimeError(f'missing evaluation hourly bars={len(missing)} first={missing[:10]}')
+if not funding:raise RuntimeError('no venue funding rows')
+for name,obj in [('PENGUUSDT-candles.json',pengu),('BTCUSDT-candles.json',btc),('PENGUUSDT-funding.json',funding)]: (OUT/name).write_text(json.dumps(obj))
+meta={'venue':VENUE,'warmMs':WARM,'startMs':START,'endMs':END,'penguRows':len(pengu),'btcRows':len(btc),'fundingRows':len(funding),'evaluationMissing':0,'repairPolicy':'exact venue refetch only; no interpolation'};(OUT/'meta.json').write_text(json.dumps(meta,indent=2));print('CROSS_DATA_V3='+json.dumps(meta,separators=(',',':')))

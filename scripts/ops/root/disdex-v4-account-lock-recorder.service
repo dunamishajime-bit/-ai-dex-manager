@@ -1,0 +1,27 @@
+[Unit]
+Description=DisDex read-only Aster shared account-lock holder evidence (V4)
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /usr/local/libexec/disdex-v4-account-lock-recorder.py
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ReadWritePaths=/var/lib/disdex/v12-v4
+ReadOnlyPaths=/var/lib/disdex/shared
+UMask=0077
+MemoryMax=64M
+CPUQuota=5%
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,678 @@
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import disdex_v52_aster_only_legacy_engine as legacy
+from disdex_strict_portfolio_planner import (
+    EPSILON,
+    STRICT_CAPS,
+    assert_strict_live_configuration,
+    plan_v52_stock_capacity,
+    self_test as strict_planner_self_test,
+    validate_gross_snapshot,
+)
+from disdex_pending_exposure_registry import aggregate_pending
+
+base = legacy.base
+STRATEGY_ID = legacy.STRATEGY_ID
+LIVE_ACK = legacy.LIVE_ACK
+STATE_SCHEMA_VERSION = legacy.STATE_SCHEMA_VERSION
+V11_SLOT = legacy.V11_SLOT
+V50_SLOT = legacy.V50_SLOT
+V50_WINDOWS = legacy.V50_WINDOWS
+V50_MIN_ENTRY_BASIS_BPS = legacy.V50_MIN_ENTRY_BASIS_BPS
+V50_MAX_HOLDING_HOURS = legacy.V50_MAX_HOLDING_HOURS
+V50_MAX_DAILY_TRADES = legacy.V50_MAX_DAILY_TRADES
+V50_CONVERGENCE_BPS = legacy.V50_CONVERGENCE_BPS
+V50_BASIS_STOP_MULTIPLE = legacy.V50_BASIS_STOP_MULTIPLE
+V50_MAX_ADVERSE_BASIS_MOVE_BPS = legacy.V50_MAX_ADVERSE_BASIS_MOVE_BPS
+V50_MAX_ROUND_TRIP_COST_BPS = legacy.V50_MAX_ROUND_TRIP_COST_BPS
+V50_MIN_NET_EDGE_BPS = legacy.V50_MIN_NET_EDGE_BPS
+transient_reference_error = legacy.transient_reference_error
+
+
+class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
+    """V52 legacy execution/reconciliation with the strict BT #33404708902 planner gate."""
+
+    def __init__(self, mode: str):
+        super().__init__(mode)
+        self.crypto_gross_cap = STRICT_CAPS.crypto_gross
+        self.stock_gross_cap = STRICT_CAPS.stock_gross
+        self.portfolio_gross_cap = STRICT_CAPS.total_gross
+        if self.live:
+            assert_strict_live_configuration()
+
+    def save(self) -> None:
+        # Additional state release identity consumed only by cross-runner V4
+        # accounting. Never replace missing release evidence with a guessed SHA.
+        sha = (os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+        if len(sha) == 40 and all(c in "0123456789abcdef" for c in sha):
+            self.state["runtimeCommitSha"] = sha
+        super().save()
+
+    def _refresh_idle_admission_heartbeat(self) -> None:
+        self.state["idleAdmissionDecisionTs"] = (base.now_ms() // 3_600_000) * 3_600_000
+        self.save()
+
+    def idle_tick(self, prepared: dict) -> None:
+        started=base.now_ms()
+        super().idle_tick(prepared)
+        # V52 is a stock sleeve, but Idle Priority is a 24/7 crypto sleeve.
+        # Even while US equities are closed (or a safe prelock skip is used),
+        # publish a current explicit "no V52 acceptance this hour" heartbeat so
+        # Idle can prove Formal > Idle priority without depending on stale stock
+        # session state.
+        self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared,'IDLE_DECISION_COMPLETE')
+
+    def tick(self, prepared: dict | None = None) -> None:
+        started=base.now_ms()
+        super().tick(prepared)
+        self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared or {},'FULL_DECISION_COMPLETE')
+
+    def _publish_completed_tick(self,started: int,prepared: dict,stage: str) -> None:
+        # Opt in only when the new release and systemd tick write path are
+        # deployed together. Old Runner/pin monitoring remains legacy.
+        if not self.live or not base.bool_env('DISDEX_V52_REAL_TICK_ENABLED',False):
+            return
+        from disdex_runner_tick_heartbeat import write_completed_runner_tick
+        sha=os.getenv('DISDEX_RELEASE_SHA','')
+        if os.getenv('DISDEX_RUNTIME_COMMIT_SHA')!=sha:
+            raise RuntimeError('V52_TICK_RUNTIME_SHA_MISMATCH')
+        kill=self.kill_switch()
+        if kill:status,reason='held','KILL_SWITCH_'+str(kill.get('action') or 'ACTIVE')
+        elif prepared.get('marketClosed'):status,reason='market-closed','US_EQUITY_SESSION_CLOSED'
+        elif prepared.get('quoteStaleLocalHold'):status,reason='held','STOCK_REFERENCE_STALE'
+        elif prepared.get('rateBudgetDeferred'):status,reason='deferred','ASTER_RATE_BUDGET_DEFERRED'
+        else:status,reason='completed',stage
+        # This marker certifies processing only. Actual new-order authority is
+        # independently determined by the operator and final preorder gates.
+        write_completed_runner_tick(root=Path(os.getenv('DISDEX_RUNNER_TICK_HEARTBEAT_ROOT','/var/lib/disdex/runner-health')),
+            runner_id='V52',sha=sha,service_unit='disdex-v52-aster-only@'+sha+'.service',
+            started_at=started,completed_at=base.now_ms(),status=status,reason=reason,new_orders_allowed=False)
+
+    def assert_gross_safe(self, snapshot=None) -> None:
+        row = snapshot or self.gross_snapshot()
+        validate_gross_snapshot(row)
+
+    def _pending_adjusted_snapshot(self, snapshot: dict) -> dict:
+        pending = aggregate_pending() if self.live else {"cryptoGross": 0.0, "stockGross": 0.0}
+        return {
+            **snapshot,
+            "cryptoGross": snapshot["cryptoGross"] + float(pending["cryptoGross"]),
+            "stockGross": snapshot["stockGross"] + float(pending["stockGross"]),
+            "totalGross": snapshot["totalGross"] + float(pending["cryptoGross"]) + float(pending["stockGross"]),
+            "pendingExposure": pending,
+        }
+
+    def _v12_dynamic_marked_gross(self, snapshot: dict) -> float:
+        if not self.live:
+            return 0.0
+        state_path = os.getenv("V12_X1_ALL_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json")
+        raw = base.read_json(Path(state_path), None)
+        if raw is None:
+            return 0.0
+        if not isinstance(raw, dict) or raw.get("strategyId") != "V12_X1.00_ALL":
+            raise RuntimeError("V12_DYNAMIC_STATE_IDENTITY_INVALID")
+        if raw.get("pending") is not None:
+            raise RuntimeError("V12_DYNAMIC_STATE_PENDING_REQUIRES_RECONCILIATION")
+        state_rows = raw.get("activePositions")
+        if state_rows is None:
+            state_rows = [raw["active"]] if isinstance(raw.get("active"), dict) else []
+        if not isinstance(state_rows, list):
+            raise RuntimeError("V12_DYNAMIC_STATE_ACTIVE_POSITIONS_INVALID")
+        venue_rows = self.aster.positions()
+        dynamic_notional = 0.0
+        for state_row in state_rows:
+            if not isinstance(state_row, dict):
+                raise RuntimeError("V12_DYNAMIC_STATE_POSITION_INVALID")
+            dynamic_qty = max(0.0, base.finite(state_row.get("dynamicQuantity")))
+            if dynamic_qty <= EPSILON:
+                continue
+            symbol = str(state_row.get("symbol") or "").upper()
+            total_qty = max(0.0, base.finite(state_row.get("quantity")))
+            base_qty = max(0.0, base.finite(state_row.get("baseQuantity")))
+            if not symbol or total_qty <= 0 or abs(base_qty + dynamic_qty - total_qty) > max(1e-8, total_qty * 0.001):
+                raise RuntimeError("V12_DYNAMIC_STATE_QUANTITY_INVALID")
+            matches = [
+                row for row in venue_rows
+                if str(row.get("symbol") or "").upper() == symbol
+                and abs(base.finite(row.get("positionAmt"))) > EPSILON
+            ]
+            if len(matches) != 1:
+                raise RuntimeError(f"V12_DYNAMIC_VENUE_POSITION_MISMATCH:{symbol}")
+            actual_qty = abs(base.finite(matches[0].get("positionAmt")))
+            if abs(actual_qty - total_qty) > max(1e-8, total_qty * 0.02):
+                raise RuntimeError(f"V12_DYNAMIC_VENUE_QUANTITY_MISMATCH:{symbol}")
+            mark = base.finite(matches[0].get("markPrice") or matches[0].get("entryPrice"))
+            if mark <= 0:
+                raise RuntimeError(f"V12_DYNAMIC_VENUE_MARK_INVALID:{symbol}")
+            dynamic_notional += dynamic_qty * mark
+        equity = base.finite(snapshot.get("equityUsd"))
+        if equity <= 0:
+            raise RuntimeError("V12_DYNAMIC_EQUITY_INVALID")
+        return max(0.0, dynamic_notional / equity)
+
+    def available_slot_gross(self, slot: str):
+        _, snapshot = super().available_slot_gross(slot)
+        snapshot = self._pending_adjusted_snapshot(snapshot)
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        provisional = min(
+            slot_cap,
+            max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
+            max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
+        )
+        max_slippage_bps = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
+        strict_plan = plan_v52_stock_capacity(
+            snapshot,
+            provisional,
+            slot_cap,
+            candidate_worst_case_gross=provisional * (1.0 + max_slippage_bps / 10_000.0),
+        )
+        accepted = min(max(0.0, provisional), strict_plan["acceptedGross"])
+        return accepted, {
+            **snapshot,
+            "v12DynamicReclaimGross": 0.0,
+            "strictPortfolioPlanningGross": snapshot,
+            "strictPortfolioPlan": strict_plan,
+        }
+
+    def _prepare_idle_residual_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        if not self.live:
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        if requested <= EPSILON:
+            return 0.0
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(os.getcwd(), "node_modules", ".bin", "tsx")
+        script = os.getenv(
+            "DISDEX_IDLE_RESIDUAL_CORE_PREEMPT_SCRIPT",
+            "scripts/disdex-idle-residual-long-core-preempt.ts",
+        )
+        cause = f"V52_CORE_IDLE_RESIDUAL|{slot}|{base.now_ms()}|{requested:.12f}"
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller", "V52_CORE",
+                "--shared-lock-held", "true",
+                "--cause", cause,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("IDLE_RESIDUAL_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "blocked":
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_BLOCKED:{payload.get('message')}")
+        if status not in {"reduced", "not-needed"}:
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+        if status == "reduced":
+            self.log(
+                "idle-residual-preempted-for-stock",
+                slot=slot,
+                requestedGross=requested,
+                preemption=payload,
+            )
+        return requested
+
+    def _prepare_fet_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        if not self.live:
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        if requested <= EPSILON:
+            return 0.0
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(
+            os.getcwd(), "node_modules", ".bin", "tsx"
+        )
+        script = os.getenv(
+            "DISDEX_FET_CORE_PREEMPT_SCRIPT",
+            "scripts/disdex-fet-brk48-core-preempt.ts",
+        )
+        cause = f"V52_CORE|{slot}|{base.now_ms()}|{requested:.12f}"
+        state_path = os.getenv("FET_BRK48_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json")
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller",
+                "V52_CORE",
+                "--shared-lock-held",
+                "true",
+                "--cause",
+                cause,
+                "--state-path",
+                state_path,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("FET_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "blocked":
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_BLOCKED:{payload.get('message')}")
+        if status not in {"reduced", "not-needed"}:
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+        if status == "reduced":
+            self.log(
+                "v52-fet-residual-preempted-for-stock",
+                slot=slot,
+                requestedGross=requested,
+                preemption=payload,
+            )
+        return requested
+
+    def _prepare_v12_dynamic_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        if not self.live:
+            return target_gross
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        requested = min(max(0.0, base.finite(target_gross)), slot_cap)
+        if requested <= EPSILON:
+            return 0.0
+        for attempt in range(3):
+            snapshot = self.gross_snapshot()
+            requested = min(
+                requested,
+                max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
+            )
+            required = max(
+                0.0,
+                snapshot["totalGross"] + requested - self.portfolio_gross_cap,
+            )
+            if required <= max(EPSILON, self.gross_tolerance):
+                return requested
+            reclaimable = self._v12_dynamic_marked_gross(snapshot)
+            if reclaimable <= max(EPSILON, self.gross_tolerance):
+                return min(
+                    requested,
+                    max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
+                )
+            trim_gross = min(required, reclaimable)
+            tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(
+                os.getcwd(), "node_modules", ".bin", "tsx"
+            )
+            script = os.getenv(
+                "DISDEX_V12_DYNAMIC_TRIM_SCRIPT",
+                "scripts/disdex-v12-dynamic-residual-trim.ts",
+            )
+            cause = f"V52_CORE|{slot}|{base.now_ms()}|{attempt}|{requested:.12f}"
+            state_path = os.getenv("V12_X1_ALL_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json")
+            result = subprocess.run(
+                [
+                    tsx,
+                    script,
+                    "--caller",
+                    "V52_CORE",
+                    "--shared-lock-held",
+                    "true",
+                    "--gross",
+                    f"{trim_gross:.12f}",
+                    "--equity",
+                    f"{snapshot['equityUsd']:.12f}",
+                    "--cause",
+                    cause,
+                    "--state-path",
+                    state_path,
+                ],
+                cwd=os.getcwd(),
+                env=os.environ.copy(),
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+            lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+            if result.returncode != 0 or not lines:
+                detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+                raise RuntimeError(f"V12_DYNAMIC_TRIM_HELPER_FAILED:rc={result.returncode}:{detail}")
+            try:
+                payload = json.loads(lines[-1])
+            except json.JSONDecodeError as error:
+                raise RuntimeError("V12_DYNAMIC_TRIM_HELPER_INVALID_JSON") from error
+            if payload.get("status") == "blocked":
+                raise RuntimeError(
+                    f"V12_DYNAMIC_TRIM_HELPER_BLOCKED:{payload.get('message')}"
+                )
+            if payload.get("status") != "reduced" or base.finite(payload.get("trimmedGross")) <= EPSILON:
+                break
+            self.log(
+                "v52-v12-dynamic-reduced-for-stock",
+                slot=slot,
+                attempt=attempt,
+                requestedGross=requested,
+                trim=payload,
+            )
+        final = self.gross_snapshot()
+        return min(
+            requested,
+            max(0.0, self.stock_gross_cap - final["stockGross"]),
+            max(0.0, self.portfolio_gross_cap - final["totalGross"]),
+        )
+
+    def _prepare_hype_zec_for_stock_entry(self, slot: str, candidate: dict, target_gross: float) -> float:
+        """Release only verified HYPE/ZEC sidecar capacity for a stock entry.
+
+        The TypeScript helper runs under the Python runner's already-held
+        account-lock assertion. It is deliberately opt-in; when disabled or
+        unable to prove the sidecars are the sole cause, the normal strict
+        planner remains the final fail-closed gate.
+        """
+        if not self.live or not base.bool_env("DISDEX_HYPE_ZEC_PREEMPTION_ENABLED", False):
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        symbol = str(candidate.get("symbol") or candidate.get("ticker") or candidate.get("asset") or "").strip().upper()
+        if requested <= EPSILON or not symbol:
+            return requested
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(os.getcwd(), "node_modules", ".bin", "tsx")
+        script = os.getenv("DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT", "scripts/disdex-hype-zec-core-preempt.ts")
+        strategy = V11_SLOT if slot == V11_SLOT else V50_SLOT
+        cause = f"V52_CORE_HYPE_ZEC|{slot}|{symbol}|{base.now_ms()}|{requested:.12f}"
+        snapshot = self.gross_snapshot()
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller", "V52_CORE",
+                "--shared-lock-held", "true",
+                "--candidate-strategy", strategy,
+                "--candidate-symbol", symbol,
+                "--candidate-gross", f"{requested:.12f}",
+                "--equity", f"{base.finite(snapshot.get('equityUsd')):.12f}",
+                "--signal-ts", str(base.now_ms()),
+                "--cause", cause,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"HYPE_ZEC_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("HYPE_ZEC_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "reduced":
+            self.log("hype-zec-sidecar-preempted-for-stock", slot=slot, symbol=symbol, requestedGross=requested, preemption=payload)
+            return requested
+        if status in {"not-needed", "blocked"}:
+            self.log("hype-zec-sidecar-preemption-not-applied", slot=slot, symbol=symbol, requestedGross=requested, preemption=payload)
+            return requested
+        raise RuntimeError(f"HYPE_ZEC_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+
+    def require_fresh_preorder_margin_guard(self) -> None:
+        if not self.live:
+            return
+        if not base.bool_env("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", False):
+            raise RuntimeError("V52 LIVE requires fresh pre-order Margin Guard")
+        python = os.getenv("DISDEX_PYTHON_BIN") or sys.executable or "python3"
+        script = os.getenv("DISDEX_V96_V52_MARGIN_GUARD_SCRIPT") or "scripts/disdex_v96_v52_margin_guard_runtime.py"
+        result = subprocess.run(
+            [python, script, "--mode", "live", "--preorder-check"],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"V52 fresh pre-order Margin Guard failed: rc={result.returncode} stderr={result.stderr.strip()}")
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if not lines:
+            raise RuntimeError("V52 fresh pre-order Margin Guard returned no result")
+        try:
+            decision = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("V52 fresh pre-order Margin Guard returned invalid JSON") from error
+        if decision.get("stage") != "HEALTHY" or decision.get("ordersAllowed") is not True:
+            raise RuntimeError(f"V52 fresh pre-order Margin Guard blocked exposure: {decision}")
+
+    def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        # Set only for a block that happened before any V52 order was submitted.
+        # The tick loop may safely retry such a decision inside the same entry window.
+        self._v52_last_entry_blocked_before_order = False
+        snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
+        self.assert_gross_safe(snapshot)
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        max_slippage_bps = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
+        strict_plan = plan_v52_stock_capacity(
+            snapshot, target_gross, slot_cap,
+            candidate_worst_case_gross=target_gross * (1.0 + max_slippage_bps / 10_000.0),
+        )
+        if strict_plan["status"] != "planned" or target_gross > strict_plan["acceptedGross"] + EPSILON:
+            self.log(
+                "v52-strict-portfolio-capacity-blocked",
+                slot=slot,
+                requestedGross=target_gross,
+                strictPortfolioPlan=strict_plan,
+            )
+            self._v52_last_entry_blocked_before_order = True
+            return False
+        self.require_fresh_preorder_margin_guard()
+        # Peer releases require an independently certified executable transfer.
+        return self._submit_basis_position(slot, candidate, target_gross, snapshot=snapshot)
+
+    def preflight(self, read_only: bool = False) -> dict:
+        checks = super().preflight(read_only=read_only)
+        if self.live:
+            assert_strict_live_configuration()
+        strict_snapshot = validate_gross_snapshot(checks["gross"])
+        checks.update({
+            "strictPortfolioPlannerActive": True,
+            "strictPortfolioGross": strict_snapshot,
+            "strictPortfolioCaps": {
+                "v12": STRICT_CAPS.v12_gross,
+                "pengu": STRICT_CAPS.pengu_gross,
+                "stock": STRICT_CAPS.stock_gross,
+                "crypto": STRICT_CAPS.crypto_gross,
+                "portfolio": STRICT_CAPS.total_gross,
+            },
+            "quality102LiveSelectorParity": False,
+            "quality102LiveBlockedFailClosed": True,
+        })
+        return checks
+
+
+def self_test() -> None:
+    strict_planner_self_test()
+    assert STRICT_CAPS.v12_base_gross == 2.0
+    assert STRICT_CAPS.v12_gross == 2.0
+    assert STRICT_CAPS.crypto_gross == 3.0
+    assert STRICT_CAPS.stock_gross == 4.0
+    assert STRICT_CAPS.stock_slot_gross == 2.0
+    assert STRICT_CAPS.total_gross == 4.25
+    engine = object.__new__(V52AsterOnlyEngine)
+    engine.crypto_gross_cap = 3.0
+    engine.stock_gross_cap = 4.0
+    engine.portfolio_gross_cap = 4.25
+    engine.v11_gross_cap = 2.0
+    engine.v50_gross_cap = 2.0
+    engine.gross_tolerance = 1e-6
+    engine.live = False
+    engine.state = {"positions": {}}
+    engine.v96_requires_margin = lambda: False
+    engine.positions = lambda: {}
+    engine.gross_snapshot = lambda: {
+        "equityUsd": 100.0,
+        "cryptoNotionalUsd": 125.0,
+        "stockNotionalUsd": 50.0,
+        "cryptoGross": 1.25,
+        "stockGross": 0.50,
+        "totalGross": 1.75,
+    }
+    gross, snapshot = engine.available_slot_gross(V11_SLOT)
+    assert abs(gross - 2.0) < EPSILON
+    assert snapshot["strictPortfolioPlan"]["strictPortfolioPlannerActive"] is True
+
+    engine.live = True
+    engine._quality102_document = lambda: None
+    engine.gross_snapshot = lambda: {
+        "equityUsd": 100.0,
+        "cryptoNotionalUsd": 290.0,
+        "stockNotionalUsd": 50.0,
+        "cryptoGross": 2.90,
+        "stockGross": 0.50,
+        "totalGross": 3.40,
+    }
+    available, live_snapshot = engine.available_slot_gross(V11_SLOT)
+    assert abs(available - (0.85 / 1.002)) < EPSILON
+    assert live_snapshot["v12DynamicReclaimGross"] == 0
+
+    assert transient_reference_error("iex_quote_stale META")
+    assert not transient_reference_error("Managed Stock position reconciliation mismatch")
+
+    heartbeat_engine = object.__new__(V52AsterOnlyEngine)
+    heartbeat_engine.state = {}
+    saved = []
+    heartbeat_engine.save = lambda: saved.append(dict(heartbeat_engine.state))
+    before_hour = (base.now_ms() // 3_600_000) * 3_600_000
+    heartbeat_engine._refresh_idle_admission_heartbeat()
+    after_hour = (base.now_ms() // 3_600_000) * 3_600_000
+    assert heartbeat_engine.state["idleAdmissionDecisionTs"] in {before_hour, after_hour}
+    assert saved and saved[-1]["idleAdmissionDecisionTs"] == heartbeat_engine.state["idleAdmissionDecisionTs"]
+    print("V52_IDLE_ADMISSION_HEARTBEAT_SELFTEST_PASS")
+    print("V52_STRICT_ASTER_ONLY_SELFTEST_PASS")
+
+
+
+
+def _atomic_monitor_json(path: Path, payload: dict) -> None:
+    from disdex_runner_tick_heartbeat import atomic_runner_health_json
+    atomic_runner_health_json(path,payload)
+
+
+def build_v52_monitor_tick(result: dict, *, started_at: int, completed_at: int) -> dict:
+    sha=(os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+    if len(sha)!=40 or any(c not in "0123456789abcdef" for c in sha):
+        raise RuntimeError("V52_MONITOR_RELEASE_SHA_INVALID")
+    release_root=(os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd()).strip()
+    service=(os.getenv("DISDEX_V52_MONITOR_SERVICE_UNIT") or f"disdex-v52-monitor@{sha}.service").strip()
+    return {
+        "schema":"disdex-runner-tick/v1","runnerId":"V52_MONITOR",
+        "runtimeSha":sha,"expectedSha":sha,"serviceUnit":service,
+        "mainPid":os.getpid(),"workingDirectory":release_root,
+        "tickStartedAt":started_at,"tickCompletedAt":completed_at,
+        "status":"observing","outcome":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS",
+        "reason":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS","mode":"MONITOR_ONLY",
+        "newOrdersAllowed":False,"permissionEvaluation":"MONITOR_ONLY_NO_ORDER_PATH",
+        "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,"stateChanged":False,
+        "positionCount":len(result.get("positions") or {}),"openOrderCount":len(result.get("openOrders") or {}),
+    }
+
+
+def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
+    if not base.bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        raise RuntimeError("V52 monitor daemon requires DISDEX_V52_MONITOR_ONLY=true")
+    if base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False):
+        raise RuntimeError("V52 monitor daemon requires LIVE_EXECUTION_ENABLED=false")
+    tick_path=Path(os.getenv("DISDEX_V52_MONITOR_TICK_PATH", "/var/lib/disdex/v52-monitor/tick.json"))
+    health_path=Path(os.getenv("DISDEX_V52_MONITOR_HEALTH_PATH", "/var/lib/disdex/v52-monitor/heartbeat.json"))
+    interval=max(5_000, int(os.getenv("DISDEX_V52_MONITOR_INTERVAL_MS","30000")))
+    last_completed_tick_at=None
+    while not runner.stop_requested:
+        started=base.now_ms()
+        try:
+            result=runner.preflight(read_only=True)
+            completed=base.now_ms()
+            tick=build_v52_monitor_tick(result,started_at=started,completed_at=completed)
+            _atomic_monitor_json(tick_path,tick)
+            last_completed_tick_at=completed
+            _atomic_monitor_json(health_path,{**tick,"schema":"disdex-v52-monitor-heartbeat/v1","heartbeatAt":completed,"lastTickAt":last_completed_tick_at})
+            print(json.dumps({"mode":"MONITOR_ONLY","status":"observing","eventTs":completed,
+                              "runtimeSha":tick["runtimeSha"],"positions":tick["positionCount"],
+                              "ordersSent":0,"cancelsSent":0,"positionChangesSent":0},
+                             separators=(",",":")),flush=True)
+        except Exception as error:
+            completed=base.now_ms()
+            sha=(os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+            _atomic_monitor_json(health_path,{
+                "schema":"disdex-v52-monitor-heartbeat/v1","runnerId":"V52_MONITOR",
+                "runtimeSha":sha,"expectedSha":sha,"mainPid":os.getpid(),
+                "serviceUnit":os.getenv("DISDEX_V52_MONITOR_SERVICE_UNIT") or f"disdex-v52-monitor@{sha}.service",
+                "workingDirectory":os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd(),
+                "tickStartedAt":started,"tickCompletedAt":completed,"updatedAt":completed,"observedAt":completed,
+                "heartbeatAt":completed,"lastTickAt":last_completed_tick_at,"status":"blocked","mode":"MONITOR_ONLY",
+                "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
+                "newOrdersAllowed":False,"permissionEvaluation":"MONITOR_ONLY_NO_ORDER_PATH",
+                "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,"positionCount":0,"openOrderCount":0,
+                "stateChanged":False,
+            })
+            print(json.dumps({"mode":"MONITOR_ONLY","status":"blocked","eventTs":completed,
+                              "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
+                              "ordersSent":0,"cancelsSent":0,"positionChangesSent":0},
+                             separators=(",",":")),flush=True)
+        if not daemon:
+            return
+        time.sleep(interval/1000.0)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=("paper", "live"), default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
+    parser.add_argument("--daemon", action="store_true")
+    parser.add_argument("--once", action="store_true")
+    parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--preflight-readonly", action="store_true")
+    parser.add_argument("--monitor-only-daemon", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+    runner = V52AsterOnlyEngine(args.mode)
+    signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True))
+    signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
+    if args.preflight_readonly:
+        print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":")))
+        return 0
+    if args.preflight:
+        print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False))
+        return 0
+    if args.monitor_only_daemon:
+        if args.mode != "live":
+            raise RuntimeError("V52 monitor-only daemon requires --mode live")
+        run_monitor_only_daemon(runner,args.daemon and not args.once)
+        return 0
+    if base.bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        raise RuntimeError("V52 monitor-only environment cannot enter order-capable runner")
+    runner.run(args.daemon and not args.once)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

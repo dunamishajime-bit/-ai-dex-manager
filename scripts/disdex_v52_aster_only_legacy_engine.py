@@ -1,0 +1,1641 @@
+from __future__ import annotations
+
+import argparse
+import dataclasses
+import datetime as dt
+import json
+import math
+import os
+import shutil
+import signal
+import tempfile
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import disdex_v11eq_aster_only_live_engine as legacy
+from disdex_v52_daily_loss import update_v52_strategy_daily_latch
+from disdex_account_order_lock import AccountOrderLock
+from disdex_pending_exposure_registry import release_pending, upsert_pending
+from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
+from disdex_strict_portfolio_planner import (
+    STRICT_CAPS,
+    quality102_crypto_notional_from_positions,
+    read_quality102_live_state_document,
+)
+from disdex_trade_fill_notification import enqueue_trade_fill_notification
+from disdex_us_equity_calendar import regular_us_equity_session
+from disdex_aster_rate_budget_policy import classify_aster_rate_budget_failure, next_aster_rate_budget_retry_ms
+from v52_amzn_yahoo_gate import fetch_yahoo_h1_bars, evaluate_amzn_short_yahoo_gate
+
+base = legacy.base
+
+_V50_RUNTIME_PATH = Path(__file__).resolve().parents[1] / "config" / "v52V50Runtime.json"
+try:
+    _V50_RUNTIME = json.loads(_V50_RUNTIME_PATH.read_text(encoding="utf-8"))
+except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    raise RuntimeError(f"V50_RUNTIME_CONTRACT_UNAVAILABLE:{_V50_RUNTIME_PATH}") from error
+if _V50_RUNTIME.get("policyId") != "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20":
+    raise RuntimeError("V50_RUNTIME_CONTRACT_MISMATCH:policyId")
+
+STRATEGY_ID = "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"
+LIVE_ACK = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
+STATE_SCHEMA_VERSION = 3
+V11_SLOT = "V11_EQ"
+V50_SLOT = "V50_POST_OPEN_BASIS"
+V50_WINDOWS = tuple(str(value) for value in _V50_RUNTIME["windowsNy"])
+V50_WINDOW_POLICY = str(_V50_RUNTIME["windowPolicy"])
+V50_MIN_ENTRY_BASIS_BPS = float(_V50_RUNTIME["minimumEntryBasisBps"])
+V50_MAX_HOLDING_HOURS = int(_V50_RUNTIME["maximumHoldingHours"])
+V50_MAX_DAILY_TRADES = 3
+V50_CONVERGENCE_BPS = float(_V50_RUNTIME["convergenceBps"])
+V50_BASIS_STOP_MULTIPLE = float(_V50_RUNTIME["basisStopMultiple"])
+V50_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
+V50_MAX_ROUND_TRIP_COST_BPS = float(_V50_RUNTIME["maximumRoundTripCostBps"])
+V50_MAX_SPREAD_BPS = float(_V50_RUNTIME["maximumSpreadBps"])
+V50_MIN_NET_EDGE_BPS = float(_V50_RUNTIME["minimumNetEdgeBps"])
+V50_POLICY_ID = str(_V50_RUNTIME["policyId"])
+
+
+def empty_v52_gate_diagnostics(ny_day: str) -> dict:
+    return {
+        "schemaVersion": 1,
+        "policyId": V50_POLICY_ID,
+        "nyDay": ny_day,
+        "decisions": [],
+        "acceptedCandidates": [],
+        "rejectionCounters": {},
+        "lastDecision": None,
+    }
+
+
+def append_v52_diagnostic(state: dict, *, ny_day: str, row: dict) -> None:
+    diagnostics = state.setdefault("v52GateDiagnostics", empty_v52_gate_diagnostics(ny_day))
+    if diagnostics.get("nyDay") != ny_day:
+        diagnostics = empty_v52_gate_diagnostics(ny_day)
+        state["v52GateDiagnostics"] = diagnostics
+    diagnostics["decisions"] = [*diagnostics.get("decisions", []), row][-500:]
+    if row.get("accepted") is True:
+        diagnostics["acceptedCandidates"] = [*diagnostics.get("acceptedCandidates", []), row][-200:]
+    counters = diagnostics.setdefault("rejectionCounters", {})
+    for reason in row.get("rejectionReasons", []):
+        counters[reason] = int(counters.get(reason, 0)) + 1
+    diagnostics["lastDecision"] = row
+    state["v50Top2Telemetry"] = {
+        "schemaVersion": 1,
+        "policyId": V50_POLICY_ID,
+        "nyDay": ny_day,
+        "decisions": diagnostics["decisions"],
+        "acceptedCandidates": diagnostics["acceptedCandidates"],
+        "rejectionCounters": counters,
+        "lastDecision": row,
+    }
+
+
+def notify_v52_fill(engine: "V52AsterOnlyEngine", fill: object, event_type: str, reason: str, slot: str) -> None:
+    """Queue only a confirmed live V52 fill; never affect the trade result."""
+    queued = enqueue_trade_fill_notification(
+        fill,
+        strategy_id="V52",
+        event_type=event_type,
+        reason=reason,
+        live=bool(engine.live),
+        metadata={"slot": slot},
+    )
+    if engine.live and queued:
+        engine.log("v52-trade-fill-notification-queued", slot=slot, eventType=event_type, clientOrderId=getattr(fill, "client_id", ""))
+
+
+def rate_limit_error(error: BaseException | str) -> bool:
+    message = str(error).lower()
+    return any(marker in message for marker in (
+        "http 429",
+        "http error 429",
+        "http 418",
+        "http error 418",
+        "ip banned",
+        "too many requests",
+        "rate limit",
+        "request weight",
+        "device time must match the actual time",
+    ))
+
+
+def rate_budget_deferred_error(error: BaseException | str) -> bool:
+    """A local pre-request scheduler denial is not a venue/API failure.
+
+    The classifier is deliberately exact.  In particular, malformed budget
+    state, HTTP 429/418, network failures, and unknown errors remain on the
+    existing fail-closed paths.
+    """
+    return classify_aster_rate_budget_failure(error) is not None
+
+
+def upstream_fail_closed_error(error: BaseException | str) -> bool:
+    message = str(error).lower()
+    return rate_limit_error(error) or any(marker in message for marker in (
+        "connection reset by peer",
+        "connectionreseterror",
+        "quality102_state_stale",
+        "quality102_state_malformed",
+        "quality102_state_mismatch",
+        "quality102_state_hash",
+        "quality102_causal_v1_pending_order_requires_reconciliation",
+        "unresolved v52 pending order requires operator review",
+    ))
+
+
+def transient_reference_error(error: BaseException | str) -> bool:
+    """Return true only for reference-validation failures which are safe to retry while flat."""
+    message = str(error).lower()
+    if (
+        "http 503 http://127.0.0.1:8797/quote?symbol=" in message
+        and ('"error":"stale_quote"' in message or '"error":"quote_unavailable"' in message)
+    ):
+        return True
+    return any(marker in message for marker in (
+        "iex_quote_stale",
+        "pyth_quote_stale",
+        "cross_source_divergence",
+        "reference quote stale",
+        "reference quote unavailable",
+        "free reference sources are not connected",
+        "free reference health did not become ready",
+    ))
+
+
+def is_brief_local_stock_quote_staleness(error: BaseException | str) -> bool:
+    """Only the exact local stock quote freshness 503 is eligible for a scoped retry.
+
+    Never classify missing venue state, network authentication, dislocated
+    references, partial fills or account/order uncertainty as local-only.
+    """
+    message = str(error).lower()
+    return (
+        "http 503 http://127.0.0.1:8797/quote?symbol=" in message
+        and '"error":"stale_quote"' in message
+    )
+
+
+class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
+    def __init__(self, mode: str):
+        super().__init__(mode)
+        self.state_root = Path(os.getenv("DISDEX_V52_ASTER_ONLY_STATE_DIR", str(self.state_root))).resolve()
+        self.state_path = self.state_root / f"runner-{mode}.json"
+        self.audit_path = self.state_root / f"audit-{mode}.jsonl"
+        self.kill_switch_path = Path(os.getenv("DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE", str(self.kill_switch_path))).resolve()
+        self.lock = AccountOrderLock(
+            os.getenv("DISDEX_ACCOUNT_LOCK_PATH", ".runtime-state/shared/account-order.lock"),
+            base.int_env("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
+            default_owner=f"V52:{mode}:{os.getpid()}",
+        )
+        self.state = base.read_json(self.state_path, {}) or {}
+        self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
+        self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", float(_V50_RUNTIME["stockAggregateGross"]))
+        self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 3.5)
+        self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", float(_V50_RUNTIME["slotGross"]))
+        self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", float(_V50_RUNTIME["slotGross"]))
+        # Strict caps are hard limits.  A legacy environment may still carry
+        # the old 3% reporting tolerance; never let that value authorize an
+        # over-cap order in the strict runner.
+        self.gross_tolerance = max(0.0, min(base.float_env("DISDEX_V52_GROSS_TOLERANCE", 1e-9), 1e-6))
+        self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
+        self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
+        self._upstream_fail_closed_hold = False
+        self._stock_quote_stale_since_ms = 0
+        self._rate_budget_defer_attempt = 0
+        self._rate_budget_defer_until_ms = 0
+        self._last_kill_flatten_key: Optional[str] = None
+        # Yahoo is an AMZN-only reference source.  Cache raw confirmed H1
+        # rows, not a decision, so each candidate is evaluated against its
+        # own decision timestamp without issuing one request per 250ms tick.
+        self._amzn_yahoo_h1_bars_cache: list[dict] = []
+        self._amzn_yahoo_h1_bars_cached_at_ms = 0
+        self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
+        self._migrate_state()
+
+    def _local_quote_stale_retry(self, error: BaseException | str, phase: str) -> bool:
+        """Pause only V52 on a brief local quote staleness while keeping all fills
+        and protected stock positions untouched. Sustained outages still trip
+        the original account-level protected hold for manual review.
+        """
+        if not is_brief_local_stock_quote_staleness(error):
+            return False
+        now = base.now_ms()
+        if not self._stock_quote_stale_since_ms:
+            self._stock_quote_stale_since_ms = now
+        duration = max(0, now - self._stock_quote_stale_since_ms)
+        stock_open = bool(self.positions())
+        maximum_local_ms = 15 * 60_000
+        if stock_open and duration >= maximum_local_ms:
+            self.log(
+                "v52-local-quote-stale-escalate-account-hold",
+                phase=phase, staleDurationMs=duration,
+                newOrdersAllowed=False, existingPositionsRetained=True,
+            )
+            return False
+        self._upstream_fail_closed_hold = True
+        self.log(
+            "v52-local-quote-stale-retry",
+            phase=phase, staleDurationMs=duration,
+            existingPositionsRetained=stock_open, newOrdersAllowed=False,
+            marketReferenceValid=False,
+        )
+        return True
+
+    def _recovery_grace_ms(self) -> int:
+        return max(60_000, base.int_env("DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS", 10 * 60_000))
+
+    @staticmethod
+    def _kill_iso_ms(value: object) -> int:
+        text = str(value or "").strip()
+        if not text:
+            return 0
+        try:
+            parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=base.UTC)
+            return int(parsed.timestamp() * 1000)
+        except ValueError:
+            return 0
+
+    @staticmethod
+    def _verified_stable4_global_hold(payload: dict) -> bool:
+        # This is a blocking foreign-owner hold, NOT permission to trade.
+        # In particular, never accept STABLE4 FLATTEN_MANAGED or an unknown owner.
+        reason = payload.get("reason")
+        return (
+            payload.get("active") is True
+            and payload.get("strategyId") == "STABLE4_H48_CUTOVER"
+            and payload.get("action") == "HOLD_PROTECTED"
+            and payload.get("scope") == "GLOBAL"
+            and payload.get("operator") == "disdex-stable4-formal-owner-hold"
+            and isinstance(reason, str)
+            and reason.startswith("STABLE4_RESEARCH_ROLLOUT:")
+            and len(reason) == len("STABLE4_RESEARCH_ROLLOUT:") + 40
+            and all(char in "0123456789abcdef" for char in reason[-40:])
+            and isinstance(payload.get("activatedAt"), str)
+            and bool(payload["activatedAt"].strip())
+            and payload.get("recoverable") is False
+        )
+
+    def kill_switch(self) -> Optional[dict]:
+        try:
+            payload = json.loads(self.kill_switch_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            # Existing documented semantics: absent switch is not an activation.
+            return None
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed") from error
+        if not isinstance(payload, dict) or type(payload.get("active")) is not bool:
+            raise RuntimeError("Shared Kill Switch state unreadable or malformed")
+        if payload["active"] is False:
+            return None
+        if self._verified_stable4_global_hold(payload):
+            return payload
+        if payload.get("strategyId") != base.V96_KILL_SWITCH_STRATEGY_ID:
+            raise RuntimeError("Shared Kill Switch is active but invalid")
+        if payload.get("action") not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
+            raise RuntimeError("Shared Kill Switch action is invalid")
+        return payload
+
+    def activate_kill_switch(
+        self,
+        reason: str,
+        *,
+        action: str = "FLATTEN_MANAGED",
+        recoverable: bool = False,
+        scope: Optional[str] = None,
+    ) -> None:
+        if action not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
+            raise RuntimeError(f"Unsupported V52 Kill Switch action: {action}")
+        if scope not in {None, "GLOBAL", "V52_REFERENCE_ONLY"}:
+            raise RuntimeError(f"Unsupported V52 Kill Switch scope: {scope}")
+        if scope == "V52_REFERENCE_ONLY" and (
+            action != "HOLD_PROTECTED"
+            or not recoverable
+            or not transient_reference_error(reason)
+        ):
+            raise RuntimeError("V52_REFERENCE_ONLY scope requires a recoverable local reference-data hold")
+        existing = base.read_json(self.kill_switch_path, {}) or {}
+        if existing.get("active"):
+            if existing.get("action") == "FLATTEN_MANAGED":
+                return
+            if action == "HOLD_PROTECTED":
+                return
+        now = dt.datetime.now(tz=base.UTC)
+        payload = {
+            "active": True,
+            "strategyId": base.V96_KILL_SWITCH_STRATEGY_ID,
+            "action": action,
+            "reason": reason,
+            "operator": "disdex-v52-aster-only",
+            "activatedAt": str(existing.get("activatedAt") or now.isoformat()),
+            "recoverable": bool(recoverable and action == "HOLD_PROTECTED"),
+        }
+        if scope is not None:
+            payload["scope"] = scope
+        if action == "HOLD_PROTECTED":
+            started = str(existing.get("graceStartedAt") or now.isoformat())
+            started_ms = self._kill_iso_ms(started) or int(now.timestamp() * 1000)
+            payload["graceStartedAt"] = started
+            payload["graceDeadlineAt"] = dt.datetime.fromtimestamp(
+                (started_ms + self._recovery_grace_ms()) / 1000,
+                tz=base.UTC,
+            ).isoformat()
+        elif existing.get("graceStartedAt"):
+            payload["graceStartedAt"] = existing.get("graceStartedAt")
+            payload["graceDeadlineAt"] = existing.get("graceDeadlineAt")
+            payload["escalatedFrom"] = "HOLD_PROTECTED"
+        base.atomic_write_json(self.kill_switch_path, payload)
+        self.log(
+            "kill-switch-activated",
+            action=action,
+            recoverable=payload.get("recoverable", False),
+            graceDeadlineAt=payload.get("graceDeadlineAt"),
+            reason=reason,
+        )
+
+    def _own_recoverable_hold(self) -> Optional[dict]:
+        kill = self.kill_switch()
+        if (
+            kill
+            and kill.get("action") == "HOLD_PROTECTED"
+            and kill.get("operator") == "disdex-v52-aster-only"
+        ):
+            return kill
+        return None
+
+    def _recoverable_hold_expired(self, kill: Optional[dict] = None) -> bool:
+        row = kill or self._own_recoverable_hold()
+        if not row:
+            return False
+        deadline = self._kill_iso_ms(row.get("graceDeadlineAt"))
+        return bool(deadline and base.now_ms() >= deadline)
+
+    def _require_manual_review_for_expired_hold(self, error: BaseException | str, phase: str) -> bool:
+        hold = self._own_recoverable_hold()
+        if not hold or not self._recoverable_hold_expired(hold):
+            return False
+        self.log(
+            "v52-recovery-grace-expired-manual-review",
+            phase=phase,
+            error=str(error),
+            action="HOLD_PROTECTED",
+            newOrdersAllowed=False,
+            positionChangesAllowed=False,
+            operatorReviewRequired=True,
+        )
+        return True
+
+    def _migrate_state(self) -> None:
+        positions = self.state.get("positions")
+        if positions is not None and not isinstance(positions, dict):
+            raise RuntimeError("V52 positions state must be an object")
+        positions = dict(positions or {})
+        old = self.state.pop("position", None)
+        if old:
+            if positions:
+                raise RuntimeError("Legacy position and V52 positions both exist")
+            if str(old.get("strategy")) != V11_SLOT:
+                raise RuntimeError("Only a legacy V11_EQ position can migrate into V52")
+            if self.live:
+                enabled = base.bool_env("DISDEX_V52_ALLOW_V11_STATE_MIGRATION", False)
+                ack = os.getenv("DISDEX_V52_STATE_MIGRATION_ACKNOWLEDGEMENT")
+                if not enabled or ack != "I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION":
+                    raise RuntimeError("Active legacy V11 state requires explicit V52 migration acknowledgement")
+                if self.state_path.exists():
+                    stamp = dt.datetime.now(tz=base.UTC).strftime("%Y%m%dT%H%M%SZ")
+                    shutil.copy2(self.state_path, self.state_path.with_name(f"{self.state_path.name}.v11-backup-{stamp}"))
+            positions[V11_SLOT] = old
+            self.state["legacyV11MigratedAt"] = base.now_ms()
+        self.state["positions"] = positions
+        self.state["schemaVersion"] = STATE_SCHEMA_VERSION
+        self.state["strategyId"] = STRATEGY_ID
+        self.state.setdefault("v50SignalBasis", {})
+        self.state.setdefault("v50Attempted", {})
+        self.state.setdefault("v50CompletedTrades", 0)
+
+    def save(self) -> None:
+        self.state.pop("position", None)
+        self.state["schemaVersion"] = STATE_SCHEMA_VERSION
+        self.state["strategyId"] = STRATEGY_ID
+        self.state["updatedAt"] = base.now_ms()
+        base.atomic_write_json(self.state_path, self.state)
+
+    def current_local_time(self) -> dt.datetime:
+        return dt.datetime.now(tz=base.NY)
+
+    def positions(self) -> Dict[str, dict]:
+        value = self.state.setdefault("positions", {})
+        if not isinstance(value, dict):
+            raise RuntimeError("V52 positions state invalid")
+        return value
+
+    @staticmethod
+    def _shared_kill_switch_integrity_error(error: BaseException | str) -> bool:
+        # Treat an invalid active shared switch as an entry-blocking condition.
+        # Never reinterpret an untrusted/mismatched switch as inactive.
+        return str(error) in {
+            "Shared Kill Switch is active but invalid",
+            "Shared Kill Switch action is invalid",
+            "Shared Kill Switch state unreadable or malformed",
+        }
+
+    def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
+        self._upstream_fail_closed_hold = True
+        message = str(error)
+        try:
+            if self._require_manual_review_for_expired_hold(message, phase):
+                return
+            if not self.kill_switch():
+                self.activate_kill_switch(
+                    f"V52 upstream state unavailable: {message}",
+                    action="HOLD_PROTECTED",
+                    recoverable=True,
+                )
+        except RuntimeError as switch_error:
+            if not self._shared_kill_switch_integrity_error(switch_error):
+                raise
+            # A second failure while protecting a stale peer must not
+            # produce a systemd crash/restart storm. The caller's local hold
+            # remains active; no entry or order mutation is authorized.
+            self.log(
+                "v52-shared-kill-switch-invalid-held",
+                phase=phase,
+                upstreamError=message,
+                error=str(switch_error),
+                newOrdersAllowed=False,
+                positionChangesAllowed=False,
+                operatorReviewRequired=True,
+            )
+            return
+        self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
+
+    def _defer_rate_budget(self, error: BaseException | str, phase: str) -> None:
+        classification = classify_aster_rate_budget_failure(error)
+        if classification is None:
+            raise RuntimeError("V52_RATE_BUDGET_DEFER_CLASSIFICATION_REQUIRED")
+        attempt = int(getattr(self, "_rate_budget_defer_attempt", 0))
+        retry_ms = next_aster_rate_budget_retry_ms(
+            attempt=attempt,
+            base_ms=max(250, base.int_env("DISDEX_ASTER_RATE_BUDGET_RETRY_BASE_MS", 1_000)),
+            max_ms=max(1_000, base.int_env("DISDEX_ASTER_RATE_BUDGET_RETRY_MAX_MS", 30_000)),
+            wait_ms=int(classification.get("waitMs", 0) or 0),
+        )
+        self._rate_budget_defer_attempt = min(attempt + 1, 10)
+        self._rate_budget_defer_until_ms = max(base.now_ms(), int(getattr(self, "_rate_budget_defer_until_ms", 0))) + retry_ms
+        self.log(
+            "v52-rate-budget-deferred",
+            phase=phase,
+            errorClass=classification["kind"],
+            reason=classification["reason"],
+            queueWaitMs=classification.get("waitMs"),
+            priority="RISK_READ",
+            retryMs=retry_ms,
+            decision="DEFER_NO_EXPOSURE",
+            ordersSent=0,
+            cancelsSent=0,
+            positionChangesSent=0,
+        )
+
+    @staticmethod
+    def _kill_flatten_key(kill: dict) -> str:
+        return json.dumps(kill, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+
+    def _kill_flatten_completed(self, kill: dict) -> bool:
+        return getattr(self, "_last_kill_flatten_key", None) == self._kill_flatten_key(kill)
+
+    def _flatten_kill_once(self, kill: dict, fallback_reason: str) -> bool:
+        key = self._kill_flatten_key(kill)
+        reason = str(kill.get("reason") or fallback_reason)
+        if getattr(self, "_last_kill_flatten_key", None) == key:
+            self.log("v52-kill-flatten-idempotent-hold", reason=reason)
+            return False
+        self.flatten_all(reason)
+        self._last_kill_flatten_key = key
+        self.log("v52-kill-flatten-complete", reason=reason)
+        return True
+
+    def _clear_kill_flatten_latch(self) -> None:
+        self._last_kill_flatten_key = None
+
+    def reset_days(self) -> None:
+        utc_day = dt.datetime.now(tz=base.UTC).date().isoformat()
+        ny_day = dt.datetime.now(tz=base.NY).date().isoformat()
+        if self.state.get("utcDay") != utc_day:
+            equity = self.portfolio_equity()
+            self.state.update({"utcDay": utc_day, "dayStartEquity": equity, "dailyLossTripped": False})
+        latch = self.state.get("v52StrategyDailyLossLatch")
+        if not isinstance(latch, dict) or latch.get("utcDay") != utc_day:
+            configured_capital = base.float_env("DISDEX_V52_STRATEGY_CAPITAL_USD", 0.0)
+            if configured_capital <= 0:
+                try:
+                    configured_capital = max(self.minimum_entry_usd, self.excess_margin_usd())
+                except Exception:
+                    configured_capital = 0.0
+            self.state["v52StrategyDailyLossLatch"] = update_v52_strategy_daily_latch(
+                previous=latch if isinstance(latch, dict) else None,
+                trades=(self.state.get("v52Ledger") or {}).get("trades", []),
+                unrealized_pnl=0.0,
+                strategy_capital_usd=configured_capital,
+                now_ms=base.now_ms(),
+                maximum_daily_loss_pct=self.max_daily_loss_pct,
+                data_available=configured_capital > 0,
+            )
+        diagnostics = self.state.get("v52GateDiagnostics")
+        telemetry = self.state.get("v50Top2Telemetry")
+        daily_state_stale = (
+            self.state.get("nyDay") != ny_day
+            or self.state.get("v50DailyEntriesDay") != ny_day
+            or self.state.get("v50SignalSnapshotDay") != ny_day
+            or not isinstance(diagnostics, dict)
+            or diagnostics.get("nyDay") != ny_day
+            or not isinstance(telemetry, dict)
+            or telemetry.get("nyDay") != ny_day
+        )
+        if daily_state_stale:
+            self.state.update({
+                "nyDay": ny_day,
+                "v11Attempted": False,
+                "v11SignalBasis": {},
+                "v11SignalSelectedSymbol": None,
+                "v11SignalAt": None,
+                "v50SignalBasis": {},
+                "v50SignalSnapshots": {},
+                "v50SignalSnapshotDay": ny_day,
+                "v50Attempted": {},
+                "v50CompletedTrades": 0,
+                "v50DailyEntriesDay": ny_day,
+                "amznShortYahooGate": None,
+                "v52GateDiagnostics": empty_v52_gate_diagnostics(ny_day),
+                "v50Top2Telemetry": {
+                    "schemaVersion": 1,
+                    "policyId": V50_POLICY_ID,
+                    "nyDay": ny_day,
+                    "decisions": [],
+                    "acceptedCandidates": [],
+                    "rejectionCounters": {},
+                    "lastDecision": None,
+                },
+            })
+        self.save()
+
+    def managed_aster_positions(self) -> Dict[str, float]:
+        if self.live:
+            result: Dict[str, float] = {}
+            for row in self.aster.positions():
+                symbol = str(row.get("symbol") or "")
+                quantity = base.finite(row.get("positionAmt"))
+                if symbol in base.ASTER_SYMBOL.values() and abs(quantity) > 1e-12:
+                    result[symbol] = quantity
+            return result
+        result: Dict[str, float] = {}
+        for position in self.positions().values():
+            side = 1 if position.get("asterOpenSide") == "BUY" else -1
+            symbol = base.ASTER_SYMBOL[str(position["symbol"])]
+            result[symbol] = result.get(symbol, 0.0) + side * base.finite(position.get("asterQty"))
+        return result
+
+    def _quality102_aware_crypto_notional(self) -> float:
+        if not self.live:
+            return 0.0
+        return quality102_crypto_notional_from_positions(
+            self.aster.positions(),
+            known_crypto=frozenset(getattr(legacy, "V96_SYMBOLS", set())),
+            known_stock=frozenset(base.ASTER_SYMBOL.values()),
+        )
+
+    def _quality102_document(self):
+        """Return validated Q102 state while the shared account lock is held."""
+        return read_quality102_live_state_document(now_ms=base.now_ms())
+
+    def _quality102_marked_notional(self, document=None) -> float:
+        if not self.live:
+            return 0.0
+        document = document if document is not None else self._quality102_document()
+        if document is None:
+            return 0.0
+        _path, raw, owned = document
+        if raw.get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+        if owned is None:
+            return 0.0
+        rows = self.aster.positions()
+        matches = [row for row in rows if str(row.get("symbol") or "").upper() == owned.symbol]
+        if len(matches) != 1:
+            raise RuntimeError("QUALITY102_STATE_POSITION_MISMATCH")
+        row = matches[0]
+        quantity = base.finite(row.get("positionAmt"))
+        mark = base.finite(row.get("markPrice") or row.get("entryPrice"))
+        if abs(quantity) <= 1e-12 or mark <= 0:
+            raise RuntimeError("QUALITY102_POSITION_MALFORMED:markPrice")
+        actual_side = 1 if quantity > 0 else -1
+        if actual_side != owned.side or abs(abs(quantity) - owned.quantity) > max(1e-8, owned.quantity * 0.02):
+            raise RuntimeError("QUALITY102_STATE_POSITION_MISMATCH")
+        return abs(quantity) * mark
+
+    def _quality102_manual_review(self, path: Path, raw: dict, pending: dict, message: str) -> None:
+        pending["phase"] = "manual_review"
+        pending["lastError"] = message
+        pending["updatedAt"] = base.now_ms()
+        failures = raw.get("failures")
+        if not isinstance(failures, list):
+            failures = []
+        failures.append({"occurredAt": base.now_ms(), "message": message, "idempotencyKey": pending.get("idempotencyKey")})
+        raw["failures"] = failures[-100:]
+        raw["updatedAt"] = base.now_ms()
+        base.atomic_write_json(path, raw)
+
+    def _prepare_quality102_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        """Free total Gross for a base Stock entry using Q102 MTM only.
+
+        The caller holds the shared account lock.  The exchange is never
+        asked to open a base order until this method has reconciled every Q102
+        reduction and a fresh gross snapshot fits the hard caps.
+        """
+        if not self.live:
+            return target_gross
+        requested = base.finite(target_gross)
+        if requested <= 0:
+            return 0.0
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        requested = min(requested, slot_cap, self.stock_gross_cap)
+        for _attempt in range(3):
+            document = self._quality102_document()
+            if document is None:
+                return requested
+            path, raw, owned = document
+            if raw.get("pending") is not None:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+            if owned is None:
+                return requested
+            snapshot = self.gross_snapshot()
+            equity = snapshot["equityUsd"]
+            q102_notional = self._quality102_marked_notional(document)
+            base_total_notional = max(0.0, snapshot["totalGross"] * equity - q102_notional)
+            desired_stock_notional = requested * equity
+            required_reduce = max(0.0, base_total_notional + q102_notional + desired_stock_notional - self.portfolio_gross_cap * equity)
+            if required_reduce <= max(1e-8, equity * self.gross_tolerance):
+                final = self.gross_snapshot()
+                self.assert_gross_safe(final)
+                return requested
+
+            symbol = owned.symbol
+            book = self.aster.book(symbol, 20)
+            now = base.now_ms()
+            if book.event_ms <= 0 or book.received_ms <= 0 or book.event_ms > now + 5_000 or now - book.received_ms > 5_000:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUOTE_STALE_OR_INVALID")
+            close_side = "SELL" if owned.side > 0 else "BUY"
+            mark_price = book.bid if close_side == "SELL" else book.ask
+            if not math.isfinite(mark_price) or mark_price <= 0:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUOTE_INVALID")
+            # A small overage handles book-to-fill movement; the fresh
+            # snapshot below decides whether another reduction is necessary.
+            reduce_quantity = min(owned.quantity, (required_reduce / mark_price) * 1.002)
+            if not (reduce_quantity > 1e-12):
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUANTITY_ZERO")
+            idempotency_key = base.hashlib.sha256(
+                f"QUALITY102_CAUSAL_V1|BASE_PRIORITY_MTM|{slot}|{symbol}|{owned.side}|{owned.quantity:.12f}|{book.event_ms}|{requested:.12f}".encode()
+            ).hexdigest()
+            client_id = f"q102v1-reduce-{idempotency_key}"[:36]
+            pending = {
+                "idempotencyKey": idempotency_key,
+                "clientOrderId": client_id,
+                "phase": "planned",
+                "symbol": symbol,
+                "side": close_side,
+                "quantity": reduce_quantity,
+                "reduceOnly": True,
+                "referenceTs": book.event_ms,
+                "createdAt": now,
+                "updatedAt": now,
+                "expectedPrice": mark_price,
+                "reason": f"BASE_PRIORITY_MTM_REDUCTION:{slot}",
+            }
+            raw["pending"] = pending
+            raw["updatedAt"] = now
+            base.atomic_write_json(path, raw)
+            try:
+                pending["phase"] = "submitted"
+                pending["updatedAt"] = base.now_ms()
+                base.atomic_write_json(path, raw)
+                fill = self.aster.place_market(
+                    symbol=symbol,
+                    side=close_side,
+                    quantity=reduce_quantity,
+                    expected_price=mark_price,
+                    client_id=client_id,
+                    reduce_only=True,
+                )
+            except Exception as error:
+                self._quality102_manual_review(path, raw, pending, f"QUALITY102_CAUSAL_V1_REDUCTION_EXECUTION_ERROR:{error}")
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW") from error
+            if (str(fill.symbol).upper() != symbol or str(fill.side).upper() != close_side
+                    or str(fill.client_id) != client_id or not math.isfinite(fill.executed_qty)
+                    or fill.executed_qty <= 0 or fill.executed_qty > reduce_quantity + 1e-8
+                    or str(fill.status).upper() not in {"FILLED", "PARTIALLY_FILLED"}):
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_RESULT_IDENTITY_OR_STATUS_INVALID"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+
+            actual_rows = [row for row in self.aster.positions() if str(row.get("symbol") or "").upper() == symbol and abs(base.finite(row.get("positionAmt"))) > 1e-12]
+            expected_remaining = owned.quantity - fill.executed_qty
+            if expected_remaining > 1e-12:
+                if len(actual_rows) != 1 or abs(abs(base.finite(actual_rows[0].get("positionAmt"))) - expected_remaining) > max(1e-8, expected_remaining * 0.02):
+                    message = "QUALITY102_CAUSAL_V1_REDUCTION_POSITION_MISMATCH"
+                    self._quality102_manual_review(path, raw, pending, message)
+                    raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            elif actual_rows:
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_NOT_FLAT"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            execution_price = base.finite(fill.average_price, mark_price)
+            if execution_price <= 0:
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_EXECUTION_PRICE_INVALID"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            fee_bps = max(0.0, base.float_env("QUALITY102_LIVE_FEE_BPS_PER_SIDE", 0.0))
+            funding_per_day = max(0.0, base.float_env("QUALITY102_LIVE_FUNDING_PER_DAY", 0.0))
+            basis = fill.executed_qty * owned.entry_price
+            price_return = owned.side * (execution_price / owned.entry_price - 1.0)
+            elapsed_days = max(0.0, book.event_ms - owned.entry_ts) / 86_400_000.0
+            transaction_cost = basis * 2.0 * fee_bps / 10_000.0
+            funding_cost = basis * elapsed_days * funding_per_day
+            raw["lastReduction"] = {
+                "idempotencyKey": idempotency_key,
+                "symbol": symbol,
+                "side": owned.side,
+                "reducedQuantity": fill.executed_qty,
+                "markTs": book.event_ms,
+                "markPrice": execution_price,
+                "realizedPnl": basis * price_return - transaction_cost - funding_cost,
+                "transactionCost": transaction_cost,
+                "fundingCost": funding_cost,
+                "accounting": "MARK_TO_MARKET_REALIZED_PNL",
+            }
+            if expected_remaining > 1e-12:
+                raw["position"]["quantity"] = abs(base.finite(actual_rows[0].get("positionAmt")))
+            else:
+                raw.pop("position", None)
+            raw.pop("pending", None)
+            raw["lastCompletedIdempotencyKey"] = idempotency_key
+            raw["lastReconciledAt"] = base.now_ms()
+            raw["updatedAt"] = base.now_ms()
+            base.atomic_write_json(path, raw)
+        raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_RETRY_EXHAUSTED")
+
+    def _actual_stock_notional(self) -> float:
+        if not self.live:
+            return sum(abs(base.finite(p.get("asterQty")) * base.finite(p.get("asterEntryPrice"))) for p in self.positions().values())
+        total = 0.0
+        for row in self.aster.positions():
+            symbol = str(row.get("symbol") or "")
+            if symbol in base.ASTER_SYMBOL.values():
+                total += abs(base.finite(row.get("positionAmt"))) * base.finite(row.get("markPrice") or row.get("entryPrice"))
+        return total
+
+    def gross_snapshot(self) -> dict:
+        equity = self.portfolio_equity()
+        if equity <= 0:
+            raise RuntimeError("Aster equity must be positive")
+        crypto_notional = self._quality102_aware_crypto_notional()
+        stock_notional = self._actual_stock_notional()
+        return {"equityUsd": equity, "cryptoNotionalUsd": crypto_notional, "stockNotionalUsd": stock_notional, "cryptoGross": crypto_notional / equity, "stockGross": stock_notional / equity, "totalGross": (crypto_notional + stock_notional) / equity}
+
+    def available_slot_gross(self, slot: str) -> Tuple[float, dict]:
+        snapshot = self.gross_snapshot()
+        if slot in self.positions() or self.v96_requires_margin():
+            return 0.0, snapshot
+        document = self._quality102_document() if self.live else None
+        if document is not None and document[1].get("pending") is not None:
+            return 0.0, snapshot
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        # Q102 is lower priority than the Stock sleeves.  Give Stock the
+        # total-Gross room currently occupied by Q102, then reduce Q102 at
+        # order planning time if that room is actually needed.
+        q102_notional = self._quality102_marked_notional(document) if self.live else 0.0
+        equity = snapshot["equityUsd"]
+        total_without_q102 = max(0.0, snapshot["totalGross"] - q102_notional / equity)
+        available = min(slot_cap, max(0.0, self.stock_gross_cap - snapshot["stockGross"]), max(0.0, self.portfolio_gross_cap - total_without_q102))
+        return max(0.0, available), snapshot
+
+    def assert_gross_safe(self, snapshot: Optional[dict] = None) -> None:
+        row = snapshot or self.gross_snapshot()
+        for name, value, cap in (("Crypto", row["cryptoGross"], self.crypto_gross_cap), ("Stock", row["stockGross"], self.stock_gross_cap), ("Portfolio", row["totalGross"], self.portfolio_gross_cap)):
+            if value > cap + self.gross_tolerance:
+                raise RuntimeError(f"{name} Gross exceeds V52 cap: {value:.6f} > {cap:.6f}")
+
+    def reconcile(self, read_only: bool = False) -> None:
+        if self.state.get("pendingOrder"):
+            raise RuntimeError("Unresolved V52 pending order requires operator review before restart")
+        if not self.live:
+            return
+        document = self._quality102_document()
+        if document is not None and document[1].get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+        actual = self.managed_aster_positions()
+        expected: Dict[str, float] = {}
+        for position in self.positions().values():
+            symbol = base.ASTER_SYMBOL[str(position["symbol"])]
+            signed = base.finite(position.get("asterQty")) * (1 if position.get("asterOpenSide") == "BUY" else -1)
+            expected[symbol] = expected.get(symbol, 0.0) + signed
+        if set(actual) != set(expected):
+            if not read_only:
+                self.activate_kill_switch("V52 managed Stock symbol reconciliation mismatch")
+            raise RuntimeError("V52 managed Stock symbols do not match state")
+        for symbol, expected_qty in expected.items():
+            actual_qty = base.finite(actual.get(symbol))
+            if abs(expected_qty - actual_qty) > max(1e-8, abs(expected_qty) * 0.02):
+                if not read_only:
+                    self.activate_kill_switch("V52 managed Stock quantity reconciliation mismatch")
+                raise RuntimeError("V52 managed Stock quantity mismatch")
+        for symbol in base.ASTER_SYMBOL.values():
+            for order in self.aster.open_orders(symbol):
+                client = str(order.get("clientOrderId") or "")
+                if client.startswith(("stock-v11eq-aster-only-", "stock-v52-")):
+                    raise RuntimeError(f"V52 pre-existing open order requires review: {client}")
+        self.assert_gross_safe()
+
+    def client_id(self, strategy: str, symbol: str, action: str) -> str:
+        digest = base.hashlib.sha256(f"{strategy}|{symbol}|{action}|{base.now_ms()}".encode()).hexdigest()[:10]
+        return f"stock-v52-{strategy.lower()}-{symbol.lower()}-{action.lower()}-{digest}"[:36]
+
+    def _set_pending(self, payload: dict) -> None:
+        if self.state.get("pendingOrder"):
+            raise RuntimeError("Another V52 order is unresolved")
+        self.state["pendingOrder"] = payload
+        self.save()
+        if payload.get("action") == "OPEN":
+            side = "LONG" if str(payload.get("side") or "").upper() == "BUY" else "SHORT"
+            upsert_pending({
+                "reservationId": str(payload["clientId"]),
+                "strategyId": str(payload.get("slot") or STRATEGY_ID),
+                "sleeve": "STOCK",
+                "symbol": str(payload.get("symbol") or "").upper(),
+                "side": side,
+                "gross": max(0.0, base.finite(payload.get("targetGross"))),
+                "notionalUsd": max(0.0, base.finite(payload.get("quantity")) * base.finite(payload.get("price"))),
+                "createdAt": base.now_ms(),
+                "runtimeSha": os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA"),
+            })
+
+    def _clear_pending(self) -> None:
+        pending = self.state.get("pendingOrder")
+        self.state["pendingOrder"] = None
+        self.save()
+        if isinstance(pending, dict) and pending.get("action") == "OPEN" and pending.get("clientId"):
+            release_pending(str(pending["clientId"]))
+
+    def v11_candidates(self, rows):
+        if self.v11_notional < self.minimum_entry_usd:
+            return None, {"ROUTER": ["V11_GROSS_CAPACITY_INSUFFICIENT"]}
+        return base.StockEngine.v11_candidates(self, rows)
+
+    def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
+            return False
+        target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
+        return self._submit_basis_position(slot, candidate, target_gross)
+
+    def _submit_basis_position(self, slot: str, candidate: dict, target_gross: float, *, snapshot: Optional[dict] = None) -> bool:
+        if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
+            return False
+        snapshot = self.gross_snapshot() if snapshot is None else snapshot
+        self.assert_gross_safe(snapshot)
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        target_gross = min(
+            target_gross,
+            slot_cap,
+            max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
+            max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
+        )
+        target_notional = target_gross * snapshot["equityUsd"]
+        if target_notional < self.minimum_entry_usd:
+            return False
+        symbol = str(candidate["symbol"])
+        aster_symbol = base.ASTER_SYMBOL[symbol]
+        side = str(candidate["side"])
+        quantity = target_notional / base.finite(candidate["entryPrice"])
+        quantity, price = self.aster.normalize(aster_symbol, quantity, base.finite(candidate["entryPrice"]), side)
+        client = self.client_id(slot, symbol, "OPEN")
+        self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
+        initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
+        fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS)
+        notify_v52_fill(self, fill, "ENTRY_FILL", f"{slot}_ENTRY", slot)
+        self.log("v52-entry-result", slot=slot, candidate=candidate, targetGross=target_gross, fill=dataclasses.asdict(fill))
+        if fill.fill_ratio < base.V11_MIN_FILL_RATIO:
+            if fill.executed_qty > 0:
+                self.flatten_aster_leg(symbol, side, fill.executed_qty, f"{slot}_LOW_FILL")
+            self._clear_pending()
+            return False
+        local = dt.datetime.now(tz=base.NY)
+        next_checkpoint = local.replace(minute=30, second=0, microsecond=0) + dt.timedelta(hours=1)
+        maximum_exit = min(local + dt.timedelta(hours=V50_MAX_HOLDING_HOURS), local.replace(hour=15, minute=30, second=0, microsecond=0))
+        position = {"strategy": slot, "positionId": client, "entryClientOrderId": client, "symbol": symbol, "openedAt": base.now_ms(), "entryBasisBps": candidate["basisBps"], "signalBasisBps": candidate.get("signalBasisBps"), "asterOpenSide": side, "asterQty": fill.executed_qty, "asterEntryPrice": fill.average_price or price, "entryCommission": (fill.executed_qty * (fill.average_price or price)) * self.aster_taker_fee_bps / 10000.0, "targetGross": target_gross, "route": candidate.get("route")}
+        if slot == V50_SLOT:
+            position.update({"checksCompleted": 0, "nextCheckpointAt": int(next_checkpoint.timestamp() * 1000), "maximumExitAt": int(maximum_exit.timestamp() * 1000)})
+        self.positions()[slot] = position
+        self._clear_pending()
+        self.save()
+        self.log("v52-position-open", slot=slot, position=position)
+        return True
+
+    def flatten_aster_leg(self, symbol: str, open_side: str, quantity: float, reason: str):
+        fill = super().flatten_aster_leg(symbol, open_side, quantity, reason)
+        notify_v52_fill(self, fill, "EXIT_FILL", reason, "RECOVERY")
+        return fill
+
+    def close_slot(self, slot: str, reason: str) -> None:
+        position = self.positions().get(slot)
+        if not position:
+            return
+        symbol = str(position["symbol"])
+        open_side = str(position["asterOpenSide"])
+        close_side = "SELL" if open_side == "BUY" else "BUY"
+        quantity = base.finite(position["asterQty"])
+        book = self.aster.book(base.ASTER_SYMBOL[symbol], 20)
+        price = book.bid if close_side == "SELL" else book.ask
+        client = self.client_id(slot, symbol, "CLOSE")
+        self._set_pending({"slot": slot, "action": "CLOSE", "symbol": symbol, "side": close_side, "quantity": quantity, "clientId": client})
+        initial = self.aster.place_limit(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client, reduce_only=True, post_only=True)
+        fill = initial if not self.live else self.aster.poll_fill(base.ASTER_SYMBOL[symbol], client, quantity, close_side, 2000)
+        notify_v52_fill(self, fill, "EXIT_FILL", reason, slot)
+        remaining = max(0.0, quantity - fill.executed_qty)
+        if remaining > quantity * 0.01:
+            market = self.flatten_aster_leg(symbol, open_side, remaining, reason + "-TAKER")
+            if market.fill_ratio < 0.99:
+                self.activate_kill_switch(f"{slot} close did not fully complete")
+                raise RuntimeError(f"{slot} close incomplete")
+        exit_price = fill.average_price or price
+        direction = 1.0 if open_side == "BUY" else -1.0
+        gross_pnl = (exit_price - base.finite(position.get("asterEntryPrice"))) * quantity * direction
+        commission = base.finite(position.get("entryCommission")) + (exit_price * quantity * self.aster_taker_fee_bps / 10000.0)
+        self._v52_ledger().append({"strategyId": slot, "symbol": symbol, "side": "LONG" if direction > 0 else "SHORT", "entryAt": position.get("openedAt"), "exitAt": base.now_ms(), "realizedPnl": gross_pnl - commission, "unrealizedPnl": 0.0, "commission": commission, "funding": 0.0, "deposits": 0.0, "withdrawals": 0.0, "unattributedDifference": 0.0, "clientOrderId": client, "tradeId": client, "positionId": position.get("positionId"), "exitReason": reason})
+        self.positions().pop(slot, None)
+        if slot == V50_SLOT:
+            self.state["v50CompletedTrades"] = int(self.state.get("v50CompletedTrades", 0)) + 1
+        self._clear_pending()
+        self.save()
+        self.log("v52-position-closed", slot=slot, symbol=symbol, reason=reason)
+
+    def _cancel_managed_open_orders(self) -> None:
+        if not self.live:
+            return
+        for order in self.aster.open_orders():
+            symbol = str(order.get("symbol") or "")
+            client = str(order.get("clientOrderId") or "")
+            if symbol not in base.ASTER_SYMBOL.values():
+                continue
+            if not client.startswith(("stock-v11eq-aster-only-", "stock-v52-")):
+                continue
+            self.aster.cancel(symbol, client)
+
+    def flatten_all(self, reason: str) -> None:
+        self._cancel_managed_open_orders()
+        for slot in list(self.positions()):
+            self.close_slot(slot, reason)
+        if self.live and self.managed_aster_positions():
+            raise RuntimeError("V52 flatten left unmanaged Aster Stock positions")
+        if self.state.get("pendingOrder"):
+            self.state["pendingOrder"] = None
+            self.save()
+
+    def capture_v50_signal(self, window: str, rows: dict) -> None:
+        signals = self.state.setdefault("v50SignalBasis", {})
+        if signals.get(window):
+            return
+        snapshot = {
+            symbol: {
+                "signalBasisBps": (aster.mid / reference.price - 1.0) * 10_000.0,
+                "timestamp": max(int(aster.received_ms), int(reference.received_ms)),
+            }
+            for symbol, (aster, _xyz, reference) in rows.items()
+        }
+        signals[window] = {symbol: row["signalBasisBps"] for symbol, row in snapshot.items()}
+        self.state.setdefault("v50SignalSnapshots", {})[window] = snapshot
+        self.state["v50SignalSnapshotDay"] = self.current_local_time().date().isoformat()
+        self.save()
+        self.log("v50-signal-recorded", window=window, basis=signals[window])
+
+    def _amzn_short_yahoo_gate(self, decision_ms: int) -> dict:
+        """Evaluate the AMZN SHORT Yahoo gate without affecting other paths."""
+
+        cache_ttl_ms = max(15_000, base.int_env("DISDEX_V52_AMZN_YAHOO_CACHE_MS", 60_000))
+        if (
+            self._amzn_yahoo_h1_bars_cached_at_ms <= 0
+            or decision_ms - self._amzn_yahoo_h1_bars_cached_at_ms >= cache_ttl_ms
+        ):
+            try:
+                self._amzn_yahoo_h1_bars_cache = fetch_yahoo_h1_bars(
+                    decision_ms=decision_ms,
+                    timeout_seconds=max(1.0, base.float_env("DISDEX_V52_AMZN_YAHOO_TIMEOUT_SECONDS", 5.0)),
+                )
+            except Exception as error:
+                self._amzn_yahoo_h1_bars_cache = []
+                self._amzn_yahoo_h1_bars_cached_at_ms = decision_ms
+                gate = evaluate_amzn_short_yahoo_gate(decision_ms=decision_ms, bars=[])
+                gate["sourceError"] = type(error).__name__
+            else:
+                self._amzn_yahoo_h1_bars_cached_at_ms = decision_ms
+                gate = evaluate_amzn_short_yahoo_gate(
+                    decision_ms=decision_ms,
+                    bars=self._amzn_yahoo_h1_bars_cache,
+                )
+        else:
+            gate = evaluate_amzn_short_yahoo_gate(
+                decision_ms=decision_ms,
+                bars=self._amzn_yahoo_h1_bars_cache,
+            )
+        gate["cacheFetchedAtTs"] = self._amzn_yahoo_h1_bars_cached_at_ms
+        gate["cacheTtlMs"] = cache_ttl_ms
+        self.state["amznShortYahooGate"] = gate
+        return gate
+
+    def v50_candidate(self, window: str, rows: dict, notional: float) -> Tuple[Optional[dict], Dict[str, List[str]]]:
+        signal = (self.state.get("v50SignalBasis") or {}).get(window) or {}
+        eligible: List[dict] = []
+        rejections: Dict[str, List[str]] = {}
+        now = base.now_ms()
+        ny_day = self.current_local_time().date().isoformat()
+        active_symbols = {str(p.get("symbol")) for p in self.positions().values()}
+        try:
+            gross = self.gross_snapshot()
+        except Exception:
+            gross = {}
+        equity = base.finite(gross.get("equityUsd"), 0.0)
+        requested_gross = notional / equity if equity > 0 else 0.0
+        stock_gross = base.finite(gross.get("stockGross"), 0.0)
+        total_gross = base.finite(gross.get("totalGross"), 0.0)
+        available_stock_gross = max(0.0, self.stock_gross_cap - stock_gross)
+        for symbol, (aster, _xyz, reference) in rows.items():
+            basis = (aster.mid / reference.price - 1.0) * 10_000.0
+            signal_basis = base.finite(signal.get(symbol), 0.0)
+            side = "SELL" if basis > 0 else "BUY"
+            exit_action = "BUY" if side == "SELL" else "SELL"
+            cost, detail = self.estimate_v11_cost(aster, exit_action, notional)
+            adverse = max(0.0, abs(basis) - abs(signal_basis))
+            reasons: List[str] = []
+            if symbol in active_symbols: reasons.append("SAME_SYMBOL_ACTIVE")
+            if abs(basis) < V50_MIN_ENTRY_BASIS_BPS: reasons.append("BASIS_BELOW_60")
+            if signal_basis * basis <= 0: reasons.append("SIGN_CHANGED")
+            if adverse > V50_MAX_ADVERSE_BASIS_MOVE_BPS: reasons.append("ADVERSE_BASIS_MOVE")
+            if now - aster.received_ms > base.V11_MAX_DATA_AGE_MS or now - reference.received_ms > base.V11_MAX_DATA_AGE_MS: reasons.append("STALE_DATA")
+            if abs(aster.received_ms - reference.received_ms) > base.V11_MAX_SOURCE_CLOCK_DIFF_MS: reasons.append("SOURCE_CLOCK_MISMATCH")
+            if cost > V50_MAX_ROUND_TRIP_COST_BPS: reasons.append("ROUND_TRIP_COST_OVER_60")
+            calculated_net_edge = abs(basis) - V50_CONVERGENCE_BPS - cost
+            if calculated_net_edge < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_7_5")
+            if aster.depth_usd(exit_action) < 2.0 * notional: reasons.append("DEPTH_BELOW_2X")
+            if aster.spread_bps > V50_MAX_SPREAD_BPS: reasons.append("SPREAD_OVER_20")
+            amzn_yahoo_gate = None
+            if str(symbol).upper() == "AMZN" and side == "SELL":
+                # This is intentionally scoped to new AMZN SHORT admission.
+                # Position management, AMZN LONG, and every other symbol do
+                # not consult Yahoo and cannot be blocked by its availability.
+                amzn_yahoo_gate = self._amzn_short_yahoo_gate(now)
+                if amzn_yahoo_gate.get("status") != "PASS":
+                    reasons.append(str(amzn_yahoo_gate.get("reason") or "AMZN_SHORT_YAHOO_REFERENCE_DATA_UNAVAILABLE"))
+            detail = detail if isinstance(detail, dict) else {}
+            accepted = not reasons
+            telemetry = {
+                "timestamp": now,
+                "nyDay": ny_day,
+                "strategy": V50_SLOT,
+                "symbol": symbol,
+                "window": window,
+                "direction": "SHORT" if side == "SELL" else "LONG",
+                "signalBasisBps": signal_basis,
+                "currentBasisBps": basis,
+                "basisBps": basis,
+                "estimatedRoundTripCostBps": cost,
+                "makerFeeBps": self.aster_maker_fee_bps,
+                "takerFeeBps": self.aster_taker_fee_bps,
+                "spreadBps": base.finite(detail.get("spreadBps"), base.finite(getattr(aster, "spread_bps", 0.0))),
+                "VWAPSlippageBps": base.finite(detail.get("vwapSlippageBps"), base.finite(detail.get("exitSlippageBps"), 0.0)),
+                "safetyBufferBps": base.finite(detail.get("safetyBufferBps"), self.v11_safety_buffer_bps),
+                "calculatedNetEdgeBps": calculated_net_edge,
+                "estimatedNetEdgeBps": calculated_net_edge,
+                "maxRoundTripCostBps": V50_MAX_ROUND_TRIP_COST_BPS,
+                "maxSpreadBps": V50_MAX_SPREAD_BPS,
+                "minimumNetEdgeBps": V50_MIN_NET_EDGE_BPS,
+                "accepted": accepted,
+                "rejectionReasons": reasons,
+                "grossRequested": requested_gross,
+                "grossAccepted": requested_gross if accepted else 0.0,
+                "availableStockGross": available_stock_gross,
+                "totalGrossBeforeReservation": total_gross,
+                "totalGrossAfterReservation": total_gross + (requested_gross if accepted else 0.0),
+            }
+            if amzn_yahoo_gate is not None:
+                telemetry["amznShortYahooGate"] = amzn_yahoo_gate
+            append_v52_diagnostic(self.state, ny_day=ny_day, row=telemetry)
+            self.log("v52-cost-telemetry", **telemetry)
+            rejections[symbol] = reasons
+            if not reasons:
+                eligible.append({"symbol": symbol, "basisBps": basis, "signalBasisBps": signal_basis, "side": side, "entryPrice": aster.bid if side == "BUY" else aster.ask, "estimatedRoundTripCostBps": cost, "adverseBasisMoveBps": adverse, "costDetail": detail, "route": f"POST_{window.replace(':', '')}"})
+        self.save()
+        if not eligible:
+            return None, rejections
+        return sorted(eligible, key=lambda row: (-abs(row["basisBps"]), row["symbol"]))[0], rejections
+
+    def manage_positions(self, rows: dict) -> None:
+        v11 = self.positions().get(V11_SLOT)
+        if v11:
+            symbol = str(v11["symbol"])
+            aster, _xyz, reference = rows[symbol]
+            basis = (aster.mid / reference.price - 1.0) * 10_000.0
+            entry = base.finite(v11["entryBasisBps"])
+            if abs(basis) <= base.V11_CONVERGENCE_BPS or basis * entry <= 0: self.close_slot(V11_SLOT, "BASIS_CONVERGED")
+            elif abs(basis) >= base.V11_BASIS_STOP_MULTIPLE * abs(entry): self.close_slot(V11_SLOT, "BASIS_STOP")
+            elif base.ny_seconds() >= base.clock("15:30:00"): self.close_slot(V11_SLOT, "FINAL_1530")
+        v50 = self.positions().get(V50_SLOT)
+        if not v50:
+            return
+        now = base.now_ms()
+        next_checkpoint = int(v50.get("nextCheckpointAt") or 0)
+        if now < next_checkpoint:
+            return
+        if now > next_checkpoint + 5 * 60_000:
+            self.close_slot(V50_SLOT, "MISSED_CHECKPOINT_FAIL_CLOSED")
+            return
+        symbol = str(v50["symbol"])
+        aster, _xyz, reference = rows[symbol]
+        basis = (aster.mid / reference.price - 1.0) * 10_000.0
+        entry = base.finite(v50["entryBasisBps"])
+        if abs(basis) <= V50_CONVERGENCE_BPS or basis * entry <= 0:
+            self.close_slot(V50_SLOT, "BASIS_CONVERGED"); return
+        if abs(basis) >= V50_BASIS_STOP_MULTIPLE * abs(entry):
+            self.close_slot(V50_SLOT, "BASIS_STOP"); return
+        checks = int(v50.get("checksCompleted", 0)) + 1
+        if checks >= V50_MAX_HOLDING_HOURS or now >= int(v50.get("maximumExitAt") or 0) or base.ny_seconds() >= base.clock("15:30:00"):
+            self.close_slot(V50_SLOT, "TIME_3H"); return
+        v50["checksCompleted"] = checks
+        v50["nextCheckpointAt"] = next_checkpoint + 60 * 60_000
+        self.save()
+        self.log("v50-checkpoint-hold", symbol=symbol, basisBps=basis, checksCompleted=checks)
+
+    def _v52_unrealized_pnl(self) -> float:
+        if not self.live:
+            return 0.0
+        marks = {str(row.get("symbol") or ""): row for row in self.aster.positions()}
+        total = 0.0
+        for position in self.positions().values():
+            symbol = base.ASTER_SYMBOL[str(position["symbol"])]
+            row = marks.get(symbol) or {}
+            mark = base.finite(row.get("markPrice") or row.get("entryPrice"))
+            entry = base.finite(position.get("asterEntryPrice"))
+            qty = base.finite(position.get("asterQty"))
+            direction = 1.0 if position.get("asterOpenSide") == "BUY" else -1.0
+            total += (mark - entry) * qty * direction
+        return total
+
+    def _v52_ledger(self) -> list:
+        ledger = self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
+        if ledger.get("strategyId") != STRATEGY_ID or not isinstance(ledger.get("trades"), list):
+            raise RuntimeError("V52 PnL ledger is invalid")
+        return ledger["trades"]
+
+    def enforce_daily_loss(self) -> bool:
+        latch = self.state.get("v52StrategyDailyLossLatch")
+        if not isinstance(latch, dict):
+            latch = None
+        try:
+            capital = base.float_env("DISDEX_V52_STRATEGY_CAPITAL_USD", 0.0)
+            if capital <= 0:
+                capital = max(self.minimum_entry_usd, self.excess_margin_usd())
+            next_latch = update_v52_strategy_daily_latch(
+                previous=latch,
+                trades=self._v52_ledger(),
+                unrealized_pnl=self._v52_unrealized_pnl(),
+                strategy_capital_usd=capital,
+                now_ms=base.now_ms(),
+                maximum_daily_loss_pct=self.max_daily_loss_pct,
+                data_available=capital > 0,
+            )
+        except Exception as error:
+            next_latch = {
+                "latchName": "v52StrategyDailyLossLatch",
+                "utcDay": dt.datetime.now(tz=base.UTC).date().isoformat(),
+                "strategyStartCapitalUsd": 0.0,
+                "realizedPnl": 0.0,
+                "unrealizedPnl": 0.0,
+                "commission": 0.0,
+                "funding": 0.0,
+                "deposits": 0.0,
+                "withdrawals": 0.0,
+                "unattributedDifference": 0.0,
+                "lossUsd": 0.0,
+                "lossPct": 0.0,
+                "lossLimitUsd": 0.0,
+                "tripped": True,
+                "failClosed": True,
+                "tripReason": f"V52 PnL API failure: {error}",
+                "lastCheckedAt": base.now_ms(),
+            }
+        self.state["v52StrategyDailyLossLatch"] = next_latch
+        self.save()
+        return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
+
+    def _flat_requires_account_lock(self, sec: int) -> bool:
+        if base.clock("09:59:55") <= sec <= base.clock("10:00:20"):
+            return True
+        if base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
+            return True
+        for window in V50_WINDOWS:
+            entry = base.clock(window + ":00")
+            if entry - 10 <= sec <= entry + 20:
+                return True
+        return False
+
+    def prepare_tick_inputs(self) -> dict:
+        local = self.current_local_time()
+        positions_open = bool(self.positions())
+        market_open = regular_us_equity_session(local)
+        sec = base.ny_seconds(local)
+        kill = self.kill_switch()
+        if kill and kill.get("action") == "FLATTEN_MANAGED":
+            completed = self._kill_flatten_completed(kill)
+            return {"local": local, "rows": None, "skipWithoutLock": completed, "killHold": completed}
+        if not kill:
+            self._clear_kill_flatten_latch()
+        if not market_open:
+            # No quote-based exit or venue mutation is possible in this branch.
+            # idle_tick still refreshes the strategy loss latch; emergency flatten
+            # above remains serialized, and the independent Margin Guard retains
+            # account-level protection for every managed position.
+            return {"local": local, "rows": None, "skipWithoutLock": True, "marketClosed": True}
+        if not positions_open and not self._flat_requires_account_lock(sec):
+            return {"local": local, "rows": None, "skipWithoutLock": True}
+        return {"local": local, "rows": self.books_and_refs(), "skipWithoutLock": False}
+
+    def idle_tick(self, prepared: dict) -> None:
+        if prepared.get("killHold"):
+            kill = self.kill_switch() or {}
+            self.log("v52-kill-hold-without-account-lock", reason=str(kill.get("reason") or "KILL_SWITCH"))
+            return
+        self.reset_days()
+        self.enforce_daily_loss()
+        local = prepared["local"]
+        if not regular_us_equity_session(local):
+            self.log(
+                "v52-market-closed",
+                market="US_EQUITY",
+                localDate=local.date().isoformat(),
+                localTime=local.isoformat(),
+                referenceFetch="deferred",
+                newOrdersAllowed=False,
+            )
+            return
+        self.update_history()
+
+    def tick(self, prepared: dict | None = None) -> None:
+        if prepared and prepared.get("preloadError") is not None:
+            raise prepared["preloadError"]
+        self.reset_days()
+        kill = self.kill_switch()
+        soft_hold = bool(kill and kill.get("action") == "HOLD_PROTECTED")
+        if kill and kill.get("action") == "FLATTEN_MANAGED":
+            self._flatten_kill_once(kill, "KILL_SWITCH")
+            return
+        if not kill:
+            self._clear_kill_flatten_latch()
+        # Daily strategy loss is an ENTRY latch, not an EXIT latch. An open
+        # position must continue to reach manage_positions() for BASIS_STOP,
+        # missed-checkpoint, and time/session exits. Keep the original
+        # FLATTEN_MANAGED and HOLD_PROTECTED decisions above unchanged.
+        strategy_daily_loss_held = self.enforce_daily_loss()
+        if strategy_daily_loss_held:
+            soft_hold = True
+            if not self.positions():
+                self.log(
+                    "v52-strategy-daily-loss-flat-entry-held",
+                    newOrdersAllowed=False,
+                    existingPosition=False,
+                )
+                return
+            self.log(
+                "v52-strategy-daily-loss-exit-management-continues",
+                newOrdersAllowed=False,
+                existingPosition=True,
+            )
+        if self.live:
+            risk_path = os.getenv("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH", ".runtime-state/shared/crypto-daily-risk.json")
+            ok, reason, _ = read_shared_crypto_daily_risk(risk_path)
+            if not ok:
+                soft_hold = True
+                self.log("v52-entry-held-shared-crypto-risk", reason=reason, path=risk_path)
+                if not self.positions():
+                    return
+        daily_kill = self.kill_switch()
+        if daily_kill and daily_kill.get("action") == "FLATTEN_MANAGED":
+            self._flatten_kill_once(daily_kill, "DAILY_LOSS")
+            return
+        if daily_kill and daily_kill.get("action") == "HOLD_PROTECTED":
+            soft_hold = True
+        local = prepared["local"] if prepared else self.current_local_time()
+        if not regular_us_equity_session(local):
+            self.log(
+                "v52-market-closed",
+                market="US_EQUITY",
+                localDate=local.date().isoformat(),
+                localTime=local.isoformat(),
+                referenceFetch="deferred",
+                newOrdersAllowed=False,
+            )
+            return
+        self.update_history()
+        sec = base.ny_seconds(local)
+        if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
+            return
+        rows = prepared.get("rows") if prepared else None
+        if rows is None:
+            rows = self.books_and_refs()
+        if self.v96_requires_margin():
+            if self.positions(): self.flatten_all("V96_MARGIN_PRIORITY")
+            return
+        if not self.state.get("v11SignalBasis") and base.clock("09:59:55") <= sec <= base.clock("10:00:20"):
+            self.record_v11_signal(rows)
+        for window in V50_WINDOWS:
+            entry = base.clock(window + ":00")
+            if entry - 10 <= sec < entry: self.capture_v50_signal(window, rows)
+        self.manage_positions(rows)
+        if soft_hold:
+            own_hold = self._own_recoverable_hold()
+            if own_hold:
+                self.log(
+                    "v52-recoverable-hold-requires-manual-review",
+                    reason=str(own_hold.get("reason") or "RECOVERABLE_HOLD"),
+                    newOrdersAllowed=False,
+                )
+            else:
+                self.log(
+                    "v52-soft-hold-entry-blocked",
+                    reason=str((self.kill_switch() or {}).get("reason") or "SHARED_RISK_RECOVERY_GRACE"),
+                    operatorReviewRequired=True,
+                    newOrdersAllowed=False,
+                )
+            return
+        if not self.state.get("v11Attempted") and base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
+            gross, snapshot = self.available_slot_gross(V11_SLOT)
+            self.v11_notional = gross * snapshot["equityUsd"]
+            candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v11_candidates(rows)
+            self.log("v52-v11-decision", candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
+            if candidate:
+                self.state["v11Attempted"] = True; self.save()
+                try:
+                    opened = self.open_basis_position(V11_SLOT, candidate, gross)
+                except Exception:
+                    if not self.state.get("pendingOrder") and V11_SLOT not in self.positions():
+                        self.state["v11Attempted"] = False; self.save()
+                    raise
+                if not opened and getattr(self, "_v52_last_entry_blocked_before_order", False):
+                    self.state["v11Attempted"] = False; self.save()
+        attempted = self.state.setdefault("v50Attempted", {})
+        for window in V50_WINDOWS:
+            entry = base.clock(window + ":00")
+            if attempted.get(window) or not (entry <= sec <= entry + 20): continue
+            if int(self.state.get("v50CompletedTrades", 0)) >= V50_MAX_DAILY_TRADES or V50_SLOT in self.positions():
+                attempted[window] = True; self.save(); continue
+            gross, snapshot = self.available_slot_gross(V50_SLOT)
+            notional = gross * snapshot["equityUsd"]
+            candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v50_candidate(window, rows, notional)
+            self.log("v52-v50-decision", window=window, candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
+            if candidate:
+                attempted[window] = True; self.save()
+                try:
+                    opened = self.open_basis_position(V50_SLOT, candidate, gross)
+                except Exception:
+                    if not self.state.get("pendingOrder") and V50_SLOT not in self.positions():
+                        attempted[window] = False; self.save()
+                    raise
+                if not opened and getattr(self, "_v52_last_entry_blocked_before_order", False):
+                    attempted[window] = False; self.save()
+
+    def _loop_interval_ms(self, prepared: dict) -> int:
+        # Protected/market-closed holds remain order-blocked; keep the retry
+        # cadence configurable down to the documented 5s floor so recovery
+        # does not wait longer than the live health contract permits.
+        idle_ms = max(5_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 15_000))
+        if prepared.get("skipWithoutLock") or prepared.get("killHold") or prepared.get("upstreamHold") or prepared.get("marketClosed"):
+            return idle_ms
+        active = regular_us_equity_session() or bool(self.positions())
+        return 250 if active else idle_ms
+
+    def preflight(self, read_only: bool = False) -> dict:
+        if self.live:
+            monitor_only = base.bool_env("DISDEX_V52_MONITOR_ONLY", False)
+            live_enabled = base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False)
+            if monitor_only:
+                if live_enabled:
+                    raise RuntimeError("V52 monitor-only requires LIVE_EXECUTION_ENABLED=false")
+                if not read_only:
+                    raise RuntimeError("V52 monitor-only permits read-only preflight only")
+            elif not live_enabled:
+                raise RuntimeError("V52 LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true")
+            if os.getenv("DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT") != LIVE_ACK: raise RuntimeError(f"V52 LIVE requires acknowledgement {LIVE_ACK}")
+        if read_only:
+            if not self.state_root.is_dir():
+                raise RuntimeError("V52 state directory missing for read-only preflight")
+            if not self.state_path.is_file():
+                raise RuntimeError("V52 state file missing for read-only preflight")
+        else:
+            self.state_root.mkdir(parents=True, exist_ok=True); self.save()
+        preflight_kill = self.kill_switch()
+        if preflight_kill and preflight_kill.get("action") == "FLATTEN_MANAGED":
+            raise RuntimeError("Shared hard Kill Switch is active")
+        if self.state.get("pendingOrder"): raise RuntimeError("V52 pending order must be resolved before no-order preflight")
+        document = self._quality102_document() if self.live else None
+        if document is not None and document[1].get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+        self.aster.ping(); self.aster.exchange_info()
+        missing = [symbol for symbol in base.ASTER_SYMBOL.values() if symbol not in self.aster._rules]
+        if missing: raise RuntimeError(f"Aster Stock symbols missing: {missing}")
+        from disdex_v13d_v11eq_stock_free_live_engine import reference_health, regular_us_equity_session
+        if regular_us_equity_session():
+            health = reference_health(self.reference)
+            for symbol in base.SYMBOLS:
+                quote = self.reference.quote(symbol)
+                if base.now_ms() - quote.timestamp_ms > base.V11_MAX_DATA_AGE_MS: raise RuntimeError(f"Reference quote stale for {symbol}")
+            reference_health_status = health.get("status")
+            reference_freshness_mode = "REQUIRED_DURING_US_REGULAR_SESSION"
+        else:
+            # IEX does not publish fresh quotes outside the regular session.  Starting
+            # the daemon must remain possible; entries remain gated by fresh data when
+            # the next regular session begins.
+            reference_health_status = "DEFERRED_MARKET_CLOSED"
+            reference_freshness_mode = "DEFERRED_MARKET_CLOSED"
+        self.reconcile(read_only=read_only)
+        snapshot = self.gross_snapshot(); self.assert_gross_safe(snapshot)
+        return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": reference_health_status, "referenceFreshnessMode": reference_freshness_mode, "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
+
+    def run(self, daemon: bool) -> None:
+        started_once = False
+        while not self.stop_requested:
+            defer_until = int(getattr(self, "_rate_budget_defer_until_ms", 0))
+            if defer_until > base.now_ms():
+                time.sleep(max(0, defer_until - base.now_ms()) / 1000.0)
+                continue
+            if self._upstream_fail_closed_hold:
+                time.sleep(max(1, base.int_env("DISDEX_V52_UPSTREAM_HOLD_SECONDS", 60)))
+                self._upstream_fail_closed_hold = False
+                continue
+            started = base.now_ms()
+            try:
+                prepared = self.prepare_tick_inputs()
+            except Exception as error:
+                if rate_budget_deferred_error(error):
+                    self._defer_rate_budget(error, "PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True, "rateBudgetDeferred": True}
+                elif upstream_fail_closed_error(error):
+                    self._hold_upstream_fail_closed(error, "PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "upstreamHold": True}
+                elif self._local_quote_stale_retry(error, "PRELOCK"):
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True, "quoteStaleLocalHold": True}
+                elif transient_reference_error(error) and not self.positions():
+                    self.log("v52-entry-held-reference-validation", error=str(error), phase="PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True}
+                else:
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "preloadError": error}
+            if prepared.get("upstreamHold"):
+                if not daemon:
+                    break
+            elif prepared.get("skipWithoutLock"):
+                self.idle_tick(prepared)
+            elif not self.lock.acquire():
+                self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
+            else:
+                try:
+                    if not started_once:
+                        self.reset_days(); self.reconcile()
+                        self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
+                        started_once = True
+                    self.tick(prepared)
+                    self._stock_quote_stale_since_ms = 0
+                except Exception as error:
+                    self.log("v52-tick-error", error=str(error))
+                    if rate_budget_deferred_error(error):
+                        self._defer_rate_budget(error, "TICK")
+                    elif self._shared_kill_switch_integrity_error(error):
+                        # No kill-switch repair or activation here: a malformed
+                        # active shared state must remain blocked for owner review.
+                        self._hold_upstream_fail_closed(error, "KILL_SWITCH_TICK")
+                    elif upstream_fail_closed_error(error):
+                        self._hold_upstream_fail_closed(error, "TICK")
+                    elif self._local_quote_stale_retry(error, "TICK"):
+                        pass
+                    elif transient_reference_error(error) and not self.positions():
+                        self.log("v52-entry-held-reference-validation", error=str(error))
+                    elif self.live:
+                        self._upstream_fail_closed_hold = True
+                        if not self._require_manual_review_for_expired_hold(error, "TICK"):
+                            self.activate_kill_switch(
+                                f"V52 recoverable tick error: {error}",
+                                action="HOLD_PROTECTED",
+                                recoverable=True,
+                                scope="V52_REFERENCE_ONLY" if transient_reference_error(error) else "GLOBAL",
+                            )
+                            self.log(
+                                "v52-recoverable-error-hold",
+                                error=str(error),
+                                graceDeadlineAt=(self._own_recoverable_hold() or {}).get("graceDeadlineAt"),
+                                existingPositionsRetained=bool(self.positions()),
+                                newOrdersAllowed=False,
+                            )
+                finally:
+                    self.lock.release()
+            if not daemon: break
+            interval = self._loop_interval_ms(prepared)
+            time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
+
+
+def self_test() -> None:
+    assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
+    assert V50_WINDOWS == ("11:30", "12:30", "13:30")
+    assert V50_WINDOW_POLICY == "POST_EARLY3"
+    assert V50_MIN_ENTRY_BASIS_BPS == 60.0
+    assert V50_CONVERGENCE_BPS == 20.0
+    assert V50_BASIS_STOP_MULTIPLE == 1.75
+    assert V50_MIN_NET_EDGE_BPS == 7.5
+    assert V50_MAX_ROUND_TRIP_COST_BPS == 60.0
+    assert V50_MAX_SPREAD_BPS == 20.0
+    def _ms(value: str) -> int:
+        return int(dt.datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+    exact_gate = evaluate_amzn_short_yahoo_gate(
+        decision_ms=_ms("2026-10-19T16:30:00Z"),
+        bars=[
+            {"start_ms": _ms("2026-10-16T13:30:00Z"), "close": 100.0},
+            {"start_ms": _ms("2026-10-19T15:30:00Z"), "close": 101.0},
+        ],
+    )
+    assert exact_gate["status"] == "PASS"
+    strict_gate = evaluate_amzn_short_yahoo_gate(
+        decision_ms=_ms("2026-10-19T16:30:00Z"),
+        bars=[
+            {"start_ms": _ms("2026-10-16T13:30:00Z"), "close": 100.0},
+            {"start_ms": _ms("2026-10-19T15:30:00Z"), "close": 101.000001},
+        ],
+    )
+    assert strict_gate["status"] == "BLOCK"
+    assert strict_gate["reason"] == "AMZN_SHORT_YAHOO_PREV_CLOSE_GT_1PCT"
+    engine = object.__new__(V52AsterOnlyEngine)
+    engine.live = True
+    engine.crypto_gross_cap = 3.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 3.5
+    engine.v11_gross_cap = 1.0; engine.v50_gross_cap = 1.0; engine.gross_tolerance = 0.03
+    engine.state = {"positions": {V11_SLOT: {}}}; engine.v96_requires_margin = lambda: False
+    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
+    gross, _ = engine.available_slot_gross(V50_SLOT)
+    assert gross == 0.5
+    assert is_brief_local_stock_quote_staleness('HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote","ageMs":32000,"maximumAgeMs":30000}')
+    assert not is_brief_local_stock_quote_staleness('HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"quote_unavailable"}')
+    assert not is_brief_local_stock_quote_staleness('ASTER_GLOBAL_RATE_BUDGET_SATURATED:5000')
+    assert not is_brief_local_stock_quote_staleness('V52 managed Stock quantity reconciliation mismatch')
+    assert transient_reference_error("iex_quote_stale META")
+    assert transient_reference_error("cross_source_divergence TSLA")
+    assert not transient_reference_error("Managed Stock position reconciliation mismatch")
+
+    with tempfile.TemporaryDirectory(prefix="v52-soft-hold-selftest-") as temporary:
+        hold_engine = object.__new__(V52AsterOnlyEngine)
+        hold_engine.kill_switch_path = Path(temporary) / "kill-switch.json"
+        hold_engine.log = lambda *_args, **_kwargs: None
+        hold_engine._recovery_grace_ms = lambda: 10 * 60_000
+        hold_engine.activate_kill_switch(
+            "temporary upstream error",
+            action="HOLD_PROTECTED",
+            recoverable=True,
+        )
+        soft = hold_engine.kill_switch()
+        assert soft is not None
+        assert soft["action"] == "HOLD_PROTECTED"
+        assert soft["recoverable"] is True
+        assert soft.get("graceDeadlineAt")
+        assert hold_engine._recoverable_hold_expired(soft) is False
+        assert hold_engine.kill_switch() == soft
+        hold_engine.activate_kill_switch(
+            "grace expired",
+            action="FLATTEN_MANAGED",
+            recoverable=False,
+        )
+        hard = hold_engine.kill_switch()
+        assert hard is not None
+        assert hard["action"] == "FLATTEN_MANAGED"
+        assert hard.get("escalatedFrom") == "HOLD_PROTECTED"
+
+    print("V52 V11-EQ + V50 Aster-only live engine self-test: PASS")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=("paper", "live"), default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
+    parser.add_argument("--daemon", action="store_true"); parser.add_argument("--once", action="store_true")
+    parser.add_argument("--preflight", action="store_true"); parser.add_argument("--preflight-readonly", action="store_true"); parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test: self_test(); return 0
+    runner = V52AsterOnlyEngine(args.mode)
+    signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True)); signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
+    if args.preflight_readonly: print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":"))); return 0
+    if args.preflight: print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False)); return 0
+    runner.run(args.daemon); return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

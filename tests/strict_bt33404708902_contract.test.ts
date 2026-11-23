@@ -1,0 +1,152 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
+import {
+    markToMarketReducePosition,
+    planStrictPortfolio,
+    type StrictPortfolioPosition,
+} from "../lib/disdex-strict-portfolio-planner";
+import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
+
+const NOW = 1_800_000_000_000;
+
+function position(input: Partial<StrictPortfolioPosition> & Pick<StrictPortfolioPosition, "id" | "strategy" | "symbol" | "quantity" | "entryPrice" | "markPrice">): StrictPortfolioPosition {
+    const markSource = input.markSource ?? (input.strategy === "QUALITY102" ? "BINANCE_VISION_USDM_1M_OPEN" : undefined);
+    return {
+        side: input.side || "LONG",
+        entryTs: input.entryTs ?? NOW - 3_600_000,
+        updatedAt: input.updatedAt ?? NOW,
+        feeBpsPerSide: input.feeBpsPerSide ?? 0,
+        fundingPerDay: input.fundingPerDay ?? 0,
+        markSource,
+        markSourceEvidence: input.markSourceEvidence ?? (markSource === "BINANCE_VISION_USDM_1M_OPEN"
+            ? { source: "BINANCE_VISION_USDM_1M_OPEN", timestamp: NOW, crossChecked: true }
+            : undefined),
+        ...input,
+    };
+}
+
+test("source identity and strict caps are immutable", () => {
+    assert.equal(STRICT_BT33404708902.sourceRun, "33404708902");
+    assert.equal(STRICT_BT33404708902.sourceSha, "aec066fefd761b12f07e6927b5f2a524f88ca08b");
+    assert.equal(STRICT_BT33404708902.quality102PositionCap, 1.5);
+    assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1.5);
+    assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
+    assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
+});
+
+test("all five simultaneous intents admit base strategies before blocking historical Q102 and preserving causal priority", () => {
+    const plan = planStrictPortfolio({
+        equity: 1_000,
+        now: NOW,
+        active: [],
+        entryGrossCaps: {cryptoGrossCap:3,totalGrossCap:3.5},
+        intents: [
+            { idempotencyKey: "q", strategy: "QUALITY102", symbol: "SOLUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
+            { idempotencyKey: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
+            { idempotencyKey: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 0.85, notionalUsd: 850, signalTs: NOW },
+            { idempotencyKey: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
+            { idempotencyKey: "q102-causal-v1", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
+        ],
+        quality102CausalV1Ready: true,
+    });
+    assert.equal(plan.status, "planned");
+    assert.deepEqual(plan.accepted.map((intent) => intent.strategy), ["V52", "PENGU_DUAL_LS_V2", "V12", "QUALITY102_CAUSAL_V1"]);
+    assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102")?.reason, "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED");
+    assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102_CAUSAL_V1"), undefined);
+    assert.ok(plan.totals.cryptoGross <= 3 + 1e-9);
+    assert.ok(plan.totals.totalGross <= 3.5 + 1e-9);
+});
+
+test("MTM reduction is restart/reconciliation stable and preserves remaining cost basis", () => {
+    const input = {
+        position: position({
+            id: "q102",
+            strategy: "QUALITY102",
+            symbol: "SOLUSDT",
+            side: "SHORT",
+            quantity: 10,
+            entryPrice: 100,
+            markPrice: 90,
+            feeBpsPerSide: 5,
+            fundingPerDay: 0.001,
+        }),
+        reduceQuantity: 4,
+        markPrice: 90,
+        markTs: NOW,
+    } as const;
+    const first = markToMarketReducePosition(input);
+    const afterReload = markToMarketReducePosition({
+        ...input,
+        position: { ...input.position, quantity: input.position.quantity },
+    });
+    assert.deepEqual(afterReload, first);
+    assert.equal(first.remainingQuantity, 6);
+    assert.equal(first.remainingEntryPrice, 100);
+    assert.ok(first.realizedPnl > 0);
+    assert.ok(first.transactionCost > 0);
+    assert.ok(first.fundingCost > 0);
+    assert.equal(first.accounting, "MARK_TO_MARKET_REALIZED_PNL");
+});
+
+test("same-symbol base entry fully flattens causal Quality102 before the base order", () => {
+    const q = position({
+        id: "q102-av", strategy: "QUALITY102_CAUSAL_V1", symbol: "AVAXUSDT", quantity: 5, entryPrice: 90, markPrice: 100, updatedAt: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+    });
+    const plan = planStrictPortfolio({
+        equity: 1000,
+        now: NOW,
+        active: [q],
+        intents: [{ idempotencyKey: "v12-avax", strategy: "V12", symbol: "AVAXUSDT", side: "LONG", gross: 1.0, notionalUsd: 1000, signalTs: NOW }],
+        quality102CausalV1Ready: true,
+    });
+    assert.equal(plan.status, "planned");
+    assert.equal(plan.accepted[0]?.strategy, "V12");
+    assert.equal(plan.reductions.length, 1);
+    assert.equal(plan.reductions[0]?.strategy, "QUALITY102_CAUSAL_V1");
+    assert.equal(plan.reductions[0]?.symbol, "AVAXUSDT");
+    assert.equal(plan.reductions[0]?.remainingQuantity, 0);
+    assert.equal(plan.activePositions.some((row) => row.strategy === "QUALITY102_CAUSAL_V1"), false);
+});
+
+test("a quality position is reduced at its current mark when a base order needs capacity", () => {
+    const plan = planStrictPortfolio({
+        equity: 1_000,
+        now: NOW,
+        researchMode: true,
+        entryGrossCaps: {cryptoGrossCap:3,totalGrossCap:3.5},
+        active: [
+            position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 50, entryPrice: 10, markPrice: 10 }),
+            position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 10, markPrice: 10 }),
+            position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 10, markPrice: 10 }),
+        ],
+        intents: [{ idempotencyKey: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW }],
+    });
+    assert.equal(plan.status, "planned");
+    assert.equal(plan.accepted[0]?.strategy, "V52");
+    assert.equal(plan.reductions.length, 1);
+    assert.equal(plan.reductions[0]?.accounting, "MARK_TO_MARKET_REALIZED_PNL");
+    assert.equal(plan.reductions[0]?.markPrice, 10);
+    assert.ok(plan.totals.cryptoGross <= STRICT_BT33404708902.cryptoGrossCap + 1e-9);
+    assert.ok(plan.totals.totalGross <= STRICT_BT33404708902.totalGrossCap + 1e-9);
+});
+
+test("missing look-ahead proof keeps Quality102 fail-closed", () => {
+    const result = evaluateQuality102LiveSelector({
+        decisionTs: NOW,
+        manifest: {
+            sourceKind: "dynamic-selector",
+            sourceRun: STRICT_BT33404708902.sourceRun,
+            sourceSha: STRICT_BT33404708902.sourceSha,
+            noLookahead: false,
+            fixedHistoricalTimestamps: false,
+            selectorParity: false,
+            availableAtTs: NOW - 1,
+        },
+    });
+    assert.equal(result.status, "LIVE_BLOCKED_FAIL_CLOSED");
+    assert.equal(result.quality102LiveSelectorParity, false);
+    assert.equal(result.quality102LiveBlockedFailClosed, true);
+});

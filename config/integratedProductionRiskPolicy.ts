@@ -1,0 +1,97 @@
+import familySideGross from "./q102FamilySideGross.json";
+import v52V50Runtime from "./v52V50Runtime.json";
+
+export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
+  HIGH_VOL: 1.0,
+  MR: 0.75,
+  BRK: 0.75,
+  REV: 1.5,
+  PB: 2.0,
+} as const);
+
+export type Q102CausalV4GrossFamily = keyof typeof Q102_CAUSAL_V4_FAMILY_GROSS;
+
+/**
+ * Single production contract for the integrated V12/PENGU/Q102/V52 portfolio.
+ * Importing this module has no side effects and cannot enable a runner or
+ * submit an order.
+ */
+export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
+  v12BaseAggregateGross: 2.0,
+  v12DynamicAggregateGrossCap: 2.0,
+  v12PerPositionGrossCap: 1.0,
+  v12MaximumPositions: 3,
+  fetResidualMaximumGross: 1.0,
+  fetResidualMinimumGross: 0.05,
+  penguMaximumGross: 1.0,
+  // HYPE/ZEC are lower-priority, long-only sidecars. These values are risk
+  // and per-sleeve ceilings; they never multiply the strategy notional.
+  hypeLongRiskPct: 5.0,
+  // The approved HYPE trend overlay has its own 1.50x sleeve ceiling.  ZEC
+  // remains a separate, disabled research sidecar at the legacy 1.00x cap.
+  hypeLongMaximumGross: 1.5,
+  zecLongRiskPct: 4.5,
+  hypeZecMaximumGross: 1.0,
+  hypeZecMaximumReductionFraction: 0.5,
+  q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
+  q102CausalV4MaximumGross: 3.0,
+  q102MaximumPositions: 1,
+  // Normal operating caps proven by the 2026-09-22 DD<20% integrated replay.
+  cryptoGrossCap: 3.0,
+  stockGrossCap: Number(v52V50Runtime.stockAggregateGross),
+  stockSlotGrossCap: Number(v52V50Runtime.slotGross),
+  totalGrossCap: 4.25,
+  // Absolute ceilings. Entry exposure may only expand above the normal caps
+  // through the integrated profit/DD/margin governor.
+  cryptoGrossHardCap: 5.0,
+  totalGrossHardCap: 8.0,
+  grossGovernorBaseAvailableBalanceReservePct: 15.0,
+  cryptoDailyLossPct: 7.5,
+  stockDailyLossPct: 3.5,
+  killSwitchRecoveryGraceMs: 10 * 60_000,
+  requiredAsterLeverage: 5,
+  requiredAsterMarginType: "cross" as const,
+  v50: Object.freeze(v52V50Runtime),
+});
+
+export function quality102GrossForFamily(family: string | undefined, side?: number): number {
+  const key = String(family || "").trim().toUpperCase() as Q102CausalV4GrossFamily;
+  if ((key === "HIGH_VOL" || key === "REV" || key === "PB") && side !== 1 && side !== -1) throw new Error(`Q102_SIDE_GROSS_REQUIRED:${key}`);
+  const table = familySideGross as Record<string, {LONG?:number;SHORT?:number;default?:number}>;
+  const row = table[key];
+  const value = row?.default ?? (side === 1 ? row?.LONG : row?.SHORT);
+  if (value === undefined || !Number.isFinite(value) || value <= 0) {
+    throw new Error(`QUALITY102_CAUSAL_V4_FAMILY_GROSS_UNRESOLVED:${family || "UNKNOWN"}`);
+  }
+  return value!;
+}
+
+export function resolveIntegratedProductionRiskPolicy(env: Record<string, string | undefined> = process.env) {
+  const expected: Record<string, number> = {
+    V12_BASE_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross,
+    V12_DYNAMIC_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
+    PENGU_DUAL_LS_V2_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
+    HYPE_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongRiskPct,
+    HYPE_LONG_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongMaximumGross,
+    ZEC_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.zecLongRiskPct,
+    HYPE_ZEC_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross,
+    HYPE_ZEC_MAX_REDUCTION_FRACTION: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumReductionFraction,
+    QUALITY102_CAUSAL_V1_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross,
+    CRYPTO_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+    CRYPTO_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap,
+    STOCK_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap,
+    TOTAL_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+    TOTAL_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap,
+    DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoDailyLossPct,
+    DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS: INTEGRATED_PRODUCTION_RISK_POLICY.killSwitchRecoveryGraceMs,
+  };
+  for (const [name, value] of Object.entries(expected)) {
+    const raw = env[name];
+    if (raw === undefined || raw.trim() === "") continue;
+    const actual = Number(raw);
+    if (!Number.isFinite(actual) || Math.abs(actual - value) > 1e-12) {
+      throw new Error(`INTEGRATED_PRODUCTION_RISK_CONTRACT_MISMATCH:${name}:${raw}:EXPECTED_${value}`);
+    }
+  }
+  return INTEGRATED_PRODUCTION_RISK_POLICY;
+}

@@ -1,0 +1,136 @@
+import assert from "node:assert/strict";
+
+import { AsterV3Client } from "../lib/aster-v3-client";
+import type { DirectOpenOrder, DirectPosition } from "../lib/direct-trade-executor";
+import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
+import {
+    assertQuality102CausalV1LiveActivation,
+    assertQuality102CausalV1ReadOnlyPreflightConfiguration,
+    findQ102PreflightManagedProtectiveOrders,
+    isQ102PreflightManagedProtectiveOrder,
+    parseQuality102CausalV1Symbols,
+    resolveQuality102CausalV1LiveConfig,
+    shouldRunQuality102CausalV1PreflightHistoryCheck,
+} from "./disdex-quality102-causal-v1-live-runner";
+
+const SHA = "a".repeat(40);
+
+const baseEnv: NodeJS.ProcessEnv = {
+    QUALITY102_CAUSAL_V1_MODE: "LIVE",
+    QUALITY102_CAUSAL_V1_ENABLED: "true",
+    QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED: "true",
+    QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED: "true",
+    QUALITY102_CAUSAL_V1_OPERATOR_ARMED: "true",
+    QUALITY102_CAUSAL_V1_SELECTOR_MODE: "CAUSAL_V4",
+    QUALITY102_CAUSAL_V1_LIVE_ACK: SHA,
+    QUALITY102_CAUSAL_V1_SYMBOLS: "SUIUSDT,OPUSDT,SEIUSDT",
+    DISDEX_RUNTIME_COMMIT_SHA: SHA,
+};
+
+assert.deepEqual(parseQuality102CausalV1Symbols("OPUSDT, suiUSDT,OPUSDT"), ["OPUSDT", "SUIUSDT"]);
+assert.throws(() => parseQuality102CausalV1Symbols("BTCUSDT"), /UNSAFE_BASE_OVERLAP/);
+const config = resolveQuality102CausalV1LiveConfig(baseEnv);
+assert.deepEqual(config.highVolSymbols, ["OPUSDT", "SEIUSDT", "SUIUSDT"]);
+assert.ok(config.symbols.includes("FETUSDT"));
+assert.ok(config.symbols.includes("AVAXUSDT"));
+assert.ok(config.symbols.includes("AAVEUSDT"));
+assert.ok(config.symbols.length > config.highVolSymbols.length);
+assert.equal(config.maximumGross, 3.0);
+assert.equal(config.cryptoGrossCap, 3);
+assert.equal(config.totalGrossCap, 4.25);
+assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));
+const adoptedEnv: NodeJS.ProcessEnv = {
+    ...baseEnv,
+    QUALITY102_Q102_PROFIT_FLOOR_ENABLED: "true",
+    QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED: "true",
+    QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK: SHA,
+};
+const adoptedConfig = resolveQuality102CausalV1LiveConfig(adoptedEnv);
+assert.equal(adoptedConfig.adoptedExitPoliciesEnabled, true);
+assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(adoptedConfig, adoptedEnv));
+assert.throws(() => assertQuality102CausalV1LiveActivation(adoptedConfig, { ...adoptedEnv, QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK: "b".repeat(40) }), /ADOPTED_EXIT_POLICIES_ACK/);
+assert.throws(() => assertQuality102CausalV1LiveActivation({ ...adoptedConfig, profitFloorEnabled: false }, adoptedEnv), /EXISTING_FLOOR_REQUIRED/);
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck(baseEnv), true);
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK: "false" }), false);
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, PREFLIGHT_HISTORY_CHECK: "false" }), false);
+assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, selectorMode: "HISTORICAL_FROZEN" }, baseEnv), /SELECTOR_MODE_ACK/);
+assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, runtimeCommitSha: "" }, baseEnv), /COMMIT_SHA_REQUIRED/);
+
+const penguLongPosition: DirectPosition = {
+    symbol: "PENGUUSDT",
+    quantity: 4244,
+    entryPrice: 0.007256,
+    markPrice: 0.00736,
+    unrealizedPnl: 0,
+    pnlPct: 0,
+    notionalUsd: 31.24,
+    positionSide: "BOTH",
+    leverage: 5,
+    updatedAt: Date.now(),
+};
+const splitProtectiveOrders: DirectOpenOrder[] = [
+    { symbol: "PENGUUSDT", clientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1", side: "SELL", status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+    { symbol: "PENGUUSDT", clientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", side: "SELL", status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+];
+assert.equal(isQ102PreflightManagedProtectiveOrder(splitProtectiveOrders[0], [penguLongPosition]), false);
+assert.deepEqual(
+    findQ102PreflightManagedProtectiveOrders(splitProtectiveOrders, [penguLongPosition]).map((order) => order.clientOrderId),
+    splitProtectiveOrders.map((order) => order.clientOrderId),
+);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], quantity: 2000 },
+    { ...splitProtectiveOrders[1], quantity: 2000 },
+], [penguLongPosition]).length, 0);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], quantity: 2200 },
+    { ...splitProtectiveOrders[1], quantity: 2200 },
+], [penguLongPosition]).length, 0);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], side: "BUY" },
+    splitProtectiveOrders[1],
+], [penguLongPosition]).length, 0);
+
+const preflightEnv: NodeJS.ProcessEnv = {
+    ...baseEnv,
+    QUALITY102_CAUSAL_V1_ENABLED: "false",
+    QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED: "false",
+    QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED: "false",
+    QUALITY102_CAUSAL_V1_OPERATOR_ARMED: "false",
+};
+const preflightConfig = resolveQuality102CausalV1LiveConfig(preflightEnv);
+assert.doesNotThrow(() => assertQuality102CausalV1ReadOnlyPreflightConfiguration(preflightConfig, preflightEnv));
+assert.throws(() => assertQuality102CausalV1LiveActivation(preflightConfig, preflightEnv), /LIVE_GATES_NOT_ALL_ENABLED/);
+
+async function zeroWidthHistoryRangeIsExpandedForAster() {
+    const requests: URL[] = [];
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        readOnlyRateLimitMaxRetries: 0,
+        fetchImpl: async (input) => {
+            const url = new URL(String(input));
+            requests.push(url);
+            const start = Number(url.searchParams.get("startTime"));
+            const end = Number(url.searchParams.get("endTime"));
+            if (end <= start) return new Response(JSON.stringify({ code: -1023, msg: "Start time is greater than end time." }), { status: 400 });
+            return new Response(JSON.stringify([[start, "1", "1.1", "0.9", "1", "1", start + 3_600_000 - 1, "1", 1, "1", "1", "0"]]), { status: 200 });
+        },
+    });
+    const provider = new Quality102CausalV1AsterMarketDataProvider(client, {
+        symbols: ["SUIUSDT"],
+        historyHours: 181 * 24,
+        pageLimit: 500,
+        now: () => 10_000_000,
+    });
+    const internal = provider as unknown as { fetchRange: (symbol: string, startTime: number, endTime: number) => Promise<Array<{ timestampMs: number }>> };
+    const rows = await internal.fetchRange("SUIUSDT", 1_000, 1_000);
+    assert.equal(rows.length, 1);
+    assert.equal(requests[0]?.searchParams.get("startTime"), "1000");
+    assert.equal(requests[0]?.searchParams.get("endTime"), "1001");
+}
+
+zeroWidthHistoryRangeIsExpandedForAster().then(() => {
+    console.log("QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS", JSON.stringify({ ordersSent: 0, syntheticOrders: 0, testOrders: 0 }));
+}).catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});

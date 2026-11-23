@@ -1,0 +1,86 @@
+/** Signed account / journal identity rules before retiring STOP after a verified EXIT. */
+import type {State} from "./v12-v4-production-lifecycle";
+import type {V4OrderIntent} from "./v12-v4-execution-store";
+import type {AsterOrderResponse,AsterPositionRiskRow} from "./aster-v3-client";
+
+type Stop=Pick<AsterOrderResponse,"symbol"|"clientOrderId"|"side"|"type"|"reduceOnly"|"origQty"|"executedQty"|"status"|"stopPrice">;
+type Position=Pick<AsterPositionRiskRow,"symbol"|"positionAmt">;
+// A stale or altered conditional trigger is not acceptable evidence that a
+// surviving virtual leg is protected before any other STOP is cancelled.
+function attestStopTrigger(intent:V4OrderIntent,order:Stop,legId:string){
+ const stored=(intent.command as {price?:unknown}|undefined)?.price;
+ const expected=typeof stored==="number"?stored:NaN;
+ const actual=order.stopPrice===undefined||order.stopPrice===null?NaN:Number(order.stopPrice);
+ if(!(expected>0)||!Number.isFinite(expected)||!(actual>0)||!Number.isFinite(actual)||
+    Math.abs(expected-actual)>Math.max(1e-12,expected*1e-10))
+   throw Error("V4_RETIRE_SURVIVING_STOP_TRIGGER_MISMATCH:"+legId);
+}
+
+/** A full reduce-only EXIT can cause Aster to expire its unused STOP itself. */
+export function attestV4CompletedExitMissingStop(args:{
+ state:State;intents:Record<string,V4OrderIntent>;legId:string;stopClientOrderId:string;
+ proof:AsterOrderResponse|undefined;
+}):void{
+ const {state,intents,legId,stopClientOrderId,proof}=args;
+ const leg=state.legs[legId],intent=intents[stopClientOrderId];
+ if(!leg||leg.status!=="CLOSED"||leg.qty!==0||!intent||intent.legId!==legId||intent.action!=="STOP"||
+    !proof||proof.clientOrderId!==stopClientOrderId||String(proof.orderId)!==intent.venueOrderId||
+    proof.symbol!==leg.candidate.symbol||proof.type!=="STOP_MARKET"||proof.reduceOnly!==true||
+    proof.side!==(leg.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
+    !["EXPIRED","CANCELED","REJECTED"].includes(String(proof.status).toUpperCase())||
+    Number(proof.executedQty)!==0||Number(proof.origQty)!==Number((intent.command as {quantity?:unknown}|undefined)?.quantity)||
+    !(Number(proof.origQty)>0))throw Error("V4_COMPLETED_EXIT_MISSING_STOP_NOT_ATTESTED:"+legId);
+ attestStopTrigger(intent,proof,legId);
+}
+
+export function planV4RetiredStops(args:{
+ state:State;intents:Record<string,V4OrderIntent>;
+ openOrders:readonly Stop[];positions:readonly Position[];
+}):string[]{
+ const {state,intents,openOrders,positions}=args;
+ const retired=Object.values(state.legs).filter(l=>l.qty===0&&l.status==="CLOSED");
+ const active=Object.values(state.legs).filter(l=>l.qty>0);
+ const retire:string[]=[];
+ for(const leg of retired){
+  const owned=Object.values(intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
+  const stillOpen=owned.filter(i=>openOrders.some(o=>o.clientOrderId===i.clientOrderId));
+  if(stillOpen.length===0)continue;
+  if(stillOpen.length!==1)throw Error("V4_CLOSED_LEG_STOP_AMBIGUOUS:"+leg.id);
+  const id=stillOpen[0].clientOrderId;
+  const order=openOrders.find(o=>o.clientOrderId===id)!;
+  if(order.symbol!==leg.candidate.symbol||order.type!=="STOP_MARKET"||
+     order.reduceOnly!==true||order.side!==(leg.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
+     !["NEW"].includes(String(order.status).toUpperCase())||
+     !(Number(order.origQty)>0)||Number(order.executedQty)!==0)
+    throw Error("V4_CLOSED_LEG_STOP_NOT_SAFE_TO_CANCEL:"+leg.id);
+  attestStopTrigger(stillOpen[0],order,leg.id);
+  // Aster one-way venue quantity must equal the remaining V4-owned legs;
+  // other peer same-symbol occupancy is not enough evidence to auto-cancel.
+  const same=active.filter(l=>l.candidate.symbol===leg.candidate.symbol);
+  const sides=new Set(same.map(l=>l.candidate.effectiveSide));
+  if(sides.size>1)throw Error("V4_CLOSED_LEG_OPPOSING_OWNER");
+  const expected=same.reduce((n,l)=>n+l.qty*(l.candidate.effectiveSide==="LONG"?1:-1),0);
+  const signed=positions.filter(p=>p.symbol===leg.candidate.symbol);
+  const actual=signed.reduce((n,p)=>n+Number(p.positionAmt),0);
+  if(signed.length>1||!Number.isFinite(actual)||
+    Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
+    throw Error("V4_CLOSED_LEG_ACCOUNT_EXPOSURE_CONFLICT:"+leg.candidate.symbol);
+  // Another open leg's STOP must exist and be correctly sized before
+  // reducing the old stop's protective coverage.
+  for(const other of same){
+   const matches=Object.values(intents).filter(i=>i.legId===other.id&&i.action==="STOP"&&
+     openOrders.some(o=>o.clientOrderId===i.clientOrderId));
+   if(matches.length!==1)throw Error("V4_REMAINING_LEG_STOP_NOT_PROTECTED:"+other.id);
+   const otherOrder=openOrders.find(o=>o.clientOrderId===matches[0].clientOrderId)!;
+   if(otherOrder.symbol!==other.candidate.symbol||otherOrder.reduceOnly!==true||
+      otherOrder.type!=="STOP_MARKET"||
+      otherOrder.side!==(other.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
+      otherOrder.status!=="NEW"||Number(otherOrder.executedQty)!==0||
+      Number(otherOrder.origQty)!==other.qty)
+    throw Error("V4_REMAINING_LEG_STOP_QTY_CONFLICT:"+other.id);
+   attestStopTrigger(matches[0],otherOrder,other.id);
+  }
+  retire.push(id);
+ }
+ return retire;
+}

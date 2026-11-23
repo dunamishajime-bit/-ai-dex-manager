@@ -1,6 +1,8 @@
 [Unit]
 Description=Read-only V12 V4 exchange STOP and owner-ledger verification
-After=disdex-shared-crypto-risk@7688ed7c93a1918d8b44837339b7da5584a868f5.service
+# Read-only health check uses its signed root pin manifest at runtime;
+# no dependency on an obsolete fixed-SHA Shared Risk unit.
+After=local-fs.target
 
 [Service]
 Type=oneshot
