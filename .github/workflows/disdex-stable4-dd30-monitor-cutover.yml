@@ -1,0 +1,286 @@
+name: DisDex STABLE4 DD30 monitor-only Root cutover
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact candidate commit to stage
+        required: true
+        type: string
+      goal_id:
+        description: Approved Owner goal UUID
+        required: true
+        type: string
+      goal_plan_sha256:
+        description: SHA-256 of docs/implementation/goal-campaigns/<goal_id>.json at target SHA
+        required: true
+        type: string
+      execution_plan_sha256:
+        description: SHA-256 of the immutable STABLE4 DD30 Root plan
+        required: true
+        type: string
+      ci_run_id:
+        description: Successful Owner Goal Candidate CI run for target_sha
+        required: true
+        type: string
+      mode:
+        description: Read-only verification or guarded monitor-only cutover
+        required: true
+        type: choice
+        options:
+          - preflight
+          - execute
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  monitor-cutover:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: disdex-production
+    steps:
+      - name: Checkout trusted master workflow source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Bind exact candidate, goal and Root plan
+        id: bind
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          GOAL_ID: ${{ inputs.goal_id }}
+          GOAL_PLAN_SHA256: ${{ inputs.goal_plan_sha256 }}
+          EXECUTION_PLAN_SHA256: ${{ inputs.execution_plan_sha256 }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          MODE: ${{ inputs.mode }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$GOAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ "$GOAL_PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXECUTION_PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$CI_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ "$MODE" == preflight || "$MODE" == execute ]]
+          git fetch --no-tags origin "$TARGET_SHA" --depth=1
+          git cat-file -e "$TARGET_SHA^{commit}"
+          mkdir -p "$RUNNER_TEMP/stable4-dd30-candidate"
+          git show "$TARGET_SHA:docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json" > "$RUNNER_TEMP/stable4-dd30-candidate/root-plan.json"
+          git show "$TARGET_SHA:docs/implementation/goal-campaigns/$GOAL_ID.json" > "$RUNNER_TEMP/stable4-dd30-candidate/goal.json"
+          actual_goal="$(sha256sum "$RUNNER_TEMP/stable4-dd30-candidate/goal.json" | awk '{print $1}')"
+          [[ "$actual_goal" == "$GOAL_PLAN_SHA256" ]]
+          actual_plan="$(sha256sum "$RUNNER_TEMP/stable4-dd30-candidate/root-plan.json" | awk '{print $1}')"
+          [[ "$actual_plan" == "$EXECUTION_PLAN_SHA256" ]]
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'stable4-dd30-candidate'
+          plan = json.loads((root / 'root-plan.json').read_text())
+          goal = json.loads((root / 'goal.json').read_text())
+          assert plan['schema'] == 'disdex-stable4-dd30-monitor-only-root-plan/v1'
+          assert plan['target'] == 'professional-dismanager.net'
+          assert plan['ordersEnabled'] is False
+          assert plan['sourceBinding'] == 'GITHUB_RUN_HEAD_SHA'
+          assert plan['ownerGoalId'] == os.environ['GOAL_ID']
+          assert plan['ownerGoalFingerprint'] == goal['goalFingerprint']
+          assert plan['globalHold']['active'] is True and plan['globalHold']['clearGlobalHold'] is False
+          assert plan['venuePreflight']['signedAsterGets'] == 3
+          assert all(plan['venuePreflight'][key] == 0 for key in ('ordersSent','cancelsSent','positionChangesSent'))
+          assert plan['verification']['postCutoverCycles'] == 3
+          assert all(plan['safeguards'].get(key) is True for key in ('failClosed','signedVenueReconciliation','protectExistingStops','noTestOrders','enforceSharedRisk','rollbackOnFailure'))
+          print('STABLE4_DD30_ROOT_PLAN_BOUND=TRUE')
+          PY
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Claim exact candidate under the approved Owner goal
+        id: claim
+        env:
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+          GOAL_ID: ${{ inputs.goal_id }}
+          GOAL_PLAN_SHA256: ${{ inputs.goal_plan_sha256 }}
+          EXECUTION_PLAN_SHA256: ${{ inputs.execution_plan_sha256 }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          url = 'https://professional-dismanager.net/api/system/deploy-approval'
+          def call(body):
+              req = urllib.request.Request(url, data=json.dumps(body).encode(), method='POST', headers={'Authorization':'Bearer '+os.environ['BRIDGE'], 'Content-Type':'application/json'})
+              with urllib.request.urlopen(req, timeout=15) as response:
+                  result = json.load(response)
+              if result.get('ok') is not True: raise RuntimeError('GOAL_BRIDGE_CALL_FAILED')
+              return result
+          status = call({'action':'get_goal_status','goal_id':os.environ['GOAL_ID']})
+          approval = status['approval']; goal = approval['goal']
+          assert goal['operation'] == 'ALL_RUNNERS_LIVE_RESTORE' and goal['scope'] == 'FULL_PROJECT'
+          assert goal['ordersEnabled'] is False
+          assert approval['status'] in ('APPROVED','DISPATCHED','REDEEMED')
+          result = call({'action':'claim_goal_release','goal_id':os.environ['GOAL_ID'],'ci_run_id':os.environ['CI_RUN_ID'],'target_sha':os.environ['TARGET_SHA'],'plan_sha256':os.environ['GOAL_PLAN_SHA256'],'execution_plan_sha256':os.environ['EXECUTION_PLAN_SHA256'],'run_id':os.environ['RUN_ID'],'orders_enabled':False})
+          assert result['candidateSha'] == os.environ['TARGET_SHA'] and result['ordersEnabled'] is False
+          token = str(result['token'])
+          out = pathlib.Path(os.environ['RUNNER_TEMP'])
+          (out/'stable4-dd30-token').write_text(token, encoding='ascii')
+          (out/'stable4-dd30-public.pem').write_text(os.environ['PUBLIC_KEY'], encoding='ascii')
+          print('::add-mask::'+token)
+          print('OWNER_GOAL_EXACT_CANDIDATE_CLAIMED=TRUE')
+          PY
+          cat "$RUNNER_TEMP/stable4-dd30-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/stable4-dd30-public.pem" \
+              --repository "$GITHUB_REPOSITORY" --sha "$TARGET_SHA" --scope FULL_PROJECT \
+              --operator dunamishajime-bit --plan-sha256 "$EXECUTION_PLAN_SHA256" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled false
+
+      - name: Build immutable candidate archive and manifest
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+          GOAL_ID: ${{ inputs.goal_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=tar "$TARGET_SHA" | gzip -n > "$RUNNER_TEMP/stable4-dd30-candidate.tar.gz"
+          python3 -B - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          sha = os.environ['TARGET_SHA']
+          files = [
+              'scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py',
+              'scripts/disdex_v52_aster_only_live_engine.py',
+              'scripts/disdex-quality102-causal-v1-monitor.ts',
+              'scripts/v12-v4-production-runner.ts',
+              'scripts/v12-v4-monitor-only-runner.ts',
+              'scripts/disdex-pengu-dual-ls-v2-live-runner.ts',
+              'scripts/disdex-fet-brk48-shadow-runner.ts',
+              'scripts/disdex-idle-priority-short-live-runner.ts',
+              'scripts/disdex-hype-trend-live-runner.ts',
+              'docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json',
+          ]
+          manifest = {'schema':'disdex-stable4-dd30-monitor-manifest/v1','targetSha':sha,'files':{}}
+          for rel in files:
+              data = subprocess.check_output(['git','show',f'{sha}:{rel}'])
+              manifest['files'][rel] = hashlib.sha256(data).hexdigest()
+          (root/'stable4-dd30-manifest.json').write_text(json.dumps(manifest, sort_keys=True, indent=2)+'\n')
+          print('STABLE4_DD30_ARCHIVE_MANIFEST_READY=TRUE')
+          PY
+
+      - name: Configure reviewed Production root SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == professional-dismanager.net && -n "$ROOT_KEY" && -n "$KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/stable4-dd30-ssh"
+          printf '%s\n' "$ROOT_KEY" > "$RUNNER_TEMP/stable4-dd30-ssh/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/stable4-dd30-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/stable4-dd30-ssh/key" "$RUNNER_TEMP/stable4-dd30-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/stable4-dd30-ssh/key" >/dev/null
+
+      - name: Stage exact helper and plan at Root
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          port="${PORT:-22}"
+          remote="/tmp/disdex-stable4-dd30-$RUN_ID"
+          mkdir -p "$RUNNER_TEMP/stable4-dd30-candidate-src"
+          git archive "$TARGET_SHA" | tar -x -C "$RUNNER_TEMP/stable4-dd30-candidate-src"
+          ssh -T -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -p "$port" "root@$HOST" "install -d -o root -g root -m 0700 '$remote'"
+          scp -q -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -P "$port" \
+            "$RUNNER_TEMP/stable4-dd30-candidate-src/scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py" \
+            "$RUNNER_TEMP/stable4-dd30-candidate-src/scripts/ops/deploy/disdex_owner_approval.py" \
+            "$RUNNER_TEMP/stable4-dd30-candidate-src/scripts/ops/deploy/disdex_deployment_contract.py" \
+            "$RUNNER_TEMP/stable4-dd30-candidate/root-plan.json" \
+            "$RUNNER_TEMP/stable4-dd30-public.pem" \
+            "root@$HOST:$remote/"
+          if [[ "${{ inputs.mode }}" == execute ]]; then
+            scp -q -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -P "$port" "$RUNNER_TEMP/stable4-dd30-candidate.tar.gz" "$RUNNER_TEMP/stable4-dd30-manifest.json" "root@$HOST:$remote/"
+          fi
+          ssh -T -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -p "$port" "root@$HOST" "chown -R root:root '$remote'; chmod 0700 '$remote'; chmod 0600 '$remote'/*; python3 -m py_compile '$remote/disdex_stable4_dd30_monitor_cutover.py'"
+
+      - name: Run formal monitor-only Root preflight or cutover
+        id: execute
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+          GOAL_ID: ${{ inputs.goal_id }}
+          EXECUTION_PLAN_SHA256: ${{ inputs.execution_plan_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          port="${PORT:-22}"
+          remote="/tmp/disdex-stable4-dd30-$RUN_ID"
+          if [[ "${{ inputs.mode }}" == preflight ]]; then
+            args=(--preflight-readonly)
+          else
+            args=(--execute-approved --tar "$remote/stable4-dd30-candidate.tar.gz" --manifest "$remote/stable4-dd30-manifest.json")
+          fi
+          cat "$RUNNER_TEMP/stable4-dd30-token" |
+            ssh -T -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=20 -p "$port" "root@$HOST" \
+            "python3 '$remote/disdex_stable4_dd30_monitor_cutover.py' \"${args[@]}\" --target-sha '$TARGET_SHA' --plan '$remote/root-plan.json' --execution-plan-sha256 '$EXECUTION_PLAN_SHA256' --approval-id '$GOAL_ID' --run-id '$RUN_ID' --public-key '$remote/stable4-dd30-public.pem'"
+
+      - name: Finish this Goal release attempt without consuming the purpose approval
+        if: ${{ always() && steps.claim.outcome == 'success' }}
+        env:
+          GOAL_ID: ${{ inputs.goal_id }}
+          RUN_ID: ${{ github.run_id }}
+          EXECUTION: ${{ steps.execute.outcome }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = {'action':'finish_goal_release','goal_id':os.environ['GOAL_ID'],'run_id':os.environ['RUN_ID'],'outcome':'success' if os.environ['EXECUTION']=='success' else 'failure','final':False}
+          req = urllib.request.Request('https://professional-dismanager.net/api/system/deploy-approval', data=json.dumps(body).encode(), method='POST', headers={'Authorization':'Bearer '+os.environ['BRIDGE'],'Content-Type':'application/json'})
+          with urllib.request.urlopen(req, timeout=15) as response:
+              result = json.load(response)
+          assert result.get('ok') is True and result.get('status') == 'APPROVED'
+          print('GOAL_RELEASE_ATTEMPT_FINISHED='+('SUCCESS' if os.environ['EXECUTION']=='success' else 'RETRYABLE'))
+          PY
+
+      - name: Remove ephemeral Root staging and approval material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set +e
+          port="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/stable4-dd30-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -o ConnectTimeout=5 -p "$port" "root@$HOST" "rm -rf -- /tmp/disdex-stable4-dd30-$RUN_ID" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/stable4-dd30-ssh" "$RUNNER_TEMP/stable4-dd30-candidate-src" "$RUNNER_TEMP/stable4-dd30-candidate" "$RUNNER_TEMP/stable4-dd30-token" "$RUNNER_TEMP/stable4-dd30-public.pem" "$RUNNER_TEMP/stable4-dd30-candidate.tar.gz" "$RUNNER_TEMP/stable4-dd30-manifest.json"

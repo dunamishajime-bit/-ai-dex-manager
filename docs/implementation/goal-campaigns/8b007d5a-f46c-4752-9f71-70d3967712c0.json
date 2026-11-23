@@ -8,7 +8,7 @@
   "target": "professional-dismanager.net",
   "sourceBinding": "GITHUB_RUN_HEAD_SHA",
   "ordersEnabled": false,
-  "executionPlanSha256": "15dc92d58dbced738cf57dd7a91396f73bd3875a3e6bd2cd100a3ee649ce4f5b",
+  "executionPlanSha256": "728045e7a741ee451c0f7236a1d1ede45052c15aaf002268b38effb3bc830c63",
   "campaign": "STABLE4_DD30_MONITOR_ONLY_20261123",
   "candidateLineage": {
     "pullRequest": 598,
@@ -24,7 +24,8 @@
       "QUALITY102_CAUSAL_V1",
       "V52",
       "FET_BRK48_RESIDUAL",
-      "IDLE_PRIORITY_SHORT"
+      "IDLE_PRIORITY_SHORT",
+      "HYPE_TREND_LONG"
     ],
     "ordersSent": 0,
     "cancelsSent": 0,

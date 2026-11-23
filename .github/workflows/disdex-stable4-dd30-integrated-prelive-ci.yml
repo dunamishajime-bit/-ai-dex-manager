@@ -12,6 +12,9 @@ on:
       - 'ops/**'
       - 'tests/**'
       - 'docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json'
+      - 'docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json'
+      - 'scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py'
+      - 'tests/test_stable4_dd30_monitor_cutover.py'
       - '.github/workflows/disdex-stable4-dd30-integrated-prelive-ci.yml'
 
 permissions:
@@ -43,7 +46,9 @@ jobs:
           python3 -m unittest -v tests/test_v4_dynamic_resident_stop_and_margin_script.py
           python3 -m py_compile scripts/disdex_v12_v52_margin_guard_runtime.py \
             scripts/disdex_v96_v52_margin_guard_runtime.py \
-            scripts/ops/root/disdex-v4-resident-stop-crosscheck.py
+            scripts/ops/root/disdex-v4-resident-stop-crosscheck.py \
+            scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py
+          python3 -m unittest -v tests/test_stable4_dd30_monitor_cutover.py
           echo 'LIVE_ORDER_PERMIT=FALSE'
 
       - name: Type-check combined master UI and DD30 Runner source
