@@ -265,7 +265,7 @@ def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
                 if key.strip() == "NRestarts":
                     n_restarts = value.strip()
             require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + missing)
-            recovered = parse_unit_health_snapshot(identity + "\\nNRestarts=" + n_restarts, {missing})
+            recovered = parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {missing})
         partial: dict[str, dict[str, str]] = {}
         current: str | None = None
         for raw_line in output.splitlines():
