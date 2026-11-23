@@ -49,6 +49,7 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         v52 = dropin_text("V52", target, units["V52"])
         self.assertIn("export DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false", v52)
         v4 = dropin_text("V12_V4", target, units["V12_V4"])
+        self.assertIn("export V12_V4_OPERATION_MODE=MONITOR_ONLY V12_V4_ORDERS_ENABLED=false", v4)
         self.assertIn("EnvironmentFile=\n", v4)
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", v4)
         self.assertEqual(v4.count("EnvironmentFile=/etc/disdex/"), 3)
