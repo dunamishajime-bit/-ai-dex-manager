@@ -75,6 +75,11 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertFalse(q102_metadata_valid(1001, 1000, 0o700, 0, 1000, 0o640, 1000, 1000))
         self.assertFalse(q102_metadata_valid(1000, 1000, 0o755, 0, 1000, 0o640, 1000, 1000))
 
+    def test_poll_cycles_waits_for_new_shared_v4_tick_before_sha_validation(self):
+        source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
+        stale_guard = "if current == previous[runner]:\n                continue\n            validate_evidence(path, target, runner)"
+        self.assertIn(stale_guard, source)
+
 
 if __name__ == "__main__":
     unittest.main()
