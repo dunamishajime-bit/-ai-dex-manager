@@ -1,0 +1,69 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { findQ102PreflightAllManagedProtectiveOrders, isQ102PreflightManagedProtectiveOrder } from "../scripts/disdex-quality102-causal-v1-live-runner";
+import type { DirectOpenOrder, DirectPosition } from "../lib/direct-trade-executor";
+
+const position: DirectPosition = {
+  symbol: "PENGUUSDT",
+  quantity: 4354,
+  entryPrice: 0.006938,
+  markPrice: 0.00698,
+  unrealizedPnl: 0.18,
+  pnlPct: 0.6,
+  notionalUsd: 30.4,
+  positionSide: "BOTH",
+  leverage: 5,
+  updatedAt: Date.now(),
+};
+
+const protectiveOrder: DirectOpenOrder = {
+  symbol: "PENGUUSDT",
+  clientOrderId: "recv8-68ad0b9cb5d4b8a4e85f3e3c178dfc",
+  side: "SELL",
+  status: "NEW",
+  reduceOnly: true,
+  quantity: 4354,
+  executedQuantity: 0,
+};
+
+test("Q102 preflight recognizes the reconciled PENGU Recovery V8 protection order", () => {
+  assert.equal(isQ102PreflightManagedProtectiveOrder(protectiveOrder, [position]), true);
+});
+
+test("Q102 preflight still rejects an unknown open order", () => {
+  assert.equal(isQ102PreflightManagedProtectiveOrder({ ...protectiveOrder, clientOrderId: "manual-order" }, [position]), false);
+  assert.equal(isQ102PreflightManagedProtectiveOrder({ ...protectiveOrder, quantity: 1 }, [position]), false);
+  assert.equal(isQ102PreflightManagedProtectiveOrder({ ...protectiveOrder, reduceOnly: false }, [position]), false);
+});
+
+test('Q102 startup preserves the existing FET profit-floor STOP and rejects malformed orders', async () => {
+ const {findQ102PreflightAllManagedProtectiveOrders}=await import('../scripts/disdex-quality102-causal-v1-live-runner');
+ const p:DirectPosition={...position,symbol:'FETUSDT',quantity:515,entryPrice:.2407,markPrice:.258};
+ const stop:DirectOpenOrder={...protectiveOrder,symbol:'FETUSDT',quantity:515,type:'STOP_MARKET',clientOrderId:'fet-stop-6b4f4d99ff49833efe3b46'};
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop],[p]),[stop]);
+ for(const bad of [{...stop,reduceOnly:false},{...stop,type:'LIMIT'},{...stop,quantity:1},{...stop,clientOrderId:'manual-stop'}])assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([bad],[p]),[]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,{...stop,clientOrderId:'fet-stop-aaaaaaaaaaaaaaaaaaaaaa'}],[p]),[]);
+});
+
+test('Q102 preflight recognizes a fully protected Idle SHORT position owned by another runner', async () => {
+ const {findQ102PreflightAllManagedProtectiveOrders}=await import('../scripts/disdex-quality102-causal-v1-live-runner');
+ const p:DirectPosition={...position,symbol:'JUPUSDT',quantity:-225,positionSide:'BOTH',entryPrice:.3048,markPrice:.3003};
+ const stop:DirectOpenOrder={...protectiveOrder,symbol:'JUPUSDT',side:'BUY',type:'STOP_MARKET',quantity:225,clientOrderId:'idle-stop-af98ca4a29c5db85186244'};
+ const tp:DirectOpenOrder={...protectiveOrder,symbol:'JUPUSDT',side:'BUY',type:'TAKE_PROFIT_MARKET',quantity:225,clientOrderId:'idle-tp-69f0923893132bd78182f1'};
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,tp],[p]),[stop,tp]);
+});
+
+test('Q102 preflight recognizes a V4-owned STOP-only protective order', async () => {
+ const {findQ102PreflightAllManagedProtectiveOrders}=await import('../scripts/disdex-quality102-causal-v1-live-runner');
+ const p:DirectPosition={...position,symbol:'NEARUSDT',quantity:-3,positionSide:'BOTH',entryPrice:5.358,markPrice:5.3150977};
+ const stop:DirectOpenOrder={...protectiveOrder,symbol:'NEARUSDT',side:'BUY',type:'STOP_MARKET',quantity:3,clientOrderId:'v12-v4-21d7c75db7d4dd8879b12975d177',stopPrice:5.787};
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop],[p]),[stop]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([{...stop,quantity:1}],[p]),[]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([{...stop,reduceOnly:false}],[p]),[]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([{...stop,clientOrderId:'manual-v4-stop'}],[p]),[]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,{...stop,clientOrderId:'v12-v4-aaaaaaaaaaaaaaaaaaaaaaaaaaaa',stopPrice:5.9}],[p]),[]);
+ const takeProfit:DirectOpenOrder={...stop,type:'TAKE_PROFIT_MARKET',clientOrderId:'v12-v4-aaaaaaaaaaaaaaaaaaaaaaaaaaaa',stopPrice:5.1};
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,takeProfit],[p]),[stop,takeProfit]);
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,takeProfit,{...takeProfit,clientOrderId:'v12-v4-bbbbbbbbbbbbbbbbbbbbbbbbbbbb'}],[p]),[]);
+});

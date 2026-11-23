@@ -1,0 +1,632 @@
+import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
+import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
+import { buildSharedCryptoDailyRiskState, SHARED_CRYPTO_STRATEGIES, writeSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import type { V12AsterLiveAdapter, V12AsterOrderView } from "@/lib/v12-aster-live-adapter";
+import { V12LiveExecutionEngine } from "@/lib/v12-live-execution-engine";
+import { planV12TrailingStop, type ResidentOrderView } from "@/lib/v12-resident-stop-lifecycle";
+import { buildV12Signal, type V12Bar } from "@/lib/v12-x1-all";
+import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
+import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+
+const NOW = Date.parse("2026-08-17T12:00:00Z");
+const BAR_MS = 2 * 60 * 60_000;
+
+function data(): Record<string, V12Bar[]> {
+    const start = NOW - 140 * BAR_MS;
+    const result: Record<string, V12Bar[]> = {};
+    V12_X1_ALL.universe.forEach((symbol, symbolIndex) => {
+        result[symbol] = Array.from({ length: 120 }, (_, index) => {
+            const strength = 0.003 + symbolIndex * 0.00002;
+            const close = 100 * Math.exp(strength * index);
+            return {
+                ts: start + index * BAR_MS,
+                endTs: start + (index + 1) * BAR_MS,
+                open: close * 0.999,
+                high: close * 1.004,
+                low: close * 0.996,
+                close,
+                volume: 1000,
+                sourceCount: 2 as const,
+                closed: true,
+            };
+        });
+    });
+    return result;
+}
+
+function flatData(): Record<string, V12Bar[]> {
+    const start = NOW - 140 * BAR_MS;
+    return Object.fromEntries(V12_X1_ALL.universe.map((symbol) => [symbol, Array.from({ length: 120 }, (_, index) => ({
+        ts: start + index * BAR_MS, endTs: start + (index + 1) * BAR_MS,
+        open: 100, high: 101, low: 99, close: 100, volume: 1000,
+        sourceCount: 2 as const, closed: true,
+    }))]));
+}
+
+function position(symbol: string, quantity: number, entryPrice = 100): DirectPosition {
+    return {
+        symbol,
+        quantity,
+        entryPrice,
+        markPrice: entryPrice,
+        unrealizedPnl: 0,
+        pnlPct: 0,
+        notionalUsd: Math.abs(quantity) * entryPrice,
+        positionSide: "BOTH",
+        leverage: 1,
+        updatedAt: NOW,
+    };
+}
+
+function tradeResult(input: { clientOrderId: string; symbol: string; status?: DirectTradeResult["status"]; executedQuantity?: number; price?: number }): DirectTradeResult {
+    const executedQuantity = input.executedQuantity ?? 1;
+    const price = input.price ?? 100;
+    return {
+        requestId: input.clientOrderId,
+        clientOrderId: input.clientOrderId,
+        symbol: input.symbol,
+        side: "BUY",
+        status: input.status ?? "FILLED",
+        requestedQuantity: executedQuantity,
+        submittedQuantity: executedQuantity,
+        executedQuantity,
+        averagePrice: price,
+        quoteQuantity: executedQuantity * price,
+        executionUnknown: input.status === "UNKNOWN",
+        reconciled: input.status !== "UNKNOWN",
+    };
+}
+
+type FakeAdapter = V12AsterLiveAdapter & {
+    positions: DirectPosition[];
+    entryFills:Map<string, any>;
+    exitFills:Map<string, any>;
+    resident: Map<string, ResidentOrderView>;
+    entryCalls: number;
+    exitCalls: number;
+    stopPlacements: number;
+    tpPlacements: number;
+    reconcileResult?: DirectTradeResult;
+    pendingObservedBeforeSend: boolean;
+    entryError?: Error;
+    stateStore?: FileV12X1AllRunnerStateStore;
+    maxSlippageBps: number;
+};
+
+function fakeAdapter(): FakeAdapter {
+    const fake = {
+        positions: [] as DirectPosition[],
+        resident: new Map<string, ResidentOrderView>(),
+        entryFills: new Map<string, any>(),
+        exitFills: new Map<string, any>(),
+        entryCalls: 0,
+        exitCalls: 0,
+        stopPlacements: 0,
+        tpPlacements: 0,
+        pendingObservedBeforeSend: false,
+        maxSlippageBps: 0,
+        client: {
+            getKlines: async (_symbol:string,_interval:string,_limit:number,range:{startTime:number;endTime:number})=>Array.from({length:Math.round((range.endTime-range.startTime)/3600000)+1},(_,i)=>[range.startTime+i*3600000, String(100*Math.exp(.001*i)), '110','90','999','100',range.startTime+(i+1)*3600000-1]),
+            getOrder: async (symbol:string)=>({orderId:7,executedQty:String(fake.entryFills.get(symbol)?.qty||0)}),
+            getUserTrades: async (symbol:string)=>{
+                const entry=fake.entryFills.get(symbol);if(!entry)return [];
+                const completedProtection=[...fake.resident.values()].find(r=>(r as any).symbol===symbol&&r.status==='FILLED');
+                const exit=fake.exitFills.get(symbol)|| (completedProtection?{...entry,id:2,orderId:8,side:entry.side==='BUY'?'SELL':'BUY',realizedPnl:'-1'}:undefined);
+                return exit?[entry,exit]:[entry];
+            },
+            getIncomeHistory: async()=>[],
+        },
+        executor: {
+            getMarketQuote: async (symbol: string) => ({ symbol, bidPrice: 99.9, askPrice: 100.1, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 20, updatedAt: NOW }),
+            normalizeMarketQuantity: async (symbol: string, quantity: number, referencePrice: number) => ({
+                symbol,
+                quantity,
+                quantityText: String(quantity),
+                minQuantity: 0.001,
+                maxQuantity: 1_000_000,
+                stepSize: 0.001,
+                minNotional: 5,
+                notional: quantity * referencePrice,
+            }),
+        },
+        credentialsReady: async () => true,
+        getAccountSnapshot: async () => ({ availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: NOW }),
+        getPositions: async () => fake.positions,
+        getMaxSlippageBps: () => fake.maxSlippageBps,
+        getOpenOrders: async () => [],
+        listV12Orders: async () => [...fake.resident.values()].filter((row) => row.clientOrderId.startsWith("v12-") && row.status !== "CANCELED").map((row) => ({
+            symbol: fake.positions[0]?.symbol || "ETHUSDT",
+            clientOrderId: row.clientOrderId,
+            status: row.status || "NEW",
+            side: row.side,
+            type: row.type,
+            reduceOnly: row.reduceOnly,
+            quantity: Number(row.quantity || 0),
+            executedQuantity: 0,
+            stopPrice: row.stopPrice,
+        })) as V12AsterOrderView[],
+        normalizeStopPrice: async (_symbol: string, requested: number) => ({ price: requested, text: String(requested) }),
+        openOrders: async (symbol: string) => [...fake.resident.values()].filter((row) => String((row as ResidentOrderView & { symbol?: string }).symbol || "").toUpperCase() === symbol.toUpperCase()),
+        placeStopMarket: async (input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) => {
+            fake.stopPlacements += 1;
+            fake.resident.set(input.clientOrderId, { ...input, status: "NEW", type: "STOP_MARKET" });
+            return { acknowledged: true };
+        },
+        placeTakeProfit: async (input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) => {
+            fake.tpPlacements += 1;
+            fake.resident.set(input.clientOrderId, { ...input, status: "NEW", type: "TAKE_PROFIT_MARKET" });
+            return { acknowledged: true };
+        },
+        cancel: async (clientOrderId: string) => {
+            const row = fake.resident.get(clientOrderId);
+            if (row) fake.resident.set(clientOrderId, { ...row, status: "CANCELED" });
+        },
+        flattenReduceOnly: async () => { fake.positions = []; },
+        queryOrderSameId: async () => null,
+        reconcileOrder: async (symbol: string, clientOrderId: string) => fake.reconcileResult ?? tradeResult({ clientOrderId, symbol }),
+        executeEntry: async (input: { symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId: string }) => {
+            fake.entryCalls += 1;
+            fake.entryFills.set(input.symbol,{id:1,orderId:7,symbol:input.symbol,side:input.side==="LONG"?"BUY":"SELL",qty:String(input.quantity),time:NOW,realizedPnl:"0",commission:"0",commissionAsset:"USDT"});
+            if (fake.stateStore) {
+                const disk = await fake.stateStore.load();
+                fake.pendingObservedBeforeSend = disk.pending?.clientOrderId === input.clientOrderId;
+            }
+            if (fake.entryError) throw fake.entryError;
+            fake.positions = [...fake.positions, position(input.symbol, input.side === "LONG" ? input.quantity : -input.quantity, input.expectedPrice)];
+            return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity, price: input.expectedPrice });
+        },
+        executeExit: async (input: { symbol: string; clientOrderId: string; quantity: number }) => {
+            fake.exitCalls += 1;
+            const entry=fake.entryFills.get(input.symbol);if(entry)fake.exitFills.set(input.symbol,{...entry,id:2,orderId:8,side:entry.side==="BUY"?"SELL":"BUY",realizedPnl:"1"});
+            fake.positions = fake.positions.filter((row) => row.symbol.toUpperCase() !== input.symbol.toUpperCase());
+            return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity });
+        },
+    } as unknown as FakeAdapter;
+    return fake;
+}
+
+async function risk(path: string) {
+    await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
+        accountScope: "ASTER_FUTURES",
+        utcDay: new Date(NOW).toISOString().slice(0, 10),
+        strategyIds: [...SHARED_CRYPTO_STRATEGIES],
+        lossPct: 0,
+        maximumLossPct: 7.5,
+        tripped: false,
+        updatedAt: NOW,
+        realizedPnl: 0,
+        unrealizedPnl: 0,
+        fees: 0,
+        funding: 0,
+        netDailyPnl: 0,
+        referenceEquity: 1000,
+        sourceComplete: true,
+    }));
+}
+
+async function blockedRisk(path: string) {
+    await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
+        accountScope: "ASTER_FUTURES",
+        utcDay: new Date(NOW).toISOString().slice(0, 10),
+        strategyIds: [...SHARED_CRYPTO_STRATEGIES],
+        lossPct: 8,
+        maximumLossPct: 7.5,
+        tripped: true,
+        updatedAt: NOW,
+        realizedPnl: -80,
+        unrealizedPnl: 0,
+        fees: 0,
+        funding: 0,
+        netDailyPnl: -80,
+        referenceEquity: 1000,
+        sourceComplete: true,
+    }));
+}
+
+async function makeHarness(root: string, name: string) {
+    const stateStore = new FileV12X1AllRunnerStateStore(join(root, `${name}-state.json`), "LIVE");
+    const lock = new FileAccountOrderLock(join(root, `${name}-account.lock`), 120_000);
+    const riskPath = join(root, `${name}-risk.json`);
+    await risk(riskPath);
+    const marketData = data();
+    const signal = buildV12Signal(marketData, marketData.BTC.length - 1);
+    assert.ok(signal, "synthetic frozen V12 fixture must produce a real V12 signal");
+    const adapter = fakeAdapter();
+    adapter.stateStore = stateStore;
+    const engine = new V12LiveExecutionEngine({ adapter, stateStore, lock, riskPath, marketData: { load: async () => marketData }, now: () => NOW, log: () => undefined });
+    return { stateStore, lock, riskPath, marketData, signal, adapter, engine };
+}
+
+async function enterHarness(root: string, name: string) {
+    const harness = await makeHarness(root, name);
+    const result = await harness.engine.tick();
+    assert.equal(result.status, "entered");
+    const state = await harness.stateStore.load();
+    assert.ok(state.active);
+    return { ...harness, state };
+}
+
+async function main() {
+    const root = await mkdtemp(join(tmpdir(), "v12-live-execution-"));
+    try {
+        // Normal entry: durable pending must exist before the exchange send.
+        const gates=await makeHarness(root,"dd1296-skip-atom");
+        for(const symbol of V12_X1_ALL.universe)gates.marketData[symbol]=Array.from({length:120},(_,i)=>{const rate=symbol==='ATOM'?.004:symbol==='SOL'?.003:symbol==='BTC'?.001:0;const close=100*Math.pow(1+rate,i);return {ts:NOW-(120-i)*BAR_MS,endTs:NOW-(119-i)*BAR_MS,open:close,high:close*1.02,low:close*.98,close,volume:100,sourceCount:2 as const,closed:true};});
+        const baseGetKlines=gates.adapter.client.getKlines.bind(gates.adapter.client);
+        gates.adapter.client.getKlines=(async(symbol:string,interval:string,limit:number,range:any)=>{const rows=await baseGetKlines(symbol,interval,limit,range);if(symbol==='ATOMUSDT')rows[rows.length-1][1]='105';return rows;}) as any;
+        const gateResult=await gates.engine.tick();assert.equal(gateResult.status,'entered',JSON.stringify(gateResult));
+        assert.equal(gates.adapter.entryFills.has('ATOMUSDT'),false,'rejected strongest candidate must never send an order');
+        assert.equal(gates.adapter.entryFills.has('SOLUSDT'),true,'later eligible rank2 must execute after rank1 refusal');
+        const normal = await enterHarness(root, "normal");
+        assert.equal(normal.adapter.entryCalls, 2);
+        assert.equal(normal.adapter.pendingObservedBeforeSend, true, "durable pending must be saved before order send");
+        assert.equal(normal.state.pending, undefined);
+        assert.ok(normal.state.active?.protection.stopClientOrderId);
+        assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
+
+        // A fresh quote/fill slippage buffer must block an entry before the
+        // exposure adapter is called when an existing V12 position leaves no
+        // safe base-cap headroom.
+        const preorderCap = await makeHarness(root, "preorder-cap");
+        preorderCap.adapter.maxSlippageBps = 20;
+        const existingId = "v12-entry-existing-ltc";
+        const existingStopId = "v12-stop-existing-ltc";
+        const existingTpId = "v12-tp-existing-ltc";
+        const existing: V12ActivePositionState = {
+            symbol: "LTCUSDT",
+            side: "LONG",
+            quantity: 8,
+            gross: 0.9,
+            baseQuantity: 8,
+            baseGross: 0.9,
+            dynamicQuantity: 0,
+            dynamicGross: 0,
+            entryRank: 2,
+            positionId: existingId,
+            entryPrice: 112.5,
+            atrAtEntry: 2,
+            entrySignalTs: NOW - BAR_MS,
+            holdingBars: 0,
+            peakPrice: 112.5,
+            troughPrice: 112.5,
+            protection: {
+                strategyId: "V12_X1.00_ALL", symbol: "LTCUSDT", side: "LONG", positionId: existingId,
+                quantity: 8, entryPrice: 112.5, atrAtEntry: 2, initialStop: 107.5, lastAckStop: 107.5,
+                takeProfit: 118.9, peakOrTrough: 112.5, stopClientOrderId: existingStopId, takeProfitClientOrderId: existingTpId,
+            },
+        };
+        preorderCap.adapter.positions = [position("LTCUSDT", 8, 112.5)];
+        preorderCap.adapter.resident.set(existingStopId, { symbol: "LTCUSDT", clientOrderId: existingStopId, status: "NEW", side: "SELL", type: "STOP_MARKET", reduceOnly: true, quantity: 8, stopPrice: 107.5 });
+        preorderCap.adapter.resident.set(existingTpId, { symbol: "LTCUSDT", clientOrderId: existingTpId, status: "NEW", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: 8, stopPrice: 118.9 });
+        await preorderCap.stateStore.save({ ...(await preorderCap.stateStore.load()), active: existing, activePositions: [existing] });
+        const originalPreorderQuote = preorderCap.adapter.executor.getMarketQuote;
+        preorderCap.adapter.executor.getMarketQuote = async (symbol: string) => {
+            if (symbol.toUpperCase() !== existing.symbol.toUpperCase()) return originalPreorderQuote(symbol);
+            const activeBar = preorderCap.marketData.LTC.at(-1)!;
+            return { symbol, bidPrice: activeBar.high + 1, askPrice: activeBar.high + 1.2, bidQuantity: 100, askQuantity: 100, midPrice: activeBar.high + 1.1, spreadBps: 2, updatedAt: NOW };
+        };
+        const preorderCapResult = await preorderCap.engine.tick();
+        assert.equal(preorderCapResult.status, "capacity-blocked");
+        assert.match(preorderCapResult.reason, /^V12_(POSITION|BASE_AGGREGATE)_GROSS_OVER_CAP$/);
+        assert.equal(preorderCap.adapter.entryCalls, 0, "pre-order gross cap must prevent exposure submission");
+
+        // Venue minimums are a benign capacity gate. They are detected before
+        // pending state/order submission and must never trip the local kill switch.
+        const minQty = await makeHarness(root, "min-qty-capacity-block");
+        minQty.adapter.executor.normalizeMarketQuantity = async () => {
+            throw new Error("Quantity 0.000795 is below Aster minQty 0.001 for BTCUSDT.");
+        };
+        const minQtyResult = await minQty.engine.tick();
+        assert.equal(minQtyResult.status, "capacity-blocked");
+        assert.equal(minQtyResult.reason, "V12_ENTRY_MIN_QTY_CAPACITY_BLOCKED");
+        assert.equal(minQty.adapter.entryCalls, 0, "minQty capacity gate must not call executeEntry");
+        const minQtyState = await minQty.stateStore.load();
+        assert.equal(minQtyState.pending, undefined);
+        assert.equal(minQtyState.manualReview, undefined);
+        assert.equal(minQtyState.killSwitch?.active, undefined);
+        assert.equal(minQtyState.lastCompletedIdempotencyKey, minQtyResult.clientOrderId);
+
+        const minNotional = await makeHarness(root, "min-notional-capacity-block");
+        minNotional.adapter.executor.normalizeMarketQuantity = async () => {
+            throw new Error("Notional 4.8721 is below Aster minimum 5 for ETHUSDT.");
+        };
+        const minNotionalResult = await minNotional.engine.tick();
+        assert.equal(minNotionalResult.status, "capacity-blocked");
+        assert.equal(minNotionalResult.reason, "V12_ENTRY_MIN_NOTIONAL_CAPACITY_BLOCKED");
+        assert.equal(minNotional.adapter.entryCalls, 0, "minNotional capacity gate must not call executeEntry");
+        const minNotionalState = await minNotional.stateStore.load();
+        assert.equal(minNotionalState.pending, undefined);
+        assert.equal(minNotionalState.manualReview, undefined);
+        assert.equal(minNotionalState.killSwitch?.active, undefined);
+
+        // Race fallback: venue constraints can change between the explicit
+        // preflight and executeEntry. The exact same pre-submit error must
+        // clear durable pending state without tripping Fail Closed.
+        const lateVenueMinimum = await makeHarness(root, "late-venue-minimum");
+        lateVenueMinimum.adapter.entryError = new Error("Quantity 0.000795 is below Aster minQty 0.001 for BTCUSDT.");
+        const lateVenueMinimumResult = await lateVenueMinimum.engine.tick();
+        assert.equal(lateVenueMinimumResult.status, "capacity-blocked");
+        assert.equal(lateVenueMinimumResult.reason, "V12_ENTRY_MIN_QTY_CAPACITY_BLOCKED");
+        assert.equal(lateVenueMinimum.adapter.entryCalls, 1, "late venue minimum must be caught after pending save");
+        assert.equal(lateVenueMinimum.adapter.pendingObservedBeforeSend, true);
+        const lateVenueMinimumState = await lateVenueMinimum.stateStore.load();
+        assert.equal(lateVenueMinimumState.pending, undefined);
+        assert.equal(lateVenueMinimumState.manualReview, undefined);
+        assert.equal(lateVenueMinimumState.killSwitch?.active, undefined);
+        assert.equal(lateVenueMinimumState.lastCompletedIdempotencyKey, lateVenueMinimumResult.clientOrderId);
+
+        // A transient shared-risk block with one free V12 slot must not consume
+        // the completed bar. After risk recovers, the same bar is retried for
+        // entry without advancing holdingBars/trailing maintenance twice.
+        const deferred = await enterHarness(root, "shared-risk-deferred-entry");
+        const deferredState = await deferred.stateStore.load();
+        const deferredActives = deferredState.activePositions || (deferredState.active ? [deferredState.active] : []);
+        assert.equal(deferredActives.length, 2);
+        const retained = deferredActives[0];
+        const removed = deferredActives[1];
+        deferred.adapter.positions = deferred.adapter.positions.filter((row) => row.symbol.toUpperCase() === retained.symbol.toUpperCase());
+        if (removed.protection.stopClientOrderId) deferred.adapter.resident.delete(removed.protection.stopClientOrderId);
+        if (removed.protection.takeProfitClientOrderId) deferred.adapter.resident.delete(removed.protection.takeProfitClientOrderId);
+        deferredState.activePositions = [retained];
+        deferredState.active = retained;
+        deferredState.lastCompletedIdempotencyKey = retained.positionId;
+        const originalDeferredQuote = deferred.adapter.executor.getMarketQuote;
+        deferred.adapter.executor.getMarketQuote = async (symbol: string) => {
+            if (symbol.toUpperCase() !== retained.symbol.toUpperCase()) return originalDeferredQuote(symbol);
+            const bar = deferred.marketData[retained.symbol.replace(/USDT$/, "")].at(-1)!;
+            return retained.side === "LONG"
+                ? { symbol, bidPrice: bar.high * 1.01, askPrice: bar.high * 1.011, bidQuantity: 100, askQuantity: 100, midPrice: bar.high * 1.0105, spreadBps: 10, updatedAt: NOW }
+                : { symbol, bidPrice: bar.low * 0.989, askPrice: bar.low * 0.99, bidQuantity: 100, askQuantity: 100, midPrice: bar.low * 0.9895, spreadBps: 10, updatedAt: NOW };
+        };
+        deferredState.lastReferenceTs = deferred.marketData.BTC.at(-1)!.endTs - BAR_MS;
+        deferredState.deferredEntryReferenceTs = undefined;
+        await deferred.stateStore.save(deferredState);
+        await blockedRisk(deferred.riskPath);
+        const entriesBeforeBlock = deferred.adapter.entryCalls;
+        const blocked = await deferred.engine.tick();
+        assert.equal(blocked.status, "risk-blocked");
+        assert.match(blocked.reason, /SHARED_CRYPTO_RISK:DAILY_LOSS_TRIPPED/);
+        const blockedState = await deferred.stateStore.load();
+        assert.equal(blockedState.lastReferenceTs, deferred.marketData.BTC.at(-1)!.endTs, "position maintenance may consume the bar");
+        assert.equal(blockedState.deferredEntryReferenceTs, deferred.marketData.BTC.at(-1)!.endTs, "entry opportunity must remain deferred");
+        const heldBarsAfterBlockedMaintenance = (blockedState.activePositions || [blockedState.active!])[0].holdingBars;
+        await risk(deferred.riskPath);
+        const retried = await deferred.engine.tick();
+        assert.equal(retried.status, "entered");
+        assert.equal(deferred.adapter.entryCalls, entriesBeforeBlock + 1, "same-bar retry must fill the free V12 slot exactly once");
+        const retriedState = await deferred.stateStore.load();
+        assert.equal(retriedState.deferredEntryReferenceTs, undefined);
+        assert.equal((retriedState.activePositions || []).length, 2);
+        assert.equal((retriedState.activePositions || [])[0].holdingBars, heldBarsAfterBlockedMaintenance, "deferred retry must not double-count the completed bar");
+
+        // Between-bar venue-resident TP/STOP fills must reconcile local state
+        // without waiting for the next 2h signal tick. Only the confirmed flat
+        // symbol is removed; the other live V12 position is preserved.
+        const protectionFill = await enterHarness(root, "between-bar-protection-fill");
+        const beforeProtectionFill = await protectionFill.stateStore.load();
+        const beforeActives = beforeProtectionFill.activePositions || (beforeProtectionFill.active ? [beforeProtectionFill.active] : []);
+        assert.equal(beforeActives.length, 2, "fixture must have two active V12 positions");
+        const exitedActive = beforeActives[1];
+        const retainedActive = beforeActives[0];
+        protectionFill.adapter.positions = protectionFill.adapter.positions.filter(
+            (row) => row.symbol.toUpperCase() !== exitedActive.symbol.toUpperCase(),
+        );
+        protectionFill.adapter.queryOrderSameId = async (_symbol: string, clientOrderId: string) => (
+            clientOrderId === exitedActive.protection.takeProfitClientOrderId
+                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit }
+                : null
+        ) as never;
+        const provenEntry=protectionFill.adapter.entryFills.get(exitedActive.symbol);
+        protectionFill.adapter.exitFills.set(exitedActive.symbol,{...provenEntry,id:2,orderId:8,side:provenEntry.side==="BUY"?"SELL":"BUY",realizedPnl:"1"});
+        const entryCallsBeforeProtectionReconcile = protectionFill.adapter.entryCalls;
+        const exitCallsBeforeProtectionReconcile = protectionFill.adapter.exitCalls;
+        const protectionReconcile = await protectionFill.engine.reconcileProtectionFillsOnly();
+        assert.equal(protectionReconcile?.status, "exited");
+        assert.match(protectionReconcile?.reason || "", /PROTECTION_FILL_RECONCILED/);
+        const afterProtectionFill = await protectionFill.stateStore.load();
+        const afterActives = afterProtectionFill.activePositions || (afterProtectionFill.active ? [afterProtectionFill.active] : []);
+        assert.deepEqual(afterActives.map((row) => row.symbol), [retainedActive.symbol]);
+        assert.equal(protectionFill.adapter.entryCalls, entryCallsBeforeProtectionReconcile, "fill reconciliation must never submit a new entry");
+        assert.equal(protectionFill.adapter.exitCalls, exitCallsBeforeProtectionReconcile, "already-flat venue position must not be exited again");
+
+        // A state-only position without FILLED STOP/TP evidence remains fail
+        // closed; the fast reconciler must never guess that an exit occurred.
+        const unexplainedFlat = await enterHarness(root, "between-bar-unexplained-flat");
+        const unexplainedState = await unexplainedFlat.stateStore.load();
+        const unexplainedActives = unexplainedState.activePositions || (unexplainedState.active ? [unexplainedState.active] : []);
+        const unexplainedMissing = unexplainedActives[1];
+        unexplainedFlat.adapter.positions = unexplainedFlat.adapter.positions.filter(
+            (row) => row.symbol.toUpperCase() !== unexplainedMissing.symbol.toUpperCase(),
+        );
+        unexplainedFlat.adapter.queryOrderSameId = async () => null;
+        const unexplainedResult = await unexplainedFlat.engine.reconcileProtectionFillsOnly();
+        assert.equal(unexplainedResult?.status, "manual-review");
+        assert.match((await unexplainedFlat.stateStore.load()).manualReview || "", /V12_STATE_ONLY_POSITION_MISMATCH/);
+
+        // Ordinary restart with a live protected V12 position must reconcile and
+        // must never submit the entry again.
+        const restarted = new V12LiveExecutionEngine({
+            adapter: normal.adapter,
+            stateStore: normal.stateStore,
+            lock: normal.lock,
+            riskPath: normal.riskPath,
+            marketData: { load: async () => normal.marketData },
+            now: () => NOW,
+            log: () => undefined,
+        });
+        const restartResult = await restarted.tick();
+        assert.equal(restartResult.status, "held");
+        assert.equal(normal.adapter.entryCalls, 2, "restart must not duplicate a completed entry");
+
+        // If the completed bar advances the trailing threshold but the live
+        // market has already crossed that replacement STOP, do not submit an
+        // invalid conditional order. Exit through the normal reduce-only path.
+        const crossed = await enterHarness(root, "trailing-crossed-before-replacement");
+        const crossedState = await crossed.stateStore.load();
+        crossedState.lastReferenceTs = crossed.marketData.BTC.at(-1)!.endTs - BAR_MS;
+        await crossed.stateStore.save(crossedState);
+        const crossedPositionCount = crossed.adapter.positions.length;
+        const crossedStopPlacements = crossed.adapter.stopPlacements;
+        const crossedResult = await crossed.engine.tick();
+        assert.equal(crossedResult.status, "exited");
+        assert.equal(crossedResult.reason, "trailing-stop-crossed-before-replacement");
+        assert.equal(crossed.adapter.exitCalls, 1, "crossed replacement STOP must use the normal reduce-only exit path");
+        assert.equal(crossed.adapter.stopPlacements, crossedStopPlacements, "crossed replacement STOP must not be submitted");
+        assert.equal(crossed.adapter.positions.length, crossedPositionCount - 1);
+
+        // Crash after exchange send but before local fill-state persistence: the
+        // pending record and same clientOrderId recover the fill without resend.
+        const crash = await makeHarness(root, "crash-after-send");
+        const pendingId = "v12-entry-crash-recovery";
+        const pending: V12PendingOrderState = {
+            idempotencyKey: pendingId,
+            action: "ENTRY",
+            clientOrderId: pendingId,
+            symbol: `${crash.signal!.symbol}USDT`,
+            side: crash.signal!.side,
+            quantity: 0.5,
+            signalTs: crash.signal!.referenceTs,
+            expectedPrice: 100,
+            requestedGross: 0.05,
+            atrAtEntry: crash.signal!.atr,
+            createdAt: NOW,
+        };
+        const crashState: V12X1AllRunnerState = {
+            schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: NOW, pending,
+            manualReview: "V12_BASE_AGGREGATE_GROSS_OVER_CAP",
+            killSwitch: { active: true, reason: "V12_BASE_AGGREGATE_GROSS_OVER_CAP", trippedAt: NOW },
+        };
+        await crash.stateStore.save(crashState);
+        crash.adapter.positions = [position(pending.symbol, pending.side === "LONG" ? pending.quantity : -pending.quantity, 100)];
+        crash.adapter.reconcileResult = tradeResult({ clientOrderId: pendingId, symbol: pending.symbol, executedQuantity: pending.quantity, price: 100 });
+        const recovered = await crash.engine.tick();
+        assert.equal(recovered.status, "entered");
+        assert.equal(crash.adapter.entryCalls, 0, "pending recovery must query the original ID instead of resubmitting");
+        const recoveredState = await crash.stateStore.load();
+        assert.equal(recoveredState.pending, undefined);
+        assert.equal(recoveredState.manualReview, undefined, "fully protected pending recovery may clear the prior review only after all checks pass");
+        assert.equal(recoveredState.killSwitch, undefined);
+
+        // Crash after STOP_UPDATE pending save but before the exchange send: the
+        // same deterministic replacement ID is submitted exactly once on restart.
+        const stopBeforeSend = await enterHarness(root, "stop-before-send");
+        const stopState = (await stopBeforeSend.stateStore.load()).active!;
+        const plannedBeforeSend = await planV12TrailingStop(stopBeforeSend.adapter, stopState.protection, stopState.entryPrice + stopState.atrAtEntry * 8);
+        assert.ok(plannedBeforeSend.plan, "fixture must request a trailing STOP replacement");
+        const planBeforeSend = plannedBeforeSend.plan!;
+        const pendingStopBeforeSend: V12PendingOrderState = {
+            idempotencyKey: planBeforeSend.clientOrderId,
+            action: "STOP_UPDATE",
+            clientOrderId: planBeforeSend.clientOrderId,
+            symbol: stopState.symbol,
+            side: stopState.side,
+            quantity: stopState.quantity,
+            signalTs: stopBeforeSend.marketData.BTC.at(-1)!.endTs,
+            reason: "TRAILING_STOP_UPDATE",
+            createdAt: NOW,
+            positionId: stopState.positionId,
+            stopPrice: planBeforeSend.stopPrice,
+            previousStopClientOrderId: planBeforeSend.previousStopClientOrderId,
+            nextPeakOrTrough: planBeforeSend.nextPeakOrTrough,
+        };
+        await stopBeforeSend.stateStore.save({ ...await stopBeforeSend.stateStore.load(), active: { ...stopState, protection: plannedBeforeSend.state }, pending: pendingStopBeforeSend });
+        const beforeSendPlacements = stopBeforeSend.adapter.stopPlacements;
+        const recoveredBeforeSend = await stopBeforeSend.engine.tick();
+        assert.equal(recoveredBeforeSend.status, "held");
+        assert.equal(stopBeforeSend.adapter.stopPlacements, beforeSendPlacements + 1, "pending STOP_UPDATE must submit its deterministic replacement once");
+        const afterStopBeforeSend = await stopBeforeSend.stateStore.load();
+        assert.equal(afterStopBeforeSend.pending, undefined);
+        assert.equal(afterStopBeforeSend.active?.protection.stopClientOrderId, planBeforeSend.clientOrderId);
+        assert.equal(stopBeforeSend.adapter.resident.get(planBeforeSend.previousStopClientOrderId!)?.status, "CANCELED");
+
+        // Crash after Aster accepted the replacement STOP but before local state
+        // save: restart must discover/reuse it and must not submit a duplicate.
+        const stopAfterSend = await enterHarness(root, "stop-after-send");
+        const stopAfterState = (await stopAfterSend.stateStore.load()).active!;
+        const plannedAfterSend = await planV12TrailingStop(stopAfterSend.adapter, stopAfterState.protection, stopAfterState.entryPrice + stopAfterState.atrAtEntry * 9);
+        assert.ok(plannedAfterSend.plan);
+        const planAfterSend = plannedAfterSend.plan!;
+        const pendingStopAfterSend: V12PendingOrderState = {
+            idempotencyKey: planAfterSend.clientOrderId,
+            action: "STOP_UPDATE",
+            clientOrderId: planAfterSend.clientOrderId,
+            symbol: stopAfterState.symbol,
+            side: stopAfterState.side,
+            quantity: stopAfterState.quantity,
+            signalTs: stopAfterSend.marketData.BTC.at(-1)!.endTs,
+            reason: "TRAILING_STOP_UPDATE",
+            createdAt: NOW,
+            positionId: stopAfterState.positionId,
+            stopPrice: planAfterSend.stopPrice,
+            previousStopClientOrderId: planAfterSend.previousStopClientOrderId,
+            nextPeakOrTrough: planAfterSend.nextPeakOrTrough,
+        };
+        await stopAfterSend.stateStore.save({ ...await stopAfterSend.stateStore.load(), active: { ...stopAfterState, protection: plannedAfterSend.state }, pending: pendingStopAfterSend });
+        stopAfterSend.adapter.resident.set(planAfterSend.clientOrderId, {
+            symbol: stopAfterState.symbol,
+            clientOrderId: planAfterSend.clientOrderId,
+            status: "NEW",
+            side: stopAfterState.side === "LONG" ? "SELL" : "BUY",
+            type: "STOP_MARKET",
+            reduceOnly: true,
+            quantity: stopAfterState.quantity,
+            stopPrice: planAfterSend.stopPrice,
+        });
+        const afterSendPlacements = stopAfterSend.adapter.stopPlacements;
+        const recoveredAfterSend = await stopAfterSend.engine.tick();
+        assert.equal(recoveredAfterSend.status, "held");
+        assert.equal(stopAfterSend.adapter.stopPlacements, afterSendPlacements, "accepted deterministic replacement STOP must not be resubmitted after crash");
+        const afterStopAfterSend = await stopAfterSend.stateStore.load();
+        assert.equal(afterStopAfterSend.pending, undefined);
+        assert.equal(afterStopAfterSend.active?.protection.stopClientOrderId, planAfterSend.clientOrderId);
+        assert.equal(stopAfterSend.adapter.resident.get(planAfterSend.previousStopClientOrderId!)?.status, "CANCELED");
+
+        // UNKNOWN is never retried with another ID; it becomes sticky manual review.
+        const unknown = await makeHarness(root, "unknown");
+        await unknown.stateStore.save({ ...crashState, pending: { ...pending, clientOrderId: "v12-entry-unknown", idempotencyKey: "v12-entry-unknown" } });
+        unknown.adapter.reconcileResult = tradeResult({ clientOrderId: "v12-entry-unknown", symbol: pending.symbol, status: "UNKNOWN", executedQuantity: 0 });
+        const unknownResult = await unknown.engine.tick();
+        assert.equal(unknownResult.status, "manual-review");
+        assert.equal(unknown.adapter.entryCalls, 0);
+        assert.match((await unknown.stateStore.load()).manualReview || "", /V12_PENDING_ENTRY_UNKNOWN/);
+
+        // Read-only observability must update for a completed bar even when no trade Signal exists.
+        const observationStore = new FileV12X1AllRunnerStateStore(join(root, "observation-state.json"), "LIVE");
+        const observationLock = new FileAccountOrderLock(join(root, "observation-account.lock"), 120_000);
+        const observationRisk = join(root, "observation-risk.json");
+        await risk(observationRisk);
+        const observationAdapter = fakeAdapter();
+        let observed: any = null;
+        const observationMarket = flatData();
+        const observationEngine = new V12LiveExecutionEngine({
+            adapter: observationAdapter, stateStore: observationStore, lock: observationLock, riskPath: observationRisk,
+            marketData: { load: async () => observationMarket }, now: () => NOW, log: () => undefined,
+            decisionObserver: async (snapshot: any) => { observed = snapshot; },
+        } as any);
+        const observationResult = await observationEngine.tick();
+        assert.equal(observationResult.status, "no-signal");
+        assert.equal(observationResult.reason, "NO_COMPLETED_BAR_SIGNAL");
+        assert.equal(observed?.referenceTs, observationMarket.BTC.at(-1)!.endTs);
+        assert.equal(observed?.reason, "NO_COMPLETED_BAR_SIGNAL");
+
+        // Position-only mismatch must never be auto-adopted or auto-closed.
+        const mismatch = await makeHarness(root, "position-only");
+        mismatch.adapter.positions = [position(`${mismatch.signal!.symbol}USDT`, 0.25, 100)];
+        const mismatchResult = await mismatch.engine.tick();
+        assert.equal(mismatchResult.status, "manual-review");
+        assert.equal(mismatch.adapter.entryCalls, 0);
+        assert.equal(mismatch.adapter.exitCalls, 0);
+        assert.match((await mismatch.stateStore.load()).manualReview || "", /V12_POSITION_ONLY_MISMATCH/);
+
+        console.log("V12_LIVE_EXECUTION_SELFTEST_PASS", JSON.stringify({ ordersSent: 0, realExchangeCalls: 0 }));
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+}
+
+main().catch((error) => { console.error(error); process.exitCode = 1; });

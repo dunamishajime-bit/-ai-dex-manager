@@ -23,7 +23,7 @@ export interface DisDexV96OperatorOverrideApproval {
 export interface DisDexV96KillSwitchCommand {
     active: boolean;
     strategyId: string;
-    action: "FLATTEN_MANAGED";
+    action: "HOLD_PROTECTED" | "FLATTEN_MANAGED";
     reason: string;
     operator: string;
     activatedAt: string;
@@ -193,13 +193,33 @@ export function updateDisDexV96DailyRisk(input: {
     };
 }
 
-export async function readDisDexV96KillSwitch(path?: string): Promise<DisDexV96KillSwitchCommand | undefined> {
+export async function readDisDexV96KillSwitch(
+    path?: string,
+    options: { acceptStable4GlobalHold?: boolean } = {},
+): Promise<DisDexV96KillSwitchCommand | undefined> {
     if (!path) return undefined;
     try {
-        const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<DisDexV96KillSwitchCommand>;
-        if (parsed.active !== true) return undefined;
-        if (parsed.strategyId !== DISDEX_V96_STRATEGY_ID
-            || parsed.action !== "FLATTEN_MANAGED"
+        const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<DisDexV96KillSwitchCommand> & {
+            scope?: unknown;
+            recoverable?: unknown;
+        };
+        if (parsed?.active === false) return undefined;
+        if (parsed?.active !== true) throw new Error("V96 Kill Switch file is active but invalid.");
+        // The existing V96 exit-mode contract remains FLATTEN_MANAGED only.
+        // A pinned STABLE4 GLOBAL protective hold is recognized solely when
+        // an explicit caller opts in, and never grants order/hold-release power.
+        const formalStable4Hold = Boolean(
+            options.acceptStable4GlobalHold
+            && parsed.strategyId === "STABLE4_H48_CUTOVER"
+            && parsed.action === "HOLD_PROTECTED"
+            && parsed.scope === "GLOBAL"
+            && parsed.operator === "disdex-stable4-formal-owner-hold"
+            && /^STABLE4_RESEARCH_ROLLOUT:[0-9a-f]{40}$/.test(String(parsed.reason || ""))
+            && parsed.recoverable === false
+        );
+        const oldV96Flatten = parsed.strategyId === DISDEX_V96_STRATEGY_ID
+            && parsed.action === "FLATTEN_MANAGED";
+        if ((!oldV96Flatten && !formalStable4Hold)
             || !nonEmpty(parsed.reason)
             || !nonEmpty(parsed.operator)
             || !nonEmpty(parsed.activatedAt)) {

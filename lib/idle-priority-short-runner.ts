@@ -1,0 +1,1061 @@
+import {reuseFlatIdleMarketSnapshot} from "./idle-lock-safe-market";
+import { createHash } from "node:crypto";
+import { lstat, readFile } from "node:fs/promises";
+
+import type { AsterV3Client } from "./aster-v3-client";
+import { AsterDirectTradeExecutor, type DirectAccountSnapshot, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "./direct-trade-executor";
+import { FileAccountOrderLock, type AccountLockHandle } from "./disdex-account-order-lock";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
+import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
+import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
+import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
+import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
+import { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
+import { IDLE_PRIORITY_SHORT_POLICY, IDLE_PRIORITY_SHORT_STRATEGY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntime";
+import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, idleRouteRequestedGross, type IdleBaselineAdmission } from "./idle-priority-short-live";
+import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
+import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
+import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
+import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
+import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
+import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
+import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
+import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
+import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
+import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { startLegacyRenderAdverse, advanceLegacyRenderAdverse, RENDER_M5_MS } from "./render-highwr-and-legacy-stop";
+import { RENDER_INDEPENDENT_ROUTE, RENDER_ENTRY_POLICY, type ClosedM5 } from "./render-highwr-and-legacy-stop";
+import { loadRenderShadow, saveRenderShadow, advanceRenderShadow, type RenderShadowDecision } from "./render-independent-six-hour-journal";
+import {isIndependentRenderRoute, independentRenderOrderId, independentRenderProtectionPlan, independentRenderExitAt} from "./render-independent-execution-contract";
+import {assertRenderLegacyAdverseCert} from "./render-legacy-adverse-cert";
+
+const EPSILON = 1e-9;
+const MAX_QUOTE_AGE_MS = 5 * 60_000;
+const ACTIVE_ORDER_STATUSES = new Set(["NEW", "PARTIALLY_FILLED", "PENDING_NEW"]);
+const CORE_SLEEVES = new Set(["V12", "PENGU_DUAL_LS_V2", "FET_RESIDUAL", "V11_EQ", "V50_POST_OPEN_BASIS", "QUALITY102_CAUSAL_V1"]);
+const SIDEcar_SLEEVES = new Set(["HYPE_LONG", "ZEC_LONG"]);
+
+export function classifyIdleFlatRateBudgetDeferral(state: IdleState, error: unknown) {
+    const deferred = classifyAsterRateBudgetFailure(error);
+    if (!deferred || state.manualReview || state.pending || state.positions.length > 0) return undefined;
+    return `IDLE_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
+
+/**
+ * A saturated read-only rate budget must not turn a previously protected
+ * position into a terminal manual-review state.  No new exposure is allowed
+ * while this result is returned; the daemon keeps its heartbeat and retries
+ * until it can perform the normal venue ownership/protection readback.
+ */
+export function classifyIdleProtectedPositionRateBudgetDeferral(state: IdleState, error: unknown) {
+    const deferred = classifyAsterRateBudgetFailure(error);
+    if (!deferred || state.manualReview || state.pending || state.positions.length === 0) return undefined;
+    if (state.positions.some((position) => position.protectionVerified !== true)) return undefined;
+    return `IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
+
+/**
+ * A protected position remains exchange-owned while a shared read-only rate
+ * budget is saturated. Persist a heartbeat so resident-stop observation does
+ * not mistake a safe retry deferral for a stale or unknown owner.
+ */
+export function heartbeatIdleProtectedRateBudgetDeferral(state: IdleState, reason: string, now: number): IdleState {
+    return {
+        ...state,
+        updatedAt: now,
+        lastDecision: {
+            decisionTs: now,
+            accepted: false,
+            reason,
+        },
+    };
+}
+
+export type IdlePriorityShortTickResult = {
+    status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "completed" | "manual-review";
+    message: string;
+    symbol?: string;
+    ordersSent: number;
+    cancelsSent: number;
+    positionChangesSent: number;
+};
+
+export type IdlePriorityShortRunnerDependencies = {
+    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar>; loadFiveMinuteSince?(symbol: string, startTs: number, endTs?: number): Promise<ConfirmedFiveMinuteBar[]>; loadRenderIndependentM5?(decisionTs: number): Promise<{btcM5: ClosedM5[]; renderM5: ClosedM5[]}> };
+    executor: AsterDirectTradeExecutor;
+    adapter: V12AsterLiveAdapter;
+    client: AsterV3Client;
+    stateStore: FileIdlePriorityShortStateStore;
+    lock: FileAccountOrderLock;
+    runtime: IdlePriorityShortRuntime;
+    now?: () => number;
+    logger?: { info(message: string, payload?: Record<string, unknown>): void; warn(message: string, payload?: Record<string, unknown>): void; error(message: string, payload?: Record<string, unknown>): void };
+};
+
+function defaultLogger() {
+    return {
+        info: (message: string, payload?: Record<string, unknown>) => console.log(JSON.stringify({ level: "info", message, ...(payload || {}) })),
+        warn: (message: string, payload?: Record<string, unknown>) => console.warn(JSON.stringify({ level: "warn", message, ...(payload || {}) })),
+        error: (message: string, payload?: Record<string, unknown>) => console.error(JSON.stringify({ level: "error", message, ...(payload || {}) })),
+    };
+}
+
+function activeOrder(order: DirectOpenOrder) { return ACTIVE_ORDER_STATUSES.has(String(order.status || "").toUpperCase()); }
+function activePosition(positions: readonly DirectPosition[], symbol: string) { return positions.find((position) => position.symbol.toUpperCase() === symbol.toUpperCase() && Math.abs(position.quantity) > EPSILON); }
+function positionQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
+function shortPosition(position: DirectPosition) { return position.positionSide === "SHORT" || (position.positionSide === "BOTH" && position.quantity < 0); }
+function hasExposure(result: DirectTradeResult) { return (result.status === "FILLED" || result.status === "PARTIALLY_FILLED") && result.executedQuantity > EPSILON; }
+function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-${createHash("sha256").update(parts.join("|")).digest("hex").slice(0, 27)}`.slice(0, 36); }
+function quoteFresh(quote: { updatedAt: number }, now: number) { return Number.isFinite(quote.updatedAt) && quote.updatedAt > 0 && quote.updatedAt <= now && now - quote.updatedAt <= MAX_QUOTE_AGE_MS; }
+function sameQuantity(actual: number, expected: number) { return Math.abs(actual - expected) <= Math.max(1e-9, Math.abs(expected) * 0.01); }
+
+function safeNumber(value: unknown) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
+
+function isOperatorActivationBlock(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.startsWith("OPERATOR_LIVE_ACTIVATION_REQUIRED")
+        || message.startsWith("OPERATOR_GATE_")
+        || message.startsWith("IDLE_PARITY_CERT_REQUIRED")
+        || message === "OPERATOR_GATE_IMPLEMENTATION_NOT_READY";
+}
+
+async function readMarginHealthy(path: string, now: number, maxAgeMs: number) {
+    const state = JSON.parse(await readFile(path, "utf8")) as { stage?: unknown; ordersAllowed?: unknown; checkedAt?: unknown; updatedAt?: unknown };
+    const checkedAt = safeNumber(state.checkedAt ?? state.updatedAt);
+    if (state.stage !== "HEALTHY" || state.ordersAllowed !== true || checkedAt <= 0 || checkedAt > now || now - checkedAt > maxAgeMs) return false;
+    return true;
+}
+
+async function assertOperatorActivation(runtime: IdlePriorityShortRuntime) {
+    if (runtime.mode !== "LIVE") return;
+    const readiness = JSON.parse(await readFile(`${runtime.releaseRoot}/docs/production/current-implementation-readiness.json`, "utf8")) as { schema?: string; target?: string; implementationStatus?: string; blockers?: unknown[] };
+    if (readiness.schema !== "disdex-current-implementation-readiness/v1" || readiness.implementationStatus !== "READY" || !readiness.target || (readiness.blockers || []).some((value) => value !== "OPERATOR_LIVE_ACTIVATION_REQUIRED")) {
+        throw new Error("OPERATOR_GATE_IMPLEMENTATION_NOT_READY");
+    }
+    try {
+        const certStats = await lstat(runtime.parityCertificatePath);
+        if (!certStats.isFile() || certStats.isSymbolicLink()) throw new Error("IDLE_PARITY_CERT_NOT_REGULAR_FILE");
+        if (typeof certStats.uid === "number" && (certStats.uid !== 0 || certStats.gid !== 0)) throw new Error("IDLE_PARITY_CERT_NOT_ROOT_OWNED");
+        if ((certStats.mode & 0o022) !== 0) throw new Error("IDLE_PARITY_CERT_WRITABLE_BY_NON_ROOT");
+        assertIdleParityCertificate(JSON.parse(await readFile(runtime.parityCertificatePath, "utf8")), runtime.runtimeSha);
+    } catch (error) {
+        throw new Error(`IDLE_PARITY_CERT_REQUIRED:${error instanceof Error ? error.message : String(error)}`);
+    }
+    const stats = await lstat(runtime.operatorActivationPath);
+    if (!stats.isFile() || stats.isSymbolicLink()) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_NOT_REGULAR_FILE");
+    if (typeof stats.uid === "number" && (stats.uid !== 0 || stats.gid !== 0)) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_NOT_ROOT_OWNED");
+    if ((stats.mode & 0o022) !== 0) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_WRITABLE_BY_NON_ROOT");
+    const artifact = JSON.parse(await readFile(runtime.operatorActivationPath, "utf8")) as {
+        schema?: string; approvedSha?: string; target?: string; ordersEnabled?: boolean;
+        operatorAcknowledgement?: string; approvedRunners?: unknown[]; approvedAt?: string;
+        activationClass?: string; limitedOverlayRunners?: unknown[]; unchangedPeerRunners?: unknown[];
+        existingEvidenceBaseline?: boolean; formalCertification?: boolean; venueLifecycleCertified?: boolean;
+        naturalSignalsOnly?: boolean; stopReadbackRequired?: boolean; testnetLifecycleRequired?: boolean;
+        existingStrategyGatesOnly?: boolean; initialPositionLimit?: number;
+        evidence?: { ciRunId?: string; signedAsterReadOnly?: boolean; positionsReconciled?: boolean;
+            pendingExposureReconciled?: boolean; sharedRiskHealthy?: boolean; marginGuardHealthy?: boolean };
+    };
+    if (artifact.schema !== "disdex-live-operator-activation/v1") throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_MISSING_OR_INVALID");
+    if (String(artifact.approvedSha || "").toLowerCase() !== runtime.runtimeSha) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH");
+    if (artifact.target !== readiness.target) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:TARGET_MISMATCH");
+    if (artifact.ordersEnabled !== true) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING");
+    const activationClass = String(artifact.activationClass || "FULL_LIVE").trim().toUpperCase();
+    if (activationClass === "LIMITED_OVERLAY_LIVE") {
+        const e = artifact.evidence;
+        if (artifact.operatorAcknowledgement !== "I_ACK_LIMITED_OVERLAY_LIVE_WITH_EXISTING_EVIDENCE"
+            || !artifact.limitedOverlayRunners?.includes(IDLE_PRIORITY_SHORT_STRATEGY)
+            || artifact.existingEvidenceBaseline !== true || artifact.formalCertification !== false
+            || artifact.venueLifecycleCertified !== false || artifact.naturalSignalsOnly !== true
+            || artifact.stopReadbackRequired !== true || artifact.testnetLifecycleRequired !== false
+            || artifact.existingStrategyGatesOnly !== true || artifact.initialPositionLimit !== 1
+            || e?.ciRunId !== "39093213253" || e.signedAsterReadOnly !== true
+            || e.positionsReconciled === false || e.pendingExposureReconciled === false
+            || e.sharedRiskHealthy !== true || e.marginGuardHealthy !== true)
+            throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_EVIDENCE_CONTRACT_INVALID");
+    } else if (activationClass !== "FULL_LIVE" || artifact.operatorAcknowledgement !== "I_ACK_REAL_MONEY_LIVE_ACTIVATION") {
+        throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING");
+    }
+    if (!Array.isArray(artifact.approvedRunners) || !artifact.approvedRunners.includes(IDLE_PRIORITY_SHORT_STRATEGY)) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:RUNNER_NOT_APPROVED:IDLE_PRIORITY_SHORT");
+    const approvedAt = Date.parse(String(artifact.approvedAt || ""));
+    if (!Number.isFinite(approvedAt) || approvedAt <= 0 || approvedAt > Date.now() + 300_000) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:APPROVED_AT_INVALID");
+}
+
+export function coreAndSidecarExposure(positions: readonly DirectPosition[], equity: number, idleOwnedSymbols: ReadonlySet<string> = new Set()) {
+    let baselineOpenPositions = 0;
+    let nonBaselineCryptoExposure = 0;
+    let totalGross = 0;
+    let cryptoGross = 0;
+    let stockGross = 0;
+    for (const position of positions) {
+        const gross = equity > 0 ? Math.abs(position.notionalUsd) / equity : Number.POSITIVE_INFINITY;
+        totalGross += gross;
+        const classification = classifyAsterSymbol(position.symbol);
+        if (!classification.tradable || classification.assetClass === "UNKNOWN") {
+            // Unknown non-flat venue rows are never adopted or guessed. They are
+            // conservative baseline exposure, so Idle cannot open new risk while
+            // another reconciler owns or explains the row.
+            baselineOpenPositions += 1;
+            continue;
+        }
+        if (classification.assetClass === "CRYPTO") cryptoGross += gross;
+        else if (classification.assetClass === "STOCK") stockGross += gross;
+
+        const symbol = position.symbol.toUpperCase();
+        if (idleOwnedSymbols.has(symbol)) continue;
+        if (symbol === "HYPEUSDT" || symbol === "ZECUSDT" || SIDEcar_SLEEVES.has(classification.sleeve)) {
+            nonBaselineCryptoExposure += gross;
+            continue;
+        }
+        // Ownership is deliberately not inferred from symbol->sleeve classification.
+        // Any non-Idle-owned, non-HYPE/ZEC live position is baseline/core exposure
+        // for Idle-admission purposes, including Q102 positions in an Idle symbol.
+        baselineOpenPositions += 1;
+    }
+    return { baselineOpenPositions, nonBaselineCryptoExposure, totalGross, cryptoGross, stockGross };
+}
+
+function pendingExposureByOwner(entries: Awaited<ReturnType<typeof readPendingExposureRegistry>>) {
+    let baselinePendingExposure = 0;
+    let nonBaselinePendingExposure = 0;
+    for (const entry of entries.entries) {
+        if (!["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status)) continue;
+        const owner = entry.strategyId.toUpperCase();
+        if (owner.includes("HYPE") || owner.includes("ZEC")) nonBaselinePendingExposure += Number(entry.gross || 0);
+        else baselinePendingExposure += Number(entry.gross || 0);
+    }
+    return { baselinePendingExposure, nonBaselinePendingExposure };
+}
+
+export class IdlePriorityShortRunner {
+    private readonly now: () => number;
+    private readonly log: NonNullable<IdlePriorityShortRunnerDependencies["logger"]>;
+
+    constructor(private readonly dependencies: IdlePriorityShortRunnerDependencies) {
+        this.now = dependencies.now || Date.now;
+        this.log = dependencies.logger || defaultLogger();
+    }
+
+    private async manualReview(state: IdleState, reason: string): Promise<IdlePriorityShortTickResult> {
+        state.manualReview = reason;
+        state.failures = [...state.failures, { message: reason, occurredAt: this.now() }].slice(-100);
+        await this.dependencies.stateStore.save(state);
+        this.log.error("idle-priority-short-manual-review", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+        return { status: "manual-review", message: reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+    }
+
+    private async verifyVenueFiveXCross(symbol: string) {
+        const rows = await this.dependencies.client.getPositions(symbol);
+        const matching = rows.filter((row) => row.symbol.toUpperCase() === symbol.toUpperCase());
+        if (!matching.length) return false;
+        for (const row of matching) {
+            if (Math.abs(Number(row.positionAmt)) > 1e-12) return false;
+            const margin = String(row.marginType || "").toLowerCase();
+            const cross = margin === "cross" || margin === "crossed" || row.isolated === false;
+            if (Number(row.leverage) !== 5 || !cross) return false;
+        }
+        return (await this.dependencies.client.getOpenOrders(symbol)).length === 0;
+    }
+
+    private candidateLifecycleAllows(state: IdleState, candidate: { symbol: IdlePrioritySymbol; features: Pick<IdleFeatures, "decisionTs"> }) {
+        const last = Number(state.lastAcceptedBySymbol[candidate.symbol] || 0);
+        const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * 3_600_000;
+        return last <= 0 || candidate.features.decisionTs - last >= cooldownMs;
+    }
+
+    private markCandidateLifecycle(state: IdleState, candidate: { symbol: IdlePrioritySymbol; accepted: boolean; side: string | null; features: Pick<IdleFeatures, "decisionTs"> }) {
+        if (!candidate.accepted || candidate.side !== "SHORT") return;
+        state.lastAcceptedBySymbol = { ...state.lastAcceptedBySymbol, [candidate.symbol]: candidate.features.decisionTs };
+    }
+
+    private async protectionReadBack(symbol: string, plan: ReturnType<typeof buildIdleProtectionPlan>, expectedQty: number) {
+        const orders = (await this.dependencies.adapter.openOrders(symbol)).filter((order) => activeOrder({ symbol, clientOrderId: order.clientOrderId, quantity: order.quantity, executedQuantity: 0, status: order.status, type: order.type, side: order.side, reduceOnly: order.reduceOnly }));
+        const stop = orders.find((order) => order.clientOrderId === plan.stopClientOrderId);
+        const takeProfit = orders.find((order) => order.clientOrderId === plan.takeProfitClientOrderId);
+        if (!stop || !takeProfit || stop.reduceOnly !== true || takeProfit.reduceOnly !== true || !sameQuantity(stop.quantity, expectedQty) || !sameQuantity(takeProfit.quantity, expectedQty)) throw new Error("IDLE_PROTECTION_READBACK_FAILED");
+        if (String(stop.type).toUpperCase() !== "STOP_MARKET" || String(takeProfit.type).toUpperCase() !== "TAKE_PROFIT_MARKET") throw new Error("IDLE_PROTECTION_TYPE_READBACK_FAILED");
+        if (String(stop.side).toUpperCase() !== "BUY" || String(takeProfit.side).toUpperCase() !== "BUY") throw new Error("IDLE_PROTECTION_SIDE_READBACK_FAILED");
+        const sameTrigger = (actual: number | undefined, expected: number) => Number.isFinite(Number(actual)) && Math.abs(Number(actual) - expected) <= Math.max(1e-12, Math.abs(expected) * 1e-6);
+        if (!sameTrigger(stop.stopPrice, plan.stopPrice) || !sameTrigger(takeProfit.stopPrice, plan.takeProfitPrice)) throw new Error("IDLE_PROTECTION_TRIGGER_READBACK_FAILED");
+        return true;
+    }
+
+    private async reconcileVenueProtectiveFills(state: IdleState, positions: DirectPosition[], openOrders: DirectOpenOrder[]) {
+        let changed = false;
+        for (const owned of [...state.positions]) {
+            if (activePosition(positions, owned.symbol)) continue;
+            const [stop, takeProfit] = await Promise.all([
+                this.dependencies.executor.reconcileOrder(owned.symbol, owned.stopClientOrderId),
+                this.dependencies.executor.reconcileOrder(owned.symbol, owned.takeProfitClientOrderId),
+            ]);
+            const stopFilled = stop.status === "FILLED" && stop.executedQuantity > EPSILON;
+            const takeProfitFilled = takeProfit.status === "FILLED" && takeProfit.executedQuantity > EPSILON;
+            if (!stopFilled && !takeProfitFilled) continue;
+
+            const siblingId = stopFilled ? owned.takeProfitClientOrderId : owned.stopClientOrderId;
+            if (openOrders.some((order) => order.clientOrderId === siblingId && activeOrder(order))) {
+                await this.dependencies.adapter.cancel(siblingId).catch(() => undefined);
+            }
+            state.positions = state.positions.filter((row) => row.symbol !== owned.symbol);
+            state.lastDecision = {
+                decisionTs: this.now(),
+                symbol: owned.symbol,
+                route: owned.route,
+                accepted: true,
+                reason: `EXIT:${stopFilled ? "HARD_STOP" : "TAKE_PROFIT"}_VENUE_RECONCILED`,
+            };
+            changed = true;
+        }
+        if (changed) await this.dependencies.stateStore.save(state);
+        return changed;
+    }
+
+    private async reconcileOwnership(state: IdleState, positions: DirectPosition[], openOrders: DirectOpenOrder[]) {
+        const owned = new Map(state.positions.map((position) => [position.symbol, position]));
+        for (const position of positions.filter((row) => Math.abs(row.quantity) > EPSILON && Object.prototype.hasOwnProperty.call(IDLE_PRIORITY_SHORT_POLICY.routes, row.symbol.toUpperCase()))) {
+            const statePosition = owned.get(position.symbol.toUpperCase() as IdlePrioritySymbol);
+            if (!statePosition || !shortPosition(position) || !sameQuantity(positionQuantity(position), statePosition.quantity)) return `IDLE_STATE_POSITION_MISMATCH:${position.symbol}`;
+        }
+        for (const statePosition of state.positions) {
+            const actual = activePosition(positions, statePosition.symbol);
+            if (!actual || !shortPosition(actual) || !sameQuantity(positionQuantity(actual), statePosition.quantity)) return `IDLE_STATE_EXPECTS_MISSING_POSITION:${statePosition.symbol}`;
+            const protections = openOrders.filter((order) => order.symbol.toUpperCase() === statePosition.symbol && (order.clientOrderId === statePosition.stopClientOrderId || order.clientOrderId === statePosition.takeProfitClientOrderId));
+            if (protections.length !== 2 || protections.some((order) => order.reduceOnly !== true || !activeOrder(order))) return `IDLE_PROTECTION_NOT_VERIFIED:${statePosition.symbol}`;
+        }
+        const expectedOrderIds = new Set(state.positions.flatMap((position) => [position.stopClientOrderId, position.takeProfitClientOrderId]));
+        for (const order of openOrders.filter((row) => Object.prototype.hasOwnProperty.call(IDLE_PRIORITY_SHORT_POLICY.routes, row.symbol.toUpperCase()) && activeOrder(row))) {
+            if (!expectedOrderIds.has(order.clientOrderId)) return `IDLE_UNMANAGED_OPEN_ORDER:${order.symbol}:${order.clientOrderId}`;
+        }
+    }
+
+    private async installProtection(state: IdleState, pending: IdlePending, actual: DirectPosition): Promise<IdleOwnedPosition> {
+        const symbol = pending.symbol;
+        const plan = isIndependentRenderRoute(symbol,pending.route)
+            ? independentRenderProtectionPlan({symbol,route:pending.route,signalTs:pending.signalTs,entryPrice:actual.entryPrice,quantity:positionQuantity(actual)})
+            : buildIdleProtectionPlan({ symbol, signalTs: pending.signalTs, entryPrice: actual.entryPrice, quantity: positionQuantity(actual) });
+        const stop = await this.dependencies.adapter.normalizeStopPrice(symbol, plan.stopPrice);
+        const takeProfit = await this.dependencies.adapter.normalizeStopPrice(symbol, plan.takeProfitPrice);
+        try {
+            await this.dependencies.adapter.placeStopMarket({ symbol, side: "BUY", quantity: plan.quantity, stopPrice: stop.price, clientOrderId: plan.stopClientOrderId, reduceOnly: true });
+            await this.dependencies.adapter.placeTakeProfit({ symbol, side: "BUY", quantity: plan.quantity, stopPrice: takeProfit.price, clientOrderId: plan.takeProfitClientOrderId, reduceOnly: true });
+            await this.protectionReadBack(symbol, { ...plan, stopPrice: stop.price, takeProfitPrice: takeProfit.price }, plan.quantity);
+        } catch (error) {
+            throw new Error(`IDLE_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
+        }
+        return {
+            symbol,
+            route: pending.route,
+            side: "SHORT",
+            signalTs: pending.signalTs,
+            entryTs: isIndependentRenderRoute(symbol,pending.route) ? pending.createdAt : this.now(),
+            // Pending planned before venue submission is a conservative
+            // bound: the real fill cannot predate the durable reservation.
+            exitTs: isIndependentRenderRoute(symbol,pending.route)
+                ? independentRenderExitAt(pending.createdAt) : this.now()+pending.holdHours*3_600_000,
+            entryPrice: actual.entryPrice,
+            quantity: positionQuantity(actual),
+            holdHours: pending.holdHours,
+            gross: pending.gross ?? IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross,
+            stopPrice: stop.price,
+            takeProfitPrice: takeProfit.price,
+            stopClientOrderId: plan.stopClientOrderId,
+            takeProfitClientOrderId: plan.takeProfitClientOrderId,
+            protectionVerified: true,
+            trailArmed: false,
+            bestConfirmed5mGainPct: 0,
+            ...(symbol === "RENDERUSDT" && pending.route === "IDLE_RENDER_RELATIVE_SHORT" && this.dependencies.runtime.renderLegacyAdverseLiveAuthorized ? {
+                legacyRenderAdverse: startLegacyRenderAdverse({ originalRoute: pending.route,
+                    entryTs: Math.ceil(this.now() / RENDER_M5_MS) * RENDER_M5_MS, entryPrice: actual.entryPrice }),
+            } : {}),
+        };
+    }
+
+    private async replaceTrailingStop(owned: IdleOwnedPosition, nextStopPrice: number, barTs: number): Promise<{ clientOrderId: string; stopPrice: number }> {
+        const normalized = await this.dependencies.adapter.normalizeStopPrice(owned.symbol, nextStopPrice);
+        const clientOrderId = deterministicIdleClientOrderId({ action: "STOP", symbol: owned.symbol, signalTs: owned.signalTs + barTs });
+        await this.dependencies.adapter.placeStopMarket({ symbol: owned.symbol, side: "BUY", quantity: owned.quantity, stopPrice: normalized.price, clientOrderId, reduceOnly: true });
+        await this.protectionReadBack(owned.symbol, {
+            symbol: owned.symbol,
+            side: "SHORT",
+            quantity: owned.quantity,
+            stopPrice: normalized.price,
+            takeProfitPrice: owned.takeProfitPrice,
+            stopClientOrderId: clientOrderId,
+            takeProfitClientOrderId: owned.takeProfitClientOrderId,
+        }, owned.quantity);
+        // The old resident STOP is cancelled only after the replacement has
+        // been independently read back.  A failed cancellation remains a
+        // manual-review condition in the caller rather than an unprotected
+        // position.
+        await this.dependencies.adapter.cancel(owned.stopClientOrderId);
+        return { clientOrderId, stopPrice: normalized.price };
+    }
+
+    private async safetyCloseUnprotectedEntry(state: IdleState, pending: IdlePending, actual: DirectPosition, lock: AccountLockHandle, protectionError: string): Promise<IdlePriorityShortTickResult> {
+        const quote = await this.dependencies.executor.getMarketQuote(pending.symbol);
+        if (!quoteFresh(quote, this.now())) return this.manualReview(state, `IDLE_UNPROTECTED_ENTRY_QUOTE_STALE:${pending.symbol}:${protectionError}`);
+        const clientOrderId = hashId([pending.clientOrderId, "UNPROTECTED_SAFETY_CLOSE"], "idle-safe");
+        try {
+            const result = await this.dependencies.executor.executeMarket({
+                requestId: clientOrderId,
+                clientOrderId,
+                symbol: pending.symbol,
+                side: "BUY",
+                positionSide: "BOTH",
+                quantity: positionQuantity(actual),
+                reduceOnly: true,
+                expectedPrice: quote.askPrice,
+                maxSlippageBps: this.dependencies.runtime.maximumSlippageBps,
+                reason: "IDLE_PRIORITY_SHORT_UNPROTECTED_SAFETY_CLOSE",
+            });
+            if (result.status === "UNKNOWN" || result.executionUnknown || activePosition(await this.dependencies.executor.getPositions(), pending.symbol)) {
+                return this.manualReview(state, `IDLE_UNPROTECTED_SAFETY_CLOSE_UNCONFIRMED:${pending.symbol}:${protectionError}`);
+            }
+            const plan = isIndependentRenderRoute(pending.symbol,pending.route)
+                ? independentRenderProtectionPlan({symbol:pending.symbol,route:pending.route,signalTs:pending.signalTs,entryPrice:actual.entryPrice,quantity:positionQuantity(actual)})
+                : buildIdleProtectionPlan({ symbol: pending.symbol, signalTs: pending.signalTs, entryPrice: actual.entryPrice, quantity: positionQuantity(actual) });
+            await this.dependencies.adapter.cancel(plan.stopClientOrderId).catch(() => undefined);
+            await this.dependencies.adapter.cancel(plan.takeProfitClientOrderId).catch(() => undefined);
+            state.pending = null;
+            state.positions = state.positions.filter((row) => row.symbol !== pending.symbol);
+            state.lastDecision = { decisionTs: this.now(), symbol: pending.symbol, route: pending.route, accepted: false, reason: "IDLE_UNPROTECTED_ENTRY_SAFETY_CLOSED" };
+            state.manualReview = `IDLE_PROTECTION_INSTALL_FAILED_SAFETY_CLOSED:${protectionError}`;
+            state.failures = [...state.failures, { message: state.manualReview, occurredAt: this.now() }].slice(-100);
+            await this.dependencies.stateStore.save(state);
+            if (pending.reservationId) await lock.releaseReservation(pending.reservationId);
+            await lock.document();
+            return { status: "manual-review", message: state.manualReview, symbol: pending.symbol, ordersSent: 1, cancelsSent: 2, positionChangesSent: 1 };
+        } catch (error) {
+            return this.manualReview(state, `IDLE_UNPROTECTED_SAFETY_CLOSE_FAILED:${pending.symbol}:${error instanceof Error ? error.message : String(error)}:${protectionError}`);
+        }
+    }
+
+    private async finalizeEntry(state: IdleState, pending: IdlePending, result: DirectTradeResult, lock: AccountLockHandle): Promise<IdlePriorityShortTickResult> {
+        if (!hasExposure(result)) {
+            state.pending = null;
+            await this.dependencies.stateStore.save(state);
+            if (pending.reservationId) await lock.releaseReservation(pending.reservationId);
+            return { status: "held", message: `IDLE_ENTRY_${result.status}_NO_EXPOSURE`, symbol: pending.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        this.markCandidateLifecycle(state, { symbol: pending.symbol, accepted: true, side: "SHORT", features: { decisionTs: pending.decisionTs } });
+        await this.dependencies.stateStore.save(state);
+        const positions = await this.dependencies.executor.getPositions();
+        const actual = activePosition(positions, pending.symbol);
+        if (!actual || !shortPosition(actual)) return this.manualReview(state, `IDLE_ENTRY_POSITION_MISMATCH:${pending.symbol}`);
+        let position: IdleOwnedPosition;
+        try { position = await this.installProtection(state, pending, actual); }
+        catch (error) {
+            return this.safetyCloseUnprotectedEntry(state, pending, actual, lock, error instanceof Error ? error.message : String(error));
+        }
+        state.positions = [...state.positions.filter((row) => row.symbol !== position.symbol), position];
+        state.pending = null;
+        state.lastDecision = { decisionTs: pending.decisionTs, symbol: position.symbol, route: position.route, accepted: true, reason: result.status === "PARTIALLY_FILLED" ? "IDLE_ENTRY_PARTIAL_FILLED_PROTECTED_MANUAL_REVIEW" : "IDLE_ENTRY_FILLED" };
+        if (result.status === "PARTIALLY_FILLED") state.manualReview = "IDLE_PARTIAL_FILL_REQUIRES_OPERATOR_REVIEW";
+        await this.dependencies.stateStore.save(state);
+        if (pending.reservationId) await lock.releaseReservation(pending.reservationId);
+        await lock.document();
+        if (state.manualReview) return { status: "manual-review", message: state.manualReview, symbol: position.symbol, ordersSent: 1, cancelsSent: 0, positionChangesSent: 0 };
+        return { status: "completed", message: `IDLE_ENTRY_COMPLETED:${position.symbol}`, symbol: position.symbol, ordersSent: 1, cancelsSent: 0, positionChangesSent: 1 };
+    }
+
+    private async reconcilePending(state: IdleState, lock: AccountLockHandle): Promise<IdlePriorityShortTickResult | undefined> {
+        const pending = state.pending;
+        if (!pending) return undefined;
+        if (pending.action === "ENTRY" && !pending.reservationId) return this.manualReview(state, "IDLE_PENDING_RESERVATION_MISSING");
+        const result = await this.dependencies.executor.reconcileOrder(pending.symbol, pending.clientOrderId);
+        if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `IDLE_PENDING_EXECUTION_UNKNOWN:${pending.clientOrderId}`);
+        if (pending.action === "ENTRY") return this.finalizeEntry(state, pending, result, lock);
+        const positions = await this.dependencies.executor.getPositions();
+        if (activePosition(positions, pending.symbol)) return this.manualReview(state, `IDLE_EXIT_POSITION_REMAINS:${pending.symbol}`);
+        const owned = state.positions.find((row) => row.symbol === pending.symbol);
+        if (owned) {
+            await this.dependencies.adapter.cancel(owned.stopClientOrderId);
+            await this.dependencies.adapter.cancel(owned.takeProfitClientOrderId);
+        }
+        state.positions = state.positions.filter((row) => row.symbol !== pending.symbol);
+        state.pending = null;
+        await this.dependencies.stateStore.save(state);
+        if (pending.reservationId) await lock.releaseReservation(pending.reservationId);
+        return { status: "completed", message: `IDLE_EXIT_RECONCILED:${pending.symbol}`, symbol: pending.symbol, ordersSent: 0, cancelsSent: 2, positionChangesSent: 1 };
+    }
+
+    private async exitPosition(state: IdleState, owned: IdleOwnedPosition, actual: DirectPosition, lock: AccountLockHandle, reason: string): Promise<IdlePriorityShortTickResult> {
+        const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
+        if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_EXIT_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        const clientOrderId = isIndependentRenderRoute(owned.symbol,owned.route) ? independentRenderOrderId("EXIT",owned.signalTs)
+            : deterministicIdleClientOrderId({ action: "EXIT", symbol: owned.symbol, signalTs: owned.signalTs });
+        const pending: IdlePending = { action: "EXIT", phase: "planned", symbol: owned.symbol, route: owned.route, clientOrderId, idempotencyKey: clientOrderId, quantity: positionQuantity(actual), expectedPrice: quote.askPrice, signalTs: owned.signalTs, decisionTs: this.now(), holdHours: owned.holdHours, createdAt: this.now(), updatedAt: this.now(), reason };
+        state.pending = pending;
+        await this.dependencies.stateStore.save(state);
+        let result: DirectTradeResult;
+        try {
+            state.pending.phase = "submitted";
+            await this.dependencies.stateStore.save(state);
+            result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: owned.symbol, side: "BUY", positionSide: "BOTH", quantity: positionQuantity(actual), reduceOnly: true, expectedPrice: quote.askPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_EXIT:${reason}` });
+        } catch (error) { return this.manualReview(state, `IDLE_EXIT_ERROR:${error instanceof Error ? error.message : String(error)}`); }
+        if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `IDLE_EXIT_UNKNOWN:${clientOrderId}`);
+        if (activePosition(await this.dependencies.executor.getPositions(), owned.symbol)) return this.manualReview(state, `IDLE_EXIT_POSITION_REMAINS:${owned.symbol}`);
+        await this.dependencies.adapter.cancel(owned.stopClientOrderId);
+        await this.dependencies.adapter.cancel(owned.takeProfitClientOrderId);
+        state.positions = state.positions.filter((row) => row.symbol !== owned.symbol);
+        state.pending = null;
+        state.lastDecision = { decisionTs: this.now(), symbol: owned.symbol, route: owned.route, accepted: true, reason: `EXIT:${reason}` };
+        await this.dependencies.stateStore.save(state);
+        await lock.document();
+        return { status: "completed", message: `IDLE_EXIT_COMPLETED:${owned.symbol}`, symbol: owned.symbol, ordersSent: 1, cancelsSent: 2, positionChangesSent: 1 };
+    }
+
+    private async assertLegacyAdverseCertified() {
+        const runtime=this.dependencies.runtime;
+        const path=runtime.renderLegacyAdverseCertPath;
+        let stats;
+        try { stats=await lstat(path); }
+        catch { throw Error("RENDER_LEGACY_ADVERSE_CERT_MISSING"); }
+        if(!stats.isFile()||stats.isSymbolicLink()||
+           (typeof stats.uid==="number"&&(stats.uid!==0||stats.gid!==0))||
+           (stats.mode&0o022)!==0)throw Error("RENDER_LEGACY_ADVERSE_CERT_UNTRUSTED");
+        let cert:unknown;
+        try {cert=JSON.parse(await readFile(path,"utf8"));}
+        catch{throw Error("RENDER_LEGACY_ADVERSE_CERT_INVALID");}
+        assertRenderLegacyAdverseCert(cert,runtime.runtimeSha);
+    }
+
+    private async assertRenderIndependentCertified() {
+        const runtime=this.dependencies.runtime;
+        if (!runtime.renderIndependentLiveAuthorized) throw Error("RENDER_INDEPENDENT_LIVE_CERT_REQUIRED");
+        let stat;
+        try { stat=await lstat(runtime.renderIndependentCertPath); }
+        catch { throw Error("RENDER_INDEPENDENT_CERT_MISSING"); }
+        if (!stat.isFile() || stat.isSymbolicLink() ||
+            (typeof stat.uid==="number"&&(stat.uid!==0||stat.gid!==0)) ||
+            (stat.mode & 0o022)!==0) throw Error("RENDER_INDEPENDENT_CERT_UNTRUSTED");
+        let cert:{schema?:string;approvedSha?:string;route?:string;
+          gross?:number;holdMinutes?:number;stopPct?:number;takeProfitPct?:number;
+          venueStopReadback?:boolean;partialFillVerified?:boolean;
+          timeoutExitVerified?:boolean;integrated10And30BpsVerified?:boolean;
+          operatorApproval?:string};
+        try { cert=JSON.parse(await readFile(runtime.renderIndependentCertPath,"utf8")); }
+        catch { throw Error("RENDER_INDEPENDENT_CERT_INVALID"); }
+        if(cert.schema!=="disdex-render-independent-venue-certificate/v1" ||
+          cert.approvedSha!==runtime.runtimeSha ||
+          cert.route!==RENDER_INDEPENDENT_ROUTE ||
+          cert.gross!==RENDER_ENTRY_POLICY.independentRequestedGross || cert.holdMinutes!==RENDER_ENTRY_POLICY.independentRealMaxMinutes ||
+          cert.stopPct!==RENDER_ENTRY_POLICY.independentRealStopLossPct || cert.takeProfitPct!==RENDER_ENTRY_POLICY.independentRealTakeProfitPct ||
+          cert.venueStopReadback!==true || cert.partialFillVerified!==true ||
+          cert.timeoutExitVerified!==true || cert.integrated10And30BpsVerified!==true ||
+          cert.operatorApproval!=="APPROVE_RENDER_INDEPENDENT_SHORT_AT_BOUND_SHA") {
+          throw Error("RENDER_INDEPENDENT_CERT_UNPROVEN");
+        }
+    }
+
+    private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
+        const symbol = signal.symbol;
+        if (isIndependentRenderRoute(symbol,signal.route) && !this.dependencies.runtime.renderIndependentLiveAuthorized)
+            return {status:"shadow",message:"RENDER_INDEPENDENT_LIVE_CERT_REQUIRED",
+                symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+        if(isIndependentRenderRoute(symbol,signal.route)) await this.assertRenderIndependentCertified();
+        if(symbol==="RENDERUSDT" && signal.route==="IDLE_RENDER_RELATIVE_SHORT" &&
+           this.dependencies.runtime.renderLegacyAdverseLiveAuthorized)
+            await this.assertLegacyAdverseCertified();
+        const quote = await this.dependencies.executor.getMarketQuote(symbol);
+        if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
+        if (!(equity > 0)) return { status: "held", message: "IDLE_EQUITY_INVALID", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
+        const ownerPending = pendingExposureByOwner(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
+        if (exposure.baselineOpenPositions > EPSILON || ownerPending.baselinePendingExposure > EPSILON) {
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
+            await this.dependencies.stateStore.save(state);
+            return { status: "no-change", message: "IDLE_BASELINE_NOT_IDLE", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        let baseline: IdleBaselineAdmission;
+        try {
+            baseline = await buildBaselineAdmissionEvidence({
+                runtimeSha: this.dependencies.runtime.runtimeSha,
+                decisionTs: signal.features.decisionTs,
+                now: this.now(),
+                baselineOpenPositions: exposure.baselineOpenPositions,
+                baselinePendingExposure: ownerPending.baselinePendingExposure,
+                decisionPath: this.dependencies.runtime.decisionPath,
+                v12Path: this.dependencies.runtime.v12DecisionPath,
+                q102Path: this.dependencies.runtime.q102DecisionPath,
+                penguPath: this.dependencies.runtime.penguStatePath,
+                fetPath: this.dependencies.runtime.fetStatePath,
+                v52Path: this.dependencies.runtime.v52StatePath,
+            });
+        } catch (error) {
+            const reason = `BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: `IDLE_${reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        let venueFiveXCrossConfirmed = true;
+        if (this.dependencies.runtime.mode === "LIVE") {
+            try {
+                await this.dependencies.executor.prepareVenueMargin5xCross(symbol);
+                venueFiveXCrossConfirmed = await this.verifyVenueFiveXCross(symbol);
+            } catch (error) {
+                return { status: "held", message: `IDLE_VENUE_MARGIN_PREPARATION_BLOCKED:${error instanceof Error ? error.message : String(error)}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            if (!venueFiveXCrossConfirmed) return { status: "held", message: "IDLE_VENUE_5X_CROSS_READBACK_FAILED", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
+        const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+        const kill = await readSharedKillSwitch(process.env);
+        const risk = await readSharedCryptoDailyRisk(this.dependencies.runtime.riskPath, this.now());
+        let marginHealthy = false;
+        // The guard reports HEALTHY every 300s. Preserve the strict configured
+        // freshness gate whenever there is exposure; permit a bounded 330s
+        // tolerance only with a fresh, independently flat signed account snapshot.
+        const marginMaxAgeMs = idleMarginGuardMaxAgeMs({
+            configuredMaxAgeMs: this.dependencies.runtime.marginMaxAgeMs,
+            accountEquity: equity,
+            positions,
+            pendingCryptoGross: pendingAggregate.cryptoGross,
+            pendingStockGross: pendingAggregate.stockGross,
+        });
+        try { marginHealthy = await readMarginHealthy(this.dependencies.runtime.marginPath, this.now(), marginMaxAgeMs); } catch { marginHealthy = false; }
+        const baseInput = {
+            symbol,
+            route:signal.route,
+            runtimeMode: this.dependencies.runtime.mode,
+            operatorArmed: true,
+            candidateAccepted: signal.accepted,
+            candidateSide: signal.side,
+            decisionTs: signal.features.decisionTs,
+            baselineDecisionTs: baseline.decisionTs,
+            baselineFresh: true,
+            baselineSourceComplete: baseline.sourceComplete,
+            // The historical shadow baseline is only one source of evidence;
+            // current live ownership/pending state is an additional hard gate.
+            // Never let a stale or incomplete shadow snapshot hide a real
+            // baseline position or reservation that exists now.
+            baselineOpenPositions: Math.max(baseline.baselineOpenPositions, exposure.baselineOpenPositions),
+            baselinePendingExposure: Math.max(baseline.baselinePendingExposure, ownerPending.baselinePendingExposure),
+            baselineAcceptedThisTimestamp: baseline.baselineAcceptedThisTimestamp,
+            nonBaselineCryptoExposure: exposure.nonBaselineCryptoExposure,
+            nonBaselinePendingExposure: ownerPending.nonBaselinePendingExposure,
+            sharedRiskHealthy: risk.ok,
+            marginGuardHealthy: marginHealthy,
+            killSwitchActive: kill.active,
+            venueFiveXCrossConfirmed,
+            fullCryptoGrossAvailable,
+            fullTotalGrossAvailable,
+            sameSymbolIdleActive: Boolean(state.positions.find((position) => position.symbol === symbol)),
+        } as const;
+        const admission = evaluateIdleLiveAdmission(baseInput);
+        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.reason };
+        await this.dependencies.stateStore.save(state);
+        if (!admission.accepted) return { status: "held", message: `IDLE_ENTRY_BLOCKED:${admission.reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        if (this.dependencies.runtime.mode !== "LIVE") return { status: "shadow", message: `IDLE_SHADOW_ENTRY:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        await assertOperatorActivation(this.dependencies.runtime);
+        await this.dependencies.executor.getAccountSnapshot();
+        let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
+        try {
+
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * admission.gross / quote.bidPrice, quote.bidPrice);
+        } catch (error) {
+            const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        const lot = evaluateIdleOneStepFloor({
+            symbol, equityUsd: equity, referencePrice: quote.bidPrice,
+            normalizedQuantity: normalized.quantity, normalizedNotional: normalized.notional,
+            minQuantity: normalized.minQuantity, maxQuantity: normalized.maxQuantity,
+            quantityStep: normalized.stepSize, minNotional: normalized.minNotional,
+            requiredGross: admission.gross,
+        });
+        if (!lot.accepted) {
+            const reason = `IDLE_QUANTITY_REJECTED:${symbol}:${lot.code}:actualGross=${lot.actualGross ?? "UNKNOWN"}:minQty=${normalized.minQuantity}:minNotional=${normalized.minNotional}:step=${normalized.stepSize}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        const clientOrderId = isIndependentRenderRoute(symbol,signal.route)
+            ? independentRenderOrderId("ENTRY",signal.features.decisionTs)
+            : deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
+
+        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross };
+        state.pending = pending;
+        await this.dependencies.stateStore.save(state);
+        try {
+            state.pending.phase = "submitted";
+            await this.dependencies.stateStore.save(state);
+            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * admission.gross });
+            return await this.finalizeEntry(state, pending, result, lock);
+        } catch (error) {
+            // This specific error is thrown by the executor BEFORE any order request.
+            // Do not strand a reservation or put a flat account in manual review.
+            if (error instanceof Error && error.message.startsWith("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:")) {
+                state.pending = null;
+                const reason = `IDLE_ENTRY_PREORDER_GROSS_LIMIT:${symbol}`;
+                state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
+                await lock.releaseReservation(reservation.reservationId);
+                return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            return this.manualReview(state, `IDLE_ENTRY_ERROR:${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    async tick(): Promise<IdlePriorityShortTickResult> {
+        if (!this.dependencies.runtime.enabled) return { status: "disabled", message: "IDLE_PRIORITY_SHORT_DISABLED", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        // Complete market-candle I/O outside account ownership only for a
+        // flat and settled local book. Protected positions and unknown fills
+        // still take the lock first, before any market prefetch.
+        let preloadedMarket: Awaited<ReturnType<typeof this.dependencies.marketData.load>>|undefined;
+        try{
+            const before=await this.dependencies.stateStore.load();
+            if(!before.pending&&!before.manualReview&&before.positions.length===0)
+                preloadedMarket=await this.dependencies.marketData.load();
+        }catch{
+            // Preserve original fail-closed locked path on prefetch failure.
+        }
+        const lock = await this.dependencies.lock.acquire(`${IDLE_PRIORITY_SHORT_STRATEGY}:${process.pid}:${Date.now()}`);
+        if (!lock) return { status: "locked", message: "IDLE_PRIORITY_SHORT_ACCOUNT_LOCK_BUSY", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        try {
+            await assertOperatorActivation(this.dependencies.runtime);
+            const state = await this.dependencies.stateStore.load();
+            if (state.manualReview) return { status: "manual-review", message: state.manualReview, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            const recovered = await this.reconcilePending(state, lock);
+            if (recovered) return recovered;
+            const [account, positions, openOrders, market] = await Promise.all([
+                this.dependencies.executor.getAccountSnapshot(),
+                this.dependencies.executor.getPositions(),
+                this.dependencies.executor.getOpenOrders(),
+                Promise.resolve(reuseFlatIdleMarketSnapshot(preloadedMarket,this.now(),
+                    !state.pending&&!state.manualReview&&state.positions.length===0))
+                    .then(market=>market??this.dependencies.marketData.load()),
+            ]);
+            const diagnosticSymbols = (Object.keys(market.symbols) as IdlePrioritySymbol[]).map((symbol) => {
+                const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
+                const generic = evaluateIdleGenericCandidate(features);
+                const routeDecision = evaluateIdlePriorityShort(symbol, features, generic);
+                const lastLifecycleTs = Number(state.lastAcceptedBySymbol[symbol] || 0) || null;
+                const cooldownAllowed = lastLifecycleTs == null || market.decisionTs - lastLifecycleTs >= IDLE_PRIORITY_SHORT_POLICY.cooldownHours * 3_600_000;
+                return {
+                    symbol,
+                    route: IDLE_PRIORITY_SHORT_POLICY.routes[symbol].route,
+                    features,
+                    generic: { accepted: generic.accepted, archetype: generic.archetype, side: generic.side, reason: generic.reason },
+                    routeDecision: { accepted: routeDecision.accepted, side: routeDecision.side, reason: routeDecision.reason, holdHours: routeDecision.holdHours },
+                    cooldownAllowed,
+                    lastLifecycleTs,
+                };
+            });
+            const diagnosticResidual = (Object.keys(market.residualSymbols) as Array<keyof typeof market.residualSymbols>).map((symbol) => {
+                const decision = evaluateIdleResidualLong(symbol, market.decisionTs, market.residualSymbols[symbol], market.btc);
+                return {
+                    symbol,
+                    route: decision.route,
+                    features: decision.features,
+                    decision: { accepted: decision.accepted, side: decision.side, reason: decision.reason, holdHours: decision.holdHours, priority: decision.priority },
+                };
+            });
+            await writeIdleDecisionDetails(this.dependencies.runtime.decisionDetailsPath, {
+                schema: IDLE_DECISION_DETAILS_SCHEMA,
+                runtimeSha: this.dependencies.runtime.runtimeSha,
+                decisionTs: market.decisionTs,
+                updatedAt: this.now(),
+                symbols: diagnosticSymbols,
+                residual: diagnosticResidual,
+                finalReason: state.lastDecision?.reason,
+            });
+            // The six-hour hypothetical ledger is independent of real account
+            // capacity and of the independent real 6h TP2.5% exit. Never order from this
+            // observation alone; source gaps fail closed for the new route only.
+            let renderShadowDecision: RenderShadowDecision | undefined;
+            if (this.dependencies.marketData.loadRenderIndependentM5) {
+                try {
+                    const journal = await loadRenderShadow(this.dependencies.runtime.renderShadowPath, this.dependencies.runtime.runtimeSha);
+                    if (journal.lastDecisionTs !== market.decisionTs || this.dependencies.runtime.renderIndependentLiveAuthorized) {
+                    const source = await this.dependencies.marketData.loadRenderIndependentM5(market.decisionTs);
+                    const oldSignal = diagnosticSymbols.find(row => row.symbol === "RENDERUSDT");
+                    const incumbent = oldSignal?.routeDecision.accepted ? {route:oldSignal.route} : undefined;
+                    const result = advanceRenderShadow({
+                        state:journal,asOfDecisionTs:market.decisionTs,
+                        btcM5:source.btcM5,renderM5:source.renderM5,
+                        incumbentAt:()=>incumbent,
+                        sameSymbolPositionOrPending:Boolean(positions.some(row => row.symbol === "RENDERUSDT" && Math.abs(row.quantity)>EPSILON)
+                            || openOrders.some(row => row.symbol === "RENDERUSDT" && activeOrder(row))
+                            || state.pending?.symbol === "RENDERUSDT"),
+                        cooldownUntil:Number(state.lastAcceptedBySymbol.RENDERUSDT||0)+RENDER_ENTRY_POLICY.newIndependentCooldownHours*3_600_000,
+                        requireShadowQuality:false
+                    });
+                    await saveRenderShadow(this.dependencies.runtime.renderShadowPath,result.state);
+                    renderShadowDecision=result.decision;
+                    this.log.info("RENDER_INDEPENDENT_FORWARD_SHADOW",{
+                        decisionTs:renderShadowDecision.decisionTs,
+                        raw:renderShadowDecision.rawReason,
+                        quality:renderShadowDecision.priority.reason,
+                        pending:renderShadowDecision.pendingCount,
+                        settled:renderShadowDecision.settledCount,
+                        diagnosticOnly:true
+                    });
+                    }
+                }catch(error){
+                    this.log.warn("RENDER_INDEPENDENT_FORWARD_SHADOW_FAIL_CLOSED",{
+                        decisionTs:market.decisionTs,
+                        reason:error instanceof Error?error.message:String(error)
+                    });
+                }
+            }
+            const protectionReconciled = await this.reconcileVenueProtectiveFills(state, positions, openOrders);
+            const ownershipOrders = protectionReconciled ? await this.dependencies.executor.getOpenOrders() : openOrders;
+            const ownershipIssue = await this.reconcileOwnership(state, positions, ownershipOrders);
+            if (ownershipIssue) return this.manualReview(state, ownershipIssue);
+            const pendingRegistry = await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath);
+            let pendingAggregate = aggregatePendingExposure(pendingRegistry);
+            for (const owned of state.positions) {
+                const actual = activePosition(positions, owned.symbol);
+                if (!actual) return this.manualReview(state, `IDLE_POSITION_MISSING:${owned.symbol}`);
+                const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
+                if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_HELD_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                let trailExit = false;
+                if (owned.symbol === "DOTUSDT" || (owned.symbol === "RENDERUSDT" && !isIndependentRenderRoute(owned.symbol,owned.route))) {
+                    const loadFiveMinute = this.dependencies.marketData.loadFiveMinute;
+                    if (!loadFiveMinute) return this.manualReview(state, `IDLE_TRAIL_5M_SOURCE_UNAVAILABLE:${owned.symbol}`);
+                    const bar = await loadFiveMinute(owned.symbol);
+                    const trail = applyIdleProfitTrailBar({
+                        side: "SHORT",
+                        entryPrice: owned.entryPrice,
+                        state: {
+                            armed: owned.trailArmed === true,
+                            bestGainPct: owned.bestConfirmed5mGainPct ?? 0,
+                            stopPrice: owned.trailingStopPrice,
+                            lastConfirmedBarTs: owned.lastConfirmed5mTs,
+                        },
+                        bar,
+                    });
+                    trailExit = trail.stopHit;
+                    if (!trail.stopHit && trail.state.stopPrice !== owned.trailingStopPrice) {
+                        try {
+                            const replacement = await this.replaceTrailingStop(owned, trail.state.stopPrice!, bar.timestampMs);
+                            owned.stopClientOrderId = replacement.clientOrderId;
+                            owned.stopPrice = replacement.stopPrice;
+                            owned.trailingStopPrice = replacement.stopPrice;
+                        } catch (error) {
+                            return this.manualReview(state, `IDLE_TRAIL_STOP_REPLACEMENT_UNVERIFIED:${owned.symbol}:${error instanceof Error ? error.message : String(error)}`);
+                        }
+                    }
+                    owned.trailArmed = trail.state.armed;
+                    owned.bestConfirmed5mGainPct = trail.state.bestGainPct;
+                    owned.lastConfirmed5mTs = trail.state.lastConfirmedBarTs;
+                    await this.dependencies.stateStore.save(state);
+                }
+                // Only a known, newly filled legacy RENDER receives this watch.
+                // Pre-upgrade live positions do not have a proven full M5/MFE
+                // history; their pre-existing venue protections stay authoritative.
+                let legacyAdverseExit = false;
+                if (owned.symbol === "RENDERUSDT" && owned.route === "IDLE_RENDER_RELATIVE_SHORT" && owned.legacyRenderAdverse && this.dependencies.runtime.renderLegacyAdverseLiveAuthorized) {
+                    legacyAdverseExit = owned.legacyRenderAdverse.completed;
+                    const loader = this.dependencies.marketData.loadFiveMinuteSince;
+                    if (!loader) return this.manualReview(state, "IDLE_RENDER_ADVERSE_CONTIGUOUS_M5_SOURCE_MISSING");
+                    const initialTs = owned.legacyRenderAdverse.lastClosedM5Ts ?? owned.legacyRenderAdverse.entryTs;
+                    let bars: ConfirmedFiveMinuteBar[];
+                    try {
+                        bars = await loader(owned.symbol, initialTs, this.now());
+                    } catch (error) {
+                        // Keep the resident protective orders; never substitute
+                        // synthetic bars or trigger an early exit on a source gap.
+                        return { status: "held", message: `IDLE_RENDER_ADVERSE_M5_FAIL_CLOSED:${error instanceof Error ? error.message : String(error)}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                    }
+                    for (const bar of bars) {
+                        const next = advanceLegacyRenderAdverse(owned.legacyRenderAdverse, { ts: bar.timestampMs,
+                            open: bar.open, high: bar.high, low: bar.low, close: bar.close });
+                        owned.legacyRenderAdverse = next.state;
+                        // Save before any order: restart must not repeat an
+                        // already observed eligible close without reconciliation.
+                        await this.dependencies.stateStore.save(state);
+                        if (next.requestProtectedReduceOnlyClose) {
+                            legacyAdverseExit = true;
+                            break;
+                        }
+                    }
+                }
+                const exitReason = legacyAdverseExit ? "RENDER_LEGACY_NEGATIVE1_WATCH2H_MFE_LT_025" : trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
+                if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            // LIVE cooldown is consumed by a filled SHORT entry, never by a
+            // generic candidate or a route/risk/capacity rejection.
+            const rawGeneric = (Object.keys(market.symbols) as IdlePrioritySymbol[])
+                .map((symbol) => {
+                    const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
+                    return { symbol, features, generic: evaluateIdleGenericCandidate(features) };
+                })
+                .filter((row) => row.generic.accepted);
+            const routeCandidates = rawGeneric
+                .filter((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic).accepted);
+            const lifecycleCandidates = routeCandidates.filter((row) => this.candidateLifecycleAllows(state, row));
+            // New independent model may become eligible even when the generic
+            // IDLE route does not. A certified model score and completed 6h
+            // hypothetical outcomes are required; default LIVE switch is OFF.
+            const independentFeatures = diagnosticSymbols.find(row=>row.symbol==="RENDERUSDT")?.features;
+            const independentCandidate: IdleSignal|undefined =
+                this.dependencies.runtime.renderIndependentLiveAuthorized &&
+                renderShadowDecision?.priority.accepted===true &&
+                independentFeatures?.decisionTs===market.decisionTs &&
+                this.candidateLifecycleAllows(state,{symbol:"RENDERUSDT",features:independentFeatures})
+                ? {accepted:true,symbol:"RENDERUSDT",route:RENDER_INDEPENDENT_ROUTE,side:"SHORT",
+                    holdHours:RENDER_ENTRY_POLICY.independentRealMaxMinutes/60,features:independentFeatures,
+                    reason:"RENDER_INDEPENDENT_NO_SHADOW_QUALITY_GATE_PASS"} : undefined;
+            if (!lifecycleCandidates.length && !independentCandidate) {
+                await this.dependencies.stateStore.save({
+                    ...state,
+                    lastDecision: {
+                        decisionTs: market.decisionTs,
+                        accepted: false,
+                        reason: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "NO_GENERIC_IDLE_CANDIDATE",
+                    },
+                });
+                return {
+                    status: "no-change",
+                    message: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "IDLE_NO_GENERIC_CANDIDATE",
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                };
+            }
+
+            // Candidate lifecycle is baseline-Idle-only.  Do not consume a
+            // lifecycle slot when the five core strategies are still active,
+            // pending, accepted at this timestamp, or have not completed the
+            // current decision cycle.
+            const lifecycleEquity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
+            if (!(lifecycleEquity > 0)) {
+                return { status: "held", message: "IDLE_GENERIC_EQUITY_INVALID", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            const lifecycleExposure = coreAndSidecarExposure(positions, lifecycleEquity, new Set(state.positions.map((row) => row.symbol)));
+            const lifecycleOwnerPending = pendingExposureByOwner(pendingRegistry);
+            if (lifecycleExposure.baselineOpenPositions > EPSILON || lifecycleOwnerPending.baselinePendingExposure > EPSILON) {
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            let lifecycleBaseline: IdleBaselineAdmission;
+            try {
+                lifecycleBaseline = await buildBaselineAdmissionEvidence({
+                    runtimeSha: this.dependencies.runtime.runtimeSha,
+                    decisionTs: market.decisionTs,
+                    now: this.now(),
+                    baselineOpenPositions: lifecycleExposure.baselineOpenPositions,
+                    baselinePendingExposure: lifecycleOwnerPending.baselinePendingExposure,
+                    decisionPath: this.dependencies.runtime.decisionPath,
+                    v12Path: this.dependencies.runtime.v12DecisionPath,
+                    q102Path: this.dependencies.runtime.q102DecisionPath,
+                    penguPath: this.dependencies.runtime.penguStatePath,
+                    fetPath: this.dependencies.runtime.fetStatePath,
+                    v52Path: this.dependencies.runtime.v52StatePath,
+                });
+            } catch (error) {
+                const reason = `BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
+                return {
+                    status: "held",
+                    message: `IDLE_GENERIC_${reason}`,
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                };
+            }
+            if (Math.max(lifecycleBaseline.baselineOpenPositions, lifecycleExposure.baselineOpenPositions) > EPSILON
+                || Math.max(lifecycleBaseline.baselinePendingExposure, lifecycleOwnerPending.baselinePendingExposure) > EPSILON
+                || lifecycleBaseline.baselineAcceptedThisTimestamp > 0) {
+                state.lastDecision = {
+                    decisionTs: market.decisionTs,
+                    accepted: false,
+                    reason: lifecycleBaseline.baselineAcceptedThisTimestamp > 0
+                        ? "BASELINE_ACCEPTED_SAME_TIMESTAMP"
+                        : "BASELINE_OPEN_OR_PENDING",
+                };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+
+            const signals = lifecycleCandidates
+                .map((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic))
+                .filter((signal) => signal.accepted);
+            if(independentCandidate) {
+                // The independent quality gate is score-aware. It preserves
+                // an unscored incumbent and never creates second RENDER owner.
+                if(signals.some(signal=>signal.symbol==="RENDERUSDT"))
+                    throw Error("RENDER_INDEPENDENT_INCUMBENT_PRIORITY_CONFLICT");
+                signals.push(independentCandidate);
+            }
+            if (!signals.length) {
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+
+            if (signals.length > 1) {
+                const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
+                const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
+                const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
+                const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+                const requestedGross = signals.reduce((sum, signal) => sum + idleRouteRequestedGross(signal.symbol,signal.route), 0);
+                if (fullCryptoGrossAvailable + EPSILON < requestedGross || fullTotalGrossAvailable + EPSILON < requestedGross) {
+                    state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS" };
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
+            }
+
+            let aggregateResult: IdlePriorityShortTickResult | undefined;
+            for (const signal of signals) {
+                const accountNow = aggregateResult?.status === "completed" ? await this.dependencies.executor.getAccountSnapshot() : account;
+                const positionsNow = aggregateResult?.status === "completed" ? await this.dependencies.executor.getPositions() : positions;
+                if (aggregateResult?.status === "completed") {
+                    pendingAggregate = aggregatePendingExposure(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
+                }
+                const result = await this.enter(state, signal, accountNow, positionsNow, lock, pendingAggregate);
+                if (result.status === "manual-review") return result;
+                if (result.status === "completed" || result.status === "shadow") {
+                    aggregateResult = aggregateResult
+                        ? { ...result, message: `IDLE_MULTI_SIGNAL_PROCESSED:${market.decisionTs}`, ordersSent: aggregateResult.ordersSent + result.ordersSent, cancelsSent: aggregateResult.cancelsSent + result.cancelsSent, positionChangesSent: aggregateResult.positionChangesSent + result.positionChangesSent }
+                        : result;
+                    continue;
+                }
+                if (!aggregateResult) aggregateResult = result;
+            }
+            return aggregateResult || { status: "no-change", message: "IDLE_NO_ACTION_AFTER_SIGNAL_SCAN", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        } catch (error) {
+            if (isOperatorActivationBlock(error)) {
+                return { status: "held", message: error instanceof Error ? error.message : String(error), ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            const state = await this.dependencies.stateStore.load().catch(() => undefined);
+            if (state) {
+                const protectedDeferred = classifyIdleProtectedPositionRateBudgetDeferral(state, error);
+                if (protectedDeferred) {
+                    await this.dependencies.stateStore.save(
+                        heartbeatIdleProtectedRateBudgetDeferral(state, protectedDeferred, this.now()),
+                    );
+                    return { status: "held", message: protectedDeferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
+                const deferred = classifyIdleFlatRateBudgetDeferral(state, error);
+                if (deferred) {
+                    return { status: "held", message: deferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
+                return this.manualReview(state, `IDLE_RUNNER_FAIL_CLOSED:${error instanceof Error ? error.message : String(error)}`);
+            }
+            throw error;
+        } finally {
+            await lock.release();
+        }
+    }
+}
+
+const INTEGRATED_CRYPTO_CAP = 3.0;
+const INTEGRATED_TOTAL_CAP = 4.25;
+
+export function idleRunnerSelfTest() {
+    if (IDLE_PRIORITY_SHORT_POLICY.gross !== 1 || IDLE_PRIORITY_SHORT_POLICY.leverage !== 5 || IDLE_PRIORITY_SHORT_POLICY.marginType !== "cross") throw new Error("IDLE_LIVE_POLICY_SELFTEST_FAILED");
+    if (IDLE_PRIORITY_SHORT_POLICY.emergencyStopPct !== 10 || IDLE_PRIORITY_SHORT_POLICY.emergencyTakeProfitPct !== 25) throw new Error("IDLE_LIVE_PROTECTION_SELFTEST_FAILED");
+    if (deterministicIdleClientOrderId({ action: "ENTRY", symbol: "DOTUSDT", signalTs: 1 }) !== deterministicIdleClientOrderId({ action: "ENTRY", symbol: "DOTUSDT", signalTs: 1 })) throw new Error("IDLE_LIVE_IDEMPOTENCY_SELFTEST_FAILED");
+    return true;
+}

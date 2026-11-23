@@ -5,35 +5,70 @@ Fail-closed: UNKNOWN remains unprotected unless all independent owner evidence m
 """
 from pathlib import Path
 from datetime import datetime,timezone
-import argparse,json,os,re,subprocess,time
+import argparse,json,os,re,stat,subprocess,time
 
-V4_SHA="53a0be396719f0284af4e11b35c66a4ac7d58f79"
+# The original 53a0 source pin is stale; the root-owned signed-pins manifest
+# is the authoritative runtime binding. Never infer a release from the ledger.
+PINS=Path("/etc/disdex/runner-pins.json")
+SHA_RE=re.compile(r"^[0-9a-f]{40}$")
 BASE=Path("/var/lib/disdex")
 OBS=BASE/"shared/resident-stop-observation.json"
 LEDGER=BASE/"v12-v4/orders.json"
 HB=BASE/"runner-health/heartbeats/v12-v4.json"
 OUT=BASE/"shared/resident-stop-v4-verification.json"
-RELEASE=Path("/home/deploy/disdex-trading/releases")/V4_SHA
-UNIT=f"disdex-v12-v4@{V4_SHA}.service"
+
 
 def require(ok,reason):
     if not ok:raise RuntimeError(reason)
 
-def run(now_ms=None,obs_path=OBS,ledger_path=LEDGER,hb_path=HB,verify_service=True):
+def load_v4_pin(pin_manifest=PINS,require_root_owned=True):
+    pin_manifest=Path(pin_manifest)
+    st=pin_manifest.lstat()
+    require(stat.S_ISREG(st.st_mode) and not pin_manifest.is_symlink(),
+            "V4_ROOT_PIN_FILE_NOT_REGULAR")
+    if os.name == "nt":
+        # Windows file modes do not represent Linux root-owned permissions.
+        # Only offline fixture checks can run on Windows.
+        require(not require_root_owned,"V4_ROOT_PIN_PRODUCTION_REQUIRES_POSIX")
+    else:
+        require((st.st_mode & 0o022)==0,"V4_ROOT_PIN_FILE_WRITABLE_BY_PEERS")
+        if require_root_owned:
+            require(st.st_uid==0,"V4_ROOT_PIN_FILE_OWNER_INVALID")
+    raw=json.loads(pin_manifest.read_text(encoding="utf8"))
+    require(raw.get("schema") in ("disdex-runner-pin-manifest/v1","disdex-runner-pin-manifest/v2")
+            and raw.get("target")=="professional-dismanager.net", "V4_ROOT_PIN_MANIFEST_INVALID")
+    if raw["schema"]=="disdex-runner-pin-manifest/v2":
+        require(raw.get("operatorTarget")=="DD1296_FINAL_ALLIN_10BPS",
+                "V4_ROOT_PIN_OPERATOR_SCOPE_INVALID")
+    pin=(raw.get("runners") or {}).get("V12_V4")
+    require(isinstance(pin,dict),"V4_ROOT_PIN_ENTRY_MISSING")
+    sha=pin.get("sha")
+    require(isinstance(sha,str) and SHA_RE.fullmatch(sha) is not None,
+            "V4_ROOT_PIN_SHA_INVALID")
+    expected_root="/home/deploy/disdex-trading/releases/"+sha
+    expected_unit="disdex-v12-v4@"+sha+".service"
+    require(pin.get("releaseRoot")==expected_root,"V4_ROOT_PIN_RELEASE_ROOT_INVALID")
+    require(pin.get("serviceUnit")==expected_unit,"V4_ROOT_PIN_UNIT_INVALID")
+    return sha,Path(expected_root),expected_unit
+
+
+def run(now_ms=None,obs_path=OBS,ledger_path=LEDGER,hb_path=HB,
+        verify_service=True,pin_manifest=PINS):
+    v4_sha,release,unit=load_v4_pin(pin_manifest,require_root_owned=verify_service)
     now_ms=int(now_ms or time.time()*1000)
     obs=json.loads(Path(obs_path).read_text())
     ledger=json.loads(Path(ledger_path).read_text())
     hb=json.loads(Path(hb_path).read_text())
     require(obs.get("schema")=="resident-stop-observation/v1" and obs.get("ok") is True and obs.get("readOnly") is True,"VENUE_OBSERVATION_INCOMPLETE")
     require(0<=now_ms-int(obs.get("checkedAt",0))<180000,"VENUE_OBSERVATION_STALE")
-    require(ledger.get("releaseSha")==V4_SHA,"V4_LEDGER_RELEASE_MISMATCH")
-    require(hb.get("runtimeSha")==V4_SHA and hb.get("expectedSha")==V4_SHA,"V4_HEARTBEAT_SHA_MISMATCH")
-    require(hb.get("serviceUnit")==UNIT and hb.get("mode")=="LIVE" and hb.get("safetyState")=="HEALTHY","V4_HEARTBEAT_NOT_LIVE")
+    require(ledger.get("releaseSha")==v4_sha,"V4_LEDGER_RELEASE_MISMATCH")
+    require(hb.get("runtimeSha")==v4_sha and hb.get("expectedSha")==v4_sha,"V4_HEARTBEAT_SHA_MISMATCH")
+    require(hb.get("serviceUnit")==unit and hb.get("mode")=="LIVE" and hb.get("safetyState")=="HEALTHY","V4_HEARTBEAT_NOT_LIVE")
     tick=int(hb.get("lastTickAt") or 0)
     require(0<=now_ms-tick<180000,"V4_HEARTBEAT_STALE")
     if verify_service:
-        require((RELEASE/".disdex-release-sha").read_text().strip()==V4_SHA,"V4_SOURCE_NOT_PINNED")
-        require(subprocess.run(["systemctl","is-active","--quiet",UNIT],check=False,timeout=8).returncode==0,"V4_SERVICE_NOT_ACTIVE")
+        require((release/".disdex-release-sha").read_text().strip()==v4_sha,"V4_SOURCE_NOT_PINNED")
+        require(subprocess.run(["systemctl","is-active","--quiet",unit],check=False,timeout=8).returncode==0,"V4_SERVICE_NOT_ACTIVE")
     legs=(ledger.get("state") or {}).get("legs") or {}
     protections=ledger.get("protections") or {}
     require(isinstance(legs,dict) and isinstance(protections,dict),"V4_LEDGER_INVALID")
@@ -86,7 +121,7 @@ def run(now_ms=None,obs_path=OBS,ledger_path=LEDGER,hb_path=HB,verify_service=Tr
     existing_unprotected=int(obs.get("unprotectedCount",0))
     effective=max(0,existing_unprotected-len(verified))
     return {"schema":"resident-stop-v4-verification/v1","status":"HEALTHY" if not unresolved and effective==0 else "BLOCKED",
-      "readOnly":True,"checkedAt":now_ms,"v4Sha":V4_SHA,"venueObservationAt":obs["checkedAt"],
+      "readOnly":True,"checkedAt":now_ms,"v4Sha":v4_sha,"venueObservationAt":obs["checkedAt"],
       "originalUnprotectedCount":existing_unprotected,"v4Verified":verified,"unresolved":unresolved,
       "effectiveUnprotectedCount":effective,
       "ordersSent":0,"cancelsSent":0,"positionChangesSent":0}

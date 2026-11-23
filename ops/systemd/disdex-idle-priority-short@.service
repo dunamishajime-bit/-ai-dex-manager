@@ -1,0 +1,37 @@
+[Unit]
+Description=DisDex Idle Priority SHORT (%i)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/home/deploy/disdex-trading/current
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/current
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env
+EnvironmentFile=-/etc/disdex/current-runtime/%i.env
+EnvironmentFile=-/etc/disdex/current-runtime/%i.idle-operator.env
+Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/current
+Environment=DISDEX_RUNTIME_SHA=%i
+Environment=DISDEX_IDLE_PRIORITY_MODE=LIVE
+Environment=DISDEX_IDLE_PRIORITY_ENABLED=true
+Environment=DISDEX_OPERATOR_ACTIVATION_PATH=/var/lib/disdex/shared/operator-activation/runtime.json
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/current/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/current/.disdex-release-sha
+ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/current/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/current --sha %i --runner IDLE_PRIORITY_SHORT --activation-path /var/lib/disdex/shared/operator-activation/current.json
+ExecStartPre=+/usr/bin/install -o root -g root -m 0644 /var/lib/disdex/shared/operator-activation/current.json /var/lib/disdex/shared/operator-activation/runtime.json
+ExecStart=/home/deploy/disdex-trading/current/node_modules/.bin/tsx /home/deploy/disdex-trading/current/scripts/disdex-idle-priority-short-live-runner.ts --daemon
+Restart=on-failure
+RestartSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/disdex/idle-priority /var/lib/disdex/shared
+
+[Install]
+WantedBy=multi-user.target

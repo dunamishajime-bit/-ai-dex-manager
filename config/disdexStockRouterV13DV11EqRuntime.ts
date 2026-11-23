@@ -130,3 +130,37 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     liveBlockReason:
         "Real orders are submitted only when the Aster-only combined runner is started in live mode, its acknowledgement is present, V11-EQ uses only measured excess Aster margin, free Pyth plus Alpaca IEX reference checks pass, and the existing V96 exact-commit live gates pass. Hyperliquid and V13D are excluded.",
 } as const;
+
+// V50 adopted-source addendum; legacy V96 master policy remains authoritative above.
+export const DISDEX_V50_CONFIG = {
+    strategyId: "POST_EARLY3__B60__C20__STOP1.75__EDGE7.5__BOTH",
+    enabledForLive: true,
+    priority: 2,
+    timeZone: "America/New_York",
+    entryTimesNy: ["11:30:00", "12:30:00", "13:30:00"],
+    universe: ["AMZN", "META", "MSFT", "NVDA", "TSLA"],
+    minimumAbsoluteCashAsterBasisBps: 60,
+    directions: "LONG_AND_SHORT",
+    maximumGross: 1.0,
+    receivesOnlyRemainingStockGross: true,
+    maximumDailyTrades: 3,
+    maximumConcurrentPositions: 1,
+    sameSymbolCooldown: false,
+    sameSymbolConcurrentWithV11Allowed: false,
+    maximumHoldingHours: 3,
+    hourlyCheckpointExitOnly: true,
+    convergenceExitBps: 20,
+    zeroCrossExit: true,
+    basisExpansionStopMultiple: 1.75,
+    maximumAdverseBasisMoveBps: 10,
+    maximumEstimatedRoundTripCostBps: 60,
+    minimumEstimatedNetEdgeBps: 7.5,
+    maximumCurrentSpreadBps: 20,
+    minimumDepthMultiple: 2,
+    entryOrderType: "POST_ONLY_LIMIT_GTX",
+    entryOrderTtlMs: 10_000,
+    minimumAcceptedFillRatio: 0.90,
+    finalExitTimeNy: "15:30:00",
+    missedCheckpointAction: "FAIL_CLOSED_FLATTEN",
+    overnightAllowed: false,
+} as const;

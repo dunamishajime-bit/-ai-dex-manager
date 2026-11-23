@@ -1,0 +1,485 @@
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import shutil
+import tempfile
+import time
+from pathlib import Path
+from typing import Iterable, Mapping, Optional
+
+DEFAULT_V12_STATE_PATH = "/var/lib/disdex/v12-x1-all/runner.json"
+DEFAULT_PENGU_STATE_PATH = "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
+DEFAULT_Q102_STATE_PATH = "/var/lib/disdex/quality102-causal-v1/state.json"
+DEFAULT_V52_STATE_PATH = "/var/lib/disdex/v52-aster-only/runner-live.json"
+DEFAULT_FET_STATE_PATH = "/var/lib/disdex/fet-brk48-residual/state.json"
+
+QTY_EPS = 1e-8
+QTY_REL_TOL = 0.001
+
+
+class EmergencyStateReconcileError(RuntimeError):
+    pass
+
+
+def _finite(value: object, default: float = 0.0) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    return number if number == number and number not in (float("inf"), float("-inf")) else default
+
+
+def _normalized_symbol(value: object) -> str:
+    symbol = str(value or "").strip().upper()
+    if not symbol or any(ch.isspace() for ch in symbol):
+        raise EmergencyStateReconcileError(f"INVALID_SYMBOL:{value}")
+    return symbol
+
+
+def _read_object(path: Path) -> Optional[dict]:
+    if not path.exists():
+        return None
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise EmergencyStateReconcileError(f"STATE_READ_FAILED:{path}:{error}") from error
+    if not isinstance(raw, dict):
+        raise EmergencyStateReconcileError(f"STATE_NOT_OBJECT:{path}")
+    return raw
+
+
+def _state_paths(env: Mapping[str, str]) -> dict[str, Path]:
+    pengu_root = str(env.get("PENGU_DUAL_LS_V2_STATE_DIR") or "").strip()
+    v52_root = str(env.get("DISDEX_V52_ASTER_ONLY_STATE_DIR") or env.get("DISDEX_V13D_V11EQ_V96_STATE_DIR") or "").strip()
+    return {
+        "V12": Path(str(env.get("V12_X1_ALL_STATE_PATH") or DEFAULT_V12_STATE_PATH)).resolve(),
+        "PENGU": Path(str(env.get("PENGU_DUAL_LS_V2_STATE_PATH") or (Path(pengu_root) / "runner-live.json" if pengu_root else DEFAULT_PENGU_STATE_PATH))).resolve(),
+        "Q102": Path(str(env.get("QUALITY102_CAUSAL_V1_STATE_PATH") or env.get("DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH") or DEFAULT_Q102_STATE_PATH)).resolve(),
+        "V52": Path(str(env.get("DISDEX_V52_ASTER_ONLY_STATE_PATH") or (Path(v52_root) / "runner-live.json" if v52_root else DEFAULT_V52_STATE_PATH))).resolve(),
+        "FET": Path(str(env.get("FET_BRK48_STATE_PATH") or env.get("FET_BRK48_RESIDUAL_STATE_PATH") or DEFAULT_FET_STATE_PATH)).resolve(),
+    }
+
+
+def _claim(strategy: str, symbol: str, quantity: float, close_side: str) -> dict:
+    if not (quantity > QTY_EPS):
+        raise EmergencyStateReconcileError(f"INVALID_CLAIM_QUANTITY:{strategy}:{symbol}:{quantity}")
+    if close_side not in {"BUY", "SELL"}:
+        raise EmergencyStateReconcileError(f"INVALID_CLAIM_SIDE:{strategy}:{symbol}:{close_side}")
+    return {"strategy": strategy, "symbol": _normalized_symbol(symbol), "quantity": quantity, "closeSide": close_side}
+
+
+def _claims_from_states(states: Mapping[str, Optional[dict]], stock_symbol_map: Mapping[str, str]) -> list[dict]:
+    claims: list[dict] = []
+
+    v12 = states.get("V12")
+    if v12 is not None:
+        if v12.get("strategyId") != "V12_X1.00_ALL":
+            raise EmergencyStateReconcileError("V12_STATE_IDENTITY_MISMATCH")
+        if v12.get("pending") is not None:
+            raise EmergencyStateReconcileError("V12_PENDING_REQUIRES_RECONCILIATION")
+        raw_actives = v12.get("activePositions")
+        if isinstance(raw_actives, list) and raw_actives:
+            actives = raw_actives
+        elif isinstance(v12.get("active"), dict):
+            actives = [v12["active"]]
+        else:
+            actives = []
+        for row in actives:
+            if not isinstance(row, dict):
+                raise EmergencyStateReconcileError("V12_ACTIVE_STATE_MALFORMED")
+            side = str(row.get("side") or "").upper()
+            claims.append(_claim(
+                "V12",
+                str(row.get("symbol") or ""),
+                abs(_finite(row.get("quantity"))),
+                "SELL" if side == "LONG" else "BUY" if side == "SHORT" else "",
+            ))
+
+    pengu = states.get("PENGU")
+    if pengu is not None:
+        if pengu.get("strategyId") != "PENGU_DUAL_LS_V2_FINAL":
+            raise EmergencyStateReconcileError("PENGU_STATE_IDENTITY_MISMATCH")
+        if pengu.get("pending") is not None:
+            raise EmergencyStateReconcileError("PENGU_PENDING_REQUIRES_RECONCILIATION")
+        position = pengu.get("position")
+        if position is not None:
+            if not isinstance(position, dict):
+                raise EmergencyStateReconcileError("PENGU_POSITION_STATE_MALFORMED")
+            side = int(_finite(position.get("side")))
+            claims.append(_claim(
+                "PENGU",
+                "PENGUUSDT",
+                abs(_finite(position.get("quantity"))),
+                "SELL" if side == 1 else "BUY" if side == -1 else "",
+            ))
+
+    q102 = states.get("Q102")
+    if q102 is not None:
+        if q102.get("strategyId") != "QUALITY102_CAUSAL_V1":
+            raise EmergencyStateReconcileError("Q102_STATE_IDENTITY_MISMATCH")
+        if q102.get("pending") is not None:
+            raise EmergencyStateReconcileError("Q102_PENDING_REQUIRES_RECONCILIATION")
+        position = q102.get("position")
+        if position is not None:
+            if not isinstance(position, dict):
+                raise EmergencyStateReconcileError("Q102_POSITION_STATE_MALFORMED")
+            side = int(_finite(position.get("side")))
+            claims.append(_claim(
+                "Q102",
+                str(position.get("symbol") or ""),
+                abs(_finite(position.get("quantity"))),
+                "SELL" if side == 1 else "BUY" if side == -1 else "",
+            ))
+
+    v52 = states.get("V52")
+    if v52 is not None:
+        if v52.get("strategyId") not in {None, "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"}:
+            raise EmergencyStateReconcileError("V52_STATE_IDENTITY_MISMATCH")
+        if v52.get("pendingOrder") is not None:
+            raise EmergencyStateReconcileError("V52_PENDING_REQUIRES_RECONCILIATION")
+        positions = v52.get("positions") or {}
+        if not isinstance(positions, dict):
+            raise EmergencyStateReconcileError("V52_POSITIONS_STATE_MALFORMED")
+        for slot, row in positions.items():
+            if not isinstance(row, dict):
+                raise EmergencyStateReconcileError(f"V52_POSITION_STATE_MALFORMED:{slot}")
+            stock_symbol = str(row.get("symbol") or "").upper()
+            aster_symbol = stock_symbol_map.get(stock_symbol)
+            if not aster_symbol:
+                raise EmergencyStateReconcileError(f"V52_ASTER_SYMBOL_UNKNOWN:{stock_symbol}")
+            open_side = str(row.get("asterOpenSide") or "").upper()
+            claims.append(_claim(
+                "V52",
+                aster_symbol,
+                abs(_finite(row.get("asterQty"))),
+                "SELL" if open_side == "BUY" else "BUY" if open_side == "SELL" else "",
+            ))
+
+    fet = states.get("FET")
+    if fet is not None:
+        if fet.get("strategyId") != "FET_BRK48_RESIDUAL":
+            raise EmergencyStateReconcileError("FET_STATE_IDENTITY_MISMATCH")
+        if fet.get("pending") is not None:
+            raise EmergencyStateReconcileError("FET_PENDING_REQUIRES_RECONCILIATION")
+        position = fet.get("position")
+        if position is not None:
+            if not isinstance(position, dict):
+                raise EmergencyStateReconcileError("FET_POSITION_STATE_MALFORMED")
+            side = int(_finite(position.get("side")))
+            claims.append(_claim(
+                "FET",
+                str(position.get("symbol") or "FETUSDT"),
+                abs(_finite(position.get("quantity"))),
+                "SELL" if side == 1 else "BUY" if side == -1 else "",
+            ))
+    return claims
+
+
+def _aggregate_claims(claims: Iterable[dict]) -> dict[str, dict]:
+    result: dict[str, dict] = {}
+    for claim in claims:
+        symbol = claim["symbol"]
+        row = result.setdefault(symbol, {"quantity": 0.0, "closeSide": claim["closeSide"], "strategies": []})
+        if row["closeSide"] != claim["closeSide"]:
+            raise EmergencyStateReconcileError(f"CONFLICTING_LOCAL_SIDES:{symbol}")
+        row["quantity"] += float(claim["quantity"])
+        row["strategies"].append(claim["strategy"])
+    return result
+
+
+def _aggregate_fills(fill_results: Iterable[dict]) -> dict[str, dict]:
+    result: dict[str, dict] = {}
+    for fill in fill_results:
+        if not isinstance(fill, dict):
+            continue
+        status = str(fill.get("status") or "").upper()
+        qty = abs(_finite(fill.get("executedQty")))
+        if status not in {"FILLED", "PARTIALLY_FILLED"} or qty <= QTY_EPS:
+            continue
+        symbol = _normalized_symbol(fill.get("symbol"))
+        side = str(fill.get("side") or "").upper()
+        if side not in {"BUY", "SELL"}:
+            raise EmergencyStateReconcileError(f"INVALID_FILL_SIDE:{symbol}:{side}")
+        row = result.setdefault(symbol, {"quantity": 0.0, "side": side})
+        if row["side"] != side:
+            raise EmergencyStateReconcileError(f"CONFLICTING_FILL_SIDES:{symbol}")
+        row["quantity"] += qty
+    return result
+
+
+def _assert_fill_evidence(claims: dict[str, dict], fills: dict[str, dict]) -> None:
+    if set(claims) != set(fills):
+        raise EmergencyStateReconcileError(
+            f"CLAIM_FILL_SYMBOL_MISMATCH:claims={sorted(claims)}:fills={sorted(fills)}"
+        )
+    for symbol, expected in claims.items():
+        actual = fills[symbol]
+        if expected["closeSide"] != actual["side"]:
+            raise EmergencyStateReconcileError(
+                f"CLAIM_FILL_SIDE_MISMATCH:{symbol}:expected={expected['closeSide']}:actual={actual['side']}"
+            )
+        expected_qty = float(expected["quantity"])
+        actual_qty = float(actual["quantity"])
+        tolerance = max(QTY_EPS, expected_qty * QTY_REL_TOL)
+        if abs(expected_qty - actual_qty) > tolerance:
+            raise EmergencyStateReconcileError(
+                f"CLAIM_FILL_QTY_MISMATCH:{symbol}:expected={expected_qty}:actual={actual_qty}:tol={tolerance}"
+            )
+
+
+def _backup_and_write(path: Path, raw: dict, now_ms: int) -> str:
+    stamp = f"{now_ms}-{os.getpid()}"
+    backup = path.with_name(f"{path.name}.before-margin-emergency-reconcile-{stamp}.json")
+    if backup.exists():
+        raise EmergencyStateReconcileError(f"BACKUP_EXISTS:{backup}")
+    original_stat = path.stat()
+    shutil.copy2(path, backup)
+    if hasattr(os, "chown"):
+        try:
+            os.chown(backup, original_stat.st_uid, original_stat.st_gid)
+        except PermissionError:
+            pass
+    handle, temp_name = tempfile.mkstemp(prefix=f".{path.name}.margin-reconcile.", dir=str(path.parent))
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as writer:
+            json.dump(raw, writer, ensure_ascii=False, indent=2)
+            writer.write("\n")
+            writer.flush()
+            os.fsync(writer.fileno())
+        os.chmod(temp_name, 0o600)
+        if hasattr(os, "chown"):
+            try:
+                os.chown(temp_name, original_stat.st_uid, original_stat.st_gid)
+            except PermissionError:
+                current_uid = os.geteuid() if hasattr(os, "geteuid") else None
+                if current_uid != original_stat.st_uid:
+                    raise EmergencyStateReconcileError(
+                        f"STATE_OWNERSHIP_PRESERVATION_FAILED:{path}:{original_stat.st_uid}:{original_stat.st_gid}"
+                    )
+        os.replace(temp_name, path)
+        os.chmod(path, 0o600)
+        if hasattr(os, "chown"):
+            replaced = path.stat()
+            if replaced.st_uid != original_stat.st_uid or replaced.st_gid != original_stat.st_gid:
+                raise EmergencyStateReconcileError(
+                    f"STATE_OWNERSHIP_CHANGED:{path}:{original_stat.st_uid}:{original_stat.st_gid}"
+                    f"->{replaced.st_uid}:{replaced.st_gid}"
+                )
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+    return str(backup)
+
+
+def _restore_from_backup(path: Path, backup: Path) -> None:
+    backup_stat = backup.stat()
+    handle, temp_name = tempfile.mkstemp(prefix=f".{path.name}.margin-rollback.", dir=str(path.parent))
+    os.close(handle)
+    try:
+        shutil.copyfile(backup, temp_name)
+        os.chmod(temp_name, 0o600)
+        if hasattr(os, "chown"):
+            os.chown(temp_name, backup_stat.st_uid, backup_stat.st_gid)
+        os.replace(temp_name, path)
+        os.chmod(path, 0o600)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+
+
+def reconcile_emergency_flatten_states(
+    fill_results: Iterable[dict],
+    *,
+    env: Optional[Mapping[str, str]] = None,
+    stock_symbol_map: Optional[Mapping[str, str]] = None,
+    now_ms: Optional[int] = None,
+) -> dict:
+    environment = os.environ if env is None else env
+    paths = _state_paths(environment)
+    states = {name: _read_object(path) for name, path in paths.items()}
+    claims_list = _claims_from_states(states, stock_symbol_map or {})
+    claims = _aggregate_claims(claims_list)
+    fills = _aggregate_fills(fill_results)
+
+    if not claims and not fills:
+        return {
+            "status": "PASS",
+            "claimCount": 0,
+            "fillSymbolCount": 0,
+            "modifiedStrategies": [],
+            "backups": {},
+        }
+    if not claims:
+        raise EmergencyStateReconcileError(f"EMERGENCY_FILL_HAS_NO_LOCAL_OWNER:{sorted(fills)}")
+    _assert_fill_evidence(claims, fills)
+
+    now = int(time.time() * 1000) if now_ms is None else int(now_ms)
+    updates: list[tuple[str, Path, dict]] = []
+
+    v12 = states.get("V12")
+    if v12 is not None and any(c["strategy"] == "V12" for c in claims_list):
+        payload = dict(v12)
+        payload["dd1296UnaccountedExits"] = payload.get("dd1296UnaccountedExits", []) + (payload.get("activePositions") or ([payload["active"]] if payload.get("active") else []))
+        payload.pop("active", None)
+        payload.pop("activePositions", None)
+        payload.pop("pending", None)
+        payload.pop("manualReview", None)
+        payload.pop("killSwitch", None)
+        reference = int(_finite(payload.get("lastReferenceTs")))
+        existing_cd = int(_finite(payload.get("cooldownUntilTs")))
+        if reference > 0:
+            payload["cooldownUntilTs"] = max(existing_cd, reference + 2 * 60 * 60 * 1000)
+        payload["updatedAt"] = now
+        updates.append(("V12", paths["V12"], payload))
+
+    pengu = states.get("PENGU")
+    if pengu is not None and any(c["strategy"] == "PENGU" for c in claims_list):
+        payload = dict(pengu)
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        reference = int(_finite(payload.get("lastSignalReferenceTs")))
+        existing_cd = int(_finite(payload.get("cooldownUntilTs")))
+        if reference > 0:
+            payload["cooldownUntilTs"] = max(existing_cd, reference + 6 * 60 * 60 * 1000)
+        failures = list(payload.get("failures")) if isinstance(payload.get("failures"), list) else []
+        failures.append({"occurredAt": now, "message": "MARGIN_GUARD_EMERGENCY_FLAT_RECONCILED"})
+        payload["failures"] = failures[-100:]
+        payload["updatedAt"] = now
+        updates.append(("PENGU", paths["PENGU"], payload))
+
+    q102 = states.get("Q102")
+    if q102 is not None and any(c["strategy"] == "Q102" for c in claims_list):
+        payload = dict(q102)
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        failures = list(payload.get("failures")) if isinstance(payload.get("failures"), list) else []
+        failures.append({"occurredAt": now, "message": "MARGIN_GUARD_EMERGENCY_FLAT_RECONCILED"})
+        payload["failures"] = failures[-100:]
+        payload["lastReconciledAt"] = now
+        payload["updatedAt"] = now
+        updates.append(("Q102", paths["Q102"], payload))
+
+    v52 = states.get("V52")
+    if v52 is not None and any(c["strategy"] == "V52" for c in claims_list):
+        payload = dict(v52)
+        payload["positions"] = {}
+        payload["pendingOrder"] = None
+        payload["updatedAt"] = now
+        updates.append(("V52", paths["V52"], payload))
+
+    fet = states.get("FET")
+    if fet is not None and any(c["strategy"] == "FET" for c in claims_list):
+        payload = dict(fet)
+        payload["lastExitTs"] = max(int(payload.get("lastExitTs") or 0), now)
+        payload["cooldownUntilTs"] = max(int(payload.get("cooldownUntilTs") or 0), now + 24 * 3600000)
+        payload["lastEvaluationCandidate"] = False
+        payload["lastEvaluationReason"] = "FET_POST_EXIT_COOLDOWN_24H"
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        payload["updatedAt"] = now
+        updates.append(("FET", paths["FET"], payload))
+
+    modified: list[str] = []
+    backups: dict[str, str] = {}
+    try:
+        for strategy, path, payload in updates:
+            backup = _backup_and_write(path, payload, now)
+            backups[strategy] = backup
+            modified.append(strategy)
+    except Exception as error:
+        rollback_errors: list[str] = []
+        for strategy in reversed(modified):
+            try:
+                _restore_from_backup(paths[strategy], Path(backups[strategy]))
+            except Exception as rollback_error:
+                rollback_errors.append(f"{strategy}:{rollback_error}")
+        if rollback_errors:
+            raise EmergencyStateReconcileError(
+                f"STATE_RECONCILIATION_PARTIAL_WRITE_ROLLBACK_FAILED:{error}:"
+                + "|".join(rollback_errors)
+            ) from error
+        raise EmergencyStateReconcileError(f"STATE_RECONCILIATION_WRITE_FAILED_ROLLED_BACK:{error}") from error
+
+    return {
+        "status": "PASS",
+        "claimCount": len(claims_list),
+        "fillSymbolCount": len(fills),
+        "claims": claims,
+        "fills": fills,
+        "modifiedStrategies": modified,
+        "backups": backups,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--evidence-path")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--ack")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+
+    if args.self_test:
+        assert _normalized_symbol("linkusdt") == "LINKUSDT"
+        assert _aggregate_fills([
+            {"symbol": "LINKUSDT", "side": "SELL", "status": "FILLED", "executedQty": "1.25"},
+            {"symbol": "LINKUSDT", "side": "SELL", "status": "PARTIALLY_FILLED", "executedQty": "0.75"},
+        ])["LINKUSDT"]["quantity"] == 2.0
+        print("MARGIN_GUARD_STATE_RECONCILE_SELFTEST_PASS")
+        return 0
+
+    if not args.apply or args.ack != "I_ACK_MARGIN_GUARD_STATE_RECONCILIATION":
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EXPLICIT_APPLY_ACK_REQUIRED")
+    if not args.evidence_path:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_PATH_REQUIRED")
+
+    evidence_path = Path(args.evidence_path).resolve()
+    evidence = _read_object(evidence_path)
+    if evidence is None:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_MISSING")
+    if evidence.get("status") == "RECONCILED":
+        reconciled = evidence.get("stateReconciliation")
+        if isinstance(reconciled, dict) and reconciled.get("status") == "PASS":
+            print(json.dumps({
+                "status": "MARGIN_GUARD_STATE_RECONCILIATION_ALREADY_PASS",
+                "stateReconciliation": reconciled,
+            }, separators=(",", ":")))
+            return 0
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_RECONCILED_WITHOUT_PASS")
+    if evidence.get("status") != "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION":
+        raise EmergencyStateReconcileError(
+            f"STATE_RECONCILIATION_EVIDENCE_STATUS_INVALID:{evidence.get('status')}"
+        )
+    remaining = evidence.get("remainingManagedPositions")
+    if not isinstance(remaining, list) or remaining:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_REMAINING_POSITIONS")
+    fill_results = evidence.get("fillResults")
+    if not isinstance(fill_results, list) or not fill_results:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_FILL_EVIDENCE_MISSING")
+
+    import disdex_v13d_v11eq_stock_live_engine as stock_base
+
+    result = reconcile_emergency_flatten_states(
+        fill_results,
+        env=os.environ,
+        stock_symbol_map=stock_base.ASTER_SYMBOL,
+        now_ms=int(time.time() * 1000),
+    )
+    print(json.dumps({
+        "status": "MARGIN_GUARD_STATE_RECONCILIATION_PASS",
+        "stateReconciliation": result,
+    }, ensure_ascii=False, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except EmergencyStateReconcileError as error:
+        print(json.dumps({
+            "status": "MARGIN_GUARD_STATE_RECONCILIATION_FAIL_CLOSED",
+            "message": str(error),
+        }, ensure_ascii=False, separators=(",", ":")))
+        raise SystemExit(1)

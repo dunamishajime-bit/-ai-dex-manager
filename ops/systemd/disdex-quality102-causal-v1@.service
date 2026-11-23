@@ -1,0 +1,41 @@
+[Unit]
+Description=DisDex Quality102 causal v1 derived HIGH_VOL sleeve (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env
+Environment=NODE_ENV=production
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/quality102-causal-v1
+ExecStartPre=+/usr/bin/test ! -L /var/lib/disdex/quality102-causal-v1/recovery-archive
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/quality102-causal-v1/recovery-archive
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/market-history.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/market-history.json && chmod 600 /var/lib/disdex/quality102-causal-v1/market-history.json; fi'
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-current-live-target-readiness.ts --require-implementation-ready
+ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner QUALITY102_CAUSAL_V1 --activation-path /var/lib/disdex/shared/operator-activation/current.json
+ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-pending-order-recovery.ts --allow-no-pending --apply --sha %i --ack I_ACK_Q102_NO_EXPOSURE_PENDING_RECOVERY_AFTER_THREE_READONLY_ROUNDS
+ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --preflight
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --daemon
+Restart=on-failure
+RestartSec=15
+TimeoutStartSec=30min
+TimeoutStopSec=90s
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/quality102-causal-v1 /var/lib/disdex/shared
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

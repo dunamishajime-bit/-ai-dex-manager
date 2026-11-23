@@ -1,0 +1,1064 @@
+import { execFile as execFileCallback } from "node:child_process";
+import { chmod, lstat, mkdir, readFile, readlink, realpath, rename, unlink, writeFile, rmdir } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { promisify } from "node:util";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { applyOperatorActivationGateToRestart, evaluateOperatorActivationGate } from "./disdex-live-operator-activation-gate.mjs";
+
+/**
+ * Release-pinned, read-only runner health watchdog.
+ *
+ * It may restart one allow-listed systemd runner after a bounded health
+ * failure. It never imports an exchange client and never submits, cancels,
+ * modifies, or closes an order/position.
+ */
+
+const execFile = promisify(execFileCallback);
+const SYSTEMCTL = "/usr/bin/systemctl";
+const DEFAULT_ENV_FILE = "/etc/disdex/disdex-runner-watchdog-current.env";
+const DEFAULT_HEALTH_ROOT = "/var/lib/disdex/runner-health";
+const RELEASE_MARKER = ".disdex-release-sha";
+const ATTEMPT_WINDOW_MS = 1_800_000;
+const BACKOFF_MS = [15_000, 60_000, 300_000];
+const MAX_ATTEMPTS = 3;
+const SHARED_CRYPTO_RISK_UNIT_PATTERN = "disdex-shared-crypto-risk@*.service";
+const MARGIN_GUARD_UNIT_PATTERN = "disdex-v12-v52-margin-guard@*.service";
+const LEGACY_LIVE_UNITS = [
+    "disdex-v96-live.service",
+    "disdex-v96-v52-live.service",
+    "disdex-v13d-v11eq-v96.service",
+    "disdex-v46-live.service",
+    "disdex-pengu-dual-ls-v2-v20.service",
+    "disdex-v12-x1-all.service",
+    "disdex-pengu-dual-ls-v2.service",
+    "disdex-quality102-causal-v1.service",
+    "disdex-fet-brk48.service",
+    "disdex-v52-aster-only.service",
+    "disdex-shared-crypto-risk.service",
+    "disdex-v12-v52-margin-guard.service",
+    "disdex-idle-priority-short.service",
+];
+const LEGACY_V12_RUNNER = {
+    key: "V12_X1_ALL",
+    expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
+    releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    heartbeatFile: "v12-x1-all.json",
+    unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
+    expectedUnit: (sha) => `disdex-v12-x1-all@${sha}.service`,
+    unitPattern: "disdex-v12-x1-all@*.service",
+    unitPrefix: "disdex-v12-x1-all",
+    script: "scripts/disdex-v12-x1-all-live-runner.ts",
+    heartbeatTimeoutMs: 10_800_000,
+    tickTimeoutMs: 5_400_000,
+};
+const V4_V12_RUNNER = {
+    key: "V12_V4",
+    expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
+    releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    operatorActivationPathEnv: "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH",
+    heartbeatFile: "v12-v4.json",
+    unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
+    expectedUnit: (sha) => `disdex-v12-v4@${sha}.service`,
+    unitPattern: "disdex-v12-v4@*.service",
+    unitPrefix: "disdex-v12-v4",
+    script: "scripts/v12-v4-production-runner.ts",
+    heartbeatTimeoutMs: 5 * 60_000,
+    tickTimeoutMs: 3 * 60_000,
+};
+const OTHER_RUNNERS = [
+    {
+        key: "PENGU_V8",
+        expectedShaEnv: "DISDEX_WATCHDOG_PENGU_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_PENGU_RELEASE_ROOT",
+        heartbeatFile: "pengu-v8.json",
+        unitEnv: "DISDEX_WATCHDOG_PENGU_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-pengu-dual-ls-v2@${sha}.service`,
+        unitPattern: "disdex-pengu-dual-ls-v2@*.service",
+        unitPrefix: "disdex-pengu-dual-ls-v2",
+        script: "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+        heartbeatTimeoutMs: 5_400_000,
+        tickTimeoutMs: 5_400_000,
+    },
+    {
+        key: "V52",
+        expectedShaEnv: "DISDEX_WATCHDOG_V52_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_V52_RELEASE_ROOT",
+        heartbeatFile: "v52.json",
+        unitEnv: "DISDEX_WATCHDOG_V52_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-v52-aster-only@${sha}.service`,
+        unitPattern: "disdex-v52-aster-only@*.service",
+        unitPrefix: "disdex-v52-aster-only",
+        scripts: [
+            "scripts/disdex_v52_aster_only_live_engine.py",
+            "scripts/disdex_v52_aster_only_legacy_engine.py",
+            "scripts/disdex_v12_v52_live_engine.py",
+            "scripts/disdex_v12_v52_live_engine_retry.py",
+        ],
+        heartbeatTimeoutMs: 10_800_000,
+        tickTimeoutMs: 900_000,
+    },
+    {
+        key: "QUALITY102_CAUSAL_V1",
+        expectedShaEnv: "DISDEX_WATCHDOG_Q102_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_Q102_RELEASE_ROOT",
+        heartbeatFile: "quality102-causal-v1.json",
+        unitEnv: "DISDEX_WATCHDOG_Q102_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-quality102-causal-v1@${sha}.service`,
+        unitPattern: "disdex-quality102-causal-v1@*.service",
+        unitPrefix: "disdex-quality102-causal-v1",
+        script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
+        heartbeatTimeoutMs: 5_400_000,
+        tickTimeoutMs: 5_400_000,
+    },
+    {
+        key: "FET_BRK48_RESIDUAL",
+        expectedShaEnv: "DISDEX_WATCHDOG_FET_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_FET_RELEASE_ROOT",
+        heartbeatFile: "fet-brk48-residual.json",
+        unitEnv: "DISDEX_WATCHDOG_FET_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-fet-brk48@${sha}.service`,
+        unitPattern: "disdex-fet-brk48@*.service",
+        unitPrefix: "disdex-fet-brk48",
+        script: "scripts/disdex-fet-brk48-live-runner.ts",
+        heartbeatTimeoutMs: 5_400_000,
+        tickTimeoutMs: 5_400_000,
+    },
+    {
+        key: "HYPE_TREND_LONG",
+        expectedShaEnv: "DISDEX_WATCHDOG_HYPE_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_HYPE_RELEASE_ROOT",
+        heartbeatFile: "hype-trend-long.json",
+        unitEnv: "DISDEX_WATCHDOG_HYPE_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-hype-long@${sha}.service`,
+        unitPattern: "disdex-hype-long@*.service",
+        unitPrefix: "disdex-hype-long",
+        script: "scripts/disdex-hype-trend-live-runner.ts",
+        heartbeatTimeoutMs: 5_400_000,
+        tickTimeoutMs: 5_400_000,
+    },
+    {
+        key: "IDLE_PRIORITY_SHORT",
+        expectedShaEnv: "DISDEX_WATCHDOG_IDLE_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_IDLE_RELEASE_ROOT",
+        heartbeatFile: "idle-priority-short.json",
+        unitEnv: "DISDEX_WATCHDOG_IDLE_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-idle-priority-short@${sha}.service`,
+        unitPattern: "disdex-idle-priority-short@*.service",
+        unitPrefix: "disdex-idle-priority-short",
+        script: "scripts/disdex-idle-priority-short-live-runner.ts",
+        heartbeatTimeoutMs: 20 * 60_000,
+        tickTimeoutMs: 15 * 60_000,
+    },
+];
+const RUNNERS = [LEGACY_V12_RUNNER, ...OTHER_RUNNERS];
+function runnersForEnv(env) {
+    const mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
+    if (mode === "LEGACY") return RUNNERS;
+    if (mode === "V4") return [V4_V12_RUNNER, ...OTHER_RUNNERS];
+    if (mode === "DISABLED") {
+        if (!String(env.DISDEX_WATCHDOG_V12_DISABLED_REASON || "").trim()) {
+            throw new Error("watchdog disabled V12 mode requires an explicit reason");
+        }
+        return OTHER_RUNNERS;
+    }
+    throw new Error("watchdog V12 mode is invalid");
+}
+
+const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 };
+
+function safeReason(value) {
+    return String(value || "unknown watchdog error")
+        .replace(/(api[_ -]?key|private[_ -]?key|secret|token|password|authorization)\s*[:=]\s*\S+/gi, "$1=[REDACTED]")
+        .replace(/[\u0000-\u001f\u007f]/g, " ")
+        .slice(0, 512);
+}
+
+function parseEnv(raw) {
+    const result = {};
+    for (const line of raw.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const match = /^([A-Z0-9_]+)=(.*)$/.exec(trimmed);
+        if (!match) continue;
+        let value = match[2].trim();
+        if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+        result[match[1]] = value;
+    }
+    return result;
+}
+
+async function loadEnv(path) {
+    return parseEnv(await readFile(path, "utf8"));
+}
+
+function exactSha(value) {
+    return /^[0-9a-f]{40}$/.test(value) && !/^0{40}$/.test(value);
+}
+
+function releaseRootForSha(sha) {
+    const normalized = String(sha || "").trim().toLowerCase();
+    if (!exactSha(normalized)) throw new Error("release SHA is invalid");
+    return `/home/deploy/disdex-trading/releases/${normalized}`;
+}
+
+function isAbsoluteCanonicalPath(path) {
+    return isAbsolute(path) && resolve(path) === path;
+}
+
+function pathWithin(root, candidate) {
+    const rel = relative(resolve(root), resolve(candidate));
+    return rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${root.includes("\\") ? "\\" : "/"}`));
+}
+
+function serviceAllowed(runner, unit, sha) {
+    if (typeof unit !== "string") return false;
+    if (runner.key === "V12_X1_ALL") return /^disdex-v12-x1-all@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
+    if (runner.key === "V12_V4") return /^disdex-v12-v4@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
+    if (runner.key === "QUALITY102_CAUSAL_V1") return /^disdex-quality102-causal-v1@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
+    if (runner.key === "PENGU_V8") return unit === runner.expectedUnit(sha);
+    return unit === runner.expectedUnit(sha);
+}
+
+function escapeRegex(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function parseNonInactiveServiceUnits(output, unitPrefix) {
+    const units = [];
+    const pattern = new RegExp(`\\b(${escapeRegex(unitPrefix)}@[0-9a-f]{40}\\.service)\\s+\\S+\\s+(\\S+)\\s+\\S+`);
+    for (const line of String(output || "").split(/\r?\n/)) {
+        const match = pattern.exec(line);
+        if (match && !new Set(["inactive", "failed"]).has(match[2])) units.push(match[1]);
+    }
+    return units;
+}
+
+function assertReleasePinnedRunnerSingleton(activeUnits, expectedUnit, label = "RUNNER_LINEAGE", requireExpected = false) {
+    const units = [...new Set(activeUnits)];
+    const conflicting = units.filter((unit) => unit !== expectedUnit);
+    if (conflicting.length > 0 || units.length > 1 || (requireExpected && units.length !== 1)) {
+        throw new Error(`${label} singleton invariant failed: expected ${requireExpected ? "only" : "no conflicts with"} ${expectedUnit}, observed ${units.join(",") || "none"}`);
+    }
+}
+
+function assertNoCompetingV12Authority(legacyV12Units, canaryV4Units) {
+    const conflicts = [...new Set([...legacyV12Units, ...canaryV4Units])];
+    if (conflicts.length > 0) throw new Error(`V12_V4_COMPETING_AUTHORITY:${conflicts.join(",")}`);
+}
+
+function assertSharedCryptoRiskWriterSingleton(activeUnits, expectedSha) {
+    assertReleasePinnedRunnerSingleton(activeUnits, `disdex-shared-crypto-risk@${expectedSha}.service`, "SHARED_CRYPTO_RISK", true);
+}
+
+const RUNNER_OWNED_HEARTBEAT_FIELDS = [
+    "lastReconciliationAt",
+    "lastDecision",
+    "reason",
+    "symbols",
+    "caps",
+    "restartAttempts",
+    "updatedAt",
+];
+
+function validateRunnerOwnedHeartbeat(value, runnerKey) {
+    const present = RUNNER_OWNED_HEARTBEAT_FIELDS.filter((key) => key in value);
+    if (present.length === 0) return;
+    if (present.length !== RUNNER_OWNED_HEARTBEAT_FIELDS.length) {
+        throw new Error(`${runnerKey} heartbeat has partial runner-owned metadata`);
+    }
+    for (const key of RUNNER_OWNED_HEARTBEAT_FIELDS) {
+        if (!(key in value)) throw new Error(`${runnerKey} heartbeat is missing runner-owned metadata`);
+    }
+    if (typeof value.reason !== "string" || value.reason.length === 0) throw new Error(`${runnerKey} heartbeat reason is invalid`);
+    if (!Array.isArray(value.symbols) || value.symbols.length > 128) throw new Error(`${runnerKey} heartbeat symbols are invalid`);
+    if (!value.caps || typeof value.caps !== "object" || Array.isArray(value.caps)) throw new Error(`${runnerKey} heartbeat caps are invalid`);
+    if (!Number.isInteger(value.restartAttempts) || value.restartAttempts < 0) throw new Error(`${runnerKey} heartbeat restartAttempts is invalid`);
+    if (!Number.isFinite(value.updatedAt) || value.updatedAt <= 0) throw new Error(`${runnerKey} heartbeat updatedAt is invalid`);
+    if (value.lastReconciliationAt !== null && (!Number.isFinite(value.lastReconciliationAt) || value.lastReconciliationAt <= 0)) {
+        throw new Error(`${runnerKey} heartbeat lastReconciliationAt is invalid`);
+    }
+    if (value.lastDecision !== null && typeof value.lastDecision !== "string") throw new Error(`${runnerKey} heartbeat lastDecision is invalid`);
+}
+
+function normalizeV4Heartbeat(value, runner) {
+    const legacyV4 = runner.key === "V12_V4" && value.schema === "disdex-v12-v4-runner-heartbeat/v1";
+    if (!legacyV4) return value;
+    if (value.strategyId !== "V12_V4" || value.releaseSha !== runner.expectedSha || value.runtimeSha !== runner.expectedSha) {
+        throw new Error(`${runner.key} legacy heartbeat source identity is invalid`);
+    }
+    return {
+        ...value,
+        runnerId: value.runnerId ?? "V12_V4",
+        serviceUnit: value.serviceUnit ?? runner.unit,
+        expectedSha: value.expectedSha ?? runner.expectedSha,
+        workingDirectory: value.workingDirectory ?? runner.expectedCwd,
+        mode: value.mode ?? "LIVE",
+        liveEnabled: value.liveEnabled ?? true,
+        safetyState: value.safetyState ?? (String(value.status || "").toLowerCase() === "failed" ? "BLOCKED" : "HEALTHY"),
+        heartbeatAt: value.heartbeatAt ?? value.updatedAt,
+        lastTickAt: value.lastTickAt ?? value.updatedAt,
+    };
+}
+
+function runnerPaths(config, runner) {
+    return {
+        heartbeat: join(config.healthRoot, "heartbeats", runner.heartbeatFile),
+        stopMarker: runner.key === "V52" ? join(config.healthRoot, "v52.intentional-stop") : undefined,
+    };
+}
+
+function heartbeatFreshness(value, runner, now) {
+    const heartbeatFresh = now - value.heartbeatAt <= runner.heartbeatTimeoutMs;
+    const runnerTickFresh = now - value.lastTickAt <= runner.tickTimeoutMs;
+    return { heartbeatFresh, runnerTickFresh, fresh: heartbeatFresh && runnerTickFresh };
+}
+
+function heartbeatModeAllowed(value, runnerKey) {
+    const mode = String(value?.mode || "").toUpperCase();
+    if (mode === "LIVE") return true;
+    // A V4 limited canary is intentionally not a formal full-LIVE run.  It is
+    // nevertheless a live-enabled, operator-approved production process and
+    // must remain under watchdog supervision.  Keep this exception narrow:
+    // only V12_V4 with all three explicit safety attestations is accepted.
+    return runnerKey === "V12_V4"
+        && mode === "CANARY"
+        && value?.liveEnabled === true
+        && value?.limitedLive === true
+        && value?.safetyState === "HEALTHY";
+}
+
+function operatorActivationPathForRunner(runner, env, defaultPath) {
+    const configuredPath = runner.operatorActivationPathEnv
+        ? env[runner.operatorActivationPathEnv]
+        : undefined;
+    if (runner.operatorActivationPathEnv && !configuredPath) {
+        throw new Error(`${runner.key} dedicated operator activation path is required`);
+    }
+    const path = String(configuredPath || defaultPath).trim();
+    if (!isAbsoluteCanonicalPath(path)) throw new Error(`${runner.key} operator activation path is non-canonical`);
+    return path;
+}
+
+function buildConfig(env) {
+    const v12Mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
+    const healthRoot = env.DISDEX_WATCHDOG_HEALTH_ROOT || DEFAULT_HEALTH_ROOT;
+    const releaseRoot = env.DISDEX_WATCHDOG_RELEASE_ROOT;
+    const expectedSha = String(env.DISDEX_WATCHDOG_EXPECTED_SHA || "").trim().toLowerCase();
+    const approvedSha = String(env.DISDEX_WATCHDOG_APPROVED_SHA || "").trim().toLowerCase();
+    if (!isAbsoluteCanonicalPath(healthRoot) || !releaseRoot || !isAbsoluteCanonicalPath(releaseRoot) || !exactSha(expectedSha) || !exactSha(approvedSha)) {
+        throw new Error("watchdog release pin or approval pin is incomplete or non-canonical");
+    }
+    if (approvedSha !== expectedSha) throw new Error("watchdog expected SHA is not explicitly approved");
+    const operatorActivationPath = String(env.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH || "/var/lib/disdex/shared/operator-activation/current.json").trim();
+    if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
+    const runnerConfig = {};
+    for (const runner of runnersForEnv(env)) {
+        const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
+        const runnerReleaseRoot = String(env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
+        if (!exactSha(runnerExpectedSha) || !isAbsoluteCanonicalPath(runnerReleaseRoot)) {
+            throw new Error(`${runner.key} release pin is incomplete or non-canonical`);
+        }
+        const unit = String(env[runner.unitEnv] || "").trim();
+        if (!serviceAllowed(runner, unit, runnerExpectedSha)) throw new Error(`${runner.key} service unit is not allow-listed for the pinned release`);
+        runnerConfig[runner.key] = {
+            ...runner,
+            unit,
+            expectedSha: runnerExpectedSha,
+            expectedCwd: runnerReleaseRoot,
+            operatorActivationPath: operatorActivationPathForRunner(runner, env, operatorActivationPath),
+            ...runnerPaths({ healthRoot }, runner),
+        };
+    }
+    const statePath = env.DISDEX_WATCHDOG_STATE_PATH || join(healthRoot, "private", "watchdog-current-state.json");
+    const auditPath = env.DISDEX_WATCHDOG_AUDIT_PATH || join(healthRoot, "private", "watchdog-current-audit.json");
+    const lockPath = env.DISDEX_WATCHDOG_LOCK_PATH || join(healthRoot, "private", "watchdog-current.lock");
+    for (const path of [statePath, auditPath, lockPath]) {
+        if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
+    }
+    const primaryV12 = runnerConfig.V12_V4 ?? runnerConfig.V12_X1_ALL;
+    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12?.expectedSha || "").trim().toLowerCase();
+    if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
+    const marginGuardExpectedSha = String(env.DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA || expectedSha).trim().toLowerCase();
+    if (!exactSha(marginGuardExpectedSha)) throw new Error("margin guard release pin is invalid");
+    const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
+    const marginGuardUnit = `disdex-v12-v52-margin-guard@${marginGuardExpectedSha}.service`;
+    const safetyDaemons = [
+        {
+            key: "SHARED_CRYPTO_RISK",
+            unit: sharedRiskUnit,
+            expectedSha: sharedRiskExpectedSha,
+            expectedCwd: releaseRootForSha(sharedRiskExpectedSha),
+            script: "scripts/disdex-shared-crypto-risk-writer.ts",
+        },
+        {
+            key: "MARGIN_GUARD",
+            unit: marginGuardUnit,
+            expectedSha: marginGuardExpectedSha,
+            expectedCwd: releaseRootForSha(marginGuardExpectedSha),
+            script: "scripts/disdex_v96_v52_margin_guard_runtime.py",
+        },
+    ];
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, v12Mode, v12DisabledReason: String(env.DISDEX_WATCHDOG_V12_DISABLED_REASON || "").trim(), sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, safetyDaemons, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
+}
+
+async function assertRelease(config) {
+    const healthStats = await lstat(config.healthRoot);
+    if (!healthStats.isDirectory() || healthStats.isSymbolicLink()) throw new Error("health root is not a real directory");
+    const rootStats = await lstat(config.releaseRoot);
+    if (!rootStats.isDirectory() || rootStats.isSymbolicLink()) throw new Error("release root is not a real directory");
+    if ((await realpath(config.releaseRoot)) !== config.releaseRoot) throw new Error("release root is not canonical");
+    const marker = join(config.releaseRoot, RELEASE_MARKER);
+    const markerStats = await lstat(marker);
+    if (!markerStats.isFile() || markerStats.isSymbolicLink()) throw new Error("release marker is not a regular file");
+    const contents = (await readFile(marker, "utf8")).trim();
+    if (contents !== config.expectedSha) throw new Error("release marker does not match expected SHA");
+    const heartbeatDir = join(config.healthRoot, "heartbeats");
+    const heartbeatDirStats = await lstat(heartbeatDir);
+    if (!heartbeatDirStats.isDirectory() || heartbeatDirStats.isSymbolicLink()) throw new Error("heartbeat directory is not a real directory");
+    for (const runner of Object.values(config.runnerConfig)) {
+        const stats = await lstat(runner.expectedCwd);
+        if (!stats.isDirectory() || stats.isSymbolicLink()) throw new Error(`${runner.key} release root is not a real directory`);
+        if ((await realpath(runner.expectedCwd)) !== runner.expectedCwd) throw new Error(`${runner.key} release root is not canonical`);
+        const runnerMarker = join(runner.expectedCwd, RELEASE_MARKER);
+        const runnerMarkerStats = await lstat(runnerMarker);
+        if (!runnerMarkerStats.isFile() || runnerMarkerStats.isSymbolicLink()) throw new Error(`${runner.key} release marker is invalid`);
+        if ((await readFile(runnerMarker, "utf8")).trim() !== runner.expectedSha) throw new Error(`${runner.key} release marker does not match expected SHA`);
+    }
+    for (const daemon of config.safetyDaemons) {
+        const stats = await lstat(daemon.expectedCwd);
+        if (!stats.isDirectory() || stats.isSymbolicLink()) throw new Error(`${daemon.key} safety daemon release root is not a real directory`);
+        if ((await realpath(daemon.expectedCwd)) !== daemon.expectedCwd) throw new Error(`${daemon.key} safety daemon release root is not canonical`);
+        const marker = join(daemon.expectedCwd, RELEASE_MARKER);
+        const markerStats = await lstat(marker);
+        if (!markerStats.isFile() || markerStats.isSymbolicLink()) throw new Error(`${daemon.key} safety daemon release marker is invalid`);
+        if ((await readFile(marker, "utf8")).trim() !== daemon.expectedSha) throw new Error(`${daemon.key} safety daemon release marker does not match expected SHA`);
+    }
+}
+
+async function readHeartbeat(config, runner, now) {
+    const path = runner.heartbeat;
+    let raw;
+    try {
+        raw = await readFile(path, "utf8");
+    } catch (error) {
+        if (error?.code === "ENOENT") return { present: false };
+        throw new Error(`${runner.key} heartbeat cannot be read`);
+    }
+    let value;
+    try { value = JSON.parse(raw); } catch { throw new Error(`${runner.key} heartbeat JSON is malformed`); }
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${runner.key} heartbeat is not an object`);
+    value = normalizeV4Heartbeat(value, runner);
+    validateRunnerOwnedHeartbeat(value, runner.key);
+    const required = ["schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "mode", "liveEnabled", "safetyState", "heartbeatAt", "lastTickAt"];
+    for (const key of required) if (!(key in value)) throw new Error(`${runner.key} heartbeat.${key} is missing`);
+    const v4Schema = runner.key === "V12_V4" && value.schema === "disdex-v12-v4-runner-heartbeat/v1";
+    if ((value.schema !== "disdex-runner-heartbeat/v1" && !v4Schema) || value.runnerId !== runner.key) throw new Error(`${runner.key} heartbeat identity is invalid`);
+    if (!serviceAllowed(runner, value.serviceUnit, runner.expectedSha) || value.serviceUnit !== runner.unit) throw new Error(`${runner.key} heartbeat service unit is invalid`);
+    if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
+    if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
+    if (!heartbeatModeAllowed(value, runner.key)) throw new Error(`${runner.key} heartbeat mode is not LIVE or approved limited CANARY`);
+    const healthReason = safeReason(value.healthReason || value.reason || "");
+    if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: healthReason || `${runner.key} service identity is not current` };
+    if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: healthReason || `safetyState=${value.safetyState}` };
+    for (const key of ["heartbeatAt", "lastTickAt"]) {
+        if (typeof value[key] !== "number" || !Number.isFinite(value[key]) || value[key] <= 0 || value[key] > now + 60_000) throw new Error(`${runner.key} heartbeat timestamp is invalid`);
+    }
+    if (runner.key === "QUALITY102_CAUSAL_V1") {
+        const q102 = value.quality102;
+        if (!q102 || q102.selectorMode !== "CAUSAL_V4" || q102.historicalSelectorParity !== false || q102.brkLiveEnabled !== true) {
+            throw new Error("QUALITY102_CAUSAL_V1 heartbeat selector contract is invalid");
+        }
+    }
+    return { present: true, valid: true, value, safeState: true, ...heartbeatFreshness(value, runner, now) };
+}
+
+async function systemctl(args, tolerateInactive = false) {
+    try {
+        return (await execFile(SYSTEMCTL, args, { encoding: "utf8", windowsHide: true })).stdout.trim();
+    } catch (error) {
+        if (tolerateInactive && error?.code === 3) return String(error.stdout || "").trim();
+        throw new Error(`systemd observation failed: ${safeReason(error?.message)}`);
+    }
+}
+
+function parseSystemdProperties(output) {
+    const properties = {};
+    for (const line of String(output || "").split(/\r?\n/)) {
+        const separator = line.indexOf("=");
+        if (separator <= 0) continue;
+        properties[line.slice(0, separator)] = line.slice(separator + 1);
+    }
+    return properties;
+}
+
+async function inspectService(unit) {
+    const raw = await systemctl([
+        "show",
+        unit,
+        "--property=ActiveState",
+        "--property=MainPID",
+        "--property=Result",
+        "--property=ExecMainCode",
+        "--property=ExecMainStatus",
+        "--no-pager",
+    ]);
+    const properties = parseSystemdProperties(raw);
+    const mainPid = Number(properties.MainPID);
+    if (!Number.isInteger(mainPid) || mainPid < 0) throw new Error("systemd MainPID is invalid");
+    return {
+        active: properties.ActiveState === "active",
+        mainPid,
+        result: String(properties.Result || ""),
+        execMainCode: String(properties.ExecMainCode || ""),
+        execMainStatus: Number(properties.ExecMainStatus),
+    };
+}
+
+function isFatalFailClosedService(service) {
+    return service?.active === false
+        && service?.mainPid === 0
+        && service?.result === "exit-code"
+        && service?.execMainCode === "exited"
+        && service?.execMainStatus === 2;
+}
+
+async function processInfo(pid) {
+    if (pid <= 0) return { cwd: undefined, command: undefined };
+    let cwd;
+    try { cwd = await readlink(`/proc/${pid}/cwd`); } catch { throw new Error("runner process cwd is unavailable"); }
+    let command;
+    try { command = (await readFile(`/proc/${pid}/cmdline`, "utf8")).replaceAll("\0", " ").trim(); } catch { throw new Error("runner process command is unavailable"); }
+    return { cwd, command };
+}
+
+function samePath(left, right) {
+    const normalize = (value) => resolve(value).replaceAll("\\", "/").replace(/\/$/, "");
+    return normalize(left) === normalize(right);
+}
+
+function pathToken(token, root, relativePath) {
+    return token === relativePath || samePath(token, join(root, relativePath));
+}
+
+function commandMatches(config, runner, command) {
+    if (!command) return false;
+    const tokens = command.split(/\s+/);
+    const scripts = runner.script ? [runner.script] : runner.scripts;
+    const scriptFound = scripts.some((script) => pathToken(tokens[tokens.indexOf(script)] || "", runner.expectedCwd, script) || tokens.some((token) => token === join(runner.expectedCwd, script)));
+    const runnerLoaderFound = tokens.some((token) => samePath(token, join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs")) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
+    const daemon = tokens.includes("--daemon") || tokens.includes("--once");
+    const v52Python = runner.key === "V52" && (
+        tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python"
+        || samePath(tokens[0], join(runner.expectedCwd, ".venv2/bin/python"))
+    );
+    return scriptFound && daemon && (runnerLoaderFound || v52Python);
+}
+
+async function markerExists(path) {
+    try {
+        const stats = await lstat(path);
+        if (stats.isSymbolicLink() || !stats.isFile()) throw new Error("stop marker is not a regular file");
+        return true;
+    } catch (error) {
+        if (error?.code === "ENOENT") return false;
+        throw error;
+    }
+}
+
+async function loadState(path) {
+    try {
+        const value = JSON.parse(await readFile(path, "utf8"));
+        if (!value || value.schema !== "disdex-runner-watchdog/current-state-v1" || typeof value.runners !== "object") throw new Error("invalid watchdog state");
+        return value;
+    } catch (error) {
+        if (error?.code === "ENOENT") return { schema: "disdex-runner-watchdog/current-state-v1", runners: {} };
+        throw new Error("watchdog state is malformed");
+    }
+}
+
+async function atomicJson(path, value) {
+    await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+    const tmp = `${path}.${process.pid}.${Date.now()}.tmp`;
+    await writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+    try { await rename(tmp, path); } catch (error) { await unlink(tmp).catch(() => undefined); throw error; }
+}
+
+async function acquireLock(path) {
+    await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+    await chmod(dirname(path), 0o700);
+    try {
+        await mkdir(path, { recursive: false, mode: 0o700 });
+    } catch { throw new Error("watchdog cycle lock is already held"); }
+    return async () => { await rmdir(path).catch((error) => { if (error?.code !== "ENOENT") throw error; }); };
+}
+
+function recentAttempts(state, key, now) {
+    const attempts = Array.isArray(state.runners?.[key]?.attempts) ? state.runners[key].attempts : [];
+    return attempts.filter((item) => Number.isInteger(item?.at) && now - item.at <= ATTEMPT_WINDOW_MS);
+}
+
+function decision(action, reason, runner, extra = {}) {
+    return { runner: runner.key, unit: runner.unit, action, reason: safeReason(reason), tradingEffects: { ...ZERO_EFFECTS }, ...extra };
+}
+
+async function evaluateRunner(config, runner, state, now) {
+    const paths = runnerPaths(config, runner);
+    const attempts = recentAttempts(state, runner.key, now);
+    if (runner.key === "V52" && await markerExists(paths.stopMarker)) {
+        return { result: decision("NOOP", "V52 intentional stop marker is present", runner), attempts, clearAttempts: true };
+    }
+    const service = await inspectService(runner.unit);
+    if (isFatalFailClosedService(service)) {
+        const reason = runner.key === "V12_V4" ? "V4_FATAL_FAIL_CLOSED" : "RUNNER_FATAL_FAIL_CLOSED";
+        return {
+            result: decision("HOLD_FAIL_CLOSED", reason, runner, {
+                fatalFailClosed: true,
+                serviceResult: service.result,
+                execMainCode: service.execMainCode,
+                execMainStatus: service.execMainStatus,
+            }),
+            attempts,
+            clearAttempts: false,
+        };
+    }
+    const heartbeat = await readHeartbeat(config, runner, now);
+    if (!heartbeat.present) return { result: decision("RESTART", "heartbeat is missing", runner), attempts };
+    const process = await processInfo(service.mainPid);
+    const identityHealthy = service.active && service.mainPid > 0 && process.cwd === runner.expectedCwd && commandMatches(config, runner, process.command);
+    if (!identityHealthy) {
+        const safetyReason = safeReason(heartbeat.reason || "");
+        const serviceIdentityBlock = safetyReason.includes("service identity is not current");
+        if (heartbeat.valid && heartbeat.safeState === false && !serviceIdentityBlock) {
+            return { result: decision("HOLD_FAIL_CLOSED", safetyReason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
+        }
+        const reason = !service.active || service.mainPid <= 0 ? "service is not active" : process.cwd !== runner.expectedCwd ? "process cwd is not pinned to release" : "process command is not pinned to runner";
+        return { result: decision("RESTART", reason, runner), attempts };
+    }
+    if (!heartbeat.valid || heartbeat.safeState === false) return { result: decision("HOLD_FAIL_CLOSED", heartbeat.reason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
+    if (heartbeat.fresh) return { result: decision("NOOP", "heartbeat, service, cwd, and process command are consistent", runner), attempts, clearAttempts: true };
+    const reason = heartbeat.heartbeatFresh
+        ? "runner-owned lastTickAt is older than the runner cadence; active process identity is retained without restart"
+        : "heartbeat is older than the runner cadence; active process identity is retained without restart";
+    return { result: decision("HOLD_FAIL_CLOSED", reason, runner), attempts, clearAttempts: false };
+}
+
+async function evaluateSafetyDaemon(config, daemon, state, now) {
+    const attempts = recentAttempts(state, daemon.key, now);
+    const service = await inspectService(daemon.unit);
+    const process = await processInfo(service.mainPid);
+    const expectedCwd = daemon.expectedCwd || config.releaseRoot;
+    const healthy = service.active
+        && service.mainPid > 0
+        && process.cwd === expectedCwd
+        && String(process.command || "").includes(daemon.script)
+        && String(process.command || "").includes("--daemon");
+    if (healthy) {
+        return { result: decision("NOOP", "service, cwd, and process command are consistent", daemon), attempts, clearAttempts: true };
+    }
+    const reason = !service.active || service.mainPid <= 0
+        ? "service is not active"
+        : process.cwd !== expectedCwd
+            ? "process cwd is not pinned to release"
+            : "process command is not pinned to safety daemon";
+    return { result: decision("RESTART", reason, daemon), attempts, clearAttempts: false };
+}
+
+async function run(config) {
+    const now = Date.now();
+    await assertRelease(config);
+    const releaseLock = await acquireLock(config.lockPath);
+    try {
+        const state = await loadState(config.statePath);
+        const nextState = { schema: "disdex-runner-watchdog/current-state-v1", runners: {} };
+        const decisions = {};
+        const dependencyDecisions = {};
+        const restartCalls = [];
+        const errors = [];
+        const safetyDaemons = config.safetyDaemons;
+        for (const daemon of safetyDaemons) {
+            try {
+                const evaluated = await evaluateSafetyDaemon(config, daemon, state, now);
+                const attempts = evaluated.attempts;
+                let result = evaluated.result;
+                if (result.action === "RESTART") {
+                    if (attempts.length >= MAX_ATTEMPTS) {
+                        result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", daemon);
+                    } else {
+                        const last = attempts[attempts.length - 1];
+                        const delay = BACKOFF_MS[Math.min(attempts.length, BACKOFF_MS.length - 1)];
+                        if (last && now < last.at + delay) {
+                            result = decision("HOLD_FAIL_CLOSED", `restart backoff active until ${last.at + delay}`, daemon);
+                        } else {
+                            await systemctl(["restart", daemon.unit]);
+                            restartCalls.push(daemon.unit);
+                            const updated = [...attempts, { at: now, unit: daemon.unit }].slice(-MAX_ATTEMPTS);
+                            nextState.runners[daemon.key] = { attempts: updated };
+                        }
+                    }
+                }
+                if (!nextState.runners[daemon.key]) nextState.runners[daemon.key] = { attempts: evaluated.clearAttempts ? [] : attempts };
+                dependencyDecisions[daemon.key] = result;
+            } catch (error) {
+                const result = decision("HOLD_FAIL_CLOSED", safeReason(error?.message), daemon, { safetyUnverified: true });
+                dependencyDecisions[daemon.key] = result;
+                nextState.runners[daemon.key] = { attempts: [] };
+                errors.push(`${daemon.key}: ${safeReason(error?.message)}`);
+            }
+        }
+        let compositionInvariantError;
+        try {
+            if (config.v12Mode === "DISABLED") {
+                const activeLegacyV12Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", LEGACY_V12_RUNNER.unitPattern,
+                ]), LEGACY_V12_RUNNER.unitPrefix);
+                const activeV4Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", V4_V12_RUNNER.unitPattern,
+                ]), V4_V12_RUNNER.unitPrefix);
+                if (activeLegacyV12Units.length > 0 || activeV4Units.length > 0) {
+                    throw new Error(`V12_DISABLED_COMPETING_AUTHORITY:${[...activeLegacyV12Units, ...activeV4Units].join(",")}`);
+                }
+            } else if (config.runnerConfig.V12_V4) {
+                const activeLegacyV12Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", LEGACY_V12_RUNNER.unitPattern,
+                ]), LEGACY_V12_RUNNER.unitPrefix);
+                const activeV4CanaryUnits = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", "disdex-v12-v4-canary@*.service",
+                ]), "disdex-v12-v4-canary");
+                assertNoCompetingV12Authority(activeLegacyV12Units, activeV4CanaryUnits);
+            }
+            for (const legacyUnit of LEGACY_LIVE_UNITS) {
+                const legacyOutput = await systemctl(["show", legacyUnit, "--property=LoadState", "--property=ActiveState", "--no-pager"], true);
+                const props = Object.fromEntries(String(legacyOutput || "").split(/\r?\n/).filter(Boolean).map((line) => line.split("=", 2)));
+                if (props.LoadState === "loaded" && !new Set(["inactive", "failed"]).has(props.ActiveState)) {
+                    throw new Error(`LEGACY_LIVE_CONFLICT:${legacyUnit}:${props.ActiveState || "UNKNOWN"}`);
+                }
+            }
+            for (const runner of Object.values(config.runnerConfig)) {
+                const nonInactiveUnits = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", runner.unitPattern,
+                ]), runner.unitPrefix);
+                assertReleasePinnedRunnerSingleton(nonInactiveUnits, runner.unit, `RUNNER_LINEAGE:${runner.key}`);
+            }
+            const nonInactiveRiskUnits = parseNonInactiveServiceUnits(await systemctl([
+                "list-units", "--all", "--type=service", "--no-legend", SHARED_CRYPTO_RISK_UNIT_PATTERN,
+            ]), "disdex-shared-crypto-risk");
+            assertSharedCryptoRiskWriterSingleton(nonInactiveRiskUnits, config.sharedRiskExpectedSha);
+            const nonInactiveMarginUnits = parseNonInactiveServiceUnits(await systemctl([
+                "list-units", "--all", "--type=service", "--no-legend", MARGIN_GUARD_UNIT_PATTERN,
+            ]), "disdex-v12-v52-margin-guard");
+            assertReleasePinnedRunnerSingleton(nonInactiveMarginUnits, config.marginGuardUnit, "MARGIN_GUARD_LINEAGE", true);
+        } catch (error) {
+            compositionInvariantError = safeReason(error?.message);
+            errors.push(`COMPOSITION_LINEAGE: ${compositionInvariantError}`);
+        }
+        for (const runner of Object.values(config.runnerConfig)) {
+            try {
+                if (compositionInvariantError) {
+                    const result = decision("HOLD_FAIL_CLOSED", `composition lineage invariant failed: ${compositionInvariantError}`, runner, { safetyUnverified: true });
+                    decisions[runner.key] = result;
+                    nextState.runners[runner.key] = { attempts: [] };
+                    continue;
+                }
+                const evaluated = await evaluateRunner(config, runner, state, now);
+                const attempts = evaluated.attempts;
+                let result = evaluated.result;
+                if (result.action === "RESTART") {
+                    const operatorGate = await evaluateOperatorActivationGate({
+                        releaseRoot: runner.expectedCwd,
+                        sha: runner.expectedSha,
+                        runner: runner.key,
+                        activationPath: runner.operatorActivationPath,
+                    });
+                    result = applyOperatorActivationGateToRestart(result, operatorGate, runner, decision);
+                }
+                if (result.action === "RESTART") {
+                    if (attempts.length >= MAX_ATTEMPTS) {
+                        result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", runner);
+                    } else {
+                        const last = attempts[attempts.length - 1];
+                        const delay = BACKOFF_MS[Math.min(attempts.length, BACKOFF_MS.length - 1)];
+                        if (last && now < last.at + delay) {
+                            result = decision("HOLD_FAIL_CLOSED", `restart backoff active until ${last.at + delay}`, runner);
+                        } else {
+                            await systemctl(["restart", runner.unit]);
+                            restartCalls.push(runner.unit);
+                            const updated = [...attempts, { at: now, unit: runner.unit }].slice(-MAX_ATTEMPTS);
+                            nextState.runners[runner.key] = { attempts: updated };
+                        }
+                    }
+                }
+                if (!nextState.runners[runner.key]) nextState.runners[runner.key] = { attempts: evaluated.clearAttempts ? [] : attempts };
+                decisions[runner.key] = result;
+            } catch (error) {
+                const result = decision("HOLD_FAIL_CLOSED", safeReason(error?.message), runner, { safetyUnverified: true });
+                decisions[runner.key] = result;
+                nextState.runners[runner.key] = { attempts: [] };
+                errors.push(`${runner.key}: ${safeReason(error?.message)}`);
+            }
+        }
+        await atomicJson(config.statePath, nextState);
+        const hasHardError = errors.length > 0;
+        const audit = {
+            schema: "disdex-runner-watchdog/current-audit-v1",
+            observedAt: now,
+            releaseSha: config.expectedSha,
+            releaseRoot: config.releaseRoot,
+            v12Mode: config.v12Mode,
+            v12DisabledReason: config.v12DisabledReason || null,
+            exitCode: hasHardError ? 1 : 0,
+            restartCalls,
+            decisions,
+            dependencies: dependencyDecisions,
+            errors,
+            tradingEffects: { ...ZERO_EFFECTS },
+        };
+        await atomicJson(config.auditPath, audit);
+        return { exitCode: hasHardError ? 1 : 0, restartCalls, decisions };
+    } finally {
+        await releaseLock();
+    }
+}
+
+function selfTest() {
+    const sha = "1094ebfec3314b355f8ebe9caf17b19e5871628c";
+    const v12 = RUNNERS[0];
+    const pengu = RUNNERS[1];
+    const v52 = RUNNERS[2];
+    const q102 = RUNNERS[3];
+    const fet = RUNNERS[4];
+    const hype = RUNNERS[5];
+    const idle = RUNNERS[6];
+    if (!serviceAllowed(v12, v12.expectedUnit(sha), sha)) throw new Error("V12 allowlist self-test failed");
+    if (!serviceAllowed(pengu, pengu.expectedUnit(sha), sha)) throw new Error("PENGU release-pinned allowlist self-test failed");
+    if (serviceAllowed(pengu, "disdex-pengu-dual-ls-v2-v20.service", sha)) throw new Error("PENGU legacy unit fail-closed self-test failed");
+    if (!serviceAllowed(v52, v52.expectedUnit(sha), sha)) throw new Error("V52 release-pinned allowlist self-test failed");
+    if (serviceAllowed(v52, v52.expectedUnit("f59347fad11553b833e75f6f35a0c545464fdf5f"), sha)) throw new Error("V52 SHA mismatch fail-closed self-test failed");
+    if (serviceAllowed(q102, "disdex-quality102-causal-v1@f59347fad11553b833e75f6f35a0c545464fdf5.service", sha)) throw new Error("39/40 SHA fail-closed self-test failed");
+    if (!serviceAllowed(fet, fet.expectedUnit(sha), sha)) throw new Error("FET release-pinned allowlist self-test failed");
+    if (!serviceAllowed(hype, hype.expectedUnit(sha), sha)) throw new Error("HYPE release-pinned allowlist self-test failed");
+    if (!serviceAllowed(idle, idle.expectedUnit(sha), sha)) throw new Error("IDLE release-pinned allowlist self-test failed");
+    if (serviceAllowed(idle, "disdex-idle-priority-short.service", sha)) throw new Error("IDLE legacy unit fail-closed self-test failed");
+    const baseConfigEnv = {
+        DISDEX_WATCHDOG_HEALTH_ROOT: join(process.cwd(), "self-test-health"),
+        DISDEX_WATCHDOG_RELEASE_ROOT: join(process.cwd(), "self-test-releases", sha),
+        DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH: join(process.cwd(), "self-test-operator-activation", "current.json"),
+        DISDEX_WATCHDOG_EXPECTED_SHA: sha,
+        DISDEX_WATCHDOG_V12_SERVICE_UNIT: v12.expectedUnit(sha),
+        DISDEX_WATCHDOG_PENGU_SERVICE_UNIT: pengu.expectedUnit(sha),
+        DISDEX_WATCHDOG_V52_SERVICE_UNIT: v52.expectedUnit(sha),
+        DISDEX_WATCHDOG_Q102_SERVICE_UNIT: q102.expectedUnit(sha),
+        DISDEX_WATCHDOG_FET_SERVICE_UNIT: fet.expectedUnit(sha),
+        DISDEX_WATCHDOG_HYPE_SERVICE_UNIT: hype.expectedUnit(sha),
+        DISDEX_WATCHDOG_IDLE_SERVICE_UNIT: idle.expectedUnit(sha),
+    };
+    try {
+        buildConfig(baseConfigEnv);
+        throw new Error("approval gate self-test accepted a missing approval pin");
+    } catch (error) {
+        if (!String(error?.message || "").includes("approval pin")) throw error;
+    }
+    const approvedEnv = { ...baseConfigEnv, DISDEX_WATCHDOG_APPROVED_SHA: sha };
+    const approvedConfig = buildConfig(approvedEnv);
+    if (approvedConfig.approvedSha !== sha) throw new Error("approval gate self-test did not retain approved SHA");
+    const v4 = V4_V12_RUNNER;
+    if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
+    if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    for (const [legacyUnits, canaryUnits] of [
+        [[LEGACY_V12_RUNNER.expectedUnit(sha)], []],
+        [[], [`disdex-v12-v4-canary@${sha}.service`]],
+    ]) {
+        try {
+            assertNoCompetingV12Authority(legacyUnits, canaryUnits);
+            throw new Error("V4 single-authority self-test accepted a competing runner");
+        } catch (error) {
+            if (!String(error?.message || "").startsWith("V12_V4_COMPETING_AUTHORITY:")) throw error;
+        }
+    }
+    assertNoCompetingV12Authority([], []);
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_SINGLE_AUTHORITY_SELFTEST_PASS");
+    try {
+        buildConfig({
+            ...approvedEnv,
+            DISDEX_WATCHDOG_V12_MODE: "V4",
+            DISDEX_WATCHDOG_V12_SERVICE_UNIT: v4.expectedUnit(sha),
+        });
+        throw new Error("V4 operator path self-test accepted the shared path without a dedicated V4 path");
+    } catch (error) {
+        if (!String(error?.message || "").includes("V12_V4 dedicated operator activation path is required")) throw error;
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_OPERATOR_PATH_REQUIRED_SELFTEST_PASS");
+    const v4FullOperatorPath = join(process.cwd(), "self-test-operator-activation", "v12-v4-full.json");
+    const v4Config = buildConfig({
+        ...approvedEnv,
+        DISDEX_WATCHDOG_V12_MODE: "V4",
+        DISDEX_WATCHDOG_V12_SERVICE_UNIT: v4.expectedUnit(sha),
+        DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH: v4FullOperatorPath,
+    });
+    if (!v4Config.runnerConfig.V12_V4 || v4Config.runnerConfig.V12_X1_ALL) throw new Error("V4 mode did not replace legacy V12 config");
+    if (v4Config.runnerConfig.V12_V4.operatorActivationPath !== v4FullOperatorPath) {
+        throw new Error("V4 runner did not use its dedicated full-live operator artifact");
+    }
+    if (v4Config.runnerConfig.PENGU_V8.operatorActivationPath !== baseConfigEnv.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH) {
+        throw new Error("peer runner did not retain the shared operator artifact");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_PER_RUNNER_OPERATOR_PATH_SELFTEST_PASS");
+    const marginGuardSha = "b".repeat(40);
+    const marginGuardConfig = buildConfig({
+        ...approvedEnv,
+        DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA: marginGuardSha,
+    });
+    if (marginGuardConfig.marginGuardUnit !== `disdex-v12-v52-margin-guard@${marginGuardSha}.service`) {
+        throw new Error("Margin Guard did not retain its independent release pin");
+    }
+    if (marginGuardConfig.expectedSha !== sha) throw new Error("Margin Guard release pin changed the watchdog release pin");
+    const marginGuardDaemon = marginGuardConfig.safetyDaemons.find((daemon) => daemon.key === "MARGIN_GUARD");
+    if (!marginGuardDaemon || marginGuardDaemon.expectedCwd !== releaseRootForSha(marginGuardSha) || marginGuardDaemon.expectedCwd === marginGuardConfig.releaseRoot) {
+        throw new Error("mixed-SHA Margin Guard process identity did not bind to the peer release root");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_MARGIN_GUARD_INDEPENDENT_SHA_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_MIXED_SHA_SAFETY_DAEMON_CWD_SELFTEST_PASS");
+    const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
+    const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
+    if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_V12_V4_MODE_SELFTEST_PASS");
+    const mismatchedApprovalSha = "f".repeat(40);
+    try {
+        buildConfig({ ...baseConfigEnv, DISDEX_WATCHDOG_APPROVED_SHA: mismatchedApprovalSha });
+        throw new Error("approval gate self-test accepted a mismatched approval pin");
+    } catch (error) {
+        if (!String(error?.message || "").includes("not explicitly approved")) throw error;
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_APPROVAL_GATE_SELFTEST_PASS");
+    const expectedRiskUnit = `disdex-shared-crypto-risk@${sha}.service`;
+    const conflictingRiskUnit = `disdex-shared-crypto-risk@${"a".repeat(40)}.service`;
+    assertSharedCryptoRiskWriterSingleton([expectedRiskUnit], sha);
+    try {
+        assertSharedCryptoRiskWriterSingleton([expectedRiskUnit, conflictingRiskUnit], sha);
+        throw new Error("shared risk singleton self-test accepted duplicate units");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    try {
+        assertSharedCryptoRiskWriterSingleton([conflictingRiskUnit], sha);
+        throw new Error("shared risk singleton self-test accepted a mismatched release");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    const parsedRiskUnits = parseNonInactiveServiceUnits(`  ${expectedRiskUnit} loaded active running\n  ${conflictingRiskUnit} loaded activating auto-restart\n  disdex-shared-crypto-risk@${"b".repeat(40)}.service loaded inactive dead\n  disdex-shared-crypto-risk@${"c".repeat(40)}.service loaded failed failed\n  unrelated.service loaded active running`, "disdex-shared-crypto-risk");
+    if (parsedRiskUnits.length !== 2 || parsedRiskUnits[0] !== expectedRiskUnit || parsedRiskUnits[1] !== conflictingRiskUnit) throw new Error("shared risk unit parser self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_SHARED_RISK_SINGLETON_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_NONINACTIVE_RISK_SELFTEST_PASS");
+    const expectedQ102Unit = q102.expectedUnit(sha);
+    const conflictingQ102Unit = q102.expectedUnit("a".repeat(40));
+    assertReleasePinnedRunnerSingleton([], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+    assertReleasePinnedRunnerSingleton([expectedQ102Unit], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+    try {
+        assertReleasePinnedRunnerSingleton([expectedQ102Unit, conflictingQ102Unit], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+        throw new Error("Q102 lineage singleton self-test accepted a conflicting release");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    const expectedMarginUnit = `disdex-v12-v52-margin-guard@${sha}.service`;
+    assertReleasePinnedRunnerSingleton([expectedMarginUnit], expectedMarginUnit, "MARGIN_GUARD_LINEAGE", true);
+    try {
+        assertReleasePinnedRunnerSingleton([], expectedMarginUnit, "MARGIN_GUARD_LINEAGE", true);
+        throw new Error("margin lineage self-test accepted a missing current unit");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_RUNNER_LINEAGE_SINGLETON_SELFTEST_PASS");
+    const config = { releaseRoot: "/home/deploy/disdex-trading/releases/1094ebfec3314b355f8ebe9caf17b19e5871628c" };
+    const q102Pinned = { ...q102, expectedCwd: config.releaseRoot };
+    const command = `/usr/bin/node ${config.releaseRoot}/node_modules/tsx/dist/cli.mjs scripts/disdex-quality102-causal-v1-live-runner.ts --daemon`;
+    if (!commandMatches(config, q102Pinned, command)) throw new Error("tsx command self-test failed");
+    if (commandMatches(config, q102Pinned, "/usr/bin/node /tmp/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --daemon")) throw new Error("un-pinned command self-test failed");
+    const v52Pinned = { ...v52, expectedCwd: config.releaseRoot };
+    const v52VenvCommand = `${config.releaseRoot}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon`;
+    if (!commandMatches(config, v52Pinned, v52VenvCommand)) throw new Error("V52 release venv command self-test failed");
+    if (commandMatches(config, v52Pinned, "/tmp/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon")) throw new Error("V52 unpinned venv command self-test failed");
+    const snapshotOnlyHeartbeat = {
+        schema: "disdex-runner-heartbeat/v1",
+        runnerId: "V12_X1_ALL",
+        serviceUnit: v12.expectedUnit(sha),
+        runtimeSha: sha,
+        expectedSha: sha,
+        workingDirectory: config.releaseRoot,
+        mode: "LIVE",
+        liveEnabled: true,
+        safetyState: "HEALTHY",
+        heartbeatAt: Date.now(),
+        lastTickAt: Date.now(),
+    };
+    validateRunnerOwnedHeartbeat(snapshotOnlyHeartbeat, "V12_X1_ALL");
+    const blockedSnapshotHeartbeat = {
+        ...snapshotOnlyHeartbeat,
+        liveEnabled: false,
+        safetyState: "BLOCKED",
+        healthReason: "V12_X1_ALL service identity is not current",
+    };
+    validateRunnerOwnedHeartbeat(blockedSnapshotHeartbeat, "V12_X1_ALL");
+    if (safeReason(blockedSnapshotHeartbeat.healthReason || blockedSnapshotHeartbeat.reason || "") !== "V12_X1_ALL service identity is not current") {
+        throw new Error("snapshot healthReason contract self-test failed");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_HEARTBEAT_CONTRACT_SELFTEST_PASS");
+    const now = Date.now();
+    const freshHeartbeat = {
+        ...snapshotOnlyHeartbeat,
+        lastReconciliationAt: null,
+        lastDecision: null,
+        reason: "runner tick freshness self-test",
+        symbols: [],
+        caps: {},
+        restartAttempts: 0,
+        updatedAt: now,
+        heartbeatAt: now,
+        lastTickAt: now - v12.tickTimeoutMs - 1,
+    };
+    validateRunnerOwnedHeartbeat(freshHeartbeat, "V12_X1_ALL");
+    const freshness = heartbeatFreshness(freshHeartbeat, v12, now);
+    if (!freshness.heartbeatFresh || freshness.runnerTickFresh || freshness.fresh) {
+        throw new Error("runner tick freshness self-test failed");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_RUNNER_TICK_FRESHNESS_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_V52_RELEASE_PIN_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_IDLE_RELEASE_PIN_SELFTEST_PASS");
+    const restartRequested = decision("RESTART", "service is not active", v12);
+    const activationBlocked = applyOperatorActivationGateToRestart(restartRequested, { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_ABSENT" }, v12, decision);
+    if (activationBlocked.action !== "HOLD_FAIL_CLOSED" || activationBlocked.operatorActivationBlocked !== true || !activationBlocked.reason.includes("OPERATOR_LIVE_ACTIVATION_REQUIRED")) throw new Error("operator activation restart-block self-test failed");
+    const activationAllowed = applyOperatorActivationGateToRestart(restartRequested, { allowed: true, reason: "OPERATOR_LIVE_ACTIVATION_CONFIRMED" }, v12, decision);
+    if (activationAllowed.action !== "RESTART") throw new Error("operator activation ready self-test failed");
+    if (!heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("limited V4 canary heartbeat self-test failed");
+    if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "PENGU_V8")) throw new Error("limited V4 canary scope self-test failed");
+    if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: false, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("unattested canary heartbeat self-test failed");
+    const fatalService = {
+        active: false,
+        mainPid: 0,
+        result: "exit-code",
+        execMainCode: "exited",
+        execMainStatus: 2,
+    };
+    if (!isFatalFailClosedService(fatalService) || isFatalFailClosedService({ ...fatalService, execMainStatus: 1 })) {
+        throw new Error("fatal fail-closed service self-test failed");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_FATAL_FAIL_CLOSED_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_LIMITED_V4_CANARY_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
+    const source = readFileSync(new URL(import.meta.url), "utf8");
+    if (/(?:submitOrder|cancelOrder|closePosition|placeMarket|modifyPosition)\s*\(/.test(source)) throw new Error("forbidden operation self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_SELFTEST_PASS");
+}
+
+if (process.argv.includes("--self-test")) {
+    selfTest();
+} else {
+    const envFile = process.env.DISDEX_WATCHDOG_ENV_FILE || DEFAULT_ENV_FILE;
+    try {
+        const env = await loadEnv(envFile);
+        const config = buildConfig({ ...env, ...process.env });
+        const result = await run(config);
+        console.log(`DISDEX_CURRENT_WATCHDOG_RESULT exitCode=${result.exitCode} restarts=${result.restartCalls.length}`);
+        process.exitCode = result.exitCode;
+    } catch (error) {
+        console.error(`DISDEX_CURRENT_WATCHDOG_FAIL_CLOSED ${safeReason(error?.message)}`);
+        process.exitCode = 1;
+    }
+}

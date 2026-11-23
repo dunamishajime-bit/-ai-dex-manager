@@ -1,0 +1,205 @@
+import { chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+
+import type { IdleBaselineAdmission } from "./idle-priority-short-live";
+import { IDLE_BASELINE_ADMISSION_SCHEMA, normalizeIdleBaselineAdmission } from "./idle-priority-short-live";
+
+type JsonRecord = Record<string, unknown>;
+
+export type BaselineAdmissionEvidenceInput = {
+    runtimeSha: string;
+    decisionTs: number;
+    now?: number;
+    baselineOpenPositions: number;
+    baselinePendingExposure: number;
+    decisionPath: string;
+    v12Path: string;
+    q102Path: string;
+    penguPath: string;
+    fetPath: string;
+    v52Path: string;
+};
+
+function record(value: unknown, code: string): JsonRecord {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(code);
+    return value as JsonRecord;
+}
+
+async function readJson(path: string): Promise<JsonRecord> {
+    try {
+        return record(JSON.parse(await readFile(path, "utf8")), "BASELINE_ADMISSION_SOURCE_MALFORMED");
+    } catch (error) {
+        if (error instanceof SyntaxError) throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+        if (error instanceof Error && error.message.startsWith("BASELINE_ADMISSION_SOURCE_MALFORMED")) throw error;
+        throw new Error(`BASELINE_ADMISSION_SOURCE_INCOMPLETE:${path}`);
+    }
+}
+
+function finite(value: unknown) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : undefined;
+}
+
+function assertCurrentTimestamp(value: unknown, decisionTs: number) {
+    if (finite(value) !== decisionTs) throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+}
+
+function parsedTimeMs(value: unknown) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+        const parsed = Date.parse(value);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return undefined;
+}
+
+function acceptedByV12(snapshot: JsonRecord, decisionTs: number, now: number) {
+    if (snapshot.schema === "v12-v4-idle-baseline/v1") {
+        if (snapshot.strategyId !== "V12_V4" || snapshot.sourceComplete !== true) throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+        const referenceTs = finite(snapshot.decisionTs);
+        const observedAt = finite(snapshot.updatedAt);
+        const candidateCount = finite(snapshot.candidateCount);
+        if (referenceTs === undefined || observedAt === undefined || candidateCount === undefined || candidateCount < 0
+            || observedAt < decisionTs || observedAt > now + 60_000 || now - observedAt > 90_000) {
+            throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+        }
+        if (referenceTs === decisionTs) return candidateCount > 0;
+        // V4 is a completed-H2 strategy while Idle evaluates every completed H1.
+        // On the alternating H1 boundary V4 legitimately re-publishes the last H2
+        // decision. It is current liveness evidence, but never a carried acceptance.
+        if (referenceTs === decisionTs - 3_600_000) return false;
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
+    if (snapshot.schema !== "v12-decision-observation/v1" || snapshot.strategyId !== "V12_X1.00_ALL") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    const referenceTs = finite(snapshot.referenceTs);
+    if (referenceTs === decisionTs) return snapshot.reason === "SIGNAL_AVAILABLE";
+
+    // V12 is a 2H strategy while Idle is evaluated on completed H1 boundaries.
+    // On the alternating H1 boundary, V12 can legitimately have no newly
+    // completed 2H bar. The observation writer still refreshes observedAt and
+    // explicitly reports NO_COMPLETED_BAR_SIGNAL. Treat that as a current
+    // no-acceptance, but only for the immediately preceding H1 reference.
+    const observedAt = parsedTimeMs(snapshot.observedAt ?? snapshot.selectedAt);
+    if (
+        snapshot.reason === "NO_COMPLETED_BAR_SIGNAL"
+        && referenceTs === decisionTs - 3_600_000
+        && observedAt !== undefined
+        && observedAt >= decisionTs
+        && observedAt <= now + 60_000
+        && now - observedAt <= 90_000
+    ) return false;
+    throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+}
+
+function acceptedByQ102(snapshot: JsonRecord, decisionTs: number) {
+    if (snapshot.strategyId !== "QUALITY102_CAUSAL_V1" || snapshot.selectorMode !== "CAUSAL_V4") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    assertCurrentTimestamp(snapshot.referenceTs, decisionTs);
+    const items = Array.isArray(snapshot.items) ? snapshot.items : [];
+    return items.some((item) => {
+        const row = record(item, "BASELINE_ADMISSION_SOURCE_MALFORMED");
+        return row.selected === true && row.eligible === true && row.side !== "WAIT";
+    });
+}
+
+function acceptedByPengu(snapshot: JsonRecord, decisionTs: number) {
+    if (snapshot.strategyId !== "PENGU_DUAL_LS_V2_FINAL") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    if ((finite(snapshot.lastRunAt) ?? 0) < decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
+    if (snapshot.latestSignal == null) return false;
+    const signal = record(snapshot.latestSignal, "BASELINE_ADMISSION_SOURCE_MALFORMED");
+    if (signal.referenceTs === undefined || finite(signal.referenceTs) !== decisionTs) return false;
+    return Number(signal.targetGross) > 0 && Number(signal.side) !== 0;
+}
+
+function acceptedByFet(snapshot: JsonRecord, decisionTs: number) {
+    if (snapshot.schema !== "fet-brk48-residual-state/v1") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    if (finite(snapshot.lastEvaluationDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
+    if (snapshot.lastEvaluationCandidate === true) return true;
+    if (snapshot.lastEvaluationCandidate !== false) throw new Error("BASELINE_ADMISSION_SOURCE_INCOMPLETE");
+    return false;
+}
+
+function acceptedByV52(snapshot: JsonRecord, decisionTs: number) {
+    if (snapshot.strategyId !== "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    // A limited-overlay deployment intentionally keeps V52 disabled.  That
+    // explicit, flat stop is a current non-acceptance, not a missing tick.
+    // Keep the shape strict so an arbitrary stale/failed V52 state cannot
+    // silently authorize an Idle admission.
+    const positions = snapshot.positions;
+    const flat = (Array.isArray(positions) && positions.length === 0)
+        || (positions !== null && typeof positions === "object" && !Array.isArray(positions) && Object.keys(positions as object).length === 0);
+    if (snapshot.mode === "DISABLED"
+        && snapshot.status === "intentional-stop"
+        && snapshot.disabledReason === "LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED"
+        && flat
+        && snapshot.pending === null
+        && snapshot.manualReview === null
+        && snapshot.ordersAllowed === false
+        && snapshot.newOrdersAllowed === false
+        && snapshot.orderEnabled === false) {
+        return false;
+    }
+    if (finite(snapshot.idleAdmissionDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
+    const diagnostics = snapshot.v52GateDiagnostics;
+    if (diagnostics && typeof diagnostics === "object") {
+        const lastDecision = (diagnostics as JsonRecord).lastDecision;
+        if (lastDecision && typeof lastDecision === "object") {
+            const row = record(lastDecision, "BASELINE_ADMISSION_SOURCE_MALFORMED");
+            const timestamp = row.decisionTs ?? row.timestamp ?? row.ts;
+            if (timestamp !== undefined && finite(timestamp) === decisionTs) return row.accepted === true;
+        }
+    }
+    return false;
+}
+
+async function writeAtomic(path: string, value: IdleBaselineAdmission) {
+    await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+    try {
+        await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await rename(temporary, path);
+        await chmod(path, 0o600);
+    } catch (error) {
+        await unlink(temporary).catch(() => undefined);
+        throw error;
+    }
+}
+
+export async function buildBaselineAdmissionEvidence(input: BaselineAdmissionEvidenceInput): Promise<IdleBaselineAdmission> {
+    const now = input.now ?? Date.now();
+    const [v12, q102, pengu, fet, v52] = await Promise.all([
+        readJson(input.v12Path),
+        readJson(input.q102Path),
+        readJson(input.penguPath),
+        readJson(input.fetPath),
+        readJson(input.v52Path),
+    ]);
+    const baselineAcceptedThisTimestamp = [
+        acceptedByV12(v12, input.decisionTs, now),
+        acceptedByQ102(q102, input.decisionTs),
+        acceptedByPengu(pengu, input.decisionTs),
+        acceptedByFet(fet, input.decisionTs),
+        acceptedByV52(v52, input.decisionTs),
+    ].some(Boolean) ? 1 : 0;
+    if (!Number.isFinite(input.baselineOpenPositions) || input.baselineOpenPositions < 0 || !Number.isFinite(input.baselinePendingExposure) || input.baselinePendingExposure < 0) {
+        throw new Error("BASELINE_ADMISSION_NUMERIC_INVALID");
+    }
+    const evidence: IdleBaselineAdmission = {
+        schema: IDLE_BASELINE_ADMISSION_SCHEMA,
+        runtimeSha: input.runtimeSha.toLowerCase(),
+        decisionTs: input.decisionTs,
+        updatedAt: now,
+        sourceComplete: true,
+        baselineOpenPositions: input.baselineOpenPositions,
+        baselinePendingExposure: input.baselinePendingExposure,
+        baselineAcceptedThisTimestamp,
+    };
+    const normalized = normalizeIdleBaselineAdmission(evidence, input.runtimeSha, input.decisionTs, now, 90_000);
+    await writeAtomic(input.decisionPath, normalized);
+    return normalized;
+}

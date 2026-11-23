@@ -1,0 +1,81 @@
+name: STABLE4 DD30 integrated master source and STOP protection CI (NO LIVE)
+
+on:
+  push:
+    branches:
+      - prep/stable4-dd30-integrated-source-20261123
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'config/**'
+      - 'scripts/**'
+      - 'ops/**'
+      - 'tests/**'
+      - 'docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json'
+      - '.github/workflows/disdex-stable4-dd30-integrated-prelive-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  integrated-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install reviewed project dependencies (no lifecycle scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Exact source & Owner approval boundary gate
+        run: |
+          set -euo pipefail
+          python3 scripts/ops/deploy/stable4_dd30_integrated_source_gate.py
+          python3 -m unittest -v tests/test_stable4_dd30_integrated_source_gate.py
+          python3 -m unittest -v tests/test_v4_dynamic_resident_stop_and_margin_script.py
+          python3 -m py_compile scripts/disdex_v12_v52_margin_guard_runtime.py \
+            scripts/disdex_v96_v52_margin_guard_runtime.py \
+            scripts/ops/root/disdex-v4-resident-stop-crosscheck.py
+          echo 'LIVE_ORDER_PERMIT=FALSE'
+
+      - name: Type-check combined master UI and DD30 Runner source
+        run: npx tsc --noEmit --pretty false
+
+      - name: V4 DD30 and resident STOP regression suite
+        run: |
+          node --import tsx --test --test-concurrency=1 \
+            tests/v12-v4-completed-exit-stop.test.ts \
+            tests/v12-v4-recoverable-safety.test.ts \
+            tests/v12-v4-monitor-only.test.ts \
+            tests/v12-v4-shared-reservations.test.ts \
+            tests/v12-v4-stop-retirement.test.ts \
+            tests/v12-v4-stop-fill-cycle.test.ts \
+            tests/v12-v4-resident-stop-owners.test.ts \
+            tests/v12-v4-venue-exit.test.ts \
+            tests/v12-v4-runner-engine.test.ts \
+            tests/v12-v4-recoverable-exit-feed-gap.test.ts \
+            tests/v12-v4-entry-safety.test.ts \
+            tests/v12-v4-execution-foundation.test.ts \
+            tests/v12-v4-monitor-coherence.test.ts \
+            tests/q102-risk-block-freshness.test.ts
+
+      - name: Protected exits V52/PENGU/Q102, no order submission
+        run: |
+          python3 scripts/disdex-v52-existing-exit-latch-selftest.py
+          npx tsx scripts/pengu-existing-exit-foreign-order-gate-selftest.ts
+          npx tsx scripts/q102-existing-exit-history-failclosed-selftest.ts
+
+      - name: Master Owner-goal approval remains independently strict
+        run: |
+          node --import tsx --test tests/owner-goal-approval.test.ts
+          node --test tests/deploy-approval-direct-writer.test.mjs
+          echo 'DD30_FORMAL_APPROVAL=NOT_GRANTED'
+          echo 'VPS_DEPLOYMENT=NOT_PERFORMED'

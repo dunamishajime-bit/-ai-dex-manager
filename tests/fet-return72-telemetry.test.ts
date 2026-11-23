@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {fetCompletedReturn72h} from '../lib/fet-brk48-signal';
+test('72h observation excludes current/future close and uses exact completed close endpoints',()=>{const H=3600000,entry=100*H;const bar=(t:number,c:number)=>({openTs:t,closeTs:t+H-1,open:c,close:c,high:c,low:c,volume:1});const rows=[bar(entry-73*H,100),bar(entry-H,102),bar(entry,99999),bar(entry+H,1)];assert.ok(Math.abs(fetCompletedReturn72h(rows,entry)!-.02)<1e-12);assert.equal(fetCompletedReturn72h(rows.slice(1),entry),undefined);});

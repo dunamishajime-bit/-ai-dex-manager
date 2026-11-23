@@ -1,6 +1,11 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
 import {
     AsterApiError,
     AsterV3Client,
+    isAsterDepositRequirementError,
+    isAsterIpBanError,
     type AsterBookTicker,
     type AsterExchangeInfo,
     type AsterExchangeSymbol,
@@ -9,6 +14,13 @@ import {
     type AsterPositionRiskRow,
     type AsterPositionSide,
 } from "@/lib/aster-v3-client";
+import {
+    buildTradeFillNotificationEvent,
+    enqueueTradeFillNotification,
+    isConfirmedTradeFill,
+} from "@/lib/trade-fill-notification";
+
+const execFileAsync = promisify(execFile);
 
 export type DirectTradeStatus = "FILLED" | "PARTIALLY_FILLED" | "NEW" | "REJECTED" | "CANCELED" | "EXPIRED" | "UNKNOWN";
 
@@ -23,6 +35,9 @@ export interface DirectTradeCommand {
     expectedPrice: number;
     maxSlippageBps: number;
     reason: string;
+    requireVenueMargin5xCross?: boolean;
+    /** Optional pre-order gross cap. Never rounds a lot upwards. */
+    maxEntryNotionalUsd?: number;
 }
 
 export interface DirectTradeResult {
@@ -37,6 +52,9 @@ export interface DirectTradeResult {
     averagePrice: number;
     quoteQuantity: number;
     orderId?: number;
+    reduceOnly?: boolean;
+    reason?: string;
+    updatedAt?: number;
     executionUnknown: boolean;
     reconciled: boolean;
     raw?: AsterOrderResponse;
@@ -64,10 +82,13 @@ export interface DirectPosition {
 }
 
 export interface DirectOpenOrder {
+    orderId?: number;
     symbol: string;
     clientOrderId: string;
     side?: AsterOrderSide;
     status?: string;
+    type?: string;
+    stopPrice?: number;
     reduceOnly?: boolean;
     quantity: number;
     executedQuantity: number;
@@ -100,7 +121,7 @@ export interface DirectTradeExecutor {
     getPositions(): Promise<DirectPosition[]>;
     getOpenOrders(): Promise<DirectOpenOrder[]>;
     getMarketQuote(symbol: string): Promise<DirectMarketQuote>;
-    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity>;
+    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options?: { allowBelowMinNotional?: boolean }): Promise<NormalizedOrderQuantity>;
     executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult>;
     reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult>;
 }
@@ -115,6 +136,124 @@ export interface AsterDirectTradeExecutorOptions {
 function safeNumber(value: unknown, fallback = 0) {
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
+}
+
+function requiredVenueNumber(value: unknown, field: string) {
+    if (typeof value === "number") {
+        if (Number.isFinite(value)) return value;
+    } else if (typeof value === "string" && value.trim()) {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    throw new Error(`ASTER_${field}_INVALID`);
+}
+
+function optionalVenueNumber(value: unknown, field: string) {
+    if (value === undefined) return 0;
+    return requiredVenueNumber(value, field);
+}
+
+function requiredVenueSymbol(value: unknown, quoteAsset: string) {
+    if (typeof value !== "string") throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+    const symbol = value.trim().toUpperCase();
+    if (!symbol || !new RegExp(`^[A-Z0-9]+${quoteAsset}$`).test(symbol)) throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+    return symbol;
+}
+
+function scopedVenueRows<T extends { symbol?: unknown }>(rows: unknown, symbol: string, field: string): T[] {
+    if (!Array.isArray(rows)) throw new Error(`ASTER_${field}_ROWS_INVALID`);
+    return rows.filter((row) => {
+        if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error(`ASTER_${field}_ROW_INVALID`);
+        if (typeof row.symbol !== "string") throw new Error(`ASTER_${field}_SYMBOL_INVALID`);
+        return row.symbol.trim().toUpperCase() === symbol;
+    }) as T[];
+}
+
+function retainManagedPositionRows(rows: AsterPositionRiskRow[], quoteAsset: string): AsterPositionRiskRow[] {
+    const managedSymbolPattern = new RegExp(`^[A-Z0-9]+${quoteAsset}$`);
+    return rows.filter((row) => {
+        if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_POSITION_ROW_INVALID");
+        if (typeof row.symbol !== "string") throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+        const symbol = row.symbol.trim().toUpperCase();
+        if (!symbol) throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+        const quantity = requiredVenueNumber(row.positionAmt, "POSITION_AMOUNT");
+        if (managedSymbolPattern.test(symbol)) return true;
+        if (quantity === 0) return false;
+        throw new Error(`ASTER_POSITION_UNKNOWN_NONZERO_SYMBOL:${symbol}`);
+    });
+}
+
+function dedupeDirectPositions(rows: DirectPosition[]) {
+    const seen = new Set<string>();
+    return rows.filter((row) => {
+        const key = [row.symbol, row.positionSide, row.quantity, row.entryPrice, row.markPrice].join("|");
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function dedupeDirectOpenOrders(rows: DirectOpenOrder[]) {
+    const seen = new Set<string>();
+    return rows.filter((row) => {
+        const key = row.orderId !== undefined
+            ? `id|${row.symbol}|${row.orderId}`
+            : `client|${row.symbol}|${row.clientOrderId}|${row.status}|${row.type}|${row.quantity}|${row.executedQuantity}|${row.stopPrice}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+const KNOWN_DIRECT_ORDER_STATUSES = new Set([
+    "NEW",
+    "PARTIALLY_FILLED",
+    "PENDING_NEW",
+    "CANCELED",
+    "FILLED",
+    "EXPIRED",
+    "REJECTED",
+]);
+
+function boolEnvironment(name: string, fallback = false) {
+    const value = process.env[name];
+    if (value === undefined) return fallback;
+    return /^(1|true|yes|on)$/i.test(value.trim());
+}
+
+function venueMarginType(row: AsterPositionRiskRow): "cross" | "isolated" | "unknown" {
+    const rawMarginType = String(row.marginType || "").trim().toLowerCase();
+    if (rawMarginType === "cross" || rawMarginType === "crossed") return "cross";
+    if (rawMarginType === "isolated" || rawMarginType === "isolate") return "isolated";
+    if (row.isolated === false) return "cross";
+    if (row.isolated === true) return "isolated";
+    return "unknown";
+}
+
+async function runFreshMarginGuardBeforeExposureOrder(symbol: string) {
+    if (!boolEnvironment("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", false)) return;
+    const python = process.env.DISDEX_PYTHON_BIN || "python3";
+    const script = process.env.DISDEX_V96_V52_MARGIN_GUARD_SCRIPT
+        || "scripts/disdex_v96_v52_margin_guard.py";
+    try {
+        const result = await execFileAsync(
+            python,
+            [script, "--mode", "live", "--preorder-check", "--symbol", symbol],
+            {
+                cwd: process.cwd(),
+                env: process.env,
+                timeout: 30_000,
+                maxBuffer: 1024 * 1024,
+            },
+        );
+        const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+        if (!/"stage":"HEALTHY"/.test(output) && !/"stage":\s*"HEALTHY"/.test(output)) {
+            throw new Error("Margin Guard did not return a HEALTHY order-time result.");
+        }
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Fresh V96/V52 pre-order Margin Guard blocked exposure increase: ${message}`);
+    }
 }
 
 function asArray<T>(value: T | T[]): T[] {
@@ -195,58 +334,204 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         return row;
     }
 
+    async prepareVenueMargin5xCross(symbol: string): Promise<void> {
+        const normalized = symbol.toUpperCase();
+        const rows = await this.client.getPositions(normalized);
+        const matchingRows = rows.filter((candidate) => candidate.symbol.toUpperCase() === normalized);
+        const row = matchingRows[0];
+        if (!row) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_ROW_MISSING`);
+        for (const candidate of matchingRows) {
+            const positionAmount = Number(candidate.positionAmt);
+            if (!Number.isFinite(positionAmount)) {
+                throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_AMOUNT_UNKNOWN`);
+            }
+            if (Math.abs(positionAmount) > 1e-12) {
+                throw new Error(`ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:${normalized}:NON_ZERO_POSITION`);
+            }
+        }
+        const openOrders = await this.client.getOpenOrders(normalized);
+        if (openOrders.length > 0) {
+            throw new Error(`ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:${normalized}:OPEN_ORDERS_PRESENT`);
+        }
+        const leverage = Number(row.leverage);
+        const marginType = venueMarginType(row);
+        if (marginType !== "cross") await this.client.setMarginType(normalized, "CROSSED");
+        if (leverage !== 5) await this.client.setLeverage(normalized, 5);
+
+        const readBackRows = await this.client.getPositions(normalized);
+        const readBack = readBackRows.find((candidate) => candidate.symbol.toUpperCase() === normalized);
+        if (!readBack) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_READBACK_MISSING`);
+        const readBackLeverage = Number(readBack.leverage);
+        const readBackMarginType = venueMarginType(readBack);
+        if (readBackLeverage !== 5 || readBackMarginType !== "cross") {
+            throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:expected=5x-cross:actual=${Number.isFinite(readBackLeverage) ? `${readBackLeverage}x` : "unknown"}-${readBackMarginType}`);
+        }
+    }
+
     async getAccountSnapshot(): Promise<DirectAccountSnapshot> {
         const rows = await this.client.getBalances();
         const row = rows.find((item) => item.asset?.toUpperCase() === this.quoteAsset);
         if (!row) throw new Error(`Aster ${this.quoteAsset} balance row was not returned.`);
+        // Aster's balance updateTime is the last balance mutation time, not
+        // the time at which this snapshot was observed. Use the venue's
+        // server clock after the balance read as the freshness boundary so a
+        // quiet account is not treated as stale while still failing closed if
+        // the venue cannot provide a current clock.
+        const venueTime = safeNumber((await this.client.getServerTime()).serverTime, 0);
+        const observedAt = Date.now();
+        if (venueTime <= 0) throw new Error("Aster venue server time was not returned.");
+        // A small clock lead is normal and must not turn a just-received
+        // snapshot into a future-dated value for downstream fail-closed
+        // checks.  A material skew still blocks the snapshot.
+        if (Math.abs(venueTime - observedAt) > 30_000) {
+            throw new Error(`Aster venue clock skew exceeds 30000ms: ${venueTime - observedAt}`);
+        }
         return {
             availableBalance: safeNumber(row.availableBalance),
             walletBalance: safeNumber(row.balance ?? row.crossWalletBalance),
             asset: this.quoteAsset,
-            updatedAt: safeNumber(row.updateTime, Date.now()),
+            updatedAt: observedAt,
         };
     }
 
-    async getPositions(): Promise<DirectPosition[]> {
-        const rows = await this.client.getPositions();
+    async getPositions(symbol?: string): Promise<DirectPosition[]> {
+        const normalizedSymbol = symbol?.trim().toUpperCase();
+        const rows = await this.client.getPositions(normalizedSymbol);
+        if (!Array.isArray(rows)) throw new Error("ASTER_POSITION_ROWS_INVALID");
+        const scopedRows = normalizedSymbol ? scopedVenueRows<AsterPositionRiskRow>(rows, normalizedSymbol, "POSITION") : rows;
+        const managedRows = normalizedSymbol ? scopedRows : retainManagedPositionRows(scopedRows, this.quoteAsset);
+        return this.normalizePositionRows(managedRows);
+    }
+
+    private normalizePositionRows(rows: AsterPositionRiskRow[]): DirectPosition[] {
+        // Aster's positionRisk updateTime is the last position mutation time,
+        // not the time at which this authenticated snapshot was observed.
+        // An unchanged live position must remain fresh when the venue returns
+        // it successfully; using updateTime would eventually block every
+        // runner that shares an account with a held position.
+        const observedAt = Date.now();
         return rows
             .map((row: AsterPositionRiskRow): DirectPosition | null => {
-                const rawQuantity = safeNumber(row.positionAmt);
-                if (Math.abs(rawQuantity) <= 1e-12) return null;
-                const markPrice = safeNumber(row.markPrice);
-                const entryPrice = safeNumber(row.entryPrice);
+                if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_POSITION_ROW_INVALID");
+                const symbol = requiredVenueSymbol(row.symbol, this.quoteAsset);
+                const rawQuantity = requiredVenueNumber(row.positionAmt, "POSITION_AMOUNT");
+                const markPrice = requiredVenueNumber(row.markPrice, "POSITION_MARK_PRICE");
+                const entryPrice = requiredVenueNumber(row.entryPrice, "POSITION_ENTRY_PRICE");
+                if (Math.abs(rawQuantity) > 1e-12 && (!(markPrice > 0) || !(entryPrice > 0))) {
+                    throw new Error("ASTER_POSITION_PRICE_INVALID");
+                }
                 const quantity = rawQuantity;
                 const notionalUsd = Math.abs(quantity) * markPrice;
-                const unrealizedPnl = safeNumber(row.unRealizedProfit ?? row.unrealizedProfit);
+                const unrealizedPnl = row.unRealizedProfit !== undefined || row.unrealizedProfit !== undefined
+                    ? requiredVenueNumber(row.unRealizedProfit ?? row.unrealizedProfit, "POSITION_UNREALIZED_PNL")
+                    : 0;
                 const initialValue = Math.abs(quantity) * entryPrice;
                 const pnlPct = initialValue > 0 ? (unrealizedPnl / initialValue) * 100 : 0;
+                const positionSide = row.positionSide || "BOTH";
+                if (positionSide !== "BOTH" && positionSide !== "LONG" && positionSide !== "SHORT") throw new Error("ASTER_POSITION_SIDE_INVALID");
+                const leverage = row.leverage === undefined ? 1 : requiredVenueNumber(row.leverage, "POSITION_LEVERAGE");
+                if (!(leverage > 0)) throw new Error("ASTER_POSITION_LEVERAGE_INVALID");
                 return {
-                    symbol: row.symbol.toUpperCase(),
+                    symbol,
                     quantity,
                     entryPrice,
                     markPrice,
                     unrealizedPnl,
                     pnlPct,
                     notionalUsd,
-                    positionSide: row.positionSide || "BOTH",
-                    leverage: safeNumber(row.leverage, 1),
-                    updatedAt: safeNumber(row.updateTime, Date.now()),
+                    positionSide,
+                    leverage,
+                    updatedAt: observedAt,
                 };
             })
             .filter((position): position is DirectPosition => position !== null);
     }
 
-    async getOpenOrders(): Promise<DirectOpenOrder[]> {
+    async getHypePortfolioPositions(): Promise<DirectPosition[]> {
+        // Ordinary HYPE ownership/risk reconciliation needs the full managed
+        // USDT crypto portfolio (for example AAVE/NEAR), while stale-flat
+        // recovery deliberately uses getHypeZecPositions() below. Aster also
+        // returns unrelated stock/USDC rows here; only a finite, exact-zero
+        // quantity proves those rows are irrelevant to this portfolio read.
+        const rows = await this.client.getPositions();
+        if (!Array.isArray(rows)) throw new Error("ASTER_POSITION_ROWS_INVALID");
+        const retainedRows = rows.filter((row) => {
+            if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_POSITION_ROW_INVALID");
+            if (typeof row.symbol !== "string") throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+            const quantity = requiredVenueNumber(row.positionAmt, "POSITION_AMOUNT");
+            const symbol = row.symbol.trim().toUpperCase();
+            if (!symbol) throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+            if (/^[A-Z0-9]+USDT$/.test(symbol)) return true;
+            if (quantity === 0) return false;
+            throw new Error(`ASTER_HYPE_PORTFOLIO_UNKNOWN_NONZERO_POSITION:${symbol}`);
+        });
+        return this.normalizePositionRows(retainedRows as AsterPositionRiskRow[]);
+    }
+
+    async getHypeZecPositions(): Promise<DirectPosition[]> {
+        const rows = await Promise.all(["HYPEUSDT", "ZECUSDT"].map((symbol) => this.getPositions(symbol)));
+        return dedupeDirectPositions(rows.flat());
+    }
+
+    async getOpenOrders(symbol?: string): Promise<DirectOpenOrder[]> {
+        const normalizedSymbol = symbol?.trim().toUpperCase();
+        const rows = await this.client.getOpenOrders(normalizedSymbol);
+        if (!Array.isArray(rows)) throw new Error("ASTER_OPEN_ORDER_ROWS_INVALID");
+        const scopedRows = normalizedSymbol ? scopedVenueRows<AsterOrderResponse>(rows, normalizedSymbol, "OPEN_ORDER") : rows;
+        return this.normalizeOpenOrderRows(scopedRows);
+    }
+
+    private normalizeOpenOrderRows(rows: AsterOrderResponse[]): DirectOpenOrder[] {
+        return rows.map((row) => {
+            if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_OPEN_ORDER_ROW_INVALID");
+            const symbol = requiredVenueSymbol(row.symbol, this.quoteAsset);
+            if (typeof row.status !== "string" || !KNOWN_DIRECT_ORDER_STATUSES.has(row.status.trim().toUpperCase())) {
+                throw new Error("ASTER_OPEN_ORDER_STATUS_INVALID");
+            }
+            const quantity = requiredVenueNumber(row.origQty, "OPEN_ORDER_ORIG_QTY");
+            const executedQuantity = requiredVenueNumber(row.executedQty, "OPEN_ORDER_EXECUTED_QTY");
+            if (quantity < 0 || executedQuantity < 0 || executedQuantity > quantity + 1e-12) throw new Error("ASTER_OPEN_ORDER_QUANTITY_INVALID");
+            const stopPrice = optionalVenueNumber(row.stopPrice, "OPEN_ORDER_STOP_PRICE");
+            const type = typeof row.type === "string" ? row.type.trim().toUpperCase() : row.type;
+            if (["STOP", "STOP_MARKET", "TAKE_PROFIT", "TAKE_PROFIT_MARKET"].includes(String(type)) && !(stopPrice > 0)) {
+                throw new Error("ASTER_OPEN_ORDER_STOP_PRICE_INVALID");
+            }
+            return {
+                symbol,
+                orderId: row.orderId,
+                clientOrderId: String(row.clientOrderId || ""),
+                side: row.side,
+                status: row.status.trim().toUpperCase(),
+                type,
+                stopPrice,
+                reduceOnly: row.reduceOnly,
+                quantity,
+                executedQuantity,
+            };
+        });
+    }
+
+    async getHypePortfolioOpenOrders(): Promise<DirectOpenOrder[]> {
+        // Unlike a position row, an open-order row is not flat evidence. Any
+        // foreign active row therefore fails closed instead of being dropped.
         const rows = await this.client.getOpenOrders();
-        return rows.map((row) => ({
-            symbol: row.symbol.toUpperCase(),
-            clientOrderId: String(row.clientOrderId || ""),
-            side: row.side,
-            status: row.status,
-            reduceOnly: row.reduceOnly,
-            quantity: safeNumber(row.origQty),
-            executedQuantity: safeNumber(row.executedQty),
-        }));
+        if (!Array.isArray(rows)) throw new Error("ASTER_OPEN_ORDER_ROWS_INVALID");
+        const retainedRows = rows.filter((row) => {
+            if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_OPEN_ORDER_ROW_INVALID");
+            if (typeof row.symbol !== "string") throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+            const symbol = row.symbol.trim().toUpperCase();
+            if (!symbol || !/^[A-Z0-9]+$/.test(symbol)) throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+            if (!symbol.endsWith(this.quoteAsset)) {
+                throw new Error(`ASTER_HYPE_PORTFOLIO_UNKNOWN_OPEN_ORDER:${symbol}`);
+            }
+            return true;
+        });
+        return this.normalizeOpenOrderRows(retainedRows as AsterOrderResponse[]);
+    }
+
+    async getHypeZecOpenOrders(): Promise<DirectOpenOrder[]> {
+        const rows = await Promise.all(["HYPEUSDT", "ZECUSDT"].map((symbol) => this.getOpenOrders(symbol)));
+        return dedupeDirectOpenOrders(rows.flat());
     }
 
     async getMarketQuote(symbol: string): Promise<DirectMarketQuote> {
@@ -268,11 +553,12 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             askQuantity: safeNumber(row.askQty),
             midPrice,
             spreadBps: midPrice > 0 ? ((askPrice - bidPrice) / midPrice) * 10_000 : Number.POSITIVE_INFINITY,
-            updatedAt: safeNumber(row.time, Date.now()),
+            // A local clock is not a market-data timestamp.
+            updatedAt: safeNumber(row.time, 0),
         };
     }
 
-    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity> {
+    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options: { allowBelowMinNotional?: boolean } = {}): Promise<NormalizedOrderQuantity> {
         const row = await this.getSymbolInfo(symbol);
         const marketLot = row.filters?.find((filter) => filter.filterType === "MARKET_LOT_SIZE")
             ?? row.filters?.find((filter) => filter.filterType === "LOT_SIZE");
@@ -287,7 +573,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         if (quantity < minQuantity || quantity <= 0) {
             throw new Error(`Quantity ${quantity} is below Aster minQty ${minQuantity} for ${symbol}.`);
         }
-        if (minNotional > 0 && notional + 1e-9 < minNotional) {
+        if (!options.allowBelowMinNotional && minNotional > 0 && notional + 1e-9 < minNotional) {
             throw new Error(`Notional ${notional.toFixed(4)} is below Aster minimum ${minNotional} for ${symbol}.`);
         }
         const precision = Math.min(12, Math.max(decimalPlaces(stepSize), row.quantityPrecision ?? 0));
@@ -313,6 +599,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         executionUnknown?: boolean;
         reconciled?: boolean;
         error?: string;
+        reduceOnly?: boolean;
+        reason?: string;
     }): DirectTradeResult {
         const raw = input.raw;
         return {
@@ -327,11 +615,43 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             averagePrice: safeNumber(raw?.avgPrice),
             quoteQuantity: safeNumber(raw?.cumQuote),
             orderId: raw?.orderId,
+            reduceOnly: input.reduceOnly ?? raw?.reduceOnly,
+            reason: input.reason,
+            updatedAt: safeNumber(raw?.updateTime) || undefined,
             executionUnknown: input.executionUnknown === true,
             reconciled: input.reconciled === true,
             raw,
             error: input.error,
         };
+    }
+
+    private async enqueueConfirmedFill(result: DirectTradeResult, context: { reason?: string; reduceOnly?: boolean } = {}) {
+        if (!isConfirmedTradeFill(result)) return;
+        try {
+            const enqueueResult = await enqueueTradeFillNotification(
+                buildTradeFillNotificationEvent(result, {
+                    env: process.env,
+                    reason: context.reason || result.reason || "Aster実約定",
+                    reduceOnly: context.reduceOnly ?? result.reduceOnly,
+                }),
+                process.env,
+            );
+            if (!enqueueResult.queued) {
+                // Do not throw after a real venue fill. Persistent telemetry
+                // exposes missing LIVE notification flags without leaking IDs.
+                console.warn("[TradeFillNotification] confirmed fill not enqueued", {
+                    reason: enqueueResult.reason,
+                    symbol: result.symbol,
+                    strategyId: process.env.DISDEX_TRADE_FILL_STRATEGY_ID || "UNCONFIGURED",
+                    isReduceOnly: context.reduceOnly ?? result.reduceOnly ?? false,
+                });
+            }
+        } catch (error) {
+            // Notification delivery is deliberately outside the order/state
+            // transaction.  A mail or local-spool failure must never turn a
+            // confirmed venue fill into an execution failure.
+            console.warn("[TradeFillNotification] enqueue failed", error instanceof Error ? error.message : String(error));
+        }
     }
 
     async reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult> {
@@ -342,7 +662,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             if (attempt > 0) await sleep(this.reconciliationDelayMs * attempt);
             try {
                 const raw = await this.client.getOrder(normalizedSymbol, normalizedClientOrderId);
-                return this.normalizeResult({
+                const result = this.normalizeResult({
                     requestId: normalizedClientOrderId,
                     clientOrderId: normalizedClientOrderId,
                     requestedQuantity: safeNumber(raw.origQty),
@@ -351,10 +671,19 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     raw,
                     executionUnknown: false,
                     reconciled: true,
+                    reduceOnly: raw.reduceOnly,
+                    reason: "Aster注文の約定を再照合",
                 });
+                await this.enqueueConfirmedFill(result, { reason: "Aster注文の約定を再照合", reduceOnly: raw.reduceOnly });
+                return result;
             } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
-                if (error instanceof AsterApiError && (error.status === 429 || error.status === 418)) {
+                if (isAsterDepositRequirementError(error)) {
+                    lastError = "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED";
+                    break;
+                }
+                if (isAsterIpBanError(error)) break;
+                if (error instanceof AsterApiError && error.status === 429) {
                     await sleep(error.retryAfterMs ?? this.reconciliationDelayMs * (attempt + 1));
                 }
             }
@@ -379,6 +708,10 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
     async executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult> {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
+        if (command.reduceOnly !== true) {
+            if (command.requireVenueMargin5xCross === true) await this.prepareVenueMargin5xCross(symbol);
+            await runFreshMarginGuardBeforeExposureOrder(symbol);
+        }
         const quote = await this.getMarketQuote(symbol);
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;
         const adverseSlippageBps = command.expectedPrice > 0
@@ -391,7 +724,14 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 `Slippage guard blocked ${symbol}: ${adverseSlippageBps.toFixed(2)}bps > ${command.maxSlippageBps.toFixed(2)}bps.`,
             );
         }
-        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice);
+        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
+        if (command.maxEntryNotionalUsd !== undefined && command.reduceOnly !== true) {
+            if (!Number.isFinite(command.maxEntryNotionalUsd) || command.maxEntryNotionalUsd <= 0 ||
+                !Number.isFinite(normalized.notional) ||
+                normalized.notional > command.maxEntryNotionalUsd * (1 + 1e-9)) {
+                throw new Error("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:" + symbol);
+            }
+        }
         try {
             const raw = await this.client.placeMarketOrder({
                 symbol,
@@ -402,14 +742,18 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 newClientOrderId: clientOrderId,
                 newOrderRespType: "RESULT",
             });
-            return this.normalizeResult({
+            const result = this.normalizeResult({
                 requestId: command.requestId,
                 clientOrderId,
                 requestedQuantity: command.quantity,
                 submittedQuantity: normalized.quantity,
                 side: command.side,
                 raw,
+                reduceOnly: command.reduceOnly,
+                reason: command.reason,
             });
+            await this.enqueueConfirmedFill(result, { reason: command.reason, reduceOnly: command.reduceOnly });
+            return result;
         } catch (error) {
             if (error instanceof AsterApiError && error.executionUnknown) {
                 const reconciled = await this.reconcileOrder(symbol, clientOrderId);
