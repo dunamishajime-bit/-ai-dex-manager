@@ -35,7 +35,7 @@
     "lib/disdex-v96-operator-override-audit.ts": "0d889d32e1d8156670c73d514e2886f9708fdf59b4e1ca13d788f92092a8f4dc",
     "lib/owner-goal-approval.ts": "5806955ec4cd140688357ec4fabfc0caaa7e263df74273d6f3956d320aa61bf4",
     "lib/pengu-dual-ls-v2-portfolio-runner.ts": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a",
-    "lib/server/owner-goal-attestation.ts": "3288c13997949884841f78ebc6625df5c633c3cf3701d63e5671690ddc9babe6",
+    "lib/server/owner-goal-attestation.ts": "f2811a1b341c4e3939f21ea0f48da917ac93b300d60c490e35c7eabf0b4fe300",
     "lib/v12-v4-runner-engine.ts": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
     "lib/v12-v4-shared-reservations.ts": "20d2856af6cbe952cb85ef41c67feb3d916248de3d367245db9e1dc8767d0711",
     "lib/v12-v4-venue-exit.ts": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd",
