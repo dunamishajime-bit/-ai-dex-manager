@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PLAN = ROOT / "docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json"
 GOAL = ROOT / "docs/implementation/goal-campaigns/8b007d5a-f46c-4752-9f71-70d3967712c0.json"
 WORKFLOW = ROOT / ".github/workflows/disdex-stable4-dd30-monitor-cutover.yml"
-PLAN_SHA = "728045e7a741ee451c0f7236a1d1ede45052c15aaf002268b38effb3bc830c63"
+PLAN_SHA = "15dc92d58dbced738cf57dd7a91396f73bd3875a3e6bd2cd100a3ee649ce4f5b"
 
 
 class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
