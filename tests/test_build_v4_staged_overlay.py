@@ -63,4 +63,12 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
             self.assertNotIn("V4RunnerEngine",monitor)
             self.assertNotIn("V12AsterLiveAdapter",monitor)
 
+    def test_materialized_runner_keeps_monitor_only_dispatch_before_live_runtime(self):
+        repo=Path(__file__).parents[1]
+        runner=(repo/"deploy/v4-staged-overlay/files/scripts/v12-v4-production-runner.ts.src").read_text(encoding="utf-8-sig")
+        self.assertIn('v4ExecutionPhase(process.argv.slice(2),process.env)==="MONITOR_ONLY"',runner)
+        self.assertIn('await runV4ReadOnlyMonitor(identity)',runner)
+        self.assertLess(runner.index('v4ExecutionPhase(process.argv.slice(2),process.env)==="MONITOR_ONLY"'),
+                        runner.index('const releaseSha=requireReleaseSha(),operationMode=requireV4OperationMode();'))
+
 if __name__=="__main__": unittest.main()
