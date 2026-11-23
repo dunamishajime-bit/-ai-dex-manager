@@ -120,6 +120,11 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertIn("health = unit_health_snapshot(units)", source)
         self.assertNotIn('unit_property(unit, "NRestarts") == restart_before[runner]', source)
 
+    def test_known_missing_release_pengu_restart_loop_is_quiesced_formally(self):
+        source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
+        self.assertIn('STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"', source)
+        self.assertIn('f"disdex-pengu-dual-ls-v2@{STALE_PENGU}.service"', source)
+
     def test_materialize_v4_staged_overlay_is_deterministic(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             stage = pathlib.Path(directory)
