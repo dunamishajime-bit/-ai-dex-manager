@@ -143,10 +143,18 @@ def stop_unit(unit: str) -> None:
     require(unit_property(unit, "ActiveState") in {"inactive", "failed", "deactivating", "unknown"}, "UNIT_NOT_TERMINAL:" + unit)
 
 
+def hold_metadata_valid(uid: int, mode: int) -> bool:
+    return uid in {0, 1000} and mode == 0o600
+
+
 def hold_snapshot() -> tuple[bytes, dict, str]:
     raw = read_regular(HOLD, 32_768)
     st = HOLD.stat()
-    require(st.st_uid == 0 and stat.S_IMODE(st.st_mode) in {0o600, 0o640, 0o644}, "GLOBAL_HOLD_METADATA_INVALID")
+    # The production HOLD is intentionally writable by the dedicated deploy
+    # runtime (uid 1000) and is also readable by Root.  Accept only those two
+    # established owners, with the exact private-file mode; never loosen this
+    # to an arbitrary user/group or a world-readable file.
+    require(hold_metadata_valid(st.st_uid, stat.S_IMODE(st.st_mode)), "GLOBAL_HOLD_METADATA_INVALID")
     value = json.loads(raw.decode("utf-8"))
     got = hashlib.sha256(raw).hexdigest()
     require(got == HOLD_DIGEST, "GLOBAL_HOLD_DIGEST_MISMATCH")
