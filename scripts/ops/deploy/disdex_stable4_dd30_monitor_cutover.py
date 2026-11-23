@@ -160,7 +160,10 @@ def materialize_v4_staged_overlay(stage: Path) -> None:
         dst = _overlay_path(stage, target)
         require(src.is_file() and not src.is_symlink(), "V4_OVERLAY_SOURCE_MISSING:" + source)
         require(not dst.is_symlink(), "V4_OVERLAY_TARGET_SYMLINK:" + target)
-        dst.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+        # The release tree is chmod-hardened by stage_candidate after all
+        # material is present.  Avoid applying POSIX mode bits while building
+        # the temporary tree so the pure helper remains portable on Windows CI.
+        dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
 
 
@@ -446,7 +449,6 @@ def stage_candidate(tar_path: Path, manifest_path: Path, target: str) -> None:
         run("/usr/bin/tar", "--extract", "--gzip", "--file", str(tar_path), "--directory", str(stage), "--no-same-owner", "--no-same-permissions", timeout=180)
         for path in stage.rglob("*"):
             require(not path.is_symlink(), "CANDIDATE_ARCHIVE_SYMLINK_FORBIDDEN")
-        materialize_v4_staged_overlay(stage)
         marker = stage / ".disdex-release-sha"
         marker.write_text(target + "\n", encoding="ascii")
         current = CURRENT.resolve()
@@ -459,6 +461,9 @@ def stage_candidate(tar_path: Path, manifest_path: Path, target: str) -> None:
         for rel, expected in (manifest.get("files") or {}).items():
             path = stage / rel
             require(path.is_file() and not path.is_symlink() and hashlib.sha256(path.read_bytes()).hexdigest() == expected, "CANDIDATE_SOURCE_HASH_MISMATCH:" + str(rel))
+        # Validate the immutable Git archive first; the reviewed V4 overlay is
+        # then expanded deterministically into the release paths it declares.
+        materialize_v4_staged_overlay(stage)
         for path in stage.rglob("*"):
             if path.is_file() and not path.is_symlink():
                 os.chmod(path, stat.S_IMODE(path.stat().st_mode) & ~0o022)
