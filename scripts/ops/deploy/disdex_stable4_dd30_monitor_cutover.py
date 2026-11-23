@@ -167,6 +167,15 @@ def materialize_v4_staged_overlay(stage: Path) -> None:
         shutil.copyfile(src, dst)
 
 
+def harden_immutable_tree(root: Path) -> None:
+    """Remove all write bits from a staged release tree."""
+    paths = [root, *root.rglob("*")]
+    for path in paths:
+        if path.is_symlink():
+            continue
+        os.chmod(path, stat.S_IMODE(path.stat().st_mode) & ~0o222)
+
+
 def unit_property(unit: str, key: str) -> str:
     return run("/usr/bin/systemctl", "show", unit, "--property=" + key, "--value", timeout=20)
 
@@ -464,9 +473,7 @@ def stage_candidate(tar_path: Path, manifest_path: Path, target: str) -> None:
         # Validate the immutable Git archive first; the reviewed V4 overlay is
         # then expanded deterministically into the release paths it declares.
         materialize_v4_staged_overlay(stage)
-        for path in stage.rglob("*"):
-            if path.is_file() and not path.is_symlink():
-                os.chmod(path, stat.S_IMODE(path.stat().st_mode) & ~0o022)
+        harden_immutable_tree(stage)
         os.replace(stage, release)
     except Exception:
         shutil.rmtree(stage, ignore_errors=True)

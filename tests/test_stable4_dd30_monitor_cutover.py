@@ -1,5 +1,7 @@
 import json
+import os
 import pathlib
+import stat
 import tempfile
 import unittest
 
@@ -8,6 +10,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     HOLD_DIGEST,
     RUNNER_IDS,
     dropin_text,
+    harden_immutable_tree,
     hold_metadata_valid,
     q102_metadata_valid,
     materialize_v4_staged_overlay,
@@ -100,7 +103,7 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertIn(stale_guard, source)
 
     def test_materialize_v4_staged_overlay_is_deterministic(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             stage = pathlib.Path(directory)
             manifest_dir = stage / "deploy" / "v4-staged-overlay"
             source = manifest_dir / "files" / "scripts" / "ops" / "root" / "disdex-v4-rate-budget-broker.ts.src"
@@ -119,7 +122,7 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             self.assertEqual(target.read_text(encoding="utf-8"), "export const broker = true;\n")
 
     def test_v4_kill_switch_block_is_accepted_as_safe_monitor_evidence(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             path = pathlib.Path(directory) / "v4.json"
             target = "a" * 40
             path.write_text(json.dumps({
@@ -134,6 +137,26 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
                 "positionChangesSent": 0,
             }), encoding="utf-8")
             validate_evidence(path, target, "V12_V4")
+
+    def test_release_tree_hardening_removes_directory_and_file_write_bits(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            root = pathlib.Path(directory) / "release"
+            nested = root / "nested"
+            nested.mkdir(parents=True)
+            file_path = nested / "marker"
+            file_path.write_text("sha\n", encoding="utf-8")
+            os.chmod(root, 0o755)
+            os.chmod(nested, 0o755)
+            os.chmod(file_path, 0o644)
+            try:
+                harden_immutable_tree(root)
+                for path in (root, nested, file_path):
+                    self.assertEqual(stat.S_IMODE(path.stat().st_mode) & 0o222, 0)
+            finally:
+                # Windows cleanup needs the temporary directory writable.
+                os.chmod(file_path, 0o644)
+                os.chmod(nested, 0o755)
+                os.chmod(root, 0o755)
 
 
 if __name__ == "__main__":
