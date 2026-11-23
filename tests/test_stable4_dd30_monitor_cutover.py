@@ -4,6 +4,9 @@ import pathlib
 import stat
 import tempfile
 import unittest
+from unittest.mock import patch
+
+import scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover as cutover
 
 from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     HASH_RE,
@@ -119,6 +122,15 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertIn("def unit_health_snapshot", source)
         self.assertIn("health = unit_health_snapshot(units)", source)
         self.assertNotIn('unit_property(unit, "NRestarts") == restart_before[runner]', source)
+
+    def test_systemd_health_snapshot_recovers_one_transitioning_unit(self):
+        unit = "disdex-hype-long@sha.service"
+        with patch.object(cutover, "run", side_effect=[
+            "Id=" + unit + "\nActiveState=active\n",
+            "Id=" + unit + "\nActiveState=active\nNRestarts=0\n",
+        ]):
+            parsed = cutover.unit_health_snapshot({"HYPE_TREND_LONG": unit})
+        self.assertEqual(parsed[unit], {"ActiveState": "active", "NRestarts": "0"})
 
     def test_known_missing_release_pengu_restart_loop_is_quiesced_formally(self):
         source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
