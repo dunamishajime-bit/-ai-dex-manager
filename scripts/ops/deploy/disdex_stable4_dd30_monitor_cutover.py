@@ -180,6 +180,44 @@ def unit_property(unit: str, key: str) -> str:
     return run("/usr/bin/systemctl", "show", unit, "--property=" + key, "--value", timeout=20)
 
 
+def parse_unit_health_snapshot(output: str, expected_units: set[str]) -> dict[str, dict[str, str]]:
+    """Parse one batched systemd health query and require complete coverage."""
+    rows: dict[str, dict[str, str]] = {}
+    current: str | None = None
+    for raw_line in output.splitlines():
+        line = raw_line.strip()
+        if not line or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key == "Id":
+            current = value.strip()
+            rows[current] = {}
+        elif current is not None and key in {"ActiveState", "NRestarts"}:
+            rows[current][key] = value.strip()
+    require(set(rows) == set(expected_units), "SYSTEMD_HEALTH_SNAPSHOT_INCOMPLETE")
+    for unit in expected_units:
+        require(set(rows[unit]) == {"ActiveState", "NRestarts"}, "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+    return rows
+
+
+def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
+    """Read all target ActiveState/NRestarts values in one bounded systemd call."""
+    expected_units = set(units.values())
+    require(expected_units and len(expected_units) == len(units), "SYSTEMD_HEALTH_UNIT_SET_INVALID")
+    try:
+        output = run(
+            "/usr/bin/systemctl",
+            "show",
+            *units.values(),
+            "--property=Id,ActiveState,NRestarts",
+            "--no-pager",
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise ContractError("SYSTEMD_HEALTH_SNAPSHOT_TIMEOUT") from exc
+    return parse_unit_health_snapshot(output, expected_units)
+
+
 def unit_state(unit: str) -> tuple[str, str]:
     return unit_property(unit, "ActiveState"), unit_property(unit, "SubState")
 
@@ -580,9 +618,10 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             previous[runner] = (0, "")
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline and min(seen.values()) < 3:
+        health = unit_health_snapshot(units)
         for runner in RUNNER_IDS:
             unit = units[runner]
-            require(unit_active(unit), "TARGET_RUNNER_LOST_ACTIVE:" + runner)
+            require(health[unit]["ActiveState"] == "active", "TARGET_RUNNER_LOST_ACTIVE:" + runner)
             path = paths[runner]
             if not path.is_file() or path.is_symlink():
                 continue
@@ -597,7 +636,7 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             seen[runner] += 1
             previous[runner] = current
         for runner, unit in units.items():
-            require(unit_property(unit, "NRestarts") == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
+            require(health[unit]["NRestarts"] == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
         if min(seen.values()) < 3:
             time.sleep(3)
     require(min(seen.values()) >= 3, "THREE_MONITOR_CYCLES_NOT_OBSERVED")
@@ -681,9 +720,10 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             validate_target_unit(unit, target, runner)
             run("/usr/bin/systemctl", "start", unit, timeout=120)
             verify_environment(unit, runner)
-        restart_before = {runner: unit_property(unit, "NRestarts") for runner, unit in units.items()}
+        restart_snapshot = unit_health_snapshot(units)
+        restart_before = {runner: restart_snapshot[unit]["NRestarts"] for runner, unit in units.items()}
         for runner, unit in units.items():
-            require(unit_active(unit), "TARGET_RUNNER_NOT_ACTIVE:" + runner)
+            require(restart_snapshot[unit]["ActiveState"] == "active", "TARGET_RUNNER_NOT_ACTIVE:" + runner)
             pid = int(unit_property(unit, "MainPID") or "0")
             require(pid > 100 and Path(f"/proc/{pid}/cwd").resolve() == release, "TARGET_RUNNER_CWD_MISMATCH:" + runner)
         poll_cycles(target, units, paths, restart_before)

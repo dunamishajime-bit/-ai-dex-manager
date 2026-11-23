@@ -14,6 +14,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     hold_metadata_valid,
     q102_metadata_valid,
     materialize_v4_staged_overlay,
+    parse_unit_health_snapshot,
     target_units,
     validate_plan,
     validate_evidence,
@@ -101,6 +102,23 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
         stale_guard = "if current == previous[runner]:\n                continue\n            validate_evidence(path, target, runner)"
         self.assertIn(stale_guard, source)
+
+    def test_systemd_health_snapshot_is_batched_and_requires_every_target_unit(self):
+        units = {
+            "V12_V4": "disdex-v12-v4@sha.service",
+            "IDLE_PRIORITY_SHORT": "disdex-idle-priority-short@sha.service",
+        }
+        parsed = parse_unit_health_snapshot(
+            "Id=disdex-v12-v4@sha.service\nActiveState=active\nNRestarts=0\n\n"
+            "Id=disdex-idle-priority-short@sha.service\nActiveState=active\nNRestarts=0\n",
+            set(units.values()),
+        )
+        self.assertEqual(parsed[units["V12_V4"]]["ActiveState"], "active")
+        self.assertEqual(parsed[units["IDLE_PRIORITY_SHORT"]]["NRestarts"], "0")
+        source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
+        self.assertIn("def unit_health_snapshot", source)
+        self.assertIn("health = unit_health_snapshot(units)", source)
+        self.assertNotIn('unit_property(unit, "NRestarts") == restart_before[runner]', source)
 
     def test_materialize_v4_staged_overlay_is_deterministic(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
