@@ -46,6 +46,8 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             self.assertIn(expected[runner][0], text, runner)
             self.assertIn(expected[runner][1], text, runner)
             self.assertNotIn("--mode live --daemon'", text)
+        v52 = dropin_text("V52", target, units["V52"])
+        self.assertIn("export DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false", v52)
         v4 = dropin_text("V12_V4", target, units["V12_V4"])
         self.assertIn("EnvironmentFile=\n", v4)
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", v4)
