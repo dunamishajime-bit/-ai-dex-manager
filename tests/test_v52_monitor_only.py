@@ -32,5 +32,11 @@ class V52MonitorOnlyContractTest(unittest.TestCase):
         self.assertIn("V52 monitor-only permits read-only preflight only",source)
         self.assertIn("V52 monitor-only requires LIVE_EXECUTION_ENABLED=false",source)
 
+    def test_monitor_only_does_not_require_order_planner_gate(self):
+        source=MOD.read_text()
+        self.assertIn('monitor_only = base.bool_env("DISDEX_V52_MONITOR_ONLY", False)', source)
+        self.assertGreaterEqual(source.count("if self.live and not monitor_only:"), 2)
+        self.assertIn('"strictPortfolioPlannerActive": not monitor_only', source)
+
 if __name__=="__main__":
     unittest.main()

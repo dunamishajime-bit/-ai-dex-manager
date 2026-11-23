@@ -46,7 +46,8 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.crypto_gross_cap = STRICT_CAPS.crypto_gross
         self.stock_gross_cap = STRICT_CAPS.stock_gross
         self.portfolio_gross_cap = STRICT_CAPS.total_gross
-        if self.live:
+        monitor_only = base.bool_env("DISDEX_V52_MONITOR_ONLY", False)
+        if self.live and not monitor_only:
             assert_strict_live_configuration()
 
     def save(self) -> None:
@@ -489,11 +490,12 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
     def preflight(self, read_only: bool = False) -> dict:
         checks = super().preflight(read_only=read_only)
-        if self.live:
+        monitor_only = base.bool_env("DISDEX_V52_MONITOR_ONLY", False)
+        if self.live and not monitor_only:
             assert_strict_live_configuration()
         strict_snapshot = validate_gross_snapshot(checks["gross"])
         checks.update({
-            "strictPortfolioPlannerActive": True,
+            "strictPortfolioPlannerActive": not monitor_only,
             "strictPortfolioGross": strict_snapshot,
             "strictPortfolioCaps": {
                 "v12": STRICT_CAPS.v12_gross,
