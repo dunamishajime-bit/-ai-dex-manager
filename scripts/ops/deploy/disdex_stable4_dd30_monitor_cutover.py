@@ -347,22 +347,40 @@ def install_state_dirs(target: str) -> None:
         os.chmod(child, 0o700)
 
 
+def q102_metadata_valid(
+    parent_uid: int, parent_gid: int, parent_mode: int,
+    state_uid: int, state_gid: int, state_mode: int,
+    deploy_uid: int, deploy_gid: int,
+) -> bool:
+    private_parent = (
+        parent_uid == deploy_uid and parent_gid == deploy_gid and parent_mode == 0o700
+    ) or (
+        parent_uid == 0 and parent_mode in {0o700, 0o710}
+    )
+    private_state = (
+        state_uid == 0 and state_gid == deploy_gid and state_mode == 0o640
+    ) or (
+        state_uid == deploy_uid and state_gid == deploy_gid and state_mode in {0o600, 0o660}
+    ) or (
+        state_uid == 0 and state_gid == 0 and state_mode == 0o600
+    )
+    return private_parent and private_state
+
+
 def prepare_q102_state_access(state_path: Path) -> None:
-    """Grant only the canonical deploy reader access without changing bytes."""
+    """Validate the canonical private Q102 state contract without chowning it."""
     require(pwd is not None, "DEPLOY_USER_DATABASE_UNAVAILABLE")
     parent = state_path.parent
     require(parent.is_dir() and not parent.is_symlink(), "Q102_STATE_PARENT_INVALID")
     before = hashlib.sha256(read_regular(state_path)).hexdigest()
     deploy = pwd.getpwnam("deploy")
-    # Keep the state root-owned, grant the deploy reader only directory
-    # traversal and file read access, and make the change reversible through
-    # the captured metadata snapshot.
     parent_st = parent.stat()
-    require(parent_st.st_uid == 0, "Q102_STATE_PARENT_OWNER_UNEXPECTED")
-    os.chown(parent, 0, deploy.pw_gid)
-    os.chmod(parent, 0o710)
-    os.chown(state_path, 0, deploy.pw_gid)
-    os.chmod(state_path, 0o640)
+    state_st = state_path.stat()
+    require(q102_metadata_valid(
+        parent_st.st_uid, parent_st.st_gid, stat.S_IMODE(parent_st.st_mode),
+        state_st.st_uid, state_st.st_gid, stat.S_IMODE(state_st.st_mode),
+        deploy.pw_uid, deploy.pw_gid,
+    ), "Q102_STATE_METADATA_UNTRUSTED")
     require(hashlib.sha256(read_regular(state_path)).hexdigest() == before, "Q102_STATE_BYTES_CHANGED")
 
 

@@ -8,6 +8,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     RUNNER_IDS,
     dropin_text,
     hold_metadata_valid,
+    q102_metadata_valid,
     target_units,
     validate_plan,
 )
@@ -63,6 +64,12 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("printf -v remote_command '%q '", workflow)
         self.assertIn('"exec $remote_command"', workflow)
+
+    def test_q102_metadata_accepts_audited_deploy_private_state(self):
+        self.assertTrue(q102_metadata_valid(1000, 1000, 0o700, 0, 1000, 0o640, 1000, 1000))
+        self.assertTrue(q102_metadata_valid(0, 0, 0o710, 0, 0, 0o600, 1000, 1000))
+        self.assertFalse(q102_metadata_valid(1001, 1000, 0o700, 0, 1000, 0o640, 1000, 1000))
+        self.assertFalse(q102_metadata_valid(1000, 1000, 0o755, 0, 1000, 0o640, 1000, 1000))
 
 
 if __name__ == "__main__":
