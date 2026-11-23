@@ -1,0 +1,55 @@
+{
+  "schema": "disdex-owner-purpose-release/v1",
+  "goalFingerprint": "6d71ee73617c574a7018878d803df5c1cca5ef4b5ac70498aca408ee11037be8",
+  "kind": "RESTORE_RUNNER_LIVE",
+  "operation": "ALL_RUNNERS_LIVE_RESTORE",
+  "scope": "FULL_PROJECT",
+  "subject": "FULL_PROJECT",
+  "target": "professional-dismanager.net",
+  "sourceBinding": "GITHUB_RUN_HEAD_SHA",
+  "ordersEnabled": false,
+  "campaign": "STABLE4_DD30_MONITOR_ONLY_20261123",
+  "candidateLineage": {
+    "pullRequest": 598,
+    "integratedSourceSha": "672316e4d6f4a9e3a6977a8094048a5c170e80c2",
+    "dd30Scope": "V4_NEW_ENTRY_HOLD_ONLY",
+    "existingStopProtection": true,
+    "preserveGlobalHold": true
+  },
+  "monitorOnlyContract": {
+    "runnerScopes": [
+      "V12_V4",
+      "PENGU_V8",
+      "QUALITY102_CAUSAL_V1",
+      "V52",
+      "FET_BRK48_RESIDUAL",
+      "IDLE_PRIORITY_SHORT"
+    ],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0,
+    "signedVenueGets": 3,
+    "postCutoverCycles": 3,
+    "requireFreshHeartbeat": true,
+    "requireStableRestartCounts": true,
+    "requireStopOwnership": true,
+    "requireGlobalHoldDigestUnchanged": true
+  },
+  "economics": {
+    "v4NewEntryDrawdownHold": 0.3,
+    "cryptoGrossCap": 3.0,
+    "stockGrossCap": 4.0,
+    "totalGrossCap": 4.25,
+    "sharedCryptoDailyLoss": 0.075,
+    "penguDrawdownProtection": 0.17,
+    "h48AndFunding": "PRESERVE_EXISTING_POLICY"
+  },
+  "safeguards": {
+    "failClosed": true,
+    "signedVenueReconciliation": true,
+    "protectExistingStops": true,
+    "noTestOrders": true,
+    "enforceSharedRisk": true,
+    "rollbackOnFailure": true
+  }
+}
