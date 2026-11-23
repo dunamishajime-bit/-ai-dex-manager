@@ -76,6 +76,13 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertIn("EnvironmentFile=\n", v4)
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", v4)
         self.assertEqual(v4.count("EnvironmentFile=/etc/disdex/"), 3)
+        hype = dropin_text("HYPE_TREND_LONG", target, units["HYPE_TREND_LONG"])
+        self.assertIn("EnvironmentFile=\n", hype)
+        self.assertIn("EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", hype)
+        self.assertIn("EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", hype)
+        self.assertIn("EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env", hype)
+        self.assertNotIn("/etc/disdex/current-runtime/%i.env", hype)
+        self.assertNotIn("/etc/disdex/current-runtime/%i.hype-operator.env", hype)
 
     def test_plan_digest_shape(self):
         self.assertTrue(HASH_RE.fullmatch(PLAN_SHA))
