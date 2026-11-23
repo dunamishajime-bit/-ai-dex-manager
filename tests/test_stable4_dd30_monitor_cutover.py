@@ -55,6 +55,8 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertIn("export PENGU_DUAL_LS_V2_MODE=SHADOW PENGU_DUAL_LS_V2_ENABLED=true PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5 DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5", pengu)
         q102 = dropin_text("QUALITY102_CAUSAL_V1", target, units["QUALITY102_CAUSAL_V1"])
         self.assertIn("export QUALITY102_CAUSAL_V1_MODE=LIVE QUALITY102_CAUSAL_V1_MONITOR_ONLY=true QUALITY102_CAUSAL_V1_ENABLED=false QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=false QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false QUALITY102_CAUSAL_V1_OPERATOR_ARMED=false DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5 QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5", q102)
+        self.assertIn(f"DISDEX_RUNTIME_COMMIT_SHA={target} DISDEX_RELEASE_SHA={target}", q102)
+        self.assertIn("exec " + f"/home/deploy/disdex-trading/releases/{target}/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-monitor.ts --daemon", q102)
         self.assertIn("EnvironmentFile=\n", v4)
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", v4)
         self.assertEqual(v4.count("EnvironmentFile=/etc/disdex/"), 3)
