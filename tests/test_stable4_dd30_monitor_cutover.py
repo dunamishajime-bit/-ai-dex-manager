@@ -46,6 +46,10 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             self.assertIn(expected[runner][0], text, runner)
             self.assertIn(expected[runner][1], text, runner)
             self.assertNotIn("--mode live --daemon'", text)
+        v4 = dropin_text("V12_V4", target, units["V12_V4"])
+        self.assertIn("EnvironmentFile=\n", v4)
+        self.assertNotIn("/etc/disdex/current-runtime/%i.env", v4)
+        self.assertEqual(v4.count("EnvironmentFile=/etc/disdex/"), 3)
 
     def test_plan_digest_shape(self):
         self.assertTrue(HASH_RE.fullmatch(PLAN_SHA))
