@@ -246,9 +246,17 @@ jobs:
           else
             args=(--execute-approved --tar "$remote/stable4-dd30-candidate.tar.gz" --manifest "$remote/stable4-dd30-manifest.json")
           fi
+          command=(python3 "$remote/disdex_stable4_dd30_monitor_cutover.py" "${args[@]}"
+            --target-sha "$TARGET_SHA"
+            --plan "$remote/root-plan.json"
+            --execution-plan-sha256 "$EXECUTION_PLAN_SHA256"
+            --approval-id "$GOAL_ID"
+            --run-id "$RUN_ID"
+            --public-key "$remote/stable4-dd30-public.pem")
+          printf -v remote_command '%q ' "${command[@]}"
           cat "$RUNNER_TEMP/stable4-dd30-token" |
             ssh -T -i "$RUNNER_TEMP/stable4-dd30-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/stable4-dd30-ssh/known_hosts" -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=20 -p "$port" "root@$HOST" \
-            "python3 '$remote/disdex_stable4_dd30_monitor_cutover.py' \"${args[@]}\" --target-sha '$TARGET_SHA' --plan '$remote/root-plan.json' --execution-plan-sha256 '$EXECUTION_PLAN_SHA256' --approval-id '$GOAL_ID' --run-id '$RUN_ID' --public-key '$remote/stable4-dd30-public.pem'"
+            "exec $remote_command"
 
       - name: Finish this Goal release attempt without consuming the purpose approval
         if: ${{ always() && steps.claim.outcome == 'success' }}
