@@ -71,6 +71,8 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
         self.assertIn('await runV4ReadOnlyMonitor(identity)',runner)
         self.assertLess(runner.index('v4ExecutionPhase(process.argv.slice(2),process.env)==="MONITOR_ONLY"'),
                         runner.index('const releaseSha=requireReleaseSha(),operationMode=requireV4OperationMode();'))
+        monitor=(repo/"deploy/v4-staged-overlay/files/scripts/v12-v4-monitor-only-runner.ts.src").read_text(encoding="utf-8-sig")
+        self.assertIn("export async function runV4ReadOnlyMonitor",monitor)
 
 if __name__=="__main__": unittest.main()
 
