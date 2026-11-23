@@ -1,5 +1,6 @@
 import json
 import pathlib
+import tempfile
 import unittest
 
 from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
@@ -9,8 +10,10 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     dropin_text,
     hold_metadata_valid,
     q102_metadata_valid,
+    materialize_v4_staged_overlay,
     target_units,
     validate_plan,
+    validate_evidence,
 )
 
 
@@ -95,6 +98,42 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
         stale_guard = "if current == previous[runner]:\n                continue\n            validate_evidence(path, target, runner)"
         self.assertIn(stale_guard, source)
+
+    def test_materialize_v4_staged_overlay_is_deterministic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            stage = pathlib.Path(directory)
+            manifest_dir = stage / "deploy" / "v4-staged-overlay"
+            source = manifest_dir / "files" / "scripts" / "ops" / "root" / "disdex-v4-rate-budget-broker.ts.src"
+            source.parent.mkdir(parents=True)
+            source.write_text("export const broker = true;\n", encoding="utf-8")
+            (manifest_dir / "manifest.json").write_text(json.dumps({
+                "schema": "disdex-v4-staged-overlay/v1",
+                "baseSha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+                "files": [{
+                    "source": "files/scripts/ops/root/disdex-v4-rate-budget-broker.ts.src",
+                    "target": "scripts/ops/root/disdex-v4-rate-budget-broker.ts",
+                }],
+            }), encoding="utf-8")
+            materialize_v4_staged_overlay(stage)
+            target = stage / "scripts" / "ops" / "root" / "disdex-v4-rate-budget-broker.ts"
+            self.assertEqual(target.read_text(encoding="utf-8"), "export const broker = true;\n")
+
+    def test_v4_kill_switch_block_is_accepted_as_safe_monitor_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "v4.json"
+            target = "a" * 40
+            path.write_text(json.dumps({
+                "mode": "MONITOR_ONLY",
+                "status": "blocked",
+                "reason": "V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE",
+                "runtimeSha": target,
+                "orderEnabled": False,
+                "newOrdersAllowed": False,
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+            }), encoding="utf-8")
+            validate_evidence(path, target, "V12_V4")
 
 
 if __name__ == "__main__":
