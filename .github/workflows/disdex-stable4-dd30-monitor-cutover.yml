@@ -123,8 +123,11 @@ jobs:
           import json, os, pathlib, urllib.request
           url = 'https://professional-dismanager.net/api/system/deploy-approval'
           def call(body):
+              # Non-secret stage marker distinguishes slow goal reads from an
+              # ambiguous claim response. Do not automatically replay claims.
+              print('OWNER_GOAL_BRIDGE_STAGE='+body['action'], flush=True)
               req = urllib.request.Request(url, data=json.dumps(body).encode(), method='POST', headers={'Authorization':'Bearer '+os.environ['BRIDGE'], 'Content-Type':'application/json'})
-              with urllib.request.urlopen(req, timeout=15) as response:
+              with urllib.request.urlopen(req, timeout=45) as response:
                   result = json.load(response)
               if result.get('ok') is not True: raise RuntimeError('GOAL_BRIDGE_CALL_FAILED')
               return result
@@ -272,7 +275,7 @@ jobs:
           import json, os, urllib.request
           body = {'action':'finish_goal_release','goal_id':os.environ['GOAL_ID'],'run_id':os.environ['RUN_ID'],'outcome':'success' if os.environ['EXECUTION']=='success' else 'failure','final':False}
           req = urllib.request.Request('https://professional-dismanager.net/api/system/deploy-approval', data=json.dumps(body).encode(), method='POST', headers={'Authorization':'Bearer '+os.environ['BRIDGE'],'Content-Type':'application/json'})
-          with urllib.request.urlopen(req, timeout=15) as response:
+          with urllib.request.urlopen(req, timeout=45) as response:
               result = json.load(response)
           assert result.get('ok') is True and result.get('status') == 'APPROVED'
           print('GOAL_RELEASE_ATTEMPT_FINISHED='+('SUCCESS' if os.environ['EXECUTION']=='success' else 'RETRYABLE'))
