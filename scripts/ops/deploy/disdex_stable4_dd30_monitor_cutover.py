@@ -52,6 +52,8 @@ STALE_Q102 = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
 STALE_MARGIN = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
+V4_OVERLAY_SCHEMA = "disdex-v4-staged-overlay/v1"
+V4_OVERLAY_BASE_SHA = "53a0be396719f0284af4e11b35c66a4ac7d58f79"
 
 
 class ContractError(RuntimeError):
@@ -121,6 +123,45 @@ def write_atomic(path: Path, data: bytes, meta: tuple[int, int, int] | None = No
     finally:
         if tmp.exists():
             tmp.unlink()
+
+
+def _overlay_path(root: Path, relative: str) -> Path:
+    candidate = (root / relative).resolve()
+    require(relative and not Path(relative).is_absolute() and ".." not in Path(relative).parts,
+            "V4_OVERLAY_PATH_INVALID:" + str(relative))
+    require(root.resolve() in candidate.parents, "V4_OVERLAY_PATH_ESCAPE:" + str(relative))
+    return candidate
+
+
+def materialize_v4_staged_overlay(stage: Path) -> None:
+    """Expand the reviewed .src V4 overlay into the immutable release tree.
+
+    The repository deliberately keeps this overlay as source-only preview
+    material.  The production archive therefore must apply the exact manifest
+    mapping before the release is installed; otherwise systemd can point at a
+    broker or runner file that is absent from the release.  All source files
+    remain inside the candidate archive and every path is checked fail-closed.
+    """
+    overlay_root = stage / "deploy" / "v4-staged-overlay"
+    manifest = read_json(overlay_root / "manifest.json")
+    require(manifest.get("schema") == V4_OVERLAY_SCHEMA, "V4_OVERLAY_MANIFEST_INVALID")
+    require(manifest.get("baseSha") == V4_OVERLAY_BASE_SHA, "V4_OVERLAY_BASE_SHA_INVALID")
+    rows = manifest.get("files")
+    require(isinstance(rows, list) and rows, "V4_OVERLAY_FILES_INVALID")
+    targets: set[str] = set()
+    for row in rows:
+        require(isinstance(row, dict), "V4_OVERLAY_ROW_INVALID")
+        source = str(row.get("source", ""))
+        target = str(row.get("target", ""))
+        require(source.endswith(".src"), "V4_OVERLAY_SOURCE_SUFFIX_INVALID:" + source)
+        require(target not in targets, "V4_OVERLAY_TARGET_DUPLICATE:" + target)
+        targets.add(target)
+        src = _overlay_path(overlay_root, "" if not source else source)
+        dst = _overlay_path(stage, target)
+        require(src.is_file() and not src.is_symlink(), "V4_OVERLAY_SOURCE_MISSING:" + source)
+        require(not dst.is_symlink(), "V4_OVERLAY_TARGET_SYMLINK:" + target)
+        dst.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+        shutil.copyfile(src, dst)
 
 
 def unit_property(unit: str, key: str) -> str:
@@ -405,6 +446,7 @@ def stage_candidate(tar_path: Path, manifest_path: Path, target: str) -> None:
         run("/usr/bin/tar", "--extract", "--gzip", "--file", str(tar_path), "--directory", str(stage), "--no-same-owner", "--no-same-permissions", timeout=180)
         for path in stage.rglob("*"):
             require(not path.is_symlink(), "CANDIDATE_ARCHIVE_SYMLINK_FORBIDDEN")
+        materialize_v4_staged_overlay(stage)
         marker = stage / ".disdex-release-sha"
         marker.write_text(target + "\n", encoding="ascii")
         current = CURRENT.resolve()
@@ -501,7 +543,16 @@ def validate_evidence(path: Path, target: str, runner: str) -> None:
             require(str(value.get(key)).lower() == target, "MONITOR_SHA_MISMATCH:" + runner)
     if runner in {"V12_V4", "QUALITY102_CAUSAL_V1", "V52"}:
         require(value.get("mode") == "MONITOR_ONLY" and value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID:" + runner)
-        require(value.get("status") == "observing", "MONITOR_HEARTBEAT_NOT_OBSERVING:" + runner)
+        status = str(value.get("status", ""))
+        if runner == "V12_V4" and status == "blocked":
+            # The shared Kill Switch is intentionally retained during this
+            # monitor-only cutover.  Accept only the explicit V4 safety block
+            # as a fresh monitor heartbeat; never reinterpret it as order
+            # authority or clear the underlying protection.
+            reason = str(value.get("reason", ""))
+            require(reason.startswith("V4_MONITOR_ENTRY_SAFETY_BLOCKED:") and "V4_KILL_SWITCH_ACTIVE" in reason, "MONITOR_HEARTBEAT_NOT_OBSERVING:" + runner)
+        else:
+            require(status == "observing", "MONITOR_HEARTBEAT_NOT_OBSERVING:" + runner)
     else:
         if "mode" in value:
             require(str(value.get("mode")).upper() == "SHADOW", "SHADOW_EVIDENCE_MODE_INVALID:" + runner)
