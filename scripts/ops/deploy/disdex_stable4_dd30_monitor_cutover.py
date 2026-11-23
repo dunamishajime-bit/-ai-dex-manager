@@ -520,11 +520,16 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             path = paths[runner]
             if not path.is_file() or path.is_symlink():
                 continue
-            validate_evidence(path, target, runner)
             current = (path.stat().st_mtime_ns, hashlib.sha256(path.read_bytes()).hexdigest())
-            if current != previous[runner]:
-                seen[runner] += 1
-                previous[runner] = current
+            # V4 uses a shared tick path, so a prior-generation heartbeat can
+            # legitimately exist before the new unit publishes its first tick.
+            # Do not treat that stale evidence as the candidate's identity; wait
+            # for an atomic file change, then validate the new content strictly.
+            if current == previous[runner]:
+                continue
+            validate_evidence(path, target, runner)
+            seen[runner] += 1
+            previous[runner] = current
         for runner, unit in units.items():
             require(unit_property(unit, "NRestarts") == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
         if min(seen.values()) < 3:
