@@ -34,6 +34,7 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
         targets={row["target"] for row in value["files"]}
         self.assertIn("scripts/v12-v4-production-runner.ts",targets)
         self.assertIn("scripts/v12-v4-monitor-only-runner.ts",targets)
+        self.assertIn("lib/v12-v4-execution-phase.ts",targets)
         self.assertIn("lib/disdex-runner-tick-heartbeat.ts",targets)
         self.assertNotIn("lib/v12-v4-runner-engine.ts",targets)
         self.assertNotIn("config/integratedProductionRiskPolicy.ts",targets)
@@ -72,3 +73,4 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
                         runner.index('const releaseSha=requireReleaseSha(),operationMode=requireV4OperationMode();'))
 
 if __name__=="__main__": unittest.main()
+
