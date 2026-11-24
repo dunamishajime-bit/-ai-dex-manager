@@ -312,6 +312,83 @@ def stop_unit(unit: str) -> None:
     require(unit_property(unit, "ActiveState") in {"inactive", "failed", "deactivating", "unknown"}, "UNIT_NOT_TERMINAL:" + unit)
 
 
+SHARED_RISK_UNIT_RE = re.compile(r"disdex-shared-crypto-risk@[0-9a-f]{40}\.service")
+
+
+def shared_risk_units() -> list[str]:
+    """List only concrete, SHA-scoped writer units (not the template)."""
+    listing = run("/usr/bin/systemctl", "list-units", "--all", "--type=service",
+                  "--no-legend", "--plain", "disdex-shared-crypto-risk@*.service", timeout=30)
+    units: set[str] = set()
+    for line in listing.splitlines():
+        unit = next((word for word in line.split() if SHARED_RISK_UNIT_RE.fullmatch(word)), None)
+        if unit:
+            units.add(unit)
+    return sorted(units)
+
+
+def pinned_shared_risk_unit(pins_raw: bytes) -> str:
+    pins = json.loads(pins_raw.decode("utf-8"))
+    row = (pins.get("runners") or {}).get("SHARED_CRYPTO_RISK") or {}
+    sha = row.get("sha")
+    unit = row.get("serviceUnit")
+    require(isinstance(sha, str) and TARGET_SHA_RE.fullmatch(sha) is not None,
+            "SHARED_RISK_PIN_SHA_INVALID")
+    require(unit == "disdex-shared-crypto-risk@" + sha + ".service",
+            "SHARED_RISK_PIN_UNIT_INVALID")
+    return unit
+
+
+def assert_single_shared_risk_writer(pins_raw: bytes, *, target: str | None = None) -> str:
+    pinned = pinned_shared_risk_unit(pins_raw)
+    require(unit_active(pinned), "PINNED_SHARED_RISK_WRITER_NOT_ACTIVE")
+    for unit in shared_risk_units():
+        if unit == pinned:
+            continue
+        state = unit_property(unit, "ActiveState")
+        require(state not in {"active", "activating", "reloading", "deactivating"},
+                "MULTIPLE_SHARED_RISK_WRITERS:" + unit)
+    if target is not None:
+        candidate = "disdex-shared-crypto-risk@" + target + ".service"
+        require(candidate != pinned, "TARGET_SHARED_RISK_WRITER_PINNED_UNEXPECTEDLY")
+        require(unit_property(candidate, "UnitFileState") == "masked",
+                "TARGET_SHARED_RISK_WRITER_NOT_MASKED")
+        require(unit_property(candidate, "MainPID") in {"", "0"},
+                "TARGET_SHARED_RISK_WRITER_PID_REMAINS")
+    return pinned
+
+
+def retire_non_pinned_shared_risk_writers(pins_raw: bytes, target: str) -> list[str]:
+    """Quiesce and mask only SHA-specific non-pinned writer instances.
+
+    Disabled is insufficient: disabled instances may remain active or be started
+    by another unit.  A concrete mask prevents auto-start at the next cutover.
+    Never stop, restart, mask or disable the pinned canonical writer.
+    """
+    pinned = pinned_shared_risk_unit(pins_raw)
+    candidate = "disdex-shared-crypto-risk@" + target + ".service"
+    require(pinned != candidate, "TARGET_SHARED_RISK_WRITER_PINNED_UNEXPECTEDLY")
+    listed = set(shared_risk_units())
+    listed.add(candidate)
+    retired: list[str] = []
+    for unit in sorted(listed):
+        if unit == pinned:
+            continue
+        state = unit_property(unit, "ActiveState")
+        if state in {"active", "activating", "reloading", "deactivating"}:
+            stop_unit(unit)
+            retired.append(unit)
+        # The candidate must ALWAYS be masked, even if it was disabled/dead.
+        # Stale siblings are masked only when we actually had to stop them.
+        if unit == candidate or unit in retired:
+            run("/usr/bin/systemctl", "mask", unit, timeout=30)
+            require(unit_property(unit, "UnitFileState") == "masked",
+                    "SHARED_RISK_WRITER_MASK_FAILED:" + unit)
+            require(unit_property(unit, "MainPID") in {"", "0"},
+                    "SHARED_RISK_WRITER_PID_REMAINS:" + unit)
+    return retired
+
+
 def hold_metadata_valid(uid: int, mode: int) -> bool:
     return uid in {0, 1000} and mode == 0o600
 
@@ -743,6 +820,9 @@ def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[st
     require(all(key in rows for key in RUNNER_IDS), "BASELINE_PIN_SET_INCOMPLETE")
     old_units = {key: str(rows[key].get("serviceUnit") or "") for key in RUNNER_IDS}
     require(all(unit and target not in unit for unit in old_units.values()), "BASELINE_ALREADY_TARGET")
+    # A monitor-only candidate is not allowed to inherit simultaneous writers.
+    # Preflight is read-only and fails closed; execute retires only scoped units.
+    assert_single_shared_risk_writer(pins_raw)
     margin_unit = str((rows.get("MARGIN_GUARD") or {}).get("serviceUnit") or "")
     require(margin_unit, "MARGIN_GUARD_PIN_MISSING")
     validate_shared_files(margin_unit)
@@ -799,6 +879,9 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         for unit in (*old_units.values(), *stale_units):
             stop_unit(unit)
             run("/usr/bin/systemctl", "disable", unit, check=False, timeout=30)
+        # A candidate writer can be disabled yet running. Enforce the
+        # immutable single-writer invariant BEFORE any new Runner starts.
+        shared_risk_retired = retire_non_pinned_shared_risk_writers(pins_raw, target)
         q102_state = dict(q102_before); q102_state["runtimeCommitSha"] = target
         write_atomic(q102_path, (json.dumps(q102_state, separators=(",", ":")) + "\n").encode("utf-8"), q102_access_meta)
         write_atomic(PINS, target_pins(pins_raw, target, units), file_snapshot[PINS][2] or (0, 0, 0o644))
@@ -815,11 +898,13 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             pid = int(unit_property(unit, "MainPID") or "0")
             require(pid > 100 and Path(f"/proc/{pid}/cwd").resolve() == release, "TARGET_RUNNER_CWD_MISMATCH:" + runner)
         poll_cycles(target, units, paths, restart_before)
+        assert_single_shared_risk_writer(read_regular(PINS, 131_072), target=target)
         final_reads = [signed_get() for _ in range(3)]
         require(len({stamp for stamp, _ in final_reads}) == 3 and all(inv == baseline_inventory for _, inv in final_reads), "SIGNED_GET_POSTCUTOVER_CHANGED")
         _h2, _v2, hd2 = hold_snapshot(); require(hd2 == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
         require(not any(unit_active(unit) for unit in old_units.values()), "DUAL_RUNNER_ACTIVE")
-        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "runnerUnits": units}, sort_keys=True))
+        assert_single_shared_risk_writer(read_regular(PINS, 131_072), target=target)
+        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "sharedRiskSingleWriter": True, "sharedRiskRetired": shared_risk_retired, "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:
             _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
