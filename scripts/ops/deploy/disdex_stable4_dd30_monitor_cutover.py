@@ -214,46 +214,64 @@ def _missing_health_unit(reason: str) -> str | None:
 
 
 def _single_unit_health(unit: str) -> dict[str, str]:
-    """Read one unit through independent bounded properties.
+    """Read one unit with a bounded retry before failing closed.
     
-    A batched systemd query can time out on one transiently busy unit.  Read
-    ActiveState and NRestarts separately so a healthy unit is not lost because
-    another unit delayed the D-Bus response; every timeout still fails closed.
+    The first query keeps the existing complete-property contract.  A single
+    retry handles a transient D-Bus/systemd delay seen on HYPE; if the retry
+    still lacks NRestarts, only then use the property-only fallback.
     """
     try:
-        active = run(
-            "/usr/bin/systemctl",
-            "show",
-            unit,
-            "--property=ActiveState",
-            "--value",
-            "--no-pager",
-            timeout=15,
-        ).strip()
-        n_restarts = run(
-            "/usr/bin/systemctl",
-            "show",
-            unit,
-            "--property=NRestarts",
-            "--value",
-            "--no-pager",
-            timeout=15,
-        ).strip()
+        try:
+            single = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState,NRestarts",
+                "--no-pager",
+                timeout=20,
+            )
+        except subprocess.TimeoutExpired:
+            single = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState,NRestarts",
+                "--no-pager",
+                timeout=30,
+            )
     except subprocess.TimeoutExpired as exc:
         raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
-    if "=" in active:
-        key, value = active.split("=", 1)
-        if key.strip() == "ActiveState":
-            active = value.strip()
-    if "=" in n_restarts:
-        key, value = n_restarts.split("=", 1)
-        if key.strip() == "NRestarts":
-            n_restarts = value.strip()
-    require(active in {"active", "inactive", "failed", "activating", "deactivating", "unknown"}, "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
-    require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
-    return {"ActiveState": active, "NRestarts": n_restarts}
-
-
+    try:
+        return parse_unit_health_snapshot(single, {unit})[unit]
+    except ContractError as single_exc:
+        if _missing_health_unit(str(single_exc)) != unit:
+            raise
+        try:
+            identity = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState",
+                "--no-pager",
+                timeout=20,
+            )
+            n_restarts = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=NRestarts",
+                "--value",
+                "--no-pager",
+                timeout=20,
+            ).strip()
+        except subprocess.TimeoutExpired as exc:
+            raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
+        if "=" in n_restarts:
+            key, value = n_restarts.split("=", 1)
+            if key.strip() == "NRestarts":
+                n_restarts = value.strip()
+        require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+        return parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {unit})[unit]
 
 def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
     """Read all target ActiveState/NRestarts values in one bounded systemd call."""
