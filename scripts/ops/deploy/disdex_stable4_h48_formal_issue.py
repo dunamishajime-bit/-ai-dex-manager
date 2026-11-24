@@ -146,6 +146,45 @@ def validate_token(token, *, now_s):
     )
 
 
+def load_existing_certificate(now_ms):
+    """Validate and reuse an exact candidate-bound certificate without rewriting it."""
+    require(CERT.exists() and not CERT.is_symlink(), "CERTIFICATE_EXISTING_MISSING")
+    regular(CERT, owner=0, no_write=True)
+    raw = CERT.read_bytes()
+    try:
+        row = json.loads(raw)
+    except Exception as exc:
+        raise ValueError("CERTIFICATE_EXISTING_JSON_INVALID") from exc
+    require(canonical(row) == raw, "CERTIFICATE_EXISTING_NONCANONICAL")
+    require(row.get("approvedSha") == SOURCE, "CERTIFICATE_EXISTING_SHA_MISMATCH")
+    require(row.get("planSha256") == PLAN, "CERTIFICATE_EXISTING_PLAN_MISMATCH")
+    require(row.get("policy") == "H48_TIME_ONLY", "CERTIFICATE_EXISTING_POLICY_MISMATCH")
+    require(row.get("deploymentTarget") == "professional-dismanager.net",
+            "CERTIFICATE_EXISTING_TARGET_MISMATCH")
+    require(row.get("authorizesOtherPolicies") is False,
+            "CERTIFICATE_EXISTING_SCOPE_LEAK")
+    require(type(row.get("expiresAt")) is int and row["expiresAt"] > now_ms,
+            "CERTIFICATE_EXISTING_EXPIRED")
+    validate_pinned_policy(row, now_ms)
+    trusted_dir(AUDIT_DIR, mode=0o700)
+    receipt_path = AUDIT_DIR / (SOURCE + ".json")
+    regular(receipt_path, owner=0, no_write=True)
+    receipt_raw = receipt_path.read_bytes()
+    try:
+        receipt = json.loads(receipt_raw)
+    except Exception as exc:
+        raise ValueError("CERTIFICATE_EXISTING_RECEIPT_JSON_INVALID") from exc
+    require(canonical(receipt) == receipt_raw, "CERTIFICATE_EXISTING_RECEIPT_NONCANONICAL")
+    require(receipt.get("sourceSha") == SOURCE and receipt.get("planSha256") == PLAN,
+            "CERTIFICATE_EXISTING_RECEIPT_BINDING_MISMATCH")
+    digest = hashlib.sha256(raw).hexdigest()
+    require(receipt.get("certificateSha256") == digest,
+            "CERTIFICATE_EXISTING_RECEIPT_DIGEST_MISMATCH")
+    require(all(receipt.get(k) == 0 for k in
+                ("ordersSent", "cancelsSent", "positionChangesSent")),
+            "CERTIFICATE_EXISTING_RECEIPT_MUTATION")
+    return row, receipt, digest
+
 def verify_preflight(approval_id, run_id, now_ms):
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     trusted_dir(ROOT, mode=0o700)
@@ -156,8 +195,12 @@ def verify_preflight(approval_id, run_id, now_ms):
     regular(STORE, owner=1000)
     rows = json.loads(STORE.read_bytes())
     record = approved_record(rows, approval_id=approval_id, run_id=run_id, now_ms=now_ms)
-    validate_pinned_policy(certificate(now_ms), now_ms)
-    require(not CERT.exists() and not CERT.is_symlink(), "CERTIFICATE_ALREADY_ISSUED")
+    if CERT.is_symlink():
+        raise ValueError("CERTIFICATE_SYMLINK_FORBIDDEN")
+    if CERT.exists():
+        load_existing_certificate(now_ms)
+    else:
+        validate_pinned_policy(certificate(now_ms), now_ms)
     return record
 
 
@@ -193,6 +236,20 @@ def issue(approval_id, run_id, token):
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         record = verify_preflight(approval_id, run_id, time.time_ns() // 1000000)
         now_ms = time.time_ns() // 1000000
+        if CERT.is_symlink():
+            raise ValueError("CERTIFICATE_SYMLINK_FORBIDDEN")
+        if CERT.exists():
+            row, receipt, digest = load_existing_certificate(now_ms)
+            return {
+                "status": "H48_OWNER_POLICY_CERTIFICATE_ISSUED_NOT_LIVE",
+                "approvedSha": SOURCE,
+                "planSha256": PLAN,
+                "certificateSha256": digest,
+                "idempotent": True,
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+            }
         row = certificate(now_ms)
         validate_pinned_policy(row, now_ms)
         parent = Path("/etc/disdex")
