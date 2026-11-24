@@ -158,7 +158,7 @@ jobs:
               plan = hashlib.sha256(context.encode("ascii")).hexdigest()
           elif hype_stable4:
               target, plan = hype_stable4.groups()
-              if target != "74331d74f400acda21a2c1edb5f7b166e197a93f" or plan != "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f":
+              if target != "08f4a0d77d85808d897d6d4d985b950af0d76bab" or plan != "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f":
                   raise SystemExit("STABLE4_H48_EXACT_SOURCE_AND_POLICY_PLAN_REQUIRED")
               operation = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
               scope = "HYPE_TREND_LONG"
@@ -184,7 +184,7 @@ jobs:
               orders_enabled = "true"
           elif dd30_all:
               target, plan = dd30_all.groups()
-              if target != "74331d74f400acda21a2c1edb5f7b166e197a93f" or plan != "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4":
+              if target != "08f4a0d77d85808d897d6d4d985b950af0d76bab" or plan != "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4":
                   raise SystemExit("STABLE4_DD30_ALLRUNNERS_EXACT_SOURCE_AND_PLAN_REQUIRED")
               operation = "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE"
               scope = "STABLE4_DD30_ALLRUNNERS"
