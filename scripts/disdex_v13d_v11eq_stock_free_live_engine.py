@@ -29,7 +29,21 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
             payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
             if not isinstance(payload, dict):
                 raise RuntimeError("Free reference /health returned a non-object response")
-            if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
+            # The proxy has two compatible health contracts in production:
+            # the legacy explicit-source form and the current aggregate form.
+            # Accept only a fully-ready response from either contract; partial,
+            # stale, or unknown payloads remain fail-closed.
+            legacy_ready = (
+                payload.get("pythConnected") is True
+                and payload.get("iexConnected") is True
+            )
+            aggregate_ready = (
+                payload.get("status") == "ok"
+                and payload.get("connected") is True
+                and payload.get("freshnessReady") is True
+                and payload.get("healthReason") == "READY"
+            )
+            if legacy_ready or aggregate_ready:
                 return payload
             last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
         except Exception as error:
