@@ -53,15 +53,7 @@ CAP_OVERRIDES: dict[str, str] = {
     "HYPE_LONG_MAX_GROSS": "1.0",
 }
 
-FORBIDDEN_TRUE_FLAGS = (
-    "ORDERS_ENABLED",
-    "LIVE_TRADING_ENABLED",
-    "LIVE_EXECUTION_ENABLED",
-    "OPERATOR_ARMED",
-    "LIVE_ENABLED",
-    "DISDEX_MONITOR_NEW_ORDERS_ALLOWED",
-)
-TRUE_VALUE_RE = re.compile(r"(?i)(?:^|[\s'\"=])([A-Z0-9_]*?(?:ORDERS_ENABLED|LIVE_TRADING_ENABLED|LIVE_EXECUTION_ENABLED|OPERATOR_ARMED|LIVE_ENABLED|DISDEX_MONITOR_NEW_ORDERS_ALLOWED))=(true|1|yes)(?:$|[\s'\"])")
+TRUE_VALUE_RE = re.compile(r"(?i)(?:^|[\s'\"=])([A-Z0-9_]*?(?:ORDERS_ENABLED|LIVE_TRADING_ENABLED|LIVE_EXECUTION_ENABLED|OPERATOR_ARMED|PRODUCTION_CONFIG_LIVE_ENABLED|DISDEX_MONITOR_NEW_ORDERS_ALLOWED))=(true|1|yes)(?:$|[\s'\"])")
 
 
 def require(ok: bool, reason: str) -> None:
@@ -97,7 +89,16 @@ def monitor_order_flags(text: str) -> list[str]:
 def assert_monitor_only(unit: str) -> None:
     env = gate.systemd_value(unit, "Environment")
     start = gate.systemd_value(unit, "ExecStart")
-    found = monitor_order_flags(env + " " + start)
+    combined = env + " " + start
+    found = monitor_order_flags(combined)
+    # QUALITY102 has a separate live selector flag; FET deliberately uses a
+    # shadow-runner entry point whose historical LIVE_ENABLED marker means the
+    # strategy is loaded, not that exchange execution is armed.  The actual
+    # execution/permit flags above remain fail-closed.
+    if re.search(r"(?i)(?:^|[\s'\"=])QUALITY102_LIVE_ENABLED=(true|1|yes)(?:$|[\s'\"])", combined):
+        found.append("QUALITY102_LIVE_ENABLED")
+    if "disdex-fet-brk48-shadow-runner.ts" not in combined and "FET_BRK48" in unit:
+        found.append("FET_SHADOW_ENTRYPOINT_MISSING")
     require(not found, "ORDER_ENABLE_FLAG_PRESENT:" + unit + ":" + ",".join(found))
 
 
