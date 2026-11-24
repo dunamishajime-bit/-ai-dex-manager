@@ -26,6 +26,11 @@ CERT_DIR = Path("/etc/disdex/stable4/h48-time-only")
 CERT = CERT_DIR / (SOURCE + ".json")
 AUDIT_DIR = ROOT / "h48-owner-policy-issuance"
 PUBKEY = ROOT / "owner-approval-public.pem"
+# The H48 policy's independent V4 inventory verifier is a root-owned runtime
+# dependency. Pin its deployed bytes so a missing or replaced verifier fails
+# closed instead of silently falling back to an untrusted import path.
+RUNTIME_OWNERSHIP_MODULE = Path("/usr/local/libexec/disdex-unified/disdex_v4_nonflat_ownership.py")
+RUNTIME_OWNERSHIP_MODULE_SHA256 = "832ac8086277bace1bf5312863f3d9e7a741207c8726032ef44858385b1df365"
 
 
 def require(value, code):
@@ -111,7 +116,15 @@ def validate_pinned_policy(row, now_ms):
     source = RELEASE / "scripts/ops/root/disdex_stable4_h48_policy.py"
     regular(source, no_write=True)
     require(hashlib.sha256(source.read_bytes()).hexdigest() == POLICY_SHA256, "PINNED_POLICY_SOURCE_MISMATCH")
-    # Import only the exact Git pin, never source supplied by an operator.
+    regular(RUNTIME_OWNERSHIP_MODULE, owner=0, no_write=True)
+    require(
+        hashlib.sha256(RUNTIME_OWNERSHIP_MODULE.read_bytes()).hexdigest()
+        == RUNTIME_OWNERSHIP_MODULE_SHA256,
+        "PINNED_OWNERSHIP_RUNTIME_MISMATCH",
+    )
+    # Import only the exact Git pin plus the separately pinned root-owned
+    # verifier dependency, never an operator-supplied module.
+    sys.path.insert(0, str(RUNTIME_OWNERSHIP_MODULE.parent))
     sys.path.insert(0, str(source.parent))
     from disdex_stable4_h48_policy import validate_h48_certificate
     return validate_h48_certificate(row, approved_sha=SOURCE, approved_plan_sha256=PLAN, now_ms=now_ms)
