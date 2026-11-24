@@ -55,6 +55,25 @@ STALE_MARGIN = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
 # P1 observed this prior failed candidate left an auto-restart loop behind.
 STALE_MARGIN_CANDIDATE = "a851129bf90c05ac4cce570af7e942a9a238ef70"
 STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"
+# Instance families whose stale non-pinned processes can interfere with a
+# monitor-only generation.  The cleanup is deliberately allow-listed; it never
+# scans or stops unrelated systemd services.
+STALE_INSTANCE_BASES = (
+    "disdex-v12-v4",
+    "disdex-v4-rate-budget-broker",
+    "disdex-pengu-dual-ls-v2",
+    "disdex-quality102-causal-v1",
+    "disdex-v52-aster-only",
+    "disdex-fet-brk48",
+    "disdex-idle-priority-short",
+    "disdex-hype-long",
+    "disdex-shared-crypto-risk",
+    "disdex-v12-v52-margin-guard",
+)
+INSTANCE_UNIT_RE = re.compile(
+    r"^(?P<base>" + "|".join(re.escape(item) for item in STALE_INSTANCE_BASES) +
+    r")@(?P<sha>[0-9a-f]{40})\\.service$"
+)
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
 V4_OVERLAY_SCHEMA = "disdex-v4-staged-overlay/v1"
@@ -811,6 +830,37 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
     require(min(seen.values()) >= 3, "THREE_MONITOR_CYCLES_NOT_OBSERVED")
 
 
+
+def discover_stale_instance_units(protected_units: set[str], target_units_set: set[str]) -> list[str]:
+    """Return only active non-pinned instances from audited runner families.
+
+    A previous failed cutover can leave a missing-release instance in
+    activating/auto-restart.  Restrict discovery to the allow-listed families,
+    preserve every currently pinned service and the new target units, and do
+    not touch failed/inactive historical units.
+    """
+    rows = run(
+        "/usr/bin/systemctl",
+        "list-units",
+        "--all",
+        "--type=service",
+        "--plain",
+        "--no-legend",
+        "--no-pager",
+        timeout=60,
+    )
+    candidates: set[str] = set()
+    for raw in rows.splitlines():
+        unit = raw.strip().split(None, 1)[0] if raw.strip() else ""
+        match = INSTANCE_UNIT_RE.fullmatch(unit)
+        if not match or unit in protected_units or unit in target_units_set:
+            continue
+        state = unit_property(unit, "ActiveState")
+        if state in {"active", "activating", "deactivating", "reloading"}:
+            candidates.add(unit)
+    return sorted(candidates)
+
+
 def validate_token(token: str, public_key: Path, target: str, execution_plan_sha256: str, approval_id: str) -> None:
     require(UUID_RE.fullmatch(approval_id) is not None and token and len(token) <= 16_384, "APPROVAL_INPUT_INVALID")
     require(public_key.is_file() and not public_key.is_symlink(), "OWNER_PUBLIC_KEY_MISSING")
@@ -880,6 +930,17 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         # restart-loop units.  This is the only systemd quiesce; no order
         # endpoint is used.  The PENGU instance is a missing-release CHDIR
         # loop and is explicitly pinned here so the repair remains auditable.
+        # Keep the pinned generation and audited canonical shared guards,
+        # but discover every other active/restarting instance in the bounded
+        # allow-list.  This closes the gap where a prior failed candidate left
+        # a different SHA in auto-restart and stole the account lock.
+        pinned_rows = (json.loads(pins_raw.decode("utf-8")).get("runners") or {})
+        protected_units = set(old_units.values())
+        for key in ("SHARED_CRYPTO_RISK", "MARGIN_GUARD"):
+            row = pinned_rows.get(key) or {}
+            service = str(row.get("serviceUnit") or "")
+            if service:
+                protected_units.add(service)
         stale_units = [
             f"disdex-quality102-causal-v1@{STALE_Q102}.service",
             f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service",
@@ -891,7 +952,8 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             # audited canonical guard; retire only this exact target unit.
             target_margin_unit,
         ]
-        for unit in (*old_units.values(), *stale_units):
+        stale_units.extend(discover_stale_instance_units(protected_units, set(units.values())))
+        for unit in sorted(set((*old_units.values(), *stale_units))):
             stop_unit(unit)
             run("/usr/bin/systemctl", "disable", unit, check=False, timeout=30)
         q102_state = dict(q102_before); q102_state["runtimeCommitSha"] = target
