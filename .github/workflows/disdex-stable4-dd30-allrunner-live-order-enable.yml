@@ -148,7 +148,7 @@ jobs:
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+          STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
           SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
           PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
         run: |
@@ -162,7 +162,7 @@ jobs:
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+          STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
           SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
           PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
         run: |
@@ -174,7 +174,7 @@ jobs:
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+          STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
         run: |
           set -euo pipefail
           opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -p "$SSH_PORT")
