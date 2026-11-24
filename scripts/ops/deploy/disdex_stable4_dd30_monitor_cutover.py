@@ -401,7 +401,7 @@ def recover_expired_account_lock(release: Path, run_id: str) -> bool:
     require(cli.is_file() and script.is_file(), "ACCOUNT_LOCK_RECOVERY_SOURCE_MISSING")
     request_id = "stable4-dd30-" + re.sub(r"[^A-Za-z0-9._-]", "_", str(run_id))
     common = [
-        "/usr/bin/node", str(cli),
+        "/usr/bin/node", str(cli), str(script),
         "--path", str(ACCOUNT_LOCK),
         "--expected-owner-id", owner_id,
         "--request-id", request_id,
