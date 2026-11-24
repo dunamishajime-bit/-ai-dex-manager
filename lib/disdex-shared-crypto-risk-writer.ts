@@ -69,6 +69,7 @@ export async function refreshSharedCryptoDailyRisk(input: {
     portfolioDdGovernorPath?: string;
     protectionObservationPath?: string;
     runtimeSha?: string;
+    assertWriterPinned?: () => Promise<void>;
 }): Promise<SharedCryptoDailyRiskState & { portfolioDdGovernor?: PortfolioDdGovernorState }> {
     const now = input.now ?? Date.now();
     const startTime = utcStart(now);
@@ -124,6 +125,9 @@ export async function refreshSharedCryptoDailyRisk(input: {
         referenceEquity,
         sourceComplete: true,
     });
+    // A pin change while signed venue GETs are in flight cannot authorize
+    // the former writer to publish another shared-risk snapshot.
+    await input.assertWriterPinned?.();
     await writeSharedCryptoDailyRisk(input.path, state);
     let portfolioDdGovernor: PortfolioDdGovernorState | undefined;
     if (input.portfolioDdGovernorPath) {

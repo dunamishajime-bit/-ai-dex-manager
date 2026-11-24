@@ -5,6 +5,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { refreshSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-risk-writer";
 import { runSharedRiskRefreshLoop } from "../lib/disdex-shared-crypto-risk-refresh-loop";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { assertSharedRiskWriterPinned, SharedRiskWriterNotPinnedError } from "../lib/disdex-shared-risk-writer-pin";
 
 function numberEnv(name: string, fallback: number): number {
     const parsed = Number(process.env[name]);
@@ -12,6 +13,17 @@ function numberEnv(name: string, fallback: number): number {
 }
 
 async function main(): Promise<void> {
+    // Unpinned instances exit successfully: Restart=on-failure cannot loop.
+    // Missing/corrupt pins still fail closed.
+    try {
+        await assertSharedRiskWriterPinned();
+    } catch (error) {
+        if (error instanceof SharedRiskWriterNotPinnedError) {
+            console.warn("SHARED_RISK_NON_PINNED_INSTANCE_INERT");
+            return;
+        }
+        throw error;
+    }
     const path = process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || ".runtime-state/shared/crypto-daily-risk.json";
     const portfolioDdGovernorPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH || ".runtime-state/shared/portfolio-dd-governor.json";
     const client = new AsterV3Client({
@@ -33,20 +45,33 @@ async function main(): Promise<void> {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
 
+    const assertStillPinned = async () => {
+        try {
+            await assertSharedRiskWriterPinned();
+        } catch (error) {
+            if (error instanceof SharedRiskWriterNotPinnedError) stop();
+            throw error;
+        }
+    };
+
     await runSharedRiskRefreshLoop({
         daemon,
         intervalMs,
         retryMs,
         wait: (milliseconds) => delay.wait(milliseconds),
         shouldStop: () => stopping,
-        refresh: () => refreshSharedCryptoDailyRisk({
-            client,
-            path,
-            maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
-            portfolioDdGovernorPath,
-            protectionObservationPath: process.env.DISDEX_RESIDENT_STOP_OBSERVATION_PATH || "/var/lib/disdex/shared/resident-stop-observation.json",
-            runtimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
-        }),
+        refresh: async () => {
+            await assertStillPinned();
+            return refreshSharedCryptoDailyRisk({
+                client,
+                path,
+                maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
+                portfolioDdGovernorPath,
+                protectionObservationPath: process.env.DISDEX_RESIDENT_STOP_OBSERVATION_PATH || "/var/lib/disdex/shared/resident-stop-observation.json",
+                runtimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                assertWriterPinned: assertStillPinned,
+            });
+        },
         onSuccess: (state) => {
             console.log(JSON.stringify({
                 timestamp: new Date().toISOString(),
