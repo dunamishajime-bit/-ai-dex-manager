@@ -156,8 +156,8 @@ jobs:
           ssh_opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -p "$SSH_PORT")
           scp_opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -P "$SSH_PORT")
           ssh -nT "${ssh_opts[@]}" "root@$HOST" "install -d -o root -g root -m 0700 '$STAGE'"
-          scp -q "${opts[@]}" scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py "root@$HOST:$STAGE/preflight.py"
-          scp -q "${opts[@]}" config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json "root@$HOST:$STAGE/plan.json"
+          scp -q "${scp_opts[@]}" scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py "root@$HOST:$STAGE/preflight.py"
+          scp -q "${scp_opts[@]}" config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json "root@$HOST:$STAGE/plan.json"
           ssh -nT "${ssh_opts[@]}" "root@$HOST" "chown root:root '$STAGE/'* && chmod 0444 '$STAGE/'* && sha256sum '$STAGE/plan.json'"
       - name: Run signed, read-only Root preflight
         shell: bash
