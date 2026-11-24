@@ -126,9 +126,9 @@ jobs:
       - name: Configure reviewed Root SSH
         shell: bash
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
-          KNOWN: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
           PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         run: |
           set -euo pipefail
@@ -147,7 +147,7 @@ jobs:
       - name: Stage immutable read-only preflight source
         shell: bash
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
           SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
           PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
@@ -161,7 +161,7 @@ jobs:
       - name: Run signed, read-only Root preflight
         shell: bash
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
           SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
           PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
@@ -173,7 +173,7 @@ jobs:
         if: always()
         shell: bash
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           STAGE: /tmp/disdex-stable4-dd30-${{ github.run_id }}
         run: |
           set -euo pipefail
