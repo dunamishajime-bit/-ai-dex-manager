@@ -67,21 +67,24 @@ export async function verifyOwnerGoalRelease(input: {
   ) {
     throw new Error("GOAL_CI_RUN_NOT_ELIGIBLE");
   }
-  const workflow = await githubJson(`${root}/actions/workflows/${ci.workflow_id}`, fetcher);
+  // After the successful exact-SHA CI gate, these four independent reads
+  // can be performed together. Sequential requests previously amplified GitHub
+  // latency and exhausted the caller's 15-second bridge deadline.
+  // Every attestation check below remains mandatory and fail-closed.
+  const path = `docs/implementation/goal-campaigns/${approvalId}.json`;
+  const [workflow, trusted, candidateWorkflow, file] = await Promise.all([
+    githubJson(`${root}/actions/workflows/${ci.workflow_id}`, fetcher),
+    githubJson(`${root}/contents/${GOAL_CI_WORKFLOW}?ref=master`, fetcher),
+    githubJson(`${root}/contents/${GOAL_CI_WORKFLOW}?ref=${candidateSha}`, fetcher),
+    githubJson(`${root}/contents/${path}?ref=${candidateSha}`, fetcher),
+  ]);
   if (workflow.path !== GOAL_CI_WORKFLOW || workflow.name !== GOAL_CI_WORKFLOW_NAME ||
       workflow.state !== "active") {
     throw new Error("GOAL_CI_WORKFLOW_NOT_TRUSTED");
   }
-  const trusted = await githubJson(
-    `${root}/contents/${GOAL_CI_WORKFLOW}?ref=master`, fetcher);
-  const candidateWorkflow = await githubJson(
-    `${root}/contents/${GOAL_CI_WORKFLOW}?ref=${candidateSha}`, fetcher);
   if (!trusted.sha || trusted.sha !== candidateWorkflow.sha || trusted.type !== "file") {
     throw new Error("GOAL_CI_WORKFLOW_MODIFIED");
   }
-
-  const path = `docs/implementation/goal-campaigns/${approvalId}.json`;
-  const file = await githubJson(`${root}/contents/${path}?ref=${candidateSha}`, fetcher);
   if (file.type !== "file" || file.encoding !== "base64" ||
       typeof file.content !== "string" || file.size > MAX_PLAN_BYTES ||
       file.size <= 0) {

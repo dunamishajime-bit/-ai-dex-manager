@@ -175,6 +175,39 @@ test("Fresh exact-SHA token eligibility comes only from verified immutable workf
   await assert.rejects(verifyOwnerGoalRelease({ ...params, fetcher: githubStub({ changedPlan: true }).fetcher }), /GOAL_PLAN_SHA_MISMATCH/);
 });
 
+test("Goal attestation fetches independent evidence concurrently after the CI run gate", async () => {
+  const stub = githubStub();
+  let active = 0;
+  let maxActive = 0;
+  let ciVerifiedFirst = false;
+  const observed: string[] = [];
+  const fetcher = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.includes("/actions/runs/")) {
+      observed.push("ci");
+      const response = await stub.fetcher(input);
+      ciVerifiedFirst = true;
+      return response;
+    }
+    assert.equal(ciVerifiedFirst, true, "all independent requests must follow the CI run gate");
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return await stub.fetcher(input);
+    } finally {
+      active -= 1;
+    }
+  }) as typeof fetch;
+  await verifyOwnerGoalRelease({
+    approvalId: GOAL_ID, goal: baseGoal,
+    candidateSha: SHA, planSha256: stub.planSha,
+    ordersEnabled: false, ciRunId: CI_ID, fetcher,
+  });
+  assert.deepEqual(observed, ["ci"]);
+  assert.equal(maxActive, 4, "four independent GitHub reads should overlap");
+});
+
 test("Legacy redeem rejects goal charter, and only admin OTP can approve the charter", () => {
   const route = fs.readFileSync("app/api/system/deploy-approval/route.ts", "utf8");
   const admin = fs.readFileSync("app/api/admin/deploy-approval/route.ts", "utf8");
