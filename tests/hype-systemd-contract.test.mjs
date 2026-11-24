@@ -12,3 +12,11 @@ test("HYPE systemd unit is operator-gated and release-pinned", async () => {
   const armedOverride = unit.indexOf("EnvironmentFile=-/etc/disdex/current-runtime/%i.hype-operator.env");
   assert.ok(envFile >= 0 && armedOverride > envFile, "HYPE operator override EnvironmentFile must follow the shared contract EnvironmentFile");
 });
+
+
+test("HYPE transient manual-review keeps the daemon alive for a fail-closed retry", async () => {
+  const source = await readFile("scripts/disdex-hype-zec-long-live-runner.ts", "utf8");
+  assert.match(source, /DISDEX_HYPE_ZEC_MANUAL_REVIEW_RETRY_MS/);
+  assert.match(source, /result\.status === "manual-review"/);
+  assert.doesNotMatch(source, /!daemon \|\| stopping \|\| result\.status === "manual-review"\) break/);
+});
