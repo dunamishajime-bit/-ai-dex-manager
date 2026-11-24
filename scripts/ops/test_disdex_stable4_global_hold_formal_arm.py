@@ -86,6 +86,13 @@ class GlobalOwnerProtectedHoldTests(unittest.TestCase):
         self.assertGreater(receipt["expiresAt"], NOW)
         self.assertLessEqual(receipt["expiresAt"] - NOW, 3600000)
 
+    def test_current_run_receipt_path_is_supported_for_idempotent_reuse(self):
+        import inspect
+        source = inspect.getsource(hold.validate_root_receipt)
+        self.assertIn("owner.SOURCE + \".\" + run_id + \".json\"", source)
+        self.assertIn("ROOT_RECEIPT_SYMLINK_FORBIDDEN", source)
+        self.assertIn("certificate_digest", source)
+
     def test_kill_change_cannot_be_called_without_signature_and_root_receipt(self):
         import inspect
         f = inspect.getsource(hold.guarded_arm)
