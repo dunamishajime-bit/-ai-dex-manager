@@ -1,6 +1,7 @@
 import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
 import "dotenv/config";
-import { resolve } from "node:path";
+import { mkdir, rename, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
@@ -21,6 +22,43 @@ import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
     return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+
+async function writePenguMonitorTick(
+    monitorPath: string | undefined,
+    result: { status: string; message: string },
+) {
+    if (!monitorPath) return;
+    const path = monitorPath.trim();
+    if (!path.startsWith("/var/lib/disdex/stable4-dd30-monitor/") || path.includes("..")) {
+        throw new Error("PENGU_MONITOR_TICK_PATH_INVALID");
+    }
+    const runtimeSha = String(
+        process.env.DISDEX_RELEASE_SHA
+        || process.env.DISDEX_RUNTIME_COMMIT_SHA
+        || "",
+    ).trim().toLowerCase();
+    if (!/^[a-f0-9]{40}$/.test(runtimeSha)) {
+        throw new Error("PENGU_MONITOR_RUNTIME_SHA_MISSING");
+    }
+    await mkdir(dirname(path), { recursive: true });
+    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+    const value = {
+        schema: "disdex-pengu-monitor-tick/v1",
+        runnerId: "PENGU_V8",
+        mode: "SHADOW",
+        runtimeSha,
+        status: result.status,
+        message: String(result.message || "").slice(0, 240),
+        newOrdersAllowed: false,
+        ordersSent: 0,
+        cancelsSent: 0,
+        positionChangesSent: 0,
+        updatedAt: Date.now(),
+    };
+    await writeFile(temporary, `${JSON.stringify(value)}\n`, { encoding: "utf8", mode: 0o640 });
+    await rename(temporary, path);
 }
 
 async function main() {
@@ -134,6 +172,7 @@ async function main() {
         v64DynamicLongEnabled: recoveryV8Enabled,
         promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status,
     }));
+    const monitorTickPath = runtime.mode === "SHADOW" ? process.env.PENGU_DUAL_LS_V2_MONITOR_TICK_PATH : undefined;
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
     const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));
@@ -150,6 +189,7 @@ async function main() {
     process.on("SIGTERM", stop);
     do {
         const result = await runner.tick();
+        await writePenguMonitorTick(monitorTickPath, result);
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
         const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message, monitorPollMs);
