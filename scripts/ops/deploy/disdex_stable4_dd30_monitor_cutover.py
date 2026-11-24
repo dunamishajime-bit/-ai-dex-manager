@@ -804,7 +804,7 @@ def validate_evidence(path: Path, target: str, runner: str) -> None:
             require(str(value.get("mode")).upper() == "SHADOW", "SHADOW_EVIDENCE_MODE_INVALID:" + runner)
 
 
-def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], restart_before: dict[str, str], timeout: int = 240) -> None:
+def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], restart_before: dict[str, str], timeout: int = 600) -> None:
     previous: dict[str, tuple[int, str]] = {}
     seen = {runner: 0 for runner in RUNNER_IDS}
     for runner, path in paths.items():
@@ -835,7 +835,7 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             require(health[unit]["NRestarts"] == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
         if min(seen.values()) < 3:
             time.sleep(3)
-    require(min(seen.values()) >= 3, "THREE_MONITOR_CYCLES_NOT_OBSERVED")
+    if min(seen.values()) < 3:\n        detail = ",".join(f"{runner}={seen[runner]}" for runner in RUNNER_IDS)\n        raise ContractError("THREE_MONITOR_CYCLES_NOT_OBSERVED:" + detail)
 
 
 
