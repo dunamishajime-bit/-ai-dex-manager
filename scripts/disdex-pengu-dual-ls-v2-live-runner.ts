@@ -137,6 +137,9 @@ async function main() {
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
     const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));
+    const monitorPollMs = runtime.mode === "SHADOW"
+        ? Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_MONITOR_POLL_MS", 0)))
+        : 0;
     let stopping = false;
     const boundaryWait = createInterruptibleDelay();
     const stop = () => {
@@ -149,7 +152,7 @@ async function main() {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
-        const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message);
+        const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message, monitorPollMs);
         await boundaryWait.wait(waitMs);
     } while (!stopping);
 }
