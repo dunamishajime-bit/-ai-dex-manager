@@ -47,9 +47,13 @@ HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
 RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
+PENDING_PROOF = Path("/var/lib/disdex/v12-v4/monitor/pending-proof.json")
+ACCOUNT_LOCK = Path("/var/lib/disdex/shared/account-order.lock")
 MONITOR_ROOT = Path("/var/lib/disdex/stable4-dd30-monitor")
 STALE_Q102 = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
 STALE_MARGIN = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
+# P1 observed this prior failed candidate left an auto-restart loop behind.
+STALE_MARGIN_CANDIDATE = "a851129bf90c05ac4cce570af7e942a9a238ef70"
 STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
@@ -369,6 +373,74 @@ def signed_get() -> tuple[str, str]:
     stamp = str(value.get("observedAt") or value.get("venueTime") or "")
     require(stamp, "SIGNED_GET_TIMESTAMP_MISSING")
     return stamp, digest(inventory)
+
+
+def recover_expired_account_lock(release: Path, run_id: str) -> bool:
+    """Archive only the known expired read-only reconciliation lock.
+
+    The TypeScript recovery command re-checks PID liveness, reservations and
+    exact bytes. This wrapper binds it to the staged immutable release and
+    never touches the exchange or any order state.
+    """
+    if not ACCOUNT_LOCK.exists():
+        return False
+    value = json.loads(read_regular(ACCOUNT_LOCK, 262_144).decode("utf-8"))
+    require(value.get("schema") == "disdex-account-lock/v1", "ACCOUNT_LOCK_SCHEMA_INVALID")
+    owner_id = str(value.get("ownerId") or "")
+    require(owner_id, "ACCOUNT_LOCK_OWNER_INVALID")
+    expires_at = value.get("expiresAt")
+    require(isinstance(expires_at, (int, float)) and not isinstance(expires_at, bool), "ACCOUNT_LOCK_EXPIRES_INVALID")
+    if float(expires_at) > time.time() * 1000:
+        return False
+    require(re.fullmatch(r"PENDING_READONLY_RECONCILE:[0-9]+:[0-9]+", owner_id) is not None, "ACCOUNT_LOCK_RECOVERY_OWNER_UNSUPPORTED")
+    reservations = value.get("reservations")
+    require(isinstance(reservations, list), "ACCOUNT_LOCK_RESERVATIONS_INVALID")
+    require(not reservations, "ACCOUNT_LOCK_RESERVATIONS_PRESENT")
+    cli = release / "node_modules" / "tsx" / "dist" / "cli.mjs"
+    script = release / "scripts" / "disdex-account-order-lock-expired-recovery.ts"
+    require(cli.is_file() and script.is_file(), "ACCOUNT_LOCK_RECOVERY_SOURCE_MISSING")
+    request_id = "stable4-dd30-" + re.sub(r"[^A-Za-z0-9._-]", "_", str(run_id))
+    common = [
+        "/usr/bin/node", str(cli),
+        "--path", str(ACCOUNT_LOCK),
+        "--expected-owner-id", owner_id,
+        "--request-id", request_id,
+    ]
+    verify = run(*common, "--verify-only", timeout=90)
+    require("EXPIRED_ACCOUNT_LOCK_RECOVERY_ELIGIBLE" in verify, "ACCOUNT_LOCK_RECOVERY_VERIFY_FAILED")
+    applied = run(*common, "--apply", "--ack", "I_ACK_EXPIRED_ACCOUNT_LOCK_RECOVERY_AFTER_3X_READONLY_RECONCILIATION", timeout=90)
+    require("EXPIRED_ACCOUNT_LOCK_ARCHIVED" in applied, "ACCOUNT_LOCK_RECOVERY_APPLY_FAILED")
+    return True
+
+
+def refresh_v4_pending_proof(target: str) -> str:
+    """Bind the stale pending registry to fresh signed-flat monitor evidence."""
+    raw = read_regular(PENDING, 262_144)
+    value = json.loads(raw.decode("utf-8"))
+    require(value.get("schema") == "disdex-pending-exposure/v1" and value.get("accountScope") == "ASTER_FUTURES", "PENDING_REGISTRY_INVALID")
+    entries = value.get("entries")
+    require(isinstance(entries, list) and not any(str(row.get("status", "")).upper() != "RELEASED" for row in entries if isinstance(row, dict)), "PENDING_REGISTRY_ACTIVE")
+    updated_at = value.get("updatedAt")
+    require(isinstance(updated_at, int) and updated_at > 0, "PENDING_REGISTRY_TIMESTAMP_INVALID")
+    meta = file_meta(PENDING_PROOF)
+    require(meta[0] == 0 and stat.S_IMODE(meta[2]) & 0o002 == 0, "V4_PENDING_PROOF_METADATA_INVALID")
+    payload = {
+        "cancelsSent": 0,
+        "candidateSha": target,
+        "openOrderCount": 0,
+        "ordersSent": 0,
+        "positionChangesSent": 0,
+        "positionCount": 0,
+        "priorUpdatedAt": updated_at,
+        "registryEntries": len(entries),
+        "registryHash": hashlib.sha256(raw).hexdigest(),
+        "schema": "disdex-pending-readonly-proof/v1",
+        "source": "SIGNED_ASTER_READONLY_ACCOUNT_LOCK",
+        "verifiedAt": int(time.time() * 1000),
+    }
+    proof_raw = (json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\\n").encode("utf-8")
+    write_atomic(PENDING_PROOF, proof_raw, meta)
+    return hashlib.sha256(proof_raw).hexdigest()
 
 
 def validate_shared_files(margin_unit: str) -> None:
@@ -762,12 +834,13 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     dropins = {runner: dropin_path(unit) for runner, unit in units.items()}
     instance = Path("/etc/systemd/system") / units["V52"]
     q102_path = Path("/var/lib/disdex/quality102-causal-v1/state.json")
-    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, *dropins.values(), instance])
+    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, PENDING_PROOF, *dropins.values(), instance])
     state_root_created = False
     release = BASE / target
     target_margin_unit = f"disdex-v12-v52-margin-guard@{target}.service"
     try:
         stage_candidate(tar_path, manifest_path, target)
+        lock_recovered = recover_expired_account_lock(release, run_id)
         install_state_dirs(target); state_root_created = True
         # The V52 template has a same-SHA guard dependency. Clone only the
         # reviewed instance and bind it to the existing healthy Margin Guard.
@@ -795,6 +868,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         stale_units = [
             f"disdex-quality102-causal-v1@{STALE_Q102}.service",
             f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service",
+            f"disdex-v12-v52-margin-guard@{STALE_MARGIN_CANDIDATE}.service",
             f"disdex-pengu-dual-ls-v2@{STALE_PENGU}.service",
             # A prior failed candidate may have left its per-SHA Margin Guard
             # restart-loop unit behind. The monitor cutover never needs a
@@ -810,6 +884,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         write_atomic(PINS, target_pins(pins_raw, target, units), file_snapshot[PINS][2] or (0, 0, 0o644))
         write_atomic(CURRENT_PLAN, target_plan(plan_raw, target), file_snapshot[CURRENT_PLAN][2] or (0, 0, 0o644))
         run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        pending_proof_digest = refresh_v4_pending_proof(target)
         for runner, unit in units.items():
             validate_target_unit(unit, target, runner)
             run("/usr/bin/systemctl", "start", unit, timeout=120)
@@ -825,7 +900,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         require(len({stamp for stamp, _ in final_reads}) == 3 and all(inv == baseline_inventory for _, inv in final_reads), "SIGNED_GET_POSTCUTOVER_CHANGED")
         _h2, _v2, hd2 = hold_snapshot(); require(hd2 == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
         require(not any(unit_active(unit) for unit in old_units.values()), "DUAL_RUNNER_ACTIVE")
-        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "runnerUnits": units}, sort_keys=True))
+        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "accountLockRecovered": lock_recovered, "pendingProofDigest": pending_proof_digest, "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:
             _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
