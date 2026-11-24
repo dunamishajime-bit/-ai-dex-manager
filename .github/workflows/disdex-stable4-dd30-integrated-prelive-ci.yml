@@ -51,6 +51,17 @@ jobs:
           python3 -m unittest -v tests/test_stable4_dd30_monitor_cutover.py
           echo 'LIVE_ORDER_PERMIT=FALSE'
 
+      - name: Shared Risk single-writer anti-duplication regression (no trading)
+        run: |
+          python3 -m unittest -v tests/test_stable4_dd30_shared_writer_singleton.py
+          python3 -m unittest -v tests/test_disdex_verify_singlewriter_candidate.py
+          node --import tsx --test \
+            tests/shared-risk-writer-pin.test.ts \
+            tests/shared-risk-writer-persist-guard.test.ts \
+            tests/shared-risk-transient-refresh-retry.test.ts
+          echo 'SHARED_RISK_SINGLE_WRITER_GUARD=PASS'
+          echo 'LIVE_ORDER_PERMIT=FALSE'
+
       - name: Type-check combined master UI and DD30 Runner source
         run: npx tsc --noEmit --pretty false
 
