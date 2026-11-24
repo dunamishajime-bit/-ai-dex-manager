@@ -108,6 +108,10 @@ async function main() {
     process.on("SIGTERM", stop);
     const lockAcquireAttempts = Math.max(1, Math.min(10, Math.trunc(numberEnv("DISDEX_IDLE_PRIORITY_LOCK_ACQUIRE_ATTEMPTS", 8))));
     const lockAcquireRetryMs = Math.max(250, Math.min(2_000, Math.trunc(numberEnv("DISDEX_IDLE_PRIORITY_LOCK_ACQUIRE_RETRY_MS", 1_000))));
+    // Keep transient venue/data failures observable without granting an
+    // order path. The next tick remains fail-closed and retries are bounded.
+    const manualReviewRetryMs = Math.max(5_000, Math.min(60_000,
+        Math.trunc(numberEnv("DISDEX_IDLE_PRIORITY_MANUAL_REVIEW_RETRY_MS", 15_000))));
     const runTick = <T extends { status: string }>(operation: () => Promise<T>) => runWithBoundedAccountLockRetry({
         operation,
         attempts: lockAcquireAttempts,
@@ -140,7 +144,11 @@ async function main() {
                 if (residualResult.status === "manual-review" || residualResult.status === "completed" || residualResult.status === "locked") result = residualResult;
             }
         }
-        if (!daemon || stopping || result.status === "manual-review") break;
+        if (!daemon || stopping) break;
+        if (result.status === "manual-review") {
+            await delay.wait(manualReviewRetryMs);
+            continue;
+        }
         const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs));
         const lockRetryMs = numberEnv("DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS", 8_000);
         const rateBudgetDeferred = result.status === "held"
