@@ -765,6 +765,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, *dropins.values(), instance])
     state_root_created = False
     release = BASE / target
+    target_margin_unit = f"disdex-v12-v52-margin-guard@{target}.service"
     try:
         stage_candidate(tar_path, manifest_path, target)
         install_state_dirs(target); state_root_created = True
@@ -795,6 +796,11 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             f"disdex-quality102-causal-v1@{STALE_Q102}.service",
             f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service",
             f"disdex-pengu-dual-ls-v2@{STALE_PENGU}.service",
+            # A prior failed candidate may have left its per-SHA Margin Guard
+            # restart-loop unit behind. The monitor cutover never needs a
+            # candidate-specific Margin Guard because V52 is bound to the
+            # audited canonical guard; retire only this exact target unit.
+            target_margin_unit,
         ]
         for unit in (*old_units.values(), *stale_units):
             stop_unit(unit)
@@ -823,7 +829,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     except Exception as exc:
         try:
             _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
-            for unit in units.values():
+            for unit in (*units.values(), target_margin_unit):
                 if unit_active(unit):
                     stop_unit(unit)
             restore_paths(file_snapshot)
