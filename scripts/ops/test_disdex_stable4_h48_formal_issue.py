@@ -87,6 +87,15 @@ class H48FormalOwnerTests(unittest.TestCase):
         self.assertNotIn("private_key", code)
         self.assertNotIn("issueDeploymentApprovalToken", code)
 
+    def test_runtime_verifier_dependency_is_root_immutable_and_pinned(self):
+        import inspect
+        import re
+        source = inspect.getsource(gate.validate_pinned_policy)
+        self.assertIn("RUNTIME_OWNERSHIP_MODULE", source)
+        self.assertIn("owner=0", source)
+        self.assertIn("no_write=True", source)
+        self.assertRegex(gate.RUNTIME_OWNERSHIP_MODULE_SHA256, r"^[0-9a-f]{64}$")
+
     def test_preflight_and_issue_are_separate(self):
         import inspect
         source = inspect.getsource(gate.main)
