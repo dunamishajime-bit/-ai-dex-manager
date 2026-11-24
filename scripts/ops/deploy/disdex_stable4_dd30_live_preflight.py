@@ -66,7 +66,7 @@ def require(ok: bool, reason: str) -> None:
 def safe_text(value: object) -> str:
     text = " ".join(str(value or "").split())
     text = re.sub(r"(?i)(token|secret|password|authorization|bearer|api[_-]?key|credential)[^ ]*", r"\1=<redacted>", text)
-    return re.sub(r"[^A-Za-z0-9_@%+.,:;/=()\\- ]", "?", text)[:220]
+    return re.sub(r"[^A-Za-z0-9_@%+.,:;/=()\- ]", "?", text)[:220]
 
 def run(*argv: str, timeout: int = 60) -> str:
     p = subprocess.run(list(argv), capture_output=True, text=True, timeout=timeout)
