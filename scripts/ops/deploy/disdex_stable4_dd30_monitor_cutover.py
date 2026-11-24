@@ -477,13 +477,22 @@ def refresh_v4_pending_proof(target: str) -> str:
     return hashlib.sha256(proof_raw).hexdigest()
 
 
-def validate_shared_files(margin_unit: str) -> None:
-    hold_snapshot()
+def validate_shared_files(margin_unit: str, *, allow_stale_shared_risk: bool = False) -> None:
+    _hold_raw, hold, _hold_digest = hold_snapshot()
     risk = read_json(RISK)
     require(risk.get("sourceComplete") is True and risk.get("tripped") is False, "SHARED_RISK_NOT_HEALTHY")
     require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_LIMIT_MISMATCH")
     updated = risk.get("updatedAt")
-    require(isinstance(updated, (int, float)) and -1000 <= int(time.time() * 1000) - float(updated) <= 15 * 60_000, "SHARED_RISK_STALE")
+    age_ms = int(time.time() * 1000) - float(updated) if isinstance(updated, (int, float)) else None
+    require(age_ms is not None and -1000 <= age_ms <= 60 * 60_000, "SHARED_RISK_STALE")
+    if age_ms > 15 * 60_000:
+        require(
+            allow_stale_shared_risk
+            and hold.get("active") is True
+            and hold.get("action") == "HOLD_PROTECTED"
+            and hold.get("scope") == "GLOBAL",
+            "SHARED_RISK_STALE",
+        )
     margin = read_json(MARGIN)
     require(margin.get("stage") == "HEALTHY" and margin.get("ordersAllowed") is True, "MARGIN_GUARD_NOT_HEALTHY")
     checked = margin.get("checkedAt")
@@ -730,19 +739,46 @@ def target_pins(raw: bytes, target: str, units: dict[str, str]) -> bytes:
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
+def _auxiliary_sha(value: dict, roots: dict, key: str) -> str:
+    root_text = str(roots.get(key) or "")
+    require(root_text, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING:" + key)
+    marker = Path(root_text) / ".disdex-release-sha"
+    candidate = ""
+    if marker.is_file() and not marker.is_symlink():
+        try:
+            candidate = marker.read_text(encoding="ascii").strip()
+        except Exception as exc:
+            raise ContractError("CURRENT_PLAN_AUXILIARY_MARKER_UNREADABLE:" + key) from exc
+    if not candidate:
+        candidate = str(value.get(key + "Sha") or "")
+    require(TARGET_SHA_RE.fullmatch(candidate) is not None, "CURRENT_PLAN_AUXILIARY_SHA_INVALID:" + key)
+    return candidate
+
+
 def target_plan(raw: bytes, target: str) -> bytes:
     value = json.loads(raw.decode("utf-8"))
     require(value.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
     value["scope"] = "FULL_PROJECT"
     value["sourceSha"] = target
-    value["monitorSha"] = target
     runners = value.setdefault("runners", {})
     for key in RUNNER_IDS:
         require(key in runners and runners[key] != target, "CURRENT_PLAN_RUNNER_INVALID:" + key)
         runners[key] = target
-    roots = value.setdefault("releaseRoots", {})
-    for key in RUNNER_IDS:
-        roots[key] = str(BASE / target)
+    legacy_roots = value.get("releaseRoots") or {}
+    require(isinstance(legacy_roots, dict), "CURRENT_PLAN_RELEASE_ROOTS_INVALID")
+    ui_root = str(legacy_roots.get("ui") or "")
+    monitor_root = str(legacy_roots.get("monitor") or "")
+    require(ui_root and monitor_root, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING")
+    value["uiSha"] = _auxiliary_sha(value, legacy_roots, "ui")
+    value["monitorSha"] = _auxiliary_sha(value, legacy_roots, "monitor")
+    # Root validation requires exactly the three lineage roots.  The prior
+    # current-plan carried one releaseRoot per Runner, which made the pinned
+    # Shared Risk prestart fail closed before it could refresh its evidence.
+    value["releaseRoots"] = {
+        "runners": str(BASE),
+        "ui": ui_root,
+        "monitor": monitor_root,
+    }
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
@@ -877,7 +913,61 @@ def validate_token(token: str, public_key: Path, target: str, execution_plan_sha
     verify_owner_token(token, public_key, REPO, target, SCOPE, OPERATOR, execution_plan_sha256, route=ROUTE, deployment_target=TARGET_HOST, operator_target=OPERATOR_TARGET, orders_enabled=False)
 
 
-def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[str, tuple[str, str]], dict[str, str], str]:
+def _shared_risk_tick() -> int:
+    risk = read_json(RISK)
+    require(risk.get("sourceComplete") is True and risk.get("tripped") is False, "SHARED_RISK_REPAIR_NOT_HEALTHY")
+    require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_REPAIR_LIMIT_MISMATCH")
+    updated = risk.get("updatedAt")
+    require(isinstance(updated, int) and updated > 0, "SHARED_RISK_REPAIR_TIMESTAMP_INVALID")
+    return updated
+
+
+def repair_shared_risk_writer(pins_raw: bytes, timeout: int = 360) -> list[int]:
+    """Restart the already pinned no-order Shared Risk Writer and prove real ticks.
+
+    This is a bounded maintenance step inside the approved monitor-only goal. It
+    never edits the HOLD, sends venue mutations, enables orders, or changes the
+    pinned Shared Risk SHA. The prestart hook remains the authority for exact
+    plan, receipt, nonce, and single-writer checks.
+    """
+    pins = json.loads(pins_raw.decode("utf-8"))
+    row = (pins.get("runners") or {}).get("SHARED_CRYPTO_RISK") or {}
+    sha = str(row.get("sha") or "")
+    unit = str(row.get("serviceUnit") or "")
+    require(TARGET_SHA_RE.fullmatch(sha) is not None, "SHARED_RISK_PIN_SHA_INVALID")
+    require(unit == f"disdex-shared-crypto-risk@{sha}.service", "SHARED_RISK_PIN_UNIT_INVALID")
+    env_path = Path("/etc/disdex/current-runtime") / f"{sha}-shared-risk-scoped.env"
+    env_text = read_regular(env_path, 16_384).decode("utf-8")
+    require(
+        re.search(r"(?m)^DISDEX_SHARED_RISK_ORDERS_ENABLED=false$",
+                   env_text) is not None,
+        "SHARED_RISK_ORDER_FLAG_NOT_FALSE",
+    )
+    _hold_raw, hold, _hold_digest = hold_snapshot()
+    require(hold.get("active") is True and hold.get("action") == "HOLD_PROTECTED" and hold.get("scope") == "GLOBAL", "GLOBAL_HOLD_NOT_PROTECTED")
+    current_plan = read_json(CURRENT_PLAN)
+    require(current_plan.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
+    before = _shared_risk_tick()
+    run("/usr/bin/systemctl", "restart", unit, timeout=120)
+    seen: list[int] = []
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline and len(seen) < 3:
+        state = unit_property(unit, "ActiveState")
+        require(state not in {"failed", "inactive", "dead"}, "SHARED_RISK_REPAIR_UNIT_NOT_ACTIVE")
+        try:
+            tick = _shared_risk_tick()
+        except ContractError:
+            tick = 0
+        if tick > before and tick not in seen:
+            seen.append(tick)
+        if len(seen) < 3:
+            time.sleep(5)
+    require(len(seen) >= 3, "SHARED_RISK_REPAIR_REAL_REFRESH_TIMEOUT")
+    require(unit_active(unit), "SHARED_RISK_REPAIR_UNIT_NOT_ACTIVE")
+    return seen
+
+
+def baseline(target: str, plan: dict, *, allow_stale_shared_risk: bool = False) -> tuple[bytes, bytes, bytes, str, dict[str, tuple[str, str]], dict[str, str], str]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     require(not (BASE / target).exists(), "TARGET_RELEASE_ALREADY_EXISTS")
     hold_raw, _hold, hold_digest = hold_snapshot()
@@ -892,7 +982,7 @@ def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[st
     require(all(unit and target not in unit for unit in old_units.values()), "BASELINE_ALREADY_TARGET")
     margin_unit = str((rows.get("MARGIN_GUARD") or {}).get("serviceUnit") or "")
     require(margin_unit, "MARGIN_GUARD_PIN_MISSING")
-    validate_shared_files(margin_unit)
+    validate_shared_files(margin_unit, allow_stale_shared_risk=allow_stale_shared_risk)
     states = {key: unit_state(unit) for key, unit in old_units.items()}
     observations = [signed_get() for _ in range(3)]
     require(len({stamp for stamp, _ in observations}) == 3 and len({inv for _, inv in observations}) == 1, "SIGNED_GET_BASELINE_CHANGED")
@@ -903,7 +993,7 @@ def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[st
 
 def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path, manifest_path: Path, token: str, public_key: Path, approval_id: str, run_id: str) -> None:
     validate_token(token, public_key, target, execution_plan_sha256, approval_id)
-    pins_raw, plan_raw, hold_raw, baseline_inventory, old_states, old_units, margin_unit = baseline(target, plan)
+    pins_raw, plan_raw, hold_raw, baseline_inventory, old_states, old_units, margin_unit = baseline(target, plan, allow_stale_shared_risk=True)
     units = target_units(target)
     paths = evidence_paths(target)
     dropins = {runner: dropin_path(unit) for runner, unit in units.items()}
@@ -973,6 +1063,12 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         write_atomic(PINS, target_pins(pins_raw, target, units), file_snapshot[PINS][2] or (0, 0, 0o644))
         write_atomic(CURRENT_PLAN, target_plan(plan_raw, target), file_snapshot[CURRENT_PLAN][2] or (0, 0, 0o644))
         run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        # The pinned Shared Risk Writer was previously trapped by the malformed
+        # legacy current-plan. Repair it only after the canonical no-order
+        # plan/pins are installed, then demand three new risk timestamps before
+        # any target Runner is started.
+        shared_risk_refreshes = repair_shared_risk_writer(read_regular(PINS, 131_072))
+        validate_shared_files(margin_unit)
         pending_proof_digest = refresh_v4_pending_proof(target)
         for runner, unit in units.items():
             validate_target_unit(unit, target, runner)
@@ -989,7 +1085,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         require(len({stamp for stamp, _ in final_reads}) == 3 and all(inv == baseline_inventory for _, inv in final_reads), "SIGNED_GET_POSTCUTOVER_CHANGED")
         _h2, _v2, hd2 = hold_snapshot(); require(hd2 == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
         require(not any(unit_active(unit) for unit in old_units.values()), "DUAL_RUNNER_ACTIVE")
-        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "accountLockRecovered": lock_recovered, "pendingProofDigest": pending_proof_digest, "runnerUnits": units}, sort_keys=True))
+        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "accountLockRecovered": lock_recovered, "sharedRiskRefreshes": len(shared_risk_refreshes), "pendingProofDigest": pending_proof_digest, "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:
             # Quiesce candidate units before any rollback read.  If the signed
