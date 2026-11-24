@@ -170,7 +170,7 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
                   <div className="font-bold">STABLE4 H48_TIME_ONLY：時間決済ポリシーの正式承認</div>
                   <div>対象：HYPEUSDT LONG、6時間間隔の入口、48時間の時間決済。</div>
                   <div>このポリシーでは常駐STOP注文・常駐TP注文を要求しません。通常のSTOP保護方式と異なるリスクがあります。</div>
-                  <div>対象Gross：Crypto 3.0x / Stock 4.0x / Total 4.25x / HYPE 1.0x。</div>
+                  <div>対象Gross：Crypto 3.0x / Stock 1.5x / Total 3.5x / HYPE 1.0x。</div>
                   <div>対象SHA・Planが下記の固定値と一致する場合に限り、メールOTPで承認してください。</div>
                   {deployApproval.targetSha !== STABLE4_H48_TIME_ONLY_APPROVAL.targetSha ||
                    deployApproval.planSha256 !== STABLE4_H48_TIME_ONLY_APPROVAL.planSha256 ? (

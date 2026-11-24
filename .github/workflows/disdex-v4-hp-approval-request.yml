@@ -158,7 +158,7 @@ jobs:
               plan = hashlib.sha256(context.encode("ascii")).hexdigest()
           elif hype_stable4:
               target, plan = hype_stable4.groups()
-              if target != "e0e4f1d8f22b62e9410188ef6e590a20e31f760f" or plan != "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce":
+              if target != "74331d74f400acda21a2c1edb5f7b166e197a93f" or plan != "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f":
                   raise SystemExit("STABLE4_H48_EXACT_SOURCE_AND_POLICY_PLAN_REQUIRED")
               operation = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
               scope = "HYPE_TREND_LONG"
