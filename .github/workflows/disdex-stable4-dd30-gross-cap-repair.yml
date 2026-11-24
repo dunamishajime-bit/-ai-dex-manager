@@ -37,7 +37,7 @@ concurrency:
 env:
   REPOSITORY: dunamishajime-bit/-ai-dex-manager
   DEPLOYMENT_TARGET: professional-dismanager.net
-  CANDIDATE_SOURCE_SHA: 74331d74f400acda21a2c1edb5f7b166e197a93f
+  CANDIDATE_SOURCE_SHA: 08f4a0d77d85808d897d6d4d985b950af0d76bab
   CANDIDATE_PLAN_SHA256: 0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4
 
 jobs:
