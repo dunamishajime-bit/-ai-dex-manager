@@ -104,6 +104,14 @@ jobs:
           PY
           echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
 
+      - name: Require SHA-bound candidate Shared Risk singleton protections
+        env:
+          TARGET_SHA: ${{ steps.bind.outputs.target_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B scripts/ops/deploy/disdex_verify_singlewriter_candidate.py --target-sha "$TARGET_SHA"
+
       - name: Claim exact candidate under the approved Owner goal
         id: claim
         env:
