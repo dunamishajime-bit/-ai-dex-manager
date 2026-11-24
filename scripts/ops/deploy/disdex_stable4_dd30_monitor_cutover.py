@@ -780,7 +780,15 @@ def validate_evidence(path: Path, target: str, runner: str) -> None:
         if key in value:
             require(str(value.get(key)).lower() == target, "MONITOR_SHA_MISMATCH:" + runner)
     if runner in {"V12_V4", "QUALITY102_CAUSAL_V1", "V52"}:
-        require(value.get("mode") == "MONITOR_ONLY" and value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID:" + runner)
+        # V4's canonical runner-health tick predates the generic mode field:
+        # it proves monitor-only authority with newOrdersAllowed=false and the
+        # explicit V4 safety-block reason.  Accept that reviewed schema only
+        # for V4; Q102/V52 must continue to carry mode=MONITOR_ONLY.
+        if runner == "V12_V4" and "mode" not in value:
+            require(value.get("schema") == "disdex-runner-tick/v1" and value.get("runnerId") == "V12_V4", "MONITOR_HEARTBEAT_SCHEMA_INVALID:" + runner)
+        else:
+            require(value.get("mode") == "MONITOR_ONLY", "MONITOR_HEARTBEAT_MODE_INVALID:" + runner)
+        require(value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID:" + runner)
         status = str(value.get("status", ""))
         if runner == "V12_V4" and status == "blocked":
             # The shared Kill Switch is intentionally retained during this
@@ -903,6 +911,8 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     state_root_created = False
     release = BASE / target
     target_margin_unit = f"disdex-v12-v52-margin-guard@{target}.service"
+    target_shared_risk_unit = f"disdex-shared-crypto-risk@{target}.service"
+    target_v4_broker_unit = f"disdex-v4-rate-budget-broker@{target}.service"
     try:
         stage_candidate(tar_path, manifest_path, target)
         lock_recovered = recover_expired_account_lock(release, run_id)
@@ -983,7 +993,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             # Quiesce candidate units before any rollback read.  If the signed
             # read is unavailable, fail closed with the candidate stopped
             # instead of leaving a partial target running.
-            for unit in (*units.values(), target_margin_unit):
+            for unit in (*units.values(), target_margin_unit, target_shared_risk_unit, target_v4_broker_unit):
                 if unit_active(unit):
                     stop_unit(unit)
             _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
