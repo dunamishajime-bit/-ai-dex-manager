@@ -214,48 +214,45 @@ def _missing_health_unit(reason: str) -> str | None:
 
 
 def _single_unit_health(unit: str) -> dict[str, str]:
+    """Read one unit through independent bounded properties.
+    
+    A batched systemd query can time out on one transiently busy unit.  Read
+    ActiveState and NRestarts separately so a healthy unit is not lost because
+    another unit delayed the D-Bus response; every timeout still fails closed.
+    """
     try:
-        single = run(
+        active = run(
             "/usr/bin/systemctl",
             "show",
             unit,
-            "--property=Id,ActiveState,NRestarts",
+            "--property=ActiveState",
+            "--value",
             "--no-pager",
-            timeout=20,
-        )
+            timeout=15,
+        ).strip()
+        n_restarts = run(
+            "/usr/bin/systemctl",
+            "show",
+            unit,
+            "--property=NRestarts",
+            "--value",
+            "--no-pager",
+            timeout=15,
+        ).strip()
     except subprocess.TimeoutExpired as exc:
         raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
-    try:
-        return parse_unit_health_snapshot(single, {unit})[unit]
-    except ContractError as single_exc:
-        if _missing_health_unit(str(single_exc)) != unit:
-            raise
-        try:
-            identity = run(
-                "/usr/bin/systemctl",
-                "show",
-                unit,
-                "--property=Id,ActiveState",
-                "--no-pager",
-                timeout=20,
-            )
-            n_restarts = run(
-                "/usr/bin/systemctl",
-                "show",
-                unit,
-                "--property=NRestarts",
-                "--value",
-                "--no-pager",
-                timeout=20,
-            ).strip()
-        except subprocess.TimeoutExpired as exc:
-            raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
-        if "=" in n_restarts:
-            key, value = n_restarts.split("=", 1)
-            if key.strip() == "NRestarts":
-                n_restarts = value.strip()
-        require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
-        return parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {unit})[unit]
+    if "=" in active:
+        key, value = active.split("=", 1)
+        if key.strip() == "ActiveState":
+            active = value.strip()
+    if "=" in n_restarts:
+        key, value = n_restarts.split("=", 1)
+        if key.strip() == "NRestarts":
+            n_restarts = value.strip()
+    require(active in {"active", "inactive", "failed", "activating", "deactivating", "unknown"}, "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+    require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
+    return {"ActiveState": active, "NRestarts": n_restarts}
+
 
 
 def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
@@ -438,7 +435,7 @@ def refresh_v4_pending_proof(target: str) -> str:
         "source": "SIGNED_ASTER_READONLY_ACCOUNT_LOCK",
         "verifiedAt": int(time.time() * 1000),
     }
-    proof_raw = (json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\\n").encode("utf-8")
+    proof_raw = (json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
     write_atomic(PENDING_PROOF, proof_raw, meta)
     return hashlib.sha256(proof_raw).hexdigest()
 
@@ -903,10 +900,13 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "accountLockRecovered": lock_recovered, "pendingProofDigest": pending_proof_digest, "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:
-            _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
+            # Quiesce candidate units before any rollback read.  If the signed
+            # read is unavailable, fail closed with the candidate stopped
+            # instead of leaving a partial target running.
             for unit in (*units.values(), target_margin_unit):
                 if unit_active(unit):
                     stop_unit(unit)
+            _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
             restore_paths(file_snapshot)
             run("/usr/bin/systemctl", "daemon-reload", timeout=30)
             for runner, unit in old_units.items():
