@@ -835,7 +835,9 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             require(health[unit]["NRestarts"] == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
         if min(seen.values()) < 3:
             time.sleep(3)
-    if min(seen.values()) < 3:\n        detail = ",".join(f"{runner}={seen[runner]}" for runner in RUNNER_IDS)\n        raise ContractError("THREE_MONITOR_CYCLES_NOT_OBSERVED:" + detail)
+    if min(seen.values()) < 3:
+        detail = ",".join(f"{runner}={seen[runner]}" for runner in RUNNER_IDS)
+        raise ContractError("THREE_MONITOR_CYCLES_NOT_OBSERVED:" + detail)
 
 
 
