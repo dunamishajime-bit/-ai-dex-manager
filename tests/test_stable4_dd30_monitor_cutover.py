@@ -201,6 +201,24 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             }), encoding="utf-8")
             validate_evidence(path, target, "V12_V4")
 
+    def test_v4_canonical_runner_tick_without_mode_is_accepted(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            path = pathlib.Path(directory) / "v4.json"
+            target = "b" * 40
+            path.write_text(json.dumps({
+                "schema": "disdex-runner-tick/v1",
+                "runnerId": "V12_V4",
+                "status": "blocked",
+                "reason": "V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE",
+                "runtimeSha": target,
+                "expectedSha": target,
+                "newOrdersAllowed": False,
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+            }), encoding="utf-8")
+            validate_evidence(path, target, "V12_V4")
+
     def test_release_tree_hardening_removes_directory_and_file_write_bits(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             root = pathlib.Path(directory) / "release"
