@@ -9,7 +9,7 @@ export const DEPLOY_APPROVAL_ROUTE = "GITHUB_ACTIONS";
 
 /** Exact-scope STABLE4 H48 production policy; not a generic SHA restoration. */
 export const STABLE4_H48_TIME_ONLY_APPROVAL = Object.freeze({
-  targetSha: "74331d74f400acda21a2c1edb5f7b166e197a93f",
+  targetSha: "08f4a0d77d85808d897d6d4d985b950af0d76bab",
   planSha256: "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f",
   researchSha: "9e1142f5ec6d4bc285deef023572623bb1c37a34",
   policy: "H48_TIME_ONLY",
