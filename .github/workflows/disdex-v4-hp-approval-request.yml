@@ -30,7 +30,8 @@ jobs:
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_STABLE4_H48_TIME_ONLY_LIVE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST RUNNER_SCOPED_ORDER_ENABLE ') ||
-        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE ')
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE ')
       )
     environment:
       name: disdex-production
@@ -95,6 +96,10 @@ jobs:
           )
           runner_bundle = re.fullmatch(
               r"DISDEX_PROTECTED_REQUEST STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          dd30_all = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
               body,
           )
 
@@ -176,6 +181,13 @@ jobs:
                   raise SystemExit("STABLE4_RUNNER_BUNDLE_EXACT_SOURCE_AND_MANIFEST_REQUIRED")
               operation = "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE"
               scope = "STABLE4_SCOPED_RUNNERS"
+              orders_enabled = "true"
+          elif dd30_all:
+              target, plan = dd30_all.groups()
+              if target != "8c0b83d6654dff45a5e221c06dc67281714cdd60" or plan != "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4":
+                  raise SystemExit("STABLE4_DD30_ALLRUNNERS_EXACT_SOURCE_AND_PLAN_REQUIRED")
+              operation = "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE"
+              scope = "STABLE4_DD30_ALLRUNNERS"
               orders_enabled = "true"
           else:
               raise SystemExit("request comment does not match a protected production request grammar")
