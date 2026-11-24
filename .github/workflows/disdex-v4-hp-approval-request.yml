@@ -184,7 +184,7 @@ jobs:
               orders_enabled = "true"
           elif dd30_all:
               target, plan = dd30_all.groups()
-              if target != "8c0b83d6654dff45a5e221c06dc67281714cdd60" or plan != "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4":
+              if target != "74331d74f400acda21a2c1edb5f7b166e197a93f" or plan != "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4":
                   raise SystemExit("STABLE4_DD30_ALLRUNNERS_EXACT_SOURCE_AND_PLAN_REQUIRED")
               operation = "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE"
               scope = "STABLE4_DD30_ALLRUNNERS"
