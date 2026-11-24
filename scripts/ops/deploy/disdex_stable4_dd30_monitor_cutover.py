@@ -758,6 +758,25 @@ def _auxiliary_sha(value: dict, roots: dict, key: str) -> str:
     return candidate
 
 
+def canonicalize_release_roots(value: dict) -> dict:
+    legacy_roots = value.get("releaseRoots") or {}
+    require(isinstance(legacy_roots, dict), "CURRENT_PLAN_RELEASE_ROOTS_INVALID")
+    ui_root = str(legacy_roots.get("ui") or "")
+    monitor_root = str(legacy_roots.get("monitor") or "")
+    require(ui_root and monitor_root, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING")
+    value["uiSha"] = _auxiliary_sha(value, legacy_roots, "ui")
+    value["monitorSha"] = _auxiliary_sha(value, legacy_roots, "monitor")
+    # Root validation requires exactly the three lineage roots. The prior
+    # current-plan carried one releaseRoot per Runner, which made the pinned
+    # Shared Risk prestart fail closed before it could refresh its evidence.
+    value["releaseRoots"] = {
+        "runners": str(BASE),
+        "ui": ui_root,
+        "monitor": monitor_root,
+    }
+    return value
+
+
 def target_plan(raw: bytes, target: str) -> bytes:
     value = json.loads(raw.decode("utf-8"))
     require(value.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
@@ -767,21 +786,7 @@ def target_plan(raw: bytes, target: str) -> bytes:
     for key in RUNNER_IDS:
         require(key in runners and runners[key] != target, "CURRENT_PLAN_RUNNER_INVALID:" + key)
         runners[key] = target
-    legacy_roots = value.get("releaseRoots") or {}
-    require(isinstance(legacy_roots, dict), "CURRENT_PLAN_RELEASE_ROOTS_INVALID")
-    ui_root = str(legacy_roots.get("ui") or "")
-    monitor_root = str(legacy_roots.get("monitor") or "")
-    require(ui_root and monitor_root, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING")
-    value["uiSha"] = _auxiliary_sha(value, legacy_roots, "ui")
-    value["monitorSha"] = _auxiliary_sha(value, legacy_roots, "monitor")
-    # Root validation requires exactly the three lineage roots.  The prior
-    # current-plan carried one releaseRoot per Runner, which made the pinned
-    # Shared Risk prestart fail closed before it could refresh its evidence.
-    value["releaseRoots"] = {
-        "runners": str(BASE),
-        "ui": ui_root,
-        "monitor": monitor_root,
-    }
+    value = canonicalize_release_roots(value)
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
@@ -925,6 +930,24 @@ def _shared_risk_tick() -> int:
     return updated
 
 
+def repair_current_plan_roots() -> tuple[bytes, tuple[int, int, int], bool]:
+    raw = read_regular(CURRENT_PLAN, 131_072)
+    current = json.loads(raw.decode("utf-8"))
+    require(current.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
+    pins = json.loads(read_regular(PINS, 131_072).decode("utf-8"))
+    rows = pins.get("runners") or {}
+    pin_values = {str(key): str(row.get("sha") or "") for key, row in rows.items() if isinstance(row, dict)}
+    require(pin_values and current.get("runners") == pin_values, "CURRENT_PLAN_PIN_BINDING_INVALID")
+    repaired = canonicalize_release_roots(current)
+    encoded = (json.dumps(repaired, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+    metadata = file_meta(CURRENT_PLAN)
+    if encoded == raw:
+        return raw, metadata, False
+    write_atomic(CURRENT_PLAN, encoded, metadata)
+    run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+    return raw, metadata, True
+
+
 def repair_shared_risk_writer(pins_raw: bytes, timeout: int = 360) -> list[int]:
     """Restart the already pinned no-order Shared Risk Writer and prove real ticks.
 
@@ -968,6 +991,29 @@ def repair_shared_risk_writer(pins_raw: bytes, timeout: int = 360) -> list[int]:
     require(len(seen) >= 3, "SHARED_RISK_REPAIR_REAL_REFRESH_TIMEOUT")
     require(unit_active(unit), "SHARED_RISK_REPAIR_UNIT_NOT_ACTIVE")
     return seen
+
+
+def repair_shared_risk_only() -> None:
+    original_raw, original_metadata, changed = repair_current_plan_roots()
+    try:
+        ticks = repair_shared_risk_writer(read_regular(PINS, 131_072))
+        _hold_raw, hold, hold_digest = hold_snapshot()
+        require(hold.get("active") is True and hold.get("action") == "HOLD_PROTECTED" and hold.get("scope") == "GLOBAL", "GLOBAL_HOLD_NOT_PROTECTED")
+        print(json.dumps({
+            "status": "SHARED_RISK_NO_ORDER_REPAIR_PASS",
+            "ordersEnabled": False,
+            "globalHoldDigest": hold_digest,
+            "refreshes": len(ticks),
+            "currentPlanCanonicalized": changed,
+            "ordersSent": 0,
+            "cancelsSent": 0,
+            "positionChangesSent": 0,
+        }, sort_keys=True))
+    except Exception:
+        if changed:
+            write_atomic(CURRENT_PLAN, original_raw, original_metadata)
+            run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        raise
 
 
 def baseline(target: str, plan: dict, *, allow_stale_shared_risk: bool = False) -> tuple[bytes, bytes, bytes, str, dict[str, tuple[str, str]], dict[str, str], str]:
@@ -1118,6 +1164,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--preflight-readonly", action="store_true")
+    group.add_argument("--repair-shared-risk", action="store_true")
     group.add_argument("--execute-approved", action="store_true")
     parser.add_argument("--target-sha", required=True)
     parser.add_argument("--plan", type=Path, required=True)
@@ -1137,6 +1184,9 @@ def main() -> int:
         if args.preflight_readonly:
             pins_raw, plan_raw, hold_raw, inventory, states, old_units, margin = baseline(args.target_sha, plan)
             print(json.dumps({"status": "STABLE4_DD30_MONITOR_PREFLIGHT_PASS", "targetSha": args.target_sha, "signedGets": 3, "ordersEnabled": False, "globalHoldDigest": hashlib.sha256(hold_raw).hexdigest(), "oldUnits": old_units, "marginGuardUnit": margin, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}, sort_keys=True))
+            return 0
+        if args.repair_shared_risk:
+            repair_shared_risk_only()
             return 0
         require(args.tar is not None and args.manifest is not None, "CANDIDATE_ARCHIVE_AND_MANIFEST_REQUIRED")
         execute(args.target_sha, plan, args.execution_plan_sha256, args.tar, args.manifest, token, args.public_key, args.approval_id, args.run_id)
