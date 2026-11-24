@@ -34,7 +34,7 @@ export function isExactStable4H48OwnerApprovalRequest(input: {
 export const DEPLOY_APPROVAL_SCOPES = [
   "V12_V4", "IDLE_PRIORITY_SHORT", "FULL_PROJECT", "V52",
   "HYPE_TREND_LONG", "QUALITY102_CAUSAL_V1", "PENGU_V8",
-  "FET_BRK48_RESIDUAL", "SHARED_CRYPTO_RISK_ONLY", "STABLE4_SCOPED_RUNNERS",
+  "FET_BRK48_RESIDUAL", "SHARED_CRYPTO_RISK_ONLY", "STABLE4_SCOPED_RUNNERS", "STABLE4_DD30_ALLRUNNERS",
 ] as const;
 export type DeploymentApprovalScope = (typeof DEPLOY_APPROVAL_SCOPES)[number];
 
@@ -58,6 +58,7 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "ALL_RUNNERS_ORDER_ENABLE_PREP",
   "ALL_RUNNERS_ORDER_ENABLE",
   "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE",
+  "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE",
 ] as const;
 export type DeploymentApprovalOperation = (typeof DEPLOY_APPROVAL_OPERATIONS)[number];
 
@@ -161,6 +162,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "STABLE4_SCOPED_RUNNERS",
     ordersEnabled: true,
     label: "STABLE4 6 Runner 一括注文有効化（HYPE除外・各Runner固有permit）",
+  },
+  STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE: {
+    scope: "STABLE4_DD30_ALLRUNNERS",
+    ordersEnabled: true,
+    label: "STABLE4 DD30 全7 Runner注文有効化（HYPEはH48専用ゲート）",
   },
 };
 
