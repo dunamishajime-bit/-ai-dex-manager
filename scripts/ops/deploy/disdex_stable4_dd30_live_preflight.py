@@ -65,7 +65,7 @@ def require(ok: bool, reason: str) -> None:
 
 def safe_text(value: object) -> str:
     text = " ".join(str(value or "").split())
-    text = re.sub(r"(?i)(token|secret|password|authorization|bearer|api[_-]?key|credential)[^ ]*", r"\\1=<redacted>", text)
+    text = re.sub(r"(?i)(token|secret|password|authorization|bearer|api[_-]?key|credential)[^ ]*", r"\1=<redacted>", text)
     return re.sub(r"[^A-Za-z0-9_@%+.,:;/=()\\- ]", "?", text)[:220]
 
 def run(*argv: str, timeout: int = 60) -> str:
@@ -230,8 +230,8 @@ def signed_get(source: str) -> tuple[str, int, int, str]:
     release = BASE / source
     require(release.is_dir() and not release.is_symlink(), "RELEASE_NOT_INSTALLED")
     command = (
-        "set -ae; for f in /etc/disdex/disdex-v13d-v11eq-v96.env "
-        "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; do . \\"$f\\"; done; set +a; "
+        'set -ae; for f in /etc/disdex/disdex-v13d-v11eq-v96.env '
+        '/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; do . "$f"; done; set +a; '
         "exec /usr/bin/node " + str(release / "node_modules/tsx/dist/cli.mjs") +
         " scripts/disdex-aster-readonly-account-diagnostic.ts"
     )
