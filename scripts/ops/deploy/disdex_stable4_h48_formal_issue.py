@@ -185,6 +185,15 @@ def load_existing_certificate(now_ms):
             "CERTIFICATE_EXISTING_RECEIPT_MUTATION")
     return row, receipt, digest
 
+
+def current_receipt_path(run_id):
+    """Return the immutable per-run receipt path used when reusing a cert."""
+    require(
+        isinstance(run_id, str) and re.fullmatch(r"[0-9]{1,20}", run_id) is not None,
+        "RUN_ID_INVALID",
+    )
+    return AUDIT_DIR / (SOURCE + "." + run_id + ".json")
+
 def verify_preflight(approval_id, run_id, now_ms):
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     trusted_dir(ROOT, mode=0o700)
@@ -240,11 +249,34 @@ def issue(approval_id, run_id, token):
             raise ValueError("CERTIFICATE_SYMLINK_FORBIDDEN")
         if CERT.exists():
             row, receipt, digest = load_existing_certificate(now_ms)
+            # The certificate bytes are immutable. Rebind the current exact
+            # approval/run through a new root-owned, non-order receipt so the
+            # downstream HOLD gate never relies on stale provenance.
+            ensure_directory(AUDIT_DIR, 0o700)
+            receipt_path = current_receipt_path(run_id)
+            receipt_row = {
+                "schema": "disdex-stable4-h48-hp-approved-issuance/v1",
+                "approvalId": record["id"],
+                "runId": run_id,
+                "sourceSha": SOURCE,
+                "planSha256": PLAN,
+                "policy": "H48_TIME_ONLY",
+                "certificateSha256": digest,
+                "tokenNonceSha256": hashlib.sha256(payload["nonce"].encode("ascii")).hexdigest(),
+                "approvedAt": record["approvedAt"],
+                "issuedAt": now_ms,
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+            }
+            receipt_raw = canonical(receipt_row)
+            install_exact_file(receipt_path, receipt_raw, 0o444)
             return {
                 "status": "H48_OWNER_POLICY_CERTIFICATE_ISSUED_NOT_LIVE",
                 "approvedSha": SOURCE,
                 "planSha256": PLAN,
                 "certificateSha256": digest,
+                "receiptSha256": hashlib.sha256(receipt_raw).hexdigest(),
                 "idempotent": True,
                 "ordersSent": 0,
                 "cancelsSent": 0,
