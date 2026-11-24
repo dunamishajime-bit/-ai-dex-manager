@@ -106,5 +106,23 @@ class H48FormalOwnerTests(unittest.TestCase):
         self.assertNotIn("systemctl", inspect.getsource(gate.issue))
 
 
+    def test_existing_certificate_reuse_is_candidate_and_plan_bound(self):
+        import inspect
+        source = inspect.getsource(gate.load_existing_certificate)
+        self.assertIn("CERTIFICATE_EXISTING_SHA_MISMATCH", source)
+        self.assertIn("CERTIFICATE_EXISTING_PLAN_MISMATCH", source)
+        self.assertIn("CERTIFICATE_EXISTING_RECEIPT_DIGEST_MISMATCH", source)
+        self.assertIn("CERTIFICATE_EXISTING_RECEIPT_MUTATION", source)
+        self.assertIn("validate_pinned_policy(row, now_ms)", source)
+
+    def test_idempotent_issue_remains_non_live_and_mutation_free(self):
+        import inspect
+        source = inspect.getsource(gate.issue)
+        self.assertIn("load_existing_certificate(now_ms)", source)
+        self.assertIn('"idempotent": True', source)
+        self.assertIn('"ordersSent": 0', source)
+        self.assertIn('"positionChangesSent": 0', source)
+
+
 if __name__ == "__main__":
     unittest.main()
