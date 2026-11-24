@@ -123,6 +123,16 @@ class H48FormalOwnerTests(unittest.TestCase):
         self.assertIn('"ordersSent": 0', source)
         self.assertIn('"positionChangesSent": 0', source)
 
+    def test_idempotent_reuse_rebinds_current_run_without_live_authority(self):
+        import inspect
+        source = inspect.getsource(gate.issue)
+        self.assertIn("current_receipt_path(run_id)", source)
+        self.assertIn("install_exact_file(receipt_path", source)
+        self.assertIn('"receiptSha256"', source)
+        self.assertIn('"ordersSent": 0', source)
+        self.assertIn('"cancelsSent": 0', source)
+        self.assertIn('"positionChangesSent": 0', source)
+
 
 if __name__ == "__main__":
     unittest.main()
