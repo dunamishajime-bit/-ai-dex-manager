@@ -46,9 +46,20 @@ class Stable4GrossCapRepairTests(unittest.TestCase):
         self.assertEqual(module.monitor_order_flags("Environment=V12_V4_ORDERS_ENABLED=false"), [])
 
     def test_source_and_plan_are_pinned(self) -> None:
-        self.assertEqual(len(module.SOURCE_SHA), 40)
-        self.assertEqual(len(module.PLAN_SHA256), 64)
+        self.assertEqual(module.SOURCE_SHA, "08f4a0d77d85808d897d6d4d985b950af0d76bab")
+        self.assertEqual(module.PLAN_SHA256, "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4")
         self.assertEqual(module.DROPIN_NAME, "zzzz-stable4-dd30-gross-cap.conf")
+        # All official paths must target the *same immutable deployed SHA*.
+        base = ROOT / ".github" / "workflows"
+        gross_workflow = (base / "disdex-stable4-dd30-gross-cap-repair.yml").read_text(encoding="utf-8")
+        live_workflow = (base / "disdex-stable4-dd30-allrunner-live-order-enable.yml").read_text(encoding="utf-8")
+        self.assertIn("CANDIDATE_SOURCE_SHA: " + module.SOURCE_SHA, gross_workflow)
+        self.assertIn("CANDIDATE_SOURCE_SHA: " + module.SOURCE_SHA, live_workflow)
+        import hashlib
+        plan_bytes = (ROOT / "config" / "disdex-stable4-dd30-allrunner-live-order-enable-plan.json").read_bytes()
+        # Windows core.autocrlf may transform the checkout; verify repository LF bytes.
+        self.assertEqual(hashlib.sha256(plan_bytes.replace(b"\r\n",b"\n")).hexdigest(), module.PLAN_SHA256)
+
 
 
 if __name__ == "__main__":

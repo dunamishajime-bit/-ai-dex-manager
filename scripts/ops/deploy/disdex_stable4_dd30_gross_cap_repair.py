@@ -25,7 +25,7 @@ from typing import Any
 import preflight as gate
 
 
-SOURCE_SHA = "74331d74f400acda21a2c1edb5f7b166e197a93f"
+SOURCE_SHA = "08f4a0d77d85808d897d6d4d985b950af0d76bab"
 PLAN_SHA256 = "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4"
 DROPIN_NAME = "zzzz-stable4-dd30-gross-cap.conf"
 BACKUP_ROOT = Path("/var/backups/disdex/stable4-dd30-gross-cap")
