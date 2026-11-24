@@ -82,17 +82,40 @@ def validate_root_receipt(approval_id, run_id, *, now_ms):
     owner.trusted_dir(owner.ROOT, mode=0o700)
     owner.trusted_dir(owner.AUDIT_DIR, mode=0o700)
     owner.regular(owner.CERT, owner=0, no_write=True)
-    owner.regular(owner.AUDIT_DIR / (owner.SOURCE + ".json"), owner=0, no_write=True)
-    receipt = json.loads((owner.AUDIT_DIR / (owner.SOURCE + ".json")).read_bytes())
     certificate_bytes = owner.CERT.read_bytes()
     cert = json.loads(certificate_bytes)
     owner.validate_pinned_policy(cert, now_ms)
-    require(receipt.get("schema") == "disdex-stable4-h48-hp-approved-issuance/v1"
-            and receipt.get("approvalId") == approval_id and receipt.get("runId") == run_id
-            and receipt.get("sourceSha") == owner.SOURCE and receipt.get("planSha256") == owner.PLAN
-            and receipt.get("certificateSha256") == hashlib.sha256(certificate_bytes).hexdigest()
-            and receipt.get("policy") == "H48_TIME_ONLY", "ROOT_CERTIFICATE_PROVENANCE_MISMATCH")
-    return receipt
+    receipt_paths = (
+        owner.AUDIT_DIR / (owner.SOURCE + ".json"),
+        owner.AUDIT_DIR / (owner.SOURCE + "." + run_id + ".json"),
+    )
+    certificate_digest = hashlib.sha256(certificate_bytes).hexdigest()
+    for receipt_path in receipt_paths:
+        if receipt_path.is_symlink():
+            raise ValueError("ROOT_RECEIPT_SYMLINK_FORBIDDEN")
+        if not receipt_path.exists():
+            continue
+        owner.regular(receipt_path, owner=0, no_write=True)
+        receipt_raw = receipt_path.read_bytes()
+        try:
+            receipt = json.loads(receipt_raw)
+        except Exception:
+            continue
+        if owner.canonical(receipt) != receipt_raw:
+            continue
+        if (
+            receipt.get("schema") == "disdex-stable4-h48-hp-approved-issuance/v1"
+            and receipt.get("approvalId") == approval_id
+            and receipt.get("runId") == run_id
+            and receipt.get("sourceSha") == owner.SOURCE
+            and receipt.get("planSha256") == owner.PLAN
+            and receipt.get("certificateSha256") == certificate_digest
+            and receipt.get("policy") == "H48_TIME_ONLY"
+            and all(receipt.get(k) == 0 for k in
+                    ("ordersSent", "cancelsSent", "positionChangesSent"))
+        ):
+            return receipt
+    raise ValueError("ROOT_CERTIFICATE_PROVENANCE_MISMATCH")
 
 
 def get_v4_pin():
