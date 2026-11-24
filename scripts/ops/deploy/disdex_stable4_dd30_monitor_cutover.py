@@ -72,7 +72,7 @@ STALE_INSTANCE_BASES = (
 )
 INSTANCE_UNIT_RE = re.compile(
     r"^(?P<base>" + "|".join(re.escape(item) for item in STALE_INSTANCE_BASES) +
-    r")@(?P<sha>[0-9a-f]{40})\\.service$"
+    r")@(?P<sha>[0-9a-f]{40})\.service$"
 )
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
