@@ -1,0 +1,49 @@
+{
+  "schema": "disdex-stable4-dd30-hype-h48-order-enable-plan/v1",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "deploymentTarget": "professional-dismanager.net",
+  "sourceBinding": "WORKFLOW_TARGET_SHA",
+  "operation": "HYPE_STABLE4_H48_TIME_ONLY_LIVE",
+  "scope": "HYPE_TREND_LONG",
+  "policy": "H48_TIME_ONLY",
+  "ordersEnabled": true,
+  "economics": {
+    "cryptoGrossCap": 3.0,
+    "stockGrossCap": 1.5,
+    "totalGrossCap": 3.5,
+    "hypeGrossCap": 1.0,
+    "v4NewEntryDrawdownHoldPct": 30,
+    "sharedCryptoDailyLossPct": 7.5
+  },
+  "globalHold": {
+    "required": true,
+    "active": true,
+    "action": "HOLD_PROTECTED",
+    "scope": "GLOBAL",
+    "mustRemainByteIdentical": true,
+    "clearGlobalHold": false
+  },
+  "h48": {
+    "holdHours": 48,
+    "entryGridHours": 6,
+    "residentStopRequired": false,
+    "residentTakeProfitRequired": false,
+    "authorizesOtherPolicies": false
+  },
+  "venuePreflight": {
+    "signedAsterGets": 3,
+    "requireHypeFlatBeforeEntry": true,
+    "requireNoOpenOrders": true,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "safety": {
+    "failClosed": true,
+    "preserveExistingStops": true,
+    "noTestOrders": true,
+    "noManualKillSwitchClear": true,
+    "noCrossRunnerAuthorization": true,
+    "rollbackOnAnyPostconditionFailure": true
+  }
+}
