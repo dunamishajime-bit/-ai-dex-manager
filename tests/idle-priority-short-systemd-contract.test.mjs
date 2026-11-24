@@ -118,3 +118,11 @@ test("runtime wiring routes protected Idle rate-budget state through the protect
   assert.match(wiring, /\.positions \/\/ \[\].*length > 0/);
   assert.doesNotMatch(wiring, /\(\(\.positions \/\/ \[\] \) \| all\(\.protectionVerified == true\)\)/);
 });
+
+
+test("Idle transient manual-review keeps the daemon alive for a fail-closed retry", async () => {
+  const source = await readFile("scripts/disdex-idle-priority-short-live-runner.ts", "utf8");
+  assert.match(source, /DISDEX_IDLE_PRIORITY_MANUAL_REVIEW_RETRY_MS/);
+  assert.match(source, /result\.status === "manual-review"/);
+  assert.doesNotMatch(source, /!daemon \|\| stopping \|\| result\.status === "manual-review"\) break/);
+});

@@ -84,6 +84,10 @@ async function main() {
   const monitorPollMs = runtime.mode === "SHADOW"
     ? Math.min(30_000, Math.max(1_000, numberEnv("DISDEX_HYPE_MONITOR_POLL_MS", 0)))
     : 0;
+  // A transient venue/data failure is fail-closed for orders, but must not
+  // terminate the daemon. Keep the runner observable and retry boundedly.
+  const manualReviewRetryMs = Math.max(5_000, Math.min(60_000,
+    numberEnv("DISDEX_HYPE_ZEC_MANUAL_REVIEW_RETRY_MS", 15_000)));
   const delay = createInterruptibleDelay();
   let stopping = false;
   const stop = () => { stopping = true; delay.interrupt(); };
@@ -92,7 +96,11 @@ async function main() {
   do {
     const result = await runner.tick();
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
-    if (!daemon || stopping || result.status === "manual-review") break;
+    if (!daemon || stopping) break;
+    if (result.status === "manual-review") {
+      await delay.wait(manualReviewRetryMs);
+      continue;
+    }
     const normalWaitMs = monitorPollMs > 0
       ? monitorPollMs
       : Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
