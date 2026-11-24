@@ -1,0 +1,89 @@
+{
+  "schema": "disdex-stable4-dd30-allrunner-live-order-enable-plan/v1",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "deploymentTarget": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+  "sourceBinding": "WORKFLOW_TARGET_SHA",
+  "operation": "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE",
+  "scope": "STABLE4_DD30_ALLRUNNERS",
+  "ordersEnabled": true,
+  "runnerSet": [
+    "V12_V4",
+    "PENGU_V8",
+    "QUALITY102_CAUSAL_V1",
+    "V52",
+    "FET_BRK48_RESIDUAL",
+    "HYPE_TREND_LONG",
+    "IDLE_PRIORITY_SHORT"
+  ],
+  "runnerOrderAuthorities": {
+    "nonHype": {
+      "operation": "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE",
+      "scope": "STABLE4_SCOPED_RUNNERS",
+      "permitPolicy": "STABLE4_SCOPED_HOLD_BYPASS",
+      "runners": [
+        "V12_V4",
+        "PENGU_V8",
+        "QUALITY102_CAUSAL_V1",
+        "V52",
+        "FET_BRK48_RESIDUAL",
+        "IDLE_PRIORITY_SHORT"
+      ]
+    },
+    "hype": {
+      "operation": "HYPE_STABLE4_H48_TIME_ONLY_LIVE",
+      "scope": "HYPE_TREND_LONG",
+      "policy": "H48_TIME_ONLY",
+      "certificateRequired": true,
+      "residentStopRequired": false,
+      "residentTakeProfitRequired": false
+    }
+  },
+  "economics": {
+    "v4NewEntryDrawdownHoldPct": 30,
+    "penguDrawdownProtectionPct": 17,
+    "sharedCryptoDailyLossPct": 7.5,
+    "grossCaps": {
+      "crypto": 3,
+      "stock": 1.5,
+      "total": 3.5,
+      "hype": 1
+    }
+  },
+  "globalHold": {
+    "required": true,
+    "active": true,
+    "action": "HOLD_PROTECTED",
+    "scope": "GLOBAL",
+    "mustRemainByteIdentical": true,
+    "clearGlobalHold": false,
+    "transition": "SCOPED_PERMIT_UNDER_ACTIVE_HOLD"
+  },
+  "venuePreflight": {
+    "signedAsterGets": 3,
+    "requireFlatPositions": true,
+    "requireNoOpenOrders": true,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0,
+    "requireStopOwnership": true
+  },
+  "safety": {
+    "failClosed": true,
+    "preserveExistingStops": true,
+    "preserveSharedRiskSingleton": true,
+    "preserveMarginGuard": true,
+    "noTestOrders": true,
+    "noManualKillSwitchClear": true,
+    "noRunnerCrossAuthorization": true,
+    "rollbackOnAnyPostconditionFailure": true
+  },
+  "verification": {
+    "postActivationCycles": 3,
+    "requireHeartbeatAndShaMatch": true,
+    "requireRestartCountStable": true,
+    "requireHoldDigestUnchanged": true,
+    "requireGrossCapsEffective": true,
+    "requireOrderMutationCountersZero": true
+  }
+}
