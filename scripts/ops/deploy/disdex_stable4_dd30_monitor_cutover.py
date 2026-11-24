@@ -484,7 +484,10 @@ def validate_shared_files(margin_unit: str, *, allow_stale_shared_risk: bool = F
     require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_LIMIT_MISMATCH")
     updated = risk.get("updatedAt")
     age_ms = int(time.time() * 1000) - float(updated) if isinstance(updated, (int, float)) else None
-    require(age_ms is not None and -1000 <= age_ms <= 60 * 60_000, "SHARED_RISK_STALE")
+    # With GLOBAL HOLD and orders disabled, allow only a bounded stale
+    # snapshot long enough to restart the pinned Writer and prove three real
+    # updates.  Beyond 90 minutes this remains fail-closed.
+    require(age_ms is not None and -1000 <= age_ms <= 90 * 60_000, "SHARED_RISK_STALE")
     if age_ms > 15 * 60_000:
         require(
             allow_stale_shared_risk
