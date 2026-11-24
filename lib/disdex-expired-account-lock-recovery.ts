@@ -113,7 +113,9 @@ export async function archiveExpiredAccountOrderLock(input: RecoveryInput): Prom
 }
 
 export function accountLockOwnerPid(ownerId: string): number {
-  const match = /:([0-9]+)$/.exec(ownerId);
+  // Recovery owners may include a PID followed by a lease timestamp.
+  // Bind to the PID segment, never the trailing timestamp.
+  const match = /:([0-9]+)(?::[0-9]+)?$/.exec(ownerId);
   if (!match) throw new Error("ACCOUNT_LOCK_OWNER_PID_MISSING");
   const pid = Number(match[1]);
   if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error("ACCOUNT_LOCK_OWNER_PID_INVALID");

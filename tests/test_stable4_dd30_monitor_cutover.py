@@ -18,6 +18,7 @@ from scripts.ops.deploy.disdex_stable4_dd30_monitor_cutover import (
     q102_metadata_valid,
     materialize_v4_staged_overlay,
     parse_unit_health_snapshot,
+    target_plan,
     target_units,
     validate_plan,
     validate_evidence,
@@ -101,6 +102,38 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("printf -v remote_command '%q '", workflow)
         self.assertIn('"exec $remote_command"', workflow)
+
+    def test_target_plan_canonicalizes_legacy_release_roots(self):
+        old = {
+            "schema": "disdex-unified-deployment-plan/v2",
+            "scope": "FULL_PROJECT",
+            "sourceSha": "b" * 40,
+            "monitorSha": "b" * 40,
+            "uiSha": "c" * 40,
+            "ordersEnabled": False,
+            "runners": {runner: "b" * 40 for runner in cutover.RUNNER_IDS},
+            "releaseRoots": {
+                **{runner: "/home/deploy/disdex-trading/releases/" + "b" * 40 for runner in cutover.RUNNER_IDS},
+                "runners": "/home/deploy/disdex-trading/releases",
+                "ui": "/home/deploy/disdex-trading/ui-releases/ui-test",
+                "monitor": "/home/deploy/disdex-trading/releases/monitor-test",
+            },
+        }
+        result = json.loads(target_plan(json.dumps(old).encode("utf-8"), "a" * 40))
+        self.assertEqual(set(result["releaseRoots"]), {"runners", "ui", "monitor"})
+        self.assertEqual(result["releaseRoots"]["runners"], str(cutover.BASE))
+        self.assertEqual(result["uiSha"], "c" * 40)
+        self.assertEqual(result["monitorSha"], "b" * 40)
+        self.assertEqual(result["sourceSha"], "a" * 40)
+        self.assertEqual(result["monitorSha"], old["monitorSha"])
+
+    def test_shared_risk_repair_is_bounded_and_no_order(self):
+        source = (ROOT / "scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py").read_text(encoding="utf-8")
+        self.assertIn("def repair_shared_risk_writer", source)
+        self.assertIn("DISDEX_SHARED_RISK_ORDERS_ENABLED=false", source)
+        self.assertIn("SHARED_RISK_REPAIR_REAL_REFRESH_TIMEOUT", source)
+        self.assertIn('run("/usr/bin/systemctl", "restart", unit', source)
+        self.assertIn("validate_shared_files(margin_unit)", source)
 
     def test_q102_metadata_accepts_audited_deploy_private_state(self):
         self.assertTrue(q102_metadata_valid(1000, 1000, 0o700, 0, 1000, 0o640, 1000, 1000))
@@ -194,6 +227,24 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
                 "reason": "V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE",
                 "runtimeSha": target,
                 "orderEnabled": False,
+                "newOrdersAllowed": False,
+                "ordersSent": 0,
+                "cancelsSent": 0,
+                "positionChangesSent": 0,
+            }), encoding="utf-8")
+            validate_evidence(path, target, "V12_V4")
+
+    def test_v4_canonical_runner_tick_without_mode_is_accepted(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            path = pathlib.Path(directory) / "v4.json"
+            target = "b" * 40
+            path.write_text(json.dumps({
+                "schema": "disdex-runner-tick/v1",
+                "runnerId": "V12_V4",
+                "status": "blocked",
+                "reason": "V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE",
+                "runtimeSha": target,
+                "expectedSha": target,
                 "newOrdersAllowed": False,
                 "ordersSent": 0,
                 "cancelsSent": 0,

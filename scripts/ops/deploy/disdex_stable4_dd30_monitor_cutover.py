@@ -47,10 +47,33 @@ HOLD = Path("/var/lib/disdex/shared/kill-switch.json")
 RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
+PENDING_PROOF = Path("/var/lib/disdex/v12-v4/monitor/pending-proof.json")
+ACCOUNT_LOCK = Path("/var/lib/disdex/shared/account-order.lock")
 MONITOR_ROOT = Path("/var/lib/disdex/stable4-dd30-monitor")
 STALE_Q102 = "b8d681f048b087f07e0dcfb743cc14ec3a796b27"
 STALE_MARGIN = "c7310d34ba1b6de07071d8883a2ed0de8dcce2a7"
+# P1 observed this prior failed candidate left an auto-restart loop behind.
+STALE_MARGIN_CANDIDATE = "a851129bf90c05ac4cce570af7e942a9a238ef70"
 STALE_PENGU = "2e3014778341107fd3929a6dd6a329b96c76779e"
+# Instance families whose stale non-pinned processes can interfere with a
+# monitor-only generation.  The cleanup is deliberately allow-listed; it never
+# scans or stops unrelated systemd services.
+STALE_INSTANCE_BASES = (
+    "disdex-v12-v4",
+    "disdex-v4-rate-budget-broker",
+    "disdex-pengu-dual-ls-v2",
+    "disdex-quality102-causal-v1",
+    "disdex-v52-aster-only",
+    "disdex-fet-brk48",
+    "disdex-idle-priority-short",
+    "disdex-hype-long",
+    "disdex-shared-crypto-risk",
+    "disdex-v12-v52-margin-guard",
+)
+INSTANCE_UNIT_RE = re.compile(
+    r"^(?P<base>" + "|".join(re.escape(item) for item in STALE_INSTANCE_BASES) +
+    r")@(?P<sha>[0-9a-f]{40})\.service$"
+)
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
 V4_OVERLAY_SCHEMA = "disdex-v4-staged-overlay/v1"
@@ -210,15 +233,31 @@ def _missing_health_unit(reason: str) -> str | None:
 
 
 def _single_unit_health(unit: str) -> dict[str, str]:
+    """Read one unit with a bounded retry before failing closed.
+    
+    The first query keeps the existing complete-property contract.  A single
+    retry handles a transient D-Bus/systemd delay seen on HYPE; if the retry
+    still lacks NRestarts, only then use the property-only fallback.
+    """
     try:
-        single = run(
-            "/usr/bin/systemctl",
-            "show",
-            unit,
-            "--property=Id,ActiveState,NRestarts",
-            "--no-pager",
-            timeout=20,
-        )
+        try:
+            single = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState,NRestarts",
+                "--no-pager",
+                timeout=20,
+            )
+        except subprocess.TimeoutExpired:
+            single = run(
+                "/usr/bin/systemctl",
+                "show",
+                unit,
+                "--property=Id,ActiveState,NRestarts",
+                "--no-pager",
+                timeout=30,
+            )
     except subprocess.TimeoutExpired as exc:
         raise ContractError("SYSTEMD_HEALTH_SINGLE_UNIT_TIMEOUT:" + unit) from exc
     try:
@@ -252,7 +291,6 @@ def _single_unit_health(unit: str) -> dict[str, str]:
                 n_restarts = value.strip()
         require(n_restarts.isdigit(), "SYSTEMD_HEALTH_SNAPSHOT_FIELDS_MISSING:" + unit)
         return parse_unit_health_snapshot(identity + "\nNRestarts=" + n_restarts, {unit})[unit]
-
 
 def unit_health_snapshot(units: dict[str, str]) -> dict[str, dict[str, str]]:
     """Read all target ActiveState/NRestarts values in one bounded systemd call."""
@@ -448,13 +486,93 @@ def signed_get() -> tuple[str, str]:
     return stamp, digest(inventory)
 
 
-def validate_shared_files(margin_unit: str) -> None:
-    hold_snapshot()
+def recover_expired_account_lock(release: Path, run_id: str) -> bool:
+    """Archive only the known expired read-only reconciliation lock.
+
+    The TypeScript recovery command re-checks PID liveness, reservations and
+    exact bytes. This wrapper binds it to the staged immutable release and
+    never touches the exchange or any order state.
+    """
+    if not ACCOUNT_LOCK.exists():
+        return False
+    value = json.loads(read_regular(ACCOUNT_LOCK, 262_144).decode("utf-8"))
+    require(value.get("schema") == "disdex-account-lock/v1", "ACCOUNT_LOCK_SCHEMA_INVALID")
+    owner_id = str(value.get("ownerId") or "")
+    require(owner_id, "ACCOUNT_LOCK_OWNER_INVALID")
+    expires_at = value.get("expiresAt")
+    require(isinstance(expires_at, (int, float)) and not isinstance(expires_at, bool), "ACCOUNT_LOCK_EXPIRES_INVALID")
+    if float(expires_at) > time.time() * 1000:
+        return False
+    require(re.fullmatch(r"PENDING_READONLY_RECONCILE:[0-9]+:[0-9]+", owner_id) is not None, "ACCOUNT_LOCK_RECOVERY_OWNER_UNSUPPORTED")
+    reservations = value.get("reservations")
+    require(isinstance(reservations, list), "ACCOUNT_LOCK_RESERVATIONS_INVALID")
+    require(not reservations, "ACCOUNT_LOCK_RESERVATIONS_PRESENT")
+    cli = release / "node_modules" / "tsx" / "dist" / "cli.mjs"
+    script = release / "scripts" / "disdex-account-order-lock-expired-recovery.ts"
+    require(cli.is_file() and script.is_file(), "ACCOUNT_LOCK_RECOVERY_SOURCE_MISSING")
+    request_id = "stable4-dd30-" + re.sub(r"[^A-Za-z0-9._-]", "_", str(run_id))
+    common = [
+        "/usr/bin/node", str(cli), str(script),
+        "--path", str(ACCOUNT_LOCK),
+        "--expected-owner-id", owner_id,
+        "--request-id", request_id,
+    ]
+    verify = run(*common, "--verify-only", timeout=90)
+    require("EXPIRED_ACCOUNT_LOCK_RECOVERY_ELIGIBLE" in verify, "ACCOUNT_LOCK_RECOVERY_VERIFY_FAILED")
+    applied = run(*common, "--apply", "--ack", "I_ACK_EXPIRED_ACCOUNT_LOCK_RECOVERY_AFTER_3X_READONLY_RECONCILIATION", timeout=90)
+    require("EXPIRED_ACCOUNT_LOCK_ARCHIVED" in applied, "ACCOUNT_LOCK_RECOVERY_APPLY_FAILED")
+    return True
+
+
+def refresh_v4_pending_proof(target: str) -> str:
+    """Bind the stale pending registry to fresh signed-flat monitor evidence."""
+    raw = read_regular(PENDING, 262_144)
+    value = json.loads(raw.decode("utf-8"))
+    require(value.get("schema") == "disdex-pending-exposure/v1" and value.get("accountScope") == "ASTER_FUTURES", "PENDING_REGISTRY_INVALID")
+    entries = value.get("entries")
+    require(isinstance(entries, list) and not any(str(row.get("status", "")).upper() != "RELEASED" for row in entries if isinstance(row, dict)), "PENDING_REGISTRY_ACTIVE")
+    updated_at = value.get("updatedAt")
+    require(isinstance(updated_at, int) and updated_at > 0, "PENDING_REGISTRY_TIMESTAMP_INVALID")
+    meta = file_meta(PENDING_PROOF)
+    require(meta[0] == 0 and stat.S_IMODE(meta[2]) & 0o002 == 0, "V4_PENDING_PROOF_METADATA_INVALID")
+    payload = {
+        "cancelsSent": 0,
+        "candidateSha": target,
+        "openOrderCount": 0,
+        "ordersSent": 0,
+        "positionChangesSent": 0,
+        "positionCount": 0,
+        "priorUpdatedAt": updated_at,
+        "registryEntries": len(entries),
+        "registryHash": hashlib.sha256(raw).hexdigest(),
+        "schema": "disdex-pending-readonly-proof/v1",
+        "source": "SIGNED_ASTER_READONLY_ACCOUNT_LOCK",
+        "verifiedAt": int(time.time() * 1000),
+    }
+    proof_raw = (json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    write_atomic(PENDING_PROOF, proof_raw, meta)
+    return hashlib.sha256(proof_raw).hexdigest()
+
+
+def validate_shared_files(margin_unit: str, *, allow_stale_shared_risk: bool = False) -> None:
+    _hold_raw, hold, _hold_digest = hold_snapshot()
     risk = read_json(RISK)
     require(risk.get("sourceComplete") is True and risk.get("tripped") is False, "SHARED_RISK_NOT_HEALTHY")
     require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_LIMIT_MISMATCH")
     updated = risk.get("updatedAt")
-    require(isinstance(updated, (int, float)) and -1000 <= int(time.time() * 1000) - float(updated) <= 15 * 60_000, "SHARED_RISK_STALE")
+    age_ms = int(time.time() * 1000) - float(updated) if isinstance(updated, (int, float)) else None
+    # With GLOBAL HOLD and orders disabled, allow only a bounded stale
+    # snapshot long enough to restart the pinned Writer and prove three real
+    # updates.  Beyond 90 minutes this remains fail-closed.
+    require(age_ms is not None and -1000 <= age_ms <= 90 * 60_000, "SHARED_RISK_STALE")
+    if age_ms > 15 * 60_000:
+        require(
+            allow_stale_shared_risk
+            and hold.get("active") is True
+            and hold.get("action") == "HOLD_PROTECTED"
+            and hold.get("scope") == "GLOBAL",
+            "SHARED_RISK_STALE",
+        )
     margin = read_json(MARGIN)
     require(margin.get("stage") == "HEALTHY" and margin.get("ordersAllowed") is True, "MARGIN_GUARD_NOT_HEALTHY")
     checked = margin.get("checkedAt")
@@ -515,7 +633,7 @@ def evidence_paths(target: str) -> dict[str, Path]:
     root = MONITOR_ROOT / target
     return {
         "V12_V4": Path("/var/lib/disdex/runner-health/ticks/v12-v4.json"),
-        "PENGU_V8": root / "pengu" / "runner-shadow.json",
+        "PENGU_V8": root / "pengu" / "monitor-tick.json",
         "QUALITY102_CAUSAL_V1": Path("/var/lib/disdex/runner-health/ticks/quality102-causal-v1.json"),
         "V52": Path("/var/lib/disdex/runner-health/ticks/v52-monitor.json"),
         "FET_BRK48_RESIDUAL": root / "fet" / "shadow.json",
@@ -568,7 +686,7 @@ def dropin_text(runner: str, target: str, unit: str) -> str:
         # risk settings, and V4 path configuration; no secret file is created.
         common += ["EnvironmentFile=", "EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", "EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", "EnvironmentFile=/etc/disdex/disdex-v12-v4.env", "Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-" + target + "/budget.sock", "Environment=V12_V4_OPERATION_MODE=MONITOR_ONLY", "Environment=V12_V4_ORDERS_ENABLED=false", f"Environment=V12_V4_SERVICE_UNIT={unit}", "Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json", f"ExecStart=/bin/sh -ec 'export V12_V4_OPERATION_MODE=MONITOR_ONLY V12_V4_ORDERS_ENABLED=false DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-{target}/budget.sock; exec {root}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --monitor-only --daemon'", "ReadWritePaths=/var/lib/disdex/v12-v4 /var/lib/disdex/shared /var/lib/disdex/runner-health"]
     elif runner == "PENGU_V8":
-        common += ["Environment=PENGU_DUAL_LS_V2_MODE=SHADOW", "Environment=PENGU_DUAL_LS_V2_ENABLED=true", "Environment=PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_STATE_DIR=" + str(MONITOR_ROOT / target / "pengu"), "Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5", f"ExecStart=/bin/sh -ec 'export PENGU_DUAL_LS_V2_MODE=SHADOW PENGU_DUAL_LS_V2_ENABLED=true PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5 DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5; exec {root}/node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon'", f"ReadWritePaths={MONITOR_ROOT / target / 'pengu'} /var/lib/disdex/shared"]
+        common += ["Environment=PENGU_DUAL_LS_V2_MODE=SHADOW", "Environment=PENGU_DUAL_LS_V2_MONITOR_POLL_MS=5000", "Environment=PENGU_DUAL_LS_V2_ENABLED=true", "Environment=PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false", "Environment=PENGU_DUAL_LS_V2_STATE_DIR=" + str(MONITOR_ROOT / target / "pengu"), "Environment=PENGU_DUAL_LS_V2_MONITOR_TICK_PATH=" + str(MONITOR_ROOT / target / "pengu" / "monitor-tick.json"), "Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5", f"ExecStart=/bin/sh -ec 'export PENGU_DUAL_LS_V2_MODE=SHADOW PENGU_DUAL_LS_V2_ENABLED=true PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5 DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5; exec {root}/node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon'", f"ReadWritePaths={MONITOR_ROOT / target / 'pengu'} /var/lib/disdex/shared"]
     elif runner == "QUALITY102_CAUSAL_V1":
         common += ["Environment=QUALITY102_CAUSAL_V1_MODE=LIVE", "Environment=QUALITY102_CAUSAL_V1_MONITOR_ONLY=true", "Environment=QUALITY102_CAUSAL_V1_ENABLED=false", "Environment=QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=false", "Environment=QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false", "Environment=QUALITY102_CAUSAL_V1_OPERATOR_ARMED=false", "Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", "Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=" + target, "Environment=QUALITY102_CAUSAL_V1_SYMBOLS=SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT", "Environment=QUALITY102_LIVE_SELECTOR_PARITY=false", "Environment=QUALITY102_LIVE_ENABLED=false", "Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=3.0", "Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false", "Environment=QUALITY102_CAUSAL_V1_MONITOR_SERVICE_UNIT=" + unit, "Environment=QUALITY102_CAUSAL_V1_MONITOR_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json", "Environment=QUALITY102_CAUSAL_V1_MONITOR_TICK_PATH=/var/lib/disdex/runner-health/ticks/quality102-causal-v1.json", f"ExecStart=/bin/sh -ec 'export QUALITY102_CAUSAL_V1_MODE=LIVE QUALITY102_CAUSAL_V1_MONITOR_ONLY=true QUALITY102_CAUSAL_V1_ENABLED=false QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=false QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=false QUALITY102_CAUSAL_V1_OPERATOR_ARMED=false DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5 QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5 DISDEX_RUNTIME_COMMIT_SHA={target} DISDEX_RELEASE_SHA={target} DISDEX_RUNTIME_SHA={target} DISDEX_RELEASE_ROOT={root} QUALITY102_CAUSAL_V1_LIVE_ACK={target} QUALITY102_CAUSAL_V1_SYMBOLS=SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT QUALITY102_LIVE_SELECTOR_PARITY=false QUALITY102_LIVE_ENABLED=false QUALITY102_CAUSAL_V1_MAX_GROSS=3.0 QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4; exec {root}/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-monitor.ts --daemon'", "ReadWritePaths=/var/lib/disdex/runner-health/heartbeats /var/lib/disdex/runner-health/ticks /var/lib/disdex/shared /var/lib/disdex/quality102-causal-v1"]
     elif runner == "V52":
@@ -576,13 +694,13 @@ def dropin_text(runner: str, target: str, unit: str) -> str:
     elif runner == "FET_BRK48_RESIDUAL":
         common += ["Environment=DISDEX_Q102_RUNTIME_SHA=" + target, "Environment=FET_BRK48_SHADOW_STATE_PATH=" + str(MONITOR_ROOT / target / "fet" / "shadow.json"), f"ExecStart={root}/node_modules/.bin/tsx scripts/disdex-fet-brk48-shadow-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'fet'} /var/lib/disdex/shared"]
     elif runner == "IDLE_PRIORITY_SHORT":
-        common += ["Environment=DISDEX_RUNTIME_SHA=" + target, "Environment=DISDEX_IDLE_PRIORITY_MODE=SHADOW", "Environment=DISDEX_IDLE_PRIORITY_ENABLED=true", "Environment=DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=false", "Environment=DISDEX_IDLE_RESIDUAL_LONG_ENABLED=false", "Environment=DISDEX_IDLE_RESIDUAL_LONG_OPERATOR_ARMED=false", "Environment=DISDEX_IDLE_PRIORITY_STATE_PATH=" + str(MONITOR_ROOT / target / "idle" / "state.json"), "Environment=DISDEX_IDLE_PRIORITY_DECISION_PATH=" + str(MONITOR_ROOT / target / "idle" / "decision.json"), "Environment=DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH=" + str(MONITOR_ROOT / target / "idle" / "decision-details.json"), f"ExecStart={root}/node_modules/.bin/tsx {root}/scripts/disdex-idle-priority-short-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'idle'} /var/lib/disdex/shared"]
+        common += ["Environment=DISDEX_RUNTIME_SHA=" + target, "Environment=DISDEX_IDLE_PRIORITY_MODE=SHADOW", "Environment=DISDEX_IDLE_PRIORITY_POLL_MS=5000", "Environment=DISDEX_IDLE_PRIORITY_ENABLED=true", "Environment=DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=false", "Environment=DISDEX_IDLE_RESIDUAL_LONG_ENABLED=false", "Environment=DISDEX_IDLE_RESIDUAL_LONG_OPERATOR_ARMED=false", "Environment=DISDEX_IDLE_PRIORITY_STATE_PATH=" + str(MONITOR_ROOT / target / "idle" / "state.json"), "Environment=DISDEX_IDLE_PRIORITY_DECISION_PATH=" + str(MONITOR_ROOT / target / "idle" / "decision.json"), "Environment=DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH=" + str(MONITOR_ROOT / target / "idle" / "decision-details.json"), f"ExecStart={root}/node_modules/.bin/tsx {root}/scripts/disdex-idle-priority-short-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'idle'} /var/lib/disdex/shared"]
     elif runner == "HYPE_TREND_LONG":
         # The base HYPE template loads SHA-pinned current-runtime EnvironmentFile
         # entries after the shared contract. Clear inherited entries before
         # re-adding only the audited shared inputs so monitor-only flags cannot
         # be overridden back to LIVE or operator-armed state.
-        common += ["EnvironmentFile=", "EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", "EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", "EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env", "Environment=DISDEX_HYPE_ZEC_MODE=SHADOW", "Environment=DISDEX_HYPE_ZEC_ENABLED=true", "Environment=DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=false", "Environment=DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND", "Environment=DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT", "Environment=DISDEX_HYPE_ZEC_RUNTIME_SHA=" + target, "Environment=DISDEX_HYPE_ZEC_STATE_PATH=" + str(MONITOR_ROOT / target / "hype" / "runner.json"), f"ExecStart={root}/node_modules/.bin/tsx scripts/disdex-hype-trend-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'hype'} /var/lib/disdex/shared"]
+        common += ["EnvironmentFile=", "EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", "EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", "EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env", "Environment=DISDEX_HYPE_ZEC_MODE=SHADOW", "Environment=DISDEX_HYPE_ZEC_ENABLED=true", "Environment=DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=false", "Environment=DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND", "Environment=DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT", "Environment=DISDEX_HYPE_MONITOR_POLL_MS=5000", "Environment=DISDEX_HYPE_ZEC_RUNTIME_SHA=" + target, "Environment=DISDEX_HYPE_ZEC_STATE_PATH=" + str(MONITOR_ROOT / target / "hype" / "runner.json"), f"ExecStart={root}/node_modules/.bin/tsx scripts/disdex-hype-trend-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'hype'} /var/lib/disdex/shared"]
     else:
         raise ContractError("MONITOR_RUNNER_UNKNOWN:" + runner)
     return "\n".join(common) + "\n"
@@ -701,19 +819,51 @@ def target_pins(raw: bytes, target: str, units: dict[str, str]) -> bytes:
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
+def _auxiliary_sha(value: dict, roots: dict, key: str) -> str:
+    root_text = str(roots.get(key) or "")
+    require(root_text, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING:" + key)
+    marker = Path(root_text) / ".disdex-release-sha"
+    candidate = ""
+    if marker.is_file() and not marker.is_symlink():
+        try:
+            candidate = marker.read_text(encoding="ascii").strip()
+        except Exception as exc:
+            raise ContractError("CURRENT_PLAN_AUXILIARY_MARKER_UNREADABLE:" + key) from exc
+    if not candidate:
+        candidate = str(value.get(key + "Sha") or "")
+    require(TARGET_SHA_RE.fullmatch(candidate) is not None, "CURRENT_PLAN_AUXILIARY_SHA_INVALID:" + key)
+    return candidate
+
+
+def canonicalize_release_roots(value: dict) -> dict:
+    legacy_roots = value.get("releaseRoots") or {}
+    require(isinstance(legacy_roots, dict), "CURRENT_PLAN_RELEASE_ROOTS_INVALID")
+    ui_root = str(legacy_roots.get("ui") or "")
+    monitor_root = str(legacy_roots.get("monitor") or "")
+    require(ui_root and monitor_root, "CURRENT_PLAN_AUXILIARY_ROOT_MISSING")
+    value["uiSha"] = _auxiliary_sha(value, legacy_roots, "ui")
+    value["monitorSha"] = _auxiliary_sha(value, legacy_roots, "monitor")
+    # Root validation requires exactly the three lineage roots. The prior
+    # current-plan carried one releaseRoot per Runner, which made the pinned
+    # Shared Risk prestart fail closed before it could refresh its evidence.
+    value["releaseRoots"] = {
+        "runners": str(BASE),
+        "ui": ui_root,
+        "monitor": monitor_root,
+    }
+    return value
+
+
 def target_plan(raw: bytes, target: str) -> bytes:
     value = json.loads(raw.decode("utf-8"))
     require(value.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
     value["scope"] = "FULL_PROJECT"
     value["sourceSha"] = target
-    value["monitorSha"] = target
     runners = value.setdefault("runners", {})
     for key in RUNNER_IDS:
         require(key in runners and runners[key] != target, "CURRENT_PLAN_RUNNER_INVALID:" + key)
         runners[key] = target
-    roots = value.setdefault("releaseRoots", {})
-    for key in RUNNER_IDS:
-        roots[key] = str(BASE / target)
+    value = canonicalize_release_roots(value)
     return (json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
 
 
@@ -751,7 +901,15 @@ def validate_evidence(path: Path, target: str, runner: str) -> None:
         if key in value:
             require(str(value.get(key)).lower() == target, "MONITOR_SHA_MISMATCH:" + runner)
     if runner in {"V12_V4", "QUALITY102_CAUSAL_V1", "V52"}:
-        require(value.get("mode") == "MONITOR_ONLY" and value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID:" + runner)
+        # V4's canonical runner-health tick predates the generic mode field:
+        # it proves monitor-only authority with newOrdersAllowed=false and the
+        # explicit V4 safety-block reason.  Accept that reviewed schema only
+        # for V4; Q102/V52 must continue to carry mode=MONITOR_ONLY.
+        if runner == "V12_V4" and "mode" not in value:
+            require(value.get("schema") == "disdex-runner-tick/v1" and value.get("runnerId") == "V12_V4", "MONITOR_HEARTBEAT_SCHEMA_INVALID:" + runner)
+        else:
+            require(value.get("mode") == "MONITOR_ONLY", "MONITOR_HEARTBEAT_MODE_INVALID:" + runner)
+        require(value.get("newOrdersAllowed") is False, "MONITOR_HEARTBEAT_ORDER_AUTHORITY_INVALID:" + runner)
         status = str(value.get("status", ""))
         if runner == "V12_V4" and status == "blocked":
             # The shared Kill Switch is intentionally retained during this
@@ -767,7 +925,7 @@ def validate_evidence(path: Path, target: str, runner: str) -> None:
             require(str(value.get("mode")).upper() == "SHADOW", "SHADOW_EVIDENCE_MODE_INVALID:" + runner)
 
 
-def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], restart_before: dict[str, str], timeout: int = 240) -> None:
+def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], restart_before: dict[str, str], timeout: int = 600) -> None:
     previous: dict[str, tuple[int, str]] = {}
     seen = {runner: 0 for runner in RUNNER_IDS}
     for runner, path in paths.items():
@@ -798,7 +956,40 @@ def poll_cycles(target: str, units: dict[str, str], paths: dict[str, Path], rest
             require(health[unit]["NRestarts"] == restart_before[runner], "TARGET_RESTART_COUNT_CHANGED:" + runner)
         if min(seen.values()) < 3:
             time.sleep(3)
-    require(min(seen.values()) >= 3, "THREE_MONITOR_CYCLES_NOT_OBSERVED")
+    if min(seen.values()) < 3:
+        detail = ",".join(f"{runner}={seen[runner]}" for runner in RUNNER_IDS)
+        raise ContractError("THREE_MONITOR_CYCLES_NOT_OBSERVED:" + detail)
+
+
+
+def discover_stale_instance_units(protected_units: set[str], target_units_set: set[str]) -> list[str]:
+    """Return only active non-pinned instances from audited runner families.
+
+    A previous failed cutover can leave a missing-release instance in
+    activating/auto-restart.  Restrict discovery to the allow-listed families,
+    preserve every currently pinned service and the new target units, and do
+    not touch failed/inactive historical units.
+    """
+    rows = run(
+        "/usr/bin/systemctl",
+        "list-units",
+        "--all",
+        "--type=service",
+        "--plain",
+        "--no-legend",
+        "--no-pager",
+        timeout=60,
+    )
+    candidates: set[str] = set()
+    for raw in rows.splitlines():
+        unit = raw.strip().split(None, 1)[0] if raw.strip() else ""
+        match = INSTANCE_UNIT_RE.fullmatch(unit)
+        if not match or unit in protected_units or unit in target_units_set:
+            continue
+        state = unit_property(unit, "ActiveState")
+        if state in {"active", "activating", "deactivating", "reloading"}:
+            candidates.add(unit)
+    return sorted(candidates)
 
 
 def validate_token(token: str, public_key: Path, target: str, execution_plan_sha256: str, approval_id: str) -> None:
@@ -807,7 +998,102 @@ def validate_token(token: str, public_key: Path, target: str, execution_plan_sha
     verify_owner_token(token, public_key, REPO, target, SCOPE, OPERATOR, execution_plan_sha256, route=ROUTE, deployment_target=TARGET_HOST, operator_target=OPERATOR_TARGET, orders_enabled=False)
 
 
-def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[str, tuple[str, str]], dict[str, str], str]:
+def _shared_risk_tick() -> int:
+    risk = read_json(RISK)
+    require(risk.get("sourceComplete") is True and risk.get("tripped") is False, "SHARED_RISK_REPAIR_NOT_HEALTHY")
+    require(abs(float(risk.get("maximumLossPct")) - 7.5) < 1e-9, "SHARED_RISK_REPAIR_LIMIT_MISMATCH")
+    updated = risk.get("updatedAt")
+    require(isinstance(updated, int) and updated > 0, "SHARED_RISK_REPAIR_TIMESTAMP_INVALID")
+    return updated
+
+
+def repair_current_plan_roots() -> tuple[bytes, tuple[int, int, int], bool]:
+    raw = read_regular(CURRENT_PLAN, 131_072)
+    current = json.loads(raw.decode("utf-8"))
+    require(current.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
+    pins = json.loads(read_regular(PINS, 131_072).decode("utf-8"))
+    rows = pins.get("runners") or {}
+    pin_values = {str(key): str(row.get("sha") or "") for key, row in rows.items() if isinstance(row, dict)}
+    require(pin_values and current.get("runners") == pin_values, "CURRENT_PLAN_PIN_BINDING_INVALID")
+    repaired = canonicalize_release_roots(current)
+    encoded = (json.dumps(repaired, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+    metadata = file_meta(CURRENT_PLAN)
+    if encoded == raw:
+        return raw, metadata, False
+    write_atomic(CURRENT_PLAN, encoded, metadata)
+    run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+    return raw, metadata, True
+
+
+def repair_shared_risk_writer(pins_raw: bytes, timeout: int = 360) -> list[int]:
+    """Restart the already pinned no-order Shared Risk Writer and prove real ticks.
+
+    This is a bounded maintenance step inside the approved monitor-only goal. It
+    never edits the HOLD, sends venue mutations, enables orders, or changes the
+    pinned Shared Risk SHA. The prestart hook remains the authority for exact
+    plan, receipt, nonce, and single-writer checks.
+    """
+    pins = json.loads(pins_raw.decode("utf-8"))
+    row = (pins.get("runners") or {}).get("SHARED_CRYPTO_RISK") or {}
+    sha = str(row.get("sha") or "")
+    unit = str(row.get("serviceUnit") or "")
+    require(TARGET_SHA_RE.fullmatch(sha) is not None, "SHARED_RISK_PIN_SHA_INVALID")
+    require(unit == f"disdex-shared-crypto-risk@{sha}.service", "SHARED_RISK_PIN_UNIT_INVALID")
+    env_path = Path("/etc/disdex/current-runtime") / f"{sha}-shared-risk-scoped.env"
+    env_text = read_regular(env_path, 16_384).decode("utf-8")
+    require(
+        re.search(r"(?m)^DISDEX_SHARED_RISK_ORDERS_ENABLED=false$",
+                   env_text) is not None,
+        "SHARED_RISK_ORDER_FLAG_NOT_FALSE",
+    )
+    _hold_raw, hold, _hold_digest = hold_snapshot()
+    require(hold.get("active") is True and hold.get("action") == "HOLD_PROTECTED" and hold.get("scope") == "GLOBAL", "GLOBAL_HOLD_NOT_PROTECTED")
+    current_plan = read_json(CURRENT_PLAN)
+    require(current_plan.get("ordersEnabled") is False, "CURRENT_PLAN_ORDERS_NOT_DISABLED")
+    before = _shared_risk_tick()
+    run("/usr/bin/systemctl", "restart", unit, timeout=120)
+    seen: list[int] = []
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline and len(seen) < 3:
+        state = unit_property(unit, "ActiveState")
+        require(state not in {"failed", "inactive", "dead"}, "SHARED_RISK_REPAIR_UNIT_NOT_ACTIVE")
+        try:
+            tick = _shared_risk_tick()
+        except ContractError:
+            tick = 0
+        if tick > before and tick not in seen:
+            seen.append(tick)
+        if len(seen) < 3:
+            time.sleep(5)
+    require(len(seen) >= 3, "SHARED_RISK_REPAIR_REAL_REFRESH_TIMEOUT")
+    require(unit_active(unit), "SHARED_RISK_REPAIR_UNIT_NOT_ACTIVE")
+    return seen
+
+
+def repair_shared_risk_only() -> None:
+    original_raw, original_metadata, changed = repair_current_plan_roots()
+    try:
+        ticks = repair_shared_risk_writer(read_regular(PINS, 131_072))
+        _hold_raw, hold, hold_digest = hold_snapshot()
+        require(hold.get("active") is True and hold.get("action") == "HOLD_PROTECTED" and hold.get("scope") == "GLOBAL", "GLOBAL_HOLD_NOT_PROTECTED")
+        print(json.dumps({
+            "status": "SHARED_RISK_NO_ORDER_REPAIR_PASS",
+            "ordersEnabled": False,
+            "globalHoldDigest": hold_digest,
+            "refreshes": len(ticks),
+            "currentPlanCanonicalized": changed,
+            "ordersSent": 0,
+            "cancelsSent": 0,
+            "positionChangesSent": 0,
+        }, sort_keys=True))
+    except Exception:
+        if changed:
+            write_atomic(CURRENT_PLAN, original_raw, original_metadata)
+            run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        raise
+
+
+def baseline(target: str, plan: dict, *, allow_stale_shared_risk: bool = False) -> tuple[bytes, bytes, bytes, str, dict[str, tuple[str, str]], dict[str, str], str]:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     require(not (BASE / target).exists(), "TARGET_RELEASE_ALREADY_EXISTS")
     hold_raw, _hold, hold_digest = hold_snapshot()
@@ -825,7 +1111,7 @@ def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[st
     assert_single_shared_risk_writer(pins_raw)
     margin_unit = str((rows.get("MARGIN_GUARD") or {}).get("serviceUnit") or "")
     require(margin_unit, "MARGIN_GUARD_PIN_MISSING")
-    validate_shared_files(margin_unit)
+    validate_shared_files(margin_unit, allow_stale_shared_risk=allow_stale_shared_risk)
     states = {key: unit_state(unit) for key, unit in old_units.items()}
     observations = [signed_get() for _ in range(3)]
     require(len({stamp for stamp, _ in observations}) == 3 and len({inv for _, inv in observations}) == 1, "SIGNED_GET_BASELINE_CHANGED")
@@ -836,17 +1122,21 @@ def baseline(target: str, plan: dict) -> tuple[bytes, bytes, bytes, str, dict[st
 
 def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path, manifest_path: Path, token: str, public_key: Path, approval_id: str, run_id: str) -> None:
     validate_token(token, public_key, target, execution_plan_sha256, approval_id)
-    pins_raw, plan_raw, hold_raw, baseline_inventory, old_states, old_units, margin_unit = baseline(target, plan)
+    pins_raw, plan_raw, hold_raw, baseline_inventory, old_states, old_units, margin_unit = baseline(target, plan, allow_stale_shared_risk=True)
     units = target_units(target)
     paths = evidence_paths(target)
     dropins = {runner: dropin_path(unit) for runner, unit in units.items()}
     instance = Path("/etc/systemd/system") / units["V52"]
     q102_path = Path("/var/lib/disdex/quality102-causal-v1/state.json")
-    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, *dropins.values(), instance])
+    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, PENDING_PROOF, *dropins.values(), instance])
     state_root_created = False
     release = BASE / target
+    target_margin_unit = f"disdex-v12-v52-margin-guard@{target}.service"
+    target_shared_risk_unit = f"disdex-shared-crypto-risk@{target}.service"
+    target_v4_broker_unit = f"disdex-v4-rate-budget-broker@{target}.service"
     try:
         stage_candidate(tar_path, manifest_path, target)
+        lock_recovered = recover_expired_account_lock(release, run_id)
         install_state_dirs(target); state_root_created = True
         # The V52 template has a same-SHA guard dependency. Clone only the
         # reviewed instance and bind it to the existing healthy Margin Guard.
@@ -871,12 +1161,30 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         # restart-loop units.  This is the only systemd quiesce; no order
         # endpoint is used.  The PENGU instance is a missing-release CHDIR
         # loop and is explicitly pinned here so the repair remains auditable.
+        # Keep the pinned generation and audited canonical shared guards,
+        # but discover every other active/restarting instance in the bounded
+        # allow-list.  This closes the gap where a prior failed candidate left
+        # a different SHA in auto-restart and stole the account lock.
+        pinned_rows = (json.loads(pins_raw.decode("utf-8")).get("runners") or {})
+        protected_units = set(old_units.values())
+        for key in ("SHARED_CRYPTO_RISK", "MARGIN_GUARD"):
+            row = pinned_rows.get(key) or {}
+            service = str(row.get("serviceUnit") or "")
+            if service:
+                protected_units.add(service)
         stale_units = [
             f"disdex-quality102-causal-v1@{STALE_Q102}.service",
             f"disdex-v12-v52-margin-guard@{STALE_MARGIN}.service",
+            f"disdex-v12-v52-margin-guard@{STALE_MARGIN_CANDIDATE}.service",
             f"disdex-pengu-dual-ls-v2@{STALE_PENGU}.service",
+            # A prior failed candidate may have left its per-SHA Margin Guard
+            # restart-loop unit behind. The monitor cutover never needs a
+            # candidate-specific Margin Guard because V52 is bound to the
+            # audited canonical guard; retire only this exact target unit.
+            target_margin_unit,
         ]
-        for unit in (*old_units.values(), *stale_units):
+        stale_units.extend(discover_stale_instance_units(protected_units, set(units.values())))
+        for unit in sorted(set((*old_units.values(), *stale_units))):
             stop_unit(unit)
             run("/usr/bin/systemctl", "disable", unit, check=False, timeout=30)
         # A candidate writer can be disabled yet running. Enforce the
@@ -887,6 +1195,13 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         write_atomic(PINS, target_pins(pins_raw, target, units), file_snapshot[PINS][2] or (0, 0, 0o644))
         write_atomic(CURRENT_PLAN, target_plan(plan_raw, target), file_snapshot[CURRENT_PLAN][2] or (0, 0, 0o644))
         run("/usr/bin/systemctl", "daemon-reload", timeout=30)
+        # The pinned Shared Risk Writer was previously trapped by the malformed
+        # legacy current-plan. Repair it only after the canonical no-order
+        # plan/pins are installed, then demand three new risk timestamps before
+        # any target Runner is started.
+        shared_risk_refreshes = repair_shared_risk_writer(read_regular(PINS, 131_072))
+        validate_shared_files(margin_unit)
+        pending_proof_digest = refresh_v4_pending_proof(target)
         for runner, unit in units.items():
             validate_target_unit(unit, target, runner)
             run("/usr/bin/systemctl", "start", unit, timeout=120)
@@ -903,14 +1218,28 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         require(len({stamp for stamp, _ in final_reads}) == 3 and all(inv == baseline_inventory for _, inv in final_reads), "SIGNED_GET_POSTCUTOVER_CHANGED")
         _h2, _v2, hd2 = hold_snapshot(); require(hd2 == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
         require(not any(unit_active(unit) for unit in old_units.values()), "DUAL_RUNNER_ACTIVE")
+        # Reconfirm singleton after final venue/HOLD reconciliation.
         assert_single_shared_risk_writer(read_regular(PINS, 131_072), target=target)
-        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target, "ownerGoalId": plan.get("ownerGoalId"), "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3, "globalHoldDigest": hd2, "ordersEnabled": False, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "oldGenerationActive": False, "staleLoopsRetired": True, "sharedRiskSingleWriter": True, "sharedRiskRetired": shared_risk_retired, "runnerUnits": units}, sort_keys=True))
+        print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target,
+                          "ownerGoalId": plan.get("ownerGoalId"),
+                          "signedGetsBefore": 3, "signedGetsAfter": 3, "monitorCycles": 3,
+                          "globalHoldDigest": hd2, "ordersEnabled": False,
+                          "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0,
+                          "oldGenerationActive": False, "staleLoopsRetired": True,
+                          "accountLockRecovered": lock_recovered,
+                          "sharedRiskRefreshes": len(shared_risk_refreshes),
+                          "pendingProofDigest": pending_proof_digest,
+                          "sharedRiskSingleWriter": True, "sharedRiskRetired": shared_risk_retired,
+                          "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:
-            _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
-            for unit in units.values():
+            # Quiesce candidate units before any rollback read.  If the signed
+            # read is unavailable, fail closed with the candidate stopped
+            # instead of leaving a partial target running.
+            for unit in (*units.values(), target_margin_unit, target_shared_risk_unit, target_v4_broker_unit):
                 if unit_active(unit):
                     stop_unit(unit)
+            _stamp, inv = signed_get(); require(inv == baseline_inventory, "ROLLBACK_VENUE_CHANGED_MANUAL_REVIEW")
             restore_paths(file_snapshot)
             run("/usr/bin/systemctl", "daemon-reload", timeout=30)
             for runner, unit in old_units.items():
@@ -931,6 +1260,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--preflight-readonly", action="store_true")
+    group.add_argument("--repair-shared-risk", action="store_true")
     group.add_argument("--execute-approved", action="store_true")
     parser.add_argument("--target-sha", required=True)
     parser.add_argument("--plan", type=Path, required=True)
@@ -950,6 +1280,9 @@ def main() -> int:
         if args.preflight_readonly:
             pins_raw, plan_raw, hold_raw, inventory, states, old_units, margin = baseline(args.target_sha, plan)
             print(json.dumps({"status": "STABLE4_DD30_MONITOR_PREFLIGHT_PASS", "targetSha": args.target_sha, "signedGets": 3, "ordersEnabled": False, "globalHoldDigest": hashlib.sha256(hold_raw).hexdigest(), "oldUnits": old_units, "marginGuardUnit": margin, "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}, sort_keys=True))
+            return 0
+        if args.repair_shared_risk:
+            repair_shared_risk_only()
             return 0
         require(args.tar is not None and args.manifest is not None, "CANDIDATE_ARCHIVE_AND_MANIFEST_REQUIRED")
         execute(args.target_sha, plan, args.execution_plan_sha256, args.tar, args.manifest, token, args.public_key, args.approval_id, args.run_id)

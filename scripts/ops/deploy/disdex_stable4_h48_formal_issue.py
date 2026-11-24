@@ -14,11 +14,11 @@ import stat
 import sys
 import time
 
-SOURCE = "e0e4f1d8f22b62e9410188ef6e590a20e31f760f"
-PLAN = "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce"
+SOURCE = "74331d74f400acda21a2c1edb5f7b166e197a93f"
+PLAN = "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f"
 RESEARCH = "9e1142f5ec6d4bc285deef023572623bb1c37a34"
 OPERATION = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
-POLICY_SHA256 = "8082c16e128c84ef929bfc18ea8f1ecf559088de0cbb13667dfc2b4ca496a190"
+POLICY_SHA256 = "0a97e977e83acbe2bc77d8ba6b60fbbac12121a103ea544ba632d8daab67ea24"
 ROOT = Path("/var/lib/disdex/unified-deploy")
 RELEASE = Path("/home/deploy/disdex-trading/releases") / SOURCE
 STORE = Path("/home/deploy/disdex-ui/shared/data/deploy-approvals.json")
@@ -99,7 +99,7 @@ def certificate(now_ms):
         "entryGridHours": 6,
         "residentStopRequired": False,
         "residentTakeProfitRequired": False,
-        "approvedGross": {"crypto": 3, "stock": 4, "total": 4.25, "hype": 1},
+        "approvedGross": {"crypto": 3, "stock": 1.5, "total": 3.5, "hype": 1},
         "issuedAt": now_ms,
         "expiresAt": now_ms + 30 * 86400000,
         "operatorAcknowledgement": "H48_TIME_ONLY",

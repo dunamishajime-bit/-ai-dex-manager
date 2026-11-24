@@ -81,6 +81,9 @@ async function main() {
   });
 
   const daemon = process.argv.includes("--daemon");
+  const monitorPollMs = runtime.mode === "SHADOW"
+    ? Math.min(30_000, Math.max(1_000, numberEnv("DISDEX_HYPE_MONITOR_POLL_MS", 0)))
+    : 0;
   const delay = createInterruptibleDelay();
   let stopping = false;
   const stop = () => { stopping = true; delay.interrupt(); };
@@ -90,7 +93,9 @@ async function main() {
     const result = await runner.tick();
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
     if (!daemon || stopping || result.status === "manual-review") break;
-    const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
+    const normalWaitMs = monitorPollMs > 0
+      ? monitorPollMs
+      : Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
     const lockRetryMs = numberEnv("DISDEX_HYPE_ZEC_LOCK_RETRY_MS", 5_000);
     await delay.wait(nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
   } while (!stopping);

@@ -15,8 +15,14 @@ export function nextPenguDaemonWaitMs(
   boundaryDelayMs: number,
   lockRetryMs: number,
   message?: string,
+  monitorPollMs = 0,
 ) {
   if (status === "locked") return lockRetryMs;
   if (status === "failed" && classifyAsterRateBudgetFailure(message)?.kind === "RATE_BUDGET_DEFERRED") return lockRetryMs;
+  // Monitor-only verification may request a short observation cadence so the
+  // cutover can prove fresh heartbeats without waiting for the live strategy's
+  // hourly boundary. The caller passes this only for SHADOW mode; LIVE keeps
+  // the production hour-boundary schedule unchanged.
+  if (monitorPollMs > 0) return Math.max(1_000, Math.min(30_000, Math.trunc(monitorPollMs)));
   return PENGU_HOUR_MS - (nowMs % PENGU_HOUR_MS) + boundaryDelayMs;
 }

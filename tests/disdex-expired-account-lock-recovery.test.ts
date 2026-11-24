@@ -5,6 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  accountLockOwnerPid,
   archiveExpiredAccountOrderLock,
   inspectExpiredAccountOrderLock,
 } from "../lib/disdex-expired-account-lock-recovery";
@@ -19,6 +20,12 @@ const BASE = {
   expiresAt: 2_000,
   reservations: [],
 };
+
+test("account lock recovery parses PID before a lease timestamp", () => {
+  assert.equal(accountLockOwnerPid("Q102_PENDING_RECOVERY:12345"), 12345);
+  assert.equal(accountLockOwnerPid("PENDING_READONLY_RECONCILE:135005:1795431286950"), 135005);
+  assert.throws(() => accountLockOwnerPid("PENDING_READONLY_RECONCILE:135005:0:1"), /ACCOUNT_LOCK_OWNER_PID_INVALID|ACCOUNT_LOCK_OWNER_PID_MISSING/);
+});
 
 test("expired lock with a dead owner and no reservations is eligible", () => {
   assert.deepEqual(

@@ -1,0 +1,199 @@
+name: STABLE4 DD30 all-runner LIVE order enable
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-stable4-dd30-allrunner-live-order-enable.yml"
+      - "config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json"
+      - "scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py"
+      - "scripts/ops/test_disdex_stable4_dd30_live_preflight.py"
+      - "lib/deploy-approval-token.ts"
+      - "scripts/ops/deploy/disdex_deployment_contract.py"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only preflight first; execute requires a separate exact orders-enabled approval
+        type: choice
+        options:
+          - preflight
+          - execute
+        default: preflight
+        required: true
+      source_sha:
+        description: Exact installed STABLE4 release SHA
+        type: string
+        required: true
+      plan_sha256:
+        description: Exact SHA-256 of the checked-in DD30 plan
+        type: string
+        required: true
+      approval_id:
+        description: Exact orders-enabled Owner approval (execute only)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-stable4-dd30-allrunner-live
+  cancel-in-progress: false
+
+env:
+  REPOSITORY: dunamishajime-bit/-ai-dex-manager
+  DEPLOYMENT_TARGET: professional-dismanager.net
+  CANDIDATE_SOURCE_SHA: 74331d74f400acda21a2c1edb5f7b166e197a93f
+  CANDIDATE_PLAN_SHA256: 0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4
+  APPROVAL_OPERATION: STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE
+  APPROVAL_SCOPE: STABLE4_DD30_ALLRUNNERS
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate Python gate and exact plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest scripts/ops/test_disdex_stable4_dd30_live_preflight.py -v
+          python3 -B -m py_compile scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py
+          actual="$(sha256sum config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json | awk '{print $1}')"
+          test "$actual" = "$CANDIDATE_PLAN_SHA256"
+          grep -q '"operation": "STABLE4_DD30_ALLRUNNERS_LIVE_ORDER_ENABLE"' config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json
+          grep -q '"ordersEnabled": true' config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json
+      - name: Validate approval policy separation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'STABLE4_DD30_ALLRUNNERS' lib/deploy-approval-token.ts
+          grep -q 'STABLE4_DD30_ALLRUNNERS' scripts/ops/deploy/disdex_deployment_contract.py
+          grep -q 'STABLE4_DD30_ALLRUNNERS_EXACT_SOURCE_AND_PLAN_REQUIRED' .github/workflows/disdex-v4-hp-approval-request.yml
+
+  bind:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      source_sha: ${{ steps.bind.outputs.source_sha }}
+      plan_sha: ${{ steps.bind.outputs.plan_sha }}
+      mode: ${{ steps.bind.outputs.mode }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Bind exact candidate source and plan
+        id: bind
+        shell: bash
+        env:
+          INPUT_SOURCE: ${{ inputs.source_sha }}
+          INPUT_PLAN: ${{ inputs.plan_sha256 }}
+          INPUT_MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+          [[ "$INPUT_SOURCE" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$INPUT_PLAN" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$INPUT_SOURCE" == "$CANDIDATE_SOURCE_SHA" ]]
+          [[ "$INPUT_PLAN" == "$CANDIDATE_PLAN_SHA256" ]]
+          [[ "$INPUT_MODE" == preflight || "$INPUT_MODE" == execute ]]
+          actual="$(sha256sum config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json | awk '{print $1}')"
+          [[ "$actual" == "$INPUT_PLAN" ]]
+          echo "source_sha=$INPUT_SOURCE" >> "$GITHUB_OUTPUT"
+          echo "plan_sha=$actual" >> "$GITHUB_OUTPUT"
+          echo "mode=$INPUT_MODE" >> "$GITHUB_OUTPUT"
+
+  preflight:
+    needs: bind
+    if: needs.bind.outputs.mode == 'preflight' || needs.bind.outputs.mode == 'execute'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Configure reviewed Root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "$DEPLOYMENT_TARGET" && -n "$KEY" && -n "$KNOWN" ]]
+          [[ -n "$PORT" ]] || PORT=22
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          dir="$RUNNER_TEMP/stable4-dd30-ssh"
+          mkdir -m 0700 -p "$dir"
+          printf '%s\n' "$KEY" > "$dir/id_root"
+          printf '%s\n' "$KNOWN" > "$dir/known_hosts"
+          chmod 0600 "$dir/id_root" "$dir/known_hosts"
+          ssh-keygen -y -f "$dir/id_root" >/dev/null
+          echo "SSH_DIR=$dir" >> "$GITHUB_ENV"
+          echo "SSH_PORT=$PORT" >> "$GITHUB_ENV"
+      - name: Stage immutable read-only preflight source
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+          SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
+          PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
+        run: |
+          set -euo pipefail
+          opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -p "$SSH_PORT")
+          ssh -nT "${opts[@]}" "root@$HOST" "install -d -o root -g root -m 0700 '$STAGE'"
+          scp -q "${opts[@]}" scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py "root@$HOST:$STAGE/preflight.py"
+          scp -q "${opts[@]}" config/disdex-stable4-dd30-allrunner-live-order-enable-plan.json "root@$HOST:$STAGE/plan.json"
+          ssh -nT "${opts[@]}" "root@$HOST" "chown root:root '$STAGE/'* && chmod 0444 '$STAGE/'* && sha256sum '$STAGE/plan.json'"
+      - name: Run signed, read-only Root preflight
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+          SOURCE_SHA: ${{ needs.bind.outputs.source_sha }}
+          PLAN_SHA: ${{ needs.bind.outputs.plan_sha }}
+        run: |
+          set -euo pipefail
+          opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -p "$SSH_PORT")
+          ssh -nT "${opts[@]}" "root@$HOST" "/usr/bin/python3 -B '$STAGE/preflight.py' --source-sha '$SOURCE_SHA' --plan '$STAGE/plan.json' --plan-sha256 '$PLAN_SHA' --preflight-readonly"
+      - name: Cleanup staged preflight files
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          STAGE: /var/lib/disdex/unified-deploy/stable4-dd30-preflight/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          opts=(-i "$SSH_DIR/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_DIR/known_hosts" -o ConnectTimeout=12 -p "$SSH_PORT")
+          ssh -nT "${opts[@]}" "root@$HOST" "rm -f '$STAGE/preflight.py' '$STAGE/plan.json' && rmdir '$STAGE' 2>/dev/null || true" || true
+          rm -rf "$SSH_DIR"
+
+  execute:
+    needs: [bind, preflight]
+    if: needs.bind.outputs.mode == 'execute'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Fail closed until the certified Root executor is installed
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "STABLE4_DD30_LIVE_EXECUTOR_NOT_CERTIFIED=TRUE"
+          echo "No orders, permits, HOLD changes, STOP changes, or restarts were attempted."
+          exit 1
+
