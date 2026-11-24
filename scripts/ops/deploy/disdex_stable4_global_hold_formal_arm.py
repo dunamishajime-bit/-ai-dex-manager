@@ -23,6 +23,11 @@ PINS = Path("/etc/disdex/runner-pins.json")
 HOLD_DIR = Path("/etc/disdex/stable4/holds")
 HOLD_RECEIPT = HOLD_DIR / (owner.SOURCE + ".json")
 REASON = "STABLE4_RESEARCH_ROLLOUT:" + owner.SOURCE
+# A prior monitor rollout can leave the canonical protection active while
+# the next exact-SHA H48 goal is being certified. Accept only that immutable
+# STABLE4 reason format; the bytes remain unchanged and no order authority is
+# granted by this path.
+STABLE4_ROLLOUT_REASON = re.compile(r"^STABLE4_RESEARCH_ROLLOUT:[0-9a-f]{40}$")
 OPERATOR = "disdex-stable4-formal-owner-hold"
 STRATEGY = "STABLE4_H48_CUTOVER"
 MAX_HOLD_GRACE_MS = 10 * 60 * 1000
@@ -60,7 +65,9 @@ def validate_existing_active_hold(value):
     require(value.get("operator") == OPERATOR, "KILL_OWNER_CHANGED")
     require(value.get("strategyId") == STRATEGY, "KILL_STRATEGY_CHANGED")
     require(value.get("recoverable") is False, "KILL_RECOVERABLE_CHANGED")
-    require(value.get("reason") == REASON, "KILL_REASON_CHANGED")
+    reason = value.get("reason")
+    require(isinstance(reason, str) and STABLE4_ROLLOUT_REASON.fullmatch(reason),
+            "KILL_REASON_CHANGED")
     return value
 
 
