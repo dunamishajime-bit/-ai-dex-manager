@@ -45,6 +45,25 @@ def validate_kill_before(value):
     return value
 
 
+def validate_existing_active_hold(value):
+    """Accept only the already-active canonical STABLE4 protection hold.
+
+    A monitor rollout may have left the exact GLOBAL HOLD_PROTECTED active.
+    In that state there is nothing safe to re-arm: clearing or rewriting the
+    shared kill switch would weaken protection. The formal H48 step may only
+    bind a new non-order receipt to the unchanged bytes.
+    """
+    require(isinstance(value, dict), "KILL_NOT_OBJECT")
+    require(value.get("active") is True, "KILL_NOT_ACTIVE")
+    require(value.get("action") == "HOLD_PROTECTED", "KILL_ACTION_CHANGED")
+    require(value.get("scope") == "GLOBAL", "KILL_SCOPE_CHANGED")
+    require(value.get("operator") == OPERATOR, "KILL_OWNER_CHANGED")
+    require(value.get("strategyId") == STRATEGY, "KILL_STRATEGY_CHANGED")
+    require(value.get("recoverable") is False, "KILL_RECOVERABLE_CHANGED")
+    require(value.get("reason") == REASON, "KILL_REASON_CHANGED")
+    return value
+
+
 def protected_hold(value, now_ms):
     validate_kill_before(value)
     require(type(now_ms) is int and now_ms > 0, "CLOCK_INVALID")
@@ -121,11 +140,28 @@ def guarded_arm(approval_id, run_id, token):
         validate_root_receipt(approval_id, run_id, now_ms=time.time_ns() // 1000000)
         before = KILL.read_bytes()
         old = json.loads(before)
-        validate_kill_before(old)
+        v4_sha = get_v4_pin()
         require(not HOLD_RECEIPT.exists() and not HOLD_RECEIPT.is_symlink(), "HOLD_ALREADY_PREPARED")
         now_ms = time.time_ns() // 1000000
+        if old.get("active") is True:
+            # The canonical protection is already active. Preserve its bytes
+            # exactly and issue only the candidate-bound non-order receipt.
+            validate_existing_active_hold(old)
+            hold_receipt = protected_hold_receipt(now_ms, v4_sha, before)
+            owner.ensure_directory(HOLD_DIR, 0o755)
+            owner.install_exact_file(HOLD_RECEIPT, owner.canonical(hold_receipt), 0o444)
+            require(KILL.read_bytes() == before, "KILL_CHANGED_DURING_RECEIPT")
+            return {
+                "status": "STABLE4_GLOBAL_HOLD_PROTECTED_ARMED_OWNER_BOUND",
+                "sourceSha": owner.SOURCE, "v4Sha": v4_sha,
+                "killSwitchSha256": hold_receipt["killSwitchSha256"],
+                "receiptSha256": hashlib.sha256(owner.canonical(hold_receipt)).hexdigest(),
+                "expiresAt": hold_receipt["expiresAt"], "authorizesOrders": False,
+                "alreadyProtected": True,
+                "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0,
+            }
+        validate_kill_before(old)
         new_bytes = owner.canonical(protected_hold(old, now_ms))
-        v4_sha = get_v4_pin()
         hold_receipt = protected_hold_receipt(now_ms, v4_sha, new_bytes)
         owner.ensure_directory(HOLD_DIR, 0o755)
         # Write an immutable, SHA-bound non-order receipt before changing shared
@@ -170,7 +206,11 @@ def main():
     now_ms = time.time_ns() // 1000000
     if args.preflight_readonly:
         validate_root_receipt(args.approval_id, args.run_id, now_ms=now_ms)
-        validate_kill_before(json.loads(KILL.read_bytes()))
+        current = json.loads(KILL.read_bytes())
+        if current.get("active") is True:
+            validate_existing_active_hold(current)
+        else:
+            validate_kill_before(current)
         result = {"status": "STABLE4_GLOBAL_HOLD_PREFLIGHT_ONLY_NOT_ARMED",
                   "sourceSha": owner.SOURCE, "authorizesOrders": False}
     else:
@@ -186,3 +226,4 @@ if __name__ == "__main__":
                           "reason": str(e)[:180], "ordersSent": 0, "cancelsSent": 0,
                           "positionChangesSent": 0}), file=sys.stderr)
         sys.exit(2)
+

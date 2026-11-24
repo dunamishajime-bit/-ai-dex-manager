@@ -20,7 +20,34 @@ def old_kill():
             "recoverable": False}
 
 
+def existing_stable4_hold():
+    return {
+        "active": True,
+        "action": "HOLD_PROTECTED",
+        "scope": "GLOBAL",
+        "operator": hold.OPERATOR,
+        "strategyId": hold.STRATEGY,
+        "recoverable": False,
+        "reason": hold.REASON,
+        "previousReason": "V52 FET owner mismatch recovered by incident-scoped root authorization",
+        "activatedAt": "2026-11-17T10:48:29.132+00:00",
+        "graceStartedAt": "2026-11-17T10:48:29.132+00:00",
+        "graceDeadlineAt": "2026-11-17T10:58:29.132+00:00",
+    }
+
+
 class GlobalOwnerProtectedHoldTests(unittest.TestCase):
+    def test_accepts_existing_active_stable4_hold_as_already_protected(self):
+        row = hold.validate_existing_active_hold(existing_stable4_hold())
+        self.assertTrue(row["active"])
+        self.assertEqual(row["reason"], hold.REASON)
+
+    def test_rejects_active_hold_with_different_owner_or_reason(self):
+        for change in ({"operator": "other"}, {"reason": "OTHER_INCIDENT"},
+                       {"recoverable": True}, {"strategyId": "OTHER"}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                hold.validate_existing_active_hold({**existing_stable4_hold(), **change})
+
     def test_rearms_only_existing_inactive_global_protected_hold(self):
         row = hold.protected_hold(old_kill(), NOW)
         self.assertEqual(row["active"], True)
@@ -80,3 +107,4 @@ class GlobalOwnerProtectedHoldTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
