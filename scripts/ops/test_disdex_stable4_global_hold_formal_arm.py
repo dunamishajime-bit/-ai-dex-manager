@@ -42,6 +42,13 @@ class GlobalOwnerProtectedHoldTests(unittest.TestCase):
         self.assertTrue(row["active"])
         self.assertEqual(row["reason"], hold.REASON)
 
+    def test_accepts_existing_active_hold_from_prior_stable4_rollout_sha(self):
+        legacy = {**existing_stable4_hold(),
+                  "reason": "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f"}
+        row = hold.validate_existing_active_hold(legacy)
+        self.assertTrue(row["active"])
+        self.assertEqual(row["reason"], legacy["reason"])
+
     def test_rejects_active_hold_with_different_owner_or_reason(self):
         for change in ({"operator": "other"}, {"reason": "OTHER_INCIDENT"},
                        {"recoverable": True}, {"strategyId": "OTHER"}):
