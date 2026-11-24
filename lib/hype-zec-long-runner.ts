@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
+import { hasValidHypeH48OrderPermit } from "./hype-h48-order-permit";
 import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
@@ -339,6 +340,30 @@ export class HypeZecLongRunner {
 
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
+    // H48 is an entry-only permit.  Existing HYPE positions still use the
+    // normal resident STOP/exit path even when the permit is absent.
+    if (this.dependencies.runtime.mode === "LIVE"
+      && this.dependencies.runtime.signalMode === "TREND"
+      && signal.strategy === "HYPE_LONG"
+      && signal.symbol === "HYPEUSDT") {
+      const permitValid = await hasValidHypeH48OrderPermit({
+        runtimeSha: this.dependencies.runtime.runtimeSha,
+        planSha256: process.env.DISDEX_STABLE4_H48_PLAN_SHA256 || "",
+        certificateSha256: process.env.DISDEX_STABLE4_H48_CERTIFICATE_SHA256 || "",
+        approvalId: process.env.DISDEX_STABLE4_H48_APPROVAL_ID || "",
+      });
+      if (!permitValid) {
+        state.lastDecision = {
+          strategy: signal.strategy,
+          signalTs: signal.signalTs,
+          accepted: false,
+          reason: "HYPE_H48_ORDER_PERMIT_REQUIRED",
+        };
+        state.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(state);
+        return { status: "held", message: "HYPE_H48_ORDER_PERMIT_REQUIRED", strategy: signal.strategy };
+      }
+    }
     const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
     if (!sharedRisk.ok) {
       state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `SHARED_CRYPTO_RISK:${sharedRisk.reason || "INVALID"}` };
