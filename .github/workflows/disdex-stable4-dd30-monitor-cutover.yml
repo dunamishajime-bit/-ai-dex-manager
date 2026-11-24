@@ -29,6 +29,7 @@ on:
         type: choice
         options:
           - preflight
+          - repair
           - execute
 
 permissions:
@@ -72,7 +73,7 @@ jobs:
           [[ "$GOAL_PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
           [[ "$EXECUTION_PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
           [[ "$CI_RUN_ID" =~ ^[0-9]{1,20}$ ]]
-          [[ "$MODE" == preflight || "$MODE" == execute ]]
+          [[ "$MODE" == preflight || "$MODE" == repair || "$MODE" == execute ]]
           git fetch --no-tags origin "$TARGET_SHA" --depth=1
           git cat-file -e "$TARGET_SHA^{commit}"
           mkdir -p "$RUNNER_TEMP/stable4-dd30-candidate"
@@ -246,8 +247,10 @@ jobs:
           remote="/tmp/disdex-stable4-dd30-$RUN_ID"
           if [[ "${{ inputs.mode }}" == preflight ]]; then
             args=(--preflight-readonly)
-          else
+          elif [[ "${{ inputs.mode }}" == execute ]]; then
             args=(--execute-approved --tar "$remote/stable4-dd30-candidate.tar.gz" --manifest "$remote/stable4-dd30-manifest.json")
+          else
+            args=(--repair-shared-risk)
           fi
           command=(python3 "$remote/disdex_stable4_dd30_monitor_cutover.py" "${args[@]}"
             --target-sha "$TARGET_SHA"
