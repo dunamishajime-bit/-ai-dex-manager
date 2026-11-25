@@ -113,6 +113,7 @@ test("29 genuine H1 research entry fixtures match PRE-frozen signal features (27
     sourceSha256: string;
     rows: Array<{
       split: string; entryTs: number; entryOpen: number;
+      exitOpen: number; expectedRaw: number;
       hypeCloses: number[]; btcCloses: number[];
       expected: { h12: number; h24: number; rel24: number };
     }>;
@@ -136,6 +137,17 @@ test("29 genuine H1 research entry fixtures match PRE-frozen signal features (27
     });
     assert.equal(result.status, "CANDIDATE", `missed ${row.split} ${row.entryTs}`);
     if (result.status !== "CANDIDATE") continue;
+    const exitTs = row.entryTs + 48 * H;
+    const exit = evaluateHypeH48TimeOnlyExit(result.contract, exitTs + 10000, {
+      openTs: exitTs, open: row.exitOpen, observedAt: exitTs + 5000,
+    });
+    assert.equal(exit.due, true);
+    if (exit.due) {
+      assert.equal(exit.logicalExitTs, exitTs);
+      assert.equal(exit.referenceOpen, row.exitOpen);
+    }
+    assert.ok(Math.abs(row.exitOpen / row.entryOpen - 1 - row.expectedRaw) < 1e-11,
+      `source exit/return mismatch ${row.split}/${row.entryTs}`);
     for (const [name, computed, expected] of [
       ["h12", result.hype12, row.expected.h12],
       ["h24", result.hype24, row.expected.h24],
