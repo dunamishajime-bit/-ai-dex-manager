@@ -30,6 +30,7 @@ The HYPE candidate policy is `H48_R4_RESIDENT_STOP8`. It preserves the frozen H4
 - Exact new STOP8-certified ENTRY and 48h EXIT intent proof: `lib/hype-h48-stop8-policy-intent.ts`.
 - Root/Owner Ed25519 signature verification and 2-minute scoped per-position evidence: `lib/hype-h48-stop8-root-authority.ts`. It never signs or mutates.
 - Pure non-authorizing future-release hard-cap calculator: `lib/stable4-dd30-owner-hard-gross-candidate.ts`.
+- Real signed-venue/pending UNKNOWN/DD30/Shared Risk/Margin Guard/Kill source precheck: `lib/hype-h48-allrunner-risk-precheck.ts`. This returns `tradingAuthorization:false` even when all evidence passes; native Runner must integrate it with the signed Root permit, not use it as a direct order gate.
 - Correctly separate Root-authorized protected reduce-only exit from new-entry permission, while requiring signed STOP8 to complete a new BUY: `lib/hype-h48-native-order-executor.ts`.
 - Cross-runner Root safety audit, Gross/STOP mismatch detection, canonical Kill Switch path validation: `lib/hype-h48-production-gates.ts`, `lib/hype-h48-kill-switch-consistency.ts`.
 - Independent source-only CI without production credentials: `.github/workflows/disdex-h48-offline-native-safety.yml`. Protected original order-enable workflow intentionally retains its existing strict authorization.
