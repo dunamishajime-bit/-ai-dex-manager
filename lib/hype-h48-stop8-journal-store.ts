@@ -18,7 +18,7 @@ const fail=(reason:string):never=>{throw Error("H48_STOP8_STORE_"+reason)};
 const errorCode=(e:unknown)=>String((e as NodeJS.ErrnoException)?.code||"");
 type FileInfo=Awaited<ReturnType<typeof lstat>>;
 function safeFile(s:FileInfo){
-  if(!s.isFile()||s.isSymbolicLink()||(process.platform!=="win32"&&(s.mode&0o022)!==0))
+  if(!s.isFile()||s.isSymbolicLink()||(process.platform!=="win32"&&(Number(s.mode)&0o022)!==0))
     fail("UNTRUSTED_FILE");
 }
 async function safeParent(path:string){
@@ -118,9 +118,10 @@ export class FileH48Stop8Store implements H48Stop8Store {
         fail("SUBMISSION_TRANSITION");
     }else if(old.stage==="SUBMITTED"&&next.stage==="CONFIRMED"){
       if(!proof)fail("VENUE_READBACK_REQUIRED");
-      if(next.submittedAt!==old.submittedAt||next.confirmedAt!==proof.now)
+      const evidence=proof!;
+      if(next.submittedAt!==old.submittedAt||next.confirmedAt!==evidence.now)
         fail("CONFIRMATION_CLOCK_MISMATCH");
-      verifyH48Stop8Venue(old,proof.venue,proof.now);
+      verifyH48Stop8Venue(old,evidence.venue,evidence.now);
     }else fail("ILLEGAL_TRANSITION");
     const initial=await assertLease(lease);
     const lockPath=this.path+".writer.lock";
