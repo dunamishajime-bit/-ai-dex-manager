@@ -64,7 +64,7 @@ export class H48Stop8NativeRetirementHandoff implements H48Stop8ExitRetirement {
     const result=await this.coordinator(input).retireOnce();
     if(result.status!=="STOP8_RETIRED_SIGNED_FLAT")
       fail("CANCEL_UNKNOWN_SIGNED_RECOVERY_REQUIRED");
-    return result;
+    return {status:"STOP8_RETIRED_SIGNED_FLAT",stopCancels:result.stopCancels};
   }
   async reconcileSubmittedWithoutResend(input:{
     sourceSha:string;planSha256:string;positionId:string;
