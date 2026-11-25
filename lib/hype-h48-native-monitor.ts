@@ -51,7 +51,9 @@ export class H48NativeReadOnlyMonitor {
       journalStore:d.store,executor:d.executor,lease:d.lease,
       runtimeSha:d.runtimeSha,now:clock,
     });
-    if(assessed.decision.startsWith("HOLD"))return {
+    if(assessed.decision==="HOLD_RECONCILIATION_REQUIRED"
+       ||assessed.decision==="HOLD_MANUAL_REVIEW"
+       ||assessed.decision==="HOLD_UNTRUSTED_INVENTORY")return {
       status:"HOLD",reason:assessed.reason,ordersSent:0,
     };
     const journal=assessed.journal;
