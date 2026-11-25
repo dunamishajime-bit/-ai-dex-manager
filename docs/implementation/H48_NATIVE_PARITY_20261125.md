@@ -78,9 +78,10 @@ mismatch in the initial candidate evaluator's use as a sequential strategy:
   creation requires a recent flat signed venue read and ASTER account lease.
   Stale revision, forged state transition, corrupt file, untrusted parent,
   stale/missing lock and conflicting state fail closed.
-- New offline test suites: sequence 4, execution journal 8, journal store 4,
-  entry/exit parity 7, policy attestation 4. **27/27 tests PASS**.
-  Whole-repository `tsc --noEmit` passed in isolated owner-PC worktree.
+- Original focused suites: sequence 4, execution journal 8, journal store
+  (since expanded), entry/exit parity 7, policy attestation 4.
+  See the final 46/46 local-test record below. Whole-repository
+  `tsc --noEmit` passed in the isolated owner-PC worktree.
 - The storage and journal modules have NO exchange order/cancel functions,
   and are not yet connected to the running SHADOW daemon.
 - IMPORTANT: GitHub H48 workflow contract passing does not mean that all
@@ -108,3 +109,63 @@ mismatch in the initial candidate evaluator's use as a sequential strategy:
 
 **Live trading remains intentionally disabled. Do NOT merge or deploy this
 candidate as an authorized H48 LIVE executor.**
+
+## 2026-11-25 final read-only H48 pipeline checkpoint
+
+New modules added to this Draft PR since the initial 27-test checkpoint:
+
+- `lib/hype-h48-authenticated-readback.ts`: obtain ASTER Futures positions,
+  open orders and venue-time-verified account balance via read-only
+  authenticated GET APIs, inside the same immutable ASTER account lease;
+  reject malformed/non-fresh GET, changed lease, bad quantities and HTTP errors.
+  The adapter itself cannot execute/cancel orders.
+- `lib/hype-h48-restart-admission.ts`: inspect a persisted exact-SHA journal
+  and fresh venue inventory before restart. FLAT is only accepted if no HYPE
+  position and no HYPE open order; OPEN requires the same long position size
+  and entry price as recorded; all PENDING states stay in reconciliation HOLD.
+  Never auto-resubmit UNKNOWN/partial orders on restart.
+- `lib/hype-h48-native-monitor.ts`: connected read-only runner pipeline for
+  6-hour research grid decisions, atomic journal checkpoint, and exact 48-hour
+  next-open exit surveillance. DUE without a formally authorized executor is
+  reported `EXIT_DUE_NOT_AUTHORIZED`, not sent as a SELL order.
+  This is an offline candidate, NOT deployed to the VPS SHADOW service.
+- `lib/hype-h48-journal-store.ts`: improved crash persistence with a
+  process-exclusive, crash-sticky writer lock and Linux directory fsync.
+  A stale lock fails closed, rather than assuming interrupted work completed.
+  If an existing SUBMITTED attempt is being reconciled, persistence requires
+  the exact original order result **and** observed venue position evidence
+  and independently re-runs reconciliation; no fabricated SUBMITTED→FLAT.
+- `lib/hype-h48-production-gates.ts`: non-authorizing cross-check of
+  GLOBAL HOLD, current vs. Owner-approved Gross, daily Shared Risk, Margin
+  Guard, pending exposure, DD30 and H48 no-resident-STOP vs. hard-STOP policy.
+  This audit **ALWAYS** says BLOCKED and cannot issue an order permit.
+
+Latest owner-PC verification for GitHub branch
+`fix/h48-native-lifecycle-20261125`:
+
+| Offline focused test suite | Passed |
+|---|---:|
+| Frozen research entry and genuine ASTER H1 parity | 7/7 |
+| Base-before-WSIG six-hour research sequence | 4/4 |
+| Root-backed read-only ENTRY / POSITION attestations | 4/4 |
+| Order-intent/reconciliation state machine | 8/8 |
+| Atomic journal, crash lock and required order proof | 6/6 |
+| Authenticated GET and lease freshness | 5/5 |
+| Restart ownership and no-retry admission | 4/4 |
+| End-to-end read-only H48 monitor pipeline | 4/4 |
+| Gross / DD30 / STOP / GLOBAL HOLD diagnostic | 4/4 |
+| **Total** | **46/46** |
+
+TypeScript whole-project `tsc --noEmit`: **PASS**.
+H48 scoped PR CI: successful on the checked candidate HEAD (confirm latest
+HEAD before merge; new offline suites are independently run locally).
+Trading mutations: **zero**.
+
+The work is still NOT a certified H48 LIVE executor. No new immutable release
+or source-bound Owner/Root approval has been issued for these new files. Old
+immutable SHA 4786 certificate and receipt must not be reused for this
+changed source. The old e0e4 order permit and previous HOLD provenance require
+formal review, and the conflict between `H48_TIME_ONLY` no-resident-STOP
+and hard-stop/DD/protected-exit governance remains unresolved. Until a new
+signed risk/STOP/permission plan, ROOT validation, independent full LIVE path
+and actual venue reconciliation are proven, keep GLOBAL HOLD protected.
