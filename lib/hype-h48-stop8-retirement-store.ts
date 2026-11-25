@@ -68,7 +68,7 @@ export class FileH48Stop8RetirementStore implements H48Stop8RetirementStore {
       ||after.size!==stat.size||after.mtimeMs!==stat.mtimeMs)
       fail("READ_CHANGED");
     try{return {state:this.validate(JSON.parse(raw.toString("utf8"))),raw}}
-    catch{fail("CORRUPT_JSON")}
+    catch{return fail("CORRUPT_JSON")}
   }
   async load():Promise<H48Stop8Retirement>{return (await this.read()).state}
   private async lease(lock:AccountLockHandle){
