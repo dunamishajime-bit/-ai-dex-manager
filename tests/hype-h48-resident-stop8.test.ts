@@ -153,3 +153,25 @@ test("a signed STOP does not protect a missing or different live HYPE position",
     /STOP_ORDER_EVIDENCE_MISMATCH/);
   verifyH48Stop8Venue(stop,snapshot(stop),NOW);
 });
+
+test("UNKNOWN STOP8 POST is independently reconciled by signed GET without a second order",async()=>{
+  const x=makeFake({networkUnknown:true});
+  assert.equal((await x.runner.installOnce()).status,
+    "STOP8_SUBMITTED_RECONCILIATION_REQUIRED");
+  assert.equal(x.getSubmitCount(),1);
+  const r=await x.runner.reconcileSubmitted();
+  assert.equal(r.status,"STOP8_VERIFIED_WITHOUT_RESEND");
+  assert.equal(r.stopAttempts,0);
+  assert.equal(x.getStatus(),"CONFIRMED");
+  assert.equal(x.getSaveCount(),2);
+  assert.equal(x.getSubmitCount(),1);
+});
+test("missing STOP8 after UNKNOWN stays SUBMITTED and cannot be assumed protected",async()=>{
+  const x=makeFake({networkUnknown:true,noStopOnGET:true});
+  await x.runner.installOnce();
+  const r=await x.runner.reconcileSubmitted();
+  assert.equal(r.status,"STOP8_RECONCILIATION_REQUIRED");
+  assert.equal(r.stopAttempts,0);
+  assert.equal(x.getStatus(),"SUBMITTED");
+  assert.equal(x.getSubmitCount(),1);
+});
