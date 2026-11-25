@@ -41,3 +41,70 @@
 6. No new order permit, LIVE switch, deployment, cancellation, or position modification occurred during this repair.
 
 **Deployment decision: HOLD_PROTECTED / SHADOW until every blocker is resolved.**
+
+## Additional critical parity repair: base-first 48h blocking
+
+After inspecting the *actual historical 6-hour timeline*, we found a causal
+mismatch in the initial candidate evaluator's use as a sequential strategy:
+
+- Source Python first chooses the non-overlapping **BASE** candidates
+  (HYPE12/HYPE24), with a 48h lockout for *every selected BASE event*.
+- Only **after** this lockout does it apply the frozen WSIG relative24 filter.
+- A rejected WSIG candidate STILL occupies the underlying BASE 48h interval.
+- In 2025-10-01 to 2026-10-01 evidence: 84 BASE signals; 62 BASE survivors;
+  the correct 27 WSIG events. Applying WSIG *before* lockout creates 31
+  hypothetical trades (an unjustified change to the historic strategy).
+- New pure sequence module `lib/hype-h48-research-sequence.ts` uses this
+  BASE-before-WSIG order and rejects missing/replayed six-hour grid events.
+- Independently extracted `tests/fixtures/hype-h48-r4-base-event-golden-20261114.json`
+  with 84 actual H1 BASE cases and the original 27 selected timestamps.
+- 4 additional replay tests PASS, including 27/27 exact event identity and
+  the 31-trade incorrect-order negative control.
+- The sequence is **research-exact**; a LIVE implementation must persist it
+  independently of real account positions, keep strict clock/data freshness,
+  and add venue/risk filters *after* this research sequence.
+
+## Crash-safe order intent journal — implemented but not LIVE wired
+
+- `lib/hype-h48-execution-journal.ts`: separately pinned H48 ENTRY/EXIT
+  intent state machine, deterministic idempotency IDs, and exact mode
+  transitions `FLAT → ENTRY_PENDING → OPEN → EXIT_PENDING → FLAT`.
+- An attempted order must be recorded before making an exchange request.
+  A missed/expired authorization and a signed GET preceding submission are
+  rejected; UNKNOWN/partial execution and contradictory venue positions
+  transition to MANUAL_REVIEW, not automatic retries.
+- `lib/hype-h48-journal-store.ts`: dedicated atomic, versioned journal
+  store. A missing file is **NOT** interpreted as a flat book; initial
+  creation requires a recent flat signed venue read and ASTER account lease.
+  Stale revision, forged state transition, corrupt file, untrusted parent,
+  stale/missing lock and conflicting state fail closed.
+- New offline test suites: sequence 4, execution journal 8, journal store 4,
+  entry/exit parity 7, policy attestation 4. **27/27 tests PASS**.
+  Whole-repository `tsc --noEmit` passed in isolated owner-PC worktree.
+- The storage and journal modules have NO exchange order/cancel functions,
+  and are not yet connected to the running SHADOW daemon.
+- IMPORTANT: GitHub H48 workflow contract passing does not mean that all
+  these new test suites have run in Actions; the 27 focused suite results
+  and `tsc` evidence above came from the isolated owner PC.
+
+## Outstanding LIVE readiness requirements (not bypassable)
+
+1. Implement and independently test the actual signed ASTER execution caller
+   in a **new immutable H48 source release**, with durable mark-attempted
+   before each request, post-call signed reconciliation, pending exposure
+   reservations, and a restart recovery that never repeats UNKNOWN orders.
+2. Prove the real LIVE runner wires the native H48R4 sequence and 48-hour
+   exit/Root ENTRY+POSITION authority rather than the legacy TREND+STOP path.
+3. Resolve the explicit H48 `residentStopRequired:false` certificate against
+   required Shared Risk, DD, emergency STOP/protective exits, and the agreed
+   hard-stop protections **before** allowing any exposure.
+4. Validate Gross 3.0/4.0/4.25/HYPE 1.5 and all other portfolio constraints
+   with fresh signed venue and scheduler data, across all affected runners.
+5. Formal Root/Owner old-permit revocation, HOLD receipt provenance, new
+   source/plan-bound certificate, signed LIVE activation and permit.
+6. Long-run H48 BT/walk-forward and independent adverse scenarios, not
+   merely the selected 29 trade-event parity. The original forward sample
+   contains only two trades and cannot substantiate an 80% win-rate target.
+
+**Live trading remains intentionally disabled. Do NOT merge or deploy this
+candidate as an authorized H48 LIVE executor.**
