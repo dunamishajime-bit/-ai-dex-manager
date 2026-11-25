@@ -3,7 +3,8 @@ import {test} from "node:test";
 import {generateKeyPairSync,sign} from "node:crypto";
 import {createHypeH48TimeOnlyContract} from "../lib/hype-stable4-time-only-contract";
 import {
-  attestH48Stop8RootBundle,deriveH48Stop8PositionEvidence,H48_STOP8_ROOT_BUNDLE_SCHEMA,
+  attestH48Stop8RootBundle,attestH48Stop8IssuanceReceipt,
+  attestH48Stop8ScopedOrderPermit,deriveH48Stop8PositionEvidence,H48_STOP8_ROOT_BUNDLE_SCHEMA,
   type H48Stop8RootBundle,
 } from "../lib/hype-h48-stop8-root-authority";
 
@@ -117,4 +118,63 @@ test("Root-attested STOP8 position evidence is short-lived and exact H48 positio
   assert.throws(()=>deriveH48Stop8PositionEvidence({
     attested,contract:c,quantity:2,now:NOW+31*86_400_000,
   }),/POSITION_PROOF_NOT_ROOT_BOUND/);
+});
+
+test("a valid STOP8 certificate still requires the SAME immutable Root receipt",()=>{
+  const cert=attest(bundle());
+  const receipt={
+    schema:"disdex-h48-stop8-issuance-receipt/v1",
+    approvedSha:SOURCE,planSha256:PLAN,
+    certificateSha256:cert.certificateSha256,
+    approvalId:cert.bundle.approvalId,runId:"45701234567",
+    policy:"H48_R4_RESIDENT_STOP8",issuedAt:cert.bundle.issuedAt,
+    ordersEnabled:false,orderPermitIssued:false,
+  };
+  const validate=(value:unknown,bytes=encode(value)+"\n")=>
+    attestH48Stop8IssuanceReceipt({
+      receipt:value,rawBytes:Buffer.from(bytes),
+      certificateSha256:cert.certificateSha256,
+      approvedSha:SOURCE,planSha256:PLAN,
+      approvalId:cert.bundle.approvalId,issuedAt:cert.bundle.issuedAt,
+    });
+  assert.doesNotThrow(()=>validate(receipt));
+  assert.throws(()=>validate({...receipt,certificateSha256:"f".repeat(64)}),
+    /IMMUTABLE_RECEIPT_NOT_ATTESTED/);
+  assert.throws(()=>validate({...receipt,approvalId:"f".repeat(36)}),
+    /IMMUTABLE_RECEIPT_NOT_ATTESTED/);
+  assert.throws(()=>validate({...receipt,ordersEnabled:true}),
+    /IMMUTABLE_RECEIPT_NOT_ATTESTED/);
+  assert.throws(()=>validate(receipt,encode({...receipt,runId:"OTHER"})+"\n"),
+    /IMMUTABLE_RECEIPT_NOT_ATTESTED/);
+});
+test("a valid Root STOP8 certificate+receipt still cannot open trades without exact scoped permit",()=>{
+  const cert=attest(bundle()),now=NOW+1000;
+  const permit={
+    schema:"disdex-h48-stop8-scoped-order-permit/v1",
+    approvedSha:SOURCE,planSha256:PLAN,
+    certificateSha256:cert.certificateSha256,
+    approvalId:cert.bundle.approvalId,
+    scope:"HYPE_TREND_LONG",operation:"HYPE_STABLE4_H48_STOP8_LIVE",
+    policy:"H48_R4_RESIDENT_STOP8",ordersEnabled:true,
+    issuedAt:NOW,expiresAt:NOW+60_000,
+  };
+  const validate=(value:unknown,at=now,bytes=encode(value)+"\n")=>
+    attestH48Stop8ScopedOrderPermit({
+      permit:value,rawBytes:Buffer.from(bytes),
+      certificateSha256:cert.certificateSha256,
+      approvedSha:SOURCE,planSha256:PLAN,
+      approvalId:cert.bundle.approvalId,now:at,
+    });
+  assert.deepEqual(validate(permit),{issuedAt:NOW,expiresAt:NOW+60_000});
+  for(const modified of [
+    {...permit,policy:"H48_TIME_ONLY"},
+    {...permit,scope:"ALL_RUNNERS"},
+    {...permit,approvedSha:"f".repeat(40)},
+    {...permit,certificateSha256:"f".repeat(64)},
+    {...permit,ordersEnabled:false},
+    {...permit,expiresAt:NOW+25*3_600_000},
+  ])assert.throws(()=>validate(modified),/SCOPED_ROOT_ORDER_PERMIT_INVALID/);
+  assert.throws(()=>validate(permit,NOW+70_000),/SCOPED_ROOT_ORDER_PERMIT_INVALID/);
+  assert.throws(()=>validate(permit,now,encode({...permit,approvalId:"OTHER"})+"\n"),
+    /SCOPED_ROOT_ORDER_PERMIT_INVALID/);
 });
