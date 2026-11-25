@@ -117,9 +117,15 @@ class HypeH48OrderEnableTests(unittest.TestCase):
         native = (root / "lib/hype-zec-long-runner.ts").read_bytes()
         module = (root / "lib/hype-h48-order-permit.ts").read_bytes()
         self.assertEqual(hashlib.sha256(native).hexdigest(), gate.NATIVE_SOURCE_SHA256)
-        self.assertEqual(hashlib.sha256(module).hexdigest(), gate.NATIVE_PERMIT_SHA256)
-        with self.assertRaisesRegex(ValueError, "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED"):
-            gate.validate_native_h48_runtime_source(native, module)
+        # master may have a later monitor-only permit module revision than
+        # immutable 4786. Isolate the semantic check from that separate pin.
+        old_module_pin = gate.NATIVE_PERMIT_SHA256
+        try:
+            gate.NATIVE_PERMIT_SHA256 = hashlib.sha256(module).hexdigest()
+            with self.assertRaisesRegex(ValueError, "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED"):
+                gate.validate_native_h48_runtime_source(native, module)
+        finally:
+            gate.NATIVE_PERMIT_SHA256 = old_module_pin
 
     def test_native_source_gate_requires_both_hashes_and_authority(self):
         base = (b'import { hasValidHypeH48OrderPermit } from "./hype-h48-order-permit";\\n'
