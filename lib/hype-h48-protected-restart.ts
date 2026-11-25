@@ -63,7 +63,8 @@ export function assessH48ProtectedRestart(input:{
         ||receipt.positionId!==stop.positionId
         ||receipt.stopClientOrderId!==stop.stopClientOrderId
         ||!Number.isSafeInteger(receipt.confirmedAt)
-        ||receipt.confirmedAt!>venue.observedAt)
+        ||Number(receipt.confirmedAt)>venue.observedAt
+        ||Number(receipt.confirmedAt)<Number(stop.confirmedAt))
         return held("STOP8_RETIREMENT_RECEIPT_NOT_ATTESTED");
     }else if(input.stopRetirement){
       return held("RETIREMENT_RECEIPT_WITHOUT_STOP8_JOURNAL");
