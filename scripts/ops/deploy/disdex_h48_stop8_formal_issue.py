@@ -178,7 +178,7 @@ def load_required_source(sha: str, plan_hash: str) -> dict:
             "IMMUTABLE_RELEASE_REQUIRED")
     raw = regular(release / "config/disdex-stable4-h48-stop8-final-order-plan.json",
                   immutable=True, root=True)
-    require(hashlib.sha256(raw.rstrip(b"\r\n")).hexdigest() == plan_hash,
+    require(hashlib.sha256(raw).hexdigest() == plan_hash,
             "PLAN_HASH_MISMATCH")
     return expected_plan(load_json(raw), sha)
 
