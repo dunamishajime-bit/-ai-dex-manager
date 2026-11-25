@@ -126,13 +126,13 @@ const BODY: Stable4RunnerBundleManifestBody = Object.freeze({
     v4NewOrderDdStopPct: 30,
     v52V11GrossCap: 2,
     v52V50GrossCap: 2,
-  },
+  } as const,
   safety: {
     funding: "preserve",
     globalHold: "must_remain_active",
     h48: "separate_exact_scope",
     residentStop: "preserve",
-  },
+  } as const,
   runners: STABLE4_RUNNER_BUNDLE_ENTRIES,
 });
 
