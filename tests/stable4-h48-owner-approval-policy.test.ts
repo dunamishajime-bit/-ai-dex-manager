@@ -39,7 +39,7 @@ test("STABLE4 H48 has explicit no-resident-STOP exception and reviewed gross bou
   assert.match(operation.label, /常駐STOP/);
   assert.equal(p.residentStopRequired, false);
   assert.equal(p.residentTakeProfitRequired, false);
-  assert.deepEqual(p.approvedGross, { crypto: 3, stock: 1.5, total: 3.5, hype: 1 });
+  assert.deepEqual(p.approvedGross, { crypto: 3, stock: 4, total: 4.25, hype: 1.5 });
 });
 
 test("Owner-triggered GitHub workflow is exact, isolated and non-trading", () => {
