@@ -48,10 +48,10 @@ const grant=(p=intent().pending!,at=NOW):H48ScopedOwnerOrderGrant=>({
 function fake(options:{
   badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;blockProtectedExit?:boolean;executionThrows?:boolean;stop8Missing?:boolean;
   result?:DirectTradeResult;quantity?:number;
-  starting?:H48ExecutionJournal;now?:number;
+  starting?:H48ExecutionJournal;now?:number;stopRetirementFails?:boolean;
 }={}){
   const at=options.now??NOW;
-  let state=options.starting??intent(),requests:DirectTradeCommand[]=[],reserves=0,releases=0,saves=0,stopCalls=0;
+  let state=options.starting??intent(),requests:DirectTradeCommand[]=[],reserves=0,releases=0,saves=0,stopCalls=0,retireCalls=0;
   const store={
     load:async()=>JSON.parse(JSON.stringify(state)) as H48ExecutionJournal,
     save:async(old:H48ExecutionJournal,next:H48ExecutionJournal,_lock:AccountLockHandle)=>{
@@ -108,6 +108,14 @@ function fake(options:{
       if(options.stop8Missing)throw Error("STOP8_NOT_CONFIRMED");
       return {status:"STOP8_VERIFIED" as const,stopClientOrderId:"h48s-"+"1".repeat(30)};
     }},
+    stop8ExitRetirement:{retireAfterSignedFlat:async({sourceSha,planSha256,positionId})=>{
+      retireCalls++;
+      assert.equal(sourceSha,SHA);
+      assert.equal(planSha256,"b".repeat(64));
+      assert.equal(positionId,contract.positionId);
+      if(options.stopRetirementFails)throw Error("SIGNED_STOP8_CANCELLATION_UNPROVEN");
+      return {status:"STOP8_RETIRED_SIGNED_FLAT" as const,stopCancels:1 as const};
+    }},
     assertGlobalOrderRelease:async()=>{if(options.blockKill)throw Error("HOLD_PROTECTED")},
     assertFreshSharedRiskAndStops:async()=>{if(options.blockRisk)throw Error("STOP_NOT_APPROVED")},
     assertProtectedReduceOnlyExitAllowed:async()=>{
@@ -115,7 +123,7 @@ function fake(options:{
     },
   });
   return {runner,requests,getState:()=>state,
-    getReserves:()=>reserves,getReleases:()=>releases,getSaves:()=>saves,getStopCalls:()=>stopCalls};
+    getReserves:()=>reserves,getReleases:()=>releases,getSaves:()=>saves,getStopCalls:()=>stopCalls,getRetireCalls:()=>retireCalls};
 }
 
 test("H48 ENTRY sends exactly one BUY only AFTER durable SUBMITTED journal and reserved exposure",async()=>{
@@ -208,6 +216,7 @@ test("H48 48-hour EXIT submits one SELL with reduceOnly and confirms flat venue"
   assert.equal(x.requests[0].reduceOnly,true);
   assert.equal(x.requests[0].requireVenueMargin5xCross,false);
   assert.equal(x.getReserves(),0);
+  assert.equal(x.getRetireCalls(),1);
   assert.equal(x.getState().mode,"FLAT");
   assert.equal(x.getState().position,null);
 });
@@ -223,4 +232,22 @@ test("ASTER entry FILLED without signed STOP8 is NOT successful; reservation sta
   assert.equal(x.requests.length,1);
   await assert.rejects(x.runner.submitPrepared(),/NO_PREPARED_INTENT/);
   assert.equal(x.requests.length,1,"unprotected entry must never be repeated");
+});
+
+test("time48 SELL filled and signed FLAT but STOP8 retirement unknown does not report completed safe flat",async()=>{
+  const at=E+48*H+1500;
+  const starting:H48ExecutionJournal={
+    ...intent(),revision:9,mode:"EXIT_PENDING",
+    position:{contract,quantity:2,entryPrice:100,entryClientOrderId:ID,observedAt:E+1000},
+    pending:{...intent().pending!,phase:"EXIT",clientOrderId:"h48x-"+"f".repeat(30),
+      referencePrice:120,preparedAt:at-500,authorizationExpiresAt:at+60000},
+  };
+  const x=fake({starting,now:at,stopRetirementFails:true});
+  const outcome=await x.runner.submitPrepared();
+  assert.equal(outcome.status,"FLAT_STOP8_RETIREMENT_REQUIRED");
+  assert.equal(x.getState().mode,"FLAT");
+  assert.equal(x.getRetireCalls(),1);
+  assert.equal(x.requests.length,1);
+  await assert.rejects(x.runner.submitPrepared(),/NO_PREPARED_INTENT/);
+  assert.equal(x.requests.length,1);
 });
