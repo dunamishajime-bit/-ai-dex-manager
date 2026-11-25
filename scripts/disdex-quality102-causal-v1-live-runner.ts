@@ -50,6 +50,11 @@ const HOUR_MS = 3_600_000;
  * keeping all exposure mutations blocked.  Other preflight failures must
  * continue to fail closed and prevent daemon startup.
  */
+/** Count actual non-flat positions, not the venue's zero-quantity symbol rows. */
+export function countQ102OpenPositions(positions: readonly Pick<DirectPosition, "quantity">[]): number {
+    return positions.filter((position) => Number.isFinite(position.quantity) && Math.abs(position.quantity) > 1e-12).length;
+}
+
 export function classifyQ102PreflightRateBudgetDeferral(error: unknown): Record<string, unknown> | undefined {
     const classified = classifyAsterRateBudgetFailure(error);
     if (!classified) return undefined;
@@ -478,7 +483,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         statePath: config.statePath,
         stateExists: await stateFileExists(config.statePath),
         accountAsset: account.asset,
-        positionCount: positions.length,
+        positionCount: countQ102OpenPositions(positions),
         openOrderCount: openOrders.length,
         managedProtectiveOrderCount: managedProtectiveOrders.length,
         quality102Position: beforeState.position?.symbol,
