@@ -38,7 +38,8 @@ export interface H48Stop8Intent {
 }
 export interface H48Stop8Store {
   load():Promise<H48Stop8Intent>;
-  save(before:H48Stop8Intent,after:H48Stop8Intent,lease:AccountLockHandle):Promise<void>;
+  save(before:H48Stop8Intent,after:H48Stop8Intent,lease:AccountLockHandle,
+    proof?:{venue:H48SignedVenueSnapshot;now:number}):Promise<void>;
 }
 export interface H48Stop8OwnerAuthority {
   /** Must check actual Root-signed, exact release/plan/policy and lease.
@@ -72,7 +73,7 @@ export function stop8Price(entryPrice:number,tickSize:number):number{
     fail("STOP_PRICE_UNEXECUTABLE");
   return price;
 }
-function exactIntent(v:H48Stop8Intent){
+export function validateH48Stop8Intent(v:H48Stop8Intent){
   if(!v||v.schema!==H48_STOP8_SCHEMA||!SHA.test(v.sourceSha)
     ||!HEX64.test(v.planSha256)||!v.positionId.startsWith("H48|HYPEUSDT|")
     ||!/^h48e-[0-9a-f]{30}$/.test(v.entryClientOrderId)
@@ -101,7 +102,7 @@ export function makeH48Stop8Intent(input:{
     stopPrice:stop8Price(input.entryPrice,input.tickSize),
     stage:"PREPARED",issuedAt:input.now,submittedAt:null,confirmedAt:null,
   };
-  return exactIntent(v);
+  return validateH48Stop8Intent(v);
 }
 
 /** The signed venue readback must attest BOTH the correct HYPE position
@@ -109,7 +110,7 @@ export function makeH48Stop8Intent(input:{
 export function verifyH48Stop8Venue(
   intent:H48Stop8Intent, venue:H48SignedVenueSnapshot,now:number,
 ):void{
-  exactIntent(intent);
+  validateH48Stop8Intent(intent);
   if(intent.stage!=="SUBMITTED"||!validClock(now)
     ||venue?.source!=="ASTER_SIGNED_READ_ONLY"
     ||!validClock(venue.observedAt)||venue.observedAt<Number(intent.submittedAt)
@@ -146,7 +147,7 @@ export class H48Stop8Installer {
   }){}
   async installOnce():Promise<H48Stop8Result>{
     const d=this.dep,now=d.now??Date.now;
-    const expected=exactIntent(await d.store.load());
+    const expected=validateH48Stop8Intent(await d.store.load());
     if(expected.stage!=="PREPARED")fail("NOT_FIRST_ATTEMPT");
     if(expected.sourceSha!==d.sourceSha||expected.planSha256!==d.planSha256)
       fail("RELEASE_OR_PLAN_MISMATCH");
@@ -175,7 +176,7 @@ export class H48Stop8Installer {
       verifyH48Stop8Venue(submitted,signed,observedAt);
       await d.store.save(submitted,{
         ...submitted,stage:"CONFIRMED",confirmedAt:observedAt,
-      },d.lease);
+      },d.lease,{venue:signed,now:observedAt});
       return {status:"STOP8_VERIFIED",clientOrderId:expected.stopClientOrderId,stopAttempts:1};
     }catch{
       return {status:"STOP8_SUBMITTED_RECONCILIATION_REQUIRED",
