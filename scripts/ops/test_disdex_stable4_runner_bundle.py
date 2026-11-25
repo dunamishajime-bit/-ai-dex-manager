@@ -56,6 +56,13 @@ class Stable4RunnerBundleTests(unittest.TestCase):
         self.assertNotIn("HYPE_TREND_LONG", [entry["runner"] for entry in gate.BUNDLE_ENTRIES])
         self.assertTrue(all(entry["operation"] == entry["runner"] + "_SCOPED_ORDER_ENABLE"
                             for entry in gate.BUNDLE_ENTRIES))
+        self.assertEqual(gate.BUNDLE_SOURCE_SHA, "4786f600ae7bf86ffca948f1412956a9113cb20d")
+        self.assertEqual(gate.BUNDLE_PLAN_SHA256,
+                         "fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852")
+        self.assertTrue(all(entry["sourceSha"] == gate.BUNDLE_SOURCE_SHA for entry in gate.BUNDLE_ENTRIES))
+        self.assertTrue(all(entry["planSha256"] ==
+                            "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712"
+                            for entry in gate.BUNDLE_ENTRIES))
 
     def test_bundle_approval_is_single_exact_identity(self):
         row = gate.validate_bundle_approval_record(
@@ -101,3 +108,4 @@ class Stable4RunnerBundleTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
