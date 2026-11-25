@@ -97,3 +97,41 @@ test("missing H1, malformed low or inconsistent entry time fails closed",()=>{
   assert.throws(()=>evaluateH48ResearchEmergencyStop({...input,logicalExitTs:input.logicalExitTs+H}),/H48_STOP_RESEARCH_INVALID/);
   assert.throws(()=>evaluateH48ResearchEmergencyStop({...input,entryOpen:input.entryOpen+10}),/H48_STOP_RESEARCH_INVALID/);
 });
+
+test("10bps vs 30bps expenses do not change the frozen H48 event or STOP8 entry/exit identity",()=>{
+  for(const row of evidence.rows){
+    const cheap=run(row,8,10),expensive=run(row,8,30);
+    assert.equal(cheap.exitReason,expensive.exitReason);
+    assert.equal(cheap.exitPrice,expensive.exitPrice);
+    assert.equal(cheap.exitTs,expensive.exitTs);
+    assert.ok(Math.abs((cheap.netReturn-expensive.netReturn)-0.002)<1e-12);
+  }
+});
+test("a severe -35% gap proves emergency STOP8 cannot guarantee -8% realized maximum loss",()=>{
+  const e=Date.UTC(2026,10,24,0);
+  const hours=Array.from({length:48},(_,i)=>({
+    openTs:e+i*H,open:i===1?65:100,low:i===1?64:100,
+  }));
+  const result=evaluateH48ResearchEmergencyStop({
+    logicalEntryTs:e,entryOpen:100,logicalExitTs:e+48*H,
+    exitOpen:120,hours,stopPct:8,feeBps:30,
+  });
+  assert.equal(result.exitReason,"H48_RESEARCH_STOP_GAP_OPEN");
+  assert.equal(result.exitPrice,65);
+  assert.ok(Math.abs(result.netReturn+0.353)<1e-12);
+});
+test("repeated sideways whipsaws remain losing STOP8 trades; no 70/80% hit-rate claim",()=>{
+  const e=Date.UTC(2026,10,24,0);
+  for(let n=0;n<20;n++){
+    const start=e+n*54*H;
+    const hours=Array.from({length:48},(_,i)=>({
+      openTs:start+i*H,open:100,low:i===1?91:100,
+    }));
+    const outcome=evaluateH48ResearchEmergencyStop({
+      logicalEntryTs:start,entryOpen:100,logicalExitTs:start+48*H,
+      exitOpen:102,hours,stopPct:8,feeBps:30,
+    });
+    assert.equal(outcome.stopTriggered,true);
+    assert.ok(outcome.netReturn<0);
+  }
+});
