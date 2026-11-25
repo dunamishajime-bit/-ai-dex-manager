@@ -9,6 +9,7 @@ on:
       - "lib/hype-h48-research-sequence.ts"
       - "lib/hype-h48-authenticated-readback.ts"
       - "lib/hype-h48-kill-switch-consistency.ts"
+      - "lib/hype-h48-native-order-executor.ts"
       - "lib/hype-h48-restart-admission.ts"
       - "lib/hype-h48-native-monitor.ts"
       - "lib/hype-h48-execution-journal.ts"
@@ -73,6 +74,7 @@ jobs:
           npx tsx tests/hype-h48-native-monitor.test.ts
           npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
+          npx tsx tests/hype-h48-native-order-executor.test.ts
           python3 -B - <<'PY'
           import ast
           from pathlib import Path
@@ -124,6 +126,7 @@ jobs:
           npx tsx tests/hype-h48-native-monitor.test.ts
           npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
+          npx tsx tests/hype-h48-native-order-executor.test.ts
       - name: Verify native H48 time-only runtime before consuming Owner approval
         shell: bash
         run: |
