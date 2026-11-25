@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findQ102PreflightAllManagedProtectiveOrders, isQ102PreflightManagedProtectiveOrder } from "../scripts/disdex-quality102-causal-v1-live-runner";
+import { countQ102OpenPositions, findQ102PreflightAllManagedProtectiveOrders, isQ102PreflightManagedProtectiveOrder } from "../scripts/disdex-quality102-causal-v1-live-runner";
 import type { DirectOpenOrder, DirectPosition } from "../lib/direct-trade-executor";
 
 const position: DirectPosition = {
@@ -66,4 +66,11 @@ test('Q102 preflight recognizes a V4-owned STOP-only protective order', async ()
  const takeProfit:DirectOpenOrder={...stop,type:'TAKE_PROFIT_MARKET',clientOrderId:'v12-v4-aaaaaaaaaaaaaaaaaaaaaaaaaaaa',stopPrice:5.1};
  assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,takeProfit],[p]),[stop,takeProfit]);
  assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,takeProfit,{...takeProfit,clientOrderId:'v12-v4-bbbbbbbbbbbbbbbbbbbbbbbbbbbb'}],[p]),[]);
+});
+
+
+test("Q102 monitor's position count excludes flat venue symbol rows", () => {
+  assert.equal(countQ102OpenPositions(Array.from({ length: 608 }, () => ({ quantity: 0 }))), 0);
+  assert.equal(countQ102OpenPositions([{ quantity: 0 }, { quantity: 1 }, { quantity: -3 }, { quantity: 1e-13 }]), 2);
+  assert.equal(countQ102OpenPositions([{ quantity: Number.NaN }, { quantity: Number.POSITIVE_INFINITY }, { quantity: 0 }]), 0);
 });
