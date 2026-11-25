@@ -111,20 +111,29 @@ class HypeH48OrderEnableTests(unittest.TestCase):
                 pass
 
     def test_native_h48_rejects_unwired_time_only_executor(self):
-        # The installed integrated 4786 HYPE source already checks the H48
-        # permit but does not call the certified 48-hour time-only authority.
+        # The immutable 4786 release pin is deliberately NOT updated just
+        # because this proposed next-source commit changes TREND fail-closed.
+        # First prove that this newer GitHub source cannot be silently used as
+        # the already-approved release source.
         root = Path(__file__).resolve().parents[2]
         native = (root / "lib/hype-zec-long-runner.ts").read_bytes()
         module = (root / "lib/hype-h48-order-permit.ts").read_bytes()
-        self.assertEqual(hashlib.sha256(native).hexdigest(), gate.NATIVE_SOURCE_SHA256)
-        # master may have a later monitor-only permit module revision than
-        # immutable 4786. Isolate the semantic check from that separate pin.
+        actual_native = hashlib.sha256(native).hexdigest()
+        actual_module = hashlib.sha256(module).hexdigest()
+        if actual_native != gate.NATIVE_SOURCE_SHA256:
+            with self.assertRaisesRegex(ValueError, "HYPE_NATIVE_SOURCE_HASH_MISMATCH"):
+                gate.validate_native_h48_runtime_source(native, module)
+        old_source_pin = gate.NATIVE_SOURCE_SHA256
         old_module_pin = gate.NATIVE_PERMIT_SHA256
         try:
-            gate.NATIVE_PERMIT_SHA256 = hashlib.sha256(module).hexdigest()
+            # Test the semantic missing-authority gate independently of the
+            # intentionally exact 4786 immutable release pins.
+            gate.NATIVE_SOURCE_SHA256 = actual_native
+            gate.NATIVE_PERMIT_SHA256 = actual_module
             with self.assertRaisesRegex(ValueError, "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED"):
                 gate.validate_native_h48_runtime_source(native, module)
         finally:
+            gate.NATIVE_SOURCE_SHA256 = old_source_pin
             gate.NATIVE_PERMIT_SHA256 = old_module_pin
 
     def test_native_source_gate_requires_both_hashes_and_authority(self):
