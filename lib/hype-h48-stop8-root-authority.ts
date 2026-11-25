@@ -29,9 +29,13 @@ const strictKeys=(obj:unknown,keys:readonly string[]):obj is Record<string,unkno
   !!obj&&typeof obj==="object"&&!Array.isArray(obj)
   &&Object.keys(obj).length===keys.length
   &&Object.keys(obj).every(k=>keys.includes(k));
-const sorted=(v:Record<string,unknown>)=>JSON.stringify(
-  Object.fromEntries(Object.keys(v).sort().map(key=>[key,v[key]]))
-);
+const canonical=(value:unknown):unknown=>Array.isArray(value)
+  ?value.map(canonical)
+  :value&&typeof value==="object"
+    ?Object.fromEntries(Object.entries(value as Record<string,unknown>)
+      .sort(([a],[b])=>a.localeCompare(b)).map(([key,val])=>[key,canonical(val)]))
+    :value;
+const sorted=(v:Record<string,unknown>)=>JSON.stringify(canonical(v));
 function parseJsonUnique(text:string):unknown{
   // HP token's field dictionary is flat. Canonical re-encoding below rejects
   // duplicates/extra fields by byte equality, not last-key-wins JSON.parse.
@@ -104,8 +108,10 @@ export function attestH48Stop8RootBundle(input:{
   const bytes=Buffer.from(input.rootCertificateBytes);
   if(bytes.length>16384||bytes.toString("utf8")!==sorted(b)+"\n")
     fail("ROOT_CERTIFICATE_CANONICAL_BYTES");
-  const outer=parseJsonUnique(base64Canonical(b.ownerSignedToken).toString("utf8"));
-  if(!strictKeys(outer,["payload","signature"]))fail("OWNER_TOKEN_FIELDS");
+  const ownerTokenText=base64Canonical(b.ownerSignedToken).toString("utf8");
+  const outer=parseJsonUnique(ownerTokenText);
+  if(!strictKeys(outer,["payload","signature"])
+    ||ownerTokenText!==sorted(outer))fail("OWNER_TOKEN_FIELDS");
   const token=outer as {payload:unknown;signature:unknown};
   if(!strictKeys(token.payload,OWNER_FIELDS))fail("OWNER_SIGNED_PAYLOAD_FIELDS");
   const p=token.payload;
