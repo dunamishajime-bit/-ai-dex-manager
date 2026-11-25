@@ -5,7 +5,7 @@ import { createHypeH48TimeOnlyContract } from "../lib/hype-stable4-time-only-con
 import {
   newH48ExecutionJournal, validateH48ExecutionJournal,
   checkpointH48ResearchGrid,prepareH48EntryIntent,prepareH48ExitIntent,
-  markH48OrderAttempted,reconcileH48Attempt,type H48ExecutionJournal,
+  markH48OrderAttempted,reconcileH48Attempt,assertH48JournalTransition,type H48ExecutionJournal,
   type H48SignedVenueSnapshot,
 } from "../lib/hype-h48-execution-journal";
 import { advanceH48ResearchSequence } from "../lib/hype-h48-research-sequence";
@@ -165,4 +165,22 @@ test("journal rejects unknown fields, invalid source, wrong pending/position mod
   ])assert.throws(()=>validateH48ExecutionJournal(raw,SHA),/HYPE_H48_JOURNAL_/);
   assert.throws(()=>markH48OrderAttempted(s,E-1000),/HYPE_H48_JOURNAL_/);
   assert.throws(()=>markH48OrderAttempted(markH48OrderAttempted(s,E+1000),E+1500),/HYPE_H48_JOURNAL_/);
+});
+
+test("journal transition firewall refuses fabricated OPEN, FLAT or review resets",()=>{
+  const planned=start();
+  const sent=markH48OrderAttempted(planned,E+1500);
+  assert.doesNotThrow(()=>assertH48JournalTransition(planned,sent));
+  const open=reconcileH48Attempt(sent,{result:fakeResult(sent,"FILLED",2,"BUY"),
+    venue:snapshot(E+1600,2),now:E+1700});
+  assert.doesNotThrow(()=>assertH48JournalTransition(sent,open));
+  const directToFlat={...sent,mode:"FLAT" as const,pending:null,position:null,revision:sent.revision+1};
+  assert.throws(()=>assertH48JournalTransition(planned,directToFlat),/HYPE_H48_JOURNAL_/);
+  const fabricatedFlat={...open,mode:"FLAT" as const,position:null,revision:open.revision+1};
+  assert.throws(()=>assertH48JournalTransition(open,fabricatedFlat),/HYPE_H48_JOURNAL_TRANSITION_/);
+  const fabricatedReview={...open,mode:"MANUAL_REVIEW" as const,
+    reviewReason:"H48_FAKE_RECONCILIATION",revision:open.revision+1};
+  assert.throws(()=>assertH48JournalTransition(open,fabricatedReview),/HYPE_H48_JOURNAL_TRANSITION_/);
+  const stale={...open,revision:open.revision+1};
+  assert.throws(()=>assertH48JournalTransition(open,stale),/HYPE_H48_JOURNAL_TRANSITION_/);
 });
