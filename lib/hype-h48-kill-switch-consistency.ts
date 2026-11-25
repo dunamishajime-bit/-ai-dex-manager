@@ -3,7 +3,6 @@
  * alias points to a different file, a fresh H48 runner must not trade even
  * if one alias or a private legacy file reports inactive.
  */
-import { resolve } from "node:path";
 import { lstat } from "node:fs/promises";
 import { readSharedKillSwitch, type SharedKillSwitchView } from "./disdex-shared-kill-switch";
 
@@ -36,7 +35,7 @@ export function validateH48CanonicalKillPaths(
 ):typeof H48_CANONICAL_KILL_SWITCH {
   for(const name of H48_KILL_SWITCH_ALIASES){
     const path=env[name];
-    if(!path||resolve(path)!==H48_CANONICAL_KILL_SWITCH)
+    if(path!==H48_CANONICAL_KILL_SWITCH)
       throw Error("H48_KILL_SWITCH_ENV_ALIAS_MISMATCH:"+name);
   }
   return H48_CANONICAL_KILL_SWITCH;
