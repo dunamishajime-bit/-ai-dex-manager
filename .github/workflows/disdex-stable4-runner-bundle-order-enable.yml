@@ -13,6 +13,8 @@ on:
       - "scripts/ops/test_disdex_stable4_runner_bundle.py"
       - "lib/runner-order-permit.ts"
       - "lib/stable4-runner-bundle.ts"
+      - "config/stable4-dd30-runner-plan.json"
+      - "config/stable4-dd30-runner-bundle-manifest.json"
       - "tests/stable4-runner-bundle.test.ts"
   workflow_dispatch:
     inputs:
@@ -87,8 +89,19 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
-          [[ "$SOURCE_SHA" == "e0e4f1d8f22b62e9410188ef6e590a20e31f760f" ]]
-          [[ "$PLAN_SHA256" == "595ab42294fe939d18e11fc9885dfb62856d6b0b22327b9d0a5e578fe448af1a" ]]
+          [[ "$SOURCE_SHA" == "4786f600ae7bf86ffca948f1412956a9113cb20d" ]]
+          [[ "$PLAN_SHA256" == "fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852" ]]
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          body=json.loads(Path('config/stable4-dd30-runner-bundle-manifest.json').read_text(encoding='utf-8'))
+          expected='fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852'
+          actual=hashlib.sha256(json.dumps(body,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode('ascii')).hexdigest()
+          assert actual == expected, (actual, expected)
+          assert body['sourceSha']=='4786f600ae7bf86ffca948f1412956a9113cb20d'
+          assert body['economics']=={'cryptoGrossCap':3,'hypeTrendGrossCap':1.5,'penguDdProtectionPct':17,'penguGrossCap':1,'sharedRiskDailyLossPct':7.5,'stockGrossCap':4,'totalGrossCap':4.25,'v4AggregateGrossCap':2,'v4NewOrderDdStopPct':30,'v52V11GrossCap':2,'v52V50GrossCap':2}
+          print('STABLE4_DD30_BUNDLE_MANIFEST=PASS')
+          PY
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest \
             scripts/ops/test_disdex_runner_scoped_order_enable.py \
             scripts/ops/test_disdex_stable4_runner_bundle.py -v
@@ -268,4 +281,5 @@ jobs:
           rm -f "$RUNNER_TEMP/stable4-bundle-token" "$RUNNER_TEMP/stable4-bundle-public.pem" \
             "$RUNNER_TEMP/stable4-bundle-normalize.json" "$RUNNER_TEMP/stable4-bundle-preflight.json" \
             "$RUNNER_TEMP/stable4-bundle-result.json"
+
 
