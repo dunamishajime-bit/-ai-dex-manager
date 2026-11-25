@@ -58,7 +58,7 @@ class Stable4RunnerBundleTests(unittest.TestCase):
                             for entry in gate.BUNDLE_ENTRIES))
         self.assertEqual(gate.BUNDLE_SOURCE_SHA, "4786f600ae7bf86ffca948f1412956a9113cb20d")
         self.assertEqual(gate.BUNDLE_PLAN_SHA256,
-                         "fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852")
+                         "678428fdd874ce0bfe1f10f31dfec3f6fde0a027931082a195404c9c462dfbf1")
         self.assertTrue(all(entry["sourceSha"] == gate.BUNDLE_SOURCE_SHA for entry in gate.BUNDLE_ENTRIES))
         self.assertTrue(all(entry["planSha256"] ==
                             "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712"
