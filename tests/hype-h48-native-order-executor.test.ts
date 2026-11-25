@@ -46,12 +46,12 @@ const grant=(p=intent().pending!,at=NOW):H48ScopedOwnerOrderGrant=>({
   stopGovernanceCertified:true,
 });
 function fake(options:{
-  badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;blockProtectedExit?:boolean;executionThrows?:boolean;
+  badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;blockProtectedExit?:boolean;executionThrows?:boolean;stop8Missing?:boolean;
   result?:DirectTradeResult;quantity?:number;
   starting?:H48ExecutionJournal;now?:number;
 }={}){
   const at=options.now??NOW;
-  let state=options.starting??intent(),requests:DirectTradeCommand[]=[],reserves=0,releases=0,saves=0;
+  let state=options.starting??intent(),requests:DirectTradeCommand[]=[],reserves=0,releases=0,saves=0,stopCalls=0;
   const store={
     load:async()=>JSON.parse(JSON.stringify(state)) as H48ExecutionJournal,
     save:async(old:H48ExecutionJournal,next:H48ExecutionJournal,_lock:AccountLockHandle)=>{
@@ -100,6 +100,14 @@ function fake(options:{
     rootGrant:{verifyForOrder:async()=>options.badGrant?
       {...grant(state.pending!,at),approvedSha:"f".repeat(40)}:grant(state.pending!,at)},
     signedVenue:{read:async()=>venue(state.pending?.phase==="EXIT"?0:2,at)},
+    residentStop8:{protectConfirmedEntry:async({sourceSha,planSha256,position})=>{
+      stopCalls++;
+      assert.equal(sourceSha,SHA);
+      assert.equal(planSha256,"b".repeat(64));
+      assert.equal(position.quantity,2);
+      if(options.stop8Missing)throw Error("STOP8_NOT_CONFIRMED");
+      return {status:"STOP8_VERIFIED" as const,stopClientOrderId:"h48s-"+"1".repeat(30)};
+    }},
     assertGlobalOrderRelease:async()=>{if(options.blockKill)throw Error("HOLD_PROTECTED")},
     assertFreshSharedRiskAndStops:async()=>{if(options.blockRisk)throw Error("STOP_NOT_APPROVED")},
     assertProtectedReduceOnlyExitAllowed:async()=>{
@@ -107,19 +115,20 @@ function fake(options:{
     },
   });
   return {runner,requests,getState:()=>state,
-    getReserves:()=>reserves,getReleases:()=>releases,getSaves:()=>saves};
+    getReserves:()=>reserves,getReleases:()=>releases,getSaves:()=>saves,getStopCalls:()=>stopCalls};
 }
 
 test("H48 ENTRY sends exactly one BUY only AFTER durable SUBMITTED journal and reserved exposure",async()=>{
   const x=fake();
   const result=await x.runner.submitPrepared();
-  assert.equal(result.status,"RECONCILED_OPEN");
+  assert.equal(result.status,"RECONCILED_OPEN_STOP8_VERIFIED");
   assert.equal(x.requests.length,1);
   assert.equal(x.requests[0].symbol,"HYPEUSDT");
   assert.equal(x.requests[0].side,"BUY");
   assert.equal(x.requests[0].reduceOnly,false);
   assert.equal(x.requests[0].requireVenueMargin5xCross,true);
   assert.equal(x.getReserves(),1);
+  assert.equal(x.getStopCalls(),1);
   assert.equal(x.getReleases(),1);
   assert.equal(x.getSaves(),2);
   assert.equal(x.getState().mode,"OPEN");
@@ -201,4 +210,17 @@ test("H48 48-hour EXIT submits one SELL with reduceOnly and confirms flat venue"
   assert.equal(x.getReserves(),0);
   assert.equal(x.getState().mode,"FLAT");
   assert.equal(x.getState().position,null);
+});
+
+test("ASTER entry FILLED without signed STOP8 is NOT successful; reservation stays active",async()=>{
+  const x=fake({stop8Missing:true});
+  const result=await x.runner.submitPrepared();
+  assert.equal(result.status,"OPEN_STOP8_UNVERIFIED");
+  assert.equal(x.getState().mode,"OPEN");
+  assert.equal(x.getStopCalls(),1);
+  assert.equal(x.getReserves(),1);
+  assert.equal(x.getReleases(),0);
+  assert.equal(x.requests.length,1);
+  await assert.rejects(x.runner.submitPrepared(),/NO_PREPARED_INTENT/);
+  assert.equal(x.requests.length,1,"unprotected entry must never be repeated");
 });
