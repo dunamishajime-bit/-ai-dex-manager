@@ -14,6 +14,7 @@ import { createHash } from "node:crypto";
 import type { DirectTradeResult, DirectPosition, DirectOpenOrder } from "./direct-trade-executor";
 import type { HypeH48TimeOnlyContract, HypeH48PolicyEvidence } from "./hype-stable4-time-only-contract";
 import { validateHypeH48TimeOnlyContract, validateHypeH48PolicyEvidence } from "./hype-stable4-time-only-contract";
+import {stop8ClientOrderId} from "./hype-h48-resident-stop8";
 import { validateH48ResearchSequence, createH48ResearchSequence, type H48ResearchSequence, type H48ResearchSequenceDecision } from "./hype-h48-research-sequence";
 
 type Phase = "ENTRY"|"EXIT";
@@ -178,12 +179,23 @@ export function markH48OrderAttempted(s:H48ExecutionJournal,now:number):H48Execu
   return next(current,{pending:{...current.pending!,stage:"SUBMITTED",submittedAt:now}});
 }
 
-function signedSnapshot(v:H48SignedVenueSnapshot,now:number){
+function signedSnapshot(v:H48SignedVenueSnapshot,now:number,ownedExitStopId?:string){
   if(!v||v.source!=="ASTER_SIGNED_READ_ONLY"||!timestamp(v.observedAt)||!timestamp(now)
     ||v.observedAt>now||now-v.observedAt>120_000||!Array.isArray(v.positions)||!Array.isArray(v.openOrders))fail("SIGNED_READ_UNVERIFIED");
   for(const p of v.positions)if(!p||typeof p.symbol!=="string"||!Number.isFinite(p.quantity)||!Number.isFinite(p.entryPrice))fail("VENUE_POSITION_INVALID");
   for(const o of v.openOrders)if(!o||typeof o.symbol!=="string")fail("VENUE_ORDER_INVALID");
-  if(v.openOrders.some(x=>x.symbol.toUpperCase()==="HYPEUSDT"))fail("UNMANAGED_HYPE_ORDER");
+  const hypeOrders=v.openOrders.filter(x=>x.symbol.toUpperCase()==="HYPEUSDT");
+  // A certified STOP8 may remain working while the exact reduce-only TIME48
+  // SELL closes the long. Never treat it as an unmanaged order, but never
+  // accept an arbitrary HYPE order or a duplicate/modified protective STOP.
+  if(hypeOrders.length){
+    if(!ownedExitStopId||hypeOrders.length!==1)fail("UNMANAGED_HYPE_ORDER");
+    const o=hypeOrders[0];
+    if(o.clientOrderId!==ownedExitStopId||o.type!=="STOP_MARKET"
+       ||o.side!=="SELL"||o.reduceOnly!==true||o.status!=="NEW"
+       ||!positive(o.quantity)||o.executedQuantity!==0||!positive(o.stopPrice))
+      fail("UNMANAGED_HYPE_ORDER");
+  }
   return v.positions.filter(x=>x.symbol.toUpperCase()==="HYPEUSDT"&&Math.abs(x.quantity)>1e-9);
 }
 function review(s:H48ExecutionJournal,reason:string){return next(s,{mode:"MANUAL_REVIEW",reviewReason:"H48_"+reason});}
@@ -257,7 +269,9 @@ export function reconcileH48Attempt(s:H48ExecutionJournal,input:{
      ||r.executedQuantity<0) return review(current,"ORDER_IDENTITY_OR_QUANTITY_UNKNOWN");
   let positions:DirectPosition[];
   try {
-    positions=signedSnapshot(input.venue,input.now);
+    const ownedExitStopId=p.phase==="EXIT"
+      ?stop8ClientOrderId(current.sourceSha,p.contract.positionId):undefined;
+    positions=signedSnapshot(input.venue,input.now,ownedExitStopId);
     if(input.venue.observedAt<(p.submittedAt??0))fail("VENUE_READ_PRECEDES_SUBMISSION");
   }catch{return review(current,"VENUE_READ_OR_OPEN_ORDER_INVALID");}
   if(r.executionUnknown||r.status==="UNKNOWN"||r.status==="PARTIALLY_FILLED"
