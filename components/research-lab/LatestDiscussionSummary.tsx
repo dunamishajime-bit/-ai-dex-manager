@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Gavel, MessageSquareText, RefreshCw } from "lucide-react";
 
-import type { ResearchDashboardPayload } from "@/lib/research-lab/dashboard-types";
+import type { ResearchDiscussionIndexEntry } from "@/lib/research-lab/discussion-types";
+
+type LatestDiscussionPayload = { latestDiscussion: ResearchDiscussionIndexEntry | null; freshness?: "fresh" | "delayed" | "stale" | "unknown" };
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -19,14 +21,18 @@ function formatDateTime(value: string) {
 }
 
 export default function LatestDiscussionSummary() {
-  const [payload, setPayload] = useState<ResearchDashboardPayload | null>(null);
+  const [payload, setPayload] = useState<LatestDiscussionPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const response = await fetch("/api/research-lab/latest", { cache: "no-store" });
-      if (!response.ok) return;
-      setPayload(await response.json() as ResearchDashboardPayload);
+      if (!response.ok) throw new Error(`Research state HTTP ${response.status}`);
+      setPayload(await response.json() as LatestDiscussionPayload);
+      setLoadFailed(false);
+    } catch {
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -59,6 +65,9 @@ export default function LatestDiscussionSummary() {
         </a>
       </div>
 
+      {!loading && (loadFailed || payload?.freshness === "stale" || payload?.freshness === "delayed" || payload?.freshness === "unknown") ? (
+        <p role="status" className="mt-3 text-xs text-amber-200">研究データの取得失敗または鮮度低下。表示済みの議論は最新と確認できていません。</p>
+      ) : null}
       {loading ? (
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/8 bg-black/20 px-4 py-5 text-xs text-white/45">
           <RefreshCw className="h-4 w-4 animate-spin" /> 議論要約を読み込んでいます
@@ -87,7 +96,7 @@ export default function LatestDiscussionSummary() {
             <p className="mt-3 text-sm leading-7 text-emerald-50/76">{discussion.decision}</p>
           </div>
         </div>
-      ) : (
+      ) : loadFailed ? null : (
         <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-black/15 px-4 py-5 text-xs leading-6 text-white/45">
           議論ログはまだありません。更新後の最初の自動研究Cycleが完了すると、ここに要約とCIO判断が表示されます。
         </div>
