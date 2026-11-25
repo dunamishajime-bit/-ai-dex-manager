@@ -57,9 +57,17 @@ export interface H48ResidentStop8Handoff {
     lease:AccountLockHandle;now:number;
   }):Promise<{status:"STOP8_VERIFIED";stopClientOrderId:string}>;
 }
+export interface H48Stop8ExitRetirement {
+  /** Root-authorized signed FLAT and exact STOP8 order retirement. No
+   * success may be reported while an unmanaged/protective stop remains. */
+  retireAfterSignedFlat(input:{
+    sourceSha:string;planSha256:string;positionId:string;
+    lease:AccountLockHandle;now:number;
+  }):Promise<{status:"STOP8_RETIRED_SIGNED_FLAT";stopCancels:0|1}>;
+}
 export type H48OrderExecutionOutcome =
   | Readonly<{status:"RECONCILED_OPEN_STOP8_VERIFIED"|"RECONCILED_FLAT"|"MANUAL_REVIEW";clientOrderId:string;ordersAttempted:1}>
-  | Readonly<{status:"SUBMITTED_RECONCILIATION_REQUIRED"|"OPEN_STOP8_UNVERIFIED";clientOrderId:string;ordersAttempted:1}>;
+  | Readonly<{status:"SUBMITTED_RECONCILIATION_REQUIRED"|"OPEN_STOP8_UNVERIFIED"|"FLAT_STOP8_RETIREMENT_REQUIRED";clientOrderId:string;ordersAttempted:1}>;
 
 const forbid=(reason:string):never=>{throw Error("H48_ORDER_EXECUTOR_BLOCKED:"+reason)};
 const validSha=(v:unknown)=>typeof v==="string"&&/^[0-9a-f]{40}$/.test(v);
@@ -95,6 +103,7 @@ export class H48NativeOrderExecutor {
     rootGrant:H48RootGrantVerifier;
     signedVenue:H48OrderVenueReadback;
     residentStop8:H48ResidentStop8Handoff;
+    stop8ExitRetirement:H48Stop8ExitRetirement;
     /** Fresh global permission is mandatory only for exposure-increasing ENTRY. */
     assertGlobalOrderRelease:()=>Promise<void>;
     /** ENTRY must pass shared risk, hard-stop and Gross before exposure. */
@@ -219,6 +228,19 @@ export class H48NativeOrderExecutor {
         }
       }
       if(reservation)throw Error("H48_ENTRY_FLAT_WITH_RESERVATION_UNEXPECTED");
+      if(pending.phase==="EXIT"){
+        try{
+          const retired=await d.stop8ExitRetirement.retireAfterSignedFlat({
+            sourceSha:d.sourceSha,planSha256:grant.planSha256,
+            positionId:pending.contract.positionId,lease:d.lease,now:now(),
+          });
+          if(retired.status!=="STOP8_RETIRED_SIGNED_FLAT")
+            throw Error("H48_PROTECTIVE_STOP_NOT_CLEARED");
+        }catch{
+          return {status:"FLAT_STOP8_RETIREMENT_REQUIRED",
+            clientOrderId:pending.clientOrderId,ordersAttempted:1};
+        }
+      }
       return {status:"RECONCILED_FLAT",
         clientOrderId:pending.clientOrderId,ordersAttempted:1};
     }catch {
