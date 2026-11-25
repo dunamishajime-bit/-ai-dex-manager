@@ -71,12 +71,18 @@ test("full restart inspection reads journal and authenticated venue under active
       asset:"USDT",availableBalance:200,walletBalance:250,updatedAt:NOW,
     }),
   };
-  const lease={
-    document:async()=>({
-      schema:"disdex-account-lock/v1" as const,accountScope:"ASTER_FUTURES",
-      ownerId:"h48-test",leaseId:"lock-1",acquiredAt:NOW-1000,expiresAt:NOW+60000,reservations:[],
-    }),
-  } as AccountLockHandle;
+  const leaseDoc={
+    schema:"disdex-account-lock/v1" as const,accountScope:"ASTER_FUTURES",
+    ownerId:"h48-test",leaseId:"lock-1",acquiredAt:NOW-1000,
+    expiresAt:NOW+60000,reservations:[],
+  };
+  const lease:AccountLockHandle={
+    ownerId:leaseDoc.ownerId,leaseId:leaseDoc.leaseId,
+    acquiredAt:leaseDoc.acquiredAt,renewalIntervalMs:1000,
+    document:async()=>({...leaseDoc}),renew:async()=>({...leaseDoc}),
+    reserve:async()=>{throw Error("TEST_RESERVATION_DISABLED")},
+    releaseReservation:async()=>{},release:async()=>{},
+  };
   const result=await inspectH48Restart({journalStore:store,executor,lease,runtimeSha:SHA,now:()=>NOW});
   assert.equal(result.decision,"OPEN_VERIFIED_READ_ONLY");
   assert.equal(result.ordersSent,0);
