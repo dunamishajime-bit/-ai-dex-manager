@@ -136,6 +136,45 @@ class UiRetentionContractTest(unittest.TestCase):
             self.assertIsNone(vps_retention.ui_release_sha(release))
             self.assertIsNone(ui_retention.release_sha(release))
 
+    def test_exact_standalone_hp_release_marker(self):
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as td:
+            release = Path(td) / ("ui-hp-approval-" + sha[:12])
+            release.mkdir()
+            (release / ".disdex-release-sha").write_text(sha + "\n", encoding="utf-8")
+            self.assertEqual(vps_retention.ui_release_sha(release), sha)
+            self.assertEqual(ui_retention.release_sha(release), sha)
+
+    def test_standalone_hp_release_marker_rejects_wrong_directory(self):
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as td:
+            for name in ("ui-hp-approval-" + "b" * 12, "ui-unrelated"):
+                release = Path(td) / name
+                release.mkdir()
+                (release / ".disdex-release-sha").write_text(sha + "\n", encoding="utf-8")
+                self.assertIsNone(vps_retention.ui_release_sha(release))
+                self.assertIsNone(ui_retention.release_sha(release))
+
+    def test_standalone_hp_release_marker_rejects_conflict_or_symlink(self):
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release = root / ("ui-hp-approval-" + sha[:12])
+            release.mkdir()
+            marker = release / ".disdex-release-sha"
+            marker.write_text(sha + "\n", encoding="utf-8")
+            legacy = release / ".disdex-ui-sha"
+            legacy.write_text("b" * 40 + "\n", encoding="utf-8")
+            self.assertIsNone(vps_retention.ui_release_sha(release))
+            self.assertIsNone(ui_retention.release_sha(release))
+            legacy.unlink()
+            marker.unlink()
+            external = root / "marker"
+            external.write_text(sha + "\n", encoding="utf-8")
+            marker.symlink_to(external)
+            self.assertIsNone(vps_retention.ui_release_sha(release))
+            self.assertIsNone(ui_retention.release_sha(release))
+
     def test_systemd_grants_only_ui_release_root_for_ui_cleanup(self):
         service = SERVICE.read_text(encoding="utf-8")
         self.assertIn("ReadWritePaths=-/home/deploy/disdex-trading/ui-releases", service)

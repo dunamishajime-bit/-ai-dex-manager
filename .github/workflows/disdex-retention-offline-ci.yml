@@ -1,0 +1,22 @@
+name: DisDex Retention Offline CI
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-ui-retention-cleanup'
+      - 'scripts/ops/root/disdex-vps-retention-cleanup'
+      - 'tests/test_ui_retention_contract.py'
+      - 'tests/test_vps_retention_dependency_protection.py'
+      - '.github/workflows/disdex-retention-offline-ci.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test marker recognition and reference protection in temporary directories
+        run: |
+          python3 tests/test_ui_retention_contract.py
+          python3 tests/test_vps_retention_dependency_protection.py
+          python3 scripts/ops/root/disdex-vps-retention-cleanup --self-test
