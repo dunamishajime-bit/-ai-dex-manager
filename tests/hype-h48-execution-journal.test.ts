@@ -121,6 +121,9 @@ test("stale, forged or unmanaged venue inventory never confirms execution",()=>{
     const attempt=reconcileH48Attempt(sent,{result:fakeResult(sent,"FILLED",2,"BUY"),venue,now:E+125_000});
     assert.equal(attempt.mode,"MANUAL_REVIEW");
   }
+  const beforeRequest=reconcileH48Attempt(sent,{result:fakeResult(sent,"FILLED",2,"BUY"),
+    venue:snapshot(E+1400,2),now:E+1700});
+  assert.equal(beforeRequest.mode,"MANUAL_REVIEW");
   const forged=reconcileH48Attempt(sent,{result:fakeResult(sent,"FILLED",2,"BUY",{clientOrderId:"other"}),
     venue:snapshot(E+1600,2),now:E+1700});
   assert.equal(forged.mode,"MANUAL_REVIEW");
@@ -141,6 +144,13 @@ test("partial, non-reduce-only or not-flat exit cannot clear owned H48 position"
     assert.equal(out.mode,"MANUAL_REVIEW");
     assert.equal(out.position?.quantity,2);
   }
+});
+
+test("expired H48 root policy evidence cannot mark an order as attempted",()=>{
+  const s=start();
+  assert.ok(s.pending?.authorizationExpiresAt===E+61_000);
+  assert.throws(()=>markH48OrderAttempted(s,E+61_000),/HYPE_H48_JOURNAL_ATTEMPT_NOT_ALLOWED/);
+  assert.throws(()=>markH48OrderAttempted(s,E+140_000),/HYPE_H48_JOURNAL_ATTEMPT_NOT_ALLOWED/);
 });
 
 test("journal rejects unknown fields, invalid source, wrong pending/position mode",()=>{
