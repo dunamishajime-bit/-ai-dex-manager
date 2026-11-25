@@ -4,6 +4,7 @@
  * if one alias or a private legacy file reports inactive.
  */
 import { resolve } from "node:path";
+import { lstat } from "node:fs/promises";
 import { readSharedKillSwitch, type SharedKillSwitchView } from "./disdex-shared-kill-switch";
 
 export const H48_CANONICAL_KILL_SWITCH = "/var/lib/disdex/shared/kill-switch.json" as const;
@@ -30,21 +31,38 @@ export type H48CanonicalKillObservation = Readonly<{
  * exact canonical shared source. A symlink or malformed HOLD must never
  * be treated as permission; the full issuer validates Root provenance.
  */
-export async function inspectH48CanonicalKillSwitch(
-  env:NodeJS.ProcessEnv = process.env,
-):Promise<H48CanonicalKillObservation> {
+export function validateH48CanonicalKillPaths(
+  env:NodeJS.ProcessEnv,
+):typeof H48_CANONICAL_KILL_SWITCH {
   for(const name of H48_KILL_SWITCH_ALIASES){
     const path=env[name];
     if(!path||resolve(path)!==H48_CANONICAL_KILL_SWITCH)
       throw Error("H48_KILL_SWITCH_ENV_ALIAS_MISMATCH:"+name);
   }
+  return H48_CANONICAL_KILL_SWITCH;
+}
+
+export async function inspectH48CanonicalKillSwitch(
+  env:NodeJS.ProcessEnv = process.env,
+):Promise<H48CanonicalKillObservation> {
+  const canonical=validateH48CanonicalKillPaths(env);
+  // A missing canonical HOLD file must never count as an inactive switch.
+  const before=await lstat(canonical);
+  if(!before.isFile()||before.isSymbolicLink()
+     ||(before.mode&0o022)!==0)
+    throw Error("H48_KILL_SWITCH_FILE_UNTRUSTED");
   const view=await readSharedKillSwitch(env);
-  if(view.configuredPaths.length!==1||view.configuredPaths[0]!==H48_CANONICAL_KILL_SWITCH)
+  const after=await lstat(canonical);
+  if(!after.isFile()||after.isSymbolicLink()
+     ||before.ino!==after.ino||before.dev!==after.dev
+     ||before.mtimeMs!==after.mtimeMs||before.size!==after.size)
+    throw Error("H48_KILL_SWITCH_FILE_CHANGED");
+  if(view.configuredPaths.length!==1||view.configuredPaths[0]!==canonical)
     throw Error("H48_KILL_SWITCH_RUNTIME_PATH_MISMATCH");
   if(view.active&&!(view.action==="HOLD_PROTECTED"&&view.scope==="GLOBAL"))
     throw Error("H48_KILL_SWITCH_UNEXPECTED_ACTIVE_MODE");
   return Object.freeze({
-    canonicalPath:H48_CANONICAL_KILL_SWITCH,globalHold:view.active,
+    canonicalPath:canonical,globalHold:view.active,
     action:view.action,reason:view.reason,
     allAliasesVerified:true as const,ordersAllowed:false as const,
   });
