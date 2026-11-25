@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -72,7 +73,15 @@ export async function loadFetRuntimeObservability(options: { now?: number; expec
   const now = options.now ?? Date.now();
   const capturedAt = new Date(now).toISOString();
   const pathValue = statePath();
-  const expectedSha = configuredExpectedReleaseSha(options.expectedReleaseSha);
+  const observation=await loadPinnedDisplayObservation("FET_BRK48_RESIDUAL",now).catch(()=>null);
+  const expectedSha = observation?.expectedSha || configuredExpectedReleaseSha(options.expectedReleaseSha);
+  if (observation?.monitorOnly) {
+    return {...unavailable(capturedAt,expectedSha,observation.healthReason || "FET監視中・新規発注未許可"),
+      configured:true,status:"STALE",updatedAt:observation.updatedAt,
+      runtimeSha:observation.runtimeSha,releaseShaVerified:observation.matchesCurrent,
+      stateFresh:observation.matchesCurrent,strategyOk:observation.matchesCurrent,
+      strategyId:"FET_BRK48_RESIDUAL"};
+  }
   if (!pathValue || !isAbsolute(pathValue)) {
     return unavailable(capturedAt, expectedSha, "FET state pathが絶対パスで設定されていません。", ["FET_STATE_PATH_INVALID"]);
   }

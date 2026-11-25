@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
     const selected = selectTradeHistorySource(official.entries, local);
     const notice = official.error
       ? `Aster約定照合に制限があります: ${official.error}。未取得の銘柄・期間が残る場合があります。`
+      : official.source === "aster" && official.entries.length===0
+        ? "Asterの取得対象銘柄に約定はありません。ローカル台帳の有無とは区別しています。"
       : selected.source === "aster"
         ? "Aster取引所の約定履歴を取得しました。各行は1約定です。同じ注文IDの複数行は分割約定であり、注文合計とは異なります。"
         : "Asterの約定履歴は取得できていません。ローカル台帳の履歴であり、現在の全約定・保有を保証しません。";
@@ -37,6 +39,7 @@ export async function GET(req: NextRequest) {
       refreshedAt: official.refreshedAt,
       historyNotice: notice,
       sourceIncomplete: !!official.error || official.source !== "aster",
+      officialSource: official.source,
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return NextResponse.json({

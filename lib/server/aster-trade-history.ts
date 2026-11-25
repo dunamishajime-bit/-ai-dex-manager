@@ -19,6 +19,7 @@ const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
   ...Q102_HISTORY_SYMBOLS,
   ...liveConfig.stockSymbols,
+  "FETUSDT", "HYPEUSDT", "ZECUSDT",
 ]));
 const CACHE_TTL_MS = 60_000;
 const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
@@ -35,7 +36,8 @@ type Lot = {
 type Book = { netQuantity: number; lots: Lot[] };
 type LivePosition = { symbol?: string; positionAmt?: string | number; positionSide?: string };
 
-let cache: { expiresAt: number; entries: TradeHistoryEntry[]; error?: string } | null = null;
+let cache: { expiresAt: number; result: AsterTradeHistoryResult } | null = null;
+let inFlight: Promise<AsterTradeHistoryResult> | null = null;
 
 export type AsterTradeHistoryResult = {
   entries: TradeHistoryEntry[];
@@ -271,7 +273,8 @@ async function fetchSymbolTrades(client: AsterDexClient, symbol: string) {
 
   for (let page = 0; page < 20; page += 1) {
     const pageRows = await client.getUserTrades(symbol, { limit: 1000, fromId });
-    if (!Array.isArray(pageRows) || pageRows.length === 0) break;
+    if (!Array.isArray(pageRows)) throw new Error("ASTER_HISTORY_PAGE_INVALID");
+    if (pageRows.length === 0) break;
     let newRows = 0;
     for (const row of pageRows) {
       const key = String(row.id ?? String(row.orderId ?? "unknown") + ":" + String(row.time ?? "unknown") + ":" + String(row.qty ?? "unknown"));
@@ -291,17 +294,29 @@ async function fetchSymbolTrades(client: AsterDexClient, symbol: string) {
   return rows.sort((left, right) => finite(left.time) - finite(right.time));
 }
 
-async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error?: string }> {
+async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; success: boolean; error?: string }> {
   const config = loadAsterDexClientConfig();
-  if (!config) return { entries: [], error: "Aster official history credentials are not configured." };
+  if (!config) return { entries: [], success: false, error: "Aster official history credentials are not configured." };
   const client = new AsterDexClient(config);
   const entries: TradeHistoryEntry[] = [];
   const errors: string[] = [];
   const fillEvidence = await loadFillLineageEvidence();
-
-  for (const symbol of ASTER_HISTORY_SYMBOLS) {
+  let positions: Awaited<ReturnType<AsterDexClient["getPositionRisk"]>> | null=null;
+  const symbols=new Set(ASTER_HISTORY_SYMBOLS);
+  try {
+    const snapshot=await client.getPositionRisk();
+    if(!Array.isArray(snapshot)) throw new Error("POSITION_RISK_INVALID");
+    positions=snapshot;
+    for(const position of snapshot){
+      const symbol=String(position.symbol || "").toUpperCase();
+      if (/^[A-Z0-9_]{2,40}$/.test(symbol) && finite(position.positionAmt)!==0) symbols.add(symbol);
+    }
+  } catch { errors.push("position reconciliation: unavailable"); }
+  let successfulSymbols=0;
+  for (const symbol of symbols) {
     try {
       const rows = await fetchSymbolTrades(client, symbol);
+      successfulSymbols+=1;
       const books = new Map<Direction, Book>([
         ["LONG", { netQuantity: 0, lots: [] }],
         ["SHORT", { netQuantity: 0, lots: [] }],
@@ -330,41 +345,31 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
   // The fill ledger is historical evidence; it is not authoritative for the
   // current position. Reconcile open-looking fills against positionRisk so a
   // closed SOLUSDT position cannot remain displayed as a live holding.
-  try {
-    const positions = await client.getPositionRisk();
-    entries.splice(0, entries.length, ...reconcileOpenEntries(entries, positions));
-  } catch (error) {
-    errors.push("position reconciliation: " + (error instanceof Error ? error.message : "Position snapshot unavailable"));
-  }
+  if (positions!==null) entries.splice(0, entries.length, ...reconcileOpenEntries(entries, positions));
   entries.sort((left, right) => Date.parse(right.executedAt) - Date.parse(left.executedAt));
   return {
     entries,
+    success: successfulSymbols>0,
     error: errors.length ? errors.slice(0, 2).join("; ") : undefined,
   };
 }
 
 export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> {
-  const now = Date.now();
-  if (cache && cache.expiresAt > now) {
-    return {
-      entries: cache.entries,
-      source: cache.entries.length > 0 ? "aster" : "unavailable",
-      refreshedAt: new Date(now).toISOString(),
-      error: cache.error,
+  if (cache && cache.expiresAt>Date.now()) return cache.result;
+  // Many HP pages request the same official ledger. Share a single read-only
+  // fetch; do not multiply signed history traffic across concurrent requests.
+  if (inFlight) return inFlight;
+  inFlight=(async()=>{
+    let result: Awaited<ReturnType<typeof fetchAsterTrades>>;
+    try { result=await fetchAsterTrades(); }
+    catch { result={entries:[],success:false,error:"Official history request failed."}; }
+    const at=Date.now();
+    const value: AsterTradeHistoryResult={
+      entries:result.entries,source:result.success?"aster":"unavailable",
+      refreshedAt:new Date(at).toISOString(),error:result.error,
     };
-  }
-
-  let result: { entries: TradeHistoryEntry[]; error?: string };
-  try {
-    result = await fetchAsterTrades();
-  } catch (error) {
-    result = { entries: [], error: error instanceof Error ? error.message : "Official history request failed." };
-  }
-  cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, error: result.error };
-  return {
-    entries: result.entries,
-    source: result.entries.length > 0 ? "aster" : "unavailable",
-    refreshedAt: new Date(now).toISOString(),
-    error: result.error,
-  };
+    cache={expiresAt:at+CACHE_TTL_MS,result:value};
+    return value;
+  })();
+  try { return await inFlight; } finally { inFlight=null; }
 }

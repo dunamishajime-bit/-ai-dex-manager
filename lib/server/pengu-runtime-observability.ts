@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -266,6 +267,14 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
   const capturedAt = new Date().toISOString();
   const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
   const expectedReleaseSha = currentRuntime?.productionReleaseShas.pengu ?? liveConfig.vpsObservedReleases.pengu;
+  const observation = await loadPinnedDisplayObservation("PENGU_V8").catch(()=>null);
+  if (observation?.monitorOnly) {
+    const reason=observation.healthReason || "PENGU監視中・新規発注未許可";
+    return {...unavailable(capturedAt,true,reason,observation.expectedSha),
+      status:"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
+      releaseSha:observation.runtimeSha,releaseShaSource:"runner-state",
+      releaseShaVerified:observation.matchesCurrent};
+  }
   const configured = configuredPath();
   if (!configured) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。", expectedReleaseSha);
   if (!isAbsolute(configured.value)) return unavailable(capturedAt, true, `${configured.name}は絶対パスで設定してください。`, expectedReleaseSha);
@@ -280,7 +289,8 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const updatedAt = number(state.updatedAt ?? state.lastHeartbeatAt ?? state.stateUpdatedAt ?? state.lastCycleAt ?? state.capturedAt);
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
     const mode = text(state.mode);
-    const releaseSha = text(state.releaseSha ?? state.sourceSha ?? state.commitSha);
+    const releaseSha = text(state.runtimeCommitSha ?? state.runtimeSha ?? state.releaseSha ?? state.sourceSha ?? state.commitSha);
+    if (!releaseSha || releaseSha !== expectedReleaseSha) return unavailable(capturedAt,true,"PENGU stateが現行pinと一致しません。",expectedReleaseSha);
     const releaseShaSource = releaseSha ? "runner-state" as const : "vps-deployment-config" as const;
     const releaseShaVerified = releaseSha ? releaseSha === expectedReleaseSha : undefined;
     const latestSignal = signalObservability(state.latestSignal);

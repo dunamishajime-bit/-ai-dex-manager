@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
@@ -30,6 +31,23 @@ export async function GET(req: NextRequest) {
   const heartbeatPath = process.env.DISDEX_IDLE_PRIORITY_HEARTBEAT_PATH || "/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json";
 
   const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
+  const observation=await loadPinnedDisplayObservation("IDLE_PRIORITY_SHORT").catch(()=>null);
+  if (observation?.monitorOnly) {
+    const releaseSha=observation.expectedSha;
+    const root="/var/lib/disdex/stable4-dd30-monitor/"+releaseSha+"/idle";
+    const raw=observation.matchesCurrent ? await jsonFile(root+"/decision-details.json") : null;
+    const details=raw?.runtimeSha===releaseSha && Number.isFinite(Number(raw.updatedAt)) &&
+      Date.now()-Number(raw.updatedAt)<=300000 && Number(raw.updatedAt)<=Date.now()+10000 ? raw : null;
+    const state=observation.matchesCurrent ? observation.monitorState : null;
+    return NextResponse.json({ok:true,status:observation.matchesCurrent?"MONITOR_ONLY":"UNKNOWN",
+      releaseSha,v4ReleaseSha:currentRuntime?.productionReleaseShas.v12 || null,
+      heartbeat:{runtimeSha:observation.runtimeSha,expectedSha:releaseSha,
+        heartbeatAt:observation.updatedAt,mainPid:observation.mainPid,
+        mode:"MONITOR_ONLY",liveEnabled:false,newOrdersAllowed:false,healthReason:observation.healthReason},
+      baseline:null,baselineStatus:"NOT_EVALUATED_THIS_CYCLE",baselineStale:false,
+      baselineObservedRuntimeSha:null,v4Baseline:null,state,residualState:null,details,
+      visibleSidecars:["HYPE"],updatedAt:Date.now()}, {headers:{"Cache-Control":"private, no-store"}});
+  }
   const [fallbackReleaseSha, details, state, residualState, rawBaseline, v4BaselineRaw, heartbeat] = await Promise.all([
     textFile(releaseShaPath),
     jsonFile(detailsPath),

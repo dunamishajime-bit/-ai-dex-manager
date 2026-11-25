@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -258,6 +259,14 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
   const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
   const thresholds = thresholdsFor(currentRuntime);
   const windowsNy = currentRuntime?.v52.windowsNy ?? [];
+  const observation = await loadPinnedDisplayObservation("V52").catch(()=>null);
+  if (observation?.monitorOnly) {
+    const reason=observation.healthReason || "V52監視中・新規発注未許可";
+    return {...unavailable(capturedAt,true,reason,thresholds,windowsNy),
+      status:"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
+      runtimeSha:observation.runtimeSha,expectedRuntimeSha:observation.expectedSha,
+      releaseShaVerified:observation.matchesCurrent,reason};
+  }
   const configuredPath = String(process.env.V52_ASTER_ONLY_STATE_PATH || "").trim();
   if (!configuredPath) return unavailable(capturedAt, false, "V52_ASTER_ONLY_STATE_PATH がUIサービスに設定されていません。", thresholds, windowsNy);
   if (!isAbsolute(configuredPath)) return unavailable(capturedAt, true, "V52_ASTER_ONLY_STATE_PATH は絶対パスで設定してください。", thresholds, windowsNy);
