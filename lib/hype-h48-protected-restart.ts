@@ -65,7 +65,7 @@ export function assessH48ProtectedRestart(input:{
     ||stop.entryClientOrderId!==state.position.entryClientOrderId
     ||stop.quantity!==state.position.quantity
     ||!exact(stop.entryPrice,state.position.entryPrice,stop.tickSize)
-    ||!Number.isSafeInteger(stop.confirmedAt)||stop.confirmedAt>venue.observedAt)
+    ||!Number.isSafeInteger(stop.confirmedAt)||Number(stop.confirmedAt)>venue.observedAt)
     return held("STOP8_JOURNAL_POSITION_OR_PLAN_MISMATCH");
   try {
     // The venue verifier only accepts a SUBMITTED intent; re-check the
