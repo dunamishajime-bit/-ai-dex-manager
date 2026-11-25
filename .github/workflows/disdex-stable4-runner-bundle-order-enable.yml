@@ -90,12 +90,12 @@ jobs:
           set -euo pipefail
           [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
           [[ "$SOURCE_SHA" == "4786f600ae7bf86ffca948f1412956a9113cb20d" ]]
-          [[ "$PLAN_SHA256" == "fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852" ]]
+          [[ "$PLAN_SHA256" == "678428fdd874ce0bfe1f10f31dfec3f6fde0a027931082a195404c9c462dfbf1" ]]
           python3 - <<'PY'
           import hashlib, json
           from pathlib import Path
           body=json.loads(Path('config/stable4-dd30-runner-bundle-manifest.json').read_text(encoding='utf-8'))
-          expected='fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852'
+          expected='678428fdd874ce0bfe1f10f31dfec3f6fde0a027931082a195404c9c462dfbf1'
           actual=hashlib.sha256(json.dumps(body,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode('ascii')).hexdigest()
           assert actual == expected, (actual, expected)
           assert body['sourceSha']=='4786f600ae7bf86ffca948f1412956a9113cb20d'
