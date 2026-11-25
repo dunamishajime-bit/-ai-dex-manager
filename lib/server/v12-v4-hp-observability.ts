@@ -1,3 +1,5 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
+import { loadReadOnlyRunnerPins } from "@/lib/server/read-only-runner-pin-telemetry";
 import { execFile } from "node:child_process";
 import { constants } from "node:fs";
 import { lstat, open, realpath } from "node:fs/promises";
@@ -295,6 +297,12 @@ function defaultSnapshot(now: number, errors: string[], displayStatus: V12V4HpDi
 export async function loadV12V4HpObservability(options: V12V4HpObservabilityOptions = {}): Promise<V12V4HpSnapshot> {
   const now = options.now ?? Date.now();
   const paths = pathsFor(options);
+  // Explicit test seams retain their original behavior. Production must use
+  // the root-owned current pin, never the obsolete trading/current symlink.
+  const production = !options.paths && !options.readSystemd && !options.readPrimaryMode && !options.readLegacyV12Active;
+  const pin = production ? (await loadReadOnlyRunnerPins()).runners.V12_V4 : null;
+  if (pin) paths.currentReleasePath=pin.releaseRoot;
+  const monitor = production ? await loadPinnedDisplayObservation("V12_V4",now).catch(()=>null) : null;
   const errors: string[] = [];
   let currentSha: string | null = null;
   let releaseDir: string | null = null;
@@ -316,7 +324,13 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   }
 
   if (paths.decisionPath) {
-    try { decision = await readJson(paths.decisionPath, paths.stateRoot, MAX_DECISION_BYTES); }
+    try {
+      decision = await readJson(paths.decisionPath, paths.stateRoot, MAX_DECISION_BYTES);
+      if (pin && (decision.runtimeSha ?? decision.releaseSha)!==pin.sha) {
+        decision=null;
+        errors.push("V4_DECISION_PIN_MISMATCH");
+      }
+    }
     catch (error) { errors.push(`V4_DECISION_SOURCE:${error instanceof Error ? error.message : "UNAVAILABLE"}`); }
   }
 
@@ -332,7 +346,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const heartbeatFresh = heartbeatSchemaOk && fresh(heartbeatUpdatedAt, now);
   const modeText = asText(heartbeat?.operationMode).toUpperCase();
   const v4RunnerMode: V12V4HpSnapshot["actual"]["v4RunnerMode"] = modeText === "CERTIFIED" || modeText === "CANARY" || modeText === "SHADOW" ? modeText : "UNKNOWN";
-  const orderEnabled = typeof heartbeat?.orderEnabled === "boolean" ? heartbeat.orderEnabled : null;
+  const orderEnabled = monitor?.monitorOnly ? false : typeof heartbeat?.orderEnabled === "boolean" ? heartbeat.orderEnabled : null;
 
   let v12PrimaryMode: V12V4HpSnapshot["actual"]["v12PrimaryMode"] = "UNKNOWN";
   let primaryModeEvidence: PrimaryModeEvidence | null = null;
@@ -477,7 +491,11 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     activeRunnerState !== "active/running" || legacyV12RunnerActive === null;
 
   let displayStatus: V12V4HpDisplayStatus;
-  if (shaMismatch) displayStatus = "SHA_MISMATCH";
+  if (monitor?.monitorOnly && monitor.matchesCurrent && monitor.runtimeSha===currentSha &&
+      runnerSha===currentSha && activeRunnerSha===currentSha && legacyV12RunnerActive===false) {
+    displayStatus="STAGED_NOT_LIVE";
+    v12PrimaryMode="V4";
+  } else if (shaMismatch) displayStatus = "SHA_MISMATCH";
   else if (sourceIntegrityError) displayStatus = "SOURCE_ERROR";
   else if (staleEvidence) displayStatus = "STALE";
   else if (v4RunnerMode === "SHADOW") displayStatus = "SHADOW";

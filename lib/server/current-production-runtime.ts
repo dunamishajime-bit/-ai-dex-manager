@@ -1,11 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { observePinnedDisplay } from "@/lib/server/pinned-runtime-display";
+import type { RunnerPinId } from "@/lib/server/runner-pin-manifest";
 import { loadReadOnlyRunnerPins } from "@/lib/server/read-only-runner-pin-telemetry";
 import { loadPinnedHypeTickObservation } from "@/lib/server/hype-pinned-tick-observability";
 
-const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha";
-const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
-const RUNTIME_ENV_ROOT = "/etc/disdex/current-runtime";
 const SHA_RE = /^[0-9a-f]{40}$/i;
 const LEGACY_V12_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json";
 const V12_V4_HEARTBEAT_PATH = "/var/lib/disdex/v12-v4/heartbeat.json";
@@ -16,9 +15,8 @@ const HEARTBEAT_PATHS = Object.freeze({
   v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
   fet: "/var/lib/disdex/fet-brk48-residual/state.json",
   hype: "/var/lib/disdex/runner-health/heartbeats/hype-trend-long.json",
+  idle: "/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json",
 });
-
-type EnvMap = Record<string, string>;
 
 export type CurrentProductionRuntime = {
   ok: true;
@@ -27,6 +25,8 @@ export type CurrentProductionRuntime = {
   checkedAt: string;
   source: "VPS_CURRENT_RUNTIME";
   releaseSha: string;
+  capsSource?: "PINNED_SOURCE_AND_PROCESS";
+  capsEffectiveVerified?: boolean;
   productionReleaseShas: {
     v12: string;
     pengu: string;
@@ -38,7 +38,7 @@ export type CurrentProductionRuntime = {
   };
   runtimeLineage: {
     synchronized: boolean;
-    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype", {
+    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype" | "idle", {
       runtimeSha?: string;
       expectedSha?: string;
       mode?: string;
@@ -48,6 +48,8 @@ export type CurrentProductionRuntime = {
       updatedAt?: number;
       healthReason?: string;
       matchesCurrent: boolean;
+      processActive?: boolean;
+      monitorOnly?: boolean;
       error?: string;
     }>;
   };
@@ -120,30 +122,6 @@ export type CurrentProductionRuntime = {
   };
 };
 
-function parseEnv(text: string): EnvMap {
-  const result: EnvMap = {};
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-    const index = line.indexOf("=");
-    if (index <= 0) continue;
-    result[line.slice(0, index).trim()] = line.slice(index + 1).trim();
-  }
-  return result;
-}
-
-function requiredNumber(env: EnvMap, name: string): number {
-  const value = Number(env[name]);
-  if (!Number.isFinite(value)) throw new Error(`CURRENT_RUNTIME_ENV_INVALID_NUMBER:${name}:${env[name] ?? "MISSING"}`);
-  return value;
-}
-
-function requiredText(env: EnvMap, name: string): string {
-  const value = String(env[name] || "").trim();
-  if (!value) throw new Error(`CURRENT_RUNTIME_ENV_MISSING:${name}`);
-  return value;
-}
-
 export function extractObjectNumber(source: string, key: string): number {
   const pattern = new RegExp(`\\b${key}\\s*:\\s*([-+]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)`);
   const match = source.match(pattern);
@@ -169,11 +147,11 @@ type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
 async function loadRuntimeLineage(
   releaseSha: string,
-  env: EnvMap,
+  observations: Record<RuntimeUnitKey, Awaited<ReturnType<typeof observePinnedDisplay>>>,
   productionReleaseShas: CurrentProductionRuntime["productionReleaseShas"],
 ): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
-  const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
+  const v12PrimaryMode = "V4";
   const expectedByUnit: Record<RuntimeUnitKey, string> = {
     v12: productionReleaseShas.v12,
     pengu: productionReleaseShas.pengu,
@@ -181,6 +159,7 @@ async function loadRuntimeLineage(
     v52: productionReleaseShas.v52,
     fet: productionReleaseShas.fet,
     hype: productionReleaseShas.hype,
+    idle: productionReleaseShas.idle,
   };
   const heartbeatPaths = {
     ...HEARTBEAT_PATHS,
@@ -188,6 +167,13 @@ async function loadRuntimeLineage(
   };
   for (const [unit, path] of Object.entries(heartbeatPaths) as Array<[RuntimeUnitKey, string]>) {
     try {
+      const observation = observations[unit];
+      if (observation.monitorOnly || !observation.processActive) {
+        // Never export env or raw state; those are internal telemetry inputs.
+        const {env: _env, monitorState: _state, ...safe} = observation;
+        units[unit] = safe;
+        continue;
+      }
       // HYPE uses an independently pinned runner. The old shared heartbeat
       // writer still follows the parent SHA, so validate the real pinned
       // process + natural decision tick for *display only* instead.
@@ -219,7 +205,9 @@ async function loadRuntimeLineage(
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: runtimeSha === pinnedSha && expectedSha === pinnedSha,
+        processActive: true,
+        matchesCurrent: runtimeSha === pinnedSha && expectedSha === pinnedSha && Number(raw.mainPid) === observation.mainPid,
+
       };
     } catch (error) {
       units[unit] = {
@@ -236,63 +224,62 @@ async function loadRuntimeLineage(
 
 export async function loadCurrentProductionRuntime(): Promise<CurrentProductionRuntime> {
   const checkedAt = new Date().toISOString();
-  const releaseSha = (await readFile(CURRENT_MARKER, "utf8")).trim();
-  if (!SHA_RE.test(releaseSha)) throw new Error(`CURRENT_RUNTIME_SHA_INVALID:${releaseSha || "EMPTY"}`);
-
-  const envPath = join(RUNTIME_ENV_ROOT, `${releaseSha}.env`);
-  const runtimeEnv = parseEnv(await readFile(envPath, "utf8"));
-  const primaryEnvPath = join(RUNTIME_ENV_ROOT, `${releaseSha}.v12-primary.env`);
-  let primaryEnv: EnvMap = {};
-  try {
-    primaryEnv = parseEnv(await readFile(primaryEnvPath, "utf8"));
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException)?.code;
-    if (code !== "ENOENT" && code !== "ENOTDIR") throw error;
-  }
-  const env = { ...runtimeEnv, ...primaryEnv };
-  const envRelease = requiredText(runtimeEnv, "DISDEX_RELEASE_SHA");
-  const runtimeCommit = requiredText(runtimeEnv, "DISDEX_RUNTIME_COMMIT_SHA");
-  if (envRelease !== releaseSha || runtimeCommit !== releaseSha) {
-    throw new Error(`CURRENT_RUNTIME_SHA_MISMATCH:MARKER_${releaseSha}:ENV_${envRelease}:RUNTIME_${runtimeCommit}`);
-  }
-  const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
-  const v4PrimarySha = (env.DISDEX_V12_V4_PRIMARY_SHA ?? "").trim();
-  const v4PeerSha = (env.DISDEX_V12_V4_PEER_SHA ?? "").trim();
-  if (v12PrimaryMode === "V4") {
-    if (!SHA_RE.test(v4PrimarySha) || !SHA_RE.test(v4PeerSha) || v4PeerSha !== releaseSha) {
-      throw new Error(`CURRENT_V12_PRIMARY_LINEAGE_MISMATCH:RELEASE_${releaseSha}:PRIMARY_${v4PrimarySha || "MISSING"}:PEER_${v4PeerSha || "MISSING"}`);
-    }
-  }
-
-  const readOnlyPins = await loadReadOnlyRunnerPins().catch(() => null);
-  const productionReleaseShas: CurrentProductionRuntime["productionReleaseShas"] = {
-    v12: v12PrimaryMode === "V4" ? (readOnlyPins?.runners.V12_V4.sha ?? v4PrimarySha ?? releaseSha) : releaseSha,
-    pengu: readOnlyPins?.runners.PENGU_V8.sha ?? releaseSha,
-    quality102: readOnlyPins?.runners.QUALITY102_CAUSAL_V1.sha ?? releaseSha,
-    v52: readOnlyPins?.runners.V52.sha ?? releaseSha,
-    fet: readOnlyPins?.runners.FET_BRK48_RESIDUAL.sha ?? releaseSha,
-    hype: readOnlyPins?.runners.HYPE_TREND_LONG.sha ?? releaseSha,
-    idle: readOnlyPins?.runners.IDLE_PRIORITY_SHORT.sha ?? releaseSha,
+  const pins = await loadReadOnlyRunnerPins();
+  const ids: Record<RuntimeUnitKey, RunnerPinId> = {
+    v12:"V12_V4",pengu:"PENGU_V8",quality102:"QUALITY102_CAUSAL_V1",
+    v52:"V52",fet:"FET_BRK48_RESIDUAL",hype:"HYPE_TREND_LONG",idle:"IDLE_PRIORITY_SHORT",
   };
-
-  const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
-  const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
-  const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
-  const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(
-    releaseSha,
-    env,
-    productionReleaseShas,
-  );
-  const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
+  const productionReleaseShas = Object.fromEntries(Object.entries(ids).map(([key,id])=>[key,pins.runners[id].sha])) as CurrentProductionRuntime["productionReleaseShas"];
+  const releaseSha = productionReleaseShas.v12;
+  // Validate the exact immutable source for each runner, not the retired
+  // parent current symlink or the unrelated HP build SHA.
+  const roots = Object.fromEntries(Object.entries(ids).map(([key,id])=>[key,pins.runners[id].releaseRoot])) as Record<RuntimeUnitKey,string>;
+  await Promise.all(Object.entries(ids).map(async ([key,id])=>{
+    const marker=(await readFile(join(pins.runners[id].releaseRoot,".disdex-release-sha"),"utf8")).trim();
+    if (!SHA_RE.test(marker) || marker!==pins.runners[id].sha) throw new Error("PINNED_RUNTIME_MARKER_MISMATCH:"+key);
+  }));
+  const observations = Object.fromEntries(await Promise.all(Object.entries(ids).map(async ([key,id])=>[key,await observePinnedDisplay(id,pins.runners[id])]))) as Record<RuntimeUnitKey,Awaited<ReturnType<typeof observePinnedDisplay>>>;
+  const q102Source = await readFile(join(roots.quality102,"config","integratedProductionRiskPolicy.ts"),"utf8");
+  const v12Risk = await readFile(join(roots.v12,"config","integratedProductionRiskPolicy.ts"),"utf8");
+  const penguRisk = await readFile(join(roots.pengu,"config","integratedProductionRiskPolicy.ts"),"utf8");
+  // Keep the older API compatibility fields, while current lineage is V4.
+  const v12Source = await readFile(join(roots.v12,"config","v12X1AllRuntime.ts"),"utf8");
+  const penguSource = await readFile(join(roots.pengu,"config","penguDualLsV2Runtime.ts"),"utf8");
+  const penguRecoverySource = await readFile(join(roots.pengu,"config","penguRecoveryV8.ts"),"utf8");
+  const runtimeLineage=await loadRuntimeLineage(releaseSha,observations,productionReleaseShas);
+  const v52Raw=JSON.parse(await readFile(join(roots.v52,"config","v52V50Runtime.json"),"utf8")) as Record<string,unknown>;
+  // Actual process values win over configured defaults. The provenance bit
+  // makes absence of process evidence explicit rather than inventing a value.
+  let capsEffectiveVerified = true;
+  function cap(unit:RuntimeUnitKey,key:string,configured:number) {
+    const raw=observations[unit].env[key];
+    if (raw===undefined) {capsEffectiveVerified=false;return configured;}
+    const value=Number(raw);
+    if (!Number.isFinite(value)) {capsEffectiveVerified=false;return configured;}
+    return value;
+  }
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
     : [];
   if (!windowsNy.length) throw new Error("CURRENT_V52_RUNTIME_WINDOWS_MISSING");
 
-  const stockDailyLossPct = extractObjectNumber(q102Source, "stockDailyLossPct");
-  const v12PerPositionGross = extractObjectNumber(q102Source, "v12PerPositionGrossCap");
+  const stockDailyLossPct = extractObjectNumber(v12Risk, "stockDailyLossPct");
+  const v12PerPositionGross = extractObjectNumber(v12Risk, "v12PerPositionGrossCap");
 
+  const caps = {
+      v12BaseGross: cap("v12","V12_BASE_GROSS_CAP",extractObjectNumber(v12Risk,"v12BaseAggregateGross")),
+      v12DynamicGross: cap("v12","V12_DYNAMIC_GROSS_CAP",extractObjectNumber(v12Risk,"v12DynamicAggregateGrossCap")),
+      v12PerPositionGross,
+      penguGross: cap("pengu","PENGU_DUAL_LS_V2_MAX_GROSS",extractObjectNumber(penguRisk,"penguMaximumGross")),
+      quality102Gross: cap("quality102","QUALITY102_CAUSAL_V1_MAX_GROSS",extractObjectNumber(q102Source,"q102CausalV4MaximumGross")),
+      cryptoGross: cap("v12","CRYPTO_GROSS_CAP",extractObjectNumber(v12Risk,"cryptoGrossCap")),
+      stockGross: cap("v52","DISDEX_V52_STOCK_GROSS_CAP",v52Number(v52Raw.stockAggregateGross,"stockAggregateGross")),
+      totalGross: cap("v12","TOTAL_GROSS_CAP",extractObjectNumber(v12Risk,"totalGrossCap")),
+      v52V11Gross: cap("v52","DISDEX_V52_V11_GROSS_CAP",v52Number(v52Raw.slotGross,"slotGross")),
+      v52V50Gross: cap("v52","DISDEX_V52_V50_GROSS_CAP",v52Number(v52Raw.slotGross,"slotGross")),
+      sharedCryptoDailyLossPct: cap("v12","DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT",extractObjectNumber(v12Risk,"cryptoDailyLossPct")),
+      stockDailyLossPct,
+  };
   return {
     ok: true,
     readOnly: true,
@@ -302,20 +289,9 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     releaseSha,
     productionReleaseShas,
     runtimeLineage,
-    caps: {
-      v12BaseGross: requiredNumber(env, "V12_BASE_GROSS_CAP"),
-      v12DynamicGross: requiredNumber(env, "V12_DYNAMIC_GROSS_CAP"),
-      v12PerPositionGross,
-      penguGross: requiredNumber(env, "PENGU_GROSS_CAP"),
-      quality102Gross: requiredNumber(env, "QUALITY102_CAUSAL_V1_MAX_GROSS"),
-      cryptoGross: requiredNumber(env, "CRYPTO_GROSS_CAP"),
-      stockGross: requiredNumber(env, "STOCK_GROSS_CAP"),
-      totalGross: requiredNumber(env, "TOTAL_GROSS_CAP"),
-      v52V11Gross: requiredNumber(env, "DISDEX_V52_V11_GROSS_CAP"),
-      v52V50Gross: requiredNumber(env, "DISDEX_V52_V50_GROSS_CAP"),
-      sharedCryptoDailyLossPct: requiredNumber(env, "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT"),
-      stockDailyLossPct,
-    },
+    capsSource: "PINNED_SOURCE_AND_PROCESS",
+    capsEffectiveVerified,
+    caps,
     v12: {
       strategyId: extractObjectText(v12Source, "strategyId"),
       maximumPositions: extractObjectNumber(v12Source, "maximumPositions"),
@@ -346,7 +322,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       lowGross: extractObjectNumber(penguRecoverySource, "lowGross"),
     },
     quality102: {
-      selectorMode: requiredText(env, "QUALITY102_CAUSAL_V1_SELECTOR_MODE"),
+      selectorMode: observations.quality102.env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "UNVERIFIED",
       familyGross: {
         HIGH_VOL: extractObjectNumber(q102Source, "HIGH_VOL"),
         MR: extractObjectNumber(q102Source, "MR"),

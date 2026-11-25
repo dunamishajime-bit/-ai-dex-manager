@@ -152,7 +152,11 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const mode = text(heartbeat?.mode) ?? text(state.mode);
     const safetyState = text(heartbeat?.safetyState);
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
-    const expectedReleaseSha = text(heartbeat?.expectedSha) ?? currentRuntime?.productionReleaseShas.quality102 ?? config.quality102Runtime.expectedReleaseSha;
+    const expectedReleaseSha = currentRuntime?.productionReleaseShas.quality102;
+    if (!expectedReleaseSha || runtimeSha !== expectedReleaseSha ||
+        (heartbeat?.expectedSha!==undefined && heartbeat.expectedSha!==expectedReleaseSha)) {
+      return unavailable(capturedAt,true,"Q102 state/heartbeatが現行pinと一致しません。");
+    }
     const selector = object(heartbeat?.quality102);
     const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;
@@ -214,8 +218,8 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
         totalGrossCap: finite(selector?.totalGrossCap) ?? currentRuntime?.caps.totalGross ?? quality102Policy.totalGrossCap,
       },
       symbols: symbols(heartbeat?.symbols),
-      position: position(state.position ?? state.active),
-      pending: pendingObject ? {
+      position: mode==="MONITOR_ONLY" ? undefined : position(state.position ?? state.active),
+      pending: mode!=="MONITOR_ONLY" && pendingObject ? {
         phase: text(pendingObject.phase ?? pendingObject.action),
         symbol: text(pendingObject.symbol),
         side: text(pendingObject.side),

@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { lstat, readFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -135,7 +136,11 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
     const match=riskSource?.match(new RegExp("\\b"+name+"\\s*:\\s*([-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+))"));
     return match?num(match[1]):undefined;
   };
-  const state=await safeJson(STATE),kill=await safeJson(KILL);
+  const observation=await loadPinnedDisplayObservation("HYPE_TREND_LONG",now).catch(()=>null);
+  const state=observation?.monitorOnly
+    ? (observation.matchesCurrent ? observation.monitorState || null : null)
+    : await safeJson(STATE);
+  const kill=await safeJson(KILL);
   const active=source!==null && await serviceActive(releaseSha);
   const sourceDeployed=source!==null;
   const stateAvailable=state!==null;

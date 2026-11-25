@@ -1,3 +1,4 @@
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 import { NextRequest, NextResponse } from "next/server";
 import { loadDecisionStatus } from "@/lib/server/disdex-decision-status";
 import { loadV12DecisionObservability } from "@/lib/server/v12-decision-observability";
@@ -47,9 +48,25 @@ export async function GET(req: NextRequest) {
     const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
     const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
     const v12Status = !v12Observability.wiring.runnerStateConfigured ? "UNAVAILABLE" : v12Fresh ? "LIVE" : "STALE";
+    const current=await loadCurrentProductionRuntime().catch(()=>null);
     const runtime = {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {
+        const key = unit.id==="V12_X1.00_ALL" || unit.id==="V12_V4" ? "v12"
+          : unit.id==="PENGU_DUAL_LS_V2_FINAL" ? "pengu"
+          : unit.id==="QUALITY102_CAUSAL_V1" ? "quality102"
+          : unit.id==="FET_BRK48_RESIDUAL" ? "fet"
+          : unit.id==="HYPE_TREND_LONG" ? "hype"
+          : unit.id==="DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" ? "v52" : null;
+        const evidence=key ? current?.runtimeLineage.units[key] : undefined;
+        if (evidence?.monitorOnly) return {...unit,
+          releaseSha:evidence.expectedSha || unit.releaseSha,
+          status:evidence.matchesCurrent ? "UNCONFIRMED" as const : "STALE" as const,
+          updatedAt:evidence.updatedAt,reason:evidence.healthReason || "監視中・発注未許可"};
+        if (evidence?.processActive===false) return {...unit,
+          releaseSha:evidence.expectedSha || unit.releaseSha,
+          status:"STOPPED" as const,reason:evidence.healthReason || "Runner停止中"};
+
         if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, releaseSha: penguRuntime.releaseSha || unit.releaseSha, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, releaseSha: quality102Runtime.runtimeSha || unit.releaseSha, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };

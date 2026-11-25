@@ -1,3 +1,4 @@
+import { observePinnedDisplay } from "@/lib/server/pinned-runtime-display";
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, readlink } from "node:fs/promises";
 import { execFile } from "node:child_process";
@@ -94,8 +95,19 @@ async function inspect(
       throw new Error("SYSTEMD_CWD_MISMATCH");
     }
 
-    let evidence: Awaited<ReturnType<typeof heartbeatEvidence>> | null = null;
-    if (active) evidence = await heartbeatEvidence(pin, mainPid, now);
+    let evidence: {mode:string;heartbeatAt:number|null;lastTickAt:number|null;status:string} | null = null;
+    if (active) {
+      const observation=await observePinnedDisplay(item.pinId,pin,now);
+      if (observation.monitorOnly) {
+        evidence={mode:"monitor-only",heartbeatAt:observation.updatedAt ?? null,
+          lastTickAt:observation.updatedAt ?? null,
+          status:observation.matchesCurrent ? "MONITOR_ONLY" : "UNVERIFIED"};
+      } else {
+        // Process RUNNING and evidence for new orders are distinct fields.
+        try {evidence = await heartbeatEvidence(pin, mainPid, now);}
+        catch {evidence={mode:pin.evidenceMode,heartbeatAt:null,lastTickAt:null,status:"UNVERIFIED"};}
+      }
+    }
 
     const state: RunnerState =
       failed ? "FAILED" :

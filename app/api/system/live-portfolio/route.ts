@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -97,10 +98,15 @@ function normalizePositions(input: unknown): NormalizedPosition[] | null {
 }
 
 async function readV12Usage() {
+  const observation=await loadPinnedDisplayObservation("V12_V4").catch(()=>null);
+  // Do not infer position ownership from a retired strategy ledger.
+  // In monitor-only mode the signed Aster positions remain authoritative.
+  if (!observation || observation.monitorOnly || !observation.processActive) return null;
   const statePath = String(process.env.V12_X1_ALL_STATE_PATH || "").trim();
   if (!statePath || !isAbsolute(statePath)) return null;
   try {
-    const raw = JSON.parse(await readFile(statePath, "utf8")) as { activePositions?: Array<{ symbol?: string; gross?: number }> };
+    const raw = JSON.parse(await readFile(statePath, "utf8")) as { runtimeSha?: string; runtimeCommitSha?: string; releaseSha?: string; activePositions?: Array<{ symbol?: string; gross?: number }> };
+    if ((raw.runtimeSha ?? raw.runtimeCommitSha ?? raw.releaseSha)!==observation.expectedSha) return null;
     const positions = Array.isArray(raw.activePositions) ? raw.activePositions : [];
     return {
       positionCount: positions.length,

@@ -353,6 +353,11 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
     if (v12Source.decisionFile.error) throw new Error(v12Source.decisionFile.error);
     v12State = object(v12Source.decisionFile.value);
     if (!v12State) throw new Error("V12 decision snapshotの形式が不正です。");
+    const v12Sha=v12State.runtimeSha ?? v12State.runtimeCommitSha ?? v12State.releaseSha;
+    if (!currentRuntime || v12Sha!==currentRuntime.productionReleaseShas.v12) {
+      v12State=null;
+      throw new Error("V4判定データが現行pinと一致しません。");
+    }
   } catch (error) {
     errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
   }
@@ -361,6 +366,10 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   if (market.open) {
     try {
       v52State = await readState(process.env.V52_ASTER_ONLY_STATE_PATH, "V52 runner state");
+      if (!currentRuntime || (v52State.runtimeSha ?? v52State.runtimeCommitSha)!==currentRuntime.productionReleaseShas.v52) {
+        v52State=null;
+        throw new Error("V52判定データが現行pinと一致しません。");
+      }
     } catch (error) {
       errors.push(error instanceof Error ? error.message : "V52 runner stateを読み取れません。");
     }
