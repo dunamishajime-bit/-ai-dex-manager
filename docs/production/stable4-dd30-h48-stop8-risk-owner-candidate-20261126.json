@@ -1,0 +1,74 @@
+{
+  "schema": "disdex-stable4-dd30-h48-stop8-owner-risk-candidate/v1",
+  "status": "DRAFT_NOT_AUTHORIZED",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "target": "professional-dismanager.net",
+  "sourceSha": "NEW_IMMUTABLE_RELEASE_NOT_YET_BUILT",
+  "ordersEnabled": false,
+  "previousPlan": {
+    "cryptoGross": 3,
+    "stockGross": 1.5,
+    "totalGross": 3.5,
+    "hypeGross": 1
+  },
+  "currentlyObservedRuntime": {
+    "cryptoGross": 3,
+    "stockGross": 4,
+    "totalGross": 4.25,
+    "hypeGross": 1.5
+  },
+  "grossDecision": "OWNER_EXPLICIT_CHOICE_REQUIRED_INCREASED_CAPS_OR_REDUCE_RUNTIME",
+  "drawdown": {
+    "v4NewEntryHoldPct": 30,
+    "penguProtectionPct": 17,
+    "sharedRiskDailyLossPct": 7.5
+  },
+  "hype": {
+    "policy": "H48_R4_RESIDENT_STOP8",
+    "route": "HYPE_REDESIGN_CAUSAL_H48R4_WSIG",
+    "symbol": "HYPEUSDT",
+    "side": "LONG",
+    "entryGridHours": 6,
+    "maxTimeExitHours": 48,
+    "emergencyStopTriggerPct": 8,
+    "residentStopMarketRequired": true,
+    "stopSide": "SELL",
+    "reduceOnly": true,
+    "workingType": "MARK_PRICE",
+    "entryCompletionRequiresAuthenticatedStopReadback": true,
+    "protectUnknownStopWithoutRetry": true,
+    "failClosedOnUnmanagedHypeOrder": true,
+    "guaranteeMaximumRealizedLossPct": null,
+    "oldH48TimeOnlyCertificateValidForThisPolicy": false
+  },
+  "safety": {
+    "perRunnerRootOwnerOrderGrantRequired": true,
+    "immutableReleaseAndExactSourceShaRequired": true,
+    "h48Stop8SignedRootCertificateRequired": true,
+    "failClosedOnAnyUnverifiedRiskGate": true,
+    "doNotReuseOldH48TimeOnlyOrderPermit": true,
+    "signedAsterVenueReadbackRequired": true,
+    "preserveCurrentGlobalHoldUntilApprovedTransition": true,
+    "noTestOrders": true,
+    "noManualKillSwitchClear": true
+  },
+  "runners": [
+    "V12_V4",
+    "PENGU_V8",
+    "QUALITY102_CAUSAL_V1",
+    "V52",
+    "FET_BRK48_RESIDUAL",
+    "HYPE_TREND_LONG",
+    "IDLE_PRIORITY_SHORT"
+  ],
+  "reviewRequired": [
+    "Owner decision for exact Gross caps",
+    "H48STOP8 independent forward/portfolio DD",
+    "Root STOP8 grant and certificate issuer",
+    "H48 native runner deployment and protected exit",
+    "All 7 new SHA permit issuance",
+    "Approved Global HOLD transition",
+    "3 signed ASTER GET and post-deploy verification"
+  ],
+  "note": "This is a review-only candidate, NOT a signed Owner authorization, not a deployed production plan and not an order permit."
+}
