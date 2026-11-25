@@ -76,10 +76,10 @@ test("corrupt or wrong-SHA journal requires manual intervention; never reset to 
  const dir=await mkdtemp(join(tmpdir(),"h48-journal-corrupt-"));
  try{
    const p=join(dir,"state.json"),store=new FileH48ExecutionJournalStore(p,SHA);
-   await writeFile(p,"{ corrupted","utf8");
+   await writeFile(p,"{ corrupted",{encoding:"utf8",mode:0o600});
    await assert.rejects(store.load());
    await assert.rejects(store.initialize({lease:lease(),venue:signed(Date.now()),now:Date.now()}));
-   await writeFile(p,JSON.stringify({...newH48ExecutionJournal(SHA),sourceSha:"a".repeat(40)}),"utf8");
+   await writeFile(p,JSON.stringify({...newH48ExecutionJournal(SHA),sourceSha:"a".repeat(40)}),{encoding:"utf8",mode:0o600});
    await assert.rejects(store.load(),/HYPE_H48_JOURNAL_STATE_HEADER/);
  }finally{await rm(dir,{recursive:true,force:true})}
 });
