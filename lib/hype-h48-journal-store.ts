@@ -44,6 +44,31 @@ async function stillOwned(lease:AccountLockHandle,first:Awaited<ReturnType<typeo
   if(after.leaseId!==first.leaseId||after.ownerId!==first.ownerId||after.acquiredAt!==first.acquiredAt)fail("LOCK_CHANGED");
 }
 
+async function syncParentDirectory(path:string) {
+  if(!unix)return;
+  const handle=await open(dirname(path),"r");
+  try {await handle.sync()} finally {await handle.close()}
+}
+async function withExclusiveJournalWriter<T>(path:string,work:()=>Promise<T>):Promise<T>{
+  await safeParent(path);
+  const writerLock=path+".writer.lock";
+  let handle;
+  try {handle=await open(writerLock,"wx",0o600);}
+  catch(e){
+    if((e as NodeJS.ErrnoException)?.code==="EEXIST")fail("EXCLUSIVE_WRITER_CONFLICT");
+    throw e;
+  }
+  try {
+    await handle.writeFile(JSON.stringify({schema:"disdex-h48-journal-writer/v1",pid:process.pid})+"\n","utf8");
+    await handle.sync();
+    await syncParentDirectory(path);
+    return await work();
+  } finally {
+    await handle.close();
+    await unlink(writerLock).catch(()=>undefined);
+  }
+}
+
 export class FileH48ExecutionJournalStore {
   private readonly path:string;
   constructor(path:string,private readonly sourceSha:string){
@@ -71,17 +96,19 @@ export class FileH48ExecutionJournalStore {
       ||v.positions.some(p=>p.symbol.toUpperCase()==="HYPEUSDT"&&Math.abs(p.quantity)>1e-9)
       ||v.openOrders.some(o=>o.symbol.toUpperCase()==="HYPEUSDT"))fail("VENUE_NOT_SIGNED_FLAT");
     const state=newH48ExecutionJournal(this.sourceSha);
-    await safeParent(this.path);
-    await stillOwned(input.lease,lease);
-    // x means no existing state, not even a corrupt one, can be overwritten.
-    const fd=await open(this.path,"wx",0o600).catch((e:NodeJS.ErrnoException)=>{
-      if(e.code==="EEXIST")fail("ALREADY_EXISTS");throw e;
+    return withExclusiveJournalWriter(this.path,async()=>{
+      await stillOwned(input.lease,lease);
+      // wx preserves corrupt/stale prior journals; no implicit reset to FLAT.
+      const fd=await open(this.path,"wx",0o600).catch((e:NodeJS.ErrnoException)=>{
+        if(e.code==="EEXIST")fail("ALREADY_EXISTS");throw e;
+      });
+      try {
+        await fd.writeFile(JSON.stringify(state)+"\n","utf8");
+        await fd.sync();
+      }finally{await fd.close()}
+      await syncParentDirectory(this.path);
+      return this.load();
     });
-    try {
-      await fd.writeFile(JSON.stringify(state)+"\n","utf8");
-      await fd.sync();
-    }finally{await fd.close()}
-    return this.load();
   }
   async save(expected:H48ExecutionJournal,replacement:H48ExecutionJournal,lease:AccountLockHandle){
     const first=await assertAccountLease(lease);
@@ -89,25 +116,28 @@ export class FileH48ExecutionJournalStore {
     const updated=validateH48ExecutionJournal(replacement,this.sourceSha);
     if(updated.revision!==old.revision+1)fail("REVISION_STEP_INVALID");
     assertH48JournalTransition(old,updated);
-    const raw=await stableRead(this.path).catch((e:NodeJS.ErrnoException)=>{
-      if(e.code==="ENOENT")fail("MISSING_NOT_FLAT");throw e;
-    });
-    const current=validateH48ExecutionJournal(JSON.parse(raw),this.sourceSha);
-    if(JSON.stringify(current)!==JSON.stringify(old))fail("STALE_OR_CONFLICTED");
-    await safeParent(this.path);
-    const tmp=this.path+"."+process.pid+"."+randomUUID()+".tmp";
-    let created=false;
-    try {
-      const fd=await open(tmp,"wx",0o600);created=true;
+    return withExclusiveJournalWriter(this.path,async()=>{
+      const raw=await stableRead(this.path).catch((e:NodeJS.ErrnoException)=>{
+        if(e.code==="ENOENT")fail("MISSING_NOT_FLAT");throw e;
+      });
+      const current=validateH48ExecutionJournal(JSON.parse(raw),this.sourceSha);
+      if(JSON.stringify(current)!==JSON.stringify(old))fail("STALE_OR_CONFLICTED");
+      await safeParent(this.path);
+      const tmp=this.path+"."+process.pid+"."+randomUUID()+".tmp";
+      let created=false;
       try {
-        await fd.writeFile(JSON.stringify(updated)+"\n","utf8");await fd.sync();
-      }finally{await fd.close()}
-      await stillOwned(lease,first);
-      if(await stableRead(this.path)!==raw)fail("MODIFIED_CONCURRENTLY");
-      await rename(tmp,this.path);created=false;
-      return this.load();
-    }finally{
-      if(created)await unlink(tmp).catch(()=>undefined);
-    }
+        const fd=await open(tmp,"wx",0o600);created=true;
+        try {
+          await fd.writeFile(JSON.stringify(updated)+"\n","utf8");await fd.sync();
+        }finally{await fd.close()}
+        await stillOwned(lease,first);
+        if(await stableRead(this.path)!==raw)fail("MODIFIED_CONCURRENTLY");
+        await rename(tmp,this.path);created=false;
+        await syncParentDirectory(this.path);
+        return this.load();
+      }finally{
+        if(created)await unlink(tmp).catch(()=>undefined);
+      }
+    });
   }
 }
