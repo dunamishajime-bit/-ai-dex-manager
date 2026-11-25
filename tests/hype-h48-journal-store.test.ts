@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
-import { mkdtemp,rm,writeFile,readFile } from "node:fs/promises";
+import { mkdtemp,rm,writeFile,readFile,open,unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AccountLockHandle,AccountLockDocument } from "../lib/disdex-account-order-lock";
@@ -92,5 +92,23 @@ test("atomic save rejects missing predecessor, invalid revision and changed lock
    const live=lease(-1000);
    await assert.rejects(store.save(current,next,live),/ACCOUNT_LOCK_INVALID/);
    assert.equal((await store.load()).revision,0);
+ }finally{await rm(dir,{recursive:true,force:true})}
+});
+
+test("exclusive journal writer-lock prevents a second process from overwriting state",async()=>{
+ const dir=await mkdtemp(join(tmpdir(),"h48-journal-writer-"));
+ try {
+   const path=join(dir,"journal.json");
+   const store=new FileH48ExecutionJournalStore(path,SHA),now=Date.now();
+   const current=await store.initialize({lease:lease(),venue:signed(now),now});
+   const before=await readFile(path,"utf8");
+   const writerLock=path+".writer.lock";
+   const guard=await open(writerLock,"wx",0o600);
+   try{
+     await assert.rejects(store.save(current,advance(),lease()),/EXCLUSIVE_WRITER_CONFLICT/);
+     assert.equal(await readFile(path,"utf8"),before);
+   }finally{await guard.close();await unlink(writerLock)}
+   const after=await store.save(current,advance(),lease());
+   assert.equal(after.revision,1);
  }finally{await rm(dir,{recursive:true,force:true})}
 });
