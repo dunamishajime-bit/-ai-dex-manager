@@ -54,7 +54,7 @@ test("H48 STOP8 fsynced PREPARED -> SUBMITTED -> signed CONFIRMED",async()=>{
     await assert.rejects(store.load(),/ENOENT/);
     await store.initialize({intent:i,lease:lock,signedVenue:venue(i),now:now()});
     assert.deepEqual(await store.load(),i);
-    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()};
+    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()-200};
     await store.save(i,submitted,lock);
     assert.deepEqual(await store.load(),submitted);
     const at=now(),snap=venue(submitted,true);
@@ -83,7 +83,7 @@ test("after STOP8 SUBMITTED a replay initialization is rejected and no reset occ
   try{
     const i=entry(),lock=lease(),store=new FileH48Stop8Store(t.path,SHA,PLAN);
     await store.initialize({intent:i,lease:lock,signedVenue:venue(i),now:now()});
-    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()};
+    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()-200};
     await store.save(i,submitted,lock);
     await assert.rejects(store.initialize({intent:i,lease:lock,signedVenue:venue(i),now:now()}),/PRIOR_INTENT_ALREADY_EXISTS/);
     assert.deepEqual(await store.load(),submitted);
@@ -94,7 +94,7 @@ test("a forged STOP8 CONFIRMED transition without independent signed readback is
   try{
     const i=entry(),lock=lease(),store=new FileH48Stop8Store(t.path,SHA,PLAN);
     await store.initialize({intent:i,lease:lock,signedVenue:venue(i),now:now()});
-    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()};
+    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()-200};
     await store.save(i,submitted,lock);
     const confirmed={...submitted,stage:"CONFIRMED" as const,confirmedAt:now()};
     await assert.rejects(store.save(submitted,confirmed,lock),/VENUE_READBACK_REQUIRED/);
@@ -107,7 +107,7 @@ test("a stale, changed or concurrent STOP8 writer cannot replace durable SUBMITT
   try{
     const i=entry(),lock=lease(),store=new FileH48Stop8Store(t.path,SHA,PLAN);
     await store.initialize({intent:i,lease:lock,signedVenue:venue(i),now:now()});
-    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()};
+    const submitted={...i,stage:"SUBMITTED" as const,submittedAt:now()-200};
     await store.save(i,submitted,lock);
     await assert.rejects(store.save(i,submitted,lock),/STALE_OR_CONFLICTED/);
     const confirmed={...submitted,stage:"CONFIRMED" as const,confirmedAt:now()};
