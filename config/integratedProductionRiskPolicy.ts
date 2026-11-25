@@ -41,10 +41,11 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   stockGrossCap: Number(v52V50Runtime.stockAggregateGross),
   stockSlotGrossCap: Number(v52V50Runtime.slotGross),
   totalGrossCap: 4.25,
-  // Absolute ceilings. Entry exposure may only expand above the normal caps
-  // through the integrated profit/DD/margin governor.
-  cryptoGrossHardCap: 5.0,
-  totalGrossHardCap: 8.0,
+  // Owner-confirmed 2026-11-26 absolute caps for this CANDIDATE.
+  // No dynamic profit tier can enlarge exposure beyond Crypto3.0/Total4.25.
+  // Not production-authorized until the new Root/HP signed plan is issued.
+  cryptoGrossHardCap: 3.0,
+  totalGrossHardCap: 4.25,
   grossGovernorBaseAvailableBalanceReservePct: 15.0,
   cryptoDailyLossPct: 7.5,
   stockDailyLossPct: 3.5,
