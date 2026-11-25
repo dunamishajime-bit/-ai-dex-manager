@@ -57,6 +57,24 @@ class Stable4Dd30PreflightContractTests(unittest.TestCase):
         self.assertNotEqual(module.EXPECTED_CAPS["STOCK_GROSS_CAP"], 4.0)
         self.assertNotEqual(module.EXPECTED_CAPS["TOTAL_GROSS_CAP"], 4.25)
 
+    def test_dd30_source_baseline_blocks_current_inconsistent_live_plan(self) -> None:
+        baseline = json.loads((ROOT / "docs" / "production" /
+            "STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json").read_text(encoding="utf-8"))
+        expected = baseline["economics"]
+        self.assertEqual(
+            (expected["cryptoGrossCap"], expected["stockGrossCap"], expected["totalGrossCap"]),
+            (3.0, 4.0, 4.25),
+        )
+        plan = module.load_plan(PLAN, hashlib.sha256(PLAN.read_bytes()).hexdigest())
+        # Existing owner LIVE plan uses a different research Gross policy.
+        with self.assertRaisesRegex(module.GateError, "STABLE4_DD30_GROSS_LINEAGE_MISMATCH"):
+            module.require_stable4_dd30_gross_source_consistency(plan)
+        # The source-policy check is a pure guard; it does not modify economics.
+        plan["economics"]["grossCaps"] = {
+            "crypto": 3.0, "stock": 4.0, "total": 4.25, "hype": 1.5,
+        }
+        module.require_stable4_dd30_gross_source_consistency(plan)
+
     def test_gate_has_no_execute_flag(self) -> None:
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn("--preflight-readonly", source)

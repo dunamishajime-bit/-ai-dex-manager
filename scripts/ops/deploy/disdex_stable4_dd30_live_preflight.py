@@ -261,9 +261,25 @@ def validate_hype_h48(source: str) -> dict[str, str]:
         require(st.st_uid == 0 and (st.st_mode & 0o222) == 0, "H48_ARTIFACT_NOT_IMMUTABLE")
     return {"certificateSha256": sha256(cert.read_bytes()), "permitSha256": sha256(permit.read_bytes())}
 
+def require_stable4_dd30_gross_source_consistency(plan: dict) -> None:
+    """Reject authorization based on mismatched STABLE4 economic lineage.
+
+    The original DD30 monitor cutover source and approved monitor plan enforce
+    Crypto3 / Stock4 / Total4.25.  The integrated HYPE Long source has a 1.5
+    sleeve cap, distinct from the ZEC research sidecar cap of 1.0.  This gate
+    does not authorize a return to these caps; it blocks the inconsistent
+    orders-enabled plan until a separately reviewed candidate, strategy
+    allocation matrix, and signed Owner plan are prepared.
+    """
+    gross = (plan.get("economics") or {}).get("grossCaps") or {}
+    expected = {"crypto": 3.0, "stock": 4.0, "total": 4.25, "hype": 1.5}
+    require(gross == expected, "STABLE4_DD30_GROSS_LINEAGE_MISMATCH")
+
+
 def preflight(source: str, plan_path: Path, plan_sha: str) -> dict:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
-    load_plan(plan_path, plan_sha)
+    plan = load_plan(plan_path, plan_sha)
+    require_stable4_dd30_gross_source_consistency(plan)
     require(SHA_RE.fullmatch(source) is not None, "SOURCE_SHA_INVALID")
     release_marker = BASE / source / ".disdex-release-sha"
     require(release_marker.is_file() and release_marker.read_text(encoding="utf-8").strip() == source, "RELEASE_MARKER_INVALID")
