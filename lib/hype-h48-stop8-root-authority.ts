@@ -17,6 +17,7 @@ import type {H48Stop8RootPositionEvidence} from "./hype-h48-stop8-policy-intent"
 
 export const H48_STOP8_ROOT_BUNDLE_SCHEMA="disdex-h48-stop8-root-owner-bundle/v1" as const;
 export const H48_STOP8_ROOT_DIR="/etc/disdex/stable4/h48-stop8" as const;
+export const H48_STOP8_RECEIPT_DIR="/var/lib/disdex/unified-deploy/h48-stop8-issuance" as const;
 export const H48_OWNER_PUBKEY="/var/lib/disdex/unified-deploy/owner-approval-public.pem" as const;
 const TARGET="professional-dismanager.net";
 const REPO="dunamishajime-bit/-ai-dex-manager";
@@ -163,6 +164,60 @@ export function deriveH48Stop8PositionEvidence(input:{
     validatedAt:input.now,expiresAt:Math.min(b.expiresAt,input.now+120_000),
   };
 }
+const RECEIPT_SCHEMA="disdex-h48-stop8-issuance-receipt/v1" as const;
+const PERMIT_SCHEMA="disdex-h48-stop8-scoped-order-permit/v1" as const;
+const RECEIPT_FIELDS=[
+ "schema","approvedSha","planSha256","certificateSha256","approvalId",
+ "runId","policy","issuedAt","ordersEnabled","orderPermitIssued",
+] as const;
+const PERMIT_FIELDS=[
+ "schema","approvedSha","planSha256","certificateSha256","approvalId",
+ "scope","operation","policy","ordersEnabled","issuedAt","expiresAt",
+] as const;
+/** A certificate without an immutable, same-source/same-Owner receipt is
+ * never enough to enable HYPE entry or protected STOP8 maintenance. */
+export function attestH48Stop8IssuanceReceipt(input:{
+  receipt:unknown;rawBytes:Uint8Array;
+  certificateSha256:string;approvedSha:string;planSha256:string;
+  approvalId:string;issuedAt:number;
+}):void{
+  const r=input.receipt as Record<string,unknown>;
+  if(!strictKeys(r,RECEIPT_FIELDS)
+    ||r.schema!==RECEIPT_SCHEMA||r.approvedSha!==input.approvedSha
+    ||r.planSha256!==input.planSha256
+    ||r.certificateSha256!==input.certificateSha256
+    ||r.approvalId!==input.approvalId||r.issuedAt!==input.issuedAt
+    ||typeof r.runId!=="string"||!/^[0-9]{1,20}$/.test(r.runId)
+    ||r.policy!=="H48_R4_RESIDENT_STOP8"
+    ||r.ordersEnabled!==false||r.orderPermitIssued!==false
+    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(r)+"\\n")
+    fail("IMMUTABLE_RECEIPT_NOT_ATTESTED");
+}
+/** A signed Owner certificate alone is NOT a scoped permission to trade.
+ * Root must independently install an exact, short-lived, immutable permit
+ * through the protected Environment approval, never an injected Boolean. */
+export function attestH48Stop8ScopedOrderPermit(input:{
+  permit:unknown;rawBytes:Uint8Array;
+  certificateSha256:string;approvedSha:string;planSha256:string;
+  approvalId:string;now:number;
+}):Readonly<{issuedAt:number;expiresAt:number}>{
+  const p=input.permit as Record<string,unknown>;
+  if(!strictKeys(p,PERMIT_FIELDS)
+    ||p.schema!==PERMIT_SCHEMA||p.approvedSha!==input.approvedSha
+    ||p.planSha256!==input.planSha256
+    ||p.certificateSha256!==input.certificateSha256
+    ||p.approvalId!==input.approvalId
+    ||p.scope!=="HYPE_TREND_LONG"
+    ||p.operation!=="HYPE_STABLE4_H48_STOP8_LIVE"
+    ||p.policy!=="H48_R4_RESIDENT_STOP8"
+    ||p.ordersEnabled!==true
+    ||!uint(p.issuedAt)||!uint(p.expiresAt)
+    ||p.issuedAt>input.now||p.expiresAt<=input.now
+    ||p.expiresAt-p.issuedAt>24*3_600_000
+    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(p)+"\\n")
+    fail("SCOPED_ROOT_ORDER_PERMIT_INVALID");
+  return {issuedAt:p.issuedAt,expiresAt:p.expiresAt};
+}
 async function rootImmutable(path:string) {
   const first=await lstat(path);
   if(!first.isFile()||first.isSymbolicLink()
@@ -190,11 +245,19 @@ export class FileH48Stop8RootAuthority
       fail("SINGLE_WRITER_LEASE_NOT_ATTESTED");
     const root=await rootImmutable(H48_STOP8_ROOT_DIR+"/"+this.sourceSha+".json");
     const ownerKey=await rootImmutable(H48_OWNER_PUBKEY);
-    return attestH48Stop8RootBundle({
+    const certificate=attestH48Stop8RootBundle({
       bundle:parseJsonUnique(root.toString("utf8")),
       rootCertificateBytes:root,trustedOwnerEd25519PublicPem:ownerKey,
       sourceSha:this.sourceSha,planSha256:this.planSha256,now,
     });
+    const receiptRaw=await rootImmutable(H48_STOP8_RECEIPT_DIR+"/"+this.sourceSha+".json");
+    attestH48Stop8IssuanceReceipt({
+      receipt:parseJsonUnique(receiptRaw.toString("utf8")),rawBytes:receiptRaw,
+      certificateSha256:certificate.certificateSha256,
+      approvedSha:this.sourceSha,planSha256:this.planSha256,
+      approvalId:certificate.bundle.approvalId,issuedAt:certificate.bundle.issuedAt,
+    });
+    return certificate;
   }
   async attestPosition(input:{
     contract:HypeH48TimeOnlyContract;quantity:number;
@@ -214,6 +277,13 @@ export class FileH48Stop8RootAuthority
     const record=await this.attest(input.lease,input.now);
     if(input.pending.certificateSha256!==record.certificateSha256)
       fail("ORDER_CERTIFICATE_BINDING");
+    const permitRaw=await rootImmutable(H48_STOP8_ROOT_DIR+"/"+this.sourceSha+".order-enable.json");
+    const permit=attestH48Stop8ScopedOrderPermit({
+      permit:parseJsonUnique(permitRaw.toString("utf8")),rawBytes:permitRaw,
+      certificateSha256:record.certificateSha256,
+      approvedSha:this.sourceSha,planSha256:this.planSha256,
+      approvalId:record.bundle.approvalId,now:input.now,
+    });
     return {
       schema:"disdex-h48-production-order-grant/v2",
       scope:"HYPE_TREND_LONG",approvedSha:this.sourceSha,
@@ -221,8 +291,8 @@ export class FileH48Stop8RootAuthority
       certificateSha256:record.certificateSha256,
       clientOrderId:input.pending.clientOrderId,phase:input.pending.phase,
       approvalId:record.bundle.approvalId,
-      issuedAt:Math.max(record.bundle.issuedAt,input.now-1000),
-      expiresAt:Math.min(record.bundle.expiresAt,input.now+60_000),
+      issuedAt:Math.max(permit.issuedAt,input.now-1000),
+      expiresAt:Math.min(permit.expiresAt,input.now+60_000),
       maxEntryNotionalUsd:record.bundle.maxEntryNotionalUsd,
       maxSlippageBps:record.bundle.maxSlippageBps,
       grossCapHype:1.5,stopGovernanceCertified:true,
