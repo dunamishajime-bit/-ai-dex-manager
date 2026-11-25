@@ -26,7 +26,7 @@ import type {H48OrderExecutionOutcome} from "./hype-h48-native-order-executor";
 import {
   inspectH48AllRunnerGrossAndRisk,type H48AllRunnerRiskObservation,
 } from "./hype-h48-allrunner-risk-precheck";
-import {evaluateHypeH48TimeOnlyExit} from "./hype-stable4-time-only-contract";
+import {evaluateHypeH48TimeOnlyExit,createHypeH48TimeOnlyContract} from "./hype-stable4-time-only-contract";
 
 export type H48NativeCoordinatorDecision=Readonly<{
   status:"HOLD_PROTECTED"|"RESEARCH_RECORDED"|"POSITION_PROTECTED"|"ORDER_HANDOFF";
@@ -101,8 +101,11 @@ export class H48NativeStop8Coordinator {
         const risk=inspectH48AllRunnerGrossAndRisk(await d.readAllRunnerRisk());
         if(risk.status!=="SOURCE_EVIDENCE_READY_NOT_AUTHORIZED")
           return held("PORTFOLIO_RISK_OR_GROSS_BLOCKED:"+risk.blockers.join(","));
-        const c=sequence.decision.contract;
-        if(!c)return held("ENTRY_CONTRACT_NOT_ATTESTED");
+        const c=createHypeH48TimeOnlyContract({
+          sourceSha:d.sourceSha,
+          positionId:"H48|HYPEUSDT|"+input.entry.openTs,
+          logicalEntryTs:input.entry.openTs,
+        });
         const proof=await d.root.attestPosition({
           contract:c,quantity:qty,lease:d.lease,now,
         });
