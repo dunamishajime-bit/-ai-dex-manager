@@ -30,10 +30,10 @@ const okResult=(clientOrderId=ID):DirectTradeResult=>({
   averagePrice:100,quoteQuantity:200,reconciled:true,executionUnknown:false,reduceOnly:false,
 });
 const venue=(qty=2):H48SignedVenueSnapshot=>({
-  source:"ASTER_SIGNED_READ_ONLY",observedAt:NOW+200,openOrders:[],
+  source:"ASTER_SIGNED_READ_ONLY",observedAt:NOW,openOrders:[],
   positions:qty?[{symbol:"HYPEUSDT",quantity:qty,entryPrice:100,
     markPrice:100,unrealizedPnl:0,pnlPct:0,notionalUsd:qty*100,
-    positionSide:"BOTH",leverage:5,updatedAt:NOW+200}]:[],
+    positionSide:"BOTH",leverage:5,updatedAt:NOW}]:[],
 });
 const grant=(p=intent().pending!):H48ScopedOwnerOrderGrant=>({
   schema:"disdex-h48-production-order-grant/v2",
