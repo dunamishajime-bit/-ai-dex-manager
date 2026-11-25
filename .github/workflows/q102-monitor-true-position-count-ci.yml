@@ -1,0 +1,25 @@
+name: Q102 monitor true position count CI (NO LIVE)
+on:
+  pull_request:
+    paths:
+      - 'scripts/disdex-quality102-causal-v1-live-runner.ts'
+      - 'tests/quality102-preflight-protective-order.test.ts'
+      - '.github/workflows/q102-monitor-true-position-count-ci.yml'
+permissions:
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install reviewed dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Verify zero-position rows and protected exit compatibility
+        run: ./node_modules/.bin/tsx --test tests/quality102-preflight-protective-order.test.ts tests/quality102-monitor-only.test.ts
+      - name: Check TypeScript
+        run: ./node_modules/.bin/tsc --noEmit
