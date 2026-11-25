@@ -10,6 +10,9 @@ on:
       - "lib/hype-h48-authenticated-readback.ts"
       - "lib/hype-h48-kill-switch-consistency.ts"
       - "lib/hype-h48-native-order-executor.ts"
+      - "lib/hype-h48-emergency-stop-research.ts"
+      - "tests/hype-h48-emergency-stop-research.test.ts"
+      - "tests/fixtures/hype-h48-emergency-stop-h1-20261125.json"
       - "scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py"
       - "scripts/ops/test_disdex_stable4_dd30_live_preflight.py"
       - "docs/production/stable4-dd30-live-plan-candidate-20261125.json"
@@ -79,6 +82,7 @@ jobs:
           npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
           npx tsx tests/hype-h48-native-order-executor.test.ts
+          npx tsx tests/hype-h48-emergency-stop-research.test.ts
           python3 -B - <<'PY'
           import ast
           from pathlib import Path
@@ -131,6 +135,7 @@ jobs:
           npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
           npx tsx tests/hype-h48-native-order-executor.test.ts
+          npx tsx tests/hype-h48-emergency-stop-research.test.ts
       - name: Verify native H48 time-only runtime before consuming Owner approval
         shell: bash
         run: |
