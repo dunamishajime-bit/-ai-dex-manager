@@ -287,6 +287,9 @@ def main() -> int:
         except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
             symlink_scan_error = str(error)
         candidates: list[Path] = []
+        candidate_records: list[dict[str, object]] = []
+        deleted: list[Path] = []
+        free_before = shutil.disk_usage(ROOT).free
         reclaimed = 0
         unverified: list[dict[str, object]] = []
         for release in all_rows:
@@ -321,9 +324,12 @@ def main() -> int:
                 protected.add(release)
                 continue
             candidates.append(release)
-            reclaimed += path_size(release)
+            size = path_size(release)
+            candidate_records.append({"path": str(release), "size": size, "reason": "all strict deletion checks passed"})
+            reclaimed += size
             if args.apply:
                 shutil.rmtree(release)
+                deleted.append(release)
 
         payload = {
             "status": "DISDEX_UI_RETENTION_PASS",
@@ -333,13 +339,13 @@ def main() -> int:
             "currentRelease": str(current),
             "protectedReleases": [str(path) for path in sorted(protected)],
             "protected": protected_records,
-            "deleteCandidates": [
-                {"path": str(path), "size": path_size(path), "reason": "all strict deletion checks passed"}
-                for path in candidates
-            ],
+            "deleteCandidates": candidate_records,
             "unverifiedProtected": unverified,
-            "deletedReleases": [str(path) for path in candidates],
+            "deletedReleases": [str(path) for path in deleted],
             "bytesReclaimed": reclaimed,
+            "estimatedCandidateBytes": reclaimed,
+            "filesystemFreeBytesBefore": free_before,
+            "filesystemFreeBytesAfter": shutil.disk_usage(ROOT).free,
             "tradingReleaseDeleted": False,
             "runtimeStateDeleted": False,
             "approvalDeleted": False,

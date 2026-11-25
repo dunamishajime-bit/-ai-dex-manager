@@ -1,4 +1,7 @@
 import importlib.machinery
+import contextlib
+import io
+import json
 import os
 import tempfile
 import unittest
@@ -174,6 +177,50 @@ class UiRetentionContractTest(unittest.TestCase):
             marker.symlink_to(external)
             self.assertIsNone(vps_retention.ui_release_sha(release))
             self.assertIsNone(ui_retention.release_sha(release))
+
+    def test_dryrun_and_apply_report_distinct_actual_deletions(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            releases = root / "ui-releases"
+            releases.mkdir()
+            paths = []
+            for index in range(4):
+                p = releases / ("ui-" + str(index))
+                p.mkdir()
+                (p / ".disdex-ui-sha").write_text("a" * 40 + "\n")
+                (p / "build.txt").write_text("fixture")
+                os.utime(p, (1000 + index, 1000 + index))
+                paths.append(p)
+            current = paths[-1]
+            oldest = paths[0]
+            audit = ui_retention.ReferenceAudit(True, {}, ())
+            with mock.patch.object(ui_retention, "ROOT", releases), mock.patch.object(
+                ui_retention, "LOCK", root / "retention.lock"
+            ), mock.patch.object(
+                ui_retention, "configured_service_directory", return_value=current
+            ), mock.patch.object(
+                ui_retention, "find_ui_symlink_references_for_paths", return_value={}
+            ), mock.patch.object(
+                ui_retention, "audit_ui_release_references", return_value=audit
+            ):
+                def report(mode):
+                    output = io.StringIO()
+                    with mock.patch("sys.argv", ["retention", mode]), contextlib.redirect_stdout(output):
+                        self.assertEqual(ui_retention.main(), 0)
+                    return json.loads(output.getvalue())
+
+                dry = report("--dry-run")
+                self.assertTrue(oldest.exists())
+                self.assertEqual(dry["deletedReleases"], [])
+                self.assertEqual(len(dry["deleteCandidates"]), 1)
+                self.assertGreater(dry["estimatedCandidateBytes"], 0)
+                applied = report("--apply")
+                self.assertFalse(oldest.exists())
+                self.assertTrue(current.exists())
+                self.assertEqual(applied["deletedReleases"], [str(oldest)])
+                self.assertEqual(applied["deleteCandidates"], dry["deleteCandidates"])
+                self.assertEqual(applied["estimatedCandidateBytes"], dry["estimatedCandidateBytes"])
+                self.assertIn("filesystemFreeBytesAfter", applied)
 
     def test_systemd_grants_only_ui_release_root_for_ui_cleanup(self):
         service = SERVICE.read_text(encoding="utf-8")
