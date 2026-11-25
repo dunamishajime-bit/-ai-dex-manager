@@ -23,8 +23,14 @@ class WorkflowContractTests(unittest.TestCase):
             "TRADING_MUTATIONS=0",
             "--preflight-readonly",
             "--execute",
+            "Verify native H48 time-only runtime before consuming Owner approval",
+            "validate_native_h48_runtime_source",
         ):
             self.assertIn(required, text)
+        self.assertLess(
+            text.index("Verify native H48 time-only runtime before consuming Owner approval"),
+            text.index("Redeem exact HYPE Owner approval through official HP bridge"),
+        )
         self.assertNotIn("ALL_RUNNERS_ORDER_ENABLE", text)
         self.assertNotIn("FULL_PROJECT", text)
 
@@ -34,6 +40,9 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("HYPE_ORDER_ENABLE_REQUIRES_FLAT_ACCOUNT", text)
         self.assertIn("GLOBAL_HOLD_CHANGED_DURING_ENABLE", text)
         self.assertIn("systemctl(\"restart\", HYPE_UNIT)", text)
+        self.assertIn("H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED", text)
+        self.assertNotIn("build_hype_source_overlay", text)
+        self.assertNotIn("BindReadOnlyPaths=", text)
         for forbidden in ("executeMarket", "cancelOrder", "createOrder", "kill-switch clear"):
             self.assertNotIn(forbidden, text)
 

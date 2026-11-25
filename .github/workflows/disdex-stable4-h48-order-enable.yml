@@ -90,6 +90,22 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
+      - name: Verify native H48 time-only runtime before consuming Owner approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          # An H48 permit cannot authorize legacy TREND/ATR STOP+TP trading.
+          # The old immutable 4786 HYPE binary must fail BEFORE redeeming a
+          # single-use Owner signed approval, not after potentially issuing it.
+          PYTHONDONTWRITEBYTECODE=1 python3 -B - <<'PY'
+          from pathlib import Path
+          from scripts.ops.deploy.disdex_stable4_h48_order_enable import validate_native_h48_runtime_source
+          src=Path('lib/hype-zec-long-runner.ts').read_bytes()
+          mod=Path('lib/hype-h48-order-permit.ts').read_bytes()
+          validate_native_h48_runtime_source(src,mod)
+          print('H48_NATIVE_ENTRY_POSITION_AUTHORITY_ATTESTED=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
       - name: Redeem exact HYPE Owner approval through official HP bridge
         shell: bash
         env:
