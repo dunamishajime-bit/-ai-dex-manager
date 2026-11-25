@@ -43,8 +43,7 @@ export function auditH48LiveReadiness(input:H48GateObservation):H48LiveReadiness
   const now=input.now;
   if(!Number.isSafeInteger(now)||now<=0)reasons.push("CLOCK_UNVERIFIED");
   if(!input.killSwitch||input.killSwitch.active!==false
-     ||input.killSwitch.configuredPaths?.length!==1
-     ||input.killSwitch.scope==="GLOBAL"&&input.killSwitch.active===true){
+     ||input.killSwitch.configuredPaths?.length!==1){
     reasons.push("GLOBAL_HOLD_OR_KILL_SWITCH_UNVERIFIED");
   }
   if(!exactCaps(input.existingOwnerApprovedPlanGross,H48_CERTIFIED_GROSS_CAPS))
