@@ -87,7 +87,7 @@ test("handoff uses actual exchange filters, first signed position GET, durable i
     assert.equal(f.getSubmits(),1);
     assert.equal(f.getAuth(),2);
     assert.equal(f.getReads(),2);
-    await assert.rejects(x.protectConfirmedEntry(args),/PRIOR_INTENT_ALREADY_EXISTS/);
+    await assert.rejects(x.protectConfirmedEntry(args),/PRIOR_STOP_INTENT_EXISTS/);
     assert.equal(f.getSubmits(),1);
   }finally{await rm(folder,{recursive:true,force:true})}
 });
@@ -131,7 +131,7 @@ test("an UNKNOWN STOP order remains persisted and is not retried by the handoff"
     const args={sourceSha:SHA,planSha256:PLAN,position:position(),lease:lease(),now:NOW()};
     await assert.rejects(x.protectConfirmedEntry(args),/STOP_SUBMITTED_ACCOUNT_RECONCILIATION_REQUIRED/);
     assert.equal(f.getSubmits(),1);
-    await assert.rejects(x.protectConfirmedEntry(args),/PRIOR_INTENT_ALREADY_EXISTS/);
+    await assert.rejects(x.protectConfirmedEntry(args),/PRIOR_STOP_INTENT_EXISTS/);
     assert.equal(f.getSubmits(),1);
   }finally{await rm(folder,{recursive:true,force:true})}
 });
