@@ -1,8 +1,9 @@
 import {strict as assert} from "node:assert";
 import {test} from "node:test";
 import {generateKeyPairSync,sign} from "node:crypto";
+import {createHypeH48TimeOnlyContract} from "../lib/hype-stable4-time-only-contract";
 import {
-  attestH48Stop8RootBundle,H48_STOP8_ROOT_BUNDLE_SCHEMA,
+  attestH48Stop8RootBundle,deriveH48Stop8PositionEvidence,H48_STOP8_ROOT_BUNDLE_SCHEMA,
   type H48Stop8RootBundle,
 } from "../lib/hype-h48-stop8-root-authority";
 
@@ -96,4 +97,24 @@ test("Owner token JSON duplicate fields, noncanonical base64, unsigned or forged
   const o=JSON.parse(raw);
   o.signature=Buffer.alloc(64,42).toString("base64");
   assert.throws(()=>attest(bundle({ownerSignedToken:Buffer.from(encode(o)).toString("base64")})),/OWNER_ED25519_SIGNATURE_INVALID/);
+});
+
+test("Root-attested STOP8 position evidence is short-lived and exact H48 position bound",()=>{
+  const attested=attest(bundle());
+  const c=createHypeH48TimeOnlyContract({sourceSha:SOURCE,
+    positionId:"H48|HYPEUSDT|"+Date.UTC(2026,10,24,0),
+    logicalEntryTs:Date.UTC(2026,10,24,0)});
+  const proof=deriveH48Stop8PositionEvidence({
+    attested,contract:c,quantity:2,now:NOW+1000,
+  });
+  assert.equal(proof.policy,"H48_R4_RESIDENT_STOP8");
+  assert.equal(proof.certificateSha256,attested.certificateSha256);
+  assert.equal(proof.planSha256,PLAN);
+  assert.equal(proof.expiresAt,proof.validatedAt+120_000);
+  assert.throws(()=>deriveH48Stop8PositionEvidence({
+    attested,contract:{...c,sourceSha:"f".repeat(40)},quantity:2,now:NOW+1000,
+  }));
+  assert.throws(()=>deriveH48Stop8PositionEvidence({
+    attested,contract:c,quantity:2,now:NOW+31*86_400_000,
+  }),/POSITION_PROOF_NOT_ROOT_BOUND/);
 });
