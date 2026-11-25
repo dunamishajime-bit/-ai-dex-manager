@@ -24,7 +24,7 @@ function snapshot(o:H48Stop8Intent,over?:{
 }):H48SignedVenueSnapshot {
   const order={
     symbol:"HYPEUSDT",clientOrderId:o.stopClientOrderId,
-    type:"STOP_MARKET",side:"SELL",reduceOnly:true,status:"NEW",
+    type:"STOP_MARKET",side:"SELL" as const,reduceOnly:true,status:"NEW",
     stopPrice:over?.wrongStop?o.stopPrice-5:o.stopPrice,
     quantity:over?.wrongQty?o.quantity-1:o.quantity,executedQuantity:0,
   };
