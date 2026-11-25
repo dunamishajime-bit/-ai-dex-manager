@@ -7,7 +7,7 @@ import {
 } from "../lib/hype-h48-kill-switch-consistency";
 
 function allCanonical():NodeJS.ProcessEnv {
-  return Object.fromEntries(H48_KILL_SWITCH_ALIASES.map(key=>[key,H48_CANONICAL_KILL_SWITCH]));
+  return { NODE_ENV:"test",...Object.fromEntries(H48_KILL_SWITCH_ALIASES.map(key=>[key,H48_CANONICAL_KILL_SWITCH])) };
 }
 
 test("all seven H48 Kill Switch aliases must resolve to canonical GLOBAL protection",()=>{
