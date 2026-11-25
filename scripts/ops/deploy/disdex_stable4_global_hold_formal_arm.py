@@ -140,6 +140,15 @@ def get_v4_pin():
 def protected_hold_receipt(now_ms, v4_sha, after_bytes):
     require(isinstance(v4_sha, str) and re.fullmatch(r"[0-9a-f]{40}", v4_sha), "V4_SOURCE_INVALID")
     require(type(now_ms) is int and now_ms > 0, "CLOCK_INVALID")
+    require(type(after_bytes) is bytes, "KILL_BYTES_INVALID")
+    try:
+        held = json.loads(after_bytes)
+    except (ValueError, UnicodeError, TypeError):
+        raise ValueError("STABLE4_H48_FORMAL_HOLD_KILL_BYTES_INVALID")
+    validate_existing_active_hold(held)
+    # A prior active STABLE4 protection remains byte-for-byte unchanged.
+    # approvedSha binds the new certificate, but reason must describe the
+    # exact canonical HOLD bytes rather than claim a source that is not active.
     return {
         "schema": "disdex-stable4-protected-hold-owner/v1",
         "planSha256": owner.PLAN,
@@ -147,7 +156,7 @@ def protected_hold_receipt(now_ms, v4_sha, after_bytes):
         "v4Sha": v4_sha,
         "killSwitchPath": str(KILL),
         "killSwitchSha256": hashlib.sha256(after_bytes).hexdigest(),
-        "reason": REASON,
+        "reason": held["reason"],
         "issuedAt": now_ms,
         "expiresAt": now_ms + 50 * 60000,
         "scope": "HYPE_TREND_LONG",
