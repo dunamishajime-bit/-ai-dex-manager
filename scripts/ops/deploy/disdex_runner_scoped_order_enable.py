@@ -50,27 +50,27 @@ ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 # intentionally excluded because it has the independent H48 certificate path.
 BUNDLE_OPERATION = "STABLE4_RUNNERS_SCOPED_ORDER_ENABLE_BUNDLE"
 BUNDLE_SCOPE = "STABLE4_SCOPED_RUNNERS"
-BUNDLE_SOURCE_SHA = "e0e4f1d8f22b62e9410188ef6e590a20e31f760f"
-BUNDLE_PLAN_SHA256 = "595ab42294fe939d18e11fc9885dfb62856d6b0b22327b9d0a5e578fe448af1a"
+BUNDLE_SOURCE_SHA = "4786f600ae7bf86ffca948f1412956a9113cb20d"
+BUNDLE_PLAN_SHA256 = "fbc47eda2b870e4fd01d759acf9bb25ac2dd83e73d5b77343310fd6f1f0bc852"
 
 # These are the immutable Runner pins audited immediately before this
 # implementation.  A new release must update this map and its Owner-approved
 # plan hash; arbitrary SHA/plan combinations are rejected by preflight.
 PINNED_SOURCE_BY_RUNNER = {
-    "V12_V4": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
-    "PENGU_V8": "1657e173d250ad58f53e62f7bb0a3428fb405496",
-    "QUALITY102_CAUSAL_V1": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
-    "V52": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
-    "FET_BRK48_RESIDUAL": "7688ed7c93a1918d8b44837339b7da5584a868f5",
-    "IDLE_PRIORITY_SHORT": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "V12_V4": BUNDLE_SOURCE_SHA,
+    "PENGU_V8": BUNDLE_SOURCE_SHA,
+    "QUALITY102_CAUSAL_V1": BUNDLE_SOURCE_SHA,
+    "V52": BUNDLE_SOURCE_SHA,
+    "FET_BRK48_RESIDUAL": BUNDLE_SOURCE_SHA,
+    "IDLE_PRIORITY_SHORT": BUNDLE_SOURCE_SHA,
 }
 PINNED_PLAN_BY_RUNNER = {
-    "V12_V4": "9fc3cc72c9520a758f1b700ed648f0e1e11a54eb92c514b08992f22605d9e515",
-    "PENGU_V8": "8928520a2391d8190c2cdda8b6e3e36959a452ed151d36a820a2ce3f8ec01568",
-    "QUALITY102_CAUSAL_V1": "01110a52b9ab740652cca48354e246edf71759916df476797b8e9753221ae4b6",
-    "V52": "a43d6e47acdc862953801a89e396f8819eeb9a580cc2aaadc901d926c23d011c",
-    "FET_BRK48_RESIDUAL": "12272418221383c53382b98bcefdda7eaba20f2655e9489eebbbdd73713c4717",
-    "IDLE_PRIORITY_SHORT": "ed6e7da737480349a6454868ed78bcbc4db5f3990a6f4cc2bbb6e111cc3346db",
+    "V12_V4": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
+    "PENGU_V8": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
+    "QUALITY102_CAUSAL_V1": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
+    "V52": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
+    "FET_BRK48_RESIDUAL": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
+    "IDLE_PRIORITY_SHORT": "568cf8f66490de5639ce2c5a8b14db385be922f1dde8d9079d3ca30022057712",
 }
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -114,28 +114,28 @@ RUNNER_SPECS: dict[str, dict[str, str]] = {
 }
 
 BUNDLE_ENTRIES: tuple[dict[str, str], ...] = (
-    {"runner": "FET_BRK48_RESIDUAL", "sourceSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
-     "planSha256": "12272418221383c53382b98bcefdda7eaba20f2655e9489eebbbdd73713c4717",
+    {"runner": "FET_BRK48_RESIDUAL", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["FET_BRK48_RESIDUAL"],
      "scope": "FET_BRK48_RESIDUAL", "operation": "FET_BRK48_RESIDUAL_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-fet-brk48@{sha}.service"},
-    {"runner": "IDLE_PRIORITY_SHORT", "sourceSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
-     "planSha256": "ed6e7da737480349a6454868ed78bcbc4db5f3990a6f4cc2bbb6e111cc3346db",
+    {"runner": "IDLE_PRIORITY_SHORT", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["IDLE_PRIORITY_SHORT"],
      "scope": "IDLE_PRIORITY_SHORT", "operation": "IDLE_PRIORITY_SHORT_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-idle-priority-short@{sha}.service"},
-    {"runner": "PENGU_V8", "sourceSha": "1657e173d250ad58f53e62f7bb0a3428fb405496",
-     "planSha256": "8928520a2391d8190c2cdda8b6e3e36959a452ed151d36a820a2ce3f8ec01568",
+    {"runner": "PENGU_V8", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["PENGU_V8"],
      "scope": "PENGU_V8", "operation": "PENGU_V8_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-pengu-dual-ls-v2@{sha}.service"},
-    {"runner": "QUALITY102_CAUSAL_V1", "sourceSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
-     "planSha256": "01110a52b9ab740652cca48354e246edf71759916df476797b8e9753221ae4b6",
+    {"runner": "QUALITY102_CAUSAL_V1", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["QUALITY102_CAUSAL_V1"],
      "scope": "QUALITY102_CAUSAL_V1", "operation": "QUALITY102_CAUSAL_V1_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-quality102-causal-v1@{sha}.service"},
-    {"runner": "V12_V4", "sourceSha": "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513",
-     "planSha256": "9fc3cc72c9520a758f1b700ed648f0e1e11a54eb92c514b08992f22605d9e515",
+    {"runner": "V12_V4", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["V12_V4"],
      "scope": "V12_V4", "operation": "V12_V4_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-v12-v4@{sha}.service"},
-    {"runner": "V52", "sourceSha": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
-     "planSha256": "a43d6e47acdc862953801a89e396f8819eeb9a580cc2aaadc901d926c23d011c",
+    {"runner": "V52", "sourceSha": BUNDLE_SOURCE_SHA,
+     "planSha256": PINNED_PLAN_BY_RUNNER["V52"],
      "scope": "V52", "operation": "V52_SCOPED_ORDER_ENABLE",
      "unitTemplate": "disdex-v52-aster-only@{sha}.service"},
 )
@@ -1455,3 +1455,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
