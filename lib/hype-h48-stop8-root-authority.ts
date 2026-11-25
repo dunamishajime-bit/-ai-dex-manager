@@ -216,7 +216,7 @@ export function attestH48Stop8ScopedOrderPermit(input:{
     ||p.expiresAt-p.issuedAt>24*3_600_000
     ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(p)+"\n")
     fail("SCOPED_ROOT_ORDER_PERMIT_INVALID");
-  return {issuedAt:p.issuedAt,expiresAt:p.expiresAt};
+  return {issuedAt:Number(p.issuedAt),expiresAt:Number(p.expiresAt)};
 }
 async function rootImmutable(path:string) {
   const first=await lstat(path);
