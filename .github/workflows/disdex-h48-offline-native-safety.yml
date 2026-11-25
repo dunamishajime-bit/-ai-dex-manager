@@ -76,7 +76,18 @@ jobs:
           from pathlib import Path
           p=Path(".github/workflows/disdex-h48-offline-native-safety.yml")
           s=p.read_text()
-          for bad in ("workflow_dispatch:", "environment: disdex-production", "secrets.", "ssh ", "scp ", "curl ", "workflow_run:"):
-              assert bad not in s, f"H48_OFFLINE_CI_PRODUCTION_CAPABILITY:{bad}"
+          # Construct forbidden tokens from fragments to avoid a false
+          # positive when this test encounters its own denylist literals.
+          denied=(
+              "workflow_"+"dispatch:",
+              "environment:"+" disdex-production",
+              "secrets"+".",
+              "s"+"sh ",
+              "s"+"cp ",
+              "c"+"url ",
+              "workflow_"+"run:",
+          )
+          for forbidden in denied:
+              assert forbidden not in s, f"H48_OFFLINE_CI_PRODUCTION_CAPABILITY:{forbidden}"
           print("H48_OFFLINE_CI_NO_PRODUCTION_CAPABILITIES=PASS")
           PY
