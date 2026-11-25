@@ -46,7 +46,7 @@ const grant=(p=intent().pending!,at=NOW):H48ScopedOwnerOrderGrant=>({
   stopGovernanceCertified:true,
 });
 function fake(options:{
-  badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;executionThrows?:boolean;
+  badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;blockProtectedExit?:boolean;executionThrows?:boolean;
   result?:DirectTradeResult;quantity?:number;
   starting?:H48ExecutionJournal;now?:number;
 }={}){
@@ -102,6 +102,9 @@ function fake(options:{
     signedVenue:{read:async()=>venue(state.pending?.phase==="EXIT"?0:2,at)},
     assertGlobalOrderRelease:async()=>{if(options.blockKill)throw Error("HOLD_PROTECTED")},
     assertFreshSharedRiskAndStops:async()=>{if(options.blockRisk)throw Error("STOP_NOT_APPROVED")},
+    assertProtectedReduceOnlyExitAllowed:async()=>{
+      if(options.blockProtectedExit)throw Error("PROTECTED_EXIT_NOT_ROOT_AUTHORIZED");
+    },
   });
   return {runner,requests,getState:()=>state,
     getReserves:()=>reserves,getReleases:()=>releases,getSaves:()=>saves};
@@ -157,6 +160,26 @@ test("no PREPARED journal refuses even a valid Root grant",async()=>{
   const x=fake({starting:{...intent(),mode:"FLAT",pending:null}});
   await assert.rejects(x.runner.submitPrepared(),/NO_PREPARED_INTENT/);
   assert.equal(x.requests.length,0);
+});
+
+test("H48 protected reduce-only EXIT is separately gated, never bypasses approval",async()=>{
+  const at=E+48*H+1500;
+  const state:H48ExecutionJournal={
+    ...intent(),revision:9,mode:"EXIT_PENDING",
+    position:{contract,quantity:2,entryPrice:100,entryClientOrderId:ID,observedAt:E+1000},
+    pending:{...intent().pending!,phase:"EXIT",clientOrderId:"h48x-"+"f".repeat(30),
+      referencePrice:120,preparedAt:at-500,authorizationExpiresAt:at+60000},
+  };
+  const permitted=fake({starting:state,now:at,blockKill:true,blockRisk:true});
+  const out=await permitted.runner.submitPrepared();
+  assert.equal(out.status,"RECONCILED_FLAT");
+  assert.equal(permitted.requests.length,1);
+  assert.equal(permitted.requests[0].side,"SELL");
+  assert.equal(permitted.requests[0].reduceOnly,true);
+  const denied=fake({starting:state,now:at,blockProtectedExit:true});
+  await assert.rejects(denied.runner.submitPrepared(),/PROTECTED_EXIT_NOT_ROOT_AUTHORIZED/);
+  assert.equal(denied.requests.length,0);
+  assert.equal(denied.getState().pending?.stage,"PREPARED");
 });
 
 test("H48 48-hour EXIT submits one SELL with reduceOnly and confirms flat venue",async()=>{
