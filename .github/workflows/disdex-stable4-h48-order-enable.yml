@@ -10,6 +10,9 @@ on:
       - "lib/hype-h48-authenticated-readback.ts"
       - "lib/hype-h48-kill-switch-consistency.ts"
       - "lib/hype-h48-native-order-executor.ts"
+      - "scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py"
+      - "scripts/ops/test_disdex_stable4_dd30_live_preflight.py"
+      - "docs/production/stable4-dd30-live-plan-candidate-20261125.json"
       - "lib/hype-h48-restart-admission.ts"
       - "lib/hype-h48-native-monitor.ts"
       - "lib/hype-h48-execution-journal.ts"
@@ -63,6 +66,7 @@ jobs:
           set -euo pipefail
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py -v
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_dd30_live_preflight.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
           npx tsx tests/hype-h48-research-entry.test.ts
           npx tsx tests/hype-h48-native-lifecycle.test.ts
