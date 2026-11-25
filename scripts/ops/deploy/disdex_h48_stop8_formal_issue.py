@@ -51,11 +51,15 @@ def canonical(value: object) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False, ensure_ascii=True) + "\n").encode("ascii")
 
 
-def regular(path: Path, *, immutable: bool = False, root: bool = False) -> bytes:
+def regular(path: Path, *, immutable: bool = False, root: bool = False,
+            owner_uid: int | None = None) -> bytes:
     st = path.lstat()
     require(stat.S_ISREG(st.st_mode) and not path.is_symlink(), "REGULAR_FILE")
     if root:
         require(st.st_uid == 0 and st.st_gid == 0, "ROOT_OWNER")
+    if owner_uid is not None:
+        require(st.st_uid == owner_uid and not st.st_mode & 0o022,
+                "OWNER_OR_WRITE_PERMISSIONS_UNTRUSTED")
     if immutable:
         require(st.st_mode & 0o222 == 0, "IMMUTABLE_FILE")
     raw = path.read_bytes()
@@ -117,7 +121,8 @@ def expected_plan(plan: object, sha: str) -> dict:
 
 
 def approved_record(records: object, *, approval_id: str, sha: str,
-                    plan_hash: str, run_id: str, now_ms: int) -> dict:
+                    plan_hash: str, run_id: str, now_ms: int,
+                    owner_token: str | None = None) -> dict:
     require(isinstance(records, list) and len(records) <= 10000,
             "APPROVAL_RECORDS_INVALID")
     require(UUID.fullmatch(approval_id) is not None
@@ -137,6 +142,13 @@ def approved_record(records: object, *, approval_id: str, sha: str,
     for k, v in expected.items():
         require(type(row.get(k)) is type(v) and row[k] == v,
                 "APPROVAL_" + k.upper() + "_MISMATCH")
+    if owner_token is not None:
+        # Bind the cryptographically signed transport credential to the
+        # *specific* HP-redeemed request in the same official backing store.
+        require(row.get("approvalToken") == owner_token
+                and type(row.get("approvalTokenExpiresAt")) is int
+                and row["approvalTokenExpiresAt"] * 1000 > now_ms,
+                "OWNER_TOKEN_NOT_THE_REDEEMED_APPROVAL")
     stamps = [row.get(k) for k in ("createdAt", "approvedAt", "redeemedAt", "requestExpiresAt")]
     require(all(type(v) is int and v > 0 for v in stamps)
             and stamps[0] <= stamps[1] <= stamps[2] <= now_ms + 30000
@@ -218,9 +230,10 @@ def formal_issue(*, sha: str, plan_hash: str, approval_id: str,
                  run_id: str, owner_token: str, now_ms: int) -> dict:
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     plan = load_required_source(sha, plan_hash)
-    record = load_json(regular(APPROVAL_STORE))
+    record = load_json(regular(APPROVAL_STORE, owner_uid=1000))
     approved_record(record, approval_id=approval_id, sha=sha,
-                    plan_hash=plan_hash, run_id=run_id, now_ms=now_ms)
+                    plan_hash=plan_hash, run_id=run_id, now_ms=now_ms,
+                    owner_token=owner_token)
     exact_owner_verification(owner_token, sha, plan_hash, now_ms)
     for directory in (CERT_ROOT, RECEIPT_ROOT):
         trusted_root_dir(directory)
