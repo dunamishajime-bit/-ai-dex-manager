@@ -31,12 +31,21 @@
       ]
     },
     "hype": {
-      "operation": "HYPE_STABLE4_H48_TIME_ONLY_LIVE",
+      "operation": "HYPE_STABLE4_H48_STOP8_LIVE",
       "scope": "HYPE_TREND_LONG",
-      "policy": "H48_TIME_ONLY",
+      "policy": "H48_R4_RESIDENT_STOP8",
       "certificateRequired": true,
-      "residentStopRequired": false,
-      "residentTakeProfitRequired": false
+      "residentStopRequired": true,
+      "residentStopType": "STOP_MARKET",
+      "residentStopSide": "SELL",
+      "residentStopReduceOnly": true,
+      "residentStopPriceTriggerPct": -8,
+      "residentStopWorkingType": "MARK_PRICE",
+      "authenticatedStopReadbackRequired": true,
+      "residentTakeProfitRequired": false,
+      "timeExitHours": 48,
+      "ownerRootStop8CertificateRequired": true,
+      "previousH48TimeOnlyCertificateMayAuthorize": false
     }
   },
   "economics": {
@@ -87,5 +96,20 @@
     "requireOrderMutationCountersZero": true
   },
   "reviewStatus": "DRAFT_NOT_AUTHORIZED",
-  "candidateNote": "Source-only read-only preflight fixture; NOT an Owner approval, permit, or deployed plan. Requires separately reviewed exact release SHA and plan SHA256 before any formal request."
+  "candidateNote": "Owner approved exact Gross limits in chat 2026-11-26; newly proposed STOP8 policy differs from H48_TIME_ONLY. This remains DRAFT_NOT_AUTHORIZED and NOT a signed HP/Root approval or trading permit.",
+  "ownerChatApproval": {
+    "recordStatus": "GROSS_LIMITS_APPROVED_IN_CHAT_NOT_HP_SIGNED",
+    "dateJst": "2026-11-26",
+    "approved": {
+      "crypto": 3,
+      "stock": 4,
+      "total": 4.25,
+      "hype": 1.5
+    },
+    "scope": "GROSS_CAPS_ONLY",
+    "sourceShaNotYetBound": true,
+    "signedHpApprovalId": null,
+    "signedRootCertificate": null,
+    "appliesToCurrentRunner": false
+  }
 }
