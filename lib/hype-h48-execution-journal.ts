@@ -26,6 +26,7 @@ export interface H48OrderIntent {
   quantity:number;
   referencePrice:number;
   certificateSha256:string;
+  authorizationExpiresAt:number;
   preparedAt:number;
   submittedAt:number|null;
 }
@@ -66,12 +67,15 @@ function validateContract(c:HypeH48TimeOnlyContract,sourceSha:string){
   return contract;
 }
 function validIntent(p:H48OrderIntent,sourceSha:string){
-  if(!exact(p,["phase","stage","clientOrderId","contract","quantity","referencePrice","certificateSha256","preparedAt","submittedAt"])
+  if(!exact(p,["phase","stage","clientOrderId","contract","quantity","referencePrice","certificateSha256","authorizationExpiresAt","preparedAt","submittedAt"])
     ||!["ENTRY","EXIT"].includes(p.phase)||!["PREPARED","SUBMITTED"].includes(p.stage)
     ||typeof p.clientOrderId!=="string"||!/^(h48e|h48x)-[0-9a-f]{30}$/.test(p.clientOrderId)
     ||(p.phase==="ENTRY"?!p.clientOrderId.startsWith("h48e-"):!p.clientOrderId.startsWith("h48x-"))
     ||!positive(p.quantity)||!positive(p.referencePrice)||typeof p.certificateSha256!=="string"||!/^[0-9a-f]{64}$/.test(p.certificateSha256)
-    ||!timestamp(p.preparedAt)|| (p.stage==="PREPARED" ? p.submittedAt!==null : !timestamp(p.submittedAt)||p.submittedAt<p.preparedAt))fail("INTENT_INVALID");
+    ||!timestamp(p.preparedAt)||!timestamp(p.authorizationExpiresAt)
+    ||p.authorizationExpiresAt<=p.preparedAt
+    ||(p.stage==="PREPARED" ? p.submittedAt!==null :
+      !timestamp(p.submittedAt)||p.submittedAt<p.preparedAt||p.submittedAt>=p.authorizationExpiresAt))fail("INTENT_INVALID");
   validateContract(p.contract,sourceSha);
 }
 function validPosition(p:H48OpenPosition,sourceSha:string){
@@ -137,7 +141,8 @@ export function prepareH48EntryIntent(s:H48ExecutionJournal,attested:{
   return next(current,{mode:"ENTRY_PENDING",pending:{
     phase:"ENTRY",stage:"PREPARED",clientOrderId:id,contract:c,
     quantity:input.quantity,referencePrice:input.referencePrice,
-    certificateSha256:proof.certificateSha256,preparedAt:input.now,submittedAt:null,
+    certificateSha256:proof.certificateSha256,authorizationExpiresAt:proof.expiresAt,
+    preparedAt:input.now,submittedAt:null,
   }});
 }
 
@@ -158,7 +163,8 @@ export function prepareH48ExitIntent(s:H48ExecutionJournal,attested:{
   return next(current,{mode:"EXIT_PENDING",pending:{
     phase:"EXIT",stage:"PREPARED",clientOrderId:id,contract:c,
     quantity:pos.quantity,referencePrice:attested.boundary.referenceOpen,
-    certificateSha256:proof.certificateSha256,preparedAt:now,submittedAt:null,
+    certificateSha256:proof.certificateSha256,authorizationExpiresAt:proof.expiresAt,
+    preparedAt:now,submittedAt:null,
   }});
 }
 
@@ -166,7 +172,9 @@ export function prepareH48ExitIntent(s:H48ExecutionJournal,attested:{
 export function markH48OrderAttempted(s:H48ExecutionJournal,now:number):H48ExecutionJournal{
   const current=validateH48ExecutionJournal(s,s.sourceSha);
   if(!["ENTRY_PENDING","EXIT_PENDING"].includes(current.mode)||!current.pending
-     ||current.pending.stage!=="PREPARED"||!timestamp(now)||now<current.pending.preparedAt)fail("ATTEMPT_NOT_ALLOWED");
+     ||current.pending.stage!=="PREPARED"||!timestamp(now)||now<current.pending.preparedAt
+     ||now>=current.pending.authorizationExpiresAt||now-current.pending.preparedAt>120_000
+     ||now-(current.pending.phase==="ENTRY"?current.pending.contract.logicalEntryTs:current.pending.contract.logicalExitTs)>120_000)fail("ATTEMPT_NOT_ALLOWED");
   return next(current,{pending:{...current.pending,stage:"SUBMITTED",submittedAt:now}});
 }
 
@@ -193,8 +201,10 @@ export function reconcileH48Attempt(s:H48ExecutionJournal,input:{
      ||r.side!==(p.phase==="ENTRY"?"BUY":"SELL")||!Number.isFinite(r.executedQuantity)
      ||r.executedQuantity<0) return review(current,"ORDER_IDENTITY_OR_QUANTITY_UNKNOWN");
   let positions:DirectPosition[];
-  try {positions=signedSnapshot(input.venue,input.now);}
-  catch{return review(current,"VENUE_READ_OR_OPEN_ORDER_INVALID");}
+  try {
+    positions=signedSnapshot(input.venue,input.now);
+    if(input.venue.observedAt<(p.submittedAt??0))fail("VENUE_READ_PRECEDES_SUBMISSION");
+  }catch{return review(current,"VENUE_READ_OR_OPEN_ORDER_INVALID");}
   if(r.executionUnknown||r.status==="UNKNOWN"||r.status==="PARTIALLY_FILLED"
      ||r.status==="NEW"||r.executedQuantity>p.quantity) return review(current,"AMBIGUOUS_EXECUTION");
   if(p.phase==="ENTRY"){
