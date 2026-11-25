@@ -14,6 +14,10 @@ import type { H48ClosedHour,H48EntryBoundary } from "./hype-h48-research-entry";
 import { advanceH48ResearchSequence } from "./hype-h48-research-sequence";
 import { checkpointH48ResearchGrid } from "./hype-h48-execution-journal";
 import { inspectH48Restart } from "./hype-h48-restart-admission";
+import { readAuthenticatedH48Inventory } from "./hype-h48-authenticated-readback";
+import {assessH48ProtectedRestart} from "./hype-h48-protected-restart";
+import type {H48Stop8Intent} from "./hype-h48-resident-stop8";
+import type {H48Stop8Retirement} from "./hype-h48-stop8-retirement";
 import { evaluateHypeH48TimeOnlyExit } from "./hype-stable4-time-only-contract";
 
 export type H48MonitorDecision =
@@ -31,6 +35,12 @@ export class H48NativeReadOnlyMonitor {
     store:H48JournalStore;
     executor:Pick<DirectTradeExecutor,"getPositions"|"getOpenOrders"|"getAccountSnapshot">;
     lease:AccountLockHandle;
+    /** Required in a STOP8 policy SHADOW/LIVE source. No order methods. */
+    protectedStop8?:{
+      planSha256:string;
+      stop8:()=>Promise<H48Stop8Intent|null>;
+      stopRetirement:()=>Promise<H48Stop8Retirement|null>;
+    };
     now?:()=>number;
   }){
     if(!/^[0-9a-f]{40}$/.test(dependencies.runtimeSha))throw Error("H48_MONITOR_SHA_INVALID");
@@ -47,16 +57,34 @@ export class H48NativeReadOnlyMonitor {
     if(!Number.isSafeInteger(now)||now<=0)throw Error("H48_MONITOR_CLOCK_INVALID");
     // A trusted journal and a complete, fresh authenticated account GET are
     // mandatory even for monitoring a position; missing file is NOT FLAT.
-    const assessed=await inspectH48Restart({
-      journalStore:d.store,executor:d.executor,lease:d.lease,
-      runtimeSha:d.runtimeSha,now:clock,
-    });
-    if(assessed.decision==="HOLD_RECONCILIATION_REQUIRED"
-       ||assessed.decision==="HOLD_MANUAL_REVIEW"
-       ||assessed.decision==="HOLD_UNTRUSTED_INVENTORY")return {
-      status:"HOLD",reason:assessed.reason,ordersSent:0,
-    };
-    const journal=assessed.journal;
+    let journal:H48ExecutionJournal;
+    if(d.protectedStop8){
+      const state=await d.store.load();
+      const venue=await readAuthenticatedH48Inventory({
+        executor:d.executor,lease:d.lease,now:clock,
+      });
+      const stop=await d.protectedStop8.stop8();
+      const retirement=await d.protectedStop8.stopRetirement();
+      const admission=assessH48ProtectedRestart({
+        journal:state,stop8:stop,stopRetirement:retirement,
+        venue,runtimeSha:d.runtimeSha,
+        planSha256:d.protectedStop8.planSha256,now:clock(),
+      });
+      if(admission.decision==="HOLD_PROTECTED_RECONCILIATION")
+        return {status:"HOLD",reason:admission.reason,ordersSent:0};
+      journal=state;
+    }else{
+      const assessed=await inspectH48Restart({
+        journalStore:d.store,executor:d.executor,lease:d.lease,
+        runtimeSha:d.runtimeSha,now:clock,
+      });
+      if(assessed.decision==="HOLD_RECONCILIATION_REQUIRED"
+         ||assessed.decision==="HOLD_MANUAL_REVIEW"
+         ||assessed.decision==="HOLD_UNTRUSTED_INVENTORY")return {
+        status:"HOLD",reason:assessed.reason,ordersSent:0,
+      };
+      journal=assessed.journal;
+    }
     // Verify close only as research evidence: never call a venue executor.
     if(journal.mode==="OPEN"&&journal.position){
       const due=evaluateHypeH48TimeOnlyExit(journal.position.contract,now,input.exitBoundary);
