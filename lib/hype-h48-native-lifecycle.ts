@@ -61,7 +61,9 @@ export async function attestH48EntryReadOnly(input: {
     phase: "ENTRY", runtimeSha: input.runtimeSha, contract,
     quantity: input.quantity, lease: input.lease,
   });
-  const evidence = validateAuthorityEvidence(proof, input);
+  const evidence = validateAuthorityEvidence(proof, {
+    runtimeSha: input.runtimeSha, contract, quantity: input.quantity, now: input.now,
+  });
   return Object.freeze({ status: "H48_ENTRY_ATTESTED_READ_ONLY" as const,
     contract, evidence, ordersSent: 0 as const, cancelsSent: 0 as const, positionChangesSent: 0 as const });
 }
