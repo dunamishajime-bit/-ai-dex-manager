@@ -145,6 +145,38 @@ export class H48Stop8Installer {
     readSignedVenue:()=>Promise<H48SignedVenueSnapshot>;
     now?:()=>number;
   }){}
+  /** After restart/UNKNOWN: signed GET only, NO POST and NO auto-reset.
+   * A confirmed pre-existing order may be durably reconciled under the
+   * same Root grant. Missing/partial/wrong stops remain SUBMITTED. */
+  async reconcileSubmitted():Promise<Readonly<{
+    status:"STOP8_VERIFIED_WITHOUT_RESEND"|"STOP8_RECONCILIATION_REQUIRED";
+    clientOrderId:string;stopAttempts:0;
+  }>>{
+    const d=this.dep,now=d.now??Date.now;
+    const existing=validateH48Stop8Intent(await d.store.load());
+    if(existing.sourceSha!==d.sourceSha||existing.planSha256!==d.planSha256
+      ||existing.stage!=="SUBMITTED")
+      fail("RECONCILIATION_NOT_ELIGIBLE");
+    const lease=await d.lease.document();
+    if(lease.accountScope!=="ASTER_FUTURES"||lease.expiresAt<=now())
+      fail("RECONCILIATION_LEASE_INVALID");
+    await d.authority.assertSignedResidentStop8({
+      sourceSha:d.sourceSha,planSha256:d.planSha256,
+      positionId:existing.positionId,lease:d.lease,now:now(),
+    });
+    try{
+      const venue=await d.readSignedVenue(),checkedAt=now();
+      verifyH48Stop8Venue(existing,venue,checkedAt);
+      await d.store.save(existing,{
+        ...existing,stage:"CONFIRMED",confirmedAt:checkedAt,
+      },d.lease,{venue,now:checkedAt});
+      return {status:"STOP8_VERIFIED_WITHOUT_RESEND",
+        clientOrderId:existing.stopClientOrderId,stopAttempts:0};
+    }catch{
+      return {status:"STOP8_RECONCILIATION_REQUIRED",
+        clientOrderId:existing.stopClientOrderId,stopAttempts:0};
+    }
+  }
   async installOnce():Promise<H48Stop8Result>{
     const d=this.dep,now=d.now??Date.now;
     const expected=validateH48Stop8Intent(await d.store.load());
