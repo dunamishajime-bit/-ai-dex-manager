@@ -100,7 +100,7 @@ export function prepareH48Stop8TimeExit(input:{
   if(!same||input.now<c.logicalExitTs||input.now-c.logicalExitTs>120_000)
     fail("EXIT_POSITION_OR_DEADLINE");
   const due=evaluateHypeH48TimeOnlyExit(c,input.now,input.exitBoundary);
-  if(due.due!==true)fail("TIME48_NOT_DUE");
+  const referenceOpen=due.due===true?due.referenceOpen:fail("TIME48_NOT_DUE");
   const proof=validateH48Stop8PositionEvidence({
     proof:input.evidence,contract:c,quantity:livePosition.quantity,
     runtimeSha:s.sourceSha,planSha256:input.planSha256,now:input.now,
@@ -109,7 +109,7 @@ export function prepareH48Stop8TimeExit(input:{
     ...s,revision:s.revision+1,mode:"EXIT_PENDING",
     pending:{phase:"EXIT",stage:"PREPARED",
       clientOrderId:orderId(s.sourceSha,c.positionId,"EXIT"),
-      contract:c,quantity:livePosition.quantity,referencePrice:due.referenceOpen,
+      contract:c,quantity:livePosition.quantity,referencePrice:referenceOpen,
       certificateSha256:proof.certificateSha256,
       authorizationExpiresAt:proof.expiresAt,
       preparedAt:input.now,submittedAt:null,
