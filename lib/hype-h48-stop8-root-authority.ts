@@ -116,6 +116,9 @@ export function attestH48Stop8RootBundle(input:{
   if(!strictKeys(outer,["payload","signature"])
     ||ownerTokenText!==sorted(outer))fail("OWNER_TOKEN_FIELDS");
   const token=outer as {payload:unknown;signature:unknown};
+  // An official HP token is transported in Base64 JSON, then verified by
+  // Ed25519. It must be cryptographically bound to exact Root certificate
+  // source+plan and must not just match an untrusted approval ID.
   if(!strictKeys(token.payload,OWNER_FIELDS))fail("OWNER_SIGNED_PAYLOAD_FIELDS");
   const p=token.payload as Record<string,unknown>;
   if(p.schema!=="disdex-owner-deployment-approval/v2"
