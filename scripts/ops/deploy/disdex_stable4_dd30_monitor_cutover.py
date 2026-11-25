@@ -674,22 +674,33 @@ def dropin_path(unit: str) -> Path:
 # Economics preserved from the Owner-selected original STABLE4 DD30 source
 # (179e3f4e50f86ca8ab60baadaba1a96ed4c914ee) and monitor-only Root plan.
 # The HYPE Trend sleeve is not the disabled ZEC sidecar.
+# These shared keys are inspected by the integrated TypeScript contract
+# regardless of which strategy calls it. Preserve its adopted defaults in
+# every process; only actual engine-specific aliases remain Runner-scoped.
 DD30_COMMON_GROSS_ENV = {
+    "V12_BASE_GROSS_CAP": "2.0",
+    "V12_DYNAMIC_GROSS_CAP": "2.0",
+    "PENGU_DUAL_LS_V2_MAX_GROSS": "1.0",
+    "HYPE_LONG_RISK_PCT": "5.0",
+    "HYPE_LONG_MAX_GROSS": "1.5",
+    "ZEC_LONG_RISK_PCT": "4.5",
+    "HYPE_ZEC_MAX_GROSS": "1.0",
+    "HYPE_ZEC_MAX_REDUCTION_FRACTION": "0.5",
+    "QUALITY102_CAUSAL_V1_MAX_GROSS": "3.0",
     "CRYPTO_GROSS_CAP": "3.0",
+    "CRYPTO_GROSS_HARD_CAP": "5.0",
     "STOCK_GROSS_CAP": "4.0",
     "TOTAL_GROSS_CAP": "4.25",
+    "TOTAL_GROSS_HARD_CAP": "8.0",
     "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT": "7.5",
+    "DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS": "600000",
 }
 DD30_RUNNER_GROSS_ENV = {
-    "V12_V4": {
-        "V12_BASE_GROSS_CAP": "2.0", "V12_DYNAMIC_GROSS_CAP": "2.0",
-        "V12_GROSS_CAP": "2.0",
-    },
+    "V12_V4": {"V12_GROSS_CAP": "2.0"},
     "PENGU_V8": {
-        "PENGU_GROSS_CAP": "1.0", "PENGU_DUAL_LS_V2_MAX_GROSS": "1.0",
-        "PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP": "3.0",
+        "PENGU_GROSS_CAP": "1.0", "PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP": "3.0",
     },
-    "QUALITY102_CAUSAL_V1": {"QUALITY102_CAUSAL_V1_MAX_GROSS": "3.0"},
+    "QUALITY102_CAUSAL_V1": {},
     "V52": {
         "DISDEX_V52_CRYPTO_GROSS_CAP": "3.0",
         "DISDEX_V52_STOCK_GROSS_CAP": "4.0",
@@ -697,10 +708,7 @@ DD30_RUNNER_GROSS_ENV = {
         "DISDEX_V52_V11_GROSS_CAP": "2.0",
         "DISDEX_V52_V50_GROSS_CAP": "2.0",
     },
-    "HYPE_TREND_LONG": {
-        "HYPE_LONG_MAX_GROSS": "1.5", "HYPE_ZEC_MAX_GROSS": "1.0",
-        "DISDEX_HYPE_ZEC_MAX_GROSS": "1.5",
-    },
+    "HYPE_TREND_LONG": {"DISDEX_HYPE_ZEC_MAX_GROSS": "1.5"},
     "FET_BRK48_RESIDUAL": {},
     "IDLE_PRIORITY_SHORT": {},
 }

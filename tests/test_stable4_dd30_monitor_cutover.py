@@ -93,6 +93,17 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             self.assertEqual(expected["CRYPTO_GROSS_CAP"], "3.0")
             self.assertEqual(expected["STOCK_GROSS_CAP"], "4.0")
             self.assertEqual(expected["TOTAL_GROSS_CAP"], "4.25")
+            self.assertEqual(expected["HYPE_LONG_MAX_GROSS"], "1.5")
+            self.assertEqual(expected["HYPE_ZEC_MAX_GROSS"], "1.0")
+            self.assertEqual(expected["V12_BASE_GROSS_CAP"], "2.0")
+            self.assertEqual(expected["PENGU_DUAL_LS_V2_MAX_GROSS"], "1.0")
+            self.assertEqual(expected["QUALITY102_CAUSAL_V1_MAX_GROSS"], "3.0")
+            # The existing resolver checks the entire shared numeric contract,
+            # so an unrelated inherited HYPE=1.0 must not break a V4 process.
+            policy_source = (ROOT / "config/integratedProductionRiskPolicy.ts").read_text(encoding="utf-8")
+            import re
+            declared = set(re.findall(r"^    ([A-Z0-9_]+): INTEGRATED_PRODUCTION_RISK_POLICY\.", policy_source, re.M))
+            self.assertEqual(declared, set(cutover.DD30_COMMON_GROSS_ENV))
             text = dropin_text(runner, target, units[runner])
             launch = next(line for line in text.splitlines() if line.startswith("ExecStart=/usr/bin/env "))
             for key, value in expected.items():
