@@ -55,6 +55,10 @@ export function inspectH48AllRunnerGrossAndRisk(input:H48AllRunnerRiskObservatio
     ||v.observedAt>now||now-v.observedAt>30_000
     ||!Array.isArray(v.positions)||!Array.isArray(v.openOrders))
     return result(["SIGNED_ASTER_GET_MISSING_STALE"],empty,noPending);
+  // No additional H48 ENTRY is possible while a venue HYPE conditional
+  // order is outstanding, regardless of whether the pending ledger is flat.
+  if(v.openOrders.some(o=>o?.symbol==="HYPEUSDT"))
+    return result(["HYPE_OPEN_ORDER_REQUIRES_SIGNED_OWNERSHIP_RECONCILIATION"],empty,noPending);
   let crypto=0,stock=0,hype=0,malformed=false;
   for(const p of v.positions){
     if(!p||typeof p.symbol!=="string"||!Number.isFinite(p.quantity)
