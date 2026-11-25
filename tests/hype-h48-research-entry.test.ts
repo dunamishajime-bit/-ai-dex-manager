@@ -1,5 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import {
   H48_FROZEN_THRESHOLDS, H48_RESEARCH_GRID_MS, H48_RESEARCH_HOUR_MS,
   H48_RESEARCH_PROVENANCE, evaluateH48R4WsigEntry,
@@ -105,4 +106,43 @@ test("H48 research limitations are explicit and thresholds are frozen", () => {
   assert.equal(H48_FROZEN_THRESHOLDS.hype12Max, 0.004297852251518686);
   assert.equal(H48_FROZEN_THRESHOLDS.hype24Min, 0.02047426596091347);
   assert.equal(H48_FROZEN_THRESHOLDS.relative24Max, 0.026202553353817715);
+});
+
+test("29 genuine H1 research entry fixtures match PRE-frozen signal features (27 target, 2 forward)", () => {
+  const raw = JSON.parse(readFileSync(new URL("./fixtures/hype-h48-r4-wsig-h1-golden-20261114.json", import.meta.url), "utf8")) as {
+    sourceSha256: string;
+    rows: Array<{
+      split: string; entryTs: number; entryOpen: number;
+      hypeCloses: number[]; btcCloses: number[];
+      expected: { h12: number; h24: number; rel24: number };
+    }>;
+  };
+  assert.equal(raw.sourceSha256, "05632294b05a64c2fe28bbff63d191feed88d0e80e4eb3fd37e7f16bc67977a9");
+  assert.equal(raw.rows.length, 29);
+  assert.equal(raw.rows.filter(x => x.split === "TARGET").length, 27);
+  assert.equal(raw.rows.filter(x => x.split === "FORWARD").length, 2);
+  for (const row of raw.rows) {
+    const t = row.entryTs - H;
+    assert.equal(row.hypeCloses.length, 25);
+    assert.equal(row.btcCloses.length, 25);
+    const bars = (closes: number[]): H48ClosedHour[] => closes.map((close, i) => ({
+      openTs: t - (24 - i) * H, close,
+    }));
+    const result = evaluateH48R4WsigEntry({
+      runtimeSha: SHA, now: row.entryTs + 10000,
+      entry: { openTs: row.entryTs, open: row.entryOpen, observedAt: row.entryTs + 5000 },
+      hypeClosed: bars(row.hypeCloses), btcClosed: bars(row.btcCloses),
+      existingHypePosition: false,
+    });
+    assert.equal(result.status, "CANDIDATE", `missed ${row.split} ${row.entryTs}`);
+    if (result.status !== "CANDIDATE") continue;
+    for (const [name, computed, expected] of [
+      ["h12", result.hype12, row.expected.h12],
+      ["h24", result.hype24, row.expected.h24],
+      ["rel24", result.relative24, row.expected.rel24],
+    ] as const) {
+      assert.ok(Math.abs(computed - expected) <= 1e-11,
+        `${row.split}/${row.entryTs}/${name} computed ${computed} != ${expected}`);
+    }
+  }
 });
