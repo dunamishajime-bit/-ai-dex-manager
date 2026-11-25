@@ -353,7 +353,19 @@ def ui_release_sha(path: Path) -> Optional[str]:
     if not path.name.startswith("ui-"):
         return None
     values: list[str] = []
-    for marker_name in (".disdex-ui-release-sha", ".disdex-ui-sha"):
+    # The protected HP deploy workflow writes this marker for its exact
+    # standalone release. Accept it only in that workflow's canonical directory.
+    hp_prefix = "ui-hp-approval-"
+    hp_marker = path / ".disdex-release-sha"
+    marker_names = (".disdex-ui-release-sha", ".disdex-ui-sha")
+    if path.name.startswith(hp_prefix):
+        if hp_marker.is_symlink():
+            return None
+        if hp_marker.exists():
+            if not hp_marker.is_file():
+                return None
+            marker_names += (".disdex-release-sha",)
+    for marker_name in marker_names:
         marker = path / marker_name
         if marker.is_symlink():
             return None
@@ -368,6 +380,9 @@ def ui_release_sha(path: Path) -> Optional[str]:
         values.append(value)
     if not values or any(value != values[0] for value in values[1:]):
         return None
+    if path.name.startswith(hp_prefix) and hp_marker.exists():
+        if path.name != hp_prefix + values[0][:12]:
+            return None
     return values[0]
 
 
