@@ -1,5 +1,6 @@
 """Fail-closed STABLE4 GLOBAL protected HOLD tests (no live mutations)."""
 from datetime import datetime
+import hashlib
 from pathlib import Path
 import sys
 import unittest
@@ -92,6 +93,23 @@ class GlobalOwnerProtectedHoldTests(unittest.TestCase):
         self.assertFalse(receipt["authorizesOrders"])
         self.assertGreater(receipt["expiresAt"], NOW)
         self.assertLessEqual(receipt["expiresAt"] - NOW, 3600000)
+
+    def test_receipt_preserves_observed_legacy_hold_reason(self):
+        legacy = {**existing_stable4_hold(),
+                  "reason": "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f"}
+        raw = owner.canonical(legacy)
+        receipt = hold.protected_hold_receipt(NOW, V4, raw)
+        self.assertEqual(receipt["approvedSha"], owner.SOURCE)
+        self.assertEqual(receipt["reason"], legacy["reason"])
+        self.assertNotEqual(receipt["reason"], hold.REASON)
+        self.assertEqual(receipt["killSwitchSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertFalse(receipt["authorizesOrders"])
+
+    def test_receipt_rejects_untrusted_or_unprotected_kill_bytes(self):
+        for raw in (b"not json", owner.canonical(old_kill()),
+                    owner.canonical({**existing_stable4_hold(), "reason": "INVALID"})):
+            with self.subTest(raw=raw[:35]), self.assertRaises(ValueError):
+                hold.protected_hold_receipt(NOW, V4, raw)
 
     def test_current_run_receipt_path_is_supported_for_idempotent_reuse(self):
         import inspect
