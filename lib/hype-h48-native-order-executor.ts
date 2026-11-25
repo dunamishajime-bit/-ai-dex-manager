@@ -84,8 +84,14 @@ export class H48NativeOrderExecutor {
     lease:AccountLockHandle;
     rootGrant:H48RootGrantVerifier;
     signedVenue:H48OrderVenueReadback;
+    /** Fresh global permission is mandatory only for exposure-increasing ENTRY. */
     assertGlobalOrderRelease:()=>Promise<void>;
+    /** ENTRY must pass shared risk, hard-stop and Gross before exposure. */
     assertFreshSharedRiskAndStops:()=>Promise<void>;
+    /** EXIT has its own Root-authorized reduce-only HOLD_PROTECTED semantics.
+     * The live factory must re-read owned HYPE quantity and STOP lineage;
+     * daily loss or GLOBAL HOLD must never silently authorize an ENTRY. */
+    assertProtectedReduceOnlyExitAllowed:()=>Promise<void>;
     now?:()=>number;
   }){
     if(!validSha(dependencies.sourceSha))forbid("SOURCE_SHA");
@@ -108,8 +114,12 @@ export class H48NativeOrderExecutor {
     // Revalidate all mutable safety conditions after the signed grant was
     // verified. The real factory MUST check canonical Kill, Owner release,
     // STOP, DD30, Gross, Shared Risk and the Root certificate on every order.
-    await d.assertGlobalOrderRelease();
-    await d.assertFreshSharedRiskAndStops();
+    if(pending.phase==="ENTRY"){
+      await d.assertGlobalOrderRelease();
+      await d.assertFreshSharedRiskAndStops();
+    }else{
+      await d.assertProtectedReduceOnlyExitAllowed();
+    }
     const account=await d.executor.getAccountSnapshot();
     if(!account||account.asset!=="USDT"||!pos(account.walletBalance)
        ||!Number.isSafeInteger(account.updatedAt)
