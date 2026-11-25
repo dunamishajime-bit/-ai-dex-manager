@@ -81,8 +81,8 @@ test("wrong source/position identity or unavailable root authority cannot cancel
   try{
     let cancels=0;
     const adapter=new H48Stop8NativeRetirementHandoff({
-      client:{cancelOrder:async()=>{cancels++;throw Error("UNEXPECTED_CANCEL")}}
-        as Pick<AsterV3Client,"cancelOrder">,
+      client:({cancelOrder:async()=>{cancels++;throw Error("UNEXPECTED_CANCEL")}}
+        as Pick<AsterV3Client,"cancelOrder">),
       root:{assertSignedResidentStop8:async()=>{throw Error("OWNER_ROOT_STOP8_GRANT_MISSING")}},
       stopRoot:f.stopRoot,retirementRoot:f.retirementRoot,
       readSignedVenue:async()=>signed(f.intent,true,true),
