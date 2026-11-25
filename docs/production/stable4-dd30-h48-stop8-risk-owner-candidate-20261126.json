@@ -17,7 +17,7 @@
     "totalGross": 4.25,
     "hypeGross": 1.5
   },
-  "grossDecision": "OWNER_EXPLICIT_CHOICE_REQUIRED_INCREASED_CAPS_OR_REDUCE_RUNTIME",
+  "grossDecision": "OWNER_CHAT_INSTRUCTION_APPROVED_PENDING_SIGNED_HP_APPROVAL",
   "drawdown": {
     "v4NewEntryHoldPct": 30,
     "penguProtectionPct": 17,
@@ -62,7 +62,7 @@
     "IDLE_PRIORITY_SHORT"
   ],
   "reviewRequired": [
-    "Owner decision for exact Gross caps",
+    "Redeem formal cryptographically signed HP approval for exact new Gross caps and source/plan SHA",
     "H48STOP8 independent forward/portfolio DD",
     "Root STOP8 grant and certificate issuer",
     "H48 native runner deployment and protected exit",
@@ -70,5 +70,27 @@
     "Approved Global HOLD transition",
     "3 signed ASTER GET and post-deploy verification"
   ],
-  "note": "This is a review-only candidate, NOT a signed Owner authorization, not a deployed production plan and not an order permit."
+  "note": "Owner explicitly approved Gross increases in chat on 2026-11-26 JST. This file remains a DRAFT candidate, not a signed HP approval, new Root certificate, order permit or LIVE deployment authorization.",
+  "ownerGrossInstruction": {
+    "decision": "APPROVE_GROSS_CAP_INCREASES",
+    "source": "EXPLICIT_OWNER_INSTRUCTION_IN_CURRENT_CHAT",
+    "recordedDateJst": "2026-11-26",
+    "approvedCaps": {
+      "cryptoGross": 3,
+      "stockGross": 4,
+      "totalGross": 4.25,
+      "hypeGross": 1.5
+    },
+    "priorCaps": {
+      "cryptoGross": 3,
+      "stockGross": 1.5,
+      "totalGross": 3.5,
+      "hypeGross": 1
+    },
+    "scope": "GROSS_CAPS_ONLY",
+    "isSignedHpApproval": false,
+    "isRootCertificate": false,
+    "isOrderPermit": false,
+    "isLiveDeploymentAuthorization": false
+  }
 }
