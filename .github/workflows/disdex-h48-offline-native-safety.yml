@@ -16,6 +16,8 @@ on:
       - "config/integratedProductionRiskPolicy.ts"
       - "lib/disdex-integrated-gross-governor.ts"
       - "tests/integrated_gross_governor.test.ts"
+      - "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py"
+      - "tests/test_disdex_h48_stop8_formal_issue.py"
       - "package.json"
       - "package-lock.json"
 
@@ -62,6 +64,12 @@ jobs:
           echo "H48_OFFLINE_SUITES=$count PASS"
           echo "GROSS_CANDIDATE_AND_OLD_IMMUTABLE_SOURCE=PASS"
           echo "TRADING_MUTATIONS=0"
+      - name: Verify NEW STOP8 issuer pure contract, never issuing a certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest -v tests/test_disdex_h48_stop8_formal_issue.py
+          echo "H48_STOP8_FORMAL_ISSUER_NO_MUTATION_TESTS=PASS"
       - name: Typecheck entire source without emitting artifacts
         shell: bash
         run: |
