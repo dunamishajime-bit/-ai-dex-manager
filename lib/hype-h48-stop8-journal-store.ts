@@ -124,6 +124,9 @@ export class FileH48Stop8Store implements H48Stop8Store {
       verifyH48Stop8Venue(old,evidence.venue,evidence.now);
     }else fail("ILLEGAL_TRANSITION");
     const initial=await assertLease(lease);
+    // Never create an exclusive writer file through an untrusted parent
+    // directory (including a symlinked mount outside the dedicated state).
+    await safeParent(this.path);
     const lockPath=this.path+".writer.lock";
     const guard=await open(lockPath,"wx",0o600).catch((e:NodeJS.ErrnoException)=>{
       if(e.code==="EEXIST")fail("EXCLUSIVE_WRITER_CONFLICT");throw e;
