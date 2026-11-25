@@ -152,7 +152,7 @@ export function prepareH48ExitIntent(s:H48ExecutionJournal,attested:{
 },now:number):H48ExecutionJournal{
   const current=validateH48ExecutionJournal(s,s.sourceSha);
   if(current.mode!=="OPEN"||!current.position||!timestamp(now))fail("EXIT_NOT_ELIGIBLE");
-  const pos=current.position,c=validateContract(attested.contract,current.sourceSha);
+  const pos=current.position!,c=validateContract(attested.contract,current.sourceSha);
   if(c.positionId!==pos.contract.positionId||now<c.logicalExitTs
     ||now-c.logicalExitTs>120_000
     ||attested.boundary.due!==true||attested.boundary.logicalExitTs!==c.logicalExitTs
@@ -175,7 +175,7 @@ export function markH48OrderAttempted(s:H48ExecutionJournal,now:number):H48Execu
      ||current.pending.stage!=="PREPARED"||!timestamp(now)||now<current.pending.preparedAt
      ||now>=current.pending.authorizationExpiresAt||now-current.pending.preparedAt>120_000
      ||now-(current.pending.phase==="ENTRY"?current.pending.contract.logicalEntryTs:current.pending.contract.logicalExitTs)>120_000)fail("ATTEMPT_NOT_ALLOWED");
-  return next(current,{pending:{...current.pending,stage:"SUBMITTED",submittedAt:now}});
+  return next(current,{pending:{...current.pending!,stage:"SUBMITTED",submittedAt:now}});
 }
 
 function signedSnapshot(v:H48SignedVenueSnapshot,now:number){
@@ -246,13 +246,13 @@ export function reconcileH48Attempt(s:H48ExecutionJournal,input:{
   result:DirectTradeResult;venue:H48SignedVenueSnapshot;now:number;
 }):H48ExecutionJournal{
   const current=validateH48ExecutionJournal(s,s.sourceSha);
-  const p=current.pending;
+  const p=current.pending!;
   if(!p||!["ENTRY_PENDING","EXIT_PENDING"].includes(current.mode)
     ||p.stage!=="SUBMITTED")fail("NO_SUBMITTED_INTENT");
   // Inconsistent order identity can never be used to release a reservation,
   // open another position or re-submit the same client ID.
   const r=input.result;
-  if(!r||r.clientOrderId!==p.clientOrderId||r.symbol.toUpperCase()!=="HYPEUSDT"
+  if(!r||r.clientOrderId!==p!.clientOrderId||typeof r.symbol!=="string"||r.symbol.toUpperCase()!=="HYPEUSDT"
      ||r.side!==(p.phase==="ENTRY"?"BUY":"SELL")||!Number.isFinite(r.executedQuantity)
      ||r.executedQuantity<0) return review(current,"ORDER_IDENTITY_OR_QUANTITY_UNKNOWN");
   let positions:DirectPosition[];
