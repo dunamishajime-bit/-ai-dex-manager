@@ -246,7 +246,28 @@ def post_validate(source: str, before: dict[str, Any], plan_path: Path, plan_sha
     }
 
 
+def require_stable4_dd30_gross_repair_consistency() -> None:
+    """Prevent re-applying the stale 3/1.5/3.5 Gross override.
+
+    Confirm the original approved monitor DD30 portfolio limits, plus the
+    integrated HYPE Long sleeve limit.  Until the Root repair, live plan and
+    V52 strategy-specific caps are reconciled, fail closed before any
+    filesystem write or systemd restart.
+    """
+    expected = {
+        "CRYPTO_GROSS_CAP": "3.0",
+        "STOCK_GROSS_CAP": "4.0",
+        "TOTAL_GROSS_CAP": "4.25",
+        "DISDEX_V52_STOCK_GROSS_CAP": "4.0",
+        "DISDEX_V52_PORTFOLIO_GROSS_CAP": "4.25",
+        "HYPE_LONG_MAX_GROSS": "1.5",
+    }
+    for key, value in expected.items():
+        require(CAP_OVERRIDES.get(key) == value, "STABLE4_DD30_GROSS_REPAIR_SOURCE_MISMATCH:" + key)
+
+
 def execute(source: str, plan_path: Path, plan_sha: str, run_id: str) -> dict[str, Any]:
+    require_stable4_dd30_gross_repair_consistency()
     before = base_snapshot(source, plan_path, plan_sha)
     snapshot = snapshot_dropins(source, run_id)
     try:

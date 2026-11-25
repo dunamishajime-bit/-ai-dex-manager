@@ -45,6 +45,14 @@ class Stable4GrossCapRepairTests(unittest.TestCase):
         self.assertIn("QUALITY102_CAUSAL_V1_OPERATOR_ARMED", module.monitor_order_flags("Environment=QUALITY102_CAUSAL_V1_OPERATOR_ARMED=yes"))
         self.assertEqual(module.monitor_order_flags("Environment=V12_V4_ORDERS_ENABLED=false"), [])
 
+    def test_unreconciled_gross_repair_cannot_mutate_live_units(self) -> None:
+        # This invalid historical overlay is blocked before any Root snapshot,
+        # drop-in write, daemon reload or unit restart.
+        with self.assertRaisesRegex(
+            module.gate.GateError, "STABLE4_DD30_GROSS_REPAIR_SOURCE_MISMATCH"
+        ):
+            module.require_stable4_dd30_gross_repair_consistency()
+
     def test_source_and_plan_are_pinned(self) -> None:
         self.assertEqual(module.SOURCE_SHA, "08f4a0d77d85808d897d6d4d985b950af0d76bab")
         self.assertEqual(module.PLAN_SHA256, "0faddfdb33ee885ffba4538a672d7719cf5a0652e1cb5082ef8ef47b7a8a02e4")
