@@ -187,6 +187,61 @@ function signedSnapshot(v:H48SignedVenueSnapshot,now:number){
   return v.positions.filter(x=>x.symbol.toUpperCase()==="HYPEUSDT"&&Math.abs(x.quantity)>1e-9);
 }
 function review(s:H48ExecutionJournal,reason:string){return next(s,{mode:"MANUAL_REVIEW",reviewReason:"H48_"+reason});}
+/**
+ * State-store transition firewall. A structurally valid JSON object is NOT
+ * enough to turn a submitted order into FLAT, or discard an open position.
+ * Journal persistence must reject unauthorized phase jumps and stale
+ * revisions, even when a caller constructs a forged replacement object.
+ */
+export function assertH48JournalTransition(before:H48ExecutionJournal,after:H48ExecutionJournal):void {
+  const old=validateH48ExecutionJournal(before,before.sourceSha);
+  const nextState=validateH48ExecutionJournal(after,old.sourceSha);
+  if(nextState.revision!==old.revision+1)fail("TRANSITION_REVISION_INVALID");
+  if(old.mode==="MANUAL_REVIEW")fail("MANUAL_REVIEW_REQUIRES_OPERATOR");
+  const eq=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
+  const sameResearch=eq(old.research,nextState.research);
+  const oldPending=old.pending,newPending=nextState.pending;
+  if(old.mode===nextState.mode){
+    if((old.mode==="FLAT"||old.mode==="OPEN")
+       &&eq(old.position,nextState.position)&&eq(oldPending,newPending)
+       &&!sameResearch&&nextState.research.lastEvaluatedEntryTs!==null
+       &&(old.research.lastEvaluatedEntryTs===null
+         ||nextState.research.lastEvaluatedEntryTs===old.research.lastEvaluatedEntryTs+6*3_600_000)
+       &&nextState.research.nextBaseEligibleTs>=old.research.nextBaseEligibleTs)return;
+    if((old.mode==="ENTRY_PENDING"||old.mode==="EXIT_PENDING")
+       &&oldPending?.stage==="PREPARED"&&newPending?.stage==="SUBMITTED"
+       &&sameResearch&&eq(old.position,nextState.position)
+       &&eq({...oldPending,stage:"SUBMITTED",submittedAt:newPending.submittedAt},newPending))return;
+    fail("TRANSITION_ILLEGAL_IN_PLACE");
+  }
+  if(!sameResearch)fail("TRANSITION_UNEXPECTED_RESEARCH_EDIT");
+  if(old.mode==="FLAT"&&nextState.mode==="ENTRY_PENDING"&&newPending?.stage==="PREPARED"
+      &&newPending.phase==="ENTRY"&&nextState.position===null
+      &&old.research.lastEvaluatedEntryTs===newPending.contract.logicalEntryTs
+      &&old.research.nextBaseEligibleTs===newPending.contract.logicalExitTs)return;
+  if(old.mode==="ENTRY_PENDING"&&oldPending?.stage==="SUBMITTED"){
+    if(nextState.mode==="OPEN"&&nextState.position
+       &&nextState.pending===null
+       &&eq(oldPending.contract,nextState.position.contract)
+       &&oldPending.quantity===nextState.position.quantity
+       &&oldPending.clientOrderId===nextState.position.entryClientOrderId
+       &&nextState.position.observedAt>=(oldPending.submittedAt??0))return;
+    if(nextState.mode==="FLAT"&&nextState.position===null&&nextState.pending===null)return;
+  }
+  if(old.mode==="OPEN"&&nextState.mode==="EXIT_PENDING"
+     &&newPending?.stage==="PREPARED"&&newPending.phase==="EXIT"
+     &&eq(old.position,nextState.position)
+     &&newPending.contract.positionId===old.position?.contract.positionId
+     &&newPending.quantity===old.position?.quantity
+     &&newPending.preparedAt>=newPending.contract.logicalExitTs)return;
+  if(old.mode==="EXIT_PENDING"&&oldPending?.stage==="SUBMITTED"
+     &&nextState.mode==="FLAT"&&nextState.position===null&&nextState.pending===null)return;
+  if((old.mode==="ENTRY_PENDING"||old.mode==="EXIT_PENDING")
+      &&oldPending?.stage==="SUBMITTED"&&nextState.mode==="MANUAL_REVIEW"
+      &&eq(oldPending,newPending)&&eq(old.position,nextState.position))return;
+  fail("TRANSITION_NOT_PERMITTED");
+}
+
 export function reconcileH48Attempt(s:H48ExecutionJournal,input:{
   result:DirectTradeResult;venue:H48SignedVenueSnapshot;now:number;
 }):H48ExecutionJournal{
