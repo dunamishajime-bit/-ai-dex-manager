@@ -9,6 +9,7 @@ on:
       - "scripts/ops/test_disdex_stable4_h48_formal_issue.py"
       - "scripts/ops/test_disdex_stable4_global_hold_formal_arm.py"
       - "scripts/ops/test_disdex_stable4_owner_workflow_contract.py"
+      - "config/stable4-dd30-h48-plan.json"
   workflow_dispatch:
     inputs:
       approval_id:
@@ -68,6 +69,14 @@ jobs:
           [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
           [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
           [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          raw=Path('config/stable4-dd30-h48-plan.json').read_bytes().rstrip(b'\r\n')
+          expected='8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d'
+          assert hashlib.sha256(raw).hexdigest()==expected
+          print('STABLE4_DD30_H48_PLAN=PASS')
+          PY
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_*formal*.py'
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_owner_workflow_contract.py'
       - name: Redeem exactly approved H48 policy from official HP bridge
@@ -172,3 +181,4 @@ jobs:
         run: |
           rm -rf "$RUNNER_TEMP/stable4-h48-ssh"
           rm -f "$RUNNER_TEMP/stable4-h48-owner-token" "$RUNNER_TEMP/stable4-h48-public.pem"
+
