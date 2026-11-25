@@ -70,3 +70,25 @@ test("missing or altered effective Gross is not accepted as an Owner-approved up
   data.existingOwnerApprovedPlanGross={crypto:3,stock:4,total:4.25,hype:1.5};
   assert.deepEqual(auditH48LiveReadiness(data).blockers,["NEW_SHA_ROOT_OWNER_ORDER_PERMIT_NOT_ATTESTED"]);
 });
+
+test("old TIME_ONLY certificate cannot certify a new STOP8 H48 exposure policy",()=>{
+  const data=ready();
+  data.requestedH48Policy="H48_R4_RESIDENT_STOP8";
+  data.h48CertificatePolicy="H48_TIME_ONLY";
+  data.residentStopRequiredByOwner=true;
+  data.h48CertificateResidentStopRequired=false;
+  const outcome=auditH48LiveReadiness(data);
+  assert.ok(outcome.blockers.includes("H48_STOP8_CERTIFICATE_POLICY_NOT_MATCHED"));
+  assert.equal(outcome.ordersAllowed,false);
+});
+test("matching STOP8 policy fields are still NOT Root signature or production order authorization",()=>{
+  const data=ready();
+  data.requestedH48Policy="H48_R4_RESIDENT_STOP8";
+  data.h48CertificatePolicy="H48_R4_RESIDENT_STOP8";
+  data.residentStopRequiredByOwner=true;
+  data.h48CertificateResidentStopRequired=true;
+  const outcome=auditH48LiveReadiness(data);
+  assert.equal(outcome.status,"BLOCKED");
+  assert.deepEqual(outcome.blockers,["NEW_SHA_ROOT_OWNER_ORDER_PERMIT_NOT_ATTESTED"]);
+  assert.equal(outcome.tradingMutations,0);
+});
