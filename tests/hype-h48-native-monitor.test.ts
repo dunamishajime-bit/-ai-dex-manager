@@ -37,11 +37,18 @@ function fixture(params:{now?:number;journal?:H48ExecutionJournal;positions?:Dir
     }),
     executeMarket:()=>{orderCalls++;throw Error("UNEXPECTED_REAL_ORDER")},
   };
-  const lease={document:async()=>({
+  const leaseDoc={
     schema:"disdex-account-lock/v1" as const,accountScope:"ASTER_FUTURES",
     ownerId:"h48-monitor-test",leaseId:"writer",acquiredAt:now-100,
     expiresAt:now+30000,reservations:[],
-  })} as AccountLockHandle;
+  };
+  const lease:AccountLockHandle={
+    ownerId:leaseDoc.ownerId,leaseId:leaseDoc.leaseId,
+    acquiredAt:leaseDoc.acquiredAt,renewalIntervalMs:1000,
+    document:async()=>({...leaseDoc}),renew:async()=>({...leaseDoc}),
+    reserve:async()=>{throw Error("TEST_RESERVATION_DISABLED")},
+    releaseReservation:async()=>{},release:async()=>{},
+  };
   const monitor=new H48NativeReadOnlyMonitor({runtimeSha:SHA,store,executor,lease,now:()=>now});
   return {monitor,getState:()=>state,getWrites:()=>writes,getOrders:()=>orderCalls};
 }
