@@ -1,0 +1,38 @@
+{
+  "blockedReasons": [
+    "NO_NEW_COMPOSITE_GIT_COMMIT_IN_FORMAL_OWNER_SCOPE",
+    "FORMAL_ROOT_CUTOVER_TARGET_STILL_C731_OLD_PLAN",
+    "NO_DD30_OWNER_APPROVAL",
+    "NO_CURRENT_VPS_RUNNER_AND_STOP_READINESS_CERT",
+    "OLD_Q102_B8D_SYSTEMD_CHDIR_STALE_UNIT_UNRESOLVED",
+    "C731_MARGIN_GUARD_RUNTIME_SCRIPT_MISSING_UNRESOLVED",
+    "V4_STOP_CROSSCHECK_DIAGNOSTIC_STALE_PIN_UNRESOLVED",
+    "UI_MONITOR_RELEASE_NOT_CERTIFIED",
+    "NO_FULL_STABLE4_RUNTIME_ECONOMIC_PARITY_CERT"
+  ],
+  "bundleBytes": 1966479,
+  "bundleName": "stable4-dd30-prelive-composite-179e3f4e50f8.tar.gz",
+  "bundleSHA256": "f4261e6d905d707fccfe6702a1ff1d18059c502ca8d7a49c955b830c2c05564f",
+  "candidateV4DdEntryHold": 0.3,
+  "codexReviewRequired": true,
+  "files": 936,
+  "formalApproval": "NOT_ISSUED",
+  "formalImmutableGitReleaseCommit": "NOT_CREATED",
+  "masterCommit": "1eeb864b7b8be2a0279be9ed60af1b9ad234d8ed",
+  "masterWorkflowSHA256": {
+    ".github/workflows/disdex-stable4-h48-owner-gates.yml": "4c79fe106298a849c119823c0018ac2e930ac7e94a2d2f4e16192ccf052c4484",
+    ".github/workflows/disdex-stable4-runner-bundle-order-enable.yml": "d8fcf8aa1ba3fde32a1fe7dd1d864ad301a879727bf4478a242638fb9553385d",
+    ".github/workflows/disdex-stable4-runner-scoped-order-enable.yml": "513fcc7276f0fe947ef73cb93516f884b626380b10364045c55a0935f8e6da5e",
+    ".github/workflows/disdex-stable4-safety-repair-ci.yml": "82d18d201cbd7c0f12abc918a07eebc7fca3ee099c6d4ba515979df6c70f1dfc",
+    ".github/workflows/disdex-stable4-safety-repair-cutover.yml": "e7f3088801dc39c83aef008201bfb562c708ea7410beb2f526d3e525d2a68cf8"
+  },
+  "productionInstalled": false,
+  "runOnlyAsPreliveResearch": true,
+  "schema": "disdex-stable4-dd30-bridge-preview/v1",
+  "sourceCommit": "179e3f4e50f86ca8ab60baadaba1a96ed4c914ee",
+  "sourceDetails": {
+    "candidateRunnerSources": 897,
+    "masterControlPlaneFiles": 38,
+    "replacedByMasterControlPlane": 1
+  }
+}

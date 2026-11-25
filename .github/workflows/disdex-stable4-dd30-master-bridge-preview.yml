@@ -1,0 +1,53 @@
+name: STABLE4 DD30 master control-plane bridge (offline only)
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/stable4_dd30_master_bridge_preview.py'
+      - 'tests/test_stable4_dd30_master_bridge_preview.py'
+      - 'docs/production/STABLE4_DD30_MASTER_BRIDGE_20261123.md'
+      - '.github/workflows/disdex-stable4-dd30-master-bridge-preview.yml'
+  push:
+    branches:
+      - prep/stable4-dd30-master-bridge-20261123
+
+permissions:
+  contents: read
+
+jobs:
+  offline-source-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Pin exact current master and DD30 source with no credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/master
+          test "$(git rev-parse FETCH_HEAD)" = "1eeb864b7b8be2a0279be9ed60af1b9ad234d8ed"
+          git fetch --no-tags --depth=1 origin refs/heads/prep/stable4-exit-integration-20261123
+          test "$(git rev-parse FETCH_HEAD)" = "179e3f4e50f86ca8ab60baadaba1a96ed4c914ee"
+
+      - name: Validate deterministic offline-only bundle and no live authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v tests/test_stable4_dd30_master_bridge_preview.py
+          python3 scripts/ops/deploy/stable4_dd30_master_bridge_preview.py --repo . --out-dir "$RUNNER_TEMP/stable4-dd30"
+          python3 - "$RUNNER_TEMP/stable4-dd30" <<'PY'
+          import hashlib,json,pathlib,sys
+          folder=pathlib.Path(sys.argv[1])
+          m=json.loads((folder/'stable4-dd30-prelive-composite-manifest.json').read_text())
+          p=folder/m['bundleName']
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==m['bundleSHA256']
+          assert m['productionInstalled'] is False
+          assert m['formalImmutableGitReleaseCommit']=='NOT_CREATED'
+          assert m['formalApproval']=='NOT_ISSUED'
+          assert 'NO_DD30_OWNER_APPROVAL' in m['blockedReasons']
+          print('PRELIVE_MASTER_CONTROL_SOURCE_BRIDGE_PASS')
+          PY
