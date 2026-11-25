@@ -12,6 +12,9 @@ MANIFEST = ROOT / "docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261
 REQUIRED_TOKENS = {
     "config/v12V4AdoptionRiskPolicy.ts": ["V12_V4_MAXIMUM_DRAWDOWN = 0.30"],
     "config/integratedProductionRiskPolicy.ts": ["cryptoGrossCap: 3.0", "totalGrossCap: 4.25"],
+    "config/v52V50Runtime.json": ['"stockAggregateGross": 4.0', '"slotGross": 2.0'],
+    "config/hypeTrendLongPolicy.ts": ["maximumGross: 1.5"],
+    "config/q102FamilySideGross.json": ['"HIGH_VOL"', '"PB"', '"MR"', '"BRK"'],
     "lib/v12-v4-shared-reservations.ts": [
         "V12_V4_MAXIMUM_DRAWDOWN", "V4_SHARED_RESERVATION_HOLD"],
     "lib/aster-v3-client.ts": ["AsterUserTradeRow", "AsterIncomeRow", "getUserTrades"],

@@ -671,6 +671,87 @@ def dropin_path(unit: str) -> Path:
     return Path("/etc/systemd/system") / (unit + ".d") / "zz-stable4-dd30-monitor-only.conf"
 
 
+# Economics preserved from the Owner-selected original STABLE4 DD30 source
+# (179e3f4e50f86ca8ab60baadaba1a96ed4c914ee) and monitor-only Root plan.
+# The HYPE Trend sleeve is not the disabled ZEC sidecar.
+DD30_COMMON_GROSS_ENV = {
+    "CRYPTO_GROSS_CAP": "3.0",
+    "STOCK_GROSS_CAP": "4.0",
+    "TOTAL_GROSS_CAP": "4.25",
+    "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT": "7.5",
+}
+DD30_RUNNER_GROSS_ENV = {
+    "V12_V4": {
+        "V12_BASE_GROSS_CAP": "2.0", "V12_DYNAMIC_GROSS_CAP": "2.0",
+        "V12_GROSS_CAP": "2.0",
+    },
+    "PENGU_V8": {
+        "PENGU_GROSS_CAP": "1.0", "PENGU_DUAL_LS_V2_MAX_GROSS": "1.0",
+        "PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP": "3.0",
+    },
+    "QUALITY102_CAUSAL_V1": {"QUALITY102_CAUSAL_V1_MAX_GROSS": "3.0"},
+    "V52": {
+        "DISDEX_V52_CRYPTO_GROSS_CAP": "3.0",
+        "DISDEX_V52_STOCK_GROSS_CAP": "4.0",
+        "DISDEX_V52_PORTFOLIO_GROSS_CAP": "4.25",
+        "DISDEX_V52_V11_GROSS_CAP": "2.0",
+        "DISDEX_V52_V50_GROSS_CAP": "2.0",
+    },
+    "HYPE_TREND_LONG": {
+        "HYPE_LONG_MAX_GROSS": "1.5", "HYPE_ZEC_MAX_GROSS": "1.0",
+        "DISDEX_HYPE_ZEC_MAX_GROSS": "1.5",
+    },
+    "FET_BRK48_RESIDUAL": {},
+    "IDLE_PRIORITY_SHORT": {},
+}
+
+
+def adopted_gross_env(runner: str) -> dict[str, str]:
+    require(runner in DD30_RUNNER_GROSS_ENV, "DD30_GROSS_RUNNER_UNKNOWN")
+    return {**DD30_COMMON_GROSS_ENV, **DD30_RUNNER_GROSS_ENV[runner]}
+
+
+def verify_adopted_gross_source(release: Path) -> None:
+    v50 = json.loads(read_regular(release / "config/v52V50Runtime.json", 32768))
+    require(v50.get("stockAggregateGross") == 4.0 and v50.get("slotGross") == 2.0,
+            "DD30_V52_ADOPTED_SOURCE_GROSS_MISMATCH")
+    integrated = read_regular(release / "config/integratedProductionRiskPolicy.ts", 131072).decode("utf-8")
+    require(all(t in integrated for t in (
+        "cryptoGrossCap: 3.0", "totalGrossCap: 4.25",
+        "stockGrossCap: Number(v52V50Runtime.stockAggregateGross)",
+        "hypeLongMaximumGross: 1.5", "cryptoDailyLossPct: 7.5",
+    )), "DD30_INTEGRATED_ADOPTED_GROSS_MISMATCH")
+    hype = read_regular(release / "config/hypeTrendLongPolicy.ts", 32768).decode("utf-8")
+    require("maximumGross: 1.5" in hype, "DD30_HYPE_ADOPTED_SOURCE_GROSS_MISMATCH")
+
+
+def check_running_gross_env(raw: bytes, runner: str) -> None:
+    # Only allowlisted numeric keys are inspected; never include credentials
+    # or the full process environment in a log/error.
+    expected = adopted_gross_env(runner)
+    observed = {}
+    for item in raw.split(b"\0"):
+        key, sep, value = item.partition(b"=")
+        if sep and key in {name.encode("ascii") for name in expected}:
+            name = key.decode("ascii")
+            require(name not in observed, "DD30_DUPLICATE_GROSS_ENV:" + runner + ":" + name)
+            observed[name] = value
+    for key, value in expected.items():
+        require(observed.get(key) == value.encode("ascii"),
+                "DD30_EFFECTIVE_GROSS_MISMATCH:" + runner + ":" + key)
+
+
+def verify_running_gross_env(unit: str, runner: str) -> None:
+    require(unit_active(unit), "DD30_GROSS_RUNNER_INACTIVE:" + runner)
+    pid = int(unit_property(unit, "MainPID") or "0")
+    require(pid > 100, "DD30_GROSS_PID_INVALID:" + runner)
+    # /proc environ is read only while the unit is running.  ExecStart uses
+    # /usr/bin/env to set the same numeric values after EnvironmentFiles have
+    # been loaded, so inherited stale values cannot override this contract.
+    check_running_gross_env(Path(f"/proc/{pid}/environ").read_bytes(), runner)
+    require(unit_property(unit, "MainPID") == str(pid), "DD30_GROSS_PID_CHANGED:" + runner)
+
+
 def dropin_text(runner: str, target: str, unit: str) -> str:
     root = f"/home/deploy/disdex-trading/releases/{target}"
     common = ["[Unit]", "Requires=", "Wants=", "Wants=network-online.target", "After=", "After=network-online.target", "[Service]", f"WorkingDirectory={root}", f"Environment=DISDEX_RELEASE_SHA={target}", f"Environment=DISDEX_RUNTIME_COMMIT_SHA={target}", f"Environment=DISDEX_RELEASE_ROOT={root}", "ExecStartPre=", f"ExecStartPre=/usr/bin/test -f {root}/.disdex-release-sha", f"ExecStartPre=/usr/bin/grep -Fxq {target} {root}/.disdex-release-sha", "ExecStart="]
@@ -703,6 +784,16 @@ def dropin_text(runner: str, target: str, unit: str) -> str:
         common += ["EnvironmentFile=", "EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env", "EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env", "EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env", "Environment=DISDEX_HYPE_ZEC_MODE=SHADOW", "Environment=DISDEX_HYPE_ZEC_ENABLED=true", "Environment=DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=false", "Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=false", "Environment=DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND", "Environment=DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT", "Environment=DISDEX_HYPE_MONITOR_POLL_MS=5000", "Environment=DISDEX_HYPE_ZEC_RUNTIME_SHA=" + target, "Environment=DISDEX_HYPE_ZEC_STATE_PATH=" + str(MONITOR_ROOT / target / "hype" / "runner.json"), f"ExecStart={root}/node_modules/.bin/tsx scripts/disdex-hype-trend-live-runner.ts --daemon", f"ReadWritePaths={MONITOR_ROOT / target / 'hype'} /var/lib/disdex/shared"]
     else:
         raise ContractError("MONITOR_RUNNER_UNKNOWN:" + runner)
+    # Environment= is useful for systemd diagnostics, but a later
+    # EnvironmentFile may override it. Bind the numeric cap values again
+    # at the final exec boundary without changing any entrypoint/monitor flag.
+    gross = adopted_gross_env(runner)
+    assignments = " ".join(f"{key}={value}" for key, value in gross.items())
+    common += [f"Environment={key}={value}" for key, value in gross.items()]
+    launches = [line for line in common if line.startswith("ExecStart=") and line != "ExecStart="]
+    require(len(launches) == 1, "DD30_GROSS_LAUNCH_CONTRACT_INVALID:" + runner)
+    launch = launches[0]
+    common[common.index(launch)] = "ExecStart=/usr/bin/env " + assignments + " " + launch[len("ExecStart="):]
     return "\n".join(common) + "\n"
 
 
@@ -1136,6 +1227,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     target_v4_broker_unit = f"disdex-v4-rate-budget-broker@{target}.service"
     try:
         stage_candidate(tar_path, manifest_path, target)
+        verify_adopted_gross_source(release)
         lock_recovered = recover_expired_account_lock(release, run_id)
         install_state_dirs(target); state_root_created = True
         # The V52 template has a same-SHA guard dependency. Clone only the
@@ -1213,6 +1305,8 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
             pid = int(unit_property(unit, "MainPID") or "0")
             require(pid > 100 and Path(f"/proc/{pid}/cwd").resolve() == release, "TARGET_RUNNER_CWD_MISMATCH:" + runner)
         poll_cycles(target, units, paths, restart_before)
+        for runner, unit in units.items():
+            verify_running_gross_env(unit, runner)
         assert_single_shared_risk_writer(read_regular(PINS, 131_072), target=target)
         final_reads = [signed_get() for _ in range(3)]
         require(len({stamp for stamp, _ in final_reads}) == 3 and all(inv == baseline_inventory for _, inv in final_reads), "SIGNED_GET_POSTCUTOVER_CHANGED")
@@ -1230,6 +1324,8 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
                           "sharedRiskRefreshes": len(shared_risk_refreshes),
                           "pendingProofDigest": pending_proof_digest,
                           "sharedRiskSingleWriter": True, "sharedRiskRetired": shared_risk_retired,
+                          "effectiveGrossVerified": True,
+                          "runnerGrossEnvironment": {runner: adopted_gross_env(runner) for runner in RUNNER_IDS},
                           "runnerUnits": units}, sort_keys=True))
     except Exception as exc:
         try:

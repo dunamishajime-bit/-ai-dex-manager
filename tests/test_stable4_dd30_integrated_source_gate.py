@@ -20,7 +20,7 @@ MANIFEST = json.loads((
 class IntegratedStable4Dd30GuardTests(unittest.TestCase):
     def test_all_critical_sources_and_master_goal_are_verified(self):
         out = MOD.verify(ROOT)
-        self.assertEqual(out["integratedFilesVerified"], 20)
+        self.assertEqual(out["integratedFilesVerified"], 23)
         self.assertEqual(out["v4Dd30EntryHold"], "PASS")
         self.assertEqual(out["ownerGoalApprovalCode"], "PRESERVED")
         self.assertFalse(out["productionInstalled"])
