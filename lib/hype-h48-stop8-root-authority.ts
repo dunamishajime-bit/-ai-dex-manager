@@ -35,7 +35,7 @@ const canonical=(value:unknown):unknown=>Array.isArray(value)
     ?Object.fromEntries(Object.entries(value as Record<string,unknown>)
       .sort(([a],[b])=>a.localeCompare(b)).map(([key,val])=>[key,canonical(val)]))
     :value;
-const sorted=(v:Record<string,unknown>)=>JSON.stringify(canonical(v));
+const sorted=(v:unknown)=>JSON.stringify(canonical(v));
 function parseJsonUnique(text:string):unknown{
   // HP token's field dictionary is flat. Canonical re-encoding below rejects
   // duplicates/extra fields by byte equality, not last-key-wins JSON.parse.
@@ -114,7 +114,7 @@ export function attestH48Stop8RootBundle(input:{
     ||ownerTokenText!==sorted(outer))fail("OWNER_TOKEN_FIELDS");
   const token=outer as {payload:unknown;signature:unknown};
   if(!strictKeys(token.payload,OWNER_FIELDS))fail("OWNER_SIGNED_PAYLOAD_FIELDS");
-  const p=token.payload;
+  const p=token.payload as Record<string,unknown>;
   if(p.schema!=="disdex-owner-deployment-approval/v2"
     ||p.repository!==REPO||p.deploymentTarget!==TARGET
     ||p.operatorTarget!==OPERATOR_TARGET||p.route!=="GITHUB_ACTIONS"
