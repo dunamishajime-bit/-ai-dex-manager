@@ -23,8 +23,8 @@ from disdex_owner_approval import verify
 REPO = "dunamishajime-bit/-ai-dex-manager"
 DEPLOYMENT_TARGET = "professional-dismanager.net"
 OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS"
-SOURCE = "e0e4f1d8f22b62e9410188ef6e590a20e31f760f"
-PLAN = "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce"
+SOURCE = "4786f600ae7bf86ffca948f1412956a9113cb20d"
+PLAN = "8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d"
 OPERATION = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
 SCOPE = "HYPE_TREND_LONG"
 POLICY = "H48_TIME_ONLY"
@@ -32,7 +32,7 @@ RUNNER = "HYPE_TREND_LONG"
 PERMIT_OPERATOR = "disdex-stable4-h48-order-enable"
 HOLD_OPERATOR = "disdex-stable4-formal-owner-hold"
 HOLD_STRATEGY = "STABLE4_H48_CUTOVER"
-HOLD_REASON = "STABLE4_RESEARCH_ROLLOUT:" + SOURCE
+HOLD_REASON = "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f"
 ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 
 RELEASES = Path("/home/deploy/disdex-trading/releases")
@@ -620,3 +620,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
