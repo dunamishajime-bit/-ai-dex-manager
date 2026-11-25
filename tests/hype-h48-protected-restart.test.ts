@@ -81,3 +81,23 @@ test("submitted/unknown EXIT remains protected HOLD and never resets to FLAT",()
   assert.equal(res.decision,"HOLD_PROTECTED_RECONCILIATION");
   assert.equal(res.ordersSent,0);
 });
+
+test("signed FLAT after STOP8 cleanup can accept NEXT grid only with matching confirmed retirement",()=>{
+  const flat=newH48ExecutionJournal(SHA),v=venue(),old=stop();
+  const receipt={
+    schema:"disdex-h48-stop8-retirement/v1" as const,
+    sourceSha:SHA,planSha256:PLAN,positionId:old.positionId,
+    stopClientOrderId:old.stopClientOrderId,
+    phase:"CONFIRMED" as const,
+    preparedAt:NOW-1200,submittedAt:NOW-1100,confirmedAt:NOW-1000,
+  };
+  const signed={...v,positions:[],openOrders:[],observedAt:NOW-100};
+  assert.equal(assess({journal:flat,stop8:old,stopRetirement:receipt,venue:signed}).decision,
+    "FLAT_VERIFIED_READ_ONLY");
+  assert.equal(assess({journal:flat,stop8:old,stopRetirement:{...receipt,phase:"CANCEL_SUBMITTED",confirmedAt:null},venue:signed}).decision,
+    "HOLD_PROTECTED_RECONCILIATION");
+  assert.equal(assess({journal:flat,stop8:old,stopRetirement:{...receipt,stopClientOrderId:"OTHER"},venue:signed}).decision,
+    "HOLD_PROTECTED_RECONCILIATION");
+  assert.equal(assess({journal:flat,stop8:old,stopRetirement:{...receipt,confirmedAt:NOW+1},venue:signed}).decision,
+    "HOLD_PROTECTED_RECONCILIATION");
+});
