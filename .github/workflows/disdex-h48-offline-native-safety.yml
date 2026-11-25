@@ -11,6 +11,11 @@ on:
       - "tests/hype-h48-**"
       - "docs/production/stable4-dd30-h48-stop8-risk-owner-candidate-20261126.json"
       - "docs/production/stable4-dd30-live-plan-candidate-20261125.json"
+      - "lib/stable4-dd30-owner-hard-gross-candidate.ts"
+      - "tests/stable4-dd30-owner-hard-gross-candidate.test.ts"
+      - "config/integratedProductionRiskPolicy.ts"
+      - "lib/disdex-integrated-gross-governor.ts"
+      - "tests/integrated_gross_governor.test.ts"
       - "package.json"
       - "package-lock.json"
 
@@ -52,7 +57,10 @@ jobs:
             echo "Expected all 18 H48 offline suites, found $count" >&2
             exit 1
           fi
+          npx --no-install tsx tests/stable4-dd30-owner-hard-gross-candidate.test.ts
+          npx --no-install tsx tests/integrated_gross_governor.test.ts
           echo "H48_OFFLINE_SUITES=$count PASS"
+          echo "GROSS_CANDIDATE_AND_OLD_IMMUTABLE_SOURCE=PASS"
           echo "TRADING_MUTATIONS=0"
       - name: Typecheck entire source without emitting artifacts
         shell: bash
