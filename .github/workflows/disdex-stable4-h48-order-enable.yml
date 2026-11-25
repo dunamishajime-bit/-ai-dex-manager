@@ -13,6 +13,7 @@ on:
       - "scripts/ops/test_disdex_stable4_h48_order_enable.py"
       - "scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py"
       - "tests/hype-h48-order-permit.test.ts"
+      - "config/stable4-dd30-h48-plan.json"
   workflow_dispatch:
     inputs:
       approval_id:
@@ -74,6 +75,14 @@ jobs:
           set -euo pipefail
           [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
           [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          raw=Path('config/stable4-dd30-h48-plan.json').read_bytes().rstrip(b'\r\n')
+          expected='8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d'
+          assert hashlib.sha256(raw).hexdigest()==expected
+          print('STABLE4_DD30_H48_PLAN=PASS')
+          PY
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
       - name: Redeem exact HYPE Owner approval through official HP bridge
@@ -169,3 +178,4 @@ jobs:
         run: |
           rm -rf "$RUNNER_TEMP/stable4-h48-order-ssh"
           rm -f "$RUNNER_TEMP/stable4-h48-order-token" "$RUNNER_TEMP/stable4-h48-order-public.pem" "$RUNNER_TEMP/stable4-h48-order-preflight.json" "$RUNNER_TEMP/stable4-h48-order-result.json"
+
