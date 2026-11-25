@@ -54,10 +54,10 @@ test("missing profit/DD evidence fail-closes to normal entry caps", () => {
   assert.equal(out.tier, "BASE");
   assert.equal(out.cryptoEntryCap, 3);
   assert.equal(out.totalEntryCap, 4.25);
-  assert.equal(out.cryptoHardCap, 5);
-  assert.equal(out.totalHardCap, 8);
+  assert.equal(out.cryptoHardCap, 3);
+  assert.equal(out.totalHardCap, 4.25);
 });
-test("profit tier expands only with fresh profit/DD evidence", () => {
+test("Owner's strict gross limits override favorable profit/DD tier signals", () => {
   const out = resolveIntegratedGrossGovernor({
     now: NOW,
     equityUsd: 100,
@@ -67,13 +67,13 @@ test("profit tier expands only with fresh profit/DD evidence", () => {
     sharedDailyRisk: risk(2),
     portfolioDdGovernor: dd(1.10, 2),
   });
-  assert.equal(out.tier, "PROFIT_2");
-  assert.equal(out.cryptoEntryCap, 3.5);
-  assert.equal(out.totalEntryCap, 4.5);
-  assert.equal(out.availableBalanceReservePct, 10);
+  assert.equal(out.tier, "BASE");
+  assert.equal(out.cryptoEntryCap, 3);
+  assert.equal(out.totalEntryCap, 4.25);
+  assert.equal(out.availableBalanceReservePct, 15);
 });
 
-test("5x Cross margin capacity prevents an 8x hard ceiling from becoming 8x exposure", () => {
+test("even high TWR and available margin cannot raise strict Owner hard caps", () => {
   const out = resolveIntegratedGrossGovernor({
     now: NOW,
     equityUsd: 100,
@@ -83,10 +83,10 @@ test("5x Cross margin capacity prevents an 8x hard ceiling from becoming 8x expo
     sharedDailyRisk: risk(5),
     portfolioDdGovernor: dd(1.30, 0.5),
   });
-  assert.equal(out.tier, "PROFIT_4");
-  assert.equal(out.cryptoEntryCap, 5);
-  assert.equal(out.totalEntryCap, 5);
-  assert.equal(out.totalHardCap, 8);
+  assert.equal(out.tier, "BASE");
+  assert.equal(out.cryptoEntryCap, 3);
+  assert.equal(out.totalEntryCap, 4.25);
+  assert.equal(out.totalHardCap, 4.25);
 });
 test("existing exposure above a reduced effective cap is preserved, not force-trimmed", () => {
   const out = resolveIntegratedGrossGovernor({
@@ -107,9 +107,9 @@ test("final integrated production constants stay pinned", () => {
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap, 5);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 2);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap, 4.25);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap, 8);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap, 4.25);
 });
