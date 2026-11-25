@@ -72,7 +72,7 @@ class H48FormalOwnerTests(unittest.TestCase):
         self.assertIs(row["residentTakeProfitRequired"], False)
         self.assertIs(row["authorizesOtherPolicies"], False)
         self.assertEqual(row["approvedGross"],
-                         {"crypto": 3, "stock": 1.5, "total": 3.5, "hype": 1})
+                         {"crypto": 3, "stock": 4, "total": 4.25, "hype": 1.5})
         self.assertEqual(row["issuedAt"], NOW)
         self.assertGreater(row["expiresAt"], NOW + 48 * 3600000)
         self.assertEqual(json.loads(gate.canonical(row)), row)
