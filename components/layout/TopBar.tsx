@@ -7,6 +7,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -26,11 +27,12 @@ export function TopBar() {
   const { currency, symbol } = useCurrency();
   const { riskStatus } = useSimulation();
   const { snapshot: liveSnapshot, loading: liveLoading } = useLiveStatus();
+  const {snapshot: productionRuntime}=useProductionRuntime();
 
   const title = PAGE_TITLES[pathname || "/"] || SITE_BRAND_NAME;
   const riskLabel =
-    riskStatus === "CRITICAL" ? "警戒" : riskStatus === "CAUTION" ? "注意" : "通常";
-  const liveLabel = liveLoading ? "確認中" : liveSnapshot?.status === "LIVE" ? "確認済み" : liveSnapshot?.status === "STALE" ? "要確認" : "未確認";
+    productionRuntime?.sharedHoldActive===true ? "共有停止中" : productionRuntime?.sharedHoldActive!==false ? "未確認" : riskStatus === "CRITICAL" ? "警戒" : riskStatus === "CAUTION" ? "注意" : "通常";
+  const liveLabel = liveLoading ? "確認中" : liveSnapshot?.status === "MONITOR_ONLY" ? "監視中・発注停止" : liveSnapshot?.status === "LIVE" ? "確認済み" : liveSnapshot?.status === "STALE" ? "要確認" : "未確認";
   const liveClass = liveSnapshot?.status === "LIVE"
     ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
     : liveSnapshot?.status === "STALE"
@@ -57,7 +59,7 @@ export function TopBar() {
           <span className="rounded-full border border-gold-400/20 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold text-white/80">
             基準: {symbol}
           </span>
-          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-1 text-[10px] font-semibold", liveClass)}>LIVE稼働: {liveLabel}</span>
+          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-1 text-[10px] font-semibold", liveClass)}>Runner: {liveLabel}</span>
           <span
             className={cn(
               "rounded-full border px-3 py-1 text-[10px] font-semibold",
@@ -80,7 +82,7 @@ export function TopBar() {
             <Bell className="mr-1 inline h-3.5 w-3.5" />
             通知
           </button>
-          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-2 text-xs font-semibold", liveClass)}>LIVE: {liveLabel}</span>
+          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-2 text-xs font-semibold", liveClass)}>発注: {productionRuntime?.sharedHoldActive===true || liveSnapshot?.status==="MONITOR_ONLY" ? "停止中" : liveSnapshot?.status==="LIVE" ? "個別確認" : "未確認"}</span>
           <button
             type="button"
             className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.14),rgba(245,158,11,0.08))] px-3 py-2 text-xs font-semibold text-white"

@@ -7,7 +7,7 @@ export type LiveStatusSnapshot = {
   ok: boolean;
   readOnly: true;
   tradingMutation: 0;
-  status: "LIVE" | "STALE" | "UNAVAILABLE";
+  status: "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
   checkedAt: string;
   runnerUpdatedAt?: string;
   strategyId?: string;
@@ -31,7 +31,7 @@ export function useLiveStatus() {
       : new Date(v4Snapshot.timestamps.heartbeatUpdatedAt).toISOString(),
     strategyId: "V12_V4",
     mode: v4Snapshot.actual.v4RunnerMode,
-    reason: status === "LIVE"
+    reason: status === "MONITOR_ONLY" ? "現行V4監視稼働確認済み・新規注文停止" : status === "LIVE"
       ? "V12 V4 primary runtime is LIVE_VERIFIED."
       : status === "STALE"
         ? "V12 V4 primary heartbeat is stale."

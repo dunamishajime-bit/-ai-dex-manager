@@ -27,8 +27,8 @@ function BannerContent() {
         {lineageDisplay?.label ?? `Production runtime未接続${runtimeError ? `: ${runtimeError}` : ""}`}
       </span>
       <span>{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}% / V52 ${caps.stockDailyLossPct}%` : "Risk contract runtime未取得"}</span>
-      <span>{caps ? `Portfolio Gross上限 ${caps.totalGross.toFixed(1)}x` : "Gross runtime未取得"}</span>
-      <span>{v12 ? `V12 Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} / ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}</span>
+      <span>{caps ? `Gross Crypto ${caps.cryptoGross.toFixed(2)}x / Stock ${caps.stockGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x` : "Gross runtime未取得"}</span>
+      <span>{runtime?.v4Policy ? `V4 ${runtime.v4Policy.policyId} / ${runtime.v4Policy.routeCount} routes / 新規DD停止 ${runtime.v4Policy.entryDrawdownPct}%` : "V4 contract runtime未取得"}</span>
       <V12V4RuntimePanel compact />
       <span>{pengu && caps ? `PENGU ${pengu.strategyId} / ${caps.penguGross.toFixed(2)}x / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / hard-stop後${pengu.hardStopCooldownHours}h` : "PENGU runtime未取得"}</span>
       <span>{v52 && caps ? `V52 ${v52.policyId} / Slot ${caps.v52V50Gross.toFixed(2)}x / Stock ${caps.stockGross.toFixed(2)}x / Hold≤${v52.maximumHoldingHours}h` : "V52 runtime未取得"}</span>
@@ -37,7 +37,7 @@ function BannerContent() {
       <LiveRuntimeBadge />
       <span className="inline-flex items-center gap-1 text-emerald-200">
         <ShieldCheck className="h-3.5 w-3.5" />
-        Kill Switch / Parity / Override は実状態を確認
+        {runtime?.sharedHoldActive===true ? "GLOBAL/共有停止中・新規発注不可" : runtime?.sharedHoldActive===false ? "共有Kill Switch inactive（発注可否は別判定）" : "共有停止状態未取得"}
       </span>
     </div>
   );

@@ -10,7 +10,7 @@ const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 type JsonObject = Record<string, unknown>;
 
 export type FetRuntimeStatus = {
-  status: "LIVE" | "STALE" | "UNAVAILABLE";
+  status: "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
   configured: boolean;
   capturedAt: string;
   updatedAt?: number;
@@ -77,7 +77,7 @@ export async function loadFetRuntimeObservability(options: { now?: number; expec
   const expectedSha = observation?.expectedSha || configuredExpectedReleaseSha(options.expectedReleaseSha);
   if (observation?.monitorOnly) {
     return {...unavailable(capturedAt,expectedSha,observation.healthReason || "FET監視中・新規発注未許可"),
-      configured:true,status:"STALE",updatedAt:observation.updatedAt,
+      configured:true,status:observation.matchesCurrent?"MONITOR_ONLY":"STALE",updatedAt:observation.updatedAt,
       runtimeSha:observation.runtimeSha,releaseShaVerified:observation.matchesCurrent,
       stateFresh:observation.matchesCurrent,strategyOk:observation.matchesCurrent,
       strategyId:"FET_BRK48_RESIDUAL"};

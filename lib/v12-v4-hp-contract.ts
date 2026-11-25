@@ -52,6 +52,7 @@ export const V12_V4_HP_ROUTE_IDS = Object.freeze([
 ] as const);
 
 export type V12V4HpDisplayStatus =
+  | "MONITOR_ONLY"
   | "LIVE_VERIFIED"
   | "STAGED_NOT_LIVE"
   | "SHADOW"
@@ -92,7 +93,7 @@ export type V12V4HpSnapshot = {
     activeRunnerId: string | null;
     activeRunnerState: string;
     activeRunnerSha: string | null;
-    v4RunnerMode: "CERTIFIED" | "CANARY" | "SHADOW" | "UNKNOWN";
+    v4RunnerMode: "MONITOR_ONLY" | "CERTIFIED" | "CANARY" | "SHADOW" | "UNKNOWN";
     v12PrimaryMode: "V4" | "LEGACY" | "UNKNOWN";
     legacyV12RunnerActive: boolean | null;
     v4ReleaseSha: string | null;

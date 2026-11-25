@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 
 type RuntimeUnit = {
   id: string;
-  status: "LIVE" | "STALE" | "UNAVAILABLE" | "UNCONFIRMED";
+  status: "MONITOR_ONLY" | "STOPPED" | "LIVE" | "STALE" | "UNAVAILABLE" | "UNCONFIRMED";
   reason?: string;
 };
 
 function statusText(unit?: RuntimeUnit) {
   if (!unit) return "未取得";
+  if (unit.status==="MONITOR_ONLY") return "監視中";
+  if (unit.status==="STOPPED") return "停止";
   if (unit.id === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" && unit.status === "UNCONFIRMED") return "市場時間外";
   return unit.status === "LIVE" ? "LIVE" : unit.status === "STALE" ? "要確認" : "未取得";
 }
@@ -36,7 +38,7 @@ export function LiveRuntimeBadge() {
   const find = (id: string) => units?.find((unit) => unit.id === id);
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold text-white/75" aria-live="polite">
-      互換runner状態: Legacy V12 X1.00 ALL {statusText(find("V12_X1.00_ALL"))} / PENGU {statusText(find("PENGU_DUAL_LS_V2_FINAL"))} / FET {statusText(find("FET_BRK48_RESIDUAL"))} / Q102 {statusText(find("QUALITY102_CAUSAL_V1"))} / V52 {statusText(find("DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"))}
+      Runner稼働状態: V4 {statusText(find("V12_V4"))} / PENGU {statusText(find("PENGU_DUAL_LS_V2_FINAL"))} / FET {statusText(find("FET_BRK48_RESIDUAL"))} / Q102 {statusText(find("QUALITY102_CAUSAL_V1"))} / V52 {statusText(find("DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"))} / IDLE {statusText(find("IDLE_PRIORITY_SHORT"))} / HYPE {statusText(find("HYPE_TREND_LONG"))}
     </span>
   );
 }

@@ -1,3 +1,4 @@
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
@@ -20,21 +21,24 @@ function authorized(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) return NextResponse.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
 
-  const releaseShaPath = process.env.DISDEX_RELEASE_SHA_PATH || "/home/deploy/disdex-trading/current/.disdex-release-sha";
-  const v12StatePath = process.env.DISDEX_V12_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json";
-  const q102StatePath = process.env.DISDEX_Q102_STATE_PATH || "/var/lib/disdex/quality102-causal-v1/state.json";
-  const [releaseSha, v12, q102] = await Promise.all([
-    textFile(releaseShaPath),
-    jsonFile(v12StatePath),
-    jsonFile(q102StatePath),
+  const current=await loadCurrentProductionRuntime().catch(()=>null);
+  if(!current) return NextResponse.json({ok:false,error:"現行Runner情報を取得できません"},{status:503});
+  const releaseSha=current.releaseSha;
+  const [v12Raw,q102Raw]=await Promise.all([
+    jsonFile("/var/lib/disdex/v12-v4/heartbeat.json"),
+    jsonFile(process.env.DISDEX_Q102_STATE_PATH || "/var/lib/disdex/quality102-causal-v1/state.json"),
   ]);
-
+  const matching=(row:any,sha:string)=>row && (row.runtimeCommitSha??row.runtimeSha??row.releaseSha)===sha ? row:null;
+  const v12=matching(v12Raw,current.productionReleaseShas.v12);
+  const q102=matching(q102Raw,current.productionReleaseShas.quality102);
+  const evidence=current.runtimeLineage.units;
   const symbolLastExitTs = v12?.symbolLastExitTs && typeof v12.symbolLastExitTs === "object" ? v12.symbolLastExitTs : {};
   const symbolCooldownUntilTs = v12?.symbolCooldownUntilTs && typeof v12.symbolCooldownUntilTs === "object" ? v12.symbolCooldownUntilTs : {};
 
   return NextResponse.json({
     ok: true,
     releaseSha,
+    formalContractHistorical: true,
     formalContract: {
       v12: {
         rank12Gross: 1.0,
@@ -60,15 +64,15 @@ export async function GET(req: NextRequest) {
       },
     },
     live: {
-      v12Mode: v12?.mode || null,
-      v12RuntimeSha: v12?.runtimeCommitSha || v12?.runtimeSha || null,
+      v12Mode: evidence.v12.monitorOnly ? "MONITOR_ONLY" : v12?.mode || null,
+      v12RuntimeSha: evidence.v12.matchesCurrent ? evidence.v12.runtimeSha : null,
       activePositions: Array.isArray(v12?.activePositions) ? v12.activePositions : (v12?.active ? [v12.active] : []),
       symbolLastExitTs,
       symbolCooldownUntilTs,
       lastPriorityHandoff: v12?.lastPriorityHandoff || null,
       pending: v12?.pending || null,
       manualReview: v12?.manualReview || null,
-      q102RuntimeSha: q102?.runtimeCommitSha || q102?.runtimeSha || null,
+      q102RuntimeSha: evidence.quality102.matchesCurrent ? evidence.quality102.runtimeSha : null,
       q102Pending: q102?.pending || null,
     },
     updatedAt: Date.now(),

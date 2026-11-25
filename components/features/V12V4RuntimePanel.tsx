@@ -8,7 +8,7 @@ import { buildV12V4HpPresentation } from "@/lib/v12-v4-hp-ui";
 
 function statusClass(status: ReturnType<typeof buildV12V4HpPresentation>["runtimeStatus"]) {
   if (status === "LIVE_VERIFIED") return "border-emerald-400/30 bg-emerald-500/10 text-emerald-100";
-  if (status === "STAGED_NOT_LIVE" || status === "SHADOW" || status === "STALE") return "border-amber-400/30 bg-amber-500/10 text-amber-100";
+  if (status === "MONITOR_ONLY" || status === "STAGED_NOT_LIVE" || status === "SHADOW" || status === "STALE") return "border-amber-400/30 bg-amber-500/10 text-amber-100";
   return "border-rose-400/30 bg-rose-500/10 text-rose-100";
 }
 

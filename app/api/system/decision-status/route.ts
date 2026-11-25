@@ -57,22 +57,23 @@ export async function GET(req: NextRequest) {
           : unit.id==="QUALITY102_CAUSAL_V1" ? "quality102"
           : unit.id==="FET_BRK48_RESIDUAL" ? "fet"
           : unit.id==="HYPE_TREND_LONG" ? "hype"
-          : unit.id==="DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" ? "v52" : null;
+          : unit.id==="DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" ? "v52" : unit.id==="IDLE_PRIORITY_SHORT" ? "idle" : null;
         const evidence=key ? current?.runtimeLineage.units[key] : undefined;
         if (evidence?.monitorOnly) return {...unit,
           releaseSha:evidence.expectedSha || unit.releaseSha,
-          status:evidence.matchesCurrent ? "UNCONFIRMED" as const : "STALE" as const,
+          status:evidence.matchesCurrent ? "MONITOR_ONLY" as const : "STALE" as const,
           updatedAt:evidence.updatedAt,reason:evidence.healthReason || "監視中・発注未許可"};
+        if (unit.id==="IDLE_PRIORITY_SHORT" && !evidence?.monitorOnly) return unit;
         if (evidence?.processActive===false) return {...unit,
           releaseSha:evidence.expectedSha || unit.releaseSha,
           status:"STOPPED" as const,reason:evidence.healthReason || "Runner停止中"};
 
-        if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
+        if (unit.id === "V12_V4") return {...unit,status:"UNCONFIRMED" as const,reason:"V4のLIVE許可は専用runtime証跡で確認してください。"};
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, releaseSha: penguRuntime.releaseSha || unit.releaseSha, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, releaseSha: quality102Runtime.runtimeSha || unit.releaseSha, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
         if (unit.id === "FET_BRK48_RESIDUAL") return { ...unit, releaseSha: fetRuntime.runtimeSha || unit.releaseSha, status: fetRuntime.status, updatedAt: fetRuntime.updatedAt, reason: fetRuntime.reason };
         if (unit.id === "HYPE_TREND_LONG") return unit;
-        if (!snapshot.v52.marketOpen) return { ...unit, releaseSha: v52Top2Observability.runtimeSha || unit.releaseSha, status: "UNCONFIRMED" as const, updatedAt: v52Top2Observability.updatedAt, reason: "米国株式市場の対象時間外です。V52は市場時間外のため意図的停止で、新規判定・発注は行いません。" };
+        if (!snapshot.v52.marketOpen) return { ...unit, releaseSha: v52Top2Observability.runtimeSha || unit.releaseSha, status: "UNCONFIRMED" as const, updatedAt: v52Top2Observability.updatedAt, reason: "米国株式市場の対象時間外です。V52は市場時間外です。プロセス稼働と判定・発注許可は別です。" };
         return { ...unit, releaseSha: v52Top2Observability.runtimeSha || unit.releaseSha, status: v52Top2Observability.status === "LIVE" ? "LIVE" : v52Top2Observability.status === "STALE" ? "STALE" : "UNAVAILABLE", updatedAt: v52Top2Observability.updatedAt, reason: v52Top2Observability.errors[0] || v52Top2Observability.reason || (v52Top2Observability.status === "LIVE" ? "V52 runner state更新済み、Kill Switch inactiveを確認しました。" : "V52 runner stateがLIVE確認条件を満たしていません。") };
       }),
     };

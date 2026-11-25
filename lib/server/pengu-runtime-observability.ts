@@ -11,7 +11,7 @@ const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
 export type PenguFailure = { occurredAt?: number; message: string };
 
 export type PenguRuntimeStatus = {
-  status: "LIVE" | "STALE" | "UNAVAILABLE";
+  status: "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
   configured: boolean;
   capturedAt: string;
   updatedAt?: number;
@@ -271,7 +271,7 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
   if (observation?.monitorOnly) {
     const reason=observation.healthReason || "PENGU監視中・新規発注未許可";
     return {...unavailable(capturedAt,true,reason,observation.expectedSha),
-      status:"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
+      status:observation.matchesCurrent?"MONITOR_ONLY":"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
       releaseSha:observation.runtimeSha,releaseShaSource:"runner-state",
       releaseShaVerified:observation.matchesCurrent};
   }

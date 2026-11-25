@@ -67,7 +67,7 @@ export type V52Top2Observability = {
   readOnly: true;
   tradingMutation: 0;
   configured: boolean;
-  status: "LIVE" | "STALE" | "UNAVAILABLE";
+  status: "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
   capturedAt: string;
   updatedAt?: number;
   runtimeSha?: string;
@@ -263,7 +263,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
   if (observation?.monitorOnly) {
     const reason=observation.healthReason || "V52監視中・新規発注未許可";
     return {...unavailable(capturedAt,true,reason,thresholds,windowsNy),
-      status:"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
+      status:observation.matchesCurrent?"MONITOR_ONLY":"STALE",mode:"MONITOR_ONLY",updatedAt:observation.updatedAt,
       runtimeSha:observation.runtimeSha,expectedRuntimeSha:observation.expectedSha,
       releaseShaVerified:observation.matchesCurrent,reason};
   }

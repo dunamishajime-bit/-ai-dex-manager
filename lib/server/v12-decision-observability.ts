@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute, join } from "node:path";
 
@@ -107,7 +108,8 @@ export async function loadV12DecisionSources(): Promise<{
     loadV12V4HpObservability().catch(() => null),
   ]);
 
-  if (v4Hp?.actual.v12PrimaryMode === "V4") {
+  const pinned = await loadPinnedDisplayObservation("V12_V4").catch(()=>null);
+  if (pinned || v4Hp?.actual.v12PrimaryMode === "V4") {
     const stateRoot = process.env.V12_V4_HP_STATE_ROOT || "/var/lib/disdex/v12-v4";
     const heartbeatPath = process.env.V12_V4_HEALTH_STATE_PATH || join(stateRoot, "heartbeat.json");
     const decisionPath = process.env.V12_V4_REALTIME_DECISION_PATH || join(stateRoot, "realtime-decision.json");
@@ -115,7 +117,13 @@ export async function loadV12DecisionSources(): Promise<{
       readJsonAtPath(heartbeatPath, "V4 heartbeat source"),
       readJsonAtPath(decisionPath, "V4 decision source"),
     ]);
-    return { runnerFile, decisionFile, source: "V4_PRIMARY" };
+    const sha=pinned?.expectedSha ?? v4Hp?.actual.currentReleaseSha;
+    function checked(file: JsonSource,label: string): JsonSource {
+      const row=asObject(file.value);
+      if (!row || !sha || (row.runtimeSha ?? row.runtimeCommitSha ?? row.releaseSha)!==sha) return {configured:file.configured,value:null,error:label+"の現行SHA証跡なし"};
+      return file;
+    }
+    return { runnerFile:checked(runnerFile,"V4 heartbeat"),decisionFile:checked(decisionFile,"V4 decision"), source: "V4_PRIMARY" };
   }
 
   return { runnerFile: legacyRunnerFile, decisionFile: legacyDecisionFile, source: "LEGACY_ENV" };
