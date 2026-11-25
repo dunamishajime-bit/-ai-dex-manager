@@ -54,12 +54,21 @@ export class H48Stop8NativeHandoff implements H48ResidentStop8Handoff {
     const basename=createHash("sha256").update(id).digest("hex").slice(0,40)+".json";
     const path=join(d.explicitStoreRoot??STOP_ROOT,input.sourceSha,basename);
     const store=new FileH48Stop8Store(path,input.sourceSha,input.planSha256);
+    // A second attempt must be rejected even before a signed venue read;
+    // a STOP may have been submitted before a crash and still be pending.
+    try{
+      await store.load();
+      fail("PRIOR_STOP_INTENT_EXISTS");
+    }catch(error){
+      if((error as NodeJS.ErrnoException)?.code!=="ENOENT")throw error;
+    }
+    const observedNow=d.now??Date.now;
     const intent=makeH48Stop8Intent({
       sourceSha:input.sourceSha,planSha256:input.planSha256,
       positionId:input.position.contract.positionId,
       entryClientOrderId:input.position.entryClientOrderId,
       entryPrice:input.position.entryPrice,quantity:input.position.quantity,
-      tickSize:tick,now:input.now,
+      tickSize:tick,now:observedNow(),
     });
     // A PREPARED file must not be created under an unsigned policy. This
     // independent Root check is repeated by the installer after persistence.
@@ -71,8 +80,12 @@ export class H48Stop8NativeHandoff implements H48ResidentStop8Handoff {
     // Refuse to overwrite an old/stale/ambiguous STOP journal. The absence
     // of a trusted flat/new state is never a reason to retry a prior attempt.
     const signed=await d.readSignedVenue();
+    // The entry submission clock predates this signed GET. Validate the
+    // snapshot against an observation clock taken AFTER the GET, not the
+    // earlier entry clock; never accept a future-dated venue proof.
+    const checkedAt=observedNow();
     await store.initialize({
-      intent,lease:input.lease,signedVenue:signed,now:input.now,
+      intent,lease:input.lease,signedVenue:signed,now:checkedAt,
     });
     const installer=new H48Stop8Installer({
       sourceSha:input.sourceSha,planSha256:input.planSha256,
