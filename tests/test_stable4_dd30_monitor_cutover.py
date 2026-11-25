@@ -85,6 +85,42 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", hype)
         self.assertNotIn("/etc/disdex/current-runtime/%i.hype-operator.env", hype)
 
+    def test_pengu_instance_uses_only_canonical_safety_writers(self):
+        target, guard_sha, risk_sha = "a" * 40, "b" * 40, "c" * 40
+        guard = f"disdex-v12-v52-margin-guard@{guard_sha}.service"
+        risk = f"disdex-shared-crypto-risk@{risk_sha}.service"
+        template = (
+            "[Unit]\n"
+            "After=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service\n"
+            "Wants=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service\n"
+            "[Service]\nWorkingDirectory=/home/deploy/disdex-trading/releases/%i\n"
+        ).encode()
+        import hashlib
+        with patch.object(cutover, "read_regular", return_value=template), patch.object(
+            cutover, "PENGU_TEMPLATE_SHA256", hashlib.sha256(template).hexdigest()
+        ):
+            rendered = cutover.pengu_instance_text(target, guard, risk).decode()
+            self.assertIn("After=network-online.target " + risk + " " + guard, rendered)
+            self.assertIn("Wants=network-online.target " + risk + " " + guard, rendered)
+            self.assertNotIn("margin-guard@%i", rendered)
+            self.assertNotIn("crypto-risk@%i", rendered)
+            self.assertIn("WorkingDirectory=/home/deploy/disdex-trading/releases/%i", rendered)
+            with self.assertRaisesRegex(cutover.ContractError, "PENGU_SAFETY_PIN_CANDIDATE_WRITER"):
+                cutover.pengu_instance_text(target, f"disdex-v12-v52-margin-guard@{target}.service", risk)
+        with patch.object(cutover, "read_regular", return_value=b"unexpected"):
+            with self.assertRaisesRegex(cutover.ContractError, "PENGU_TEMPLATE_SHA_MISMATCH"):
+                cutover.pengu_instance_text(target, guard, risk)
+
+    def test_pengu_effective_dependencies_reject_duplicate_guard_and_risk(self):
+        guard = "disdex-v12-v52-margin-guard@" + "b" * 40 + ".service"
+        risk = "disdex-shared-crypto-risk@" + "c" * 40 + ".service"
+        duplicate = "disdex-v12-v52-margin-guard@" + "a" * 40 + ".service"
+        with patch.object(cutover, "unit_property", side_effect=[guard + " " + risk, guard + " " + risk, ""]):
+            cutover.validate_pengu_safety_dependencies("pengu.service", guard, risk)
+        with patch.object(cutover, "unit_property", return_value=guard + " " + risk + " " + duplicate):
+            with self.assertRaisesRegex(cutover.ContractError, "PENGU_EFFECTIVE_SAFETY_DEPENDENCY_MISMATCH"):
+                cutover.validate_pengu_safety_dependencies("pengu.service", guard, risk)
+
     def test_adopted_dd30_gross_is_bound_per_runner_after_environment_files(self):
         target = "a" * 40
         units = target_units(target)

@@ -74,6 +74,8 @@ INSTANCE_UNIT_RE = re.compile(
     r"^(?P<base>" + "|".join(re.escape(item) for item in STALE_INSTANCE_BASES) +
     r")@(?P<sha>[0-9a-f]{40})\.service$"
 )
+PENGU_TEMPLATE = Path("/etc/systemd/system/disdex-pengu-dual-ls-v2@.service")
+PENGU_TEMPLATE_SHA256 = "c04e05755d939ccd51ff6db69de4ef8a41ad725ad3e83c87f8c45dc0483e90ce"
 V52_TEMPLATE = Path("/etc/systemd/system/disdex-v52-aster-only@.service")
 V52_TEMPLATE_SHA256 = "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a"
 V4_OVERLAY_SCHEMA = "disdex-v4-staged-overlay/v1"
@@ -904,6 +906,40 @@ def v52_instance_text(target: str, margin_unit: str) -> bytes:
     return text.replace(old_after, "After=network-online.target disdex-stock-reference-free.service " + margin_unit).replace(old_requires, "Requires=disdex-stock-reference-free.service " + margin_unit).encode("utf-8")
 
 
+def pengu_instance_text(target: str, margin_unit: str, risk_unit: str) -> bytes:
+    """Bind a no-order PENGU monitor to the reviewed canonical safety writers.
+
+    systemd dependency lists cannot be cleared from a drop-in. A same-SHA
+    template otherwise pulls in duplicate Margin Guard and Shared Risk units.
+    """
+    require(TARGET_SHA_RE.fullmatch(target) is not None, "PENGU_TARGET_SHA_INVALID")
+    for unit, family in ((margin_unit, "disdex-v12-v52-margin-guard"), (risk_unit, "disdex-shared-crypto-risk")):
+        match = INSTANCE_UNIT_RE.fullmatch(unit)
+        require(match is not None and match.group("base") == family, "PENGU_SAFETY_PIN_INVALID")
+        require(match.group("sha") != target, "PENGU_SAFETY_PIN_CANDIDATE_WRITER")
+    raw = read_regular(PENGU_TEMPLATE, 256_000)
+    require(hashlib.sha256(raw).hexdigest() == PENGU_TEMPLATE_SHA256, "PENGU_TEMPLATE_SHA_MISMATCH")
+    text = raw.decode("utf-8")
+    previous = "network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service"
+    updated = "network-online.target " + risk_unit + " " + margin_unit
+    for directive in ("After=", "Wants="):
+        require(text.count(directive + previous) == 1, "PENGU_TEMPLATE_DEPENDENCIES_UNEXPECTED")
+        text = text.replace(directive + previous, directive + updated, 1)
+    require("disdex-shared-crypto-risk@%i.service" not in text and "disdex-v12-v52-margin-guard@%i.service" not in text,
+            "PENGU_TEMPLATE_SAME_SHA_DEPENDENCY_REMAINS")
+    return text.encode("utf-8")
+
+
+def validate_pengu_safety_dependencies(unit: str, margin_unit: str, risk_unit: str) -> None:
+    expected = {margin_unit, risk_unit}
+    prefixes = ("disdex-v12-v52-margin-guard@", "disdex-shared-crypto-risk@")
+    for property_name in ("After", "Wants"):
+        actual = {value for value in unit_property(unit, property_name).split() if value.startswith(prefixes)}
+        require(actual == expected, "PENGU_EFFECTIVE_SAFETY_DEPENDENCY_MISMATCH:" + property_name)
+    requires = {value for value in unit_property(unit, "Requires").split() if value.startswith(prefixes)}
+    require(requires.issubset(expected), "PENGU_EFFECTIVE_SAFETY_DEPENDENCY_MISMATCH:Requires")
+
+
 def target_pins(raw: bytes, target: str, units: dict[str, str]) -> bytes:
     value = json.loads(raw.decode("utf-8"))
     rows = value.get("runners") or {}
@@ -1226,8 +1262,10 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
     paths = evidence_paths(target)
     dropins = {runner: dropin_path(unit) for runner, unit in units.items()}
     instance = Path("/etc/systemd/system") / units["V52"]
+    pengu_instance = Path("/etc/systemd/system") / units["PENGU_V8"]
+    risk_unit = str((json.loads(pins_raw.decode("utf-8"))["runners"].get("SHARED_CRYPTO_RISK") or {}).get("serviceUnit") or "")
     q102_path = Path("/var/lib/disdex/quality102-causal-v1/state.json")
-    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, PENDING_PROOF, *dropins.values(), instance])
+    file_snapshot = snapshot_paths([PINS, CURRENT_PLAN, q102_path, q102_path.parent, PENDING_PROOF, *dropins.values(), instance, pengu_instance])
     state_root_created = False
     release = BASE / target
     target_margin_unit = f"disdex-v12-v52-margin-guard@{target}.service"
@@ -1241,6 +1279,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         # The V52 template has a same-SHA guard dependency. Clone only the
         # reviewed instance and bind it to the existing healthy Margin Guard.
         write_atomic(instance, v52_instance_text(target, margin_unit), (0, 0, 0o644))
+        write_atomic(pengu_instance, pengu_instance_text(target, margin_unit, risk_unit), (0, 0, 0o644))
         for runner, unit in units.items():
             path = dropins[runner]
             path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
@@ -1250,6 +1289,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         for runner, unit in units.items():
             validate_target_unit(unit, target, runner)
             verify_environment(unit, runner)
+        validate_pengu_safety_dependencies(units["PENGU_V8"], margin_unit, risk_unit)
         # Reconcile immediately before quiescing any old process.
         _h, _v, hd = hold_snapshot(); require(hd == hashlib.sha256(hold_raw).hexdigest(), "GLOBAL_HOLD_CHANGED_PRECUTOVER")
         _stamp, inv = signed_get(); require(inv == baseline_inventory, "VENUE_CHANGED_PRECUTOVER")
@@ -1321,6 +1361,7 @@ def execute(target: str, plan: dict, execution_plan_sha256: str, tar_path: Path,
         _h2, _v2, hd2 = hold_snapshot(); require(hd2 == HOLD_DIGEST, "GLOBAL_HOLD_MUTATED")
         require(not any(unit_active(unit) for unit in old_units.values()), "DUAL_RUNNER_ACTIVE")
         # Reconfirm singleton after final venue/HOLD reconciliation.
+        validate_pengu_safety_dependencies(units["PENGU_V8"], margin_unit, risk_unit)
         assert_single_shared_risk_writer(read_regular(PINS, 131_072), target=target)
         print(json.dumps({"status": "STABLE4_DD30_MONITOR_CUTOVER_PASS", "targetSha": target,
                           "ownerGoalId": plan.get("ownerGoalId"),
