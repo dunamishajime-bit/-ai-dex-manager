@@ -80,9 +80,11 @@ test("wrong source/position identity or unavailable root authority cannot cancel
   const f=await fixture();
   try{
     let cancels=0;
+    const fakeClient={cancelOrder:async()=>{
+      cancels++;throw Error("UNEXPECTED_CANCEL");
+    }} as unknown as Pick<AsterV3Client,"cancelOrder">;
     const adapter=new H48Stop8NativeRetirementHandoff({
-      client:({cancelOrder:async()=>{cancels++;throw Error("UNEXPECTED_CANCEL")}}
-        as Pick<AsterV3Client,"cancelOrder">),
+      client:fakeClient,
       root:{assertSignedResidentStop8:async()=>{throw Error("OWNER_ROOT_STOP8_GRANT_MISSING")}},
       stopRoot:f.stopRoot,retirementRoot:f.retirementRoot,
       readSignedVenue:async()=>signed(f.intent,true,true),
