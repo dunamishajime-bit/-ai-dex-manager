@@ -12,7 +12,8 @@ import { randomUUID } from "node:crypto";
 import { lstat,open,readFile,rename,unlink } from "node:fs/promises";
 import { dirname,resolve } from "node:path";
 import type { AccountLockHandle } from "./disdex-account-order-lock";
-import { newH48ExecutionJournal,validateH48ExecutionJournal,assertH48JournalTransition,
+import type { DirectTradeResult } from "./direct-trade-executor";
+import { newH48ExecutionJournal,validateH48ExecutionJournal,assertH48JournalTransition,reconcileH48Attempt,
   type H48ExecutionJournal,type H48SignedVenueSnapshot } from "./hype-h48-execution-journal";
 
 const fail=(reason:string):never=>{throw Error("H48_JOURNAL_STORE_"+reason)};
@@ -110,12 +111,21 @@ export class FileH48ExecutionJournalStore {
       return this.load();
     });
   }
-  async save(expected:H48ExecutionJournal,replacement:H48ExecutionJournal,lease:AccountLockHandle){
+  async save(expected:H48ExecutionJournal,replacement:H48ExecutionJournal,lease:AccountLockHandle,
+    evidence?:{result:DirectTradeResult;venue:H48SignedVenueSnapshot;now:number}){
     const first=await assertAccountLease(lease);
     const old=validateH48ExecutionJournal(expected,this.sourceSha);
     const updated=validateH48ExecutionJournal(replacement,this.sourceSha);
     if(updated.revision!==old.revision+1)fail("REVISION_STEP_INVALID");
     assertH48JournalTransition(old,updated);
+    if(old.pending?.stage==="SUBMITTED"){
+      // No transition from a potentially executed order may be committed
+      // without a fresh reconciliation of exact venue order + account
+      // position evidence. In particular, never fabricate SUBMITTED -> FLAT.
+      if(!evidence)fail("AUTHENTICATED_RECONCILIATION_REQUIRED");
+      const recomputed=reconcileH48Attempt(old,evidence);
+      if(JSON.stringify(recomputed)!==JSON.stringify(updated))fail("RECONCILIATION_TRANSITION_MISMATCH");
+    }
     return withExclusiveJournalWriter(this.path,async()=>{
       const raw=await stableRead(this.path).catch((e:NodeJS.ErrnoException)=>{
         if(e.code==="ENOENT")fail("MISSING_NOT_FLAT");throw e;
