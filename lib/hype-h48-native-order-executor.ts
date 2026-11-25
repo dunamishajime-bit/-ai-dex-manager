@@ -47,9 +47,19 @@ export interface H48OrderStateStore {
 export interface H48OrderVenueReadback {
   read():Promise<H48SignedVenueSnapshot>;
 }
+export interface H48ResidentStop8Handoff {
+  /** This separately approved policy must atomically persist a STOP8 intent,
+   * POST one reduce-only STOP_MARKET, and read back actual signed ASTER
+   * position/STOP. No signed certificate => must throw, not report success. */
+  protectConfirmedEntry(input:{
+    sourceSha:string;planSha256:string;
+    position:NonNullable<H48ExecutionJournal["position"]>;
+    lease:AccountLockHandle;now:number;
+  }):Promise<{status:"STOP8_VERIFIED";stopClientOrderId:string}>;
+}
 export type H48OrderExecutionOutcome =
-  | Readonly<{status:"RECONCILED_OPEN"|"RECONCILED_FLAT"|"MANUAL_REVIEW";clientOrderId:string;ordersAttempted:1}>
-  | Readonly<{status:"SUBMITTED_RECONCILIATION_REQUIRED";clientOrderId:string;ordersAttempted:1}>;
+  | Readonly<{status:"RECONCILED_OPEN_STOP8_VERIFIED"|"RECONCILED_FLAT"|"MANUAL_REVIEW";clientOrderId:string;ordersAttempted:1}>
+  | Readonly<{status:"SUBMITTED_RECONCILIATION_REQUIRED"|"OPEN_STOP8_UNVERIFIED";clientOrderId:string;ordersAttempted:1}>;
 
 const forbid=(reason:string):never=>{throw Error("H48_ORDER_EXECUTOR_BLOCKED:"+reason)};
 const validSha=(v:unknown)=>typeof v==="string"&&/^[0-9a-f]{40}$/.test(v);
@@ -84,6 +94,7 @@ export class H48NativeOrderExecutor {
     lease:AccountLockHandle;
     rootGrant:H48RootGrantVerifier;
     signedVenue:H48OrderVenueReadback;
+    residentStop8:H48ResidentStop8Handoff;
     /** Fresh global permission is mandatory only for exposure-increasing ENTRY. */
     assertGlobalOrderRelease:()=>Promise<void>;
     /** ENTRY must pass shared risk, hard-stop and Gross before exposure. */
@@ -186,8 +197,29 @@ export class H48NativeOrderExecutor {
       if(reconciled.mode==="MANUAL_REVIEW")return {
         status:"MANUAL_REVIEW",clientOrderId:pending.clientOrderId,ordersAttempted:1,
       };
-      if(reservation)await d.lease.releaseReservation(reservation.reservationId);
-      return {status:reconciled.mode==="OPEN"?"RECONCILED_OPEN":"RECONCILED_FLAT",
+      if(reconciled.mode==="OPEN"){
+        // An entry fill is NOT a safe completion until the exchange confirms
+        // a real reduce-only STOP8. Keep gross exposure RESERVED on every
+        // unknown/missing/unsigned/stale STOP state; never retry ENTRY.
+        try{
+          if(!reconciled.position)throw Error("H48_OPEN_POSITION_MISSING");
+          const protectedBy=await d.residentStop8.protectConfirmedEntry({
+            sourceSha:d.sourceSha,planSha256:grant.planSha256,
+            position:reconciled.position,lease:d.lease,now:now(),
+          });
+          if(protectedBy.status!=="STOP8_VERIFIED"
+            ||!/^h48s-[0-9a-f]{30}$/.test(protectedBy.stopClientOrderId))
+            throw Error("H48_STOP8_UNVERIFIED");
+          if(reservation)await d.lease.releaseReservation(reservation.reservationId);
+          return {status:"RECONCILED_OPEN_STOP8_VERIFIED",
+            clientOrderId:pending.clientOrderId,ordersAttempted:1};
+        }catch{
+          return {status:"OPEN_STOP8_UNVERIFIED",
+            clientOrderId:pending.clientOrderId,ordersAttempted:1};
+        }
+      }
+      if(reservation)throw Error("H48_ENTRY_FLAT_WITH_RESERVATION_UNEXPECTED");
+      return {status:"RECONCILED_FLAT",
         clientOrderId:pending.clientOrderId,ordersAttempted:1};
     }catch {
       return {status:"SUBMITTED_RECONCILIATION_REQUIRED",
