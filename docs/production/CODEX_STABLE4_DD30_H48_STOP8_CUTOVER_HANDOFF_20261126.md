@@ -15,7 +15,7 @@ The Owner approved the **strict aggregate upper bounds**, not new profit-tier ex
 | Total | 4.25× |
 | HYPE | 1.5× |
 
-This is chat policy consent, **NOT** a cryptographically signed HP deployment approval, Root certificate, source-bound permit or authorization to clear GLOBAL HOLD. The old STABLE4 plan had Stock 1.5×, Total 3.5×, HYPE 1.0×. The candidate updates `config/integratedProductionRiskPolicy.ts` to make Crypto 3.0 and Total 4.25 the **hard** limits as well: the old profit/DD governor could otherwise escalate to Crypto 5.0 and Total 8.0, which is outside the newly approved limits. `tests/integrated_gross_governor.test.ts` checks this.
+This is chat policy consent, **NOT** a cryptographically signed HP deployment approval, Root certificate, source-bound permit or authorization to clear GLOBAL HOLD. The old STABLE4 plan had Stock 1.5×, Total 3.5×, HYPE 1.0×. **Critical immutable-source integrity:** The old signed `config/integratedProductionRiskPolicy.ts` and `lib/disdex-integrated-gross-governor.ts` remain EXACTLY as `master` because editing them failed `STABLE4_DD30_INTEGRATED_SOURCE_BLOCKED:INTEGRATED_SOURCE_SHA_MISMATCH`. The new absolute-cap contract is **separately staged**, not deployed, in `lib/stable4-dd30-owner-hard-gross-candidate.ts` and `tests/stable4-dd30-owner-hard-gross-candidate.test.ts`. The old signed runtime governor can still escalate to Crypto 5.0× / Total 8.0× with profit/DD. **Codex MUST incorporate 3.0× / 4.25× HARD caps in a NEW immutable signed release, with new source fingerprints and formal Owner/Root source authorization. Never replace the pinned SHA hash in old release just to pass CI.**
 
 The HYPE candidate policy is `H48_R4_RESIDENT_STOP8`. It preserves the frozen H48R4 6-hour entry grid / 48-hour next-open exit and additionally requires a resident ASTER reduce-only SELL `STOP_MARKET` at an -8% trigger. This is **not** the previous signed `H48_TIME_ONLY` / `residentStopRequired:false` contract, nor proof the loss is capped at 8% when the market gaps. The 2025-10-01 to 2026-10-01 TARGET sample had only 27 entries, and independent FORWARD had 2; source-equivalent, but insufficient for broad profitability or whole-account DD guarantees.
 
@@ -27,6 +27,9 @@ The HYPE candidate policy is `H48_R4_RESIDENT_STOP8`. It preserves the frozen H4
 - **Protected restart** requires an exact signed resident STOP8 plus owned live position; otherwise protected HOLD: `lib/hype-h48-protected-restart.ts`.
 - Root/Owner Ed25519 **read-only verifier** for the NEW STOP8 bundle + pinned source/plan, certificate SHA, Root file metadata and short-lived position evidence: `lib/hype-h48-stop8-root-authority.ts`, `lib/hype-h48-stop8-policy-intent.ts`. This code **does not issue or sign anything**.
 - Post-confirmed-flat owned STOP8 cancellation using durable CANCEL_SUBMITTED state and signed GET with no retry on UNKNOWN: `lib/hype-h48-stop8-retirement.ts`, `lib/hype-h48-stop8-retirement-store.ts`.
+- Exact new STOP8-certified ENTRY and 48h EXIT intent proof: `lib/hype-h48-stop8-policy-intent.ts`.
+- Root/Owner Ed25519 signature verification and 2-minute scoped per-position evidence: `lib/hype-h48-stop8-root-authority.ts`. It never signs or mutates.
+- Pure non-authorizing future-release hard-cap calculator: `lib/stable4-dd30-owner-hard-gross-candidate.ts`.
 - Correctly separate Root-authorized protected reduce-only exit from new-entry permission, while requiring signed STOP8 to complete a new BUY: `lib/hype-h48-native-order-executor.ts`.
 - Cross-runner Root safety audit, Gross/STOP mismatch detection, canonical Kill Switch path validation: `lib/hype-h48-production-gates.ts`, `lib/hype-h48-kill-switch-consistency.ts`.
 - Independent source-only CI without production credentials: `.github/workflows/disdex-h48-offline-native-safety.yml`. Protected original order-enable workflow intentionally retains its existing strict authorization.
@@ -65,3 +68,11 @@ npx --no-install tsc --noEmit -p tsconfig.json
 ```
 
 **Acceptance boundary:** Code/tests/PR preparation are valid deliverables. LIVE is **not complete** until the new Owner/Root credentials and source-bound permits are issued and post-deploy results actually prove them. Maintain no-orders/hold until that point.
+
+## Additional strict stop/rollback preconditions before Codex formal switch
+
+- Offline protected restart and STOP retirement tests do NOT prove the H48 systemd runtime is wired. Build separate native H48 Runner; never repurpose legacy TREND/ATR.
+- STOP retirement DELETE is allowed only AFTER signed flat account GET, durable CANCEL_SUBMITTED and Root STOP8 approval; UNKNOWN remains pending and no retries.
+- Root STOP8 verifier is NOT the certificate issuer. Obtain valid HP signed approval_id for exact NEW SHA and STOP8 policy, then separate Root-signed issuer; old TIME_ONLY permit is unusable.
+- Source-only CI is no-secret/no-production, not a substitute for protected GitHub Environment and real Root preflight.
+- Old runtime gross governor has 5.0/8.0 escalations: explicitly change it only in NEW signed release and verify strict upper bounds before any order.
