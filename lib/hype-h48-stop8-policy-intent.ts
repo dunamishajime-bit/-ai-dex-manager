@@ -95,20 +95,21 @@ export function prepareH48Stop8TimeExit(input:{
     ||!isTime(input.now))
     fail("EXIT_NOT_PROTECTED");
   const c=validateHypeH48TimeOnlyContract(input.contract,input.contract);
-  const same=s.position.contract.positionId===c.positionId&&c.sourceSha===s.sourceSha;
+  const livePosition=s.position!;
+  const same=livePosition.contract.positionId===c.positionId&&c.sourceSha===s.sourceSha;
   if(!same||input.now<c.logicalExitTs||input.now-c.logicalExitTs>120_000)
     fail("EXIT_POSITION_OR_DEADLINE");
   const due=evaluateHypeH48TimeOnlyExit(c,input.now,input.exitBoundary);
-  if(!due.due)fail("TIME48_NOT_DUE");
+  if(due.due!==true)fail("TIME48_NOT_DUE");
   const proof=validateH48Stop8PositionEvidence({
-    proof:input.evidence,contract:c,quantity:s.position.quantity,
+    proof:input.evidence,contract:c,quantity:livePosition.quantity,
     runtimeSha:s.sourceSha,planSha256:input.planSha256,now:input.now,
   });
   return validateH48ExecutionJournal({
     ...s,revision:s.revision+1,mode:"EXIT_PENDING",
     pending:{phase:"EXIT",stage:"PREPARED",
       clientOrderId:orderId(s.sourceSha,c.positionId,"EXIT"),
-      contract:c,quantity:s.position.quantity,referencePrice:due.referenceOpen,
+      contract:c,quantity:livePosition.quantity,referencePrice:due.referenceOpen,
       certificateSha256:proof.certificateSha256,
       authorizationExpiresAt:proof.expiresAt,
       preparedAt:input.now,submittedAt:null,
