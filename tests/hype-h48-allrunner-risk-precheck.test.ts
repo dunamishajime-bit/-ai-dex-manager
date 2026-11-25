@@ -43,7 +43,7 @@ test("GLOBAL HOLD or missing Risk/ DD or margin never upgrades precheck into LIV
     {marginGuard:{stage:"FAILED",ordersAllowed:false,checkedAt:NOW}},
     {ddState:{...a.ddState,currentDrawdownPct:31}},
     {venue:{...a.venue,observedAt:NOW-300000}},
-    {sharedDailyRisk:{...a.sharedDailyRisk,updatedAt:NOW-400000}},
+    {sharedDailyRisk:{...(a.sharedDailyRisk as object),updatedAt:NOW-400000}},
   ]){
     const r=inspectH48AllRunnerGrossAndRisk({...a,...update});
     assert.equal(r.status,"BLOCKED");
