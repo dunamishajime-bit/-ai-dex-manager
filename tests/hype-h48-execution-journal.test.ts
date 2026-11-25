@@ -9,6 +9,7 @@ import {
   type H48SignedVenueSnapshot,
 } from "../lib/hype-h48-execution-journal";
 import { advanceH48ResearchSequence } from "../lib/hype-h48-research-sequence";
+import {stop8ClientOrderId} from "../lib/hype-h48-resident-stop8";
 
 const SHA="4786f600ae7bf86ffca948f1412956a9113cb20d", E=Date.UTC(2026,10,24,0), H=3600000;
 const contract=createHypeH48TimeOnlyContract({positionId:"H48|HYPEUSDT|"+E,sourceSha:SHA,logicalEntryTs:E});
@@ -183,4 +184,46 @@ test("journal transition firewall refuses fabricated OPEN, FLAT or review resets
   assert.throws(()=>assertH48JournalTransition(open,fabricatedReview),/HYPE_H48_JOURNAL_TRANSITION_/);
   const stale={...open,revision:open.revision+1};
   assert.throws(()=>assertH48JournalTransition(open,stale),/HYPE_H48_JOURNAL_TRANSITION_/);
+});
+
+test("certified H48 STOP8 remains as sole owned reduce-only STOP during signed time48 SELL reconciliation",()=>{
+  const open=entered(),t=E+48*H+10_000;
+  const planned=prepareH48ExitIntent(open,{
+    status:"H48_EXIT_ATTESTED_READ_ONLY",contract,
+    evidence:evidence(t),boundary:{due:true,reason:"HYPE_REDESIGN_TIME48_NEXTOPEN",
+      logicalExitTs:E+48*H,referenceOpen:120},
+  },t);
+  const sent=markH48OrderAttempted(planned,t+20);
+  const owned={
+    clientOrderId:stop8ClientOrderId(SHA,contract.positionId),
+    symbol:"HYPEUSDT",type:"STOP_MARKET",side:"SELL" as const,
+    reduceOnly:true,status:"NEW",stopPrice:92,quantity:2,executedQuantity:0,
+  };
+  const ok=reconcileH48Attempt(sent,{
+    result:fakeResult(sent,"FILLED",2,"SELL"),
+    venue:snapshot(t+120,0,[owned]),now:t+140,
+  });
+  assert.equal(ok.mode,"FLAT");
+  assert.equal(ok.pending,null);
+  assert.equal(ok.position,null);
+  // The STOP is still on ASTER and is *not* considered physically retired;
+  // the H48Stop8RetirementCoordinator must prove signed flat and cancel it.
+  for(const orders of [
+    [{...owned,clientOrderId:"WRONG-STOP"}],
+    [{...owned,type:"TAKE_PROFIT_MARKET"}],
+    [{...owned,reduceOnly:false}],
+    [owned,owned],
+  ]){
+    const rejected=reconcileH48Attempt(sent,{
+      result:fakeResult(sent,"FILLED",2,"SELL"),
+      venue:snapshot(t+120,0,orders),now:t+140,
+    });
+    assert.equal(rejected.mode,"MANUAL_REVIEW");
+  }
+  const entry=markH48OrderAttempted(start(),E+1500);
+  const wrongEntry=reconcileH48Attempt(entry,{
+    result:fakeResult(entry,"FILLED",2,"BUY"),
+    venue:snapshot(E+1600,2,[owned]),now:E+1700,
+  });
+  assert.equal(wrongEntry.mode,"MANUAL_REVIEW");
 });
