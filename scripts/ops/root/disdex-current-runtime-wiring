@@ -2374,6 +2374,16 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   # ExecStartPre still requires the exact operator artifact, so this flag alone
   # can never activate real-money trading.
   write_atomic "$HYPE_OPERATOR_ENV_FILE" "DISDEX_HYPE_ZEC_OPERATOR_ARMED=true
+# A legacy EnvironmentFile is loaded before this SHA-pinned final HYPE
+# operator file. Rebind every shared Kill Switch alias to the canonical
+# protected file so the integrated reader never observes mixed policies.
+DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V11EQ_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+QUALITY102_CAUSAL_V1_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
 DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
 DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl

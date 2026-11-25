@@ -5,6 +5,9 @@ on:
     paths:
       - ".github/workflows/disdex-stable4-h48-order-enable.yml"
       - "lib/hype-h48-order-permit.ts"
+      - "lib/hype-h48-kill-switch-consistency.ts"
+      - "tests/hype-h48-kill-switch-consistency.test.ts"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
       - "scripts/ops/deploy/disdex_stable4_h48_order_enable.py"
       - "scripts/ops/deploy/disdex_owner_approval.py"
       - "scripts/ops/deploy/disdex_deployment_contract.py"
@@ -44,6 +47,7 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py -v
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
+          npx tsx tests/hype-h48-kill-switch-consistency.test.ts
           python3 -B - <<'PY'
           import ast
           from pathlib import Path
@@ -85,6 +89,7 @@ jobs:
           PY
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
+          npx tsx tests/hype-h48-kill-switch-consistency.test.ts
       - name: Redeem exact HYPE Owner approval through official HP bridge
         shell: bash
         env:
