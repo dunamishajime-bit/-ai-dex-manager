@@ -17,6 +17,7 @@ on:
       - "lib/disdex-integrated-gross-governor.ts"
       - "tests/integrated_gross_governor.test.ts"
       - "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py"
+      - "scripts/disdex-hype-h48-native-shadow.ts"
       - "tests/test_disdex_h48_stop8_formal_issue.py"
       - "package.json"
       - "package-lock.json"
@@ -70,6 +71,22 @@ jobs:
           set -euo pipefail
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest -v tests/test_disdex_h48_stop8_formal_issue.py
           echo "H48_STOP8_FORMAL_ISSUER_NO_MUTATION_TESTS=PASS"
+      - name: Fail-closed H48 native SHADOW CLI self-test
+        shell: bash
+        env:
+          DISDEX_H48_RUNTIME_SHA: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          DISDEX_H48_MODE: SHADOW
+        run: |
+          set -euo pipefail
+          output="$(npx --no-install tsx scripts/disdex-hype-h48-native-shadow.ts --self-test)"
+          echo "$output"
+          grep -q '"ordersSent":0' <<<"$output"
+          grep -q '"cancelsSent":0' <<<"$output"
+          if DISDEX_H48_MODE=LIVE npx --no-install tsx scripts/disdex-hype-h48-native-shadow.ts --self-test; then
+            echo "H48_SHADOW_ACCIDENTALLY_ACCEPTED_LIVE" >&2
+            exit 1
+          fi
+          echo "H48_SHADOW_NO_LIVE_MODE=PASS"
       - name: Typecheck entire source without emitting artifacts
         shell: bash
         run: |
