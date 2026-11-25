@@ -16,7 +16,7 @@ export function validateH48TimeOnlyCertificate(value:unknown,sourceSha:string,no
  if(!value||typeof value!=="object"||Array.isArray(value))fail();const v=value as Record<string,any>;
  if(Reflect.ownKeys(v).length!==keys.length||Reflect.ownKeys(v).some(k=>typeof k!=="string"||!keys.includes(k)||!("value" in Object.getOwnPropertyDescriptor(v,k)!)))fail();
  if(!/^[a-f0-9]{40}$/.test(sourceSha)||v.schema!=="disdex-stable4-h48-time-only-policy/v1"||v.approvedSha!==sourceSha||v.researchSha!==RESEARCH||typeof v.planSha256!=="string"||!/^[a-f0-9]{64}$/.test(v.planSha256)||v.deploymentTarget!=="professional-dismanager.net"||v.policy!=="H48_TIME_ONLY"||v.route!=="HYPE_REDESIGN_CAUSAL_H48R4_WSIG"||v.symbol!=="HYPEUSDT"||v.side!=="LONG"||v.holdHours!==48||v.entryGridHours!==6||v.residentStopRequired!==false||v.residentTakeProfitRequired!==false||v.operatorAcknowledgement!=="H48_TIME_ONLY"||v.authorizesOtherPolicies!==false||!Number.isSafeInteger(now)||now<=0||!Number.isSafeInteger(v.issuedAt)||v.issuedAt<=0||v.issuedAt>now||!Number.isSafeInteger(v.expiresAt)||v.expiresAt<=now)fail();
- const g=v.approvedGross;if(!g||typeof g!=="object"||Array.isArray(g)||Object.keys(g).length!==4||g.crypto!==3||g.stock!==1.5||g.total!==3.5||g.hype!==1)fail();
+ const g=v.approvedGross;if(!g||typeof g!=="object"||Array.isArray(g)||Object.keys(g).length!==4||g.crypto!==3||g.stock!==4||g.total!==4.25||g.hype!==1.5)fail();
  return Object.freeze(structuredClone(v));
 }
 async function readRootCertificate(sha:string){
