@@ -86,3 +86,15 @@ test("unknown venue symbol, stale pending ledger and NaN signed position fail cl
     positions:[{...a.venue.positions[0],quantity:NaN}]}});
   assert.ok(nan.blockers.includes("ASTER_POSITIONS_INCONSISTENT_OR_UNKNOWN_SYMBOL"));
 });
+
+test("a signed existing HYPE STOP or stale conditional order blocks any additional H48 ENTRY",()=>{
+  const a=base();
+  const r=inspectH48AllRunnerGrossAndRisk({...a,venue:{
+    ...a.venue,openOrders:[{symbol:"HYPEUSDT",clientOrderId:"EXISTING-STOP",
+      type:"STOP_MARKET",side:"SELL",reduceOnly:true,status:"NEW",
+      quantity:1,executedQuantity:0,stopPrice:90}],
+  }});
+  assert.equal(r.status,"BLOCKED");
+  assert.ok(r.blockers.includes("HYPE_OPEN_ORDER_REQUIRES_SIGNED_OWNERSHIP_RECONCILIATION"));
+  assert.equal(r.tradingAuthorization,false);
+});
