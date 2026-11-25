@@ -1,7 +1,9 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import type { AccountLockHandle } from "../lib/disdex-account-order-lock";
-import type { DirectTradeExecutor,DirectPosition } from "../lib/direct-trade-executor";
+import type { DirectTradeExecutor,DirectPosition,DirectOpenOrder } from "../lib/direct-trade-executor";
+import {makeH48Stop8Intent,type H48Stop8Intent} from "../lib/hype-h48-resident-stop8";
+import type {H48Stop8Retirement} from "../lib/hype-h48-stop8-retirement";
 import { newH48ExecutionJournal,type H48ExecutionJournal } from "../lib/hype-h48-execution-journal";
 import { createHypeH48TimeOnlyContract } from "../lib/hype-stable4-time-only-contract";
 import { H48NativeReadOnlyMonitor } from "../lib/hype-h48-native-monitor";
@@ -20,7 +22,10 @@ function source(e=E) {
     })),
   };
 }
-function fixture(params:{now?:number;journal?:H48ExecutionJournal;positions?:DirectPosition[];throwRead?:boolean}={}){
+function fixture(params:{now?:number;journal?:H48ExecutionJournal;positions?:DirectPosition[];throwRead?:boolean;
+  openOrders?:DirectOpenOrder[];
+  stop8?:{planSha256:string;stop:H48Stop8Intent|null;retirement:H48Stop8Retirement|null};
+}={}){
   const now=params.now??E+1000;
   let state=params.journal??newH48ExecutionJournal(SHA),writes=0,orderCalls=0;
   const store={
@@ -31,7 +36,7 @@ function fixture(params:{now?:number;journal?:H48ExecutionJournal;positions?:Dir
   };
   const executor:Pick<DirectTradeExecutor,"getPositions"|"getOpenOrders"|"getAccountSnapshot"> & {executeMarket:()=>never}={
     getPositions:async()=>{if(params.throwRead)throw Error("HTTP502");return params.positions??[];},
-    getOpenOrders:async()=>[],
+    getOpenOrders:async()=>params.openOrders??[],
     getAccountSnapshot:async()=>({
       asset:"USDT",walletBalance:200,availableBalance:200,updatedAt:now,
     }),
@@ -49,7 +54,13 @@ function fixture(params:{now?:number;journal?:H48ExecutionJournal;positions?:Dir
     reserve:async()=>{throw Error("TEST_RESERVATION_DISABLED")},
     releaseReservation:async()=>{},release:async()=>{},
   };
-  const monitor=new H48NativeReadOnlyMonitor({runtimeSha:SHA,store,executor,lease,now:()=>now});
+  const monitor=new H48NativeReadOnlyMonitor({runtimeSha:SHA,store,executor,lease,now:()=>now,
+    ...(params.stop8?{protectedStop8:{
+      planSha256:params.stop8.planSha256,
+      stop8:async()=>params.stop8!.stop,
+      stopRetirement:async()=>params.stop8!.retirement,
+    }}:{}),
+  });
   return {monitor,getState:()=>state,getWrites:()=>writes,getOrders:()=>orderCalls};
 }
 
@@ -116,4 +127,40 @@ test("H48 monitor blocks missing H1 data and never skips an unobserved grid",asy
   assert.equal(result.status,"HOLD");
   assert.equal(a.getWrites(),0);
   assert.equal(a.getOrders(),0);
+});
+
+test("H48 protected shadow monitor can observe 48h DUE with ONE owned STOP8 without placing/canceling orders",async()=>{
+  const contract=createHypeH48TimeOnlyContract({
+    positionId:"H48|HYPEUSDT|"+E,sourceSha:SHA,logicalEntryTs:E,
+  });
+  const now=E+48*H+1000,plan="a".repeat(64),entryId="h48e-"+"a".repeat(30);
+  const j:H48ExecutionJournal={...newH48ExecutionJournal(SHA),
+    revision:3,mode:"OPEN",
+    research:{schema:"disdex-h48-r4-wsig-research-sequence/v1",
+      sourceSha:SHA,lastEvaluatedEntryTs:E+42*H,nextBaseEligibleTs:E+48*H},
+    position:{contract,quantity:2,entryPrice:110,entryClientOrderId:entryId,observedAt:E+1000},
+  };
+  const stop={...makeH48Stop8Intent({
+    sourceSha:SHA,planSha256:plan,positionId:contract.positionId,
+    entryClientOrderId:entryId,entryPrice:110,quantity:2,tickSize:0.1,now:now-3000,
+  }),stage:"CONFIRMED" as const,submittedAt:now-2500,confirmedAt:now-2000};
+  const position:DirectPosition={symbol:"HYPEUSDT",quantity:2,entryPrice:110,
+    markPrice:112,unrealizedPnl:4,pnlPct:0.01,notionalUsd:224,
+    positionSide:"BOTH",leverage:5,updatedAt:now};
+  const openOrders:DirectOpenOrder[]=[{symbol:"HYPEUSDT",
+    clientOrderId:stop.stopClientOrderId,type:"STOP_MARKET",
+    side:"SELL",status:"NEW",reduceOnly:true,
+    stopPrice:stop.stopPrice,quantity:2,executedQuantity:0}];
+  const a=fixture({now,journal:j,positions:[position],openOrders,
+    stop8:{planSha256:plan,stop,retirement:null}});
+  const result=await a.monitor.tick({exitBoundary:{
+    openTs:E+48*H,open:112,observedAt:now-500,
+  }});
+  assert.equal(result.status,"EXIT_DUE_NOT_AUTHORIZED");
+  assert.equal(a.getWrites(),0);
+  assert.equal(a.getOrders(),0);
+  const missing=fixture({now,journal:j,positions:[position],openOrders,
+    stop8:{planSha256:plan,stop:null,retirement:null}});
+  assert.equal((await missing.monitor.tick({})).status,"HOLD");
+  assert.equal(missing.getOrders(),0);
 });
