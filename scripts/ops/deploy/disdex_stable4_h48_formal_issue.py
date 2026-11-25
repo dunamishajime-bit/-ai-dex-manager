@@ -14,11 +14,11 @@ import stat
 import sys
 import time
 
-SOURCE = "08f4a0d77d85808d897d6d4d985b950af0d76bab"
-PLAN = "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f"
+SOURCE = "4786f600ae7bf86ffca948f1412956a9113cb20d"
+PLAN = "8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d"
 RESEARCH = "9e1142f5ec6d4bc285deef023572623bb1c37a34"
 OPERATION = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
-POLICY_SHA256 = "0a97e977e83acbe2bc77d8ba6b60fbbac12121a103ea544ba632d8daab67ea24"
+POLICY_SHA256 = "3a43b8f874b18d430c8c4027471236aef6e1199c022d5ff410dc5b8e76bb6a8d"
 ROOT = Path("/var/lib/disdex/unified-deploy")
 RELEASE = Path("/home/deploy/disdex-trading/releases") / SOURCE
 STORE = Path("/home/deploy/disdex-ui/shared/data/deploy-approvals.json")
@@ -104,7 +104,7 @@ def certificate(now_ms):
         "entryGridHours": 6,
         "residentStopRequired": False,
         "residentTakeProfitRequired": False,
-        "approvedGross": {"crypto": 3, "stock": 1.5, "total": 3.5, "hype": 1},
+        "approvedGross": {"crypto": 3, "stock": 4, "total": 4.25, "hype": 1.5},
         "issuedAt": now_ms,
         "expiresAt": now_ms + 30 * 86400000,
         "operatorAcknowledgement": "H48_TIME_ONLY",
@@ -337,3 +337,4 @@ if __name__ == "__main__":
         print(json.dumps({"status": "H48_FORMAL_ISSUER_FAIL_CLOSED", "reason": str(e)[:180],
                           "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}), file=sys.stderr)
         sys.exit(2)
+
