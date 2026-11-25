@@ -29,27 +29,28 @@ const okResult=(clientOrderId=ID):DirectTradeResult=>({
   status:"FILLED",requestedQuantity:2,submittedQuantity:2,executedQuantity:2,
   averagePrice:100,quoteQuantity:200,reconciled:true,executionUnknown:false,reduceOnly:false,
 });
-const venue=(qty=2):H48SignedVenueSnapshot=>({
-  source:"ASTER_SIGNED_READ_ONLY",observedAt:NOW,openOrders:[],
+const venue=(qty=2,at=NOW):H48SignedVenueSnapshot=>({
+  source:"ASTER_SIGNED_READ_ONLY",observedAt:at,openOrders:[],
   positions:qty?[{symbol:"HYPEUSDT",quantity:qty,entryPrice:100,
     markPrice:100,unrealizedPnl:0,pnlPct:0,notionalUsd:qty*100,
-    positionSide:"BOTH",leverage:5,updatedAt:NOW}]:[],
+    positionSide:"BOTH",leverage:5,updatedAt:at}]:[],
 });
-const grant=(p=intent().pending!):H48ScopedOwnerOrderGrant=>({
+const grant=(p=intent().pending!,at=NOW):H48ScopedOwnerOrderGrant=>({
   schema:"disdex-h48-production-order-grant/v2",
   scope:"HYPE_TREND_LONG",approvedSha:SHA,
   planSha256:"b".repeat(64),certificateSha256:p.certificateSha256,
   clientOrderId:p.clientOrderId,phase:p.phase,
   approvalId:"11111111-1111-4111-8111-111111111111",
-  issuedAt:NOW-1000,expiresAt:NOW+50000,
+  issuedAt:at-1000,expiresAt:at+50000,
   maxEntryNotionalUsd:220,maxSlippageBps:20,grossCapHype:1.5,
   stopGovernanceCertified:true,
 });
 function fake(options:{
   badGrant?:boolean;blockKill?:boolean;blockRisk?:boolean;executionThrows?:boolean;
   result?:DirectTradeResult;quantity?:number;
-  starting?:H48ExecutionJournal;
+  starting?:H48ExecutionJournal;now?:number;
 }={}){
+  const at=options.now??NOW;
   let state=options.starting??intent(),requests:DirectTradeCommand[]=[],reserves=0,releases=0,saves=0;
   const store={
     load:async()=>JSON.parse(JSON.stringify(state)) as H48ExecutionJournal,
@@ -66,15 +67,17 @@ function fake(options:{
       maxQuantity:1000,stepSize:0.01,minNotional:5,notional:200,
     }),
     getAccountSnapshot:async()=>({
-      asset:"USDT",walletBalance:200,availableBalance:200,updatedAt:NOW,
+      asset:"USDT",walletBalance:200,availableBalance:200,updatedAt:at,
     }),
     executeMarket:async(command:DirectTradeCommand)=>{
       requests.push(command);
       assert.equal(state.pending?.stage,"SUBMITTED","must fsync before POST");
       if(options.executionThrows)throw Error("ASTER_NETWORK_UNKNOWN");
-      return options.result??okResult();
+      return options.result??(command.side==="SELL"?
+        {...okResult(command.clientOrderId),side:"SELL",reduceOnly:true}:okResult());
     },
-    reconcileOrder:async()=>options.result??okResult(),
+    reconcileOrder:async()=>options.result??(state.pending?.phase==="EXIT"?
+      {...okResult(state.pending.clientOrderId),side:"SELL",reduceOnly:true}:okResult()),
   } as Pick<DirectTradeExecutor,
     "normalizeMarketQuantity"|"getAccountSnapshot"|"executeMarket"|"reconcileOrder">;
   const lock={
@@ -93,9 +96,10 @@ function fake(options:{
     release:async()=>{},
   } as AccountLockHandle;
   const runner=new H48NativeOrderExecutor({
-    sourceSha:SHA,store,executor,lease:lock,now:()=>NOW,
-    rootGrant:{verifyForOrder:async()=>options.badGrant?{...grant(),approvedSha:"f".repeat(40)}:grant(state.pending!)},
-    signedVenue:{read:async()=>venue()},
+    sourceSha:SHA,store,executor,lease:lock,now:()=>at,
+    rootGrant:{verifyForOrder:async()=>options.badGrant?
+      {...grant(state.pending!,at),approvedSha:"f".repeat(40)}:grant(state.pending!,at)},
+    signedVenue:{read:async()=>venue(state.pending?.phase==="EXIT"?0:2,at)},
     assertGlobalOrderRelease:async()=>{if(options.blockKill)throw Error("HOLD_PROTECTED")},
     assertFreshSharedRiskAndStops:async()=>{if(options.blockRisk)throw Error("STOP_NOT_APPROVED")},
   });
@@ -153,4 +157,25 @@ test("no PREPARED journal refuses even a valid Root grant",async()=>{
   const x=fake({starting:{...intent(),mode:"FLAT",pending:null}});
   await assert.rejects(x.runner.submitPrepared(),/NO_PREPARED_INTENT/);
   assert.equal(x.requests.length,0);
+});
+
+test("H48 48-hour EXIT submits one SELL with reduceOnly and confirms flat venue",async()=>{
+  const at=E+48*H+1500;
+  const state:H48ExecutionJournal={
+    ...intent(),revision:9,mode:"EXIT_PENDING",
+    position:{contract,quantity:2,entryPrice:100,
+      entryClientOrderId:ID,observedAt:E+1000},
+    pending:{...intent().pending!,phase:"EXIT",clientOrderId:"h48x-"+"f".repeat(30),
+      referencePrice:120,preparedAt:at-500,authorizationExpiresAt:at+60000},
+  };
+  const x=fake({starting:state,now:at});
+  const result=await x.runner.submitPrepared();
+  assert.equal(result.status,"RECONCILED_FLAT");
+  assert.equal(x.requests.length,1);
+  assert.equal(x.requests[0].side,"SELL");
+  assert.equal(x.requests[0].reduceOnly,true);
+  assert.equal(x.requests[0].requireVenueMargin5xCross,false);
+  assert.equal(x.getReserves(),0);
+  assert.equal(x.getState().mode,"FLAT");
+  assert.equal(x.getState().position,null);
 });
