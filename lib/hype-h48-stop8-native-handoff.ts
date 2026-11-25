@@ -61,6 +61,13 @@ export class H48Stop8NativeHandoff implements H48ResidentStop8Handoff {
       entryPrice:input.position.entryPrice,quantity:input.position.quantity,
       tickSize:tick,now:input.now,
     });
+    // A PREPARED file must not be created under an unsigned policy. This
+    // independent Root check is repeated by the installer after persistence.
+    await d.stop8RootAuthority.assertSignedResidentStop8({
+      sourceSha:input.sourceSha,planSha256:input.planSha256,
+      positionId:input.position.contract.positionId,
+      lease:input.lease,now:input.now,
+    });
     // Refuse to overwrite an old/stale/ambiguous STOP journal. The absence
     // of a trusted flat/new state is never a reason to retry a prior attempt.
     const signed=await d.readSignedVenue();
