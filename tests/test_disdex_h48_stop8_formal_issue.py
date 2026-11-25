@@ -38,6 +38,8 @@ def approval_record():
         "targetSha": SHA, "planSha256": PLAN_SHA, "requestActor": issuer.OWNER,
         "ordersEnabled": True, "status": "REDEEMED",
         "redeemedByRunId": RUN,
+        "approvalToken": "SIGNED_HP_TOKEN_FOR_THIS_RUN",
+        "approvalTokenExpiresAt": NOW // 1000 + 200,
         "createdAt": NOW - 120000, "approvedAt": NOW - 80000,
         "redeemedAt": NOW - 20000, "requestExpiresAt": NOW + 150000,
     }
@@ -74,6 +76,22 @@ class Stop8IssuerContractTest(unittest.TestCase):
             issuer.approved_record([record, record],
                 approval_id=APPROVAL, sha=SHA, plan_hash=PLAN_SHA,
                 run_id=RUN, now_ms=NOW)
+
+    def test_hp_token_must_match_same_redeemed_run_and_still_be_fresh(self):
+        expected = approval_record()
+        self.assertEqual(issuer.approved_record([expected],
+            approval_id=APPROVAL, sha=SHA, plan_hash=PLAN_SHA,
+            run_id=RUN, now_ms=NOW,
+            owner_token="SIGNED_HP_TOKEN_FOR_THIS_RUN"), expected)
+        for edited in (
+            {"approvalToken": "ANOTHER_REDEEMED_RUN_TOKEN"},
+            {"approvalTokenExpiresAt": NOW // 1000 - 1},
+        ):
+            with self.assertRaisesRegex(ValueError, "OWNER_TOKEN_NOT_THE_REDEEMED_APPROVAL"):
+                issuer.approved_record([{**expected,**edited}],
+                    approval_id=APPROVAL, sha=SHA, plan_hash=PLAN_SHA,
+                    run_id=RUN, now_ms=NOW,
+                    owner_token="SIGNED_HP_TOKEN_FOR_THIS_RUN")
 
     def test_redeemed_approval_receipt_timing_is_fresh(self):
         with self.assertRaisesRegex(ValueError, "APPROVAL_EXPIRED_OR_OUT_OF_ORDER"):
