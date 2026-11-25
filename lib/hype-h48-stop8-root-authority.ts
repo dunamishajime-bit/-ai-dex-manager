@@ -12,6 +12,8 @@ import type {AccountLockHandle} from "./disdex-account-order-lock";
 import type {H48RootGrantVerifier,H48ScopedOwnerOrderGrant} from "./hype-h48-native-order-executor";
 import type {H48OrderIntent} from "./hype-h48-execution-journal";
 import type {H48Stop8OwnerAuthority} from "./hype-h48-resident-stop8";
+import {validateHypeH48TimeOnlyContract,type HypeH48TimeOnlyContract} from "./hype-stable4-time-only-contract";
+import type {H48Stop8RootPositionEvidence} from "./hype-h48-stop8-policy-intent";
 
 export const H48_STOP8_ROOT_BUNDLE_SCHEMA="disdex-h48-stop8-root-owner-bundle/v1" as const;
 export const H48_STOP8_ROOT_DIR="/etc/disdex/stable4/h48-stop8" as const;
@@ -138,6 +140,29 @@ export function attestH48Stop8RootBundle(input:{
   return Object.freeze({bundle:b,
     certificateSha256:createHash("sha256").update(bytes).digest("hex")});
 }
+/** Derive an ephemeral, position-specific STOP8 proof only from an
+ * already independently verified Owner-signed Root certificate. */
+export function deriveH48Stop8PositionEvidence(input:{
+  attested:Readonly<{bundle:H48Stop8RootBundle;certificateSha256:string}>;
+  contract:HypeH48TimeOnlyContract;quantity:number;now:number;
+}):H48Stop8RootPositionEvidence{
+  const c=validateHypeH48TimeOnlyContract(input.contract,input.contract);
+  const b=input.attested.bundle;
+  if(c.sourceSha!==b.approvedSha
+    ||b.policy!=="H48_R4_RESIDENT_STOP8"||b.residentStopRequired!==true
+    ||!pos(input.quantity)||!uint(input.now)
+    ||input.now>=b.expiresAt||!HEX64.test(input.attested.certificateSha256))
+    fail("POSITION_PROOF_NOT_ROOT_BOUND");
+  return {
+    schema:"disdex-h48-stop8-position-policy-evidence/v1",
+    policy:"H48_R4_RESIDENT_STOP8",
+    runtimeSha:c.sourceSha,planSha256:b.planSha256,
+    positionId:c.positionId,logicalEntryTs:c.logicalEntryTs,
+    logicalExitTs:c.logicalExitTs,quantity:input.quantity,
+    certificateSha256:input.attested.certificateSha256,
+    validatedAt:input.now,expiresAt:Math.min(b.expiresAt,input.now+120_000),
+  };
+}
 async function rootImmutable(path:string) {
   const first=await lstat(path);
   if(!first.isFile()||first.isSymbolicLink()
@@ -169,6 +194,15 @@ export class FileH48Stop8RootAuthority
       bundle:parseJsonUnique(root.toString("utf8")),
       rootCertificateBytes:root,trustedOwnerEd25519PublicPem:ownerKey,
       sourceSha:this.sourceSha,planSha256:this.planSha256,now,
+    });
+  }
+  async attestPosition(input:{
+    contract:HypeH48TimeOnlyContract;quantity:number;
+    lease:AccountLockHandle;now:number;
+  }):Promise<H48Stop8RootPositionEvidence>{
+    const attested=await this.attest(input.lease,input.now);
+    return deriveH48Stop8PositionEvidence({
+      attested,contract:input.contract,quantity:input.quantity,now:input.now,
     });
   }
   async verifyForOrder(input:{
