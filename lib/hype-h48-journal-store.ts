@@ -12,7 +12,7 @@ import { randomUUID } from "node:crypto";
 import { lstat,open,readFile,rename,unlink } from "node:fs/promises";
 import { dirname,resolve } from "node:path";
 import type { AccountLockHandle } from "./disdex-account-order-lock";
-import { newH48ExecutionJournal,validateH48ExecutionJournal,
+import { newH48ExecutionJournal,validateH48ExecutionJournal,assertH48JournalTransition,
   type H48ExecutionJournal,type H48SignedVenueSnapshot } from "./hype-h48-execution-journal";
 
 const fail=(reason:string):never=>{throw Error("H48_JOURNAL_STORE_"+reason)};
@@ -88,6 +88,7 @@ export class FileH48ExecutionJournalStore {
     const old=validateH48ExecutionJournal(expected,this.sourceSha);
     const updated=validateH48ExecutionJournal(replacement,this.sourceSha);
     if(updated.revision!==old.revision+1)fail("REVISION_STEP_INVALID");
+    assertH48JournalTransition(old,updated);
     const raw=await stableRead(this.path).catch((e:NodeJS.ErrnoException)=>{
       if(e.code==="ENOENT")fail("MISSING_NOT_FLAT");throw e;
     });
