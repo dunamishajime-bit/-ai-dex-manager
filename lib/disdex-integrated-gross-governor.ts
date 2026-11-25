@@ -62,8 +62,14 @@ export function resolveIntegratedGrossGovernor(
   const dailyPct = dailyProfitPct(input.sharedDailyRisk);
   const twr = ddFresh ? finite(input.portfolioDdGovernor?.twrIndex, 1) : 1;
   const dd = ddFresh ? finite(input.portfolioDdGovernor?.currentDrawdownPct) : 100;
+  // Profit/DD evidence can never authorize larger gross than Owner caps.
+  // With hard caps pinned to normal limits, profit-tier escalation is off.
+  const profitExpansionAuthorized =
+    policy.cryptoGrossHardCap > policy.cryptoGrossCap + EPS
+    || policy.totalGrossHardCap > policy.totalGrossCap + EPS;
   const profitGate = Boolean(
-    availableKnown
+    profitExpansionAuthorized
+    && availableKnown
     && input.sharedDailyRisk
     && input.sharedDailyRisk.sourceComplete === true
     && dailyPct > 0
