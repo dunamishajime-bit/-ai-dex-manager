@@ -123,7 +123,7 @@ export class FileH48ExecutionJournalStore {
       // without a fresh reconciliation of exact venue order + account
       // position evidence. In particular, never fabricate SUBMITTED -> FLAT.
       if(!evidence)fail("AUTHENTICATED_RECONCILIATION_REQUIRED");
-      const recomputed=reconcileH48Attempt(old,evidence);
+      const recomputed=reconcileH48Attempt(old,evidence!);
       if(JSON.stringify(recomputed)!==JSON.stringify(updated))fail("RECONCILIATION_TRANSITION_MISMATCH");
     }
     return withExclusiveJournalWriter(this.path,async()=>{
