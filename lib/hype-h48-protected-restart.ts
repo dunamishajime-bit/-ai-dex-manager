@@ -10,6 +10,7 @@ import {validateH48ExecutionJournal} from "./hype-h48-execution-journal";
 import type {H48Stop8Intent} from "./hype-h48-resident-stop8";
 import {validateH48Stop8Intent,verifyH48Stop8Venue} from "./hype-h48-resident-stop8";
 import {assessH48Restart} from "./hype-h48-restart-admission";
+import type {H48Stop8Retirement} from "./hype-h48-stop8-retirement";
 
 export type H48ProtectedRestartResult=Readonly<{
   decision:"FLAT_VERIFIED_READ_ONLY"|"OPEN_STOP8_VERIFIED_READ_ONLY"|"HOLD_PROTECTED_RECONCILIATION";
@@ -28,6 +29,8 @@ const exact=(a:number,b:number,tol=1e-8)=>Number.isFinite(a)&&Number.isFinite(b)
 export function assessH48ProtectedRestart(input:{
   journal:H48ExecutionJournal;
   stop8:H48Stop8Intent|null;
+  /** Only a confirmed immutable retirement receipt can close a prior STOP8. */
+  stopRetirement?:H48Stop8Retirement|null;
   venue:H48SignedVenueSnapshot;
   runtimeSha:string;
   planSha256:string;
@@ -47,10 +50,24 @@ export function assessH48ProtectedRestart(input:{
     return held("SIGNED_VENUE_OR_PLAN_UNVERIFIED");
   const hypeOrders=venue.openOrders.filter(o=>o?.symbol==="HYPEUSDT");
   if(state.mode==="FLAT") {
-    // A STOP journal is never silently deleted. Any lingering HYPE STOP
-    // after a confirmed 48-hour exit is a blocker for the next entry.
-    if(stop!==null||hypeOrders.length!==0||venue.positions.some(p=>p?.symbol==="HYPEUSDT"&&Math.abs(p.quantity)>1e-9))
+    // A STOP journal is immutable historical evidence. A subsequent FLAT
+    // is allowed only with a matching, durable, CONFIRMED stop-retirement
+    // receipt, plus a NEW signed GET proving no HYPE position or order.
+    if(hypeOrders.length!==0||venue.positions.some(p=>p?.symbol==="HYPEUSDT"&&Math.abs(p.quantity)>1e-9))
       return held("FLAT_BUT_HYPE_STOP_OR_POSITION_REMAINS");
+    if(stop!==null){
+      const receipt=input.stopRetirement;
+      if(!receipt||receipt.schema!=="disdex-h48-stop8-retirement/v1"
+        ||receipt.phase!=="CONFIRMED"
+        ||receipt.sourceSha!==runtimeSha||receipt.planSha256!==planSha256
+        ||receipt.positionId!==stop.positionId
+        ||receipt.stopClientOrderId!==stop.stopClientOrderId
+        ||!Number.isSafeInteger(receipt.confirmedAt)
+        ||receipt.confirmedAt!>venue.observedAt)
+        return held("STOP8_RETIREMENT_RECEIPT_NOT_ATTESTED");
+    }else if(input.stopRetirement){
+      return held("RETIREMENT_RECEIPT_WITHOUT_STOP8_JOURNAL");
+    }
     const base=assessH48Restart(state,venue);
     return base.decision==="FLAT_VERIFIED_READ_ONLY"
       ?pass("FLAT_VERIFIED_READ_ONLY","NO_HYPE_POSITION_OR_STOP")
