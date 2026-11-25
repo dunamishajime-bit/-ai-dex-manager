@@ -19,7 +19,22 @@ const RAW_BASE = `https://raw.githubusercontent.com/${REPOSITORY}/${STATE_BRANCH
 const GITHUB_BASE = `https://github.com/${REPOSITORY}`;
 const SERVER_CACHE_MS = 60_000;
 
-let cachedPayload: ResearchDashboardPayload | null = null;
+interface DirectResearchDashboardPayload {
+  schemaVersion: 2;
+  mode: "win80_ultra90_direct_v2";
+  generatedAt: string;
+  lastRunAt: string;
+  freshness: ResearchDashboardPayload["freshness"];
+  cycle: number;
+  mainStrategyId: string;
+  latestDiscussion: ResearchDiscussionIndexEntry;
+  historyMetricsAvailable: false;
+  legacyChampionStateInherited: false;
+}
+
+type DashboardPayload = ResearchDashboardPayload | DirectResearchDashboardPayload;
+
+let cachedPayload: DashboardPayload | null = null;
 let cachedAt = 0;
 
 interface RawAutonomousState {
@@ -263,7 +278,7 @@ function freshness(lastRunAt: string | null): ResearchDashboardPayload["freshnes
   return "stale";
 }
 
-function response(payload: ResearchDashboardPayload, cacheState: "fresh" | "stale") {
+function response(payload: DashboardPayload, cacheState: "fresh" | "stale") {
   return NextResponse.json(payload, {
     headers: {
       "Cache-Control": "public, max-age=30, stale-while-revalidate=120",
@@ -272,12 +287,64 @@ function response(payload: ResearchDashboardPayload, cacheState: "fresh" | "stal
   });
 }
 
+// The direct program intentionally removed the old autonomous/champion state.
+async function loadDirectProgram(): Promise<DirectResearchDashboardPayload | null> {
+  const markerResponse = await fetch(`${RAW_BASE}/active-research-program.json`, {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  // Only a missing marker permits the legacy reader. A transient failure does not.
+  if (markerResponse.status === 404) return null;
+  if (!markerResponse.ok) throw new Error(`active-research-program.json fetch failed: ${markerResponse.status}`);
+  const marker = await markerResponse.json() as Record<string, unknown>;
+  if (marker.programId !== "win80_ultra90_direct_v2" ||
+      typeof marker.mainStrategyId !== "string" || marker.oldChampionStateInherited !== false) {
+    throw new Error("Unsupported or invalid active research program");
+  }
+  const [state, index] = await Promise.all([
+    fetchJson<Record<string, unknown>>("main-strategy-research-state.json"),
+    fetchJson<ResearchDiscussionIndex>("discussions/index.json"),
+  ]);
+  if (state.version !== 2 || state.programId !== marker.programId ||
+      state.mainStrategyId !== marker.mainStrategyId || state.oldChampionStateInherited !== false ||
+      typeof state.iteration !== "number" || !Number.isSafeInteger(state.iteration) || state.iteration < 1 ||
+      typeof state.updatedAt !== "string" || !Number.isFinite(Date.parse(state.updatedAt)) ||
+      Date.parse(state.updatedAt) > Date.now() + 60_000 ||
+      typeof state.lastDiscussionId !== "string" || !Array.isArray(index.items)) {
+    throw new Error("Invalid direct research state");
+  }
+  const discussion = normalizeDiscussionEntry(index.items.find(item => item.id === state.lastDiscussionId));
+  if (!discussion || discussion.cycle !== state.iteration ||
+      Date.parse(discussion.completedAt) !== Date.parse(state.updatedAt)) {
+    throw new Error("Direct research state and discussion index do not match");
+  }
+  return {
+    schemaVersion: 2,
+    mode: "win80_ultra90_direct_v2",
+    generatedAt: new Date().toISOString(),
+    lastRunAt: state.updatedAt,
+    freshness: freshness(state.updatedAt),
+    cycle: state.iteration,
+    mainStrategyId: marker.mainStrategyId,
+    latestDiscussion: discussion,
+    historyMetricsAvailable: false,
+    legacyChampionStateInherited: false,
+  };
+}
+
 export async function GET() {
   if (cachedPayload && Date.now() - cachedAt < SERVER_CACHE_MS) {
     return response(cachedPayload, "fresh");
   }
 
   try {
+    const directPayload = await loadDirectProgram();
+    if (directPayload) {
+      cachedPayload = directPayload;
+      cachedAt = Date.now();
+      return response(directPayload, "fresh");
+    }
     const [state, deduplication, discussionIndex, deepState] = await Promise.all([
       fetchJson<RawAutonomousState>("autonomous-state.json"),
       fetchJson<RawDeduplicationStats>("deduplication-stats.json")
