@@ -38,7 +38,8 @@ ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 RELEASES = Path("/home/deploy/disdex-trading/releases")
 RELEASE = RELEASES / SOURCE
 HYPE_SOURCE = RELEASE / "lib/hype-zec-long-runner.ts"
-BASE_SOURCE_SHA256 = "797b9356f8f788411a6c29f8c36939927b03d476c28e09ee16cfa37ae5e4f53a"
+NATIVE_SOURCE_SHA256 = "2ea2a5b2d39efab004714b6468e080d9300cf547e465d6c036d3c7e1357523de"
+NATIVE_PERMIT_SHA256 = "9a33eced492a24c4d9668bc81cb6b3085ccc1fa715ece2718ae9896bcd2c7bb8"
 KILL = Path("/var/lib/disdex/shared/kill-switch.json")
 APPROVAL_STORE = Path("/home/deploy/disdex-ui/shared/data/deploy-approvals.json")
 PUBLIC_KEY = Path("/var/lib/disdex/unified-deploy/owner-approval-public.pem")
@@ -54,16 +55,12 @@ MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 GLOBAL_ACTIVATION = Path("/var/lib/disdex/shared/operator-activation/current.json")
 
-OVERLAY_DIR = Path("/var/lib/disdex/hype-zec-long/runtime-overlays/h48-order-enable-v1")
-OVERLAY_SOURCE = OVERLAY_DIR / "hype-zec-long-runner.ts"
-OVERLAY_MODULE = OVERLAY_DIR / "hype-h48-order-permit.ts"
 DROPIN_DIR = Path("/etc/systemd/system") / (HYPE_UNIT + ".d")
 DROPIN = DROPIN_DIR / "zzzzzzzzzz-h48-order-enable.conf"
 ENV_FILE = Path("/etc/disdex/stable4/h48-time-only") / (SOURCE + ".order-enable.env")
 PERMIT = Path("/etc/disdex/stable4/h48-time-only") / (SOURCE + ".order-enable.json")
 RECEIPT_DIR = Path("/var/lib/disdex/unified-deploy/receipts")
 RECEIPT = RECEIPT_DIR / ("hype-h48-order-enable-" + SOURCE + ".json")
-MODULE_PATH_IN_RUNTIME = str(OVERLAY_MODULE)
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -191,39 +188,31 @@ def validate_permit(value: object, *, now_ms: int, kill_switch: dict,
     validate_global_hold(kill_switch, canonical(kill_switch), now_ms=now_ms)
     return value
 
-def build_hype_source_overlay(base: bytes, module_path: str = MODULE_PATH_IN_RUNTIME) -> bytes:
-    require(sha256(base) == BASE_SOURCE_SHA256, "HYPE_BASELINE_SOURCE_HASH_CHANGED")
+def validate_native_h48_runtime_source(base: bytes, module: bytes) -> bytes:
+    """Fail closed on integrated entry-only permit without the certified H48
+    time-only ENTRY/POSITION executor. This is a source evidence gate, not an
+    alternative to signed approval, live state, venue, STOP or Root verification.
+
+    The current 4786 HYPE code has the permit reader, but still uses TREND
+    stop/take-profit execution. It MUST be rejected until a distinct,
+    independently reviewed time-only implementation is released and pinned.
+    """
+    require(sha256(base) == NATIVE_SOURCE_SHA256, "HYPE_NATIVE_SOURCE_HASH_MISMATCH")
+    require(sha256(module) == NATIVE_PERMIT_SHA256, "HYPE_NATIVE_PERMIT_HASH_MISMATCH")
     text = base.decode("utf-8")
-    newline = "\r\n" if "\r\n" in text else "\n"
-    old_import = 'import { readSharedKillSwitch } from "./disdex-shared-kill-switch";'
-    new_import = old_import + newline + f'import {{ hasValidHypeH48OrderPermit }} from "{module_path}";'
-    require(text.count(old_import) == 1, "HYPE_IMPORT_PATCH_ANCHOR_NOT_UNIQUE")
-    old_block = newline.join((
-        "    if (!kill.active) return;",
-        '    const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";',
-    ))
-    new_block = newline.join((
-        "    if (!kill.active) return;",
-        '    const scopedHypePermit = this.dependencies.runtime.mode === "LIVE"',
-        '      && this.dependencies.runtime.signalMode === "STABLE4"',
-        '      && this.dependencies.runtime.stable4Mode === "LIVE"',
-        '      && signal.strategy === "HYPE_LONG"',
-        '      && signal.symbol === "HYPEUSDT"',
-        '      && await hasValidHypeH48OrderPermit({',
-        '        runtimeSha: this.dependencies.runtime.runtimeSha,',
-        '        planSha256: process.env.DISDEX_STABLE4_H48_PLAN_SHA256 || "",',
-        '        certificateSha256: process.env.DISDEX_STABLE4_H48_CERTIFICATE_SHA256 || "",',
-        '        approvalId: process.env.DISDEX_STABLE4_H48_APPROVAL_ID || "",',
-        '      });',
-        '    if (scopedHypePermit) return;',
-        '    const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";',
-    ))
-    require(text.count(old_block) == 1, "HYPE_ENTRY_PATCH_ANCHOR_NOT_UNIQUE")
-    text = text.replace(old_import, new_import, 1).replace(old_block, new_block, 1)
-    require(text.count("hasValidHypeH48OrderPermit") == 2 and text.count("hasValidHypeH48OrderPermit({") == 1,
-            "HYPE_PERMIT_CALL_COUNT_INVALID")
-    require(text.count(new_block) == 1, "HYPE_ENTRY_PATCH_RESULT_INVALID")
-    return text.encode("utf-8")
+    require(text.count('import { hasValidHypeH48OrderPermit } from "./hype-h48-order-permit";') == 1
+            and text.count("await hasValidHypeH48OrderPermit({") == 1,
+            "H48_NATIVE_ENTRY_PERMIT_GATE_MISSING")
+    # Calling a dormant policy module is not enough: the exact approved
+    # runtime needs a callable certified H48 ENTRY and POSITION authority.
+    require("createH48TimeOnlyPolicyAuthority(" in text,
+            "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED")
+    require("HYPE_REDESIGN_CAUSAL_H48R4_WSIG" in text,
+            "H48_NATIVE_APPROVED_ROUTE_NOT_WIRED")
+    require("H48_TIME_ONLY" in text,
+            "H48_NATIVE_TIME_ONLY_EXECUTION_NOT_WIRED")
+    return base
+
 
 def build_env(approval_id: str, certificate_sha256: str) -> bytes:
     require(UUID_RE.fullmatch(approval_id) is not None, "APPROVAL_ID_INVALID")
@@ -233,10 +222,13 @@ def build_env(approval_id: str, certificate_sha256: str) -> bytes:
             f"DISDEX_STABLE4_H48_APPROVAL_ID={approval_id}\n").encode("ascii")
 
 def build_dropin() -> bytes:
+    # Use the immutable release's integrated source, never a code overlay.
+    # The signer must separately authorize leaving SHADOW and any STOP-policy
+    # changes; EnvironmentFile alone cannot upgrade monitor-only operation.
     return ("[Service]\n"
-            "# HYPE-only STABLE4 H48 scoped permit; canonical GLOBAL HOLD stays active.\n"
-            f"BindReadOnlyPaths={OVERLAY_SOURCE}:{HYPE_SOURCE}\n"
+            "# HYPE-only signed H48 binding; no executable source replacement.\n"
             f"EnvironmentFile={ENV_FILE}\n").encode("utf-8")
+
 
 def publish_permit_transaction(target: Path, raw: bytes, post_validate: Callable[[], None] | None = None) -> None:
     existed = target.exists() or target.is_symlink()
@@ -372,7 +364,7 @@ def validate_candidate_source() -> bytes:
     require(stat.S_ISREG(st.st_mode) and not HYPE_SOURCE.is_symlink() and (st.st_mode & 0o222) == 0,
             "HYPE_SOURCE_NOT_IMMUTABLE")
     raw = HYPE_SOURCE.read_bytes()
-    require(sha256(raw) == BASE_SOURCE_SHA256, "HYPE_SOURCE_SHA256_MISMATCH")
+    require(sha256(raw) == NATIVE_SOURCE_SHA256, "HYPE_SOURCE_SHA256_MISMATCH")
     return raw
 
 def validate_runtime_readonly() -> None:
@@ -443,9 +435,16 @@ def preflight(*, approval_id: str, run_id: str, token: str, permit_module: Path)
     require(os.geteuid() == 0, "ROOT_REQUIRED")
     now_ms = time.time_ns() // 1_000_000
     root_immutable(permit_module)
+    require(sha256(permit_module.read_bytes()) == NATIVE_PERMIT_SHA256,
+            "H48_STAGE_MODULE_HASH_MISMATCH")
     token_payload = validate_token(token, now_s=now_ms // 1000)
     approval = read_approval(approval_id, run_id, now_ms)
     source = validate_candidate_source()
+    native_permit_path = RELEASE / "lib/hype-h48-order-permit.ts"
+    root_immutable(native_permit_path)
+    native_module = native_permit_path.read_bytes()
+    require(native_module == permit_module.read_bytes(), "H48_STAGED_MODULE_RELEASE_MISMATCH")
+    validate_native_h48_runtime_source(source, native_module)
     cert_digest = validate_certificate()
     hold, hold_raw, hold_digest = read_hold()
     validate_activation()
@@ -453,7 +452,7 @@ def preflight(*, approval_id: str, run_id: str, token: str, permit_module: Path)
     validate_runtime_readonly()
     validate_shared_safety()
     venue = signed_flat_get()
-    for path in (OVERLAY_SOURCE, OVERLAY_MODULE, DROPIN, ENV_FILE, PERMIT, RECEIPT):
+    for path in (DROPIN, ENV_FILE, PERMIT, RECEIPT):
         require(not path.exists() and not path.is_symlink(), "ORDER_ENABLE_ALREADY_INSTALLED:" + str(path))
     other_permits = [path for path in CERT.parent.glob("*.order-enable.json") if path != PERMIT]
     require(not other_permits, "NON_HYPE_ORDER_PERMIT_PRESENT")
@@ -507,25 +506,24 @@ def execute(*, approval_id: str, run_id: str, token: str, permit_module: Path) -
             certificate_sha256=second["certificateSha256"], nonce_sha256=second["tokenNonceSha256"],
             issued_at=now_ms, expires_at=min(now_ms + 30 * 86_400_000, int(certificate["expiresAt"])),
         )
-        overlay = build_hype_source_overlay(second["source"], MODULE_PATH_IN_RUNTIME)
-        module = permit_module.read_bytes()
+        # No patch/bind mount of the already-integrated HYPE source.
+        # A future signed LIVE transition must independently prove its native
+        # time-only executor; the source gate currently blocks that transition.
         env = build_env(approval_id, second["certificateSha256"])
         dropin = build_dropin()
-        for directory in (OVERLAY_DIR, DROPIN_DIR, RECEIPT_DIR):
+        for directory in (DROPIN_DIR, RECEIPT_DIR):
             if directory.exists():
                 trusted_dir(directory)
             else:
                 directory.mkdir(parents=True, exist_ok=False)
                 os.chown(directory, 0, 0); os.chmod(directory, 0o755)
-        install_exact(OVERLAY_SOURCE, overlay); installed.append(OVERLAY_SOURCE)
-        install_exact(OVERLAY_MODULE, module); installed.append(OVERLAY_MODULE)
         install_exact(ENV_FILE, env); installed.append(ENV_FILE)
         install_exact(DROPIN, dropin); installed.append(DROPIN)
         publish_permit_transaction(PERMIT, canonical(permit)); installed.append(PERMIT)
         systemctl("daemon-reload")
         systemctl("restart", HYPE_UNIT)
         pid = wait_service_stable(previous_pid)
-        require(namespace_source_sha(pid) == sha256(overlay), "HYPE_OVERLAY_NOT_ACTIVE")
+        require(namespace_source_sha(pid) == NATIVE_SOURCE_SHA256, "HYPE_NATIVE_SOURCE_NOT_ACTIVE")
         hold_after, hold_raw_after, hold_digest_after = read_hold()
         validate_permit(json.loads(PERMIT.read_bytes()), now_ms=time.time_ns() // 1_000_000,
                         kill_switch=hold_after, kill_switch_sha256=hold_digest_after,
@@ -536,8 +534,10 @@ def execute(*, approval_id: str, run_id: str, token: str, permit_module: Path) -
             "schema": "disdex-stable4-h48-hype-order-enable/v1", "approvedSha": SOURCE, "planSha256": PLAN,
             "operation": OPERATION, "scope": SCOPE, "policy": POLICY, "approvalId": approval_id,
             "certificateSha256": second["certificateSha256"], "killSwitchSha256": second["killSwitchSha256"],
-            "permitSha256": sha256(canonical(permit)), "overlaySha256": sha256(overlay),
-            "moduleSha256": sha256(module), "environmentSha256": sha256(env), "dropinSha256": sha256(dropin),
+            "permitSha256": sha256(canonical(permit)),
+            "nativeSourceSha256": NATIVE_SOURCE_SHA256,
+            "nativePermitModuleSha256": NATIVE_PERMIT_SHA256,
+            "environmentSha256": sha256(env), "dropinSha256": sha256(dropin),
             "pid": pid, "venueRead": second["venue"],
             "status": "HYPE_SCOPED_ORDER_ENABLE_INSTALLED_GLOBAL_HOLD_REMAINS_ACTIVE",
             "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0, "issuedAt": now_ms,
@@ -553,10 +553,6 @@ def execute(*, approval_id: str, run_id: str, token: str, permit_module: Path) -
         for path in reversed(installed):
             try: remove_exact(path)
             except Exception: pass
-        try:
-            if OVERLAY_DIR.exists() and not any(OVERLAY_DIR.iterdir()): OVERLAY_DIR.rmdir()
-        except Exception:
-            pass
         raise
     finally:
         os.close(fd)
@@ -575,11 +571,7 @@ def rollback() -> dict:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         old_pid = int(service_property("MainPID") or "0")
         remove_exact(DROPIN); systemctl("daemon-reload"); systemctl("restart", HYPE_UNIT); wait_service_stable(old_pid)
-        for path in (PERMIT, ENV_FILE, OVERLAY_SOURCE, OVERLAY_MODULE, RECEIPT): remove_exact(path)
-        try:
-            if OVERLAY_DIR.exists() and not any(OVERLAY_DIR.iterdir()): OVERLAY_DIR.rmdir()
-        except Exception:
-            pass
+        for path in (PERMIT, ENV_FILE, RECEIPT): remove_exact(path)
         return {"status": "HYPE_SCOPED_ORDER_ENABLE_ROLLED_BACK_GLOBAL_HOLD_UNCHANGED",
                 "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
     finally:
