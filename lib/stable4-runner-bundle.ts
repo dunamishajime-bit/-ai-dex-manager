@@ -82,6 +82,7 @@ type Stable4RunnerBundleManifestBody = {
   operation: typeof STABLE4_RUNNER_BUNDLE_OPERATION;
   scope: typeof STABLE4_RUNNER_BUNDLE_SCOPE;
   ordersEnabled: true;
+  runnerSet: readonly Stable4RunnerBundleEntry["runner"][];
   economics: {
     cryptoGrossCap: 3;
     stockGrossCap: 4;
@@ -114,6 +115,7 @@ const BODY: Stable4RunnerBundleManifestBody = Object.freeze({
   operation: STABLE4_RUNNER_BUNDLE_OPERATION,
   scope: STABLE4_RUNNER_BUNDLE_SCOPE,
   ordersEnabled: true,
+  runnerSet: STABLE4_RUNNER_BUNDLE_ENTRIES.map((entry) => entry.runner),
   economics: {
     cryptoGrossCap: 3,
     hypeTrendGrossCap: 1.5,
