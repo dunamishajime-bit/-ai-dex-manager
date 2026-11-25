@@ -340,8 +340,10 @@ export class HypeZecLongRunner {
 
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
-    // H48 is an entry-only permit.  Existing HYPE positions still use the
-    // normal resident STOP/exit path even when the permit is absent.
+    // The H48 certificate is a different native 6h/48h time-only strategy,
+    // NOT the legacy TREND+STOP entry/exit path below. Even a valid H48 permit
+    // MUST NOT grant permission to execute the TREND strategy. Positions
+    // already managed by this runner retain their existing protective exits.
     if (this.dependencies.runtime.mode === "LIVE"
       && this.dependencies.runtime.signalMode === "TREND"
       && signal.strategy === "HYPE_LONG"
@@ -363,6 +365,20 @@ export class HypeZecLongRunner {
         await this.dependencies.stateStore.save(state);
         return { status: "held", message: "HYPE_H48_ORDER_PERMIT_REQUIRED", strategy: signal.strategy };
       }
+      // Mandatory defense-in-depth: the native H48 ENTRY/POSITION authority
+      // is not connected to this TREND runner. A valid certificate/permit
+      // cannot convert its ATR STOP/TP and 168h lifecycle into H48_TIME_ONLY.
+      // This branch must be replaced only with a separately verified native
+      // H48 route and fresh, matching Owner/Root authorization.
+      state.lastDecision = {
+        strategy: signal.strategy,
+        signalTs: signal.signalTs,
+        accepted: false,
+        reason: "HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED",
+      };
+      state.lastDecisionTs = this.now();
+      await this.dependencies.stateStore.save(state);
+      return { status: "held", message: "HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED", strategy: signal.strategy };
     }
     const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
     if (!sharedRisk.ok) {
