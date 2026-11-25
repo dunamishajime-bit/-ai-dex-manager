@@ -35,7 +35,7 @@ def validate_h48_certificate(value,*,approved_sha,approved_plan_sha256,now_ms):
     if type(value["holdHours"])is not int or value["holdHours"]!=48 or type(value["entryGridHours"])is not int or value["entryGridHours"]!=6:_fail("CERTIFICATE_TIME_POLICY_INVALID")
     if any(value[k]is not False for k in ("residentStopRequired","residentTakeProfitRequired","authorizesOtherPolicies")):_fail("CERTIFICATE_POLICY_SCOPE_INVALID")
     gross=value["approvedGross"]
-    if not isinstance(gross,dict) or set(gross)!={"crypto","stock","total","hype"} or any(type(gross[k])not in(int,float) or gross[k]!=n for k,n in {"crypto":3,"stock":1.5,"total":3.5,"hype":1}.items()):_fail("CERTIFICATE_GROSS_INVALID")
+    if not isinstance(gross,dict) or set(gross)!={"crypto","stock","total","hype"} or any(type(gross[k])not in(int,float) or gross[k]!=n for k,n in {"crypto":3,"stock":4,"total":4.25,"hype":1.5}.items()):_fail("CERTIFICATE_GROSS_INVALID")
     if not _time(value["issuedAt"]) or not _time(value["expiresAt"]) or not value["issuedAt"]<=now_ms<value["expiresAt"]:_fail("CERTIFICATE_CLOCK_INVALID")
     return copy.deepcopy(value)
 
