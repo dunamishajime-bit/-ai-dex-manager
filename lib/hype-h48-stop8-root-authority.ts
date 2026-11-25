@@ -190,7 +190,7 @@ export function attestH48Stop8IssuanceReceipt(input:{
     ||typeof r.runId!=="string"||!/^[0-9]{1,20}$/.test(r.runId)
     ||r.policy!=="H48_R4_RESIDENT_STOP8"
     ||r.ordersEnabled!==false||r.orderPermitIssued!==false
-    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(r)+"\\n")
+    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(r)+"\n")
     fail("IMMUTABLE_RECEIPT_NOT_ATTESTED");
 }
 /** A signed Owner certificate alone is NOT a scoped permission to trade.
@@ -214,7 +214,7 @@ export function attestH48Stop8ScopedOrderPermit(input:{
     ||!uint(p.issuedAt)||!uint(p.expiresAt)
     ||p.issuedAt>input.now||p.expiresAt<=input.now
     ||p.expiresAt-p.issuedAt>24*3_600_000
-    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(p)+"\\n")
+    ||Buffer.from(input.rawBytes).toString("utf8")!==sorted(p)+"\n")
     fail("SCOPED_ROOT_ORDER_PERMIT_INVALID");
   return {issuedAt:p.issuedAt,expiresAt:p.expiresAt};
 }
