@@ -27,6 +27,11 @@ export type CurrentProductionRuntime = {
   releaseSha: string;
   capsSource?: "PINNED_SOURCE_AND_PROCESS";
   capsEffectiveVerified?: boolean;
+  sharedHoldActive?: boolean | null;
+  v4Policy?: { policyId: string; routeCount: number; entryDrawdownPct: number };
+  // Source-backed display-only policy caps; legacy v12 fields are compatibility only.
+  fetMaximumGross?: number;
+  hypeMaximumGross?: number;
   productionReleaseShas: {
     v12: string;
     pengu: string;
@@ -244,6 +249,20 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const penguRisk = await readFile(join(roots.pengu,"config","integratedProductionRiskPolicy.ts"),"utf8");
   // Keep the older API compatibility fields, while current lineage is V4.
   const v12Source = await readFile(join(roots.v12,"config","v12X1AllRuntime.ts"),"utf8");
+  const v4Risk=await readFile(join(roots.v12,"config","v12V4AdoptionRiskPolicy.ts"),"utf8");
+  const v4Contract=await readFile(join(roots.v12,"lib","v12-v4-hp-contract.ts"),"utf8");
+  const dd=v4Risk.match(/export const V12_V4_MAXIMUM_DRAWDOWN\s*=\s*([0-9.]+);/);
+  const policyId=extractObjectText(v4Contract,"policyId");
+  const routeCount=extractObjectNumber(v4Contract,"expectedRouteCount");
+  const v4Policy=dd && Number.isFinite(Number(dd[1])) ? {policyId,routeCount,entryDrawdownPct:Number(dd[1])*100} : undefined;
+  const fetRisk=await readFile(join(roots.fet,"config","integratedProductionRiskPolicy.ts"),"utf8");
+  const hypeSource=await readFile(join(roots.hype,"config","hypeTrendLongPolicy.ts"),"utf8");
+  let sharedHoldActive:boolean|null=null;
+  try {
+    const hold=JSON.parse(await readFile("/var/lib/disdex/shared/kill-switch.json","utf8"));
+    if (typeof hold.active==="boolean") sharedHoldActive=hold.active;
+  } catch {}
+
   const penguSource = await readFile(join(roots.pengu,"config","penguDualLsV2Runtime.ts"),"utf8");
   const penguRecoverySource = await readFile(join(roots.pengu,"config","penguRecoveryV8.ts"),"utf8");
   const runtimeLineage=await loadRuntimeLineage(releaseSha,observations,productionReleaseShas);
@@ -280,6 +299,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       sharedCryptoDailyLossPct: cap("v12","DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT",extractObjectNumber(v12Risk,"cryptoDailyLossPct")),
       stockDailyLossPct,
   };
+  const hypeMaximumGross=cap("hype","HYPE_LONG_MAX_GROSS",extractObjectNumber(hypeSource,"maximumGross"));
   return {
     ok: true,
     readOnly: true,
@@ -291,6 +311,10 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     runtimeLineage,
     capsSource: "PINNED_SOURCE_AND_PROCESS",
     capsEffectiveVerified,
+    sharedHoldActive,
+    v4Policy,
+    fetMaximumGross:extractObjectNumber(fetRisk,"fetResidualMaximumGross"),
+    hypeMaximumGross,
     caps,
     v12: {
       strategyId: extractObjectText(v12Source, "strategyId"),

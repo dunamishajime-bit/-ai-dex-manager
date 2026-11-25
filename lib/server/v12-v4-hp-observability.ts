@@ -345,7 +345,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const heartbeatUpdatedAt = finite(heartbeat?.updatedAt) ? heartbeat.updatedAt : null;
   const heartbeatFresh = heartbeatSchemaOk && fresh(heartbeatUpdatedAt, now);
   const modeText = asText(heartbeat?.operationMode).toUpperCase();
-  const v4RunnerMode: V12V4HpSnapshot["actual"]["v4RunnerMode"] = modeText === "CERTIFIED" || modeText === "CANARY" || modeText === "SHADOW" ? modeText : "UNKNOWN";
+  const v4RunnerMode: V12V4HpSnapshot["actual"]["v4RunnerMode"] = monitor?.monitorOnly ? "MONITOR_ONLY" : modeText === "CERTIFIED" || modeText === "CANARY" || modeText === "SHADOW" ? modeText : "UNKNOWN";
   const orderEnabled = monitor?.monitorOnly ? false : typeof heartbeat?.orderEnabled === "boolean" ? heartbeat.orderEnabled : null;
 
   let v12PrimaryMode: V12V4HpSnapshot["actual"]["v12PrimaryMode"] = "UNKNOWN";
@@ -493,7 +493,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   let displayStatus: V12V4HpDisplayStatus;
   if (monitor?.monitorOnly && monitor.matchesCurrent && monitor.runtimeSha===currentSha &&
       runnerSha===currentSha && activeRunnerSha===currentSha && legacyV12RunnerActive===false) {
-    displayStatus="STAGED_NOT_LIVE";
+    displayStatus="MONITOR_ONLY";
     v12PrimaryMode="V4";
   } else if (shaMismatch) displayStatus = "SHA_MISMATCH";
   else if (sourceIntegrityError) displayStatus = "SOURCE_ERROR";

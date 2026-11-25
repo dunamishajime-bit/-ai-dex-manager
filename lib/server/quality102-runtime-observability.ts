@@ -1,3 +1,4 @@
+import { loadPinnedDisplayObservation } from "@/lib/server/pinned-runtime-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -33,7 +34,7 @@ export type Quality102RuntimeStatus = {
   readOnly: true;
   tradingMutation: 0;
   configured: boolean;
-  status: "LIVE" | "STALE" | "UNAVAILABLE";
+  status: "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
   capturedAt: string;
   updatedAt?: number;
   stateUpdatedAt?: number;
@@ -129,6 +130,17 @@ function symbols(value: unknown): string[] {
 export async function loadQuality102RuntimeObservability(): Promise<Quality102RuntimeStatus> {
   const capturedAt = new Date().toISOString();
   const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
+  const observation=await loadPinnedDisplayObservation("QUALITY102_CAUSAL_V1").catch(()=>null);
+  if (observation?.monitorOnly) {
+    const reason=observation.healthReason || "Q102監視中・新規発注未許可";
+    return {...unavailable(capturedAt,true,reason),status:observation.matchesCurrent?"MONITOR_ONLY":"STALE",mode:"MONITOR_ONLY",
+      runtimeSha:observation.runtimeSha,expectedReleaseSha:observation.expectedSha,
+      updatedAt:observation.updatedAt,heartbeatUpdatedAt:observation.updatedAt,
+      releaseShaVerified:observation.matchesCurrent,safetyState:observation.safetyState,
+      selectorMode:currentRuntime?.quality102.selectorMode || "UNVERIFIED",
+      caps:currentRuntime ? {strategyGrossCap:currentRuntime.caps.quality102Gross,cryptoGrossCap:currentRuntime.caps.cryptoGross,totalGrossCap:currentRuntime.caps.totalGross} : unavailable(capturedAt,true,reason).caps,
+      errors:observation.matchesCurrent?[]:[reason]};
+  }
   const statePath = String(process.env.QUALITY102_CAUSAL_V1_STATE_PATH || "").trim();
   if (!statePath) return unavailable(capturedAt, false, "QUALITY102_CAUSAL_V1_STATE_PATH がUIサービスに設定されていません。");
   if (!isAbsolute(statePath)) return unavailable(capturedAt, true, "QUALITY102_CAUSAL_V1_STATE_PATH は絶対パスで設定してください。");

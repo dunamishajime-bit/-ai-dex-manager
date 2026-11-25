@@ -82,7 +82,7 @@ export default function FormalPriorityDecisionPage() {
             判定状況一覧へ戻る
           </Link>
           <h1 className="mt-2 text-2xl font-black text-white md:text-3xl">Formal Priority / Cooldown</h1>
-          <p className="mt-2 text-sm text-white/65">V12 Gross、Q102 handoff、symbol別cooldown、正式10bps BTを同じ画面で確認します。</p>
+          <p className="mt-2 text-sm text-white/65">V12 Gross、Q102 handoff、symbol別cooldown、過去研究の10bps BT（現行STABLE4 DD30とは別）を同じ画面で確認します。</p>
         </div>
         <button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
           <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
@@ -108,11 +108,11 @@ export default function FormalPriorityDecisionPage() {
         </div>
         <div className="panel-gold rounded-2xl p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-gold-100/70">Pending</div>
-          <div className="mt-2 text-xl font-black text-white">{live?.pending || live?.q102Pending ? "あり" : "なし"}</div>
+          <div className="mt-2 text-xl font-black text-white">{live?.pending || live?.q102Pending ? "あり" : "未確認"}</div>
         </div>
         <div className="panel-gold rounded-2xl p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-gold-100/70">Manual Review</div>
-          <div className="mt-2 text-sm font-black text-white">{live?.manualReview || "なし"}</div>
+          <div className="mt-2 text-sm font-black text-white">{live?.manualReview || "未確認"}</div>
         </div>
       </section>
 
@@ -122,7 +122,7 @@ export default function FormalPriorityDecisionPage() {
             <div className="panel-gold rounded-2xl p-4">
               <div className="flex items-center gap-2 text-sm font-bold text-white">
                 <Activity className="h-4 w-4 text-gold-100" />
-                V12 Gross契約
+                過去研究 V12 Gross契約
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">

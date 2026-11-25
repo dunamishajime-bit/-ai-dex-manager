@@ -36,7 +36,7 @@ export type DecisionStatusSnapshot = {
     units: Array<{
       id: string;
       label: string;
-      status: "LIVE" | "STALE" | "STOPPED" | "UNAVAILABLE" | "UNCONFIRMED";
+      status: "MONITOR_ONLY" | "LIVE" | "STALE" | "STOPPED" | "UNAVAILABLE" | "UNCONFIRMED";
       releaseSha: string;
       venue: string;
       timeframe: string;
@@ -101,14 +101,14 @@ export function runtimeSnapshot(
     checkedAt,
     units: [
       {
-        id: v12?.strategyId ?? "V12_X1.00_ALL",
-        label: v12 ? v12.strategyId : "V12 runtime unavailable",
+        id: "V12_V4",
+        label: "V12 V4",
         status: "UNCONFIRMED",
         releaseSha,
         venue: "Aster Futures V3",
         timeframe: "closed H1 -> H2",
-        entryPolicy: v12 && caps
-          ? `Score>=${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR/Price>=${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}% / Top${v12.maximumPositions} / Base ${caps.v12BaseGross.toFixed(2)}x / Dynamic ${caps.v12DynamicGross.toFixed(2)}x / per-position ${caps.v12PerPositionGross.toFixed(2)}x`
+        entryPolicy: currentRuntime?.v4Policy && caps
+          ? `V4 ${currentRuntime.v4Policy.policyId} / ${currentRuntime.v4Policy.routeCount} routes / 新規DD停止 ${currentRuntime.v4Policy.entryDrawdownPct}%`
           : "Production runtime unavailable; no static contract fallback.",
         protection: caps
           ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / daily loss ${caps.sharedCryptoDailyLossPct}% / Aster 5x Cross`
@@ -155,7 +155,7 @@ export function runtimeSnapshot(
         releaseSha: releaseShas?.fet ?? releaseSha,
         venue: "Aster Futures FETUSDT",
         timeframe: "BRK48 residual signal",
-        entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時はpreemptibleな残余枠で判定",
+        entryPolicy: currentRuntime?.fetMaximumGross!==undefined ? `FET BRK48 / 残余枠上限 ${currentRuntime.fetMaximumGross.toFixed(2)}x（発注許可は別判定）` : "FET BRK48 残余枠の現行設定未取得",
         protection: "5x Cross・reduce-only protection・reconciliation・共有risk・Kill Switch",
         note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
         reason: "Waiting for FET runner state.",
@@ -178,13 +178,19 @@ export function runtimeSnapshot(
         releaseSha: hype?.runtimeSha || releaseShas?.hype || releaseSha,
         venue: "Aster Futures HYPEUSDT",
         timeframe: "closed H1 trend / breakout",
-        entryPolicy: "HYPE Trend Long Production runner / current heartbeat authoritative",
+        entryPolicy: currentRuntime?.hypeMaximumGross!==undefined ? `HYPE Trend Long / 上限 ${currentRuntime.hypeMaximumGross.toFixed(2)}x（発注許可は別判定）` : "HYPE Trend Long 現行設定未取得",
         protection: caps
           ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk / Kill Switch / Aster 5x Cross`
           : "Production runtime unavailable.",
         note: "6番目のProduction Runner。停止・manual review時も一覧から消さず状態を表示します。",
         reason: hype?.healthReason || (hype?.matchesCurrent ? "HYPE heartbeatを取得しました。" : "HYPE heartbeatがcurrent Productionと一致しません。"),
         updatedAt: hype?.updatedAt,
+      },
+      {
+        id:"IDLE_PRIORITY_SHORT",label:"IDLE Priority Short",status:"UNCONFIRMED",
+        releaseSha:releaseShas?.idle ?? releaseSha,venue:"Aster Futures",timeframe:"current runner",
+        entryPolicy:"現行IDLE Runnerの判定情報",protection:"共有risk・Gross・Kill Switch",
+        note:"実プロセスの観測と新規注文許可は別です。",reason:"Waiting for IDLE runner state."
       },
       {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",

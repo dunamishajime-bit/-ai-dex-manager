@@ -51,6 +51,7 @@ export type Quality102SymbolSnapshot = {
   observerCommitSha?: string;
   rankingModelVersion?: string;
   rankingAvailable: boolean;
+  observationMode?: "MONITOR_ONLY";
   snapshotSource: "ranking" | "decision";
   productionSha: string;
   selectorMode: string;
@@ -154,6 +155,14 @@ export async function loadQuality102SymbolObservability(
   options: Quality102SymbolObservabilityOptions = {},
 ): Promise<Quality102SymbolSnapshot> {
   const runtime = await (options.loadRuntime ?? loadQuality102RuntimeObservability)();
+  if(runtime.status==="MONITOR_ONLY") {
+    const productionSha=String(runtime.runtimeSha||"");
+    if(!SHA_RE.test(productionSha)||runtime.expectedReleaseSha!==productionSha||runtime.releaseShaVerified!==true) throw new Error("Q102_MONITOR_SHA_UNVERIFIED");
+    return {ok:true,readOnly:true,tradingMutation:0,capturedAt:new Date().toISOString(),
+      rankingAvailable:false,observationMode:"MONITOR_ONLY",snapshotSource:"decision",
+      productionSha,selectorMode:"CAUSAL_V4",referenceTs:0,
+      selectedReason:"監視稼働中・新規注文停止。今回の通貨別売買判定は未実施です。",items:[]};
+  }
   const productionSha = resolveQuality102RuntimeSha(runtime);
   const rankingPath = options.rankingPath || process.env.QUALITY102_RANKING_SNAPSHOT_PATH || DEFAULT_RANKING_SNAPSHOT_PATH;
   const decisionPath = options.decisionPath || process.env.QUALITY102_DECISION_SNAPSHOT_PATH || DEFAULT_DECISION_SNAPSHOT_PATH;

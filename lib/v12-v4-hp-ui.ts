@@ -10,12 +10,13 @@ export type V12V4HpPresentation = {
 
 export type V12V4HpPresentationOptions = { loading?: boolean; error?: string | null };
 
-export type V12V4LiveStatus = "LIVE" | "STALE" | "UNAVAILABLE";
+export type V12V4LiveStatus = "MONITOR_ONLY" | "LIVE" | "STALE" | "UNAVAILABLE";
 
 const SHA_RE = /^[a-f0-9]{40}$/i;
 
 function statusLabel(status: V12V4HpDisplayStatus): string {
   switch (status) {
+    case "MONITOR_ONLY": return "監視稼働中 / 新規注文停止";
     case "LIVE_VERIFIED": return "LIVE確認済み";
     case "STAGED_NOT_LIVE": return "V4仕様 / 本番未切替";
     case "SHADOW": return "SHADOW / 発注不可";
@@ -35,6 +36,7 @@ function actualSummary(snapshot: V12V4HpSnapshot | null): string {
 }
 
 export function v12V4LiveStatus(snapshot: V12V4HpSnapshot | null): V12V4LiveStatus {
+  if (snapshot?.displayStatus === "MONITOR_ONLY") return "MONITOR_ONLY";
   if (snapshot?.displayStatus === "LIVE_VERIFIED") return "LIVE";
   if (snapshot?.displayStatus === "STALE") return "STALE";
   return "UNAVAILABLE";

@@ -2,6 +2,7 @@
 
 import { Activity, Layers3, ShieldCheck } from "lucide-react";
 
+import { DIST_TERMINAL_LIVE_CONFIG } from "@/lib/disterminal-live-config";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
@@ -26,13 +27,17 @@ export default function PositionsPage() {
   const positionsAvailable = snapshot?.availability.positions === true;
   const ordersAvailable = snapshot?.availability.orders === true;
   const positionMarksVerified = positionsAvailable && snapshot!.positions.every((position) => position.markVerified);
-  const riskMetricsAvailable = accountAvailable && positionMarksVerified;
+  const riskMetricsAvailable = accountAvailable && positionMarksVerified && snapshot!.account.balanceUsd>0;
   const totalNotionalUsd = riskMetricsAvailable ? snapshot!.positions.reduce((sum, position) => sum + position.notionalUsd, 0) : 0;
   const equityUsd = accountAvailable ? snapshot!.account.balanceUsd : 0;
   const usedMarginUsd = accountAvailable ? Math.max(0, snapshot!.account.balanceUsd - snapshot!.account.availableUsd) : 0;
   const marginUsePct = equityUsd > 0 ? (usedMarginUsd / equityUsd) * 100 : 0;
   const grossUsed = equityUsd > 0 ? totalNotionalUsd / equityUsd : 0;
-  const cryptoGrossRemaining = caps && riskMetricsAvailable ? Math.max(0, caps.cryptoGross - grossUsed) : null;
+  // Total usage includes stock sleeves; crypto headroom is not total notional.
+  const stockSymbols=new Set<string>(DIST_TERMINAL_LIVE_CONFIG.stockSymbols);
+  const cryptoNotionalUsd=riskMetricsAvailable ? snapshot!.positions.filter(p=>!stockSymbols.has(p.symbol)).reduce((sum,p)=>sum+p.notionalUsd,0) : 0;
+  const cryptoUsed=equityUsd>0 ? cryptoNotionalUsd/equityUsd : 0;
+  const cryptoGrossRemaining = caps && riskMetricsAvailable && equityUsd>0 ? Math.max(0,Math.min(caps.cryptoGross-cryptoUsed,caps.totalGross-grossUsed)) : null;
   const cryptoNotionalRemainingUsd = cryptoGrossRemaining != null ? cryptoGrossRemaining * equityUsd : null;
   const entryOrderCount = ordersAvailable ? snapshot!.orders.entryOrderCount : 0;
   const protectionBySymbol = ordersAvailable && snapshot ? snapshot.orders.items.filter((order) => order.protection).reduce<Record<string, typeof snapshot.orders.items>>((grouped, order) => {
@@ -47,7 +52,7 @@ export default function PositionsPage() {
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Current Production Dashboard</div>
           <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{productionRuntime && pengu && v52 ? `V12 V4 / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-white/82">Asterの読み取り結果を正本として、口座残高、実建玉、未決済注文、保護注文を表示します。データ未取得時は正常稼働と推測表示しません。</p>
-          <p className={`mt-2 max-w-4xl rounded-2xl border px-4 py-3 text-[12px] leading-6 ${lineageDisplay?.tone === "healthy" ? "border-emerald-400/25 bg-emerald-500/5 text-emerald-100/85" : lineageDisplay?.tone === "scoped" ? "border-cyan-400/25 bg-cyan-500/5 text-cyan-100/85" : "border-amber-400/25 bg-amber-500/5 text-amber-100/85"}`}>{productionRuntime && caps && q102 ? `${lineageDisplay?.label ?? "Production runtime未接続"} / Q102 ${q102.selectorMode} ${caps.quality102Gross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / ${v12 ? `V12 Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : "。旧固定値は表示しません。"}`}</p>
+          <p className={`mt-2 max-w-4xl rounded-2xl border px-4 py-3 text-[12px] leading-6 ${lineageDisplay?.tone === "healthy" ? "border-emerald-400/25 bg-emerald-500/5 text-emerald-100/85" : lineageDisplay?.tone === "scoped" ? "border-cyan-400/25 bg-cyan-500/5 text-cyan-100/85" : "border-amber-400/25 bg-amber-500/5 text-amber-100/85"}`}>{productionRuntime && caps && q102 ? `${lineageDisplay?.label ?? "Production runtime未接続"} / Q102 ${q102.selectorMode} ${caps.quality102Gross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / ${productionRuntime.v4Policy ? `V4 DD ${productionRuntime.v4Policy.entryDrawdownPct}% 新規停止` : "V4 contract runtime未取得"}` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : "。旧固定値は表示しません。"}`}</p>
         </header>
 
         <V12V4RuntimePanel />
@@ -63,7 +68,7 @@ export default function PositionsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3"><div className="text-sm font-bold">資金使用量 / 注文余力</div><span className="text-[11px] text-white/55">Aster実残高・実建玉から30秒ごとに再計算</span></div>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Metric label="証拠金使用" value={accountAvailable ? formatPrice(usedMarginUsd) : "UNAVAILABLE"} detail={accountAvailable ? String(marginUsePct.toFixed(1)) + "% / available " + formatPrice(snapshot!.account.availableUsd) : "Aster残高取得不可"} />
-            <Metric label="Gross使用" value={riskMetricsAvailable && caps ? grossUsed.toFixed(2) + "x / " + caps.cryptoGross.toFixed(2) + "x" : "UNAVAILABLE"} detail={positionMarksVerified ? "Notional " + formatPrice(totalNotionalUsd) : "実建玉Markの取得が不完全"} />
+            <Metric label="Total Gross使用" value={riskMetricsAvailable && caps ? grossUsed.toFixed(2) + "x / " + caps.totalGross.toFixed(2) + "x" : "UNAVAILABLE"} detail={positionMarksVerified ? "Notional " + formatPrice(totalNotionalUsd) : "実建玉Markの取得が不完全"} />
             <Metric label="Crypto Gross余力" value={cryptoGrossRemaining != null ? `${cryptoGrossRemaining.toFixed(2)}x` : "—"} detail={cryptoNotionalRemainingUsd != null ? `約 ${formatPrice(cryptoNotionalRemainingUsd)} 相当の追加Notional余地` : "Production cap取得待ち"} />
             <Metric label="V12 V4 runtime" value="詳細パネル参照" detail="旧V12 capacity snapshotをV4の建玉枠として流用しません" />
           </div>
@@ -72,7 +77,7 @@ export default function PositionsPage() {
 
         <section className="grid gap-3 xl:grid-cols-3">
           <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Layers3 className="h-4 w-4 text-gold-100" />{pengu?.strategyId ?? "PENGU runtime未取得"}</div>{pengu && caps ? <><p className="mt-3 text-[12px] leading-6 text-white/78">Gross上限 {caps.penguGross.toFixed(2)}x / Recovery {pengu.recoveryRule} 初期 {pengu.recoveryInitialGross.toFixed(2)}x / hard-stop後 cooldown {pengu.hardStopCooldownHours}h / Recovery max hold {pengu.recoveryMaxHoldHours}h。</p><p className="mt-2 text-[11px] leading-5 text-white/58">Recovery hard stop {(pengu.recoveryHardStopPct * 100).toFixed(1)}% / trail activation {(pengu.recoveryTrailActivationPct * 100).toFixed(1)}% / retrace {(pengu.recoveryTrailRetracePct * 100).toFixed(1)}% / Crypto共有 {caps.cryptoGross.toFixed(2)}x / daily loss {caps.sharedCryptoDailyLossPct}%</p></> : <p className="mt-3 text-[12px] leading-6 text-amber-100/80">Production runtime未取得。旧固定値は表示しません。</p>}</div>
-          <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />{v52 ? `V52 / ${v52.policyId}` : "V52 runtime未取得"}</div>{v52 && caps ? <><p className="mt-3 text-[12px] leading-6 text-white/78">{v52.strategy}: Basis ≥{v52.minimumEntryBasisBps}bps / Convergence {v52.convergenceBps}bps / Stop {v52.basisStopMultiple}x / Net Edge ≥{v52.minimumNetEdgeBps}bps / Max Cost {v52.maximumRoundTripCostBps}bps / Spread ≤{v52.maximumSpreadBps}bps / Hold ≤{v52.maximumHoldingHours}h。</p><p className="mt-2 text-[11px] leading-5 text-white/58">Slot上限 {caps.v52V50Gross.toFixed(2)}x / Stock {caps.stockGross.toFixed(2)}x / Global {caps.totalGross.toFixed(1)}x / Aster 5x Cross</p></> : <p className="mt-3 text-[12px] leading-6 text-amber-100/80">Production runtime未取得。旧固定値は表示しません。</p>}</div>
+          <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />{v52 ? `V52 / ${v52.policyId}` : "V52 runtime未取得"}</div>{v52 && caps ? <><p className="mt-3 text-[12px] leading-6 text-white/78">{v52.strategy}: Basis ≥{v52.minimumEntryBasisBps}bps / Convergence {v52.convergenceBps}bps / Stop {v52.basisStopMultiple}x / Net Edge ≥{v52.minimumNetEdgeBps}bps / Max Cost {v52.maximumRoundTripCostBps}bps / Spread ≤{v52.maximumSpreadBps}bps / Hold ≤{v52.maximumHoldingHours}h。</p><p className="mt-2 text-[11px] leading-5 text-white/58">Slot上限 {caps.v52V50Gross.toFixed(2)}x / Stock {caps.stockGross.toFixed(2)}x / Global {caps.totalGross.toFixed(2)}x / Aster 5x Cross</p></> : <p className="mt-3 text-[12px] leading-6 text-amber-100/80">Production runtime未取得。旧固定値は表示しません。</p>}</div>
           <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-amber-200" />Q102 {q102?.selectorMode ?? "runtime未取得"}</div>{q102 && caps ? <><p className="mt-3 text-[12px] leading-6 text-white/78">{q102.selectorMode}の1-slot補完スリーブ。最大 {caps.quality102Gross.toFixed(2)}x / Crypto {caps.cryptoGross.toFixed(2)}x / Total {caps.totalGross.toFixed(2)}x。</p><p className="mt-2 text-[10px] leading-5 text-amber-100/65">Family Gross: HIGH_VOL {q102.familyGross.HIGH_VOL.toFixed(3)}x / MR {q102.familyGross.MR.toFixed(2)}x / BRK {q102.familyGross.BRK.toFixed(3)}x / REV {q102.familyGross.REV.toFixed(2)}x / PB {q102.familyGross.PB.toFixed(2)}x / Aster 5x Cross</p></> : <p className="mt-3 text-[12px] leading-6 text-amber-100/80">Production runtime未取得。旧固定値は表示しません。</p>}</div>
         </section>
 
