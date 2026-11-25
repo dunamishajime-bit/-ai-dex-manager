@@ -26,8 +26,11 @@
   "sourceSha256": {
     ".github/workflows/disdex-owner-goal-candidate-ci.yml": "078c89f635a5a75fd10a234d571fe0c6de47498a85db9bd1ee64f4392efdff2d",
     "app/api/system/deploy-approval/route.ts": "0ee036a323098a557249201789e7c9b45208978b4a54b0f835a03d6e2ee99191",
+    "config/hypeTrendLongPolicy.ts": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad",
     "config/integratedProductionRiskPolicy.ts": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+    "config/q102FamilySideGross.json": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
     "config/v12V4AdoptionRiskPolicy.ts": "97ddd1beef1e75f1a38b2f62b436a45b8e59c6b95d0e936f720b854e9260f672",
+    "config/v52V50Runtime.json": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
     "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
     "lib/direct-trade-executor.ts": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
     "lib/disdex-quality102-causal-v1-runner.ts": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2",

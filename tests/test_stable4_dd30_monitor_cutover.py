@@ -85,6 +85,51 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
         self.assertNotIn("/etc/disdex/current-runtime/%i.env", hype)
         self.assertNotIn("/etc/disdex/current-runtime/%i.hype-operator.env", hype)
 
+    def test_adopted_dd30_gross_is_bound_per_runner_after_environment_files(self):
+        target = "a" * 40
+        units = target_units(target)
+        for runner in RUNNER_IDS:
+            expected = cutover.adopted_gross_env(runner)
+            self.assertEqual(expected["CRYPTO_GROSS_CAP"], "3.0")
+            self.assertEqual(expected["STOCK_GROSS_CAP"], "4.0")
+            self.assertEqual(expected["TOTAL_GROSS_CAP"], "4.25")
+            self.assertEqual(expected["HYPE_LONG_MAX_GROSS"], "1.5")
+            self.assertEqual(expected["HYPE_ZEC_MAX_GROSS"], "1.0")
+            self.assertEqual(expected["V12_BASE_GROSS_CAP"], "2.0")
+            self.assertEqual(expected["PENGU_DUAL_LS_V2_MAX_GROSS"], "1.0")
+            self.assertEqual(expected["QUALITY102_CAUSAL_V1_MAX_GROSS"], "3.0")
+            # The existing resolver checks the entire shared numeric contract,
+            # so an unrelated inherited HYPE=1.0 must not break a V4 process.
+            policy_source = (ROOT / "config/integratedProductionRiskPolicy.ts").read_text(encoding="utf-8")
+            import re
+            declared = set(re.findall(r"^    ([A-Z0-9_]+): INTEGRATED_PRODUCTION_RISK_POLICY\.", policy_source, re.M))
+            self.assertEqual(declared, set(cutover.DD30_COMMON_GROSS_ENV))
+            text = dropin_text(runner, target, units[runner])
+            launch = next(line for line in text.splitlines() if line.startswith("ExecStart=/usr/bin/env "))
+            for key, value in expected.items():
+                self.assertIn(f"Environment={key}={value}", text)
+                self.assertIn(f"{key}={value}", launch)
+            payload = b"\0".join(f"{k}={v}".encode() for k,v in expected.items()) + b"\0"
+            cutover.check_running_gross_env(payload, runner)
+            wrong = payload.replace(b"TOTAL_GROSS_CAP=4.25", b"TOTAL_GROSS_CAP=3.5")
+            with self.assertRaisesRegex(cutover.ContractError, "DD30_EFFECTIVE_GROSS_MISMATCH"):
+                cutover.check_running_gross_env(wrong, runner)
+        self.assertEqual(cutover.adopted_gross_env("V52")["DISDEX_V52_V11_GROSS_CAP"], "2.0")
+        self.assertEqual(cutover.adopted_gross_env("V52")["DISDEX_V52_V50_GROSS_CAP"], "2.0")
+        self.assertEqual(cutover.adopted_gross_env("HYPE_TREND_LONG")["DISDEX_HYPE_ZEC_MAX_GROSS"], "1.5")
+        self.assertEqual(cutover.adopted_gross_env("HYPE_TREND_LONG")["HYPE_ZEC_MAX_GROSS"], "1.0")
+        self.assertNotIn("DISDEX_HYPE_ZEC_MAX_GROSS", cutover.adopted_gross_env("V52"))
+
+    def test_adopted_v52_stock_and_slot_source(self):
+        config = json.loads((ROOT / "config/v52V50Runtime.json").read_text(encoding="utf-8"))
+        self.assertEqual((config["stockAggregateGross"], config["slotGross"]), (4.0, 2.0))
+        # The candidate cannot authorize orders, and the original monitor plan
+        # retains precisely the same economics.
+        plan = json.loads(PLAN.read_text(encoding="utf-8"))
+        self.assertIs(plan["ordersEnabled"], False)
+        self.assertEqual(plan["economics"]["stockGrossCap"], config["stockAggregateGross"])
+        self.assertEqual(plan["economics"]["totalGrossCap"], 4.25)
+
     def test_plan_digest_shape(self):
         self.assertTrue(HASH_RE.fullmatch(PLAN_SHA))
 
