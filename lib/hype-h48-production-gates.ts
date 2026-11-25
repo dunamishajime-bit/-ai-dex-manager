@@ -26,6 +26,9 @@ export interface H48GateObservation {
   ddDrawdownPct:number|null;
   residentStopRequiredByOwner:boolean;
   h48CertificateResidentStopRequired:boolean;
+  /** Read-only policy label: a H48_TIME_ONLY certificate never authorizes STOP8. */
+  requestedH48Policy?:"H48_TIME_ONLY"|"H48_R4_RESIDENT_STOP8";
+  h48CertificatePolicy?:"H48_TIME_ONLY"|"H48_R4_RESIDENT_STOP8"|null;
 }
 export type H48LiveReadinessAudit=Readonly<{
   status:"BLOCKED";ordersAllowed:false;tradingMutations:0;
@@ -65,8 +68,17 @@ export function auditH48LiveReadiness(input:H48GateObservation):H48LiveReadiness
   if(typeof input.ddDrawdownPct!=="number"||!Number.isFinite(input.ddDrawdownPct)
       ||input.ddDrawdownPct<0||input.ddDrawdownPct>30)
     reasons.push("DD30_NOT_VERIFIED");
-  if(input.h48CertificateResidentStopRequired!==false||input.residentStopRequiredByOwner!==false)
+  const desired=input.requestedH48Policy??"H48_TIME_ONLY";
+  const certified=input.h48CertificatePolicy??"H48_TIME_ONLY";
+  if(desired==="H48_R4_RESIDENT_STOP8"){
+    if(certified!==desired||input.h48CertificateResidentStopRequired!==true
+      ||input.residentStopRequiredByOwner!==true)
+      reasons.push("H48_STOP8_CERTIFICATE_POLICY_NOT_MATCHED");
+  }else if(input.h48CertificateResidentStopRequired!==false
+     ||input.residentStopRequiredByOwner!==false
+     ||certified!=="H48_TIME_ONLY"){
     reasons.push("H48_TIME_ONLY_VS_PROTECTIVE_STOP_POLICY_UNRESOLVED");
+  }
   // Even if all non-authorizing observations happen to look healthy, the
   // complete signed Owner approval, Root cert, venue/writer + new SHA gates
   // have NOT been evaluated here and can never be inferred.
