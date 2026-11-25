@@ -8,6 +8,8 @@ export const HYPE_H48_ORDER_PERMIT_POLICY = "H48_TIME_ONLY" as const;
 export const HYPE_H48_ORDER_PERMIT_OPERATOR = "disdex-stable4-h48-order-enable" as const;
 export const HYPE_H48_GLOBAL_HOLD_OPERATOR = "disdex-stable4-formal-owner-hold" as const;
 export const HYPE_H48_GLOBAL_HOLD_STRATEGY = "STABLE4_H48_CUTOVER" as const;
+export const HYPE_H48_GLOBAL_HOLD_REASON =
+  "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f" as const;
 export const HYPE_H48_ORDER_PERMIT_DEFAULT_ROOT = "/etc/disdex/stable4/h48-time-only" as const;
 export const HYPE_H48_GLOBAL_KILL_PATH = "/var/lib/disdex/shared/kill-switch.json" as const;
 
@@ -112,7 +114,7 @@ export function validateHypeH48OrderPermit(
   const hold = input.killSwitch;
   if (hold.active !== true || hold.action !== "HOLD_PROTECTED" || hold.scope !== "GLOBAL"
       || hold.operator !== HYPE_H48_GLOBAL_HOLD_OPERATOR || hold.strategyId !== HYPE_H48_GLOBAL_HOLD_STRATEGY
-      || hold.reason !== `STABLE4_RESEARCH_ROLLOUT:${input.sourceSha}`) fail("GLOBAL_HOLD");
+      || hold.reason !== HYPE_H48_GLOBAL_HOLD_REASON) fail("GLOBAL_HOLD");
   return Object.freeze({ ...value }) as HypeH48OrderPermit;
 }
 
@@ -205,3 +207,4 @@ export async function hasValidHypeH48OrderPermit(input: {
     return false;
   }
 }
+

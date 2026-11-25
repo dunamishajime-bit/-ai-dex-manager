@@ -38,7 +38,7 @@ def hold():
         "scope": "GLOBAL",
         "operator": "disdex-stable4-formal-owner-hold",
         "strategyId": "STABLE4_H48_CUTOVER",
-        "reason": "STABLE4_RESEARCH_ROLLOUT:" + SOURCE,
+        "reason": "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
     }
 
 
@@ -131,3 +131,4 @@ class HypeH48OrderEnableTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

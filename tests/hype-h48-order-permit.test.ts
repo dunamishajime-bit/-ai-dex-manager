@@ -6,8 +6,8 @@ import {
   type HypeH48OrderPermit,
 } from "../lib/hype-h48-order-permit";
 
-const SOURCE = "e0e4f1d8f22b62e9410188ef6e590a20e31f760f";
-const PLAN = "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce";
+const SOURCE = "4786f600ae7bf86ffca948f1412956a9113cb20d";
+const PLAN = "8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d";
 const CERT = "a".repeat(64);
 const KILL = "b".repeat(64);
 const NONCE = "c".repeat(64);
@@ -45,7 +45,7 @@ const hold = {
   scope: "GLOBAL" as const,
   operator: "disdex-stable4-formal-owner-hold",
   strategyId: "STABLE4_H48_CUTOVER",
-  reason: `STABLE4_RESEARCH_ROLLOUT:${SOURCE}`,
+  reason: "STABLE4_RESEARCH_ROLLOUT:e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
 };
 
 test("valid HYPE H48 permit is accepted only under the exact protected GLOBAL HOLD", () => {
@@ -124,3 +124,4 @@ test("permit requires the exact HYPE operation and no trading mutations", () => 
     }));
   }
 });
+

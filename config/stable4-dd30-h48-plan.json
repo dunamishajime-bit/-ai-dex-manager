@@ -1,0 +1,2 @@
+{"approvedGross":{"crypto":3,"hype":1.5,"stock":4,"total":4.25},"authorizesOtherPolicies":false,"dd":{"penguProtectionPct":17,"sharedRiskDailyLossPct":7.5,"v4NewOrderStopPct":30},"globalHold":"must_remain_active","operation":"HYPE_STABLE4_H48_TIME_ONLY_LIVE","ordersEnabled":true,"policy":"H48_TIME_ONLY","residentStopRequired":false,"residentTakeProfitRequired":false,"schema":"STABLE4_DD30_H48_ORDER_PLAN_V1","scope":"HYPE_TREND_LONG","sourceSha":"4786f600ae7bf86ffca948f1412956a9113cb20d"}
+

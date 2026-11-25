@@ -104,8 +104,8 @@ try {
   if (h48.scope !== h48Operation.scope || h48Operation.ordersEnabled !== true ||
       h48.policy !== "H48_TIME_ONLY" || h48.residentStopRequired !== false ||
       h48.residentTakeProfitRequired !== false || !h48Operation.label.includes("常駐STOP") ||
-      h48.approvedGross.crypto !== 3 || h48.approvedGross.stock !== 1.5 ||
-      h48.approvedGross.total !== 3.5 || h48.approvedGross.hype !== 1) {
+      h48.approvedGross.crypto !== 3 || h48.approvedGross.stock !== 4 ||
+      h48.approvedGross.total !== 4.25 || h48.approvedGross.hype !== 1.5) {
     throw new Error("STABLE4 H48 production policy/owner acknowledgement is not exact");
   }
   verifyCase({ scope: h48.scope, ordersEnabled: true, planSha256: h48.planSha256 });
@@ -170,3 +170,4 @@ try {
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
 }
+

@@ -9,14 +9,14 @@ export const DEPLOY_APPROVAL_ROUTE = "GITHUB_ACTIONS";
 
 /** Exact-scope STABLE4 H48 production policy; not a generic SHA restoration. */
 export const STABLE4_H48_TIME_ONLY_APPROVAL = Object.freeze({
-  targetSha: "08f4a0d77d85808d897d6d4d985b950af0d76bab",
-  planSha256: "684b1b49d51cad53835d5e66ff1db3ca1692e4198d5a61ba5598bd73303a632f",
+  targetSha: "4786f600ae7bf86ffca948f1412956a9113cb20d",
+  planSha256: "8af6e4eb73e53f63f7f7d441f171176cc420090a8ab29faaacf4f01427a3822d",
   researchSha: "9e1142f5ec6d4bc285deef023572623bb1c37a34",
   policy: "H48_TIME_ONLY",
   scope: "HYPE_TREND_LONG",
   residentStopRequired: false,
   residentTakeProfitRequired: false,
-  approvedGross: { crypto: 3, stock: 1.5, total: 3.5, hype: 1 },
+  approvedGross: { crypto: 3, stock: 4, total: 4.25, hype: 1.5 },
 } as const);
 
 export function isExactStable4H48OwnerApprovalRequest(input: {
@@ -136,7 +136,7 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
   HYPE_STABLE4_H48_TIME_ONLY_LIVE: {
     scope: "HYPE_TREND_LONG",
     ordersEnabled: true,
-    label: "STABLE4 HYPE H48時間決済（常駐STOP・TPなし／Crypto3.0x・Stock1.5x・Total3.5x・HYPE1.0x）",
+    label: "STABLE4 HYPE H48時間決済（常駐STOP・TPなし／Crypto3.0x・Stock4.0x・Total4.25x・HYPE1.5x）",
   },
   V4_HYPE_PEER_PIN_CONTINUITY: {
     scope: "V12_V4",
@@ -317,3 +317,4 @@ export function deploymentApprovalIdentityMatches(
     payload.ordersEnabled === ordersEnabled
   );
 }
+
