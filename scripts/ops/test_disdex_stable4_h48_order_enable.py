@@ -110,23 +110,45 @@ class HypeH48OrderEnableTests(unittest.TestCase):
             except FileNotFoundError:
                 pass
 
-    def test_overlay_is_hype_symbol_and_live_stable4_only(self):
-        base = (b'import { readSharedKillSwitch } from "./disdex-shared-kill-switch";\n'
-                b'  async gate(signal:any) {\n'
-                b'    if (!kill.active) return;\n'
-                b'    const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";\n'
-                b'  }\n')
-        previous = gate.BASE_SOURCE_SHA256
-        gate.BASE_SOURCE_SHA256 = hashlib.sha256(base).hexdigest()
+    def test_native_h48_rejects_unwired_time_only_executor(self):
+        # The installed integrated 4786 HYPE source already checks the H48
+        # permit but does not call the certified 48-hour time-only authority.
+        root = Path(__file__).resolve().parents[2]
+        native = (root / "lib/hype-zec-long-runner.ts").read_bytes()
+        module = (root / "lib/hype-h48-order-permit.ts").read_bytes()
+        self.assertEqual(hashlib.sha256(native).hexdigest(), gate.NATIVE_SOURCE_SHA256)
+        self.assertEqual(hashlib.sha256(module).hexdigest(), gate.NATIVE_PERMIT_SHA256)
+        with self.assertRaisesRegex(ValueError, "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED"):
+            gate.validate_native_h48_runtime_source(native, module)
+
+    def test_native_source_gate_requires_both_hashes_and_authority(self):
+        base = (b'import { hasValidHypeH48OrderPermit } from "./hype-h48-order-permit";\\n'
+                b'await hasValidHypeH48OrderPermit({});\\n')
+        module = b'integrated permit module'
+        old_source = gate.NATIVE_SOURCE_SHA256
+        old_module = gate.NATIVE_PERMIT_SHA256
         try:
-            patched = gate.build_hype_source_overlay(base, "/overlay/hype-h48-order-permit.ts").decode()
+            gate.NATIVE_SOURCE_SHA256 = hashlib.sha256(base).hexdigest()
+            gate.NATIVE_PERMIT_SHA256 = hashlib.sha256(module).hexdigest()
+            with self.assertRaisesRegex(ValueError, "H48_NATIVE_ENTRY_POSITION_AUTHORITY_NOT_WIRED"):
+                gate.validate_native_h48_runtime_source(base, module)
+            with self.assertRaisesRegex(ValueError, "HYPE_NATIVE_PERMIT_HASH_MISMATCH"):
+                gate.validate_native_h48_runtime_source(base, module + b'changed')
+            with self.assertRaisesRegex(ValueError, "HYPE_NATIVE_SOURCE_HASH_MISMATCH"):
+                gate.validate_native_h48_runtime_source(base + b'changed', module)
+            wired = (base + b'createH48TimeOnlyPolicyAuthority({});\\n'
+                     b'HYPE_REDESIGN_CAUSAL_H48R4_WSIG H48_TIME_ONLY\\n')
+            gate.NATIVE_SOURCE_SHA256 = hashlib.sha256(wired).hexdigest()
+            self.assertEqual(gate.validate_native_h48_runtime_source(wired, module), wired)
         finally:
-            gate.BASE_SOURCE_SHA256 = previous
-        self.assertIn('hasValidHypeH48OrderPermit', patched)
-        self.assertIn('signal.symbol === "HYPEUSDT"', patched)
-        self.assertIn('runtime.signalMode === "STABLE4"', patched)
-        self.assertIn('runtime.stable4Mode === "LIVE"', patched)
-        self.assertEqual(patched.count("HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE"), 1)
+            gate.NATIVE_SOURCE_SHA256 = old_source
+            gate.NATIVE_PERMIT_SHA256 = old_module
+
+    def test_dropin_never_replaces_the_immutable_native_source(self):
+        dropin = gate.build_dropin().decode("utf-8")
+        self.assertIn("EnvironmentFile=", dropin)
+        self.assertNotIn("BindReadOnlyPaths=", dropin)
+        self.assertFalse(hasattr(gate, "build_hype_source_overlay"))
 
 
 if __name__ == "__main__":
