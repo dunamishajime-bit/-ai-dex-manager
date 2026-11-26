@@ -1,0 +1,118 @@
+name: H48 offline native research and STOP8 safety (NO LIVE)
+
+# Source-only CI. This workflow has no production environment, permissions
+# to dispatch order-enable, credentials, root key, approval token or VPS access.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-h48-offline-native-safety.yml"
+      - "lib/hype-h48-**"
+      - "lib/hype-stable4-time-only-contract.ts"
+      - "tests/hype-h48-**"
+      - "docs/production/stable4-dd30-h48-stop8-risk-owner-candidate-20261126.json"
+      - "docs/production/stable4-dd30-live-plan-candidate-20261125.json"
+      - "lib/stable4-dd30-owner-hard-gross-candidate.ts"
+      - "tests/stable4-dd30-owner-hard-gross-candidate.test.ts"
+      - "config/integratedProductionRiskPolicy.ts"
+      - "lib/disdex-integrated-gross-governor.ts"
+      - "tests/integrated_gross_governor.test.ts"
+      - "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py"
+      - "scripts/disdex-hype-h48-native-shadow.ts"
+      - "tests/test_disdex_h48_stop8_formal_issue.py"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: h48-offline-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  offline-no-mutation:
+    name: H48 offline no-order tests, typecheck and frozen H1 research
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Checkout source without credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Node.js for isolated, offline-source tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install only pinned project dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify all native H48, STOP8, recovery, Owner-Gross and source tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for spec in tests/hype-h48-*.test.ts; do
+            echo "=== FAIL-CLOSED OFFLINE SOURCE TEST: $spec"
+            npx --no-install tsx "$spec"
+            count=$((count+1))
+          done
+          if (( count < 18 )); then
+            echo "Expected all 18 H48 offline suites, found $count" >&2
+            exit 1
+          fi
+          npx --no-install tsx tests/stable4-dd30-owner-hard-gross-candidate.test.ts
+          npx --no-install tsx tests/integrated_gross_governor.test.ts
+          echo "H48_OFFLINE_SUITES=$count PASS"
+          echo "GROSS_CANDIDATE_AND_OLD_IMMUTABLE_SOURCE=PASS"
+          echo "TRADING_MUTATIONS=0"
+      - name: Verify NEW STOP8 issuer pure contract, never issuing a certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest -v tests/test_disdex_h48_stop8_formal_issue.py
+          echo "H48_STOP8_FORMAL_ISSUER_NO_MUTATION_TESTS=PASS"
+      - name: Fail-closed H48 native SHADOW CLI self-test
+        shell: bash
+        env:
+          DISDEX_H48_RUNTIME_SHA: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          DISDEX_H48_MODE: SHADOW
+        run: |
+          set -euo pipefail
+          output="$(npx --no-install tsx scripts/disdex-hype-h48-native-shadow.ts --self-test)"
+          echo "$output"
+          grep -q '"ordersSent":0' <<<"$output"
+          grep -q '"cancelsSent":0' <<<"$output"
+          if DISDEX_H48_MODE=LIVE npx --no-install tsx scripts/disdex-hype-h48-native-shadow.ts --self-test; then
+            echo "H48_SHADOW_ACCIDENTALLY_ACCEPTED_LIVE" >&2
+            exit 1
+          fi
+          echo "H48_SHADOW_NO_LIVE_MODE=PASS"
+      - name: Typecheck entire source without emitting artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --no-install tsc --noEmit -p tsconfig.json
+          echo "H48_FULL_TYPESCRIPT=PASS"
+      - name: Assert this CI has no LIVE dispatch or production credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path(".github/workflows/disdex-h48-offline-native-safety.yml")
+          s=p.read_text()
+          # Construct forbidden tokens from fragments to avoid a false
+          # positive when this test encounters its own denylist literals.
+          denied=(
+              "workflow_"+"dispatch:",
+              "environment:"+" disdex-production",
+              "secrets"+".",
+              "s"+"sh ",
+              "s"+"cp ",
+              "c"+"url ",
+              "workflow_"+"run:",
+          )
+          for forbidden in denied:
+              assert forbidden not in s, f"H48_OFFLINE_CI_PRODUCTION_CAPABILITY:{forbidden}"
+          print("H48_OFFLINE_CI_NO_PRODUCTION_CAPABILITIES=PASS")
+          PY

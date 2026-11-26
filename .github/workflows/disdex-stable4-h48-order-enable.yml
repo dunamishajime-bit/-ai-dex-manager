@@ -5,9 +5,32 @@ on:
     paths:
       - ".github/workflows/disdex-stable4-h48-order-enable.yml"
       - "lib/hype-h48-order-permit.ts"
+      - "lib/hype-h48-research-entry.ts"
+      - "lib/hype-h48-research-sequence.ts"
+      - "lib/hype-h48-authenticated-readback.ts"
       - "lib/hype-h48-kill-switch-consistency.ts"
-      - "tests/hype-h48-kill-switch-consistency.test.ts"
+      - "lib/hype-h48-native-order-executor.ts"
+      - "lib/hype-h48-emergency-stop-research.ts"
+      - "tests/hype-h48-emergency-stop-research.test.ts"
+      - "tests/fixtures/hype-h48-emergency-stop-h1-20261125.json"
+      - "scripts/ops/deploy/disdex_stable4_dd30_live_preflight.py"
+      - "scripts/ops/test_disdex_stable4_dd30_live_preflight.py"
+      - "docs/production/stable4-dd30-live-plan-candidate-20261125.json"
+      - "lib/hype-h48-restart-admission.ts"
+      - "lib/hype-h48-native-monitor.ts"
+      - "lib/hype-h48-execution-journal.ts"
+      - "lib/hype-h48-journal-store.ts"
+      - "lib/hype-h48-production-gates.ts"
+      - "tests/hype-h48-*.test.ts"
+      - "tests/fixtures/hype-h48-*.json"
       - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "ops/systemd/disdex-hype-long@.service"
+      - "lib/hype-zec-long-runner.ts"
+      - "lib/hype-h48-native-lifecycle.ts"
+      - "tests/hype-h48-native-lifecycle.test.ts"
+      - "lib/hype-stable4-time-only-contract.ts"
+      - "tests/hype-h48-research-entry.test.ts"
+      - "tests/fixtures/hype-h48-r4-wsig-h1-golden-20261114.json"
       - "scripts/ops/deploy/disdex_stable4_h48_order_enable.py"
       - "scripts/ops/deploy/disdex_owner_approval.py"
       - "scripts/ops/deploy/disdex_deployment_contract.py"
@@ -46,8 +69,20 @@ jobs:
           set -euo pipefail
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py -v
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_dd30_live_preflight.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
+          npx tsx tests/hype-h48-research-entry.test.ts
+          npx tsx tests/hype-h48-native-lifecycle.test.ts
+          npx tsx tests/hype-h48-research-sequence.test.ts
+          npx tsx tests/hype-h48-execution-journal.test.ts
+          npx tsx tests/hype-h48-journal-store.test.ts
+          npx tsx tests/hype-h48-authenticated-readback.test.ts
+          npx tsx tests/hype-h48-restart-admission.test.ts
+          npx tsx tests/hype-h48-native-monitor.test.ts
+          npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
+          npx tsx tests/hype-h48-native-order-executor.test.ts
+          npx tsx tests/hype-h48-emergency-stop-research.test.ts
           python3 -B - <<'PY'
           import ast
           from pathlib import Path
@@ -89,21 +124,31 @@ jobs:
           PY
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_stable4_h48_order_enable.py scripts/ops/test_disdex_stable4_h48_order_enable_workflow.py -v
           npx tsx tests/hype-h48-order-permit.test.ts
+          npx tsx tests/hype-h48-research-entry.test.ts
+          npx tsx tests/hype-h48-native-lifecycle.test.ts
+          npx tsx tests/hype-h48-research-sequence.test.ts
+          npx tsx tests/hype-h48-execution-journal.test.ts
+          npx tsx tests/hype-h48-journal-store.test.ts
+          npx tsx tests/hype-h48-authenticated-readback.test.ts
+          npx tsx tests/hype-h48-restart-admission.test.ts
+          npx tsx tests/hype-h48-native-monitor.test.ts
+          npx tsx tests/hype-h48-production-gates.test.ts
           npx tsx tests/hype-h48-kill-switch-consistency.test.ts
+          npx tsx tests/hype-h48-native-order-executor.test.ts
+          npx tsx tests/hype-h48-emergency-stop-research.test.ts
       - name: Verify native H48 time-only runtime before consuming Owner approval
         shell: bash
         run: |
           set -euo pipefail
-          # An H48 permit cannot authorize legacy TREND/ATR STOP+TP trading.
-          # The old immutable 4786 HYPE binary must fail BEFORE redeeming a
-          # single-use Owner signed approval, not after potentially issuing it.
+          # This stops the current 4786 TREND+STOP implementation before it
+          # redeems a one-run Owner approval or stages an order-enabled permit.
           PYTHONDONTWRITEBYTECODE=1 python3 -B - <<'PY'
           from pathlib import Path
           from scripts.ops.deploy.disdex_stable4_h48_order_enable import validate_native_h48_runtime_source
           src=Path('lib/hype-zec-long-runner.ts').read_bytes()
           mod=Path('lib/hype-h48-order-permit.ts').read_bytes()
           validate_native_h48_runtime_source(src,mod)
-          print('H48_NATIVE_ENTRY_POSITION_AUTHORITY_ATTESTED=TRUE')
+          print('H48_NATIVE_TIME_ONLY_RUNTIME_ATTESTED=TRUE')
           print('TRADING_MUTATIONS=0')
           PY
       - name: Redeem exact HYPE Owner approval through official HP bridge
