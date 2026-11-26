@@ -1,0 +1,47 @@
+name: Q102 D126 and V52 pre-LIVE source validation (NO ORDERS)
+on:
+  pull_request:
+    paths:
+      - 'lib/disdex-quality102-causal-v4-signal.ts'
+      - 'lib/disdex-quality102-highvol-d126.ts'
+      - 'scripts/disdex_v52_daily_loss.py'
+      - 'scripts/disdex_v52_aster_only_legacy_engine.py'
+      - 'scripts/disdex-quality102-highvol-d126-selftest.ts'
+      - 'tests/test_v52_daily_flatten_lifecycle.py'
+      - 'tests/test_v52_daily_flatten_engine_offline.py'
+      - '.github/workflows/disdex-q102-d126-v52-prelive-source-safety.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source development dependencies
+        run: npm ci
+      - name: TypeScript project and research checks
+        run: npm run typecheck
+      - name: Q102 D126 closed-bars and signal regression
+        run: |
+          npx tsx scripts/disdex-quality102-highvol-d126-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
+      - name: V52 strategy-scoped daily loss and flatten tests
+        run: |
+          python -m unittest discover -s tests -p 'test_v52_daily_loss_recovery.py' -v
+          python scripts/disdex-v52-daily-loss-selftest.py
+          python tests/test_v52_daily_flatten_lifecycle.py
+          python tests/test_v52_daily_flatten_engine_offline.py
+          python -m py_compile scripts/disdex_v52_daily_loss.py scripts/disdex_v52_aster_only_legacy_engine.py
+      - name: No live or deployment command executed
+        run: echo "SOURCE_VALIDATION_ONLY_NO_TRADES_NO_ORDER_ENABLE"
