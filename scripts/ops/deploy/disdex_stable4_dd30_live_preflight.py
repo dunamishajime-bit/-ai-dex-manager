@@ -51,8 +51,8 @@ CAP_KEYS = ("CRYPTO_GROSS_CAP", "STOCK_GROSS_CAP", "TOTAL_GROSS_CAP",
             "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT")
 EXPECTED_CAPS = {
     "CRYPTO_GROSS_CAP": 3.0,
-    "STOCK_GROSS_CAP": 1.5,
-    "TOTAL_GROSS_CAP": 3.5,
+    "STOCK_GROSS_CAP": 4.0,
+    "TOTAL_GROSS_CAP": 4.25,
     "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT": 7.5,
 }
 
@@ -106,7 +106,7 @@ def load_plan(path: Path, plan_sha: str) -> dict:
     require(econ.get("v4NewEntryDrawdownHoldPct") == 30
             and econ.get("penguDrawdownProtectionPct") == 17
             and econ.get("sharedCryptoDailyLossPct") == 7.5, "PLAN_DD_RISK_INVALID")
-    require(econ.get("grossCaps") == {"crypto": 3.0, "stock": 1.5, "total": 3.5, "hype": 1.0}, "PLAN_GROSS_INVALID")
+    require(econ.get("grossCaps") == {"crypto": 3.0, "stock": 4.0, "total": 4.25, "hype": 1.5}, "PLAN_GROSS_INVALID")
     hold = value.get("globalHold") or {}
     require(hold.get("required") is True and hold.get("active") is True
             and hold.get("action") == "HOLD_PROTECTED" and hold.get("scope") == "GLOBAL"
@@ -131,42 +131,38 @@ def systemd_value(unit: str, key: str) -> str:
 def unit_for(runner: str, source: str) -> str:
     return PREFIX[runner] + source + ".service"
 
-def parse_env_file(path: Path) -> dict[str, str]:
-    values: dict[str, str] = {}
-    if not path.is_file() or path.is_symlink():
-        return values
-    for raw in path.read_text(encoding="utf-8", errors="strict").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
+def caps_from_process_environment(raw: bytes) -> dict[str, float]:
+    """Read only allowed numeric caps; reject duplicate or malformed entries."""
+    observed: dict[str, float] = {}
+    allowed = {key.encode("ascii"): key for key in CAP_KEYS}
+    for entry in raw.split(b"\0"):
+        key, sep, value = entry.partition(b"=")
+        if not sep or key not in allowed:
             continue
-        key, value = line.split("=", 1)
-        values[key.strip()] = value.strip().strip('"').strip("'")
-    return values
+        name = allowed[key]
+        require(name not in observed, "GROSS_CAP_DUPLICATE:" + name)
+        try:
+            number = float(value.decode("ascii"))
+        except (UnicodeError, ValueError):
+            raise GateError("GROSS_CAP_INVALID:" + name) from None
+        require(math.isfinite(number), "GROSS_CAP_INVALID:" + name)
+        observed[name] = number
+    for key in CAP_KEYS:
+        require(key in observed, "GROSS_CAP_MISSING:" + key)
+    return observed
+
 
 def effective_caps(unit: str) -> dict[str, float]:
-    # systemd exposes EnvironmentFiles without secret values.  Only the four
-    # allow-listed numeric cap keys are parsed; no credential is logged.
-    paths = []
-    for token in systemd_value(unit, "EnvironmentFiles").split():
-        path = token.split("(", 1)[0]
-        if path.startswith("/"):
-            paths.append(Path(path))
-    merged: dict[str, str] = {}
-    for path in paths:
-        merged.update(parse_env_file(path))
-    explicit = systemd_value(unit, "Environment")
-    for token in explicit.split():
-        if "=" in token:
-            key, value = token.split("=", 1)
-            if key in CAP_KEYS:
-                merged[key] = value
-    result: dict[str, float] = {}
-    for key in CAP_KEYS:
-        try:
-            result[key] = float(merged[key])
-        except (KeyError, TypeError, ValueError):
-            raise GateError("GROSS_CAP_MISSING:" + key) from None
-    return result
+    # EnvironmentFiles and unit Environment= are not the effective final
+    # ExecStart environment: /usr/bin/env and shell exports can override them.
+    require(systemd_value(unit, "ActiveState") == "active", "GROSS_RUNNER_INACTIVE")
+    pid = systemd_value(unit, "MainPID")
+    require(pid.isdigit() and int(pid) > 100, "GROSS_PID_INVALID")
+    values = caps_from_process_environment(Path("/proc").joinpath(pid, "environ").read_bytes())
+    require(systemd_value(unit, "MainPID") == pid and systemd_value(unit, "ActiveState") == "active",
+            "GROSS_PROCESS_CHANGED")
+    return values
+
 
 def validate_pins(source: str) -> dict:
     pins, _ = json_file(PINS)

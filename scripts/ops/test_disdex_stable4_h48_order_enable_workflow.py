@@ -46,6 +46,19 @@ class WorkflowContractTests(unittest.TestCase):
         for forbidden in ("executeMarket", "cancelOrder", "createOrder", "kill-switch clear"):
             self.assertNotIn(forbidden, text)
 
+    def test_existing_trend_runner_denies_h48_live_permit_even_when_valid(self):
+        path = ROOT / "lib" / "hype-zec-long-runner.ts"
+        text = path.read_text(encoding="utf-8")
+        entry = text[text.index("  private async enter("):text.index("  async tick(")]
+        self.assertIn("await hasValidHypeH48OrderPermit(", entry)
+        self.assertIn("HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED", entry)
+        self.assertGreater(entry.count("HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED"), 1)
+        self.assertLess(entry.index("HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED"),
+                        entry.index("this.dependencies.executor.executeMarket("))
+        self.assertIn('return { status: "held", message: "HYPE_H48_NATIVE_TIME_ONLY_EXECUTOR_NOT_WIRED"', entry)
+        self.assertIn("this.dependencies.stateStore.save(state)", entry)
+
+
 
 if __name__ == "__main__":
     unittest.main()

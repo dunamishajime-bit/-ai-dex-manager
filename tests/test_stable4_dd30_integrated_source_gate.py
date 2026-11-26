@@ -20,7 +20,7 @@ MANIFEST = json.loads((
 class IntegratedStable4Dd30GuardTests(unittest.TestCase):
     def test_all_critical_sources_and_master_goal_are_verified(self):
         out = MOD.verify(ROOT)
-        self.assertEqual(out["integratedFilesVerified"], 23)
+        self.assertEqual(out["integratedFilesVerified"], len(MOD.REQUIRED_TOKENS))
         self.assertEqual(out["v4Dd30EntryHold"], "PASS")
         self.assertEqual(out["ownerGoalApprovalCode"], "PRESERVED")
         self.assertFalse(out["productionInstalled"])
@@ -32,6 +32,27 @@ class IntegratedStable4Dd30GuardTests(unittest.TestCase):
         data["sourceSha256"]["lib/v12-v4-runner-engine.ts"] = "0" * 64
         with self.assertRaisesRegex(AssertionError, "INTEGRATED_SOURCE_SHA_MISMATCH"):
             MOD.verify(ROOT, data)
+
+    def test_new_h48_and_q102_v52_sources_cannot_be_swapped(self):
+        new_sources = (
+            "lib/disdex-quality102-causal-v4-signal.ts",
+            "lib/disdex-quality102-highvol-d126.ts",
+            "lib/disdex-runner-cumulative-dd.ts",
+            "lib/v12-v4-production-lifecycle.ts",
+            "lib/v12-v4-shared-reservations.ts",
+            "lib/hype-h48-native-stop8-coordinator.ts",
+            "lib/hype-h48-stop8-root-authority.ts",
+            "scripts/disdex_v52_aster_only_legacy_engine.py",
+            "scripts/disdex_v52_daily_loss.py",
+            "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py",
+        )
+        for path in new_sources:
+            data = copy.deepcopy(MANIFEST)
+            self.assertIn(path, data["sourceSha256"])
+            data["sourceSha256"][path] = "0" * 64
+            with self.subTest(path=path), self.assertRaisesRegex(
+                    AssertionError, "INTEGRATED_SOURCE_SHA_MISMATCH"):
+                MOD.verify(ROOT, data)
 
     def test_wrong_dd21_or_dd30_hard_limit_claim_rejected(self):
         for patch in (

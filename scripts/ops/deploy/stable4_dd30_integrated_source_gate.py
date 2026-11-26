@@ -16,18 +16,43 @@ REQUIRED_TOKENS = {
     "config/hypeTrendLongPolicy.ts": ["maximumGross: 1.5"],
     "config/q102FamilySideGross.json": ['"HIGH_VOL"', '"PB"', '"MR"', '"BRK"'],
     "lib/v12-v4-shared-reservations.ts": [
-        "V12_V4_MAXIMUM_DRAWDOWN", "V4_SHARED_RESERVATION_HOLD"],
+        "V12_V4_MAXIMUM_DRAWDOWN", "V4_SHARED_RESERVATION_HOLD",
+        "gross.crypto>3.0+1e-12", "gross.total>4.25+1e-12"],
+    "lib/disdex-runner-cumulative-dd.ts": [
+        "RUNNER_DD_SCHEMA", "SIGNED_ACCOUNT_MARK_AND_RUNNER_LEDGER_RECONCILED",
+        "ACCOUNT_TO_RUNNER_MTM_RECONCILIATION_FAILED", "RUNNER_CUMULATIVE_MAX_DD_EXCEEDED",
+        "orderAuthority:false"],
     "lib/aster-v3-client.ts": ["AsterUserTradeRow", "AsterIncomeRow", "getUserTrades"],
     "lib/direct-trade-executor.ts": ["requireVenueMargin5xCross", "prepareVenueMargin5xCross"],
     "lib/disdex-v96-live-risk-controls.ts": ["formalStable4Hold", "oldV96Flatten"],
     "lib/disdex-v96-operator-override-audit.ts": ["V96_OPERATOR_OVERRIDE_EXPIRY_REQUIRED"],
     "lib/v12-v4-runner-engine.ts": [
         "attestV4CompletedExitMissingStop", "reconcileEntriesAndProtection"],
+    "lib/v12-v4-production-lifecycle.ts": [
+        "g.crypto+worst>3.0+1e-12", "g.total+worst>4.25+1e-12"],
     "lib/v12-v4-venue-exit.ts": ["reconcileV4ExternalFlatClose"],
     "lib/pengu-dual-ls-v2-portfolio-runner.ts": ["penguForeignOrderConflictsWithAction"],
     "lib/disdex-quality102-causal-v1-runner.ts": ["Q102 existing-position H1 history unavailable"],
     "scripts/disdex_v52_aster_only_legacy_engine.py": [
-        "strategy_daily_loss_held = self.enforce_daily_loss()"],
+        "strategy_daily_loss_held = self.enforce_daily_loss()",
+        "self._refresh_v52_daily_flatten_intent()",
+        "self._finish_v52_daily_flatten()"],
+    "scripts/disdex_v52_daily_loss.py": [
+        "update_v52_strategy_daily_flatten", "complete_v52_strategy_daily_flatten",
+        'trade.get("exitAt")'],
+    "lib/disdex-quality102-causal-v4-signal.ts": [
+        "evaluateQ102HighVolD126",
+        'requestedGross: quality102GrossForFamily("HIGH_VOL", legacy.side)'],
+    "lib/disdex-quality102-highvol-d126.ts": [
+        '"LONG_OVERRIDE"', '"KEEP_SHORT"', '"DATA_INVALID"'],
+    "lib/hype-h48-native-stop8-coordinator.ts": [
+        "prepareH48Stop8Entry", 'tradingAuthorization:false'],
+    "lib/hype-h48-stop8-root-authority.ts": [
+        "H48_STOP8_ROOT_BUNDLE_SCHEMA", "H48_STOP8_ROOT_GRANT_INVALID"],
+    "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py": [
+        'POLICY = "H48_R4_RESIDENT_STOP8"', "OWNER_VERIFIER"],
+    "lib/stable4-dd30-owner-hard-gross-candidate.ts": [
+        "OWNER_STABLE4_GROSS_HARD_CAP_CANDIDATE", "tradingAuthorization:false"],
     "scripts/disdex_v96_v52_margin_guard_runtime.py": ["SerializedMarginGuard"],
     "scripts/disdex_v12_v52_margin_guard_runtime.py": [
         "disdex_v96_v52_margin_guard_runtime.py", "runpy.run_path"],
