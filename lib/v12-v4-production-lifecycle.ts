@@ -170,8 +170,8 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   const g=productionGross(state), worst=notional/equity;
   if (c.family.startsWith("RECOVERY_")&&g.recovery+worst>V12_V4_V2_CAPS.recoveryFamilyGross+1e-12) throw Error("RECOVERY_FAMILY_GROSS_CAP");
   if (g.v12+worst>3+1e-12) throw Error("V12_GROSS_CAP");
-  if (g.crypto+worst>3.5+1e-12) throw Error("CRYPTO_GROSS_CAP");
-  if (g.total+worst>4.75+1e-12) throw Error("TOTAL_GROSS_CAP");
+  if (g.crypto+worst>3.0+1e-12) throw Error("CRYPTO_GROSS_CAP");
+  if (g.total+worst>4.25+1e-12) throw Error("TOTAL_GROSS_CAP");
   return { type:"RESERVE", eventId:input.eventId, ts:observedAtMs, leg:{
     id:key(c), candidate:structuredClone(c), qty:0, entryNotional:0, requestedQty:p.normalized.quantity,
     reservationUsd:notional, entryTs:c.eligibleEntryTs, entryAtr:input.entryAtr,nativeExitEvidence:input.nativeExitEvidence, status:"PENDING_ENTRY",

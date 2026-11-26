@@ -37,6 +37,9 @@ class IntegratedStable4Dd30GuardTests(unittest.TestCase):
         new_sources = (
             "lib/disdex-quality102-causal-v4-signal.ts",
             "lib/disdex-quality102-highvol-d126.ts",
+            "lib/disdex-runner-cumulative-dd.ts",
+            "lib/v12-v4-production-lifecycle.ts",
+            "lib/v12-v4-shared-reservations.ts",
             "lib/hype-h48-native-stop8-coordinator.ts",
             "lib/hype-h48-stop8-root-authority.ts",
             "scripts/disdex_v52_aster_only_legacy_engine.py",

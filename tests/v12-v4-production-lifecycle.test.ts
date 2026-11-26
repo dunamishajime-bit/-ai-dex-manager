@@ -73,6 +73,22 @@ test("precision floors; protected hold and worst-case cap reservations fail clos
  const bad:any={normalizeMarketQuantity:async()=>({quantity:4,notional:120,stepSize:.01})};
  await assert.rejects(planProductionEntry(createProductionState(initial),{candidate:candidate(),ts,eventId:"bad",referencePrice:30,minimumOrderNotionalUsd:5,quantityNormalizer:bad}),/normalization increased/);
 });
+test("V4 entry plans enforce adopted crypto 3.0x and total 4.25x hard caps",async()=>{
+ const f=(owner:string,gross:number,crypto:boolean)=>({
+   owner,symbol:owner+"USDT",side:"SHORT" as const,qty:0,gross:0,
+   pendingGross:gross,crypto,
+ });
+ const crypto=createProductionState({...initial,foreign:[f("PENGU",2.95,true)]});
+ await assert.rejects(reserve(crypto),/CRYPTO_GROSS_CAP/);
+ const combined=createProductionState({...initial,foreign:[
+   f("PENGU",2.9,true),f("V52",1.3,false),
+ ]});
+ await assert.rejects(reserve(combined),/TOTAL_GROSS_CAP/);
+ const under=createProductionState({...initial,foreign:[
+   f("PENGU",2.8,true),f("V52",1.2,false),
+ ]});
+ assert.ok((await reserve(under)).leg.reservationUsd>0);
+});
 test("ATR stop-first same-bar ambiguity, gap-stop and H1 cutoff are executable",()=>{
  const c=candidate("REC_X13_TP1.5_SL1_H24");
  const leg:Leg={id:"leg",candidate:c,qty:1,entryNotional:100,requestedQty:1,reservationUsd:0,entryTs:ts,entryAtr:10,status:"OPEN",exitRemainingQty:0,realizedUsd:0,feesUsd:0,fundingUsd:0};

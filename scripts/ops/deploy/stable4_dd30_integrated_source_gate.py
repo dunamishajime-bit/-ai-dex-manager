@@ -16,13 +16,20 @@ REQUIRED_TOKENS = {
     "config/hypeTrendLongPolicy.ts": ["maximumGross: 1.5"],
     "config/q102FamilySideGross.json": ['"HIGH_VOL"', '"PB"', '"MR"', '"BRK"'],
     "lib/v12-v4-shared-reservations.ts": [
-        "V12_V4_MAXIMUM_DRAWDOWN", "V4_SHARED_RESERVATION_HOLD"],
+        "V12_V4_MAXIMUM_DRAWDOWN", "V4_SHARED_RESERVATION_HOLD",
+        "gross.crypto>3.0+1e-12", "gross.total>4.25+1e-12"],
+    "lib/disdex-runner-cumulative-dd.ts": [
+        "RUNNER_DD_SCHEMA", "SIGNED_ACCOUNT_MARK_AND_RUNNER_LEDGER_RECONCILED",
+        "ACCOUNT_TO_RUNNER_MTM_RECONCILIATION_FAILED", "RUNNER_CUMULATIVE_MAX_DD_EXCEEDED",
+        "orderAuthority:false"],
     "lib/aster-v3-client.ts": ["AsterUserTradeRow", "AsterIncomeRow", "getUserTrades"],
     "lib/direct-trade-executor.ts": ["requireVenueMargin5xCross", "prepareVenueMargin5xCross"],
     "lib/disdex-v96-live-risk-controls.ts": ["formalStable4Hold", "oldV96Flatten"],
     "lib/disdex-v96-operator-override-audit.ts": ["V96_OPERATOR_OVERRIDE_EXPIRY_REQUIRED"],
     "lib/v12-v4-runner-engine.ts": [
         "attestV4CompletedExitMissingStop", "reconcileEntriesAndProtection"],
+    "lib/v12-v4-production-lifecycle.ts": [
+        "g.crypto+worst>3.0+1e-12", "g.total+worst>4.25+1e-12"],
     "lib/v12-v4-venue-exit.ts": ["reconcileV4ExternalFlatClose"],
     "lib/pengu-dual-ls-v2-portfolio-runner.ts": ["penguForeignOrderConflictsWithAction"],
     "lib/disdex-quality102-causal-v1-runner.ts": ["Q102 existing-position H1 history unavailable"],

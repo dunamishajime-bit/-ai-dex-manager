@@ -131,6 +131,20 @@ test("concurrent managers sharing one account lease preserve both reservations",
 });
 
 
+test("shared V4 reservation rejects approved 3.0x crypto cap, without touching peer",async()=>{
+ const x=await setup();
+ try{
+   const before=x.store.read();
+   const foreign=[{owner:"PENGU",symbol:"PENGUUSDT",side:"SHORT" as const,
+     qty:0,gross:0,pendingGross:2.6,crypto:true}];
+   const marked=applyProductionEvent(before.state,{type:"ACCOUNT_MARK",
+     eventId:"fresh-foreign-owner-mark",ts:x.at+1,equityUsd:1000,
+     prices:{[x.command.symbol]:100},foreign});
+   x.store.commit(before.revision,{...before,state:marked});
+   await assert.rejects(()=>x.manager.reserve(x.cid,x.command),/V4_SHARED_GROSS_CAP/);
+   assert.equal((await readPendingExposureRegistry(x.pending)).entries.length,0);
+ }finally{await x.handle.release();rmSync(x.dir,{recursive:true,force:true});}
+});
 test("DD30 adopted: V4 accepts below/at 30%, blocks above 30%, without touching existing STOPs",async()=>{
  assert.equal(V12_V4_MAXIMUM_DRAWDOWN,0.30);
  for(const vector of [

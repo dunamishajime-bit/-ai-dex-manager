@@ -90,7 +90,7 @@ export class V4SharedReservations{
   }
   for(const [k,notional]of peers)if((covered.get(k)??0)+1e-8<notional)throw Error("PEER_RESERVATION_NOT_IN_ACCOUNT_LEDGER:"+k);
   const gross=productionGross(doc.state);
-  if(gross.recovery>2.5+1e-12||gross.v12>3+1e-12||gross.crypto>3.5+1e-12||gross.total>4.75+1e-12)throw Error("V4_SHARED_GROSS_CAP");
+  if(gross.recovery>2.5+1e-12||gross.v12>3+1e-12||gross.crypto>3.0+1e-12||gross.total>4.25+1e-12)throw Error("V4_SHARED_GROSS_CAP");
   const prior=registry.entries.find(x=>x.reservationId===cid);
   if(prior){
    this.verifyRow(prior,doc,cid);

@@ -10,7 +10,7 @@ and Q102/V52 PR #671 head eb8fb3ecf945ce2de9e7199dd499bff45e1dd193.
 2. H48R4 resident STOP8 candidate (Root issuer/verifier, production-shaped executor, shadow monitor, native coordinator, journal, restart, source-only testing), no Root-issued actual STOP8 certificate or order permit.
 3. V52 verified 3.5% daily strategy-loss trigger: V52-owned V11/V50 flatten intent is durable through crash and UTC rollover, only on confirmed trading loss (not unknown API data); entry blocked, scope-limited reduce-only exit, post-exit flat check; ledger timestamp and net fee corrected.
 4. Gross source: owner-approved candidate Crypto3.0/Stock4.0/Total4.25/HYPE1.5. An updated candidate is NOT a signed, active source-plan contract.
-5. Legacy STABLE4 DD30 source pin: 30 critical paths checksum-pinned. No prior live authority inherited; original c731 Root cutover is explicitly disabled.
+5. Legacy STABLE4 DD30 source pin: 32 critical paths checksum-pinned. No prior live authority inherited; original c731 Root cutover is explicitly disabled.
 
 ## Local validation before remote CI
 - Q102: 182 candidate historical signal decision/return parity and no future-bar leakage; native new D126, existing V4 signal, exits and protective order tests.
@@ -29,3 +29,12 @@ and Q102/V52 PR #671 head eb8fb3ecf945ce2de9e7199dd499bff45e1dd193.
 
 ## Codex final role
 After ALL above gates green, Codex receives reviewed immutable release, owner-signed exact plan/certificate, unified preflight results and performs the **last formal order-capable production cutover only**. If any gate is false, remain SHADOW/HOLD and report blockers. No paper orders, no canary trades, no unapproved live orders.
+
+
+## 2026-11-26 source-only follow-up: per-runner cumulative DD and V4 Gross hardening
+
+- A pure, **not yet connected to production admission** seven-runner DD component is present in `lib/disdex-runner-cumulative-dd.ts`. It accumulates each strategy's reconciled net MTM PnL contribution divided by prior account equity. This is **account-relative contribution DD**, not a separately allocated standalone account equity or evidence that standalone DD is below 30%.
+- Each observation must contain explicitly all seven owners, exact source SHA, signed/reconciled account mark provenance, monotonically increasing distinct proof, and an externally reconciled net cashflow. Unknown/fabricated/missing MTM or failed equity-to-PnL reconciliation raises error; no midnight/restart reset. Pure entry check returns **orderAuthority:false** for every status; a positive DD alone cannot authorize orders.
+- The on-venue signed seven-runner PnL feed, durable state migration/retention, independent authorized capital/attribution policy, and actual runner entry connection are **NOT implemented or approved**. V4's existing account-wide DD hold remains in place, so no safety check has been bypassed. No individual-DD feature must be advertised as LIVE until independently validated and wired.
+- V4 entry planning and shared pending-reservation execution now use **Crypto 3.0x / Total 4.25x** hard caps rather than stale 3.5x/4.75x; the central Shared Risk, margin, no-opposite position and exit protection remain unchanged. Offline regression verifies older 3.5x or 4.75x allowances cannot be used.
+- Original manifest now checksum-pins 32 critical files; the unified no-order CI explicitly runs these accounting and V4 cap tests. This only makes a newer candidate; previously issued exact-SHA approvals, if any, are invalid for this newer SHA.
