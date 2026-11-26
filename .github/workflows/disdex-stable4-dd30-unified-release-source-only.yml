@@ -1,0 +1,62 @@
+name: STABLE4 Q102 D126 H48 STOP8 unified release source-only
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/disdex-stable4-dd30-unified-release-source-only.yml'
+      - 'docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json'
+      - 'scripts/ops/deploy/stable4_dd30_integrated_source_gate.py'
+      - 'lib/disdex-quality102-*'
+      - 'lib/hype-h48-*'
+      - 'scripts/disdex_v52_*'
+      - 'scripts/ops/deploy/disdex_h48_stop8_formal_issue.py'
+      - 'tests/test_stable4_dd30_integrated_source_gate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only-no-order-permits:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    env:
+      PYTHONPATH: .
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked test dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Immutable critical source and old-approval fail-closed gate
+        run: |
+          python -B scripts/ops/deploy/stable4_dd30_integrated_source_gate.py
+          python -B -m unittest -v tests/test_stable4_dd30_integrated_source_gate.py
+      - name: Q102 D126 and protected exits
+        run: |
+          npx --no-install tsx scripts/disdex-quality102-highvol-d126-selftest.ts
+          npx --no-install tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
+          npx --no-install tsx scripts/disdex-quality102-causal-v4-exit-selftest.ts
+          npx --no-install tsx tests/disdex-quality102-adopted-exit-policy.test.ts
+      - name: V52 owned 3.5 percent daily loss flatten and ledger contract
+        run: |
+          python -B -m unittest -v tests/test_v52_daily_loss_recovery.py
+          python -B tests/test_v52_daily_flatten_lifecycle.py
+          python -B tests/test_v52_daily_flatten_engine_offline.py
+          python -B scripts/disdex-v52-daily-loss-selftest.py
+          python -B -m py_compile scripts/disdex_v52_daily_loss.py scripts/disdex_v52_aster_only_legacy_engine.py
+      - name: H48 STOP8 source Root refusal and gross
+        run: |
+          python -B -m unittest -v tests/test_disdex_h48_stop8_formal_issue.py
+          npx --no-install tsx tests/hype-h48-native-stop8-coordinator.test.ts
+          npx --no-install tsx tests/hype-h48-stop8-root-authority.test.ts
+          npx --no-install tsx tests/stable4-dd30-owner-hard-gross-candidate.test.ts
+      - name: Entire TypeScript project
+        run: npx --no-install tsc --noEmit -p tsconfig.json
+      - name: Explicit release is not order enabled
+        run: echo "UNIFIED_SOURCE_ONLY=PASS OWNER_SIGNED_ORDER_PERMITS=NOT_ISSUED LIVE_ORDERS=0"

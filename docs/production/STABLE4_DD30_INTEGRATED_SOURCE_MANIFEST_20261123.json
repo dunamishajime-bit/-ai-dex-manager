@@ -34,21 +34,36 @@
     "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
     "lib/direct-trade-executor.ts": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
     "lib/disdex-quality102-causal-v1-runner.ts": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2",
+    "lib/disdex-quality102-causal-v4-signal.ts": "5fdc2d6bda0ddaf880be60c6a331bb0c4e6aa418529431582980b4d410e22f2a",
+    "lib/disdex-quality102-highvol-d126.ts": "3ea7c2d2e24ceac55d7763d5e7a9f42587ee6755fe2d8f7ce47cf55bdc0c33b3",
     "lib/disdex-v96-live-risk-controls.ts": "00a516fca1b247b57c04507f98f680995d275f24338697cb8c70f21e9686fe47",
     "lib/disdex-v96-operator-override-audit.ts": "0d889d32e1d8156670c73d514e2886f9708fdf59b4e1ca13d788f92092a8f4dc",
+    "lib/hype-h48-native-stop8-coordinator.ts": "3798ec14bdd8892ac9e2fd065166cd694020dfec3b243f99f427797c07ac243a",
+    "lib/hype-h48-stop8-root-authority.ts": "3b46b7a7927a47b0171566ba58a73adf3007eb7d2fe8f93ffcfde46e3578dd43",
     "lib/owner-goal-approval.ts": "5806955ec4cd140688357ec4fabfc0caaa7e263df74273d6f3956d320aa61bf4",
     "lib/pengu-dual-ls-v2-portfolio-runner.ts": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a",
     "lib/server/owner-goal-attestation.ts": "f2811a1b341c4e3939f21ea0f48da917ac93b300d60c490e35c7eabf0b4fe300",
+    "lib/stable4-dd30-owner-hard-gross-candidate.ts": "8b070cd80b92aa658499d1de70f520bcbdcd2771c0c5bbc28e635426b943fe75",
     "lib/v12-v4-runner-engine.ts": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
     "lib/v12-v4-shared-reservations.ts": "20d2856af6cbe952cb85ef41c67feb3d916248de3d367245db9e1dc8767d0711",
     "lib/v12-v4-venue-exit.ts": "016cf8356bbd08b53cf7ae1804db256e03daf711bb1b567f32c65da8ace219bd",
     "scripts/disdex_v12_v52_margin_guard_runtime.py": "606159e0ca28bacab5b221841fb1292ea69ba9dec7a9bfc5836f9fd25458296e",
-    "scripts/disdex_v52_aster_only_legacy_engine.py": "df0adba284c1aa3af26e6f8e06e4349c3155326831902abd4e6a469b1937fe9c",
+    "scripts/disdex_v52_aster_only_legacy_engine.py": "22abd746b806c674328b7b86b82886a2ce74c7ef83d2fdad3ab925f060e1603e",
+    "scripts/disdex_v52_daily_loss.py": "c8c505fe5726124ef3c526ba48fce483d8c879a51be2971e9adeaf0ad17a8127",
     "scripts/disdex_v96_v52_margin_guard_runtime.py": "3396aa15a0ee9041dc1029d612124e8891fdaa09565e1703e4e2c176a40a5b43",
+    "scripts/ops/deploy/disdex_h48_stop8_formal_issue.py": "193e4f6de5d9720dd8682e1ed1838b136a1e1d8083dee6e48c9d3bf4e52eb39d",
     "scripts/ops/deploy/disdex_owner_approval.py": "cdb7c79ee8585f2b8b72976cf507e90fed1afbf37952f43824a174883ae5f58b",
     "scripts/ops/root/disdex-v4-resident-stop-crosscheck.py": "8ce9bd4a482b45121909ad2d5e267d13440dfe94777eec6376ba58cb3f941c63"
   },
   "stopExitSafetySourceRestored": true,
+  "unifiedPreliveCandidate": {
+    "inputs": [
+      "PR668_H48_STOP8",
+      "PR671_Q102_D126_V52_SCOPED_FLATTEN"
+    ],
+    "sourceManifestPinnedCount": 30,
+    "status": "SOURCE_ONLY_NO_OWNER_AUTHORIZATION"
+  },
   "unresolvedRealSystemState": [
     "Legacy Q102 b8d unit references missing release and requires formally authorized retirement",
     "Candidate c731 Margin Guard unit references missing script and requires coordinated transition",
