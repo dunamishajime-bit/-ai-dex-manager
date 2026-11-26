@@ -71,10 +71,20 @@ def update_v52_strategy_daily_latch(
     deposits = 0.0
     withdrawals = 0.0
     for trade in trades:
-        if utc_day(int(_finite(trade.get("closedAt") or trade.get("timestamp") or now_ms))) != day:
+        # Actual V52 order ledger records exitAt, not closedAt. Never silently
+        # re-date an old exit to the current day when the timestamp is absent.
+        closed_at = trade.get("closedAt") or trade.get("exitAt") or trade.get("timestamp")
+        if not closed_at or utc_day(int(_finite(closed_at))) != day:
             continue
-        realized += _finite(trade.get("realizedPnl"))
-        commission += _finite(trade.get("commission"))
+        fee = _finite(trade.get("commission"))
+        pnl = _finite(trade.get("realizedPnl"))
+        # The legacy V52 close_slot persists realizedPnl net of commission,
+        # while the risk latch separately subtracts commission. Normalize
+        # only this explicit legacy row shape back to gross to avoid double
+        # fee counting; other ledger producers keep gross-PnL semantics.
+        legacy_net = bool(trade.get("entryAt") and trade.get("exitAt"))
+        realized += pnl + fee if legacy_net else pnl
+        commission += fee
         funding += _finite(trade.get("funding"))
         deposits += _finite(trade.get("deposits"))
         withdrawals += _finite(trade.get("withdrawals"))
@@ -113,3 +123,34 @@ def update_v52_strategy_daily_latch(
         ),
         "lastCheckedAt": now_ms,
     }
+
+
+def update_v52_strategy_daily_flatten(
+    previous: Optional[Dict[str, Any]], daily_latch: Optional[Dict[str, Any]], now_ms: int
+) -> Dict[str, Any]:
+    """Pure persistent V52-only flatten intent. Never infer a loss trip from API failure."""
+    day = utc_day(now_ms)
+    before = dict(previous) if isinstance(previous, dict) else {}
+    if before.get("pending") is True:
+        return before  # Survives midnight, restart, and incomplete exits.
+    if before.get("tripDay") == day:
+        return before  # Already completed today; do not replay old intents.
+    tripped = bool(daily_latch and daily_latch.get("tripped") is True)
+    verified_loss = bool(daily_latch and daily_latch.get("failClosed") is False)
+    current_day = bool(daily_latch and daily_latch.get("utcDay") == day)
+    if not (tripped and verified_loss and current_day):
+        return before
+    return {
+        "pending": True,
+        "tripDay": day,
+        "createdAt": now_ms,
+        "completedAt": None,
+        "reason": "V52_STRATEGY_DAILY_LOSS_3P5",
+    }
+
+
+def complete_v52_strategy_daily_flatten(intent: Dict[str, Any], now_ms: int) -> Dict[str, Any]:
+    """Only invoke after scoped venue exit/cancel and FLAT verification succeeded."""
+    if not isinstance(intent, dict) or intent.get("pending") is not True:
+        raise ValueError("V52_DAILY_FLATTEN_COMPLETION_WITHOUT_PENDING_INTENT")
+    return {**intent, "pending": False, "completedAt": now_ms}
