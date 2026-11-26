@@ -1,0 +1,45 @@
+{
+  "protocol": "Y06_R2_REBUILD_FROZEN_20261126_V1",
+  "created_date_jst": "2026-11-26",
+  "scope": "Research-only, new dual-side logic, NO live orders or production changes",
+  "periods_utc": {
+    "PRE": [
+      "2025-03-24T00:00:00Z",
+      "2025-10-01T00:00:00Z"
+    ],
+    "TARGET": [
+      "2025-10-01T00:00:00Z",
+      "2026-10-01T00:00:00Z"
+    ],
+    "FORWARD_INSPECTED": [
+      "2026-10-01T00:00:00Z",
+      "2026-11-23T00:00:00Z"
+    ]
+  },
+  "source": "Archived ASTER H1 and M5 March 2025–Nov 26 2026; BTC+13 pinned V4 alts, 48h 75% nonzero M5 volume, complete H1/M5; 1h,15m candle completion then next5m open",
+  "quality_caveat": "Previously inspected PRE/TARGET/FORWARD so NO untouched independent out-of-sample; price discrepancies and zero-volume ASTER must be inspected",
+  "arm_regime": {
+    "A": "confirmed D,12H,6H all same direction and BTC12H same direction",
+    "B": "confirmed D+12H same direction, either 6H or4H same direction, BTC12H aligned",
+    "NO_TRADE": "ambiguous or BTC contrary, missing bar or quality failure"
+  },
+  "arm": "Previous completed H1: LONG iff close<priorClose and low<=EMA12*1.004 and close>=EMA12*.988; SHORT iff close>priorClose and high>=EMA12*.996 and close<=EMA12*1.012. 8h expiration. First future completed 15m bullish close>prior two completed 15m highs for LONG; bearish close<prior two completed 15m lows for SHORT; entry next 5m open; one entry per setup.",
+  "exit": "structural risk in [0.015,0.08] from max(1.2*ATR14 H1, swing6H distance+0.25*ATR14); hard STOP8 authoritative; stop before 1.8R target on dual hit; gap adverse at next M5 open; TIME24 or TIME48; symbol cooldown 12h after exit",
+  "variants": [
+    "A_E24",
+    "A_E48",
+    "B_E24",
+    "B_E48"
+  ],
+  "costs_bps": [
+    10,
+    30
+  ],
+  "initial_jpy": 10000,
+  "gross_per_trade": 0.3,
+  "max_simultaneous_positions": 2,
+  "stress": "test extra 0.5% adverse entry price slip on stopped fills at 30bps, compare portfolio",
+  "comparisons": "Evaluate same data with fixed BTC drift and random entry-offset negative controls, old Y06 as contextual only not same integrated engine",
+  "formal_adoption": "No adoption from repeated target/forward or synthetic; >=50 trades per period with fee30 net positive, PF>1, DD<=30, no profit/edge collapse under stress and random timing; exact unified 7-runner source-native backtest, funding, permissions, owner signoff required",
+  "model_limits": "no all-runner portfolio, no funding, no signed venue fills, no live order authority"
+}
