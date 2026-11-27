@@ -29,3 +29,7 @@ The original seven-runner per-sleeve DD contribution index is not account-wide p
 
 ## R26 LIVE adoption boundary
 Optional DISDEX_IDLE_R26_LIVE_CERTIFIED=1 does not itself permit orders. The new R26 admission filter is inspected only after existing protection checks. The R26 root-owned, exact-source-SHA admission certificate is mandatory when explicitly enabling the R26 policy in LIVE. Default false preserves existing certified legacy LIVE policy. There is no R26 certificate issued: missing full seven-runner native-source synthetic rerun, authoritative account-MTM DDR, source-parity coverage and Owner approval. A plain JSON object is insufficient unless root owns the regular file and all independent issuer fields are proven by external governance.
+
+
+## Multi-SHA seven-sleeve decision ordering — offline only
+The standalone research coordinator reads per-runner source SHA pins, checks H1 decision clocks including PENGU M5 confirmation, rejects incomplete native sources/unknown owners/reconciled R21 slot uncertainty, and reserves an in-memory PENDING position on each accepted dry decision so same-timestamp proposals cannot double count capacity. Frozen historical ranking V52 > PENGU > V4 (R21) > Q102 > FET > HYPE > IDLE. No venue orders, asset transfers, or signing are exposed. This test verifies priority and Gross competition, not live multi-process atomic reservation. A production authority-compatible 7-sleeve order state machine remains blocked.

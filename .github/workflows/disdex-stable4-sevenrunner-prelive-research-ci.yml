@@ -38,6 +38,7 @@ jobs:
             tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/idle-r26-entry-certificate.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
+            tests/stable4-seven-runner-dry-coordinator.test.ts \
             tests/stable4-observation-snapshot.test.ts \
             tests/stable4-r21-public-observation-feed.test.ts \
             tests/stable4-public-get-resilience.test.ts \
