@@ -55,7 +55,7 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
     def test_real_native_evidence_falsification_rejected(self):
         for path_attr, mutate, expected in [
             ("PENGU_NATIVE", lambda x: x["arms"]["BASE"].__setitem__("checked", 53),
-             "PENGU_REAL_H1_NATIVE_ONLY_EVIDENCE_INVALID"),
+             "PENGU_M5_REPORT_SOURCE_OR_RELEASE_SCOPE_INVALID"),
             ("Q102_REAL", lambda x: x.__setitem__("portfolioReplayComplete", True),
              "Q102_LIMITED_REAL_H1_NATIVE_EVIDENCE_INVALID"),
             ("V52_COVERAGE", lambda x: x["perTicker"]["AMZN"]["asterM5"].__setitem__("rows", 1),
