@@ -64,7 +64,7 @@ export function advanceRunnerCumulativeDd(
       ||!valid(prior.runners[k].currentDd)||!valid(prior.runners[k].maximumDd)
       ||prior.runners[k].currentDd<0||prior.runners[k].maximumDd>1
       ||prior.runners[k].maximumDd<prior.runners[k].currentDd-1e-12
-      ||Math.abs(prior.runners[k].currentDd-Math.max(0,1-prior.runners[k].index/prior.runners[k].peak))>1e-9)))
+      ||Math.abs(prior.runners[k].currentDd-Math.max(0,1-prior.runners[k].index/prior.runners[k].peak))>1e-9))
     err("STATE_INVALID");
   if(obs.exactReleaseSha!==prior.releaseSha||obs.atMs<=prior.updatedAt
     ||obs.proofId===prior.proofId)err("PROOF_OR_TIME_REPLAY");
