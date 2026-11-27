@@ -12,6 +12,9 @@ on:
       - 'scripts/stable4-pengu-*'
       - 'tests/test_stable4_pengu_*.py'
       - 'docs/research/STABLE4_PENGU_*.json'
+      - 'scripts/research/stable4_v52_*.py'
+      - 'tests/test_stable4_v52_*.py'
+      - 'docs/research/STABLE4_V52_*.json'
       - 'scripts/stable4-market-observe.ts'
       - 'scripts/stable4-four-sleeve-native-synthetic.ts'
       - 'scripts/disdex_public_read_resilience.py'
@@ -92,6 +95,9 @@ jobs:
           python -B -m unittest -v tests.test_stable4_q102_extended_aster_h1_archive_coverage
           python -B -m unittest -v tests.test_stable4_q102_181d_monthly_readiness
           python -B -m unittest -v tests.test_stable4_v52_regular_session_liquidity
+          # Native V52 V13D/V11EQ requires synchronous ASTER/XYZ L2 data.
+          # Reject any attempt to turn M5+Yahoo H1 into invented native fills.
+          python -B -m unittest -v tests.test_stable4_v52_native_entry_source_gap
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           python -B scripts/research/stable4_q102_real_monthly_ledger_audit.py
           python -B scripts/stable4_seven_native_coverage_audit.py
