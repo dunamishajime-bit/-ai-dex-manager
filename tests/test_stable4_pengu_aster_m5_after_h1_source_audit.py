@@ -5,6 +5,7 @@ No entry fills or profitability can be inferred from public M5 volume.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
@@ -26,6 +27,10 @@ class PenguH1AsterM5TapeAuditTests(unittest.TestCase):
     def test_166_real_raw_signals_mapped_to_m5_without_venue_fills(self):
         source=validate_h1(self.ledger)
         self.assertEqual(source["checkedTotal"],166)
+        self.assertEqual(hashlib.sha256(self.raw).hexdigest(),
+            "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc")
+        self.assertEqual(hashlib.sha256(QUALITY.read_bytes()).hexdigest(),
+            "f22b0aa4d9afcde3f0336d1884be54330d9c15b7ab6a2c6281e0f11f455a6f0d")
         verify_report(self.report,self.ledger,self.raw)
         self.assertEqual(self.report["archiveClockCoverage"]["totalM5"],107136)
         self.assertEqual(self.report["archiveClockCoverage"]["invalidM5"],0)
@@ -67,6 +72,8 @@ class PenguH1AsterM5TapeAuditTests(unittest.TestCase):
             lambda r:r["crossArmDedup"].__setitem__("shared",0),
             lambda r:r["crossArmDedup"].__setitem__("crossArmEventsAreIndependentTrades",True),
         ]
+        with self.assertRaisesRegex(ValueError,"PENGU_M5_REPORT_"):
+            verify_report(self.report,self.ledger,self.raw+b" ")
         for mutate in changes:
             forged=copy.deepcopy(self.report)
             mutate(forged)
