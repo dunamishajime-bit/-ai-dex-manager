@@ -149,7 +149,7 @@ jobs:
               raise ValueError("NATIVE_H1_RESEARCH_SCOPE_OR_COVERAGE_INVALID")
           for r in o["rows"]:
               for case in r["cases"]:
-                  for name in ("pengu","q102"):
+                  for name in ("pengu","penguV8","q102"):
                       item=case[name]
                       if item["status"] not in ("NO_SOURCE_ENTRY","NATIVE_ENTRY_OBSERVED","BLOCKED_SOURCE"):
                           raise ValueError("NATIVE_H1_OBSERVATION_UNRECOGNISED")
