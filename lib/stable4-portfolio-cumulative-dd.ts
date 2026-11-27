@@ -30,6 +30,8 @@ export function advancePortfolioDd(p:PortfolioDdState,o:EquityMark):PortfolioDdS
  if(!p||p.schema!==STABLE4_PORTFOLIO_DD_SCHEMA||p.source!=="OFFLINE_RECONCILED_MTM_ONLY"||
  !Number.isFinite(p.index)||p.index<=0||!Number.isFinite(p.peak)||p.peak<p.index||
  !Number.isFinite(p.maximumDd)||p.maximumDd<0||p.maximumDd>1||
+ !Number.isFinite(p.currentDd)||p.currentDd<0||p.currentDd>p.maximumDd+1e-12||
+ Math.abs(p.currentDd-Math.max(0,1-p.index/p.peak))>1e-9||
  !Number.isFinite(p.equity)||p.equity<=0)throw Error("PORTFOLIO_DD_STATE_INVALID");
  if(o.releaseSha!==p.releaseSha||o.atMs<=p.updatedAt||o.proofId===p.proofId)throw Error("PORTFOLIO_DD_CLOCK_OR_PROOF_REPLAY");
  const growth=(o.equity-o.externalNetFlow)/p.equity;
@@ -46,6 +48,7 @@ export function evaluatePortfolioDdEntry(p:PortfolioDdState|undefined,atMs:numbe
  !Number.isFinite(p.equity)||p.equity<=0||!Number.isFinite(p.index)||p.index<=0||
  !Number.isFinite(p.peak)||p.peak<p.index||!Number.isFinite(p.maximumDd)||p.maximumDd<0||p.maximumDd>1||
  !Number.isFinite(p.currentDd)||p.currentDd<0||p.currentDd>p.maximumDd+1e-12||
+ Math.abs(p.currentDd-Math.max(0,1-p.index/p.peak))>1e-9||
  !Number.isFinite(limit)||limit<=0||limit>1)return blocked("PORTFOLIO_DD_STALE_OR_INVALID");
  if(p.maximumDd>limit+1e-12)return blocked("PORTFOLIO_CUMULATIVE_MAX_DD_EXCEEDED");
  return {status:"ELIGIBLE_OFFLINE",reason:"PORTFOLIO_CUMULATIVE_DD_WITHIN_LIMIT",currentDd:p.currentDd,maximumDd:p.maximumDd,orderAuthority:false};
