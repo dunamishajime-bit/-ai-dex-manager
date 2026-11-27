@@ -54,7 +54,7 @@ test("nonfinite capital, unknown direction and invalid V4 cap never pass dry-run
 
 
 test("unknown owner, duplicate IDs, false stock classification and invalid open rows are blocked",()=>{
- const position={id:"existing",sleeve:"V52" as const,symbol:"AMZNUSDT",route:"V50",gross:1,stock:true,status:"OPEN" as const};
+ const position={id:"existing",sleeve:"V52" as const,symbol:"AMZN",route:"V50",gross:1,stock:true,status:"OPEN" as const};
  const evaluate=(open:any[])=>evaluateStable4DryEntry({...x,open}).reason;
  assert.equal(evaluate([position]),"ALL_OBSERVED_RISK_CHECKS_WITHIN_LIMIT");
  assert.equal(evaluate([{...position,status:"UNKNOWN"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
@@ -63,7 +63,7 @@ test("unknown owner, duplicate IDs, false stock classification and invalid open 
  assert.equal(evaluate([{...position,sleeve:"PENGU",stock:true}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([{...position,gross:0}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([{...position,gross:Infinity}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
- assert.equal(evaluate([position,{...position,symbol:"TSLAUSDT"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([position,{...position,symbol:"TSLA"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([{...position,id:c.id}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([null]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([{...position,symbol:"NOT_A_SYMBOL"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
@@ -78,4 +78,19 @@ test("account denominator must match both independently fresh DD equity snapshot
  const forgedRunner={...base,accountEquityUsd:1100};
  assert.equal(evaluateStable4DryEntry({...x,ddState:forgedRunner}).reason,"ACCOUNT_MTM_EQUITY_MISMATCH");
  assert.equal(evaluateStable4DryEntry({...x,equityUsd:1000.005}).status,"ELIGIBLE_OFFLINE");
+});
+
+
+test("V52 stock source symbols are admitted only as equities; crypto stays USDT-quoted",()=>{
+ const v52={...c,id:"stock-candidate",sleeve:"V52" as const,symbol:"AMZN",route:"V50",gross:2,side:"LONG" as const};
+ assert.equal(evaluateStable4DryEntry({...x,candidate:v52}).status,"ELIGIBLE_OFFLINE");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...v52,symbol:"TSLA"}}).status,"ELIGIBLE_OFFLINE");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...v52,symbol:"BRK.B"}}).status,"ELIGIBLE_OFFLINE");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...v52,symbol:"AMZNUSDT"}}).reason,"SOURCE_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...v52,symbol:"../AMZN"}}).reason,"SOURCE_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...c,symbol:"ETH"}}).reason,"SOURCE_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,open:[{id:"stock-peer",sleeve:"V52",symbol:"TSLA",route:"V11",gross:1,stock:true,status:"OPEN"}],candidate:v52}).status,"ELIGIBLE_OFFLINE");
+ assert.equal(evaluateStable4DryEntry({...x,open:[{id:"stock-peer",sleeve:"V52",symbol:"AMZN",route:"V11",gross:1,stock:true,status:"OPEN"}],candidate:v52}).reason,"SAME_SYMBOL_OWNERSHIP_UNRESOLVED");
+ assert.equal(evaluateStable4DryEntry({...x,open:[{id:"wrong",sleeve:"V52",symbol:"TSLAUSDT",route:"V11",gross:1,stock:true,status:"OPEN"}],candidate:v52}).reason,"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluateStable4DryEntry({...x,open:[{id:"wrong",sleeve:"V4",symbol:"TSLA",route:"BASE",gross:1,stock:false,status:"OPEN"}],candidate:v52}).reason,"OPEN_OWNER_EXPOSURE_UNVERIFIED");
 });
