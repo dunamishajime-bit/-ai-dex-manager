@@ -177,6 +177,96 @@ def observe(root: Path, ledger: dict, ledger_sha256: str) -> dict:
     }
 
 
+def verify_report(report: dict, ledger: dict, ledger_raw: bytes) -> None:
+    """Fail closed on false venue fills, altered raw H1 events, or forged M5 counts."""
+    if (report.get("schema") != "stable4-pengu-h1-signal-aster-m5-tape-quality/v1"
+            or report.get("status") != "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS"
+            or report.get("sourceH1LedgerSha256") != hashlib.sha256(ledger_raw).hexdigest()
+            or any(report.get(field) is not False for field in
+                ("singleSevenWalletNativeReplay","entryExecutionOrNativeExitCertified",
+                 "liveEligible","rootCertificateIssued","orderAuthority"))):
+        raise ValueError("PENGU_M5_REPORT_SOURCE_OR_RELEASE_SCOPE_INVALID")
+    summary = report.get("archiveClockCoverage", {})
+    files = report.get("asterM5SourceFiles", [])
+    if (summary.get("fromMs") != START or summary.get("untilMsExclusive") != END
+            or summary.get("totalM5") != (END - START) // M5
+            or summary.get("invalidM5") != 0
+            or not isinstance(summary.get("zeroVolumeM5"), int)
+            or summary["zeroVolumeM5"] < 0 or summary["zeroVolumeM5"] > summary["totalM5"]
+            or not isinstance(files,list) or len(files) != 2):
+        raise ValueError("PENGU_M5_REPORT_ARCHIVE_COVERAGE_INVALID")
+    previous_last = None
+    total = 0
+    for i, ((folder, filename, digest), doc) in enumerate(zip(INPUTS, files)):
+        if (doc.get("folder") != folder or doc.get("file") != filename
+                or doc.get("sha256") != digest
+                or type(doc.get("rows")) is not int or doc["rows"] <= 0
+                or type(doc.get("firstMs")) is not int or type(doc.get("lastMs")) is not int
+                or doc["lastMs"] - doc["firstMs"] != (doc["rows"] - 1) * M5
+                or (i == 0 and doc["firstMs"] != START)
+                or (i > 0 and doc["firstMs"] != previous_last + M5)):
+            raise ValueError("PENGU_M5_REPORT_ARCHIVE_SOURCE_PIN_OR_GAP_INVALID")
+        total += doc["rows"]
+        previous_last = doc["lastMs"]
+    if total != summary["totalM5"] or previous_last != END - M5:
+        raise ValueError("PENGU_M5_REPORT_ARCHIVE_TOTAL_INVALID")
+    if set(report.get("events", {})) != {"BASE","V8_V64"} or set(report.get("arms", {})) != {"BASE","V8_V64"}:
+        raise ValueError("PENGU_M5_REPORT_ALTERNATE_ARM_INVALID")
+    for arm in ("BASE","V8_V64"):
+        originals = ledger.get("rawSignalEvents", {}).get(arm)
+        rows = report["events"][arm]
+        counts = report["arms"][arm]
+        if (not isinstance(originals,list) or not isinstance(rows,list)
+                or len(rows) != len(originals)
+                or len(rows) != (54 if arm == "BASE" else 112)
+                or counts.get("rawH1Signals") != len(rows)
+                or counts.get("actualVenueFillsVerified") != 0
+                or counts.get("noOrderAuthority") is not True):
+            raise ValueError("PENGU_M5_REPORT_SOURCE_H1_ARM_MISMATCH:" + arm)
+        first_5m = any_15m = all_15m = zero_15m = invalid_15m = 0
+        for source, row in zip(originals, rows):
+            ts = source.get("entryTs")
+            obs = row.get("m5BarsAfterSignal")
+            allowed = {"M5_BAR_MISSING","M5_BAR_INVALID",
+                       "M5_BAR_ZERO_VOLUME","M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"}
+            if (type(ts) is not int or row.get("entryTs") != ts
+                    or row.get("side") != source.get("side")
+                    or row.get("route") != source.get("route")
+                    or row.get("firstM5CompleteAt") != ts + M5
+                    or row.get("first15MinutesCompleteAt") != ts + 3*M5
+                    or not isinstance(obs,list) or len(obs) != 3
+                    or any(o not in allowed for o in obs)
+                    or row.get("entryExecuted") is not False
+                    or row.get("nativeExitReplayed") is not False):
+                raise ValueError("PENGU_M5_REPORT_EVENT_LINEAGE_OR_CUTOFF_INVALID")
+            m5 = obs[0] == "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+            any15 = "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED" in obs
+            all15 = all(o == "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED" for o in obs)
+            invalid = any(o in ("M5_BAR_MISSING", "M5_BAR_INVALID") for o in obs)
+            status = ("M5_SOURCE_INVALID" if invalid else
+                      "M5_15M_ALL_ZERO_VOLUME" if not any15 else
+                      "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF")
+            if (row.get("m5HasPositiveVolumeNotFillProof") is not m5
+                    or row.get("anyPositiveVolumeInFirst15m") is not any15
+                    or row.get("allThreeM5PositiveNotFillProof") is not all15
+                    or row.get("status") != status):
+                raise ValueError("PENGU_M5_REPORT_EVENT_VOLUME_OR_STATUS_INVALID")
+            first_5m += m5
+            any_15m += any15
+            all_15m += all15
+            zero_15m += status == "M5_15M_ALL_ZERO_VOLUME"
+            invalid_15m += invalid
+        expected = {
+            "first5mPositiveVolume":first_5m,
+            "first15mAnyPositiveVolume":any_15m,
+            "first15mAllThreePositiveVolume":all_15m,
+            "first15mAllZero":zero_15m,
+            "first15mInvalidOrMissing":invalid_15m,
+        }
+        if any(counts.get(key) != val for key,val in expected.items()):
+            raise ValueError("PENGU_M5_REPORT_EVENT_TOTALS_MISMATCH:" + arm)
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 4:
