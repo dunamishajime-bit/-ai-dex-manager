@@ -247,7 +247,7 @@ def verify_reviewed_snapshot(raw: bytes) -> dict:
     if not isinstance(raw, bytes):
         raise ValueError("Q102_EXTENDED_H1_REVIEWED_SNAPSHOT_BYTES_REQUIRED")
     sha1 = hashlib.sha1(
-        b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw
+        b"blob " + str(len(raw)).encode("ascii") + bytes([0]) + raw
     ).hexdigest()
     if sha1 != REVIEWED_EVIDENCE_GIT_BLOB_SHA1:
         raise ValueError("Q102_EXTENDED_H1_REVIEWED_SNAPSHOT_SHA_MISMATCH")
