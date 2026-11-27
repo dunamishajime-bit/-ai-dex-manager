@@ -31,7 +31,7 @@
         "SHORT_V20": 41,
         "LONG_V2_FINAL": 13
       },
-      "checked": 34,
+      "checked": 54,
       "mismatches": 0,
       "details": []
     },
@@ -44,7 +44,7 @@
         "RECOVERY_V8": 48,
         "SHORT_V20": 41
       },
-      "checked": 37,
+      "checked": 112,
       "mismatches": 0,
       "details": []
     }
