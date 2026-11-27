@@ -29,6 +29,9 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
         self.assertEqual(report["penguAsterM5SignalTape"]["verifiedVenueFills"], 0)
         self.assertTrue(report["penguAsterM5SignalTape"]["m5VolumeIsNotExecutableFillProof"])
         self.assertFalse(report["q102AsterArchiveCausal181d"]["monthlyReadyIsNativeTradeProof"])
+        self.assertEqual(report["q102AsterArchiveCausal181d"]["btcDuplicatedCorruptAsterH1Bar"],
+                         "2025-09-13T13:00:00Z")
+        self.assertFalse(report["q102AsterArchiveCausal181d"]["binanceSubstitutionAuthorized"])
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["BTC"], 6)
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["ENA"], 10)
         self.assertEqual(report["realMarketNativeSourceScope"]["PENGU"],
