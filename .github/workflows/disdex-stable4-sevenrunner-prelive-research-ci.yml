@@ -57,6 +57,9 @@ jobs:
             tests/v12-v4-runner-engine.test.ts; do
               npx tsx "$name"
             done
+          # Independently validate 23 exact-byte pins and all original safety tokens.
+          # This MUST NOT replace the failing formal historical approval gate.
+          python -B -m unittest -v tests.test_stable4_candidate_source_safety_contract
           python -B tests/test_public_read_resilience_offline.py
           python -B -m unittest -q \
             tests.test_v52_market_closed_gate \
