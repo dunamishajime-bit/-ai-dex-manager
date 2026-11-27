@@ -68,3 +68,14 @@ test("unknown owner, duplicate IDs, false stock classification and invalid open 
  assert.equal(evaluate([null]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluate([{...position,symbol:"NOT_A_SYMBOL"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
 });
+
+
+test("account denominator must match both independently fresh DD equity snapshots",()=>{
+ assert.equal(evaluateStable4DryEntry(x).status,"ELIGIBLE_OFFLINE");
+ assert.equal(evaluateStable4DryEntry({...x,equityUsd:1100}).reason,"ACCOUNT_MTM_EQUITY_MISMATCH");
+ const forgedPortfolio={...portfolio,equity:1100};
+ assert.equal(evaluateStable4DryEntry({...x,portfolioDdState:forgedPortfolio}).reason,"ACCOUNT_MTM_EQUITY_MISMATCH");
+ const forgedRunner={...base,accountEquityUsd:1100};
+ assert.equal(evaluateStable4DryEntry({...x,ddState:forgedRunner}).reason,"ACCOUNT_MTM_EQUITY_MISMATCH");
+ assert.equal(evaluateStable4DryEntry({...x,equityUsd:1000.005}).status,"ELIGIBLE_OFFLINE");
+});
