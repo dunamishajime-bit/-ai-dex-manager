@@ -48,7 +48,7 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
             ("Q102_REAL", lambda x: x.__setitem__("portfolioReplayComplete", True),
              "Q102_LIMITED_REAL_H1_NATIVE_EVIDENCE_INVALID"),
             ("V52_COVERAGE", lambda x: x["perTicker"]["AMZN"]["asterM5"].__setitem__("rows", 1),
-             "V52_MARKET_COVERAGE_NOT_EXECUTION_EVIDENCE_INVALID"),
+             "V52_LIQUIDITY_ROW_OR_PROVENANCE_INVALID"),
         ]:
             original = getattr(audit, path_attr)
             evidence = json.loads(original.read_text(encoding="utf8"))
