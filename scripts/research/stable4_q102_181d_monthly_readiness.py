@@ -73,6 +73,48 @@ def monthly(data_root:Path, integrity:dict)->dict:
     }
 
 
+def verify_monthly_snapshot(snapshot:dict,source_integrity:dict)->None:
+    """A valid H1 observation ledger never proves orders or certifies Q102 trades."""
+    if (snapshot.get("schema")!="stable4-q102-archived-h1-monthly-181d-readiness/v1"
+        or snapshot.get("status")!="PARTIAL_H1_HISTORY_READINESS_NO_NATIVE_SIGNALS_OR_FILLS"
+        or snapshot.get("monthlyClocks")!=12 or snapshot.get("requiredPriorDays")!=181
+        or snapshot.get("archiveSourceSymbols")!=10
+        or snapshot.get("fullQ102NativeTradeReplay") is not False
+        or snapshot.get("fullSevenRunnerWalletReplay") is not False
+        or snapshot.get("rootCertificateIssued") is not False
+        or snapshot.get("orderAuthority") is not False
+        or snapshot.get("productionEligible") is not False):
+        raise ValueError("Q102_MONTHLY_HISTORY_RELEASE_SCOPE_INVALID")
+    src=source_integrity.get("folders",{}).get("aster-public-v3-h1-q102-warmup",{})
+    rows=snapshot.get("byTicker",{})
+    if set(src)!=set(rows):
+        raise ValueError("Q102_MONTHLY_HISTORY_SYMBOL_SET_MISMATCH")
+    expected=[f"{y:04d}-{m:02d}" for y,m in MONTHS]
+    for ticker,item in rows.items():
+        if item.get("inputSha256")!=src[ticker]["sha256"]:
+            raise ValueError("Q102_MONTHLY_HISTORY_SOURCE_SHA_MISMATCH:"+ticker)
+        months=item.get("months")
+        if not isinstance(months,list) or len(months)!=12 or [r.get("decisionMonth") for r in months]!=expected:
+            raise ValueError("Q102_MONTHLY_HISTORY_CLOCKS_INVALID:"+ticker)
+        ready=0
+        for m in months:
+            absent=m.get("missingH1")
+            bad=m.get("badH1")
+            if (type(absent) is not int or type(bad) is not int or absent<0 or bad<0
+                or absent+bad>181*24
+                or m.get("signalComputed") is not False
+                or m.get("venueEntryProven") is not False):
+                raise ValueError("Q102_MONTHLY_HISTORY_ROW_INVALID:"+ticker)
+            expected_status=("H1_181D_INVALID_SOURCE" if bad else
+                             "H1_181D_INCOMPLETE_SOURCE" if absent else
+                             "H1_181D_CLOSED_HISTORY_ONLY")
+            if m.get("status")!=expected_status:
+                raise ValueError("Q102_MONTHLY_HISTORY_STATUS_FORGED:"+ticker)
+            ready+=int(expected_status=="H1_181D_CLOSED_HISTORY_ONLY")
+        if item.get("historyReadyMonths")!=ready:
+            raise ValueError("Q102_MONTHLY_HISTORY_READY_COUNT_INVALID:"+ticker)
+
+
 if __name__=="__main__":
     import sys
     if len(sys.argv)!=3:
