@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 THREE = ROOT / "docs/research/STABLE4_THREE_NATIVE_SLEEVE_SYNTHETIC_20261127.json"
 OTHER = ROOT / "docs/research/STABLE4_Q102_V4_HYPE_NATIVE_SYNTHETIC_EVIDENCE_20261127.json"
+FOUR_REEXEC = ROOT / "docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -25,6 +26,17 @@ def exact_sha(path: Path) -> str:
 def evaluate() -> dict:
     three = json.loads(THREE.read_text(encoding="utf-8"))
     other = json.loads(OTHER.read_text(encoding="utf-8"))
+    four = json.loads(FOUR_REEXEC.read_text(encoding="utf-8"))
+    if (four.get("schema") != "stable4-four-native-source-synthetic-comparison/v1"
+            or four.get("status") != "REVIEW_ONLY_PARTIAL_SOURCE_REPLAY_NO_ADOPTION"
+            or four.get("adoptFourSleeveHype") is not False
+            or four.get("portfolioNativeSevenComplete") is not False
+            or four.get("productionEligible") is not False
+            or four.get("liveOrderAuthority") is not False
+            or four.get("rootCertificateIssued") is not False):
+        raise ValueError("FOUR_SLEEVE_REPLAY_RELEASE_BOUNDARY_UNVERIFIED")
+    if four.get("syntheticWindow", {}).get("cases") != 12:
+        raise ValueError("FOUR_SLEEVE_CASE_COVERAGE_INVALID")
     if three.get("status") != "PARTIAL_NATIVE_SOURCE_RESEARCH_ONLY" or len(three.get("cases", [])) != 12:
         raise ValueError("THREE_SLEEVE_EVIDENCE_UNVERIFIED")
     if other.get("schema") != "stable4-q102-hype-monthly-native-synthetic-evidence/v1" or other.get("status") != "RESEARCH_ONLY_NOT_CERTIFIED":
@@ -41,6 +53,11 @@ def evaluate() -> dict:
         "isolatedQ102Hype": {
             "path": other["source"],
             "expected": other.get("sourceSha256"),
+        },
+        "fourSleeveCurrentSource": {
+            "path": "scripts/stable4-four-sleeve-native-synthetic.ts",
+            "expected": next((e["sourceSha256"] for e in four.get("evidence", [])
+                              if e.get("name") == "fourSleeve"), None),
         },
     }
     integrity = {}
@@ -61,7 +78,7 @@ def evaluate() -> dict:
         "Q102": "ISOLATED_MONTHLY_NATIVE_FOUR_TRADES_ONLY",
         "IDLE": "PARTIAL_R26_IN_THREE_SLEEVE_WALLET",
         "FET": "PARTIAL_BRK48_IN_THREE_SLEEVE_WALLET",
-        "HYPE": "ISOLATED_NATIVE_NOT_SHARED_WALLET",
+        "HYPE": "PARTIAL_NATIVE_HYPE_IN_FOUR_SLEEVE_SHARED_WALLET",
         "V52": "NO_NATIVE_STOCK_SESSION_SYNTHETIC_REPLAY",
     }
     if set(coverage) != set(RUNNERS):
@@ -71,6 +88,8 @@ def evaluate() -> dict:
         "status": "BLOCKED_INCOMPLETE_RESEARCH" if all_source_matched else "BLOCKED_SOURCE_SHA_MISMATCH",
         "runnerCoverage": coverage,
         "threeSleeveSharedWalletCases": len(three["cases"]),
+        "fourSleeveSharedWalletCases": four["syntheticWindow"]["cases"],
+        "fourSleeveComparisonAdopted": False,
         "q102IsolatedCases": other["summary"]["q102"]["cases"],
         "hypeIsolatedCases": other["summary"]["hype"]["cases"],
         "singleSevenRunnerNativeReplay": False,
