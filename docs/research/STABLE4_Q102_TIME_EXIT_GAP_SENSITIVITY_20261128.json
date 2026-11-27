@@ -1,0 +1,435 @@
+{
+  "conditional": {
+    "BLOCKED_OCCUPIED_SLOT": 16,
+    "MODELED_ADMIT_AND_EXIT": 15,
+    "MODELED_ADMIT_UNRESOLVED_LATCH": 1,
+    "NO_MODELED_ENTRY_PRICE": 6
+  },
+  "conditionalDecisions": [
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1787461200000,
+      "family": "PB",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1787464800000,
+      "exitTs": 1787652000000,
+      "family": "HIGH_VOL",
+      "reason": "TRAIL_5P_AFTER_12P",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "ONDOUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1787504400000,
+      "family": "MR",
+      "occupyingEntryTs": 1787464800000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1787518800000,
+      "family": "MR",
+      "occupyingEntryTs": 1787464800000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1787720400000,
+      "family": "PB",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1787821200000,
+      "exitTs": 1787908500000,
+      "family": "MR",
+      "reason": "DELAYED_TIME_PRICE_COUNTERFACTUAL",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1788224400000,
+      "family": "BRK",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1788238800000,
+      "family": "PB",
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1788411600000,
+      "exitTs": 1788498300000,
+      "family": "MR",
+      "reason": "DELAYED_TIME_PRICE_COUNTERFACTUAL",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788440400000,
+      "family": "MR",
+      "occupyingEntryTs": 1788411600000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788469200000,
+      "family": "MR",
+      "occupyingEntryTs": 1788411600000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1788584400000,
+      "family": "REV",
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1788616800000,
+      "exitTs": 1788876000000,
+      "family": "HIGH_VOL",
+      "reason": "TIME",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788624000000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1788616800000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788642000000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1788616800000,
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1788901200000,
+      "exitTs": 1788923400000,
+      "family": "PB",
+      "reason": "Q102_PB_LONG_INITIAL_ADVERSE_1P5",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788915600000,
+      "family": "PB",
+      "occupyingEntryTs": 1788901200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1788930000000,
+      "exitTs": 1788974100000,
+      "family": "PB",
+      "reason": "DELAYED_TIME_PRICE_COUNTERFACTUAL",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1788973200000,
+      "family": "PB",
+      "occupyingEntryTs": 1788930000000,
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1788987600000,
+      "family": "PB",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1789002000000,
+      "exitTs": 1789025700000,
+      "family": "PB",
+      "reason": "HARD_STOP",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1789632000000,
+      "exitTs": 1789725000000,
+      "family": "HIGH_VOL",
+      "reason": "HARD_STOP",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1789639200000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1789632000000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1789650000000,
+      "family": "MR",
+      "occupyingEntryTs": 1789632000000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1789657200000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1789632000000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "ONDOUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1789664400000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1789632000000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1789722000000,
+      "family": "BRK",
+      "occupyingEntryTs": 1789632000000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1789779600000,
+      "exitTs": 1789809600000,
+      "family": "MR",
+      "reason": "HARD_STOP",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1789981200000,
+      "exitTs": 1790001600000,
+      "family": "BRK",
+      "reason": "PROFIT_FLOOR_0P5",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "RENDERUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1790024400000,
+      "exitTs": 1790038500000,
+      "family": "BRK",
+      "reason": "PROFIT_FLOOR_0P5",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "RENDERUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1790038800000,
+      "exitTs": 1790049900000,
+      "family": "MR",
+      "reason": "HARD_STOP",
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1790067600000,
+      "exitTs": 1790172900000,
+      "family": "BRK",
+      "reason": "HARD_STOP",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1790154000000,
+      "family": "PB",
+      "occupyingEntryTs": 1790067600000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1790168400000,
+      "family": "PB",
+      "occupyingEntryTs": 1790067600000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1790182800000,
+      "exitTs": 1790226000000,
+      "family": "REV",
+      "reason": "TIME",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1790226000000,
+      "exitTs": 1790312400000,
+      "family": "REV",
+      "reason": "TIME",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "APTUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1790254800000,
+      "family": "REV",
+      "occupyingEntryTs": 1790226000000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "APTUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_UNRESOLVED_LATCH",
+      "entryTs": 1790654400000,
+      "family": "HIGH_VOL",
+      "observedThrough": 1790812800000,
+      "side": 1,
+      "sourceStatus": "STUDY_END_OPEN_POSITION",
+      "symbol": "SUIUSDT"
+    }
+  ],
+  "fullQ102AnnualReplay": false,
+  "gaps": [
+    {
+      "delayMinutes": 5,
+      "dueTs": 1787605200000,
+      "entryTs": 1787518800000,
+      "observedBarOpenTs": 1787605200000,
+      "observedClose": 4.308,
+      "priceObservationTs": 1787605500000,
+      "sourceSha256": "e0ce5a329babab536b371d5d41b6d266884c5969dc5c55ba47e37183e2d658e5",
+      "status": "COUNTERFACTUAL_PRICE_ONLY",
+      "symbol": "UNIUSDT",
+      "trades": 3,
+      "volume": 82.0
+    },
+    {
+      "delayMinutes": 15,
+      "dueTs": 1787907600000,
+      "entryTs": 1787821200000,
+      "observedBarOpenTs": 1787908200000,
+      "observedClose": 7.387,
+      "priceObservationTs": 1787908500000,
+      "sourceSha256": "fb4fbd8ed8ea09cff1581207ab9c6847f2c4836fc7600c2ad81141434e0ab197",
+      "status": "COUNTERFACTUAL_PRICE_ONLY",
+      "symbol": "AVAXUSDT",
+      "trades": 2,
+      "volume": 39.0
+    },
+    {
+      "delayMinutes": 5,
+      "dueTs": 1788498000000,
+      "entryTs": 1788411600000,
+      "observedBarOpenTs": 1788498000000,
+      "observedClose": 7.497,
+      "priceObservationTs": 1788498300000,
+      "sourceSha256": "fb4fbd8ed8ea09cff1581207ab9c6847f2c4836fc7600c2ad81141434e0ab197",
+      "status": "COUNTERFACTUAL_PRICE_ONLY",
+      "symbol": "AVAXUSDT",
+      "trades": 2,
+      "volume": 13.0
+    },
+    {
+      "delayMinutes": 15,
+      "dueTs": 1788973200000,
+      "entryTs": 1788930000000,
+      "observedBarOpenTs": 1788973800000,
+      "observedClose": 0.1771,
+      "priceObservationTs": 1788974100000,
+      "sourceSha256": "87a865c46f59e4cc739a331ca799719f9b8d080a9c0166c647747beb0c17fa09",
+      "status": "COUNTERFACTUAL_PRICE_ONLY",
+      "symbol": "FETUSDT",
+      "trades": 7,
+      "volume": 3852.0
+    }
+  ],
+  "inputPins": {
+    "STABLE4_Q102_FULL_UNIVERSE_ALL_READY_CLOCK_SCREEN_20261128.json": "8bcaa800393b4cd920c3524f0ba242bc482c54fa05564ed4c8b53276a49864f0",
+    "STABLE4_Q102_SELECTED_NATIVE_EXIT_MODEL_20261128.json": "2d208ef1252884bdf60720802ce78ee65f84f45afe221edccfaeb411481bb5f0"
+  },
+  "limitations": [
+    "Does not change the strict unresolved-slot result. Assumes pending time exit can be modeled at first later positive-volume M5 close, not proof of executable quote, actual order or fill.",
+    "Does not replay protection or slippage during delay; competing STOP/quote path unknown, so alternative is sensitivity only. Other sleeves assumed idle, no PnL/DD or annual certification."
+  ],
+  "maxWaitMinutes": 60,
+  "orderAuthority": false,
+  "schema": "stable4-q102-time-exit-gap-sensitivity/v1",
+  "status": "COUNTERFACTUAL_PRICE_SENSITIVITY_NOT_EXECUTION",
+  "strict": {
+    "BLOCKED_OCCUPIED_SLOT": 2,
+    "BLOCKED_UNRESOLVED_SLOT": 32,
+    "MODELED_ADMIT_AND_EXIT": 1,
+    "MODELED_ADMIT_UNRESOLVED_LATCH": 1,
+    "NO_MODELED_ENTRY_PRICE": 2
+  }
+}
