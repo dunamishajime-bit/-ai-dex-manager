@@ -1,0 +1,1400 @@
+{
+  "schema": "stable4-pengu-real-h1-native-entry-ledger/v1",
+  "status": "NATIVE_REAL_H1_RAW_SIGNAL_PARITY_PASS",
+  "periodUtc": [
+    "2025-10-01T00:00:00.000Z",
+    "2026-10-01T00:00:00.000Z"
+  ],
+  "source": "pinned PENGU dual LS V2 signal module and deterministic evaluation series",
+  "input": {
+    "pengu": {
+      "count": 10512,
+      "sha256": "9f287209dbffc67d447433cdc5f8b159a459659554b2e07282b236bab1676af0",
+      "startUtc": "2025-07-20T00:00:00.000Z",
+      "endUtc": "2026-09-30T23:59:59.999Z"
+    },
+    "btc": {
+      "count": 10512,
+      "sha256": "155accb6e2885bdafe72c0eb48c3737f85daca44caaea4272c932c41a826ac6c"
+    },
+    "funding": {
+      "count": 2627,
+      "sha256": "f2220113447f695ffd40a8cd59c4428d3dc9cb9c30ee8b7e3884dd3ee279738a"
+    }
+  },
+  "arms": {
+    "BASE": {
+      "rawCandidates": 54,
+      "longs": 13,
+      "shorts": 41,
+      "byRoute": {
+        "SHORT_V20": 41,
+        "LONG_V2_FINAL": 13
+      },
+      "checked": 34,
+      "mismatches": 0,
+      "details": []
+    },
+    "V8_V64": {
+      "rawCandidates": 112,
+      "longs": 71,
+      "shorts": 41,
+      "byRoute": {
+        "LONG_V2_FINAL": 23,
+        "RECOVERY_V8": 48,
+        "SHORT_V20": 41
+      },
+      "checked": 37,
+      "mismatches": 0,
+      "details": []
+    }
+  },
+  "featureMissing": 0,
+  "ambiguous": 0,
+  "rawSignalEvents": {
+    "BASE": [
+      {
+        "barTs": 1760061600000,
+        "entryTs": 1760065200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1760540400000,
+        "entryTs": 1760544000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761152400000,
+        "entryTs": 1761156000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761678000000,
+        "entryTs": 1761681600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761890400000,
+        "entryTs": 1761894000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761904800000,
+        "entryTs": 1761908400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762228800000,
+        "entryTs": 1762232400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762646400000,
+        "entryTs": 1762650000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762678800000,
+        "entryTs": 1762682400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762905600000,
+        "entryTs": 1762909200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1763089200000,
+        "entryTs": 1763092800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1764435600000,
+        "entryTs": 1764439200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765026000000,
+        "entryTs": 1765029600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765296000000,
+        "entryTs": 1765299600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1765767600000,
+        "entryTs": 1765771200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765890000000,
+        "entryTs": 1765893600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766005200000,
+        "entryTs": 1766008800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766059200000,
+        "entryTs": 1766062800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766073600000,
+        "entryTs": 1766077200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766077200000,
+        "entryTs": 1766080800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766098800000,
+        "entryTs": 1766102400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1767391200000,
+        "entryTs": 1767394800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767405600000,
+        "entryTs": 1767409200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767513600000,
+        "entryTs": 1767517200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1768856400000,
+        "entryTs": 1768860000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1768924800000,
+        "entryTs": 1768928400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1769803200000,
+        "entryTs": 1769806800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1771066800000,
+        "entryTs": 1771070400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1771081200000,
+        "entryTs": 1771084800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1771556400000,
+        "entryTs": 1771560000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1774537200000,
+        "entryTs": 1774540800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1775163600000,
+        "entryTs": 1775167200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1778666400000,
+        "entryTs": 1778670000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1778698800000,
+        "entryTs": 1778702400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1778954400000,
+        "entryTs": 1778958000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1779994800000,
+        "entryTs": 1779998400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1780052400000,
+        "entryTs": 1780056000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1781838000000,
+        "entryTs": 1781841600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1782255600000,
+        "entryTs": 1782259200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1783540800000,
+        "entryTs": 1783544400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1785229200000,
+        "entryTs": 1785232800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1785294000000,
+        "entryTs": 1785297600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1787277600000,
+        "entryTs": 1787281200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787288400000,
+        "entryTs": 1787292000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787295600000,
+        "entryTs": 1787299200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787306400000,
+        "entryTs": 1787310000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787317200000,
+        "entryTs": 1787320800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787349600000,
+        "entryTs": 1787353200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1788541200000,
+        "entryTs": 1788544800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1788555600000,
+        "entryTs": 1788559200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1788872400000,
+        "entryTs": 1788876000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1789041600000,
+        "entryTs": 1789045200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1789056000000,
+        "entryTs": 1789059600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1790096400000,
+        "entryTs": 1790100000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      }
+    ],
+    "V8_V64": [
+      {
+        "barTs": 1759309200000,
+        "entryTs": 1759312800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1759330800000,
+        "entryTs": 1759334400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1759629600000,
+        "entryTs": 1759633200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1759910400000,
+        "entryTs": 1759914000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1760061600000,
+        "entryTs": 1760065200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1760540400000,
+        "entryTs": 1760544000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761152400000,
+        "entryTs": 1761156000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761678000000,
+        "entryTs": 1761681600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761890400000,
+        "entryTs": 1761894000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1761904800000,
+        "entryTs": 1761908400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762228800000,
+        "entryTs": 1762232400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762646400000,
+        "entryTs": 1762650000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762678800000,
+        "entryTs": 1762682400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1762747200000,
+        "entryTs": 1762750800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1762905600000,
+        "entryTs": 1762909200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1763010000000,
+        "entryTs": 1763013600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1763089200000,
+        "entryTs": 1763092800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1764316800000,
+        "entryTs": 1764320400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1764435600000,
+        "entryTs": 1764439200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1764684000000,
+        "entryTs": 1764687600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1765026000000,
+        "entryTs": 1765029600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765029600000,
+        "entryTs": 1765033200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1765296000000,
+        "entryTs": 1765299600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1765483200000,
+        "entryTs": 1765486800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1765767600000,
+        "entryTs": 1765771200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765778400000,
+        "entryTs": 1765782000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1765882800000,
+        "entryTs": 1765886400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1765890000000,
+        "entryTs": 1765893600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1765980000000,
+        "entryTs": 1765983600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1766005200000,
+        "entryTs": 1766008800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766059200000,
+        "entryTs": 1766062800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766073600000,
+        "entryTs": 1766077200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766077200000,
+        "entryTs": 1766080800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766098800000,
+        "entryTs": 1766102400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1766588400000,
+        "entryTs": 1766592000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1767106800000,
+        "entryTs": 1767110400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1767326400000,
+        "entryTs": 1767330000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767391200000,
+        "entryTs": 1767394800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767405600000,
+        "entryTs": 1767409200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767513600000,
+        "entryTs": 1767517200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1767884400000,
+        "entryTs": 1767888000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1768593600000,
+        "entryTs": 1768597200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1768856400000,
+        "entryTs": 1768860000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1768924800000,
+        "entryTs": 1768928400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1769803200000,
+        "entryTs": 1769806800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1771034400000,
+        "entryTs": 1771038000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1771066800000,
+        "entryTs": 1771070400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1771081200000,
+        "entryTs": 1771084800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1771545600000,
+        "entryTs": 1771549200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1771556400000,
+        "entryTs": 1771560000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1772020800000,
+        "entryTs": 1772024400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1772283600000,
+        "entryTs": 1772287200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1773028800000,
+        "entryTs": 1773032400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1773608400000,
+        "entryTs": 1773612000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1774238400000,
+        "entryTs": 1774242000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1774537200000,
+        "entryTs": 1774540800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1774710000000,
+        "entryTs": 1774713600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1774836000000,
+        "entryTs": 1774839600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1775163600000,
+        "entryTs": 1775167200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1775430000000,
+        "entryTs": 1775433600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1775725200000,
+        "entryTs": 1775728800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1776085200000,
+        "entryTs": 1776088800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1776603600000,
+        "entryTs": 1776607200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1776668400000,
+        "entryTs": 1776672000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1777251600000,
+        "entryTs": 1777255200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1777845600000,
+        "entryTs": 1777849200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1777982400000,
+        "entryTs": 1777986000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1778666400000,
+        "entryTs": 1778670000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1778698800000,
+        "entryTs": 1778702400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1778954400000,
+        "entryTs": 1778958000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1779051600000,
+        "entryTs": 1779055200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1779134400000,
+        "entryTs": 1779138000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1779544800000,
+        "entryTs": 1779548400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1779800400000,
+        "entryTs": 1779804000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1779994800000,
+        "entryTs": 1779998400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1780052400000,
+        "entryTs": 1780056000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1781146800000,
+        "entryTs": 1781150400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1781470800000,
+        "entryTs": 1781474400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1781816400000,
+        "entryTs": 1781820000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1781838000000,
+        "entryTs": 1781841600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1781888400000,
+        "entryTs": 1781892000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1782255600000,
+        "entryTs": 1782259200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1783350000000,
+        "entryTs": 1783353600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1783443600000,
+        "entryTs": 1783447200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1783540800000,
+        "entryTs": 1783544400000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1783645200000,
+        "entryTs": 1783648800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1784034000000,
+        "entryTs": 1784037600000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1784995200000,
+        "entryTs": 1784998800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1785229200000,
+        "entryTs": 1785232800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1785250800000,
+        "entryTs": 1785254400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1785294000000,
+        "entryTs": 1785297600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1785376800000,
+        "entryTs": 1785380400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1785416400000,
+        "entryTs": 1785420000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1786611600000,
+        "entryTs": 1786615200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1787277600000,
+        "entryTs": 1787281200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787288400000,
+        "entryTs": 1787292000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787295600000,
+        "entryTs": 1787299200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787306400000,
+        "entryTs": 1787310000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787317200000,
+        "entryTs": 1787320800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1787349600000,
+        "entryTs": 1787353200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1788091200000,
+        "entryTs": 1788094800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1788541200000,
+        "entryTs": 1788544800000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1788555600000,
+        "entryTs": 1788559200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1788872400000,
+        "entryTs": 1788876000000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1789041600000,
+        "entryTs": 1789045200000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1789056000000,
+        "entryTs": 1789059600000,
+        "symbol": "PENGUUSDT",
+        "side": "SHORT",
+        "route": "SHORT_V20",
+        "gross": 1
+      },
+      {
+        "barTs": 1789131600000,
+        "entryTs": 1789135200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1789405200000,
+        "entryTs": 1789408800000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1789599600000,
+        "entryTs": 1789603200000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      },
+      {
+        "barTs": 1790002800000,
+        "entryTs": 1790006400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1790096400000,
+        "entryTs": 1790100000000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "LONG_V2_FINAL",
+        "gross": 1
+      },
+      {
+        "barTs": 1790596800000,
+        "entryTs": 1790600400000,
+        "symbol": "PENGUUSDT",
+        "side": "LONG",
+        "route": "RECOVERY_V8",
+        "gross": 1
+      }
+    ]
+  },
+  "limitations": [
+    "Raw H1 source candidate signal only: no PENGU order, cooldown, funding PnL, M5 entry confirmation, Shared Risk, slot, gross or DD",
+    "No source-native position lifecycle, resident STOP, partial fill, ASTER tick/quote, or signed account mark",
+    "Source hash must be audited independently; source code is imported from a caller-provided checkout, no Root certificate",
+    "V8/V64 runtime option arms are both shown; this does not establish which configuration was live"
+  ],
+  "sourceRealMarketData": true,
+  "executionParityProven": false,
+  "annualProfitOrDdCertified": false,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "rootCertificateIssued": false
+}
