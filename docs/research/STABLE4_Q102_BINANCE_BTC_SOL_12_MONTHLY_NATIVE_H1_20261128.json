@@ -1,0 +1,260 @@
+{
+  "schema": "stable4-q102-binance-btc-sol-real-h1-monthly-native-v1",
+  "status": "LIMITED_NATIVE_H1_MONTHLY_REPLAY_PASS_NO_TRADES",
+  "periodUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "inputs": {
+    "BTCUSDT": {
+      "h1": 13896,
+      "sha256": "c367d886cbf4470c791026ac067f1d85c6807610f3f2579ecb8dcc8f98bc3e1d"
+    },
+    "SOLUSDT": {
+      "h1": 13896,
+      "sha256": "a11a62dab778ded86b7bfdaf961e1a898c7c159319b56200afd1bcd1f369df1b"
+    }
+  },
+  "sourcePins": {
+    "lib/disdex-quality102-causal-v1-signal.ts": "ae530d14fc088b5f018495f4a17ab5615388df57",
+    "lib/disdex-quality102-causal-pipeline.ts": "388054044274f34c9156a343d22a72cc611f4071",
+    "lib/disdex-quality102-causal-selector.ts": "6e309f2ccc08e2a8812493be00e5b591fe6f2cff",
+    "config/disdexQuality102CausalV1Runtime.ts": "f679dde1007e7aa521d7e81c82d00ca543d3b2dc"
+  },
+  "cases": [
+    {
+      "decisionTs": 1759276800000,
+      "monthUtc": "2025-10",
+      "hoursOfClosedHistory": 5136,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1759273200000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1761955200000,
+      "monthUtc": "2025-11",
+      "hoursOfClosedHistory": 5880,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1761951600000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1764547200000,
+      "monthUtc": "2025-12",
+      "hoursOfClosedHistory": 6600,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1764543600000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1767225600000,
+      "monthUtc": "2026-01",
+      "hoursOfClosedHistory": 7344,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1767222000000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1769904000000,
+      "monthUtc": "2026-02",
+      "hoursOfClosedHistory": 8088,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1769900400000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1772323200000,
+      "monthUtc": "2026-03",
+      "hoursOfClosedHistory": 8760,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1772319600000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1775001600000,
+      "monthUtc": "2026-04",
+      "hoursOfClosedHistory": 9504,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1774998000000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1777593600000,
+      "monthUtc": "2026-05",
+      "hoursOfClosedHistory": 10224,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1777590000000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1780272000000,
+      "monthUtc": "2026-06",
+      "hoursOfClosedHistory": 10968,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1780268400000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1782864000000,
+      "monthUtc": "2026-07",
+      "hoursOfClosedHistory": 11688,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1782860400000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1785542400000,
+      "monthUtc": "2026-08",
+      "hoursOfClosedHistory": 12432,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1785538800000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    },
+    {
+      "decisionTs": 1788220800000,
+      "monthUtc": "2026-09",
+      "hoursOfClosedHistory": 13176,
+      "nativeSource": {
+        "status": "NO_SOURCE_ENTRY",
+        "side": 0,
+        "symbol": null,
+        "family": null,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
+        "dataCutoffTs": 1788217200000,
+        "maxHoldHours": null,
+        "hardStop": null
+      },
+      "orderAuthority": false,
+      "venueExecutionConfirmed": false
+    }
+  ],
+  "summary": {
+    "months": 12,
+    "rawLong": 0,
+    "rawShort": 0,
+    "noSignal": 12,
+    "blocked": 0
+  },
+  "limitations": [
+    "BTC/SOL only, not 49-candidate Q102 native source universe, not multi-strategy S34/PB/MR/BRK/REV",
+    "12 monthly H1 decision clocks only, not 8760 per-hour signals or completed position lifecycle",
+    "Current H1 open exposed by source API only; no exchange order, ASTER quote/lot, M5 fill, funding or signed account",
+    "No portfolio Gross, cumulative DD, protected resident STOP, R21 slot or seven-runner PnL"
+  ],
+  "sourceOnly": true,
+  "rootCertificateIssued": false,
+  "orderAuthority": false,
+  "portfolioReplayComplete": false,
+  "productionEligible": false
+}
