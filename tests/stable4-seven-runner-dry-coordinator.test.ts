@@ -55,7 +55,13 @@ test("real V52 stock and crypto use distinct symbol grammar with shared gross",(
   f("C","PENGU","PENGUUSDT","SHORT_V20",.75),
  ]});
  assert.deepEqual(good.decisions.map(x=>x.status),["RETAINED_OFFLINE","RETAINED_OFFLINE"]);
- const fake=coordinateStable4DryCandidates({...base,candidates:[f("S","V52","AMZNUSDT","V50",2)]});
+ const venue=coordinateStable4DryCandidates({...base,candidates:[f("S","V52","AMZNUSDT","V50",2)]});
+ assert.equal(venue.decisions[0].status,"RETAINED_OFFLINE");
+ const fake=coordinateStable4DryCandidates({...base,candidates:[f("S","V52","BADSTOCKUSDT","V50",2)]});
  assert.equal(fake.decisions[0].reason,"SOURCE_INVALID");
+ const aliases=coordinateStable4DryCandidates({...base,candidates:[
+  f("V1","V52","AMZN","V50",2), f("V2","V52","AMZNUSDT","V11",1),
+ ]});
+ assert.equal(aliases.decisions[1].reason,"SAME_SYMBOL_OWNERSHIP_UNRESOLVED");
  assert.equal(fake.orderAuthority,false);
 });
