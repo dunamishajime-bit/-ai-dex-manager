@@ -19,6 +19,7 @@ Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
 Q102_H1_ARCHIVE = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
+Q102_H1_MONTHLY = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_MONTHLY_181D_READINESS_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -42,6 +43,12 @@ def evaluate() -> dict:
     else:
         from research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot as verify_q102_archive
     verify_q102_archive(q102_archive)
+    q102_monthly = json.loads(Q102_H1_MONTHLY.read_text(encoding="utf8"))
+    if __package__:
+        from .research.stable4_q102_181d_monthly_readiness import verify_monthly_snapshot
+    else:
+        from research.stable4_q102_181d_monthly_readiness import verify_monthly_snapshot
+    verify_monthly_snapshot(q102_monthly, q102_archive)
     # Both direct "python scripts/..." CLI and package unit-test imports are
     # supported; never skip the provenance verifier in either invocation.
     if __package__:
@@ -142,6 +149,10 @@ def evaluate() -> dict:
         "q102AsterArchiveCausal181d": {
             "matchingWarmupFiles": q102_archive["matchingCount"],
             "causallyValidWarmupAtTargetStart": q102_archive["matchedWarmupCoveringTargetStart"],
+            "monthlyRolling181dReadyByTicker": {
+                ticker: row["historyReadyMonths"] for ticker, row in q102_monthly["byTicker"].items()
+            },
+            "monthlyReadyIsNativeTradeProof": False,
             "wholeNativeQ102UniverseOrFillsProven": False,
         },
         "v52RegularSessionVolumeAudit": {
