@@ -166,6 +166,96 @@ def evaluate(root: Path) -> dict:
     }
 
 
+REVIEWED_EVIDENCE_GIT_BLOB_SHA1 = "fde409c99505a3fb9c36491a06a043a421482ac4"
+
+
+def verify_snapshot(report: dict) -> None:
+    """Frozen local source-H1 readiness, not strategy execution authorization."""
+    if (report.get("schema") != "stable4-q102-aster-main-early-h1-full-year-pre181d-source-inventory/v1"
+            or report.get("status") != "LOCAL_H1_PRICE_HISTORY_READINESS_ONLY_NO_SOURCE_NATIVE_TRADES"
+            or report.get("studyWindowUtc") != ["2025-10-01T00:00:00Z", "2026-10-01T00:00:00Z"]
+            or report.get("prior181dWindowUtc") != ["2025-04-03T00:00:00Z", "2025-10-01T00:00:00Z"]
+            or report.get("sourceDirectories") != [MAIN, EARLY]
+            or report.get("prior181dHours") != 4344 or report.get("yearHours") != 8760
+            or report.get("mainSymbols") != 36 or report.get("earlySymbols") != 31
+            or any(report.get(flag) is not False for flag in (
+                "fullNativeQ102AnnualEntryOrExitProven", "fullSevenRunnerSharedWalletReplayed",
+                "rootCertificateIssued", "orderAuthority", "productionEligible"))):
+        raise ValueError("Q102_EXTENDED_H1_SOURCE_SCOPE_OR_RELEASE_INVALID")
+    rows = report.get("perTicker")
+    if not isinstance(rows, dict) or len(rows) != 36:
+        raise ValueError("Q102_EXTENDED_H1_SYMBOL_COUNT_INVALID")
+    missing = []
+    ready = []
+    num_early = 0
+    for symbol, entry in rows.items():
+        if not symbol.isalnum() or not symbol.isupper() or not isinstance(entry, dict):
+            raise ValueError("Q102_EXTENDED_H1_SYMBOL_INVALID")
+        main = entry.get("main")
+        early = entry.get("early")
+        if not isinstance(main, dict):
+            raise ValueError("Q102_EXTENDED_H1_MAIN_SOURCE_MISSING:" + symbol)
+        if early is None:
+            missing.append(symbol)
+        else:
+            num_early += 1
+        for group, part in ((MAIN, main), (EARLY, early)):
+            if part is None:
+                continue
+            sha = part.get("sha256")
+            if (not isinstance(sha, str) or len(sha) != 64
+                    or any(ch not in "0123456789abcdef" for ch in sha)
+                    or not isinstance(part.get("file"), str)
+                    or not part["file"].startswith(symbol + "USDT-1h-")
+                    or not part["file"].endswith(".jsonl.gz")
+                    or type(part.get("rows")) is not int or part["rows"] < 0
+                    or type(part.get("invalidH1")) is not int or part["invalidH1"] < 0
+                    or type(part.get("missingH1Slots")) is not int or part["missingH1Slots"] < 0
+                    or type(part.get("duplicateOrReversed")) is not int or part["duplicateOrReversed"] < 0
+                    or part["invalidH1"] > part["rows"] + part["missingH1Slots"]):
+                raise ValueError("Q102_EXTENDED_H1_SOURCE_DIGEST_OR_SHAPE_INVALID:" + symbol)
+        prior, year = entry.get("prior181d"), entry.get("studyYear")
+        for section, expected in ((prior, 4344), (year, 8760)):
+            if not isinstance(section, dict) or section.get("requiredHours") != expected:
+                raise ValueError("Q102_EXTENDED_H1_WINDOW_GRAIN_INVALID:" + symbol)
+            valid, absent, invalid = (section.get(k) for k in ("validHours", "missingHours", "invalidHours"))
+            if (any(type(v) is not int or v < 0 for v in (valid, absent, invalid))
+                    or valid + absent + invalid != expected):
+                raise ValueError("Q102_EXTENDED_H1_WINDOW_COUNTS_INVALID:" + symbol)
+            expected_ready = absent == 0 and invalid == 0 and entry.get("earlyMainTimestampOverlap") == 0
+            if section.get("closedH1HistoryReady") is not expected_ready:
+                raise ValueError("Q102_EXTENDED_H1_WINDOW_READINESS_FORGED:" + symbol)
+        is_ready = prior["closedH1HistoryReady"] and year["closedH1HistoryReady"]
+        if (entry.get("yearAndCausalPrior181dReady") is not is_ready
+                or entry.get("signalOrVenueExecutionProven") is not False):
+            raise ValueError("Q102_EXTENDED_H1_NATIVE_SIGNAL_SCOPE_FORGED:" + symbol)
+        if is_ready:
+            ready.append(symbol)
+    if (num_early != 31 or sorted(missing) != report.get("missingEarlySymbols")
+            or sorted(ready) != report.get("yearAndPrior181dReadySymbols")
+            or len(ready) != report.get("yearAndPrior181dReadyCount")
+            or len(ready) != 21):
+        raise ValueError("Q102_EXTENDED_H1_COVERAGE_SUMMARY_MISMATCH")
+    if (rows["BTC"]["prior181d"]["invalidHours"] != 1
+            or rows["FET"]["studyYear"]["missingHours"] != 2418
+            or rows["LDO"]["early"]["rows"] != 0):
+        raise ValueError("Q102_EXTENDED_H1_CRITICAL_SOURCE_ANOMALY_ERASED")
+
+
+def verify_reviewed_snapshot(raw: bytes) -> dict:
+    """Review SHA of the complete immutable source report before trusting summaries."""
+    if not isinstance(raw, bytes):
+        raise ValueError("Q102_EXTENDED_H1_REVIEWED_SNAPSHOT_BYTES_REQUIRED")
+    sha1 = hashlib.sha1(
+        b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw
+    ).hexdigest()
+    if sha1 != REVIEWED_EVIDENCE_GIT_BLOB_SHA1:
+        raise ValueError("Q102_EXTENDED_H1_REVIEWED_SNAPSHOT_SHA_MISMATCH")
+    report = json.loads(raw)
+    verify_snapshot(report)
+    return report
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
