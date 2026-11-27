@@ -44,6 +44,7 @@ jobs:
             tests/stable4-hype-offline-m5-exit.test.ts \
             tests/stable4-fet-offline-m5-exit.test.ts \
             tests/stable4-seven-runner-dry-coordinator.test.ts \
+            tests/stable4-native-pengu-q102-source-observer.test.ts \
             tests/stable4-observation-snapshot.test.ts \
             tests/stable4-r21-public-observation-feed.test.ts \
             tests/stable4-public-get-resilience.test.ts \
