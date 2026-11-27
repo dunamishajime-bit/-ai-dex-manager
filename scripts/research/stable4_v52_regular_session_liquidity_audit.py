@@ -132,6 +132,43 @@ def evaluate(data_root: Path, coverage_file: Path | dict) -> dict:
     }
 
 
+def verify_report(report: dict, original_coverage: dict) -> None:
+    """Reject forged volume, venue, runner or LIVE claims in archived research."""
+    if (report.get("schema") != "stable4-v52-regular-session-liquidity-audit/v1"
+            or report.get("status") != "PARTIAL_MARKET_COVERAGE_NOT_EXECUTION_PROOF"
+            or report.get("orderAuthority") is not False
+            or report.get("productionEligible") is not False
+            or report.get("allSevenNativeReplay") is not False
+            or report.get("v52SourceEntryOrFillParityProven") is not False
+            or report.get("rootCertificateIssued") is not False
+            or set(report.get("perTicker", {})) != set(BASES)
+            or set(original_coverage.get("perTicker", {})) != set(BASES)):
+        raise ValueError("V52_LIQUIDITY_REPORT_RELEASE_SCOPE_INVALID")
+    for ticker in BASES:
+        row = report["perTicker"][ticker]
+        pinned = original_coverage["perTicker"][ticker]["asterM5"]
+        positive = row.get("regularSessionPositiveVolumeM5")
+        zero = row.get("regularSessionZeroVolumeM5")
+        regular = row.get("regularSessionWeekdayM5")
+        outside = row.get("outsideWeekdayRegularSessionM5")
+        if (not all(type(v) is int and v >= 0 for v in (positive, zero, regular, outside))
+                or row.get("sourceSha256") != pinned.get("sha256")
+                or row.get("totalM5") != pinned.get("rows")
+                or row.get("totalM5") != (WINDOW_END - WINDOW_START)//M5
+                or positive + zero != regular
+                or regular + outside != row["totalM5"]
+                or regular != 261 * 78
+                or row.get("positiveVolumeMeansExecutable") is not False
+                or row.get("signedQuoteOrFillProven") is not False
+                or row.get("weekdayCalendarDaysWithoutHolidayAdjustment") != 261
+                or row.get("weekdayDaysNot78Bars") != 0
+                or row.get("weekdayDaysWithNoPositiveVolume", -1) < 0
+                or row.get("weekdayDaysWithNoPositiveVolume", 999) > 261
+                or not math.isclose(row.get("regularSessionZeroVolumePct", -1),
+                                    round(100 * zero / regular, 4), abs_tol=0.00001)):
+            raise ValueError("V52_LIQUIDITY_ROW_OR_PROVENANCE_INVALID:" + ticker)
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
