@@ -16,6 +16,7 @@ OTHER = ROOT / "docs/research/STABLE4_Q102_V4_HYPE_NATIVE_SYNTHETIC_EVIDENCE_202
 FOUR_REEXEC = ROOT / "docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json"
 PENGU_NATIVE = ROOT / "docs/research/STABLE4_PENGU_BINANCE_NATIVE_H1_LEDGER_20261128.json"
 PENGU_M5 = ROOT / "docs/research/STABLE4_PENGU_BINANCE_H1_ASTER_M5_CANDIDATE_QUALITY_20261128.json"
+PENGU_M5_REVIEWED_REPORT_SHA256 = "f22b0aa4d9afcde3f0336d1884be54330d9c15b7ab6a2c6281e0f11f455a6f0d"
 Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE_H1_20261128.json"
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
@@ -36,6 +37,8 @@ def evaluate() -> dict:
     four = json.loads(FOUR_REEXEC.read_text(encoding="utf-8"))
     pengu_native_raw = PENGU_NATIVE.read_bytes()
     pengu_native = json.loads(pengu_native_raw)
+    if exact_sha(PENGU_M5) != PENGU_M5_REVIEWED_REPORT_SHA256:
+        raise ValueError("PENGU_M5_REVIEWED_RESULT_BYTE_SHA_MISMATCH")
     pengu_m5 = json.loads(PENGU_M5.read_text(encoding="utf8"))
     if __package__:
         from .research.stable4_pengu_aster_m5_after_h1_source_audit import verify_report as verify_pengu_m5
