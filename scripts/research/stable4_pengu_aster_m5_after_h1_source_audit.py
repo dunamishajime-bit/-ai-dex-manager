@@ -155,7 +155,22 @@ def observe(root: Path, ledger: dict, ledger_sha256: str) -> dict:
             "actualVenueFillsVerified": 0,
             "noOrderAuthority": True,
         }
+    def key(event: dict) -> tuple[int, str, str]:
+        return event["entryTs"], event["side"], event["route"]
+    baseline = {key(e) for e in ledger["rawSignalEvents"]["BASE"]}
+    extended = {key(e) for e in ledger["rawSignalEvents"]["V8_V64"]}
+    extension = [e for e in ledger["rawSignalEvents"]["V8_V64"] if key(e) not in baseline]
+    cross_arm_dedup = {
+        "baseline": len(baseline), "v8V64": len(extended),
+        "shared": len(baseline & extended),
+        "onlyBaseline": len(baseline - extended),
+        "onlyV8V64": len(extended - baseline),
+        "union": len(baseline | extended),
+        "extendedOnlyByRoute": dict(sorted(Counter(e["route"] for e in extension).items())),
+        "crossArmEventsAreIndependentTrades": False,
+    }
     return {
+        "crossArmDedup": cross_arm_dedup,
         "schema": "stable4-pengu-h1-signal-aster-m5-tape-quality/v1",
         "status": "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS",
         "sourceH1LedgerSha256": ledger_sha256,
@@ -265,6 +280,21 @@ def verify_report(report: dict, ledger: dict, ledger_raw: bytes) -> None:
         }
         if any(counts.get(key) != val for key,val in expected.items()):
             raise ValueError("PENGU_M5_REPORT_EVENT_TOTALS_MISMATCH:" + arm)
+    baseline = {(e["entryTs"],e["side"],e["route"]) for e in ledger["rawSignalEvents"]["BASE"]}
+    extended = {(e["entryTs"],e["side"],e["route"]) for e in ledger["rawSignalEvents"]["V8_V64"]}
+    extension = [e for e in ledger["rawSignalEvents"]["V8_V64"]
+                 if (e["entryTs"],e["side"],e["route"]) not in baseline]
+    expected_dedup = {
+        "baseline":len(baseline), "v8V64":len(extended),
+        "shared":len(baseline & extended),
+        "onlyBaseline":len(baseline-extended),
+        "onlyV8V64":len(extended-baseline),
+        "union":len(baseline|extended),
+        "extendedOnlyByRoute":dict(sorted(Counter(e["route"] for e in extension).items())),
+        "crossArmEventsAreIndependentTrades":False,
+    }
+    if report.get("crossArmDedup") != expected_dedup:
+        raise ValueError("PENGU_M5_REPORT_CROSS_ARM_DEDUP_FALSIFIED")
 
 
 if __name__ == "__main__":
