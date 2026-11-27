@@ -75,6 +75,7 @@ jobs:
           # Does not claim the full Q102 source universe or fills.
           # Time-contiguous V52 M5 bars have high zero-volume even in NY regular hours.
           # Verify pinned actual yearly market-data audit, never infer venue fills.
+          python -B -m unittest -v tests.test_stable4_q102_aster_h1_archive_source_audit
           python -B -m unittest -v tests.test_stable4_v52_regular_session_liquidity
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           python -B scripts/research/stable4_q102_real_monthly_ledger_audit.py
