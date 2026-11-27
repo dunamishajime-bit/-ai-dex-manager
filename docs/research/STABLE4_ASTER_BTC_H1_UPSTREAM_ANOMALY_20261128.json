@@ -1,0 +1,68 @@
+{
+  "schema": "stable4-public-historical-ohlc-provenance-audit/v1",
+  "status": "UPSTREAM_ASTER_BTCUSDT_INVALID_H1_FAIL_CLOSED",
+  "detectedUtcDate": "2026-11-28",
+  "offendingCandle": {
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "openTimeMs": 1757768400000,
+    "openTimeUtc": "2025-09-13T13:00:00Z",
+    "closeTimeMs": 1757771999999,
+    "asterPublicFuturesV1": {
+      "open": 115941.8,
+      "high": 115916.1,
+      "low": 115580.7,
+      "close": 115707.3,
+      "volume": 285.98
+    },
+    "asterPublicFuturesV3": {
+      "open": 115941.8,
+      "high": 115916.1,
+      "low": 115580.7,
+      "close": 115707.3,
+      "volume": 285.98
+    },
+    "failure": "HIGH_LT_OPEN",
+    "negativeDifference": 25.70000000001164,
+    "independentBinanceUsdMFutures": {
+      "open": 115947.5,
+      "high": 115947.5,
+      "low": 115566,
+      "close": 115706.4,
+      "volume": 2159.63
+    }
+  },
+  "readOnlyQueryPaths": [
+    "https://fapi.asterdex.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&startTime=1757768400000&endTime=1757772000000&limit=1",
+    "https://fapi.asterdex.com/fapi/v3/klines?symbol=BTCUSDT&interval=1h&startTime=1757768400000&endTime=1757772000000&limit=1",
+    "https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&startTime=1757768400000&endTime=1757772000000&limit=1"
+  ],
+  "localAsterSnapshot": {
+    "btcH1Rows": 10536,
+    "penguH1Rows": 10536,
+    "penguFundingRows": 2633,
+    "errors": "BTCUSDT 1/10536 invalid OHLC candles; PENGUUSDT 0 anomalies by the same OHLC/timestamp check; no missing H1 index",
+    "action": "DO_NOT_PATCH_OR_INTERPOLATE_SNAPSHOT"
+  },
+  "independentlyDownloadedBinanceSnapshot": {
+    "utcStart": "2025-07-20T00:00:00Z",
+    "utcEndExclusive": "2026-10-01T00:00:00Z",
+    "btcH1Count": 10512,
+    "penguH1Count": 10512,
+    "penguFundingRows": 2627,
+    "btcSha256": "155accb6e2885bdafe72c0eb48c3737f85daca44caaea4272c932c41a826ac6c",
+    "penguSha256": "9f287209dbffc67d447433cdc5f8b159a459659554b2e07282b236bab1676af0",
+    "fundingSha256": "f2220113447f695ffd40a8cd59c4428d3dc9cb9c30ee8b7e3884dd3ee279738a",
+    "validation": "STRICT_CONTIGUOUS_H1_AND_HIGH_GE_MAX_OPEN_CLOSE",
+    "researchUse": "BINANCE_ONLY_FOR_NATIVE_ENTRY_H1_VALIDATION",
+    "notVenueExecutionPrice": true
+  },
+  "limitations": [
+    "Aster public API itself returned invalid OHLC historical data; do not substitute unrelated Binance ticks for signed Aster fills/STOP/TP accounting",
+    "PENGU native Binance source H1 candidate reproducibility is NOT proof of real ASTER five-minute entry confirmation",
+    "No funding profit calculation, no signed account mark/position/STOP proof, no Owner release authorization"
+  ],
+  "orderAuthority": false,
+  "productionEligible": false,
+  "rootCertificateIssued": false
+}
