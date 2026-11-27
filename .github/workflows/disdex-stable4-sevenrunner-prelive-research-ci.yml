@@ -112,6 +112,10 @@ jobs:
           # but old missing hours and absent L3/venue fills must stay blocked.
           # Pure offline source-pin test; DO NOT fetch live external API in CI.
           python -B -m unittest -v tests.test_stable4_v52_public_paired_l2_sample_evidence
+          # One actual public AMZN same-hour L2 pair parsed in isolated
+          # research environment. Pinned file sha/row clocks, NOT maker fills.
+          # No network, external data download or private local files in CI.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_profile_evidence
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior

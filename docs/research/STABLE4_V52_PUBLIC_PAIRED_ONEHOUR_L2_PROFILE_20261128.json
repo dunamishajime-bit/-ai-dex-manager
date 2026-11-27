@@ -1,0 +1,133 @@
+{
+  "duckdbVersion": "1.4.3",
+  "executionOrFillProven": false,
+  "files": {
+    "ASTER": {
+      "byteLength": 1653986,
+      "datasetFile": "aster_futures/2026-09-02/16/AMZNUSDT_orderbook.parquet",
+      "expectedMarket": "AMZNUSDT",
+      "localFilename": "ASTER_AMZNUSDT_20260902_16.parquet",
+      "parquetHeadTailMagic": true,
+      "sha256": "7334077a62b095dac84a1706c0e00de6bd7a3d4fdeb1728e3221d291a4e677e5",
+      "signedFillProof": false
+    },
+    "HYPERLIQUID_XYZ": {
+      "byteLength": 115815,
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:AMZN_orderbook.parquet",
+      "expectedMarket": "xyz:AMZN",
+      "localFilename": "HL_XYZ_AMZN_20260902_16.parquet",
+      "parquetHeadTailMagic": true,
+      "sha256": "e191f12d0522fe0f1e918002935c76c22cdf7e44931945277735b3d5fa059ab3",
+      "signedFillProof": false
+    }
+  },
+  "fullSevenRunnerAnnualBtComplete": false,
+  "limitations": [
+    "Only one same-hour AMZN source pair; all 5 stocks annual continuous coverage, updated-book reconciliation and comparable exchange timestamps remain unverified.",
+    "Parquet files are stored under owner user-root, SHA256 only in Git. DuckDB reads in an isolated package directory. No API key, no full-year bulk download.",
+    "L2 rows alone lack per-account maker queue position, actual order/fill and resident STOP readbacks. Vendor known pre-Oct2026 duplicate REST snapshots and missing empty-book clears must be handled before native book replay.",
+    "Event counts and raw receiver gaps are diagnostic only, never live quote parity, spread execution cost, native V52 entry/exit or real PnL/DD."
+  ],
+  "nativeV52EntryReplayComplete": false,
+  "observedAtUtc": "2026-11-27T23:37:02.043043+00:00",
+  "orderAuthority": false,
+  "productionEligible": false,
+  "profile": {
+    "ASTER": {
+      "distinctReceivedClocks": 39902,
+      "eventsByTypeAndSide": [
+        {
+          "count": 680,
+          "eventType": "snapshot",
+          "side": "ask"
+        },
+        {
+          "count": 878,
+          "eventType": "snapshot",
+          "side": "bid"
+        },
+        {
+          "count": 45341,
+          "eventType": "update",
+          "side": "ask"
+        },
+        {
+          "count": 46473,
+          "eventType": "update",
+          "side": "bid"
+        }
+      ],
+      "maxUniqueReceiveClockGapRaw": 259439072341,
+      "meanUniqueReceiveClockGapRaw": 90223082.76231173,
+      "nativeV52OrdersOrFillsVerified": false,
+      "nullPricesOrQuantity": 0,
+      "parquetColumns": [
+        "received_time",
+        "event_time",
+        "transaction_time",
+        "symbol",
+        "event_type",
+        "first_update_id",
+        "final_update_id",
+        "prev_final_update_id",
+        "last_update_id",
+        "side",
+        "price",
+        "quantity",
+        "order_count"
+      ],
+      "receivedMax": 1788368399995000435,
+      "receivedMin": 1788364800003775136,
+      "rows": 93372,
+      "snapshotReconstructionCertified": false,
+      "sourceFile": "aster_futures/2026-09-02/16/AMZNUSDT_orderbook.parquet",
+      "sourceSha256": "7334077a62b095dac84a1706c0e00de6bd7a3d4fdeb1728e3221d291a4e677e5",
+      "sourceVenueMarket": "AMZNUSDT"
+    },
+    "HYPERLIQUID_XYZ": {
+      "distinctReceivedClocks": 649,
+      "eventsByTypeAndSide": [
+        {
+          "count": 12980,
+          "eventType": "snapshot",
+          "side": "ask"
+        },
+        {
+          "count": 12980,
+          "eventType": "snapshot",
+          "side": "bid"
+        }
+      ],
+      "maxUniqueReceiveClockGapRaw": 131373164513,
+      "meanUniqueReceiveClockGapRaw": 5549289198.893518,
+      "nativeV52OrdersOrFillsVerified": false,
+      "nullPricesOrQuantity": 0,
+      "parquetColumns": [
+        "received_time",
+        "event_time",
+        "transaction_time",
+        "symbol",
+        "event_type",
+        "first_update_id",
+        "final_update_id",
+        "prev_final_update_id",
+        "last_update_id",
+        "side",
+        "price",
+        "quantity",
+        "order_count"
+      ],
+      "receivedMax": 1788368395939400883,
+      "receivedMin": 1788364800000000000,
+      "rows": 25960,
+      "snapshotReconstructionCertified": false,
+      "sourceFile": "hyperliquid_futures/2026-09-02/16/xyz:AMZN_orderbook.parquet",
+      "sourceSha256": "e191f12d0522fe0f1e918002935c76c22cdf7e44931945277735b3d5fa059ab3",
+      "sourceVenueMarket": "xyz:AMZN"
+    }
+  },
+  "sampleHourUtc": "2026-09-02T16:00:00Z",
+  "schema": "stable4-v52-public-paired-onehour-l2-data-profile/v1",
+  "sourcePin": "96f7ce8af39a04da8135e974877b2576c58d2fe43dee9d2561b621c370ac989f",
+  "status": "PARTIAL_SOURCE_CANDIDATE_ONE_HOUR_NOT_NATIVE_V52_BT"
+}
