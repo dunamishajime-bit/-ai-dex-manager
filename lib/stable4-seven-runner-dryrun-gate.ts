@@ -3,6 +3,12 @@ import {evaluateRunnerDdEntry,type RunnerDdState,type RunnerDdId} from "./disdex
 import {evaluatePortfolioDdEntry,type PortfolioDdState} from "./stable4-portfolio-cumulative-dd";
 const H=3600000,M=300000,EPS=1e-12;
 export type Sleeve=RunnerDdId;
+/** Source-specific symbol grammar; stocks must not masquerade as USDT pairs. */
+export function stable4ValidResearchSymbol(sleeve:Sleeve,symbol:unknown):boolean{
+ if(typeof symbol!=="string")return false;
+ if(sleeve==="V52")return /^[A-Z]{1,6}(?:[.-][A-Z]{1,2})?$/.test(symbol)&&!symbol.endsWith("USDT");
+ return /^(?=.{4,24}$)[A-Z0-9]{2,20}USDT$/.test(symbol);
+}
 export type Proposed={id:string;sleeve:Sleeve;symbol:string;side:"LONG"|"SHORT";gross:number;route:string;entryTs:number};
 export type OpenRisk={id:string;sleeve:Sleeve;symbol:string;route:string;gross:number;stock:boolean;status:"PENDING"|"OPEN"|"UNKNOWN"|"EXIT_PENDING"};
 export type RiskInput={candidate:Proposed;open:readonly OpenRisk[];equityUsd:number;asof:number;releaseSha:string;ddState?:RunnerDdState;portfolioDdState?:PortfolioDdState;v4GrossCap?:number};
@@ -10,7 +16,7 @@ export type Decision={status:"ELIGIBLE_OFFLINE"|"BLOCKED";reason:string;orderAut
 export function evaluateStable4DryEntry(x:RiskInput):Decision{
  const blocked=(reason:string,ddMax?:number):Decision=>({status:"BLOCKED",reason,orderAuthority:false,ddMax});
  const c=x.candidate;if(!c||!Number.isSafeInteger(x.asof)||!Number.isSafeInteger(c.entryTs)||c.entryTs<=0||c.entryTs>x.asof||x.asof-c.entryTs>15*60000||!Number.isFinite(c.gross)||c.gross<=0||!Number.isFinite(x.equityUsd)||x.equityUsd<=0||!/^([a-f0-9]{40})$/.test(x.releaseSha))return blocked("CANDIDATE_OR_PROOF_INVALID");
- if(!Array.isArray(x.open)||!["LONG","SHORT"].includes(c.side)||!(/^[A-Z0-9]+USDT$/.test(c.symbol))||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||(x.v4GrossCap!==undefined&&(!Number.isFinite(x.v4GrossCap)||x.v4GrossCap<=0)))return blocked("SOURCE_INVALID");
+ if(!Array.isArray(x.open)||!["LONG","SHORT"].includes(c.side)||!stable4ValidResearchSymbol(c.sleeve,c.symbol)||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||(x.v4GrossCap!==undefined&&(!Number.isFinite(x.v4GrossCap)||x.v4GrossCap<=0)))return blocked("SOURCE_INVALID");
  // Never calculate available Gross from unverified owner/stock classifications.
  // Unknown positions, invalid ownership, zero-notional OPEN rows, or duplicate
  // reservation IDs can all understate risk. This is an offline-only gate.
@@ -18,7 +24,7 @@ export function evaluateStable4DryEntry(x:RiskInput):Decision{
  for(const row of x.open){
   if(!row||typeof row.id!=="string"||!row.id||ids.has(row.id)||row.id===c.id||
     !["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(row.sleeve)||
-    !/^[A-Z0-9]+USDT$/.test(row.symbol)||typeof row.route!=="string"||!row.route||
+    !stable4ValidResearchSymbol(row.sleeve,row.symbol)||typeof row.route!=="string"||!row.route||
     !Number.isFinite(row.gross)||row.gross<=0||
     typeof row.stock!=="boolean"||row.stock!==(row.sleeve==="V52")||
     !["PENDING","OPEN","EXIT_PENDING"].includes(row.status))
