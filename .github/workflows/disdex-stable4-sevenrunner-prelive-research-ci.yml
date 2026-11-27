@@ -7,6 +7,11 @@ on:
       - 'lib/aster-v3-client.ts'
       - 'lib/v12-v4-*.ts'
       - 'lib/pengu-dual-ls-v2*.ts'
+      - 'scripts/research/stable4-pengu-*'
+      - 'scripts/research/stable4_pengu_*'
+      - 'scripts/stable4-pengu-*'
+      - 'tests/test_stable4_pengu_*.py'
+      - 'docs/research/STABLE4_PENGU_*.json'
       - 'scripts/stable4-market-observe.ts'
       - 'scripts/stable4-four-sleeve-native-synthetic.ts'
       - 'scripts/disdex_public_read_resilience.py'
@@ -72,6 +77,12 @@ jobs:
           # This deliberately does not claim ASTER M5 fills or a seven-runner BT.
           python -B -m unittest -v tests.test_stable4_pengu_real_h1_ledger_audit
           python -B -m unittest -v tests.test_stable4_pengu_aster_m5_after_h1_source_audit
+          # PENGU source-native H1 position exit and conditional one-slot/cooldown
+          # evidence MUST remain explicitly non-venue and non-production. These
+          # tests reject lookahead, source-SHA drift, false fills/STOPs, forged
+          # annual certification and overlapping model positions.
+          python -B -m unittest -v tests.test_stable4_pengu_partial_native_exit_evidence
+          python -B -m unittest -v tests.test_stable4_pengu_scoped_native_one_slot_evidence
           python -B scripts/research/stable4_pengu_native_h1_ledger_audit.py
           # Separate partial 12-month Q102 BTC/SOL native H1 source proof.
           # Does not claim the full Q102 source universe or fills.
