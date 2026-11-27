@@ -41,6 +41,7 @@ jobs:
             tests/stable4-q102-hype-risk-policy-contract.test.ts \
             tests/stable4-proposed-source-integrity.test.ts \
             tests/stable4-hype-offline-m5-exit.test.ts \
+            tests/stable4-fet-offline-m5-exit.test.ts \
             tests/stable4-seven-runner-dry-coordinator.test.ts \
             tests/stable4-observation-snapshot.test.ts \
             tests/stable4-r21-public-observation-feed.test.ts \
