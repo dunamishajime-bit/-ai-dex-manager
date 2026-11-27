@@ -180,6 +180,39 @@ def verify_snapshot(payload: dict) -> None:
         raise ValueError("Q102_H1_ARCHIVE_COVERAGE_SUMMARY_INVALID")
 
 
+def verify_btc_aster_binance_conflict(conflict:dict, integrity:dict)->None:
+    """A second copy of the corrupt ASTER bar does not authorize Binance repair."""
+    if (conflict.get("schema") != "stable4-q102-btc-h1-aster-binance-20250913-exact-source-disagreement/v1"
+            or conflict.get("status") != "SOURCE_DATA_CONFLICT_BLOCKED_NO_INTERPOLATION"
+            or conflict.get("barOpenMs") != 1757768400000
+            or conflict.get("barCloseMs") != 1757771999999
+            or any(conflict.get(k) is not False for k in (
+                "autoRepairApplied", "priceSubstitutionAllowed",
+                "q102VenueCausalHistoryFixed", "sevenRunnerPortfolioNativeReplayComplete",
+                "rootCertificateIssued", "orderAuthority", "productionEligible"))):
+        raise ValueError("Q102_BTC_CROSS_VENUE_REPAIR_SCOPE_INVALID")
+    ast=conflict.get("aster",{})
+    binance=conflict.get("binanceReference",{})
+    original=integrity.get("folders",{}).get(
+        "aster-public-v3-h1-q102-warmup",{}).get("BTC",{})
+    inputs=ast.get("sources")
+    expected_main="aster-public-v3-h1-early/BTCUSDT-1h-20250301-20250924.jsonl.gz"
+    expected_warm="aster-public-v3-h1-q102-warmup/BTCUSDT-1h-20250301-20261001.jsonl.gz"
+    names={i.get("path"):i.get("sha256") for i in inputs} if isinstance(inputs,list) else {}
+    if (len(names)!=2 or names.get(expected_main)!="b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+            or names.get(expected_warm)!=original.get("sha256")
+            or names.get(expected_warm)!="d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+            or ast.get("open")!=115941.8 or ast.get("high")!=115916.1
+            or not ast["high"]<ast["open"]
+            or not original.get("prehistory181dInvalidOHLCOrTime")==1
+            or binance.get("isSameVenue") is not False
+            or binance.get("ohlcInternallyConsistent") is not True
+            or binance.get("high")!=115947.5
+            or binance.get("open")!=115947.5
+            or binance.get("source",{}).get("sha256")!="596723e2c9e64aeacbad0be8bd5d1e5f2878a8ec6545818e4f26e852babfb837"):
+        raise ValueError("Q102_BTC_CROSS_VENUE_SOURCE_CONFLICT_INVALID")
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
