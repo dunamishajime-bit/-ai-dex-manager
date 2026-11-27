@@ -1,0 +1,92 @@
+{
+  "allSevenNativeReplay": false,
+  "limitations": [
+    "A regular-session positive-volume 5m candle is not a signed executable bid/ask or fill",
+    "NYSE/Nasdaq holidays and early closes are not removed; zero-volume days remain visible",
+    "No strategy signal, venue quote/depth, funding, slippage, fees, gross or DD re-execution",
+    "No authenticated account mark, protected STOP or owner-signed source certificate"
+  ],
+  "marketSessionBasis": "America/New_York M-F 09:30-16:00; holidays and early closes NOT adjusted",
+  "orderAuthority": false,
+  "perTicker": {
+    "AMZN": {
+      "outsideWeekdayRegularSessionM5": 84762,
+      "positiveVolumeMeansExecutable": false,
+      "regularSessionPositiveVolumeM5": 7794,
+      "regularSessionWeekdayM5": 20358,
+      "regularSessionZeroVolumeM5": 12564,
+      "regularSessionZeroVolumePct": 61.7153,
+      "signedQuoteOrFillProven": false,
+      "sourceSha256": "d84d4d5b7da27b155230f593a532bc384a6a485ca86fcf198fc7450709498d53",
+      "totalM5": 105120,
+      "weekdayCalendarDaysWithoutHolidayAdjustment": 261,
+      "weekdayDaysNot78Bars": 0,
+      "weekdayDaysWithNoPositiveVolume": 5
+    },
+    "META": {
+      "outsideWeekdayRegularSessionM5": 84762,
+      "positiveVolumeMeansExecutable": false,
+      "regularSessionPositiveVolumeM5": 9181,
+      "regularSessionWeekdayM5": 20358,
+      "regularSessionZeroVolumeM5": 11177,
+      "regularSessionZeroVolumePct": 54.9022,
+      "signedQuoteOrFillProven": false,
+      "sourceSha256": "54e3f005206caa131511b8cccacc621bb5503d71b19c55aafdecfcbcf40b8368",
+      "totalM5": 105120,
+      "weekdayCalendarDaysWithoutHolidayAdjustment": 261,
+      "weekdayDaysNot78Bars": 0,
+      "weekdayDaysWithNoPositiveVolume": 4
+    },
+    "MSFT": {
+      "outsideWeekdayRegularSessionM5": 84762,
+      "positiveVolumeMeansExecutable": false,
+      "regularSessionPositiveVolumeM5": 8284,
+      "regularSessionWeekdayM5": 20358,
+      "regularSessionZeroVolumeM5": 12074,
+      "regularSessionZeroVolumePct": 59.3084,
+      "signedQuoteOrFillProven": false,
+      "sourceSha256": "8ef26027389a1b6c6943d63865fb2da05bf0fe5c260ead38bf1cc6cae58b10a6",
+      "totalM5": 105120,
+      "weekdayCalendarDaysWithoutHolidayAdjustment": 261,
+      "weekdayDaysNot78Bars": 0,
+      "weekdayDaysWithNoPositiveVolume": 4
+    },
+    "NVDA": {
+      "outsideWeekdayRegularSessionM5": 84762,
+      "positiveVolumeMeansExecutable": false,
+      "regularSessionPositiveVolumeM5": 12889,
+      "regularSessionWeekdayM5": 20358,
+      "regularSessionZeroVolumeM5": 7469,
+      "regularSessionZeroVolumePct": 36.6883,
+      "signedQuoteOrFillProven": false,
+      "sourceSha256": "a164a703b13ade1deeaa47cc3744e63eaf8bdf113b13a9a7d479ae7b76f4186d",
+      "totalM5": 105120,
+      "weekdayCalendarDaysWithoutHolidayAdjustment": 261,
+      "weekdayDaysNot78Bars": 0,
+      "weekdayDaysWithNoPositiveVolume": 0
+    },
+    "TSLA": {
+      "outsideWeekdayRegularSessionM5": 84762,
+      "positiveVolumeMeansExecutable": false,
+      "regularSessionPositiveVolumeM5": 14328,
+      "regularSessionWeekdayM5": 20358,
+      "regularSessionZeroVolumeM5": 6030,
+      "regularSessionZeroVolumePct": 29.6198,
+      "signedQuoteOrFillProven": false,
+      "sourceSha256": "ddbf9351faacd2777ab77a7bffe3ceb7f89ee86a7c6266af1902159e740a8e56",
+      "totalM5": 105120,
+      "weekdayCalendarDaysWithoutHolidayAdjustment": 261,
+      "weekdayDaysNot78Bars": 0,
+      "weekdayDaysWithNoPositiveVolume": 0
+    }
+  },
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-v52-regular-session-liquidity-audit/v1",
+  "status": "PARTIAL_MARKET_COVERAGE_NOT_EXECUTION_PROOF",
+  "v52SourceEntryOrFillParityProven": false,
+  "windowUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ]
+}
