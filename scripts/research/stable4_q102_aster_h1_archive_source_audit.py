@@ -263,6 +263,45 @@ def verify_btc_native_m5_disagreement(m5:dict,conflict:dict)->None:
         raise ValueError("Q102_BTC_M5_H1_AGGREGATION_RECONCILIATION_FAILED")
 
 
+def verify_btc_181d_h1_m5_source_parity(parity:dict, integrity:dict)->None:
+    """Reject rewriting 85 observed time-frame mismatches into 4344 exact matches."""
+    if (parity.get("schema")!="stable4-q102-btc-181d-aster-archive-h1-vs-m5-timeframe-parity/v1"
+            or parity.get("status")!="BLOCKED_SOURCE_PRICE_PARITY_UNVERIFIED"
+            or parity.get("windowUtc")!=["2025-04-03T00:00:00Z","2025-10-01T00:00:00Z"]
+            or parity.get("knownInvalidHourUtc")!="2025-09-13T13:00:00Z"
+            or any(parity.get(k) is not False for k in (
+                "sameVenueByteAuthenticated","uniformCrossTimeframeSemanticsProven",
+                "autoRepairApplied","nativeQ102ProductionParityProven",
+                "executionPriceCertified","rootCertificateIssued",
+                "orderAuthority","productionEligible"))):
+        raise ValueError("Q102_BTC_181D_PARITY_RELEASE_SCOPE_INVALID")
+    src=integrity.get("folders",{}).get(
+        "aster-public-v3-h1-q102-warmup",{}).get("BTC",{})
+    h1=parity.get("h1Source",{})
+    m5=parity.get("m5Source",{})
+    if (h1.get("path")!="aster-public-v3-h1-q102-warmup/BTCUSDT-1h-20250301-20261001.jsonl.gz"
+            or h1.get("sha256")!=src.get("sha256")
+            or h1.get("sha256")!="d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+            or m5.get("path")!="PREPERIOD_TRAIN_20250322_20251001/aster-m5/BTCUSDT-5m-20250322-20251001.jsonl.gz"
+            or m5.get("sha256")!="59aa88e6bc1943945167aebca3c01b67f50d86810731b07b2df44a707607b589"):
+        raise ValueError("Q102_BTC_181D_PARITY_SOURCE_SHA_INVALID")
+    fields=parity.get("mismatchedFields")
+    expected={"open":84,"high":17,"low":18,"close":0,"volume":0}
+    months=parity.get("monthly")
+    expected_month_hours={"2025-04":672,"2025-05":744,"2025-06":720,
+                          "2025-07":744,"2025-08":744,"2025-09":720}
+    expected_month_diffs={"2025-04":51,"2025-05":0,"2025-06":1,
+                          "2025-07":13,"2025-08":17,"2025-09":3}
+    if (parity.get("expectedHours")!=4344 or parity.get("hoursCompared")!=4344
+            or parity.get("missingPairedHours")!=0 or parity.get("mismatchHours")!=85
+            or fields!=expected or parity.get("invalidH1Bars")!=1
+            or parity.get("invalidM5Bars")!=1
+            or not isinstance(months,dict) or set(months)!=set(expected_month_hours)
+            or any(months[k].get("paired")!=n or months[k].get("different")!=expected_month_diffs[k]
+                   for k,n in expected_month_hours.items())):
+        raise ValueError("Q102_BTC_181D_PARITY_COUNTS_FALSIFIED")
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
