@@ -1,0 +1,55 @@
+{
+  "schema": "stable4-q102-btc-h1-aster-binance-20250913-exact-source-disagreement/v1",
+  "status": "SOURCE_DATA_CONFLICT_BLOCKED_NO_INTERPOLATION",
+  "observedAtJst": "2026-11-28",
+  "timestampUtc": "2025-09-13T13:00:00Z",
+  "barOpenMs": 1757768400000,
+  "barCloseMs": 1757771999999,
+  "aster": {
+    "open": 115941.8,
+    "high": 115916.1,
+    "low": 115580.7,
+    "close": 115707.3,
+    "volume": 285.98,
+    "invalidBecause": "high (115916.1) < open (115941.8)",
+    "sources": [
+      {
+        "path": "aster-public-v3-h1-early/BTCUSDT-1h-20250301-20250924.jsonl.gz",
+        "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3"
+      },
+      {
+        "path": "aster-public-v3-h1-q102-warmup/BTCUSDT-1h-20250301-20261001.jsonl.gz",
+        "sha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+      }
+    ]
+  },
+  "binanceReference": {
+    "open": 115947.5,
+    "high": 115947.5,
+    "low": 115566,
+    "close": 115706.4,
+    "volume": 2159.63,
+    "ohlcInternallyConsistent": true,
+    "isSameVenue": false,
+    "source": {
+      "path": "PREPERIOD_TRAIN_20250101_20251001/PENGU_V20_BINANCE_PROXY/BTCUSDT-1h-20250101-20251001.jsonl.gz",
+      "sha256": "596723e2c9e64aeacbad0be8bd5d1e5f2878a8ec6545818e4f26e852babfb837"
+    },
+    "secondBinanceReferenceSha256": "28cf3f2ba8551b03b3070ef18eb62780d759fa03763d7a92c3e071e1bab7cd57"
+  },
+  "affectedResearch": "Q102 ASTER H1 181d rolling archive readiness: October 2025 through March 2026 fail closed, 2026-04 onward that particular bad bar outside lookback",
+  "procedure": "Read-only exact-timestamp decompression and SHA256 of four local archival files on connected PC; original archives left unchanged",
+  "nextRequired": "Obtain independent ASTER-native source correction with independently verified same-venue provenance, or exclude affected causal windows. No cross-exchange price substitution without explicit source policy and price/basis sensitivity replay.",
+  "limitations": [
+    "Binance proxy reference is NOT an ASTER market price or signed venue quote",
+    "Repeated identical ASTER corrupt H1 values are not independent repair evidence",
+    "Nothing establishes a live entry, exit, funding, STOP or order execution"
+  ],
+  "autoRepairApplied": false,
+  "priceSubstitutionAllowed": false,
+  "q102VenueCausalHistoryFixed": false,
+  "sevenRunnerPortfolioNativeReplayComplete": false,
+  "rootCertificateIssued": false,
+  "orderAuthority": false,
+  "productionEligible": false
+}
