@@ -91,11 +91,9 @@ function parseFile(path:string){const raw=readFileSync(path);return {
   BASE:{checked:0,mismatches:0,details:[]},V8_V64:{checked:0,mismatches:0,details:[]}};
  for(const arm of arms){
   const found=events[arm.name];
-  const indices=[...new Set([
-    ...found.slice(0,12).map(e=>e.index),
-    ...found.slice(-12).map(e=>e.index),
-    ...found.filter((_,i)=>i%Math.max(1,Math.floor(found.length/16))===0).slice(0,16).map(e=>e.index),
-  ])].sort((a,b)=>a-b);
+  // Every raw entry must agree with the pinned native prefix source;
+  // selective sampling is insufficient for a research parity claim.
+  const indices=found.map(e=>e.index);
   for(const i of indices){
    const event=found.find(e=>e.index===i)!;
    const now=pengu[i].openTime+H;
