@@ -22,6 +22,7 @@ V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
 Q102_H1_ARCHIVE = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
 Q102_H1_MONTHLY = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_MONTHLY_181D_READINESS_20261128.json"
+Q102_BTC_BAD_BAR = ROOT / "docs/research/STABLE4_Q102_BTC_H1_ASTERVS_BINANCE_BAD_BAR_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -55,6 +56,12 @@ def evaluate() -> dict:
     else:
         from research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot as verify_q102_archive
     verify_q102_archive(q102_archive)
+    q102_btc_conflict = json.loads(Q102_BTC_BAD_BAR.read_text(encoding="utf8"))
+    if __package__:
+        from .research.stable4_q102_aster_h1_archive_source_audit import verify_btc_aster_binance_conflict
+    else:
+        from research.stable4_q102_aster_h1_archive_source_audit import verify_btc_aster_binance_conflict
+    verify_btc_aster_binance_conflict(q102_btc_conflict, q102_archive)
     q102_monthly = json.loads(Q102_H1_MONTHLY.read_text(encoding="utf8"))
     if __package__:
         from .research.stable4_q102_181d_monthly_readiness import verify_monthly_snapshot
@@ -181,6 +188,8 @@ def evaluate() -> dict:
                 ticker: row["historyReadyMonths"] for ticker, row in q102_monthly["byTicker"].items()
             },
             "monthlyReadyIsNativeTradeProof": False,
+            "btcDuplicatedCorruptAsterH1Bar": q102_btc_conflict["timestampUtc"],
+            "binanceSubstitutionAuthorized": False,
             "wholeNativeQ102UniverseOrFillsProven": False,
         },
         "v52RegularSessionVolumeAudit": {
