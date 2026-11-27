@@ -15,6 +15,7 @@ from pathlib import Path
 
 M5 = 300_000
 H = 3_600_000
+REVIEWED_PENGU_H1_LEDGER_SHA256 = "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc"
 START = int(datetime(2025, 9, 24, tzinfo=timezone.utc).timestamp() * 1000)
 END = int(datetime(2026, 10, 1, tzinfo=timezone.utc).timestamp() * 1000)
 INPUTS = (
@@ -196,7 +197,8 @@ def verify_report(report: dict, ledger: dict, ledger_raw: bytes) -> None:
     """Fail closed on false venue fills, altered raw H1 events, or forged M5 counts."""
     if (report.get("schema") != "stable4-pengu-h1-signal-aster-m5-tape-quality/v1"
             or report.get("status") != "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS"
-            or report.get("sourceH1LedgerSha256") != hashlib.sha256(ledger_raw).hexdigest()
+            or hashlib.sha256(ledger_raw).hexdigest() != REVIEWED_PENGU_H1_LEDGER_SHA256
+            or report.get("sourceH1LedgerSha256") != REVIEWED_PENGU_H1_LEDGER_SHA256
             or any(report.get(field) is not False for field in
                 ("singleSevenWalletNativeReplay","entryExecutionOrNativeExitCertified",
                  "liveEligible","rootCertificateIssued","orderAuthority"))):
