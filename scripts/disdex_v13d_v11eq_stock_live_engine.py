@@ -167,6 +167,16 @@ def http_json(
         headers={"User-Agent": "DisDex-V13D-V11EQ-Live/1.0", **(headers or {})},
     )
     try:
+        # Only allowlisted unsigned public GETs use bounded retries.
+        # Signed requests and mutations retain their original single-attempt semantics.
+        parsed = urllib.parse.urlsplit(target)
+        query_keys = {key.lower() for key, _ in urllib.parse.parse_qsl(parsed.query)}
+        public = method.upper() == "GET" and parsed.scheme == "https" and parsed.hostname in {
+            "fapi.asterdex.com", "fapi3.asterdex.com", "query1.finance.yahoo.com", "query2.finance.yahoo.com"
+        } and not query_keys.intersection({"signature", "nonce", "user", "signer", "apikey", "token"})
+        if public:
+            from disdex_public_read_resilience import public_read_json
+            return public_read_json(request, timeout)
         with urllib.request.urlopen(request, timeout=timeout) as response:
             text = response.read().decode()
             return json.loads(text) if text else {}

@@ -1,4 +1,5 @@
-﻿import "dotenv/config";
+import {readR21Observation} from "../lib/stable4-observation-snapshot";
+import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
 import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
 import {dirname} from "node:path";
@@ -353,6 +354,8 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
  };
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
+  researchR21Input:process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH?
+   (at)=>readR21Observation(process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH!,releaseSha,at):undefined,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async (symbol,fromTs,untilTs)=>{
    const now=Date.now();

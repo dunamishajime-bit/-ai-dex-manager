@@ -1,3 +1,4 @@
+import type {P91Observation} from "./stable4-research-decision-observation";
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import { PENGU_V8_V64_BASE } from "@/config/penguRecoveryV8";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
@@ -125,6 +126,7 @@ export interface PenguDualLsV2Signal {
     updatedPosition?: PenguDualLsV2Position;
     entryVersion?: "LONG_V2_FINAL" | "SHORT_V20" | "RECOVERY_V8";
     diagnostics: {
+        researchP91?:P91Observation;
         evaluatedDecisionBars: number;
         latestCompletedPenguTs?: number;
         latestCompletedBtcTs?: number;

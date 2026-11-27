@@ -4,6 +4,7 @@
  * It never reads trading credentials or sends an order.
  */
 import {createHash} from "node:crypto";
+import type {R21Observation} from "./stable4-research-decision-observation";
 import type {AsterV3Client,AsterKline} from "./aster-v3-client";
 import {V12_X1_ALL} from "../config/v12X1AllRuntime";
 import {resampleV12H1ToH2,computeV12Regime,buildV12DecisionObservation,type V12Bar} from "./v12-x1-all";
@@ -16,6 +17,7 @@ export type V4VenueH1Bar=FeatureBar & {volume:number};
 const H=3600000;
 const TWO_HOURS=2*H;
 export type V4LiveDecisionSnapshot={
+ researchR21?:R21Observation;
  schema:"v12-v4-live-decision/v1";policyId:typeof V12_V4_V2_POLICY;decisionTs:number;capturedAtMs:number;
  sourceFingerprint:string;candidateCount:number;filteredCount:number;
  sourceCount:number;nativeCoreEvents:NativeCoreEvent[];entryAtrByCandidate:Record<string,number>;errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;

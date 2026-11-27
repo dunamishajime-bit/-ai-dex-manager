@@ -101,7 +101,10 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
    !Number.isFinite(now)||now<entryTs)throw Error("V4_EXIT_FEED_WINDOW_INVALID");
  return {fromTs:entryTs,untilTs:Math.min(now,entryTs+durationHours*3600000)};
 }
+import {observeR21,type R21ObservationInput} from "./stable4-research-decision-observation";
 export interface V4RunnerDependencies{
+ /** Offline observation dependency, never a source of executable candidates. */
+ researchR21Input?:(asof:number)=>Promise<R21ObservationInput|undefined>;
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
  client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory"|"getOrder">;
@@ -146,13 +149,20 @@ export class V4RunnerEngine{
   * This fetch reads completed venue candles only; no signed account state or
   * order mutation may be hoisted out of the protected section.
   */
+ private async fetchDecisionWithObservation():Promise<V4LiveDecisionSnapshot>{
+   const base=await this.deps.fetchDecision();
+   if(!this.deps.researchR21Input)return base;
+   const asof=this.now();
+   try{return {...base,researchR21:observeR21(await this.deps.researchR21Input(asof),asof)};}
+   catch{return {...base,researchR21:observeR21(undefined,asof)};}
+ }
  async prepareFlatMarketDecision():Promise<V4PreparedDecision|undefined>{
   const local=this.deps.store.read();
   if(Object.values(local.intents).some(intent=>intent.stage!=="TERMINAL")||
     Object.values(local.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"))return;
   const preparedAtMs=this.now();
   try{
-   return {kind:"READY",preparedAtMs,decision:await this.deps.fetchDecision()};
+   return {kind:"READY",preparedAtMs,decision:await this.fetchDecisionWithObservation()};
   }catch(error){
    return {kind:"FAILED",preparedAtMs,
     reason:safeDecisionFailureReason(error)};
