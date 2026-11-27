@@ -26,6 +26,9 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
             "BTC_SOL_12_MONTH_START_SOURCE_HIGH_VOL_CHECKPOINTS_ONLY")
         self.assertEqual(report["realMarketNativeSourceScope"]["V52"],
             "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY")
+        self.assertFalse(report["v52RegularSessionVolumeAudit"]["fiveStockVenueExecutablePricesOrFillsProven"])
+        self.assertGreater(report["v52RegularSessionVolumeAudit"]["zeroVolumePercentByTicker"]["AMZN"], 60)
+        self.assertGreater(report["v52RegularSessionVolumeAudit"]["zeroVolumePercentByTicker"]["TSLA"], 29)
         self.assertEqual(report["runnerCoverage"]["HYPE"], "PARTIAL_NATIVE_HYPE_IN_FOUR_SLEEVE_SHARED_WALLET")
         self.assertTrue(report["sourceEvidenceIntegrity"]["fourSleeveCurrentSource"]["matched"])
         self.assertEqual(report["q102IsolatedCases"], 8)
