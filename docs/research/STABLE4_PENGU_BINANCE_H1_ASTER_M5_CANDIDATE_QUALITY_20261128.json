@@ -3054,5 +3054,18 @@
   "schema": "stable4-pengu-h1-signal-aster-m5-tape-quality/v1",
   "singleSevenWalletNativeReplay": false,
   "sourceH1LedgerSha256": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
-  "status": "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS"
+  "status": "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS",
+  "crossArmDedup": {
+    "baseline": 54,
+    "v8V64": 112,
+    "shared": 54,
+    "onlyBaseline": 0,
+    "onlyV8V64": 58,
+    "union": 112,
+    "extendedOnlyByRoute": {
+      "LONG_V2_FINAL": 10,
+      "RECOVERY_V8": 48
+    },
+    "crossArmEventsAreIndependentTrades": false
+  }
 }
