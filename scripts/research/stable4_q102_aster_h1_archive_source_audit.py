@@ -128,6 +128,58 @@ def evaluate(root: Path) -> dict:
     }
 
 
+def verify_snapshot(payload: dict) -> None:
+    """Validate locally computed archive evidence, never promote to fill parity."""
+    if (payload.get("schema") != "stable4-q102-aster-archived-h1-source-integrity/v1"
+            or payload.get("status") != "PARTIAL_SOURCE_ARCHIVE_COVERAGE_NOT_NATIVE_REPLAY"
+            or payload.get("orderAuthority") is not False
+            or payload.get("productionEligible") is not False
+            or payload.get("executionQuotesOrFillsCertified") is not False
+            or payload.get("fullAnnualSevenWalletReplayed") is not False
+            or payload.get("rootCertificateIssued") is not False):
+        raise ValueError("Q102_H1_ARCHIVE_RELEASE_SCOPE_INVALID")
+    folders = payload.get("folders", {})
+    if set(folders) != set(SOURCE_FOLDERS):
+        raise ValueError("Q102_H1_ARCHIVE_FOLDER_SCOPE_INVALID")
+    main, warm = [folders[p] for p in SOURCE_FOLDERS]
+    overlap = sorted(set(main) & set(warm))
+    valid = []
+    for folder in (main, warm):
+        for symbol, row in folder.items():
+            first = row.get("firstOpenMs")
+            last = row.get("lastOpenMs")
+            count = row.get("rows")
+            pre = row.get("prehistory181dRows")
+            bad = row.get("prehistory181dInvalidOHLCOrTime")
+            gaps = row.get("prehistory181dDiscontinuities")
+            if (not symbol.isalnum() or not row.get("filename", "").startswith(symbol + "USDT-1h-")
+                    or not isinstance(row.get("sha256"), str)
+                    or len(row["sha256"]) != 64
+                    or any(z not in "0123456789abcdef" for z in row["sha256"])
+                    or type(count) is not int or count <= 0
+                    or type(pre) is not int or not 0 <= pre <= 181 * 24
+                    or type(bad) is not int or bad < 0
+                    or type(gaps) is not int or gaps < 0
+                    or not isinstance(first, int) or not isinstance(last, int)
+                    or last < first or (last - first) // H + 1 < count
+                    or row.get("fillsOrPricesCertified") is not False):
+                raise ValueError("Q102_H1_ARCHIVE_ROW_PROVENANCE_INVALID:" + symbol)
+            if row["covers181dToTargetStart"] and (
+                    pre != 181 * 24 or bad != 0 or gaps != 0
+                    or first > CAUSAL_181D_START or last < TARGET_START - H):
+                raise ValueError("Q102_H1_ARCHIVE_CAUSAL_PREHISTORY_FALSIFIED:" + symbol)
+    for symbol in overlap:
+        if warm[symbol]["covers181dToTargetStart"]:
+            valid.append(symbol)
+    if (payload.get("mainSymbols") != len(main)
+            or payload.get("warmupSymbols") != len(warm)
+            or payload.get("matchingCount") != len(overlap)
+            or payload.get("matchingSymbols") != overlap
+            or payload.get("mainWithoutMatchingWarmup") != sorted(set(main) - set(warm))
+            or payload.get("matchedWarmupCoveringTargetStart") != valid):
+        raise ValueError("Q102_H1_ARCHIVE_COVERAGE_SUMMARY_INVALID")
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
