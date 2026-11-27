@@ -35,6 +35,7 @@ jobs:
       - name: No-trade R21 P91, IDLE and shared API regression
         run: |
           for name in \
+            tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
             tests/stable4-observation-snapshot.test.ts \
             tests/stable4-r21-public-observation-feed.test.ts \

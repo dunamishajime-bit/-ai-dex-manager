@@ -1,15 +1,18 @@
 /** STABLE4 integration dry-run contract. No order or certificate authority. */
 import {evaluateRunnerDdEntry,type RunnerDdState,type RunnerDdId} from "./disdex-runner-cumulative-dd";
+import {evaluatePortfolioDdEntry,type PortfolioDdState} from "./stable4-portfolio-cumulative-dd";
 const H=3600000,M=300000,EPS=1e-12;
 export type Sleeve=RunnerDdId;
 export type Proposed={id:string;sleeve:Sleeve;symbol:string;side:"LONG"|"SHORT";gross:number;route:string;entryTs:number};
 export type OpenRisk={id:string;sleeve:Sleeve;symbol:string;route:string;gross:number;stock:boolean;status:"PENDING"|"OPEN"|"UNKNOWN"|"EXIT_PENDING"};
-export type RiskInput={candidate:Proposed;open:readonly OpenRisk[];equityUsd:number;asof:number;releaseSha:string;ddState?:RunnerDdState;v4GrossCap?:number};
+export type RiskInput={candidate:Proposed;open:readonly OpenRisk[];equityUsd:number;asof:number;releaseSha:string;ddState?:RunnerDdState;portfolioDdState?:PortfolioDdState;v4GrossCap?:number};
 export type Decision={status:"ELIGIBLE_OFFLINE"|"BLOCKED";reason:string;orderAuthority:false;ddMax:number|undefined};
 export function evaluateStable4DryEntry(x:RiskInput):Decision{
  const blocked=(reason:string,ddMax?:number):Decision=>({status:"BLOCKED",reason,orderAuthority:false,ddMax});
  const c=x.candidate;if(!c||!Number.isSafeInteger(x.asof)||!Number.isSafeInteger(c.entryTs)||c.entryTs<=0||c.entryTs>x.asof||x.asof-c.entryTs>15*60000||!Number.isFinite(c.gross)||c.gross<=0||!x.equityUsd||x.equityUsd<=0||!/^([a-f0-9]{40})$/.test(x.releaseSha))return blocked("CANDIDATE_OR_PROOF_INVALID");
  if(!/^[A-Z0-9]+USDT$/.test(c.symbol)||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||x.open.some(y=>!Number.isFinite(y.gross)||y.gross<0))return blocked("SOURCE_INVALID");
+ const portfolio=evaluatePortfolioDdEntry(x.portfolioDdState,x.asof,x.releaseSha,0.30);
+ if(portfolio.status!=="ELIGIBLE_OFFLINE")return blocked(portfolio.reason);
  const dd=evaluateRunnerDdEntry(x.ddState,c.sleeve,x.asof,x.releaseSha,0.30);
  if(dd.status!=="ENTRY_ALLOWED_BY_THIS_DD_ONLY")return blocked(dd.reason,dd.runnerMaxDd);
  const used=x.open.reduce((z,a)=>({crypto:z.crypto+(a.stock?0:a.gross),stock:z.stock+(a.stock?a.gross:0),v4:z.v4+(a.sleeve==="V4"?a.gross:0)}),{crypto:0,stock:0,v4:0});

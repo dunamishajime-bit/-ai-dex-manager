@@ -21,3 +21,7 @@ This Draft branch carries R21 and P91 public-market observation, strict source S
 6. This workflow never writes a credential, mutates a venue, approves, deploys or issues any certificate.
 
 Owner protections: preserve GLOBAL HOLD and any existing venue resident STOPs. No bypass, no dual V12/V96 activation.
+
+
+## Incremental review: account-wide DD30 (not live)
+The original seven-runner per-sleeve DD contribution index is not account-wide peak-to-trough equity drawdown. A separate time-weighted account equity DD module now tracks net deposits/withdrawals, historical peaks and permanent maximum breach, and blocks *new* dry-run entries at >30%. It never authorizes venue orders or suspends exits. Missing/old marks fail closed. Data proof type is explicitly **OFFLINE_RECONCILED_MTM_ONLY**, not a root-signed live account mark. Actual reconciled signed live feed remains a separate blocker.

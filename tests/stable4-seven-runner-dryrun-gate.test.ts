@@ -1,3 +1,4 @@
+import {initializePortfolioDd} from "../lib/stable4-portfolio-cumulative-dd";
 import test from "node:test";import assert from "node:assert/strict";
 import {evaluateStable4DryEntry,evaluateR21ResearchExit} from "../lib/stable4-seven-runner-dryrun-gate";
 import {initializeRunnerCumulativeDd,advanceRunnerCumulativeDd,RUNNER_DD_IDS} from "../lib/disdex-runner-cumulative-dd";
@@ -5,14 +6,15 @@ const H=3600000,M=300000,sha="a".repeat(40),t=200*H;
 const pnl=Object.fromEntries(RUNNER_DD_IDS.map(x=>[x,0])) as any;
 const baseline={atMs:t,exactReleaseSha:sha,proofId:"signed-001",accountEquityUsd:1000,externalNetFlowUsd:0,netMtmPnlUsd:pnl,provenance:"SIGNED_ACCOUNT_MARK_AND_RUNNER_LEDGER_RECONCILED"} as const;
 const base=initializeRunnerCumulativeDd(baseline);
+const portfolio=initializePortfolioDd({atMs:t,releaseSha:sha,proofId:"portfolio-initial",equity:1000,externalNetFlow:0,source:"OFFLINE_RECONCILED_MTM_ONLY"});
 const c={id:"A",sleeve:"V4" as const,symbol:"ETHUSDT",side:"SHORT" as const,gross:.3,route:"R21_OLD24",entryTs:t};
-const x={candidate:c,open:[],equityUsd:1000,asof:t+60000,releaseSha:sha,ddState:base};
+const x={candidate:c,open:[],equityUsd:1000,asof:t+60000,releaseSha:sha,ddState:base,portfolioDdState:portfolio};
 test("no DD proof, stale proof, 31% DD all fail closed",()=>{
  assert.equal(evaluateStable4DryEntry({...x,ddState:undefined}).reason,"RUNNER_DD_SOURCE_UNAVAILABLE");
- assert.equal(evaluateStable4DryEntry({...x,asof:t+3*M}).reason,"RUNNER_DD_STALE_OR_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,asof:t+3*M}).reason,"PORTFOLIO_DD_STALE_OR_INVALID");
  const after=advanceRunnerCumulativeDd(base,{...baseline,atMs:t+H,proofId:"signed-002",netMtmPnlUsd:{...pnl,V4:-310},accountEquityUsd:690});
  const result=evaluateStable4DryEntry({...x,ddState:after,asof:t+H,candidate:{...c,entryTs:t+H}});
- assert.equal(result.reason,"RUNNER_CUMULATIVE_MAX_DD_EXCEEDED");assert.equal(result.orderAuthority,false);
+ assert.equal(result.reason,"PORTFOLIO_DD_STALE_OR_INVALID");assert.equal(result.orderAuthority,false);
 });
 test("same-symbol unresolved, R21 occupied, V4/crypto/total caps and known-equal DD",()=>{
  assert.equal(evaluateStable4DryEntry(x).status,"ELIGIBLE_OFFLINE");
