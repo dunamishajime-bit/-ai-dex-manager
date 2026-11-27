@@ -24,6 +24,7 @@ Q102_H1_ARCHIVE = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURC
 Q102_H1_MONTHLY = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_MONTHLY_181D_READINESS_20261128.json"
 Q102_BTC_BAD_BAR = ROOT / "docs/research/STABLE4_Q102_BTC_H1_ASTERVS_BINANCE_BAD_BAR_20261128.json"
 Q102_BTC_M5_BAD_BAR = ROOT / "docs/research/STABLE4_Q102_BTC_H1_ASTERNAMED_M5_12BAR_CONFLICT_20261128.json"
+Q102_BTC_181D_PARITY = ROOT / "docs/research/STABLE4_Q102_BTC_181D_ASTER_H1_M5_SOURCE_PARITY_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -69,6 +70,12 @@ def evaluate() -> dict:
     else:
         from research.stable4_q102_aster_h1_archive_source_audit import verify_btc_native_m5_disagreement
     verify_btc_native_m5_disagreement(q102_btc_m5, q102_btc_conflict)
+    q102_btc_181d = json.loads(Q102_BTC_181D_PARITY.read_text(encoding="utf8"))
+    if __package__:
+        from .research.stable4_q102_aster_h1_archive_source_audit import verify_btc_181d_h1_m5_source_parity
+    else:
+        from research.stable4_q102_aster_h1_archive_source_audit import verify_btc_181d_h1_m5_source_parity
+    verify_btc_181d_h1_m5_source_parity(q102_btc_181d, q102_archive)
     q102_monthly = json.loads(Q102_H1_MONTHLY.read_text(encoding="utf8"))
     if __package__:
         from .research.stable4_q102_181d_monthly_readiness import verify_monthly_snapshot
@@ -199,6 +206,9 @@ def evaluate() -> dict:
             "binanceSubstitutionAuthorized": False,
             "btcNativeM5InvalidBars": len(q102_btc_m5["invalidM5Indices"]),
             "btcM5AggregateCanRepairH1": False,
+            "btcPrior181dH1VsM5HoursCompared": q102_btc_181d["hoursCompared"],
+            "btcPrior181dH1VsM5MismatchHours": q102_btc_181d["mismatchHours"],
+            "btcH1VsM5PriceParityProven": False,
             "wholeNativeQ102UniverseOrFillsProven": False,
         },
         "v52RegularSessionVolumeAudit": {
