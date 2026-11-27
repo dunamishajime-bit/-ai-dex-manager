@@ -66,6 +66,11 @@ jobs:
           # complete, current-source, shared-wallet seven-runner artificial BT.
           python -B -m unittest -v tests.test_stable4_seven_native_coverage_audit
           python -B -m unittest -v tests.test_stable4_synthetic_evidence_fingerprint
+          # Full-year, true Binance PENGU raw H1 trigger replay:
+          # validate all 166 events against pinned native source + immutable data SHA.
+          # This deliberately does not claim ASTER M5 fills or a seven-runner BT.
+          python -B -m unittest -v tests.test_stable4_pengu_real_h1_ledger_audit
+          python -B scripts/research/stable4_pengu_native_h1_ledger_audit.py
           python -B scripts/stable4_seven_native_coverage_audit.py
           python -B tests/test_public_read_resilience_offline.py
           python -B -m unittest -q \
