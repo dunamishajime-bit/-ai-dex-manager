@@ -6,7 +6,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot, verify_btc_aster_binance_conflict
+from scripts.research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot, verify_btc_aster_binance_conflict, verify_btc_native_m5_disagreement
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
 
@@ -64,6 +64,29 @@ class Q102AsterHistoryTests(unittest.TestCase):
             mutation(fake)
             with self.assertRaisesRegex(ValueError,"Q102_BTC_CROSS_VENUE"):
                 verify_btc_aster_binance_conflict(fake,self.report)
+
+
+    def test_btc_same_label_m5_bars_are_not_authorized_to_repair_h1(self):
+        m5=json.loads((EVIDENCE.parent/"STABLE4_Q102_BTC_H1_ASTERNAMED_M5_12BAR_CONFLICT_20261128.json").read_text(encoding="utf8"))
+        h1=json.loads((EVIDENCE.parent/"STABLE4_Q102_BTC_H1_ASTERVS_BINANCE_BAD_BAR_20261128.json").read_text(encoding="utf8"))
+        verify_btc_native_m5_disagreement(m5,h1)
+        self.assertEqual(m5["invalidM5Indices"],[10])
+        self.assertGreater(m5["m5Aggregate"]["high"],m5["h1Recorded"]["high"])
+        self.assertFalse(m5["automaticH1RepairApplied"])
+        mutators=[
+            lambda d:d.__setitem__("automaticH1RepairApplied",True),
+            lambda d:d.__setitem__("venueExecutionCertified",True),
+            lambda d:d["source"].__setitem__("sha256","0"*64),
+            lambda d:d["m5Rows"][10].__setitem__("ohlcValid",True),
+            lambda d:d["m5Rows"][10].__setitem__("high",d["m5Rows"][10]["open"]),
+            lambda d:d["m5Aggregate"].__setitem__("high",115916.1),
+            lambda d:d["m5Rows"][11].__setitem__("openTimeMs",0),
+        ]
+        for f in mutators:
+            forged=copy.deepcopy(m5)
+            f(forged)
+            with self.assertRaisesRegex(ValueError,"Q102_BTC_M5_H1"):
+                verify_btc_native_m5_disagreement(forged,h1)
 
 
 if __name__ == "__main__":
