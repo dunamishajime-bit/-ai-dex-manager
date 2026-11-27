@@ -53,7 +53,7 @@ function parseFile(path:string){const raw=readFileSync(path);return {
 
  const native=await import(pathToFileURL(resolve(root,"lib/pengu-dual-ls-v2.ts")).href);
  const history={pengu1h:pengu,btc1h:btc,penguFunding:funding};
- const rows=native.buildPenguDualLsV2EvaluationSeries(history,END);
+ const rows=native.buildPenguDualLsV2EvaluationSeries(history,pengu.at(-1)!.closeTime+1);
  if(rows.length!==pengu.length)fail("SERIES_LENGTH_MISMATCH");
  const arms=[
   {name:"BASE",recoveryV8Enabled:false,v64DynamicLongEnabled:false},
@@ -71,7 +71,7 @@ function parseFile(path:string){const raw=readFileSync(path);return {
   const v64=native.isPenguV8V64DynamicLongSignal(rows,i);
   const recRow=r.recoveryV8?{...r.recoveryV8,ordinaryLongEligible:v64,baseLongSignal:v64}:undefined;
   const rec=native.selectPenguRecoveryV8Entry(recRow,true);
-  const v8Side:runside= r.shortSignal?-1:v64?1:rec?.kind==="RECOVERY_V8"?1:0;
+  const v8Side:-1|0|1= r.shortSignal?-1:v64?1:rec?.kind==="RECOVERY_V8"?1:0;
   const v8Route=r.shortSignal?"SHORT_V20":v64?"LONG_V2_FINAL":rec?.kind==="RECOVERY_V8"?"RECOVERY_V8":null;
   const selections=[
    {name:"BASE",side:base.side,route:base.side===-1?"SHORT_V20":base.side===1?"LONG_V2_FINAL":null},
@@ -87,7 +87,6 @@ function parseFile(path:string){const raw=readFileSync(path);return {
   }
   if(base.side!==0&&v8Side!==0&&base.side!==v8Side)ambiguous++;
  }
- type runside=number;
  const parity:Record<string,{checked:number;mismatches:number;details:unknown[]}>={
   BASE:{checked:0,mismatches:0,details:[]},V8_V64:{checked:0,mismatches:0,details:[]}};
  for(const arm of arms){
