@@ -59,7 +59,12 @@ export function advanceRunnerCumulativeDd(
   validate(obs);
   if(prior.schema!==RUNNER_DD_SCHEMA||!eligible(prior.accountEquityUsd)
     ||RUNNER_DD_IDS.some(k=>!prior.runners?.[k]||!valid(prior.netMtmPnlUsd?.[k])
-      ||!eligible(prior.runners[k].index)||!eligible(prior.runners[k].peak)))
+      ||!eligible(prior.runners[k].index)||!eligible(prior.runners[k].peak)
+      ||prior.runners[k].peak<prior.runners[k].index
+      ||!valid(prior.runners[k].currentDd)||!valid(prior.runners[k].maximumDd)
+      ||prior.runners[k].currentDd<0||prior.runners[k].maximumDd>1
+      ||prior.runners[k].maximumDd<prior.runners[k].currentDd-1e-12
+      ||Math.abs(prior.runners[k].currentDd-Math.max(0,1-prior.runners[k].index/prior.runners[k].peak))>1e-9)))
     err("STATE_INVALID");
   if(obs.exactReleaseSha!==prior.releaseSha||obs.atMs<=prior.updatedAt
     ||obs.proofId===prior.proofId)err("PROOF_OR_TIME_REPLAY");
@@ -101,8 +106,10 @@ export function evaluateRunnerDdEntry(
     return block("RUNNER_DD_STALE_OR_INVALID");
   const r=state.runners[runner];
   if(!r||!valid(r.maximumDd)||!valid(r.currentDd)||!eligible(r.peak)
-    ||!eligible(r.index)||r.maximumDd<r.currentDd-1e-12
-    ||r.maximumDd>1)return block("RUNNER_DD_STATE_INVALID");
+    ||!eligible(r.index)||r.peak<r.index||r.currentDd<0
+    ||r.maximumDd<r.currentDd-1e-12||r.maximumDd>1
+    ||Math.abs(r.currentDd-Math.max(0,1-r.index/r.peak))>1e-9)
+    return block("RUNNER_DD_STATE_INVALID");
   if(r.maximumDd>maximumDd+1e-12)return block("RUNNER_CUMULATIVE_MAX_DD_EXCEEDED");
   return {status:"ENTRY_ALLOWED_BY_THIS_DD_ONLY",reason:"RUNNER_CUMULATIVE_DD_WITHIN_LIMIT",
     runnerMaxDd:r.maximumDd,orderAuthority:false};
