@@ -155,6 +155,9 @@ def evaluate() -> dict:
         },
         "noCurrentSourceNativeSharedWalletPortfolioResult": True,
         "penguAsterM5SignalTape": {
+            "crossArmUniqueNativeH1Signals": pengu_m5["crossArmDedup"]["union"],
+            "crossArmOverlappingH1Signals": pengu_m5["crossArmDedup"]["shared"],
+            "baselineAndV8AreIndependentTrades": False,
             "h1RawSignalArmCounts": {
                 mode: row["rawH1Signals"] for mode, row in pengu_m5["arms"].items()
             },
