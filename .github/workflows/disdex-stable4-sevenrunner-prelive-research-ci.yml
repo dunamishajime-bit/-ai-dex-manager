@@ -64,6 +64,7 @@ jobs:
           # A partially regenerated/isolated sleeve study cannot stand in for one
           # complete, current-source, shared-wallet seven-runner artificial BT.
           python -B -m unittest -v tests.test_stable4_seven_native_coverage_audit
+          python -B -m unittest -v tests.test_stable4_synthetic_evidence_fingerprint
           python -B scripts/stable4_seven_native_coverage_audit.py
           python -B tests/test_public_read_resilience_offline.py
           python -B -m unittest -q \
@@ -95,7 +96,12 @@ jobs:
           npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/q102-hype-native-current.json"
           python - <<'PY'
           import hashlib,json,os,pathlib
+          from scripts.stable4_synthetic_evidence_fingerprint import canonical_result_sha256
           root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          review=json.loads(pathlib.Path("docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json").read_text(encoding="utf8"))
+          if review.get("productionEligible") is not False or review.get("liveOrderAuthority") is not False:
+              raise ValueError("SYNTHETIC_REVIEW_ORDER_AUTHORITY_FORBIDDEN")
+          frozen={item["source"]:item for item in review["evidence"]}
           pairs=[
             ("scripts/stable4-three-sleeve-native-synthetic.ts","three-sleeve-native-current.json"),
             ("scripts/stable4-four-sleeve-native-synthetic.ts","four-sleeve-native-current.json"),
@@ -109,7 +115,18 @@ jobs:
                   raise ValueError("REPLAY_EXPECTED_CASES_MISSING:"+output)
               source_digest=hashlib.sha256(pathlib.Path(source).read_bytes()).hexdigest()
               output_digest=hashlib.sha256(path.read_bytes()).hexdigest()
-              evidence.append({"source":source,"sourceSha256":source_digest,"output":output,"outputSha256":output_digest,"status":obj["status"],"orderAuthority":False})
+              canonical_digest=canonical_result_sha256(obj)
+              pinned=frozen.get(source)
+              if not pinned or pinned["sourceSha256"]!=source_digest or pinned["canonicalResultSha256"]!=canonical_digest:
+                  raise ValueError("SYNTHETIC_CURRENT_SOURCE_OR_TRADING_RESULTS_CHANGED:"+source)
+              # The Q102/HYPE output includes runtimeMs; exact raw bytes are not
+              # stable across hosts. Trading outcome fields are still signed by
+              # the canonical digest, excluding runtimeMs only.
+              if source!="scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts" and pinned["rawOutputSha256"]!=output_digest:
+                  raise ValueError("SYNTHETIC_DETERMINISTIC_OUTPUT_CHANGED:"+source)
+              evidence.append({"source":source,"sourceSha256":source_digest,"output":output,
+                               "outputSha256":output_digest,"canonicalResultSha256":canonical_digest,
+                               "status":obj["status"],"orderAuthority":False})
           (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\n",encoding="utf8")
           print(json.dumps(evidence))
           PY
