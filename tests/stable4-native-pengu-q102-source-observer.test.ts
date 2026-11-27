@@ -31,6 +31,7 @@ test("native PENGU H1 flat-market replay matches pinned source and grants zero o
 
 test("native PENGU rejects missing, future, incomplete, desynchronised, or fake funding data",()=>{
  const valid=pengu();
+ assert.equal(observeStable4PenguH1({history:pengu(175),decisionTs:t,sourcePin:sha,options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false}}).reason,"NATIVE_H1_HISTORY_OR_FUNDING_INVALID");
  const run=(x:ReturnType<typeof pengu>)=>observeStable4PenguH1({options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false},history:x,decisionTs:t,sourcePin:sha});
  assert.equal(run({...valid,pengu1h:valid.pengu1h.slice(1)}).status,"BLOCKED_SOURCE");
  assert.equal(run({...valid,pengu1h:[...valid.pengu1h,{...valid.pengu1h.at(-1)!,openTime:t,closeTime:t+H-1}]}).reason,"NATIVE_H1_HISTORY_OR_FUNDING_INVALID");
