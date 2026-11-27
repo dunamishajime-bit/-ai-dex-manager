@@ -71,6 +71,17 @@ jobs:
             tests.test_v52_q102_independent_pin \
             tests.test_v52_upstream_fail_closed \
             tests.test_v52_reference_transient
+      - name: Independent V4 resident STOP and Shared Risk regressions (no formal approval)
+        run: |
+          python -B -m unittest -v tests.test_v4_dynamic_resident_stop_and_margin_script
+          python -B -m unittest -v tests.test_stable4_dd30_shared_writer_singleton
+          python -B -m unittest -v tests.test_disdex_verify_singlewriter_candidate
+          node --import tsx --test \
+            tests/shared-risk-writer-pin.test.ts \
+            tests/shared-risk-writer-persist-guard.test.ts \
+            tests/shared-risk-transient-refresh-retry.test.ts
+          echo 'INDEPENDENT_RESEARCH_REGRESSION_ONLY=true'
+          echo 'LIVE_ORDER_PERMIT=FALSE'
       - name: Source-level validation only; NO certificate or LIVE activation
         run: |
           echo "PRELIVE_SOURCE_ONLY=true"
