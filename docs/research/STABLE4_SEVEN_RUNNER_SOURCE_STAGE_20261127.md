@@ -43,3 +43,8 @@ Synthetic: 6 regimes x 4 seeds, 72d each, dynamically regenerated R21 prices/ord
 Research evidence is separately preserved in docs/research/y06-r3/STABLE4_R26_REEXEC_AND_R21_NATIVE_SYNTH_DD30_V2_20261127.json on the #674 draft research branch. It provides both reproducible Python sources and SHA-256 output fingerprints.
 
 The independent entry-risk gate is an orderless research component. It cannot control real existing stops, authorize order sends, issue root proofs, or assert full native 7-runner simulation. Formal current-source/pinned-SHA CI remains blocked and is not bypassed.
+
+
+## Three-source synthetic replay
+R21/IDLE R26/FET entry functions and native protection/trail contracts were applied to 12 shared artificial markets, 10/30bps, with and without projected STOP loss + 2% price gap reserve. At 30bps, 442 trades with reserve, worst DD 27.98% (without 31.95%); mean terminal JPY8967.72 and 185 wins, below profitability/win-rate goals. This is not full seven-runner coverage or live parity: missing other four sleeves, legacy V4 routes, exact preemption/residual allocation, funding, executable depth, venue rounding and verified owner/STOP lifecycle. Conservative no-preempt rule suppresses candidate entries. See accompanying JSON and TS source. The synthetic generator is not calibrated to market returns, so this result cannot establish live DD guarantees.
+The historical formal integrated gate detects exactly four intentionally modified manifest-bound files; base master matches all four old digests. Preserve old manifest; use the candidate pin-delta research record for review. No production installation, formal certificate, or Owner authorization claimed.
