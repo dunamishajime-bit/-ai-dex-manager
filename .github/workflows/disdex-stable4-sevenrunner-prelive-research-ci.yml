@@ -71,6 +71,10 @@ jobs:
           # This deliberately does not claim ASTER M5 fills or a seven-runner BT.
           python -B -m unittest -v tests.test_stable4_pengu_real_h1_ledger_audit
           python -B scripts/research/stable4_pengu_native_h1_ledger_audit.py
+          # Separate partial 12-month Q102 BTC/SOL native H1 source proof.
+          # Does not claim the full Q102 source universe or fills.
+          python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
+          python -B scripts/research/stable4_q102_real_monthly_ledger_audit.py
           python -B scripts/stable4_seven_native_coverage_audit.py
           python -B tests/test_public_read_resilience_offline.py
           python -B -m unittest -q \
