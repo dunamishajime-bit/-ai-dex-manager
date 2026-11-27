@@ -131,6 +131,30 @@ jobs:
           (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\n",encoding="utf8")
           print(json.dumps(evidence))
           PY
+      - name: Co-observe native PENGU and Q102 H1 on independent 280d artificial prices (no trade)
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-pengu-q102-native-h1-artificial-observations.ts "$RUNNER_TEMP/pengu-q102-native-h1-current.json"
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"pengu-q102-native-h1-current.json"
+          o=json.loads(p.read_text(encoding="utf8"))
+          if (o.get("status")!="NATIVE_H1_OBSERVATION_ONLY_NO_VENUE_CERTIFICATION"
+              or len(o.get("rows",[]))!=4
+              or any(len(r.get("cases",[]))!=8 for r in o["rows"])
+              or o.get("orderAuthority") is not False
+              or o.get("asterM5Confirmed") is not False
+              or o.get("fullSevenNativeReplay") is not False
+              or o.get("liveEligible") is not False):
+              raise ValueError("NATIVE_H1_RESEARCH_SCOPE_OR_COVERAGE_INVALID")
+          for r in o["rows"]:
+              for case in r["cases"]:
+                  for name in ("pengu","q102"):
+                      item=case[name]
+                      if item["status"] not in ("NO_SOURCE_ENTRY","NATIVE_ENTRY_OBSERVED","BLOCKED_SOURCE"):
+                          raise ValueError("NATIVE_H1_OBSERVATION_UNRECOGNISED")
+          print(json.dumps({"observationOnly":True,"noOrders":True,"cases":32,"aggregate":o["aggregate"]}))
+          PY
       - name: Preserve independently regenerated research artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -142,6 +166,7 @@ jobs:
             ${{ runner.temp }}/four-sleeve-native-current.json
             ${{ runner.temp }}/q102-hype-native-current.json
             ${{ runner.temp }}/source-native-replay-fingerprints.json
+            ${{ runner.temp }}/pengu-q102-native-h1-current.json
       - name: Source-level validation only; NO certificate or LIVE activation
         run: |
           echo "PRELIVE_SOURCE_ONLY=true"
