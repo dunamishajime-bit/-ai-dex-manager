@@ -105,6 +105,15 @@ export function observeStable4Q102H1(input:{
     typeof occupancy.unresolvedPendingEntry!=="boolean"||
     (occupancy.basePositionActive!==undefined&&typeof occupancy.basePositionActive!=="boolean"))
    return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_OCCUPANCY_UNVERIFIED");
+ // The source may consume the current H1 open, but no future candle body.
+ // Never accept next-hour opens or unfinished highs/lows as entry evidence.
+ const entryOpens=history.entryOpenBySymbol;
+ if(entryOpens!==undefined&&(
+    typeof entryOpens!=="object"||entryOpens===null||
+    Object.entries(entryOpens).some(([symbol,bar])=>
+      !entries.some(([name])=>name===symbol)||!bar||
+      bar.timestampMs!==decisionTs||!Number.isFinite(bar.open)||bar.open<=0)
+  ))return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_ENTRY_OPEN_UNVERIFIED");
  try{
   const s=buildQuality102CausalV1Signal({history,decisionTs,sleeveOccupancy:occupancy});
   if(s.referenceTs!==decisionTs-H||s.dataCutoffTs!==decisionTs-H)
