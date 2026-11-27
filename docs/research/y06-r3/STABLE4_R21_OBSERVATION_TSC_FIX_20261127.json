@@ -1,0 +1,30 @@
+{
+  "status": "SOURCE_ONLY_NO_LIVE",
+  "results": [
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false",
+        "-p",
+        "tsconfig.json"
+      ],
+      "exit": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "C:\\tmp\\disdex-stable4-gross-offline-20261127\\research-offline-contract-20261127\\stable4-r21-raw-market-replay.test.ts"
+      ],
+      "exit": 0,
+      "output": "{\"expected\":378,\"actual\":378,\"unique\":378,\"missing\":[],\"extra\":[],\"excludedByHistoricalExitCoverage\":12,\"matched\":378}\n"
+    }
+  ],
+  "source": "import {readFileSync,writeFileSync} from \"node:fs\";\nimport {gunzipSync} from \"node:zlib\";\nimport {observationAt,R21_SYMBOLS,type R21Series} from \"../lib/stable4-r21-market-observation\";\nconst F=String.raw`C:\\tmp\\disdex-d126-crossrunner-research-20261126\\R21_TS_RAW_INPUT_20261127`,H=3600000,M=300000;\nconst data:Record<string,R21Series>={};\nfor(const s of [\"BTC\",...R21_SYMBOLS]) data[s]=JSON.parse(gunzipSync(readFileSync(F+\"/\"+s+\".json.gz\")).toString(\"utf8\"));\nconst begin=Date.parse(\"2025-10-01T00:00:00Z\"),end=Date.parse(\"2026-10-01T00:00:00Z\");\nconst expected: {symbol:string;route:string;ts:number}[]=JSON.parse(readFileSync(F+\"/expected.json\",\"utf8\"));\nconst key=(x:any)=>[x.symbol,x.route,x.ts].join(\"|\");\nconst actual:any[]=[];let rejects=0;\nfor(let t=begin;t<end;t+=H){\n for(const x of observationAt(data,t)){\n  const s=data[x.symbol.replace(/USDT$/,\"\")],k=(t-s.startM)/M;\n  const duration=x.route===\"R21_OLD24\"?72:48;\n  // Historical evaluation availability only; NEVER used by the observation kernel.\n  if(t+duration*H>=end||k<0||k+duration*12>=s.m.length||s.m.slice(k,k+duration*12+1).some(r=>!r||!r.slice(0,4).every(Number.isFinite))){rejects++;continue;}\n  actual.push(x);\n }\n}\nconst e=new Set(expected.map(key)),a=new Set(actual.map(key));\nconst missing=[...e].filter(x=>!a.has(x)),extra=[...a].filter(x=>!e.has(x));\nconst out={expected:expected.length,actual:actual.length,unique:a.size,missing,extra,excludedByHistoricalExitCoverage:rejects,matched:[...e].filter(x=>a.has(x)).length};\nwriteFileSync(F+\"/parity_v1.json\",JSON.stringify(out,null,2));console.log(JSON.stringify(out));if(missing.length||extra.length||a.size!==actual.length)process.exitCode=1;\n",
+  "sha256": "a8fbca6be00a39dfa983dea3b01a3915140a4bfc5ae74ffa05064af55d9238e9",
+  "fix": "Type annotation in historical test, no decision rule change."
+}
