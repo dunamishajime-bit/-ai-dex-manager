@@ -37,7 +37,8 @@ def evaluate() -> dict:
     four = json.loads(FOUR_REEXEC.read_text(encoding="utf-8"))
     pengu_native_raw = PENGU_NATIVE.read_bytes()
     pengu_native = json.loads(pengu_native_raw)
-    if exact_sha(PENGU_M5) != PENGU_M5_REVIEWED_REPORT_SHA256:
+    if (not PENGU_M5.is_file() or PENGU_M5.is_symlink()
+            or hashlib.sha256(PENGU_M5.read_bytes()).hexdigest() != PENGU_M5_REVIEWED_REPORT_SHA256):
         raise ValueError("PENGU_M5_REVIEWED_RESULT_BYTE_SHA_MISMATCH")
     pengu_m5 = json.loads(PENGU_M5.read_text(encoding="utf8"))
     if __package__:
