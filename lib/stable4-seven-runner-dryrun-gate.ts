@@ -10,7 +10,21 @@ export type Decision={status:"ELIGIBLE_OFFLINE"|"BLOCKED";reason:string;orderAut
 export function evaluateStable4DryEntry(x:RiskInput):Decision{
  const blocked=(reason:string,ddMax?:number):Decision=>({status:"BLOCKED",reason,orderAuthority:false,ddMax});
  const c=x.candidate;if(!c||!Number.isSafeInteger(x.asof)||!Number.isSafeInteger(c.entryTs)||c.entryTs<=0||c.entryTs>x.asof||x.asof-c.entryTs>15*60000||!Number.isFinite(c.gross)||c.gross<=0||!Number.isFinite(x.equityUsd)||x.equityUsd<=0||!/^([a-f0-9]{40})$/.test(x.releaseSha))return blocked("CANDIDATE_OR_PROOF_INVALID");
- if(!Array.isArray(x.open)||!["LONG","SHORT"].includes(c.side)||!(/^[A-Z0-9]+USDT$/.test(c.symbol))||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||x.open.some(y=>!Number.isFinite(y.gross)||y.gross<0)||(x.v4GrossCap!==undefined&&(!Number.isFinite(x.v4GrossCap)||x.v4GrossCap<=0)))return blocked("SOURCE_INVALID");
+ if(!Array.isArray(x.open)||!["LONG","SHORT"].includes(c.side)||!(/^[A-Z0-9]+USDT$/.test(c.symbol))||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||(x.v4GrossCap!==undefined&&(!Number.isFinite(x.v4GrossCap)||x.v4GrossCap<=0)))return blocked("SOURCE_INVALID");
+ // Never calculate available Gross from unverified owner/stock classifications.
+ // Unknown positions, invalid ownership, zero-notional OPEN rows, or duplicate
+ // reservation IDs can all understate risk. This is an offline-only gate.
+ const ids=new Set<string>();
+ for(const row of x.open){
+  if(!row||typeof row.id!=="string"||!row.id||ids.has(row.id)||row.id===c.id||
+    !["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(row.sleeve)||
+    !/^[A-Z0-9]+USDT$/.test(row.symbol)||typeof row.route!=="string"||!row.route||
+    !Number.isFinite(row.gross)||row.gross<=0||
+    typeof row.stock!=="boolean"||row.stock!==(row.sleeve==="V52")||
+    !["PENDING","OPEN","EXIT_PENDING"].includes(row.status))
+    return blocked("OPEN_OWNER_EXPOSURE_UNVERIFIED");
+  ids.add(row.id);
+ }
  const portfolio=evaluatePortfolioDdEntry(x.portfolioDdState,x.asof,x.releaseSha,0.30);
  if(portfolio.status!=="ELIGIBLE_OFFLINE")return blocked(portfolio.reason);
  const dd=evaluateRunnerDdEntry(x.ddState,c.sleeve,x.asof,x.releaseSha,0.30);
