@@ -9,8 +9,8 @@ export type RiskInput={candidate:Proposed;open:readonly OpenRisk[];equityUsd:num
 export type Decision={status:"ELIGIBLE_OFFLINE"|"BLOCKED";reason:string;orderAuthority:false;ddMax:number|undefined};
 export function evaluateStable4DryEntry(x:RiskInput):Decision{
  const blocked=(reason:string,ddMax?:number):Decision=>({status:"BLOCKED",reason,orderAuthority:false,ddMax});
- const c=x.candidate;if(!c||!Number.isSafeInteger(x.asof)||!Number.isSafeInteger(c.entryTs)||c.entryTs<=0||c.entryTs>x.asof||x.asof-c.entryTs>15*60000||!Number.isFinite(c.gross)||c.gross<=0||!x.equityUsd||x.equityUsd<=0||!/^([a-f0-9]{40})$/.test(x.releaseSha))return blocked("CANDIDATE_OR_PROOF_INVALID");
- if(!/^[A-Z0-9]+USDT$/.test(c.symbol)||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||x.open.some(y=>!Number.isFinite(y.gross)||y.gross<0))return blocked("SOURCE_INVALID");
+ const c=x.candidate;if(!c||!Number.isSafeInteger(x.asof)||!Number.isSafeInteger(c.entryTs)||c.entryTs<=0||c.entryTs>x.asof||x.asof-c.entryTs>15*60000||!Number.isFinite(c.gross)||c.gross<=0||!Number.isFinite(x.equityUsd)||x.equityUsd<=0||!/^([a-f0-9]{40})$/.test(x.releaseSha))return blocked("CANDIDATE_OR_PROOF_INVALID");
+ if(!Array.isArray(x.open)||!["LONG","SHORT"].includes(c.side)||!(/^[A-Z0-9]+USDT$/.test(c.symbol))||!c.id||!c.route||!["V4","Q102","PENGU","FET","IDLE","HYPE","V52"].includes(c.sleeve)||x.open.some(y=>!Number.isFinite(y.gross)||y.gross<0)||(x.v4GrossCap!==undefined&&(!Number.isFinite(x.v4GrossCap)||x.v4GrossCap<=0)))return blocked("SOURCE_INVALID");
  const portfolio=evaluatePortfolioDdEntry(x.portfolioDdState,x.asof,x.releaseSha,0.30);
  if(portfolio.status!=="ELIGIBLE_OFFLINE")return blocked(portfolio.reason);
  const dd=evaluateRunnerDdEntry(x.ddState,c.sleeve,x.asof,x.releaseSha,0.30);

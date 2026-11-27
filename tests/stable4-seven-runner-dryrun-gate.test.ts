@@ -42,3 +42,12 @@ test("portfolio DD does not disable a resident STOP exit",()=>{
    bars:[{ts:at,open:101,high:110,low:99,close:105}]});
  assert.equal(r.kind,"STOP8");assert.equal(r.orderAuthority,false);
 });
+
+
+test("nonfinite capital, unknown direction and invalid V4 cap never pass dry-run admission",()=>{
+ assert.equal(evaluateStable4DryEntry({...x,equityUsd:Infinity}).reason,"CANDIDATE_OR_PROOF_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,equityUsd:NaN}).reason,"CANDIDATE_OR_PROOF_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,candidate:{...c,side:"INVALID" as any}}).reason,"SOURCE_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,v4GrossCap:NaN}).reason,"SOURCE_INVALID");
+ assert.equal(evaluateStable4DryEntry({...x,v4GrossCap:Infinity}).reason,"SOURCE_INVALID");
+});
