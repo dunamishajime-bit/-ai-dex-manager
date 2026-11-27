@@ -13,7 +13,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 INPUTS={
     "native":("STABLE4_PENGU_ALL_ROUTES_NATIVE_H1_POSITION_HELPER_REPLAY_20261128.json","93b4c4dd203da5394b77e58a7a23eaa359d3978ee27a6df5973aaddafde84e00"),
-    "slot":("STABLE4_PENGU_NATIVE_ONE_SLOT_COOLDOWN_20261128.json","dd7b990c8c828780af70409c9914f893c6c541ce113f7466975a1a545af3c9c2"),
+    "slot":("STABLE4_PENGU_NATIVE_ONE_SLOT_COOLDOWN_SOURCE_CLOCK_V2_20261128.json","0f8afd4a68e1969e8849d1e19ce3b011c6d7fdf5abe0cb7276c4c17f97441824"),
     "refetch":("STABLE4_PENGU_BINANCE_INDEPENDENT_H1_NATIVE_ENTRY_PARITY_20261128.json","cfb7b6e46b8b3543778c1ed519a62918f17eed28fa9e9afb67496281dfbe7a56"),
 }
 
@@ -30,7 +30,7 @@ def load():
 def verify(docs):
     n,s,r=docs["native"],docs["slot"],docs["refetch"]
     if (n.get("schema")!="stable4-pengu-all-routes-native-h1-position-helper-replay/v1"
-        or s.get("schema")!="stable4-pengu-isolated-native-one-slot-cooldown/v1"
+        or s.get("schema")!="stable4-pengu-isolated-native-one-slot-cooldown/v2"
         or r.get("schema")!="stable4-pengu-binance-independent-h1-native-entry-parity/v1"):
         raise ValueError("RESEARCH_EVIDENCE_SCHEMA")
     for doc in (n,s,r):
@@ -58,7 +58,7 @@ def verify(docs):
             raise ValueError("SOURCE_PIN:"+p)
     expected={
         "BASE":(54,32,22,23,16,15,0),
-        "V8_V64":(112,69,43,46,31,30,5),
+        "V8_V64":(112,69,43,47,31,30,4),
     }
     for arm,(count,priced,missing,admitted,occupied,no_m5,cooled) in expected.items():
         summary=n["summary"][arm]
@@ -104,7 +104,9 @@ def verify(docs):
                     raise ValueError("SLOT_EXIT_CLOCK_PARITY")
                 active_until=row["exitModelTs"]
                 cooldown_until=row["cooldownUntilTs"]
-                if cooldown_until!=active_until+evidence["exit"]["cooldownHours"]*3600000:
+                if (row["cooldownReferenceTs"]!=evidence["exit"]["referenceTs"]
+                    or active_until!=row["cooldownReferenceTs"]+3600000
+                    or cooldown_until!=row["cooldownReferenceTs"]+evidence["exit"]["cooldownHours"]*3600000):
                     raise ValueError("NATIVE_COOLDOWN_MISMATCH")
             elif row["decision"]=="BLOCKED_OCCUPIED_MODEL_SLOT":
                 if ts>=active_until:raise ValueError("FALSE_OCCUPIED")
