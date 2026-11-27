@@ -1,0 +1,997 @@
+{
+  "fullQ102AnnualReplay": false,
+  "inputPins": {
+    "m5": "b1c2d6f336d7441eeb367ec1660167c04706266a744136cb805508c62d218373",
+    "raw": "04209f9c8e49d8fcb781f6aa2afa7a16952dd9a3f2e876866ee1fa40bf73eeac",
+    "selected": "f4338565bd408b97f48359d83f80fe4503ef76d7f2518fe23b322d372b947e01"
+  },
+  "limitations": [
+    "All sleeves assumed idle in selected source ledger. No one-slot replay or other HIGH_VOL clocks.",
+    "Base and floor exit arms omit adopted PB adverse policy. Prices are M5 proxies, not actual fills. Missing exit is unresolved; do not free slot from missing evidence.",
+    "No PnL, DD, funding, shared risk, or LIVE authority."
+  ],
+  "orderAuthority": false,
+  "rows": [
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1787461200000,
+      "id": "S34:AVAX|PB168_0.1_P24_0.04_H24:1787461200000:1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1787457600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.07,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1787461200000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "PB168_0.1_P24_0.04_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 4.548,
+        "exitPrice": 4.316,
+        "exitTs": 1787590800000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 49
+      },
+      "entryTs": 1787504400000,
+      "id": "S34:UNI|MR48_Z1.5_H24:1787504400000:-1",
+      "profitFloor": {
+        "entryPrice": 4.548,
+        "exitPrice": 4.52526,
+        "exitTs": 1787545800000,
+        "reason": "PROFIT_FLOOR",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 26
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1787500800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S4",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1787504400000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "UNIUSDT",
+        "variant": "MR48_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 4.589,
+        "exitPrice": 4.302,
+        "exitTs": 1787605200000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 58
+      },
+      "entryTs": 1787518800000,
+      "id": "S34:UNI|MR48_Z1.5_H24:1787518800000:-1",
+      "profitFloor": {
+        "entryPrice": 4.589,
+        "exitPrice": 4.302,
+        "exitTs": 1787605200000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 58
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1787515200000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S4",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1787518800000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "UNIUSDT",
+        "variant": "MR48_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1787720400000,
+      "id": "S34:AVAX|PB168_0.1_P24_0.04_H24:1787720400000:1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1787716800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.07,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1787720400000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "PB168_0.1_P24_0.04_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 7.467,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 122
+      },
+      "entryTs": 1787821200000,
+      "id": "S34:AVAX|MR24_Z1.5_H24:1787821200000:-1",
+      "profitFloor": {
+        "entryPrice": 7.467,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 122
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1787817600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1787821200000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "MR24_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1788224400000,
+      "id": "S34:FET|BRK24_H48_V1.2:1788224400000:1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788220800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "BRK",
+        "hardStop": 0.08,
+        "layer": "S3",
+        "maxHoldHours": 48,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788224400000,
+        "requestedGross": 0.75,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "BRK24_H48_V1.2"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1788238800000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788238800000:-1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788235200000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788238800000,
+        "requestedGross": 2.5,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 7.315,
+        "exitPrice": 7.496,
+        "exitTs": 1788498000000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 178
+      },
+      "entryTs": 1788411600000,
+      "id": "S34:AVAX|MR24_Z1.5_H24:1788411600000:-1",
+      "profitFloor": {
+        "entryPrice": 7.315,
+        "exitPrice": 7.496,
+        "exitTs": 1788498000000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 178
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788408000000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788411600000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "MR24_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.08364,
+        "exitPrice": 0.08782200000000001,
+        "exitTs": 1788447600000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "entryTs": 1788440400000,
+      "id": "S34:DOGE|MR48_Z2.0_H12:1788440400000:-1",
+      "profitFloor": {
+        "entryPrice": 0.08364,
+        "exitPrice": 0.08782200000000001,
+        "exitTs": 1788447600000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788436800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.05,
+        "layer": "S4",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788440400000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "DOGEUSDT",
+        "variant": "MR48_Z2.0_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.08864,
+        "exitPrice": 0.08764,
+        "exitTs": 1788512400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "entryTs": 1788469200000,
+      "id": "S34:DOGE|MR48_Z2.0_H12:1788469200000:-1",
+      "profitFloor": {
+        "entryPrice": 0.08864,
+        "exitPrice": 0.08764,
+        "exitTs": 1788512400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788465600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.05,
+        "layer": "S4",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788469200000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "DOGEUSDT",
+        "variant": "MR48_Z2.0_H12"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1788584400000,
+      "id": "S34:FET|REV12_T0.05_H12:1788584400000:-1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788580800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "REV",
+        "hardStop": 0.045,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788584400000,
+        "requestedGross": 1.25,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "REV12_T0.05_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.1799,
+        "exitPrice": 0.18,
+        "exitTs": 1788944400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 105
+      },
+      "entryTs": 1788901200000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788901200000:1",
+      "profitFloor": {
+        "entryPrice": 0.1799,
+        "exitPrice": 0.18,
+        "exitTs": 1788944400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 105
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788897600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788901200000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.1796,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 97
+      },
+      "entryTs": 1788915600000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788915600000:1",
+      "profitFloor": {
+        "entryPrice": 0.1796,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 97
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788912000000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788915600000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.1787,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 95
+      },
+      "entryTs": 1788930000000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788930000000:1",
+      "profitFloor": {
+        "entryPrice": 0.1787,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 95
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788926400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788930000000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1788973200000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788973200000:1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788969600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788973200000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "entryTs": 1788987600000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1788987600000:1",
+      "profitFloor": {
+        "status": "ENTRY_M5_ZERO_VOLUME"
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788984000000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1788987600000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.1686,
+        "exitPrice": 0.16016999999999998,
+        "exitTs": 1789025700000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 62
+      },
+      "entryTs": 1789002000000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1789002000000:1",
+      "profitFloor": {
+        "entryPrice": 0.1686,
+        "exitPrice": 0.16016999999999998,
+        "exitTs": 1789025700000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 62
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1788998400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1789002000000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 6.929,
+        "exitPrice": 7.41403,
+        "exitTs": 1789663800000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "entryTs": 1789650000000,
+      "id": "S34:UNI|MR72_Z1.5_H24:1789650000000:-1",
+      "profitFloor": {
+        "entryPrice": 6.929,
+        "exitPrice": 7.41403,
+        "exitTs": 1789663800000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1789646400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S4",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1789650000000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "UNIUSDT",
+        "variant": "MR72_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.185,
+        "exitPrice": 0.1696,
+        "exitTs": 1789881900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 371
+      },
+      "entryTs": 1789722000000,
+      "id": "S34:FET|BRK24_H48_V1.2:1789722000000:1",
+      "profitFloor": {
+        "entryPrice": 0.185,
+        "exitPrice": 0.1696,
+        "exitTs": 1789881900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 371
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1789718400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "BRK",
+        "hardStop": 0.08,
+        "layer": "S3",
+        "maxHoldHours": 48,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1789722000000,
+        "requestedGross": 0.75,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "BRK24_H48_V1.2"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 8.347,
+        "exitPrice": 8.93129,
+        "exitTs": 1789809600000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 12
+      },
+      "entryTs": 1789779600000,
+      "id": "S34:AVAX|MR24_Z1.5_H24:1789779600000:-1",
+      "profitFloor": {
+        "entryPrice": 8.347,
+        "exitPrice": 8.93129,
+        "exitTs": 1789809600000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 12
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1789776000000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.07,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1789779600000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "MR24_Z1.5_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 1.792,
+        "exitPrice": 1.852,
+        "exitTs": 1790024400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 7
+      },
+      "entryTs": 1789981200000,
+      "id": "S34:RENDER|BRK168_H12_V1.2:1789981200000:1",
+      "profitFloor": {
+        "entryPrice": 1.792,
+        "exitPrice": 1.796,
+        "exitTs": 1790001600000,
+        "reason": "PROFIT_FLOOR",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 3
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1789977600000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "BRK",
+        "hardStop": 0.05,
+        "layer": "S4",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1789981200000,
+        "requestedGross": 0.75,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "RENDERUSDT",
+        "variant": "BRK168_H12_V1.2"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 1.852,
+        "status": "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME",
+        "zeroVolumeBars": 52
+      },
+      "entryTs": 1790024400000,
+      "id": "S34:RENDER|BRK168_H12_V1.2:1790024400000:1",
+      "profitFloor": {
+        "entryPrice": 1.852,
+        "exitPrice": 1.858,
+        "exitTs": 1790038500000,
+        "reason": "PROFIT_FLOOR",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 11
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790020800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "BRK",
+        "hardStop": 0.05,
+        "layer": "S4",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790024400000,
+        "requestedGross": 0.75,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "RENDERUSDT",
+        "variant": "BRK168_H12_V1.2"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.09961,
+        "exitPrice": 0.1045905,
+        "exitTs": 1790049900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "entryTs": 1790038800000,
+      "id": "S34:DOGE|MR72_Z1.5_H12:1790038800000:-1",
+      "profitFloor": {
+        "entryPrice": 0.09961,
+        "exitPrice": 0.1045905,
+        "exitTs": 1790049900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 0
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790035200000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "MR",
+        "hardStop": 0.05,
+        "layer": "S4",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790038800000,
+        "requestedGross": 0.75,
+        "side": -1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "DOGEUSDT",
+        "variant": "MR72_Z1.5_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.2112,
+        "exitPrice": 0.194304,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 18
+      },
+      "entryTs": 1790067600000,
+      "id": "S34:FET|BRK24_H48_V1.2:1790067600000:1",
+      "profitFloor": {
+        "entryPrice": 0.2112,
+        "exitPrice": 0.194304,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 18
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790064000000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "BRK",
+        "hardStop": 0.08,
+        "layer": "S3",
+        "maxHoldHours": 48,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790067600000,
+        "requestedGross": 0.75,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "BRK24_H48_V1.2"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.2066,
+        "exitPrice": 0.19627,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 7
+      },
+      "entryTs": 1790154000000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1790154000000:1",
+      "profitFloor": {
+        "entryPrice": 0.2066,
+        "exitPrice": 0.19627,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 7
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790150400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790154000000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.2058,
+        "exitPrice": 0.19551,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 1
+      },
+      "entryTs": 1790168400000,
+      "id": "S34:FET|PB168_0.1_P24_0.02_H12:1790168400000:1",
+      "profitFloor": {
+        "entryPrice": 0.2058,
+        "exitPrice": 0.19551,
+        "exitTs": 1790172900000,
+        "reason": "HARD_STOP",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 1
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790164800000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "PB",
+        "hardStop": 0.05,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790168400000,
+        "requestedGross": 2,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "FETUSDT",
+        "variant": "PB168_0.1_P24_0.02_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 10.272,
+        "exitPrice": 10.364,
+        "exitTs": 1790226000000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 6
+      },
+      "entryTs": 1790182800000,
+      "id": "S34:AVAX|REV12_T0.03_H12:1790182800000:1",
+      "profitFloor": {
+        "entryPrice": 10.272,
+        "exitPrice": 10.364,
+        "exitTs": 1790226000000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 6
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790179200000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "REV",
+        "hardStop": 0.045,
+        "layer": "S3",
+        "maxHoldHours": 12,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790182800000,
+        "requestedGross": 1.5,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "AVAXUSDT",
+        "variant": "REV12_T0.03_H12"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.7776,
+        "exitPrice": 0.8056,
+        "exitTs": 1790312400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 21
+      },
+      "entryTs": 1790226000000,
+      "id": "S34:APT|REV24_T0.05_H24:1790226000000:1",
+      "profitFloor": {
+        "entryPrice": 0.7776,
+        "exitPrice": 0.8056,
+        "exitTs": 1790312400000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 21
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790222400000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "REV",
+        "hardStop": 0.06,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790226000000,
+        "requestedGross": 1.5,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "APTUSDT",
+        "variant": "REV24_T0.05_H24"
+      }
+    },
+    {
+      "base": {
+        "entryPrice": 0.7759,
+        "exitPrice": 0.845,
+        "exitTs": 1790341200000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 21
+      },
+      "entryTs": 1790254800000,
+      "id": "S34:APT|REV24_T0.05_H24:1790254800000:1",
+      "profitFloor": {
+        "entryPrice": 0.7759,
+        "exitPrice": 0.845,
+        "exitTs": 1790341200000,
+        "reason": "TIME",
+        "status": "MODELED_EXIT_NOT_FILL",
+        "zeroVolumeBars": 21
+      },
+      "signal": {
+        "brkEnabled": true,
+        "dataCutoffTs": 1790251200000,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "family": "REV",
+        "hardStop": 0.06,
+        "layer": "S3",
+        "maxHoldHours": 24,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "referenceTs": 1790254800000,
+        "requestedGross": 1.5,
+        "side": 1,
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "symbol": "APTUSDT",
+        "variant": "REV24_T0.05_H24"
+      }
+    }
+  ],
+  "schema": "stable4-q102-selected-s34-m5-binding/v1",
+  "selected": 29,
+  "status": "PARTIAL_SELECTED_SIGNALS_PRICE_MODEL_BINDING_ONLY",
+  "summary": {
+    "base": {
+      "reason": {
+        "HARD_STOP": 9,
+        "TIME": 9
+      },
+      "status": {
+        "ENTRY_M5_ZERO_VOLUME": 7,
+        "MODELED_EXIT_NOT_FILL": 18,
+        "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME": 4
+      }
+    },
+    "profitFloor": {
+      "reason": {
+        "HARD_STOP": 9,
+        "PROFIT_FLOOR": 3,
+        "TIME": 7
+      },
+      "status": {
+        "ENTRY_M5_ZERO_VOLUME": 7,
+        "MODELED_EXIT_NOT_FILL": 19,
+        "TIME_EXIT_M5_MISSING_INVALID_OR_ZERO_VOLUME": 3
+      }
+    }
+  }
+}
