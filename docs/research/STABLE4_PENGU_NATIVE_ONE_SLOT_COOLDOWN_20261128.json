@@ -1,0 +1,1637 @@
+{
+  "decisions": {
+    "BASE": [
+      {
+        "cooldownUntilTs": 1760101200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1760079600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_V20_TIMED_NEGATIVE_3H_EXIT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1760065200000
+      },
+      {
+        "cooldownUntilTs": 1760716800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1760695200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1760544000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761156000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761681600000
+      },
+      {
+        "cooldownUntilTs": 1762174800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1762153200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1761894000000
+      },
+      {
+        "blockingUntilTs": 1762153200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761908400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1762232400000
+      },
+      {
+        "cooldownUntilTs": 1762822800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1762736400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1762650000000
+      },
+      {
+        "blockingUntilTs": 1762736400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1762682400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1762909200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1763092800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1764439200000
+      },
+      {
+        "cooldownUntilTs": 1765155600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1765069200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765029600000
+      },
+      {
+        "cooldownUntilTs": 1765490400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1765404000000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765299600000
+      },
+      {
+        "cooldownUntilTs": 1766052000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1766030400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765771200000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765893600000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766008800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766062800000
+      },
+      {
+        "cooldownUntilTs": 1766358000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1766336400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1766077200000
+      },
+      {
+        "blockingUntilTs": 1766336400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766080800000
+      },
+      {
+        "blockingUntilTs": 1766336400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1766102400000
+      },
+      {
+        "cooldownUntilTs": 1767513600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1767492000000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767394800000
+      },
+      {
+        "blockingUntilTs": 1767492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767409200000
+      },
+      {
+        "cooldownUntilTs": 1767672000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1767650400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767517200000
+      },
+      {
+        "cooldownUntilTs": 1769140800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1769119200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1768860000000
+      },
+      {
+        "blockingUntilTs": 1769119200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1768928400000
+      },
+      {
+        "cooldownUntilTs": 1769911200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1769889600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1769806800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1771070400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1771084800000
+      },
+      {
+        "cooldownUntilTs": 1771650000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1771628400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_V20_DEADLINE_EXIT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1771560000000
+      },
+      {
+        "cooldownUntilTs": 1774821600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1774800000000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1774540800000
+      },
+      {
+        "cooldownUntilTs": 1775448000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1775426400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1775167200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778670000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778702400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778958000000
+      },
+      {
+        "cooldownUntilTs": 1780279200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1780257600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779998400000
+      },
+      {
+        "blockingUntilTs": 1780257600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1780056000000
+      },
+      {
+        "cooldownUntilTs": 1782122400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1782100800000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1781841600000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1782259200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1783544400000
+      },
+      {
+        "cooldownUntilTs": 1785513600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1785492000000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1785232800000
+      },
+      {
+        "blockingUntilTs": 1785492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1785297600000
+      },
+      {
+        "cooldownUntilTs": 1787353200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1787331600000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787281200000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787292000000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1787299200000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787310000000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1787320800000
+      },
+      {
+        "cooldownUntilTs": 1787464800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1787378400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787353200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1788544800000
+      },
+      {
+        "cooldownUntilTs": 1788753600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1788667200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1788559200000
+      },
+      {
+        "cooldownUntilTs": 1789156800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1789135200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1788876000000
+      },
+      {
+        "blockingUntilTs": 1789135200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789045200000
+      },
+      {
+        "blockingUntilTs": 1789135200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789059600000
+      },
+      {
+        "cooldownUntilTs": 1790136000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1790114400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1790100000000
+      }
+    ],
+    "V8_V64": [
+      {
+        "cooldownUntilTs": 1759680000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1759658400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1759312800000
+      },
+      {
+        "blockingUntilTs": 1759658400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1759334400000
+      },
+      {
+        "blockingUntilTs": 1759658400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1759633200000
+      },
+      {
+        "cooldownUntilTs": 1759996800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1759975200000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1759914000000
+      },
+      {
+        "cooldownUntilTs": 1760101200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1760079600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_V20_TIMED_NEGATIVE_3H_EXIT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1760065200000
+      },
+      {
+        "cooldownUntilTs": 1760716800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1760695200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1760544000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761156000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761681600000
+      },
+      {
+        "cooldownUntilTs": 1762174800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1762153200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1761894000000
+      },
+      {
+        "blockingUntilTs": 1762153200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1761908400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1762232400000
+      },
+      {
+        "cooldownUntilTs": 1762822800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1762736400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1762650000000
+      },
+      {
+        "blockingUntilTs": 1762736400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1762682400000
+      },
+      {
+        "blockingUntilTs": 1762822800000,
+        "decision": "BLOCKED_NATIVE_COOLDOWN",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1762750800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1762909200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1763013600000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1763092800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1764320400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1764439200000
+      },
+      {
+        "cooldownUntilTs": 1764723600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1764702000000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1764687600000
+      },
+      {
+        "cooldownUntilTs": 1765155600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1765069200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765029600000
+      },
+      {
+        "blockingUntilTs": 1765069200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765033200000
+      },
+      {
+        "cooldownUntilTs": 1765490400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1765404000000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765299600000
+      },
+      {
+        "blockingUntilTs": 1765490400000,
+        "decision": "BLOCKED_NATIVE_COOLDOWN",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765486800000
+      },
+      {
+        "cooldownUntilTs": 1766052000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1766030400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765771200000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1765782000000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765886400000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765893600000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1765983600000
+      },
+      {
+        "blockingUntilTs": 1766030400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766008800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766062800000
+      },
+      {
+        "cooldownUntilTs": 1766358000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1766336400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1766077200000
+      },
+      {
+        "blockingUntilTs": 1766336400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1766080800000
+      },
+      {
+        "blockingUntilTs": 1766336400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1766102400000
+      },
+      {
+        "cooldownUntilTs": 1766872800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1766851200000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1766592000000
+      },
+      {
+        "cooldownUntilTs": 1767286800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1767200400000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767110400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1767330000000
+      },
+      {
+        "cooldownUntilTs": 1767513600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1767492000000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767394800000
+      },
+      {
+        "blockingUntilTs": 1767492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767409200000
+      },
+      {
+        "cooldownUntilTs": 1767672000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1767650400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767517200000
+      },
+      {
+        "cooldownUntilTs": 1768168800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1768147200000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1767888000000
+      },
+      {
+        "cooldownUntilTs": 1768834800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1768748400000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1768597200000
+      },
+      {
+        "cooldownUntilTs": 1769140800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1769119200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1768860000000
+      },
+      {
+        "blockingUntilTs": 1769119200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1768928400000
+      },
+      {
+        "cooldownUntilTs": 1769911200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1769889600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1769806800000
+      },
+      {
+        "cooldownUntilTs": 1771135200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1771113600000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1771038000000
+      },
+      {
+        "blockingUntilTs": 1771113600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1771070400000
+      },
+      {
+        "blockingUntilTs": 1771113600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1771084800000
+      },
+      {
+        "cooldownUntilTs": 1771729200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1771707600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1771549200000
+      },
+      {
+        "blockingUntilTs": 1771707600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1771560000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1772024400000
+      },
+      {
+        "cooldownUntilTs": 1772352000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1772330400000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1772287200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1773032400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1773612000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1774242000000
+      },
+      {
+        "cooldownUntilTs": 1774821600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1774800000000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1774540800000
+      },
+      {
+        "blockingUntilTs": 1774800000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1774713600000
+      },
+      {
+        "cooldownUntilTs": 1775120400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1775098800000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1774839600000
+      },
+      {
+        "cooldownUntilTs": 1775448000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1775426400000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1775167200000
+      },
+      {
+        "blockingUntilTs": 1775448000000,
+        "decision": "BLOCKED_NATIVE_COOLDOWN",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1775433600000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1775728800000
+      },
+      {
+        "cooldownUntilTs": 1776168000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1776146400000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1776088800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1776607200000
+      },
+      {
+        "cooldownUntilTs": 1776751200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1776729600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1776672000000
+      },
+      {
+        "cooldownUntilTs": 1777708800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1777687200000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1777255200000
+      },
+      {
+        "cooldownUntilTs": 1777975200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1777953600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1777849200000
+      },
+      {
+        "cooldownUntilTs": 1778202000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1778115600000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1777986000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778670000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778702400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1778958000000
+      },
+      {
+        "cooldownUntilTs": 1779148800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1779062400000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779055200000
+      },
+      {
+        "blockingUntilTs": 1779148800000,
+        "decision": "BLOCKED_NATIVE_COOLDOWN",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779138000000
+      },
+      {
+        "cooldownUntilTs": 1779595200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1779573600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779548400000
+      },
+      {
+        "cooldownUntilTs": 1779937200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1779850800000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779804000000
+      },
+      {
+        "cooldownUntilTs": 1780279200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1780257600000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1779998400000
+      },
+      {
+        "blockingUntilTs": 1780257600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1780056000000
+      },
+      {
+        "cooldownUntilTs": 1781431200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1781409600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1781150400000
+      },
+      {
+        "cooldownUntilTs": 1781575200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1781553600000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1781474400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1781820000000
+      },
+      {
+        "cooldownUntilTs": 1782122400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1782100800000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1781841600000
+      },
+      {
+        "blockingUntilTs": 1782100800000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1781892000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1782259200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1783353600000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1783447200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1783544400000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1783648800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1784037600000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1784998800000
+      },
+      {
+        "cooldownUntilTs": 1785513600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1785492000000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1785232800000
+      },
+      {
+        "blockingUntilTs": 1785492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1785254400000
+      },
+      {
+        "blockingUntilTs": 1785492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1785297600000
+      },
+      {
+        "blockingUntilTs": 1785492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1785380400000
+      },
+      {
+        "blockingUntilTs": 1785492000000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1785420000000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1786615200000
+      },
+      {
+        "cooldownUntilTs": 1787353200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1787331600000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787281200000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787292000000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1787299200000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787310000000
+      },
+      {
+        "blockingUntilTs": 1787331600000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1787320800000
+      },
+      {
+        "cooldownUntilTs": 1787464800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1787378400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1787353200000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1788094800000
+      },
+      {
+        "decision": "NO_M5_ENTRY_CONFIRMATION",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "FIRST_M5_CONFIRMATION_UNAVAILABLE",
+        "sourceSignalTs": 1788544800000
+      },
+      {
+        "cooldownUntilTs": 1788753600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1788667200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1788559200000
+      },
+      {
+        "cooldownUntilTs": 1789156800000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1789135200000,
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourceExitReason": "SHORT_MAX_HOLD",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1788876000000
+      },
+      {
+        "blockingUntilTs": 1789135200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789045200000
+      },
+      {
+        "blockingUntilTs": 1789135200000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789059600000
+      },
+      {
+        "blockingUntilTs": 1789156800000,
+        "decision": "BLOCKED_NATIVE_COOLDOWN",
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789135200000
+      },
+      {
+        "cooldownUntilTs": 1789585200000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1789498800000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789408800000
+      },
+      {
+        "cooldownUntilTs": 1789754400000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1789732800000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1789603200000
+      },
+      {
+        "cooldownUntilTs": 1790136000000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1790114400000,
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourceExitReason": "LONG_TRAILING_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1790006400000
+      },
+      {
+        "blockingUntilTs": 1790114400000,
+        "decision": "BLOCKED_OCCUPIED_MODEL_SLOT",
+        "orderAuthority": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1790100000000
+      },
+      {
+        "cooldownUntilTs": 1790697600000,
+        "decision": "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT",
+        "exitModelTs": 1790611200000,
+        "orderAuthority": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "sourceExitReason": "RECOVERY_V8_HARD_STOP",
+        "sourcePriceModel": "SOURCE_NATIVE_EXIT_WITH_ASTER_PRICE_PROXY_NO_FILL",
+        "sourceSignalTs": 1790600400000
+      }
+    ]
+  },
+  "fullPenguAnnualTradeReplay": false,
+  "limitations": [
+    "Only independent PENGU alternative mode arms, not simultaneous BASE + V8/V64. Native raw signals are routed into one conditional PENGU model slot with source helper exit times and source cooldown hours.",
+    "Assumes fills at hypothetical ASTER next M5 opens and instant complete source exits at subsequent observed price; actual venue read-back, resident STOPs, partial orders and slippage are UNVERIFIED.",
+    "Strict SAFE LIVE policy must NOT release a real slot on source model exit alone; requires signed venue position/order reconciliation. This table is only a conditional research comparator.",
+    "Absent first M5 positive volume excludes an entry from this model; future next-bar M5 volume is recorded only ex-post, not used to admit an entry.",
+    "No seven-Runner shared exposure, daily loss, cumulative DD, fees/funding, order authority, exact-source release certificate or Owner authorization."
+  ],
+  "orderAuthority": false,
+  "productionEligible": false,
+  "schema": "stable4-pengu-isolated-native-one-slot-cooldown/v1",
+  "sharedWalletCompleted": false,
+  "sourceLedgerSha256": "93b4c4dd203da5394b77e58a7a23eaa359d3978ee27a6df5973aaddafde84e00",
+  "status": "CONDITIONAL_SOURCE_HELPER_ONE_SLOT_NOT_VENUE_EXECUTION",
+  "summary": {
+    "BASE": {
+      "admittedRoute": {
+        "LONG_V2_FINAL": 6,
+        "SHORT_V20": 17
+      },
+      "decisionCounts": {
+        "BLOCKED_OCCUPIED_MODEL_SLOT": 16,
+        "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT": 23,
+        "NO_M5_ENTRY_CONFIRMATION": 15
+      },
+      "rawCandidates": 54
+    },
+    "V8_V64": {
+      "admittedRoute": {
+        "LONG_V2_FINAL": 11,
+        "RECOVERY_V8": 19,
+        "SHORT_V20": 16
+      },
+      "decisionCounts": {
+        "BLOCKED_NATIVE_COOLDOWN": 5,
+        "BLOCKED_OCCUPIED_MODEL_SLOT": 31,
+        "MODELED_ONE_SLOT_ADMIT_AND_SOURCE_EXIT": 46,
+        "NO_M5_ENTRY_CONFIRMATION": 30
+      },
+      "rawCandidates": 112
+    }
+  }
+}
