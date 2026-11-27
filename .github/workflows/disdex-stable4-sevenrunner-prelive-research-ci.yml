@@ -124,6 +124,10 @@ jobs:
           # update ID chain breaks and 20+20 HL snapshot row-grain. Reject
           # native book reconstruction claims without verified repair.
           python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_sequence_quality
+          # Only 6 paired snapshot receipts / 3 unique ASTER source IDs;
+          # reject conflating raw mid difference with native V52 trade basis.
+          # No historical HTTP calls, no account/fill claims in CI.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_snapshot_quote_overlap
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
