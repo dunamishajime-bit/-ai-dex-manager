@@ -1,0 +1,550 @@
+{
+  "capturedAtUtc": "2026-11-27T23:34:40.068702+00:00",
+  "continuousAnnualPairedL2Proven": false,
+  "limitations": [
+    "Header-only Range checks prove file objects and compression magic, not full book state or synchronized ASTER/XYZ timestamp alignment. Two separately re-fetched old ZSTD samples decode to Parquet (AMZN only).",
+    "Historical early META/MSFT sampled 2025-10-01 12 UTC still HTTP404; a later file cannot supply a nonexistent earlier market hour. Provider snapshot gaps, producer clock differences, and 2s/30s cadence remain untested.",
+    "Only two dates x one hour per venue and five symbols. No bulk download, historical one-hour file sequence proof, source-native V52 candidate generation, actual maker queue position, hedge IOC fills or realized PnL/DD.",
+    "No credential, account action, provider subscription, LIVE trade, safety gate override, or release authority. 5-minute OHLC cannot substitute for L2 and third-party L2 must be independently verified before BT."
+  ],
+  "nativeV52EntryReplayProven": false,
+  "newPairSampleHoursUtc": [
+    {
+      "date": "2025-10-20",
+      "hour": 16
+    },
+    {
+      "date": "2026-09-02",
+      "hour": 16
+    }
+  ],
+  "orderAuthority": false,
+  "pairObservations": [
+    {
+      "base": "AMZN",
+      "contentRange": "bytes 0-3/1913",
+      "datasetFile": "aster_futures/2025-10-20/16/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "fileLengthBytes": 1913,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "28b52ffd",
+      "status": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "AMZN",
+      "datasetFile": "hyperliquid_futures/2025-10-20/16/xyz:AMZN_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "hourUtc": 16,
+      "httpStatus": 404,
+      "modelOrderAuthority": false,
+      "status": "HTTP_ERROR_UNVERIFIED",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "META",
+      "contentRange": "bytes 0-3/1940",
+      "datasetFile": "aster_futures/2025-10-20/16/METAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "fileLengthBytes": 1940,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "28b52ffd",
+      "status": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "META",
+      "datasetFile": "hyperliquid_futures/2025-10-20/16/xyz:META_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "hourUtc": 16,
+      "httpStatus": 404,
+      "modelOrderAuthority": false,
+      "status": "HTTP_ERROR_UNVERIFIED",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "MSFT",
+      "contentRange": "bytes 0-3/1957",
+      "datasetFile": "aster_futures/2025-10-20/16/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "fileLengthBytes": 1957,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "28b52ffd",
+      "status": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "MSFT",
+      "datasetFile": "hyperliquid_futures/2025-10-20/16/xyz:MSFT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "hourUtc": 16,
+      "httpStatus": 404,
+      "modelOrderAuthority": false,
+      "status": "HTTP_ERROR_UNVERIFIED",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "NVDA",
+      "contentRange": "bytes 0-3/2454",
+      "datasetFile": "aster_futures/2025-10-20/16/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "fileLengthBytes": 2454,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "28b52ffd",
+      "status": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "NVDA",
+      "datasetFile": "hyperliquid_futures/2025-10-20/16/xyz:NVDA_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "hourUtc": 16,
+      "httpStatus": 404,
+      "modelOrderAuthority": false,
+      "status": "HTTP_ERROR_UNVERIFIED",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "TSLA",
+      "contentRange": "bytes 0-3/29324",
+      "datasetFile": "aster_futures/2025-10-20/16/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "fileLengthBytes": 29324,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "28b52ffd",
+      "status": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "TSLA",
+      "datasetFile": "hyperliquid_futures/2025-10-20/16/xyz:TSLA_orderbook.parquet",
+      "dateUtc": "2025-10-20",
+      "hourUtc": 16,
+      "httpStatus": 404,
+      "modelOrderAuthority": false,
+      "status": "HTTP_ERROR_UNVERIFIED",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "AMZN",
+      "contentRange": "bytes 0-3/1653986",
+      "datasetFile": "aster_futures/2026-09-02/16/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 1653986,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "AMZN",
+      "contentRange": "bytes 0-3/115815",
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:AMZN_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 115815,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "META",
+      "contentRange": "bytes 0-3/2131033",
+      "datasetFile": "aster_futures/2026-09-02/16/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 2131033,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "META",
+      "contentRange": "bytes 0-3/126112",
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:META_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 126112,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "MSFT",
+      "contentRange": "bytes 0-3/1872390",
+      "datasetFile": "aster_futures/2026-09-02/16/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 1872390,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "MSFT",
+      "contentRange": "bytes 0-3/104058",
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:MSFT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 104058,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "NVDA",
+      "contentRange": "bytes 0-3/2256609",
+      "datasetFile": "aster_futures/2026-09-02/16/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 2256609,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "NVDA",
+      "contentRange": "bytes 0-3/174544",
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:NVDA_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 174544,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "HYPERLIQUID_XYZ"
+    },
+    {
+      "base": "TSLA",
+      "contentRange": "bytes 0-3/1991627",
+      "datasetFile": "aster_futures/2026-09-02/16/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 1991627,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "ASTER"
+    },
+    {
+      "base": "TSLA",
+      "contentRange": "bytes 0-3/139454",
+      "datasetFile": "hyperliquid_futures/2026-09-02/16/xyz:TSLA_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "fileLengthBytes": 139454,
+      "hourUtc": 16,
+      "httpStatus": 206,
+      "modelOrderAuthority": false,
+      "prefixHex": "50415231",
+      "status": "PARQUET_FRAME_HEADER_ONLY",
+      "venue": "HYPERLIQUID_XYZ"
+    }
+  ],
+  "pairSummaryByDate": {
+    "2025-10-20": {
+      "ASTER": {
+        "ZSTD_ENVELOPE_HEADER_ONLY": 5
+      },
+      "HYPERLIQUID_XYZ": {
+        "HTTP_ERROR_UNVERIFIED": 5
+      }
+    },
+    "2026-09-02": {
+      "ASTER": {
+        "PARQUET_FRAME_HEADER_ONLY": 5
+      },
+      "HYPERLIQUID_XYZ": {
+        "PARQUET_FRAME_HEADER_ONLY": 5
+      }
+    }
+  },
+  "previousAsterSampleSha256": "3fa8cff9bf26eafd6a9837d5a8d58700b6d4c1d7422b1a096478044e2989c46d",
+  "priorAsterSamplesReclassified": [
+    {
+      "contentRange": "bytes 0-3/1764",
+      "datasetFile": "aster_futures/2025-10-01/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "datasetFile": "aster_futures/2025-10-01/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "headerClassification": "HTTP_404_NOT_AVAILABLE_AT_SAMPLED_HOUR",
+      "hourUtc": 12,
+      "httpStatus": 404,
+      "rangeRequest": "bytes=0-3",
+      "status": "NOT_CONFIRMED_HTTP_ERROR",
+      "symbol": "METAUSDT"
+    },
+    {
+      "datasetFile": "aster_futures/2025-10-01/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "headerClassification": "HTTP_404_NOT_AVAILABLE_AT_SAMPLED_HOUR",
+      "hourUtc": 12,
+      "httpStatus": 404,
+      "rangeRequest": "bytes=0-3",
+      "status": "NOT_CONFIRMED_HTTP_ERROR",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/3353",
+      "datasetFile": "aster_futures/2025-10-01/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/1952",
+      "datasetFile": "aster_futures/2025-10-01/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/738389",
+      "datasetFile": "aster_futures/2026-01-10/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/687771",
+      "datasetFile": "aster_futures/2026-01-10/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/815139",
+      "datasetFile": "aster_futures/2026-01-10/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/781627",
+      "datasetFile": "aster_futures/2026-01-10/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/740012",
+      "datasetFile": "aster_futures/2026-01-10/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/88970",
+      "datasetFile": "aster_futures/2026-05-10/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/297652",
+      "datasetFile": "aster_futures/2026-05-10/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/928576",
+      "datasetFile": "aster_futures/2026-05-10/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/35904",
+      "datasetFile": "aster_futures/2026-05-10/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/128066",
+      "datasetFile": "aster_futures/2026-05-10/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "headerClassification": "ZSTD_ENVELOPE_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentLengthBytes": 2244978,
+      "datasetFile": "aster_futures/2026-09-02/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "headerClassification": "PARQUET_FRAME_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentLengthBytes": 1880314,
+      "datasetFile": "aster_futures/2026-09-02/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "headerClassification": "PARQUET_FRAME_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentLengthBytes": 2346575,
+      "datasetFile": "aster_futures/2026-09-02/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "headerClassification": "PARQUET_FRAME_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentLengthBytes": 1939487,
+      "datasetFile": "aster_futures/2026-09-02/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "headerClassification": "PARQUET_FRAME_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentLengthBytes": 1273704,
+      "datasetFile": "aster_futures/2026-09-02/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "headerClassification": "PARQUET_FRAME_HEADER_ONLY",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "TSLAUSDT"
+    }
+  ],
+  "priorHeaderClasses": {
+    "HTTP_404_NOT_AVAILABLE_AT_SAMPLED_HOUR": 2,
+    "PARQUET_FRAME_HEADER_ONLY": 5,
+    "ZSTD_ENVELOPE_HEADER_ONLY": 13
+  },
+  "productionEligible": false,
+  "schema": "stable4-v52-public-aster-hyperliquid-xyz-sampled-l2-presence/v1",
+  "signedMakerHedgeFillsProven": false,
+  "status": "SAMPLED_DUAL_VENUE_L2_HEADERS_NOT_CONTIGUOUS_NATIVE_BT",
+  "zstdPayloadSamples": [
+    {
+      "compressedBytes": 1764,
+      "compressedSha256": "3b324150b21665db2c36fd4f63f71feef918acced44fececad5acc51ee3bcdfa",
+      "compression": "ZSTD",
+      "datasetFile": "aster_futures/2025-10-01/12/AMZNUSDT_orderbook.parquet",
+      "decompressedBytes": 4284,
+      "parquetHeadTailMagicVerified": true,
+      "sampleOnly": true
+    },
+    {
+      "compressedBytes": 738389,
+      "compressedSha256": "b02f6800b5453554c5cc0b283ed92559ed9f1e83616388d59141f64d5756efee",
+      "compression": "ZSTD",
+      "datasetFile": "aster_futures/2026-01-10/12/AMZNUSDT_orderbook.parquet",
+      "decompressedBytes": 2957588,
+      "parquetHeadTailMagicVerified": true,
+      "sampleOnly": true
+    }
+  ]
+}

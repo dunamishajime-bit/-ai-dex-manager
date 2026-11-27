@@ -108,6 +108,10 @@ jobs:
           # Native V52 V13D/V11EQ requires synchronous ASTER/XYZ L2 data.
           # Reject any attempt to turn M5+Yahoo H1 into invented native fills.
           python -B -m unittest -v tests.test_stable4_v52_native_entry_source_gap
+          # Historical third-party ASTER/xyz L2 source exists on sampled hours,
+          # but old missing hours and absent L3/venue fills must stay blocked.
+          # Pure offline source-pin test; DO NOT fetch live external API in CI.
+          python -B -m unittest -v tests.test_stable4_v52_public_paired_l2_sample_evidence
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
