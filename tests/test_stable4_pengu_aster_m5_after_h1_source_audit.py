@@ -34,6 +34,12 @@ class PenguH1AsterM5TapeAuditTests(unittest.TestCase):
         self.assertEqual(self.report["arms"]["V8_V64"]["first5mPositiveVolume"],69)
         self.assertEqual(self.report["arms"]["BASE"]["first15mAllZero"],9)
         self.assertEqual(self.report["arms"]["V8_V64"]["first15mAllZero"],18)
+        self.assertEqual(self.report["crossArmDedup"],{
+            "baseline":54,"v8V64":112,"shared":54,"onlyBaseline":0,
+            "onlyV8V64":58,"union":112,
+            "extendedOnlyByRoute":{"LONG_V2_FINAL":10,"RECOVERY_V8":48},
+            "crossArmEventsAreIndependentTrades":False,
+        })
         for arm in ("BASE","V8_V64"):
             self.assertEqual(self.report["arms"][arm]["actualVenueFillsVerified"],0)
             for event in self.report["events"][arm]:
@@ -57,6 +63,9 @@ class PenguH1AsterM5TapeAuditTests(unittest.TestCase):
             lambda r:r["events"]["BASE"][0].__setitem__("m5HasPositiveVolumeNotFillProof",False),
             lambda r:r["events"]["BASE"][0].__setitem__("status","M5_15M_ALL_ZERO_VOLUME"),
             lambda r:r.__setitem__("sourceH1LedgerSha256","0"*64),
+            lambda r:r["crossArmDedup"].__setitem__("union",166),
+            lambda r:r["crossArmDedup"].__setitem__("shared",0),
+            lambda r:r["crossArmDedup"].__setitem__("crossArmEventsAreIndependentTrades",True),
         ]
         for mutate in changes:
             forged=copy.deepcopy(self.report)
