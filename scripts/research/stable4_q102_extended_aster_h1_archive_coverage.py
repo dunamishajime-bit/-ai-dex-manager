@@ -67,8 +67,9 @@ def audit_file(file: Path) -> tuple[dict, dict[int, bool]]:
             first = ts if first is None else first
             last = previous = ts
             count += 1
-    if not count:
-        raise ValueError("Q102_EXTENDED_H1_ARCHIVE_EMPTY:" + file.name)
+    # An empty file is a genuine source-coverage failure for its symbol,
+    # not a reason to discard the remaining 35+ independently readable files.
+    # Keep the source digest and zero-row metadata for fail-closed reporting.
     return ({
         "file": file.name,
         "sha256": digest.hexdigest(),
