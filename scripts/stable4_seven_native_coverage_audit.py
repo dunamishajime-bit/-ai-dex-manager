@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 THREE = ROOT / "docs/research/STABLE4_THREE_NATIVE_SLEEVE_SYNTHETIC_20261127.json"
 OTHER = ROOT / "docs/research/STABLE4_Q102_V4_HYPE_NATIVE_SYNTHETIC_EVIDENCE_20261127.json"
 FOUR_REEXEC = ROOT / "docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json"
+PENGU_NATIVE = ROOT / "docs/research/STABLE4_PENGU_BINANCE_NATIVE_H1_LEDGER_20261128.json"
+Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE_H1_20261128.json"
+V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -27,6 +30,30 @@ def evaluate() -> dict:
     three = json.loads(THREE.read_text(encoding="utf-8"))
     other = json.loads(OTHER.read_text(encoding="utf-8"))
     four = json.loads(FOUR_REEXEC.read_text(encoding="utf-8"))
+    pengu_native = json.loads(PENGU_NATIVE.read_text(encoding="utf8"))
+    q102_real = json.loads(Q102_REAL.read_text(encoding="utf8"))
+    v52_coverage = json.loads(V52_COVERAGE.read_text(encoding="utf8"))
+    if (pengu_native.get("status") != "NATIVE_REAL_H1_RAW_SIGNAL_PARITY_PASS"
+            or any(pengu_native.get("arms", {}).get(mode, {}).get("checked") != count
+                   for mode, count in (("BASE", 54), ("V8_V64", 112)))
+            or pengu_native.get("orderAuthority") is not False
+            or pengu_native.get("annualProfitOrDdCertified") is not False
+            or pengu_native.get("productionEligible") is not False):
+        raise ValueError("PENGU_REAL_H1_NATIVE_ONLY_EVIDENCE_INVALID")
+    if (q102_real.get("status") != "LIMITED_NATIVE_H1_MONTHLY_REPLAY_PASS_NO_TRADES"
+            or q102_real.get("summary", {}).get("months") != 12
+            or q102_real.get("summary", {}).get("noSignal") != 12
+            or q102_real.get("portfolioReplayComplete") is not False
+            or q102_real.get("orderAuthority") is not False):
+        raise ValueError("Q102_LIMITED_REAL_H1_NATIVE_EVIDENCE_INVALID")
+    if (v52_coverage.get("status") != "COVERAGE_REVIEW_ONLY"
+            or v52_coverage.get("orderAuthority") is not False
+            or v52_coverage.get("sourceFillParityProven") is not False
+            or len(v52_coverage.get("perTicker", {})) != 5
+            or any(v.get("asterM5", {}).get("rows") != 105120
+                   or v.get("yahooH1", {}).get("rows") != 1742
+                   for v in v52_coverage["perTicker"].values())):
+        raise ValueError("V52_MARKET_COVERAGE_NOT_EXECUTION_EVIDENCE_INVALID")
     if (four.get("schema") != "stable4-four-native-source-synthetic-comparison/v1"
             or four.get("status") != "REVIEW_ONLY_PARTIAL_SOURCE_REPLAY_NO_ADOPTION"
             or four.get("adoptFourSleeveHype") is not False
@@ -90,6 +117,12 @@ def evaluate() -> dict:
         "threeSleeveSharedWalletCases": len(three["cases"]),
         "fourSleeveSharedWalletCases": four["syntheticWindow"]["cases"],
         "fourSleeveComparisonAdopted": False,
+        "realMarketNativeSourceScope": {
+            "PENGU": "BINANCE_H1_RAW_SOURCE_ENTRY_166_OF_166_ONLY_NOT_VENUE",
+            "Q102": "BTC_SOL_12_MONTH_START_SOURCE_HIGH_VOL_CHECKPOINTS_ONLY",
+            "V52": "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY",
+        },
+        "noCurrentSourceNativeSharedWalletPortfolioResult": True,
         "q102IsolatedCases": other["summary"]["q102"]["cases"],
         "hypeIsolatedCases": other["summary"]["hype"]["cases"],
         "singleSevenRunnerNativeReplay": False,
