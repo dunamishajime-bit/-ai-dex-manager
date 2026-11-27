@@ -19,6 +19,8 @@ export function resolveIdlePriorityShortRuntime(){
   parityCertificatePath:resolve(process.env.DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH||"/var/lib/disdex/shared/idle-priority-parity-cert.json"),
   statePath:resolve(process.env.DISDEX_IDLE_PRIORITY_STATE_PATH||"/var/lib/disdex/idle-priority/state.json"),
   renderShadowPath:resolve(process.env.DISDEX_RENDER_INDEPENDENT_SHADOW_PATH||"/var/lib/disdex/idle-priority/render-independent-shadow.json"),
+  r26LiveCertified:bool(process.env.DISDEX_IDLE_R26_LIVE_CERTIFIED,false),
+  r26EntryCertPath:resolve(process.env.DISDEX_IDLE_R26_ENTRY_CERT_PATH||"/var/lib/disdex/shared/operator-activation/idle-r26-entry-certificate.json"),
   renderIndependentLiveAuthorized:bool(process.env.DISDEX_RENDER_INDEPENDENT_LIVE_CERTIFIED,false),
   renderIndependentCertPath:resolve(process.env.DISDEX_RENDER_INDEPENDENT_CERT_PATH||"/var/lib/disdex/shared/operator-activation/render-independent-cert.json"),
   renderLegacyAdverseLiveAuthorized:bool(process.env.DISDEX_RENDER_LEGACY_ADVERSE_LIVE_CERTIFIED,false),

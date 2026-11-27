@@ -18,6 +18,7 @@ import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-a
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import {evaluateIdleLatestFromClosedMarket} from "./stable4-idle-research-policy";
+import {assertRootOwnedIdleR26EntryCertificate} from "./idle-r26-entry-certificate";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
@@ -894,7 +895,18 @@ export class IdlePriorityShortRunner {
             // STABLE4 R26 candidate-only admission. SHADOW/PAPER exercise the
             // newest research policy. LIVE awaits a root-owned exact-SHA
             // parity certificate; neither exits nor legacy owned legs change.
-            const latestResearchOnly = this.dependencies.runtime.mode !== "LIVE";
+            const latestResearchOnly = this.dependencies.runtime.mode !== "LIVE" || this.dependencies.runtime.r26LiveCertified;
+            // Exit and resident STOP reconciliation happened above. A missing
+            // R26 certificate can only suppress a NEW LIVE entry, never an exit.
+            if(this.dependencies.runtime.mode==="LIVE" && this.dependencies.runtime.r26LiveCertified){
+                try {await assertRootOwnedIdleR26EntryCertificate(
+                  this.dependencies.runtime.r26EntryCertPath,this.dependencies.runtime.runtimeSha);
+                }catch(error){
+                  return {status:"held",message:"IDLE_R26_ENTRY_CERT_REQUIRED:"+
+                    (error instanceof Error?error.message:String(error)),
+                    ordersSent:0,cancelsSent:0,positionChangesSent:0};
+                }
+            }
             const selectedRoutes = latestResearchOnly
                 ? routeCandidates.filter(row=>evaluateIdleLatestFromClosedMarket({
                     decisionTs:market.decisionTs,btc:market.btc,tao:market.symbols.TAOUSDT,

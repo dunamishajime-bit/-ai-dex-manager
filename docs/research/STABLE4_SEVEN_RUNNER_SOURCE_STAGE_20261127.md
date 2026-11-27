@@ -25,3 +25,7 @@ Owner protections: preserve GLOBAL HOLD and any existing venue resident STOPs. N
 
 ## Incremental review: account-wide DD30 (not live)
 The original seven-runner per-sleeve DD contribution index is not account-wide peak-to-trough equity drawdown. A separate time-weighted account equity DD module now tracks net deposits/withdrawals, historical peaks and permanent maximum breach, and blocks *new* dry-run entries at >30%. It never authorizes venue orders or suspends exits. Missing/old marks fail closed. Data proof type is explicitly **OFFLINE_RECONCILED_MTM_ONLY**, not a root-signed live account mark. Actual reconciled signed live feed remains a separate blocker.
+
+
+## R26 LIVE adoption boundary
+Optional DISDEX_IDLE_R26_LIVE_CERTIFIED=1 does not itself permit orders. The new R26 admission filter is inspected only after existing protection checks. The R26 root-owned, exact-source-SHA admission certificate is mandatory when explicitly enabling the R26 policy in LIVE. Default false preserves existing certified legacy LIVE policy. There is no R26 certificate issued: missing full seven-runner native-source synthetic rerun, authoritative account-MTM DDR, source-parity coverage and Owner approval. A plain JSON object is insufficient unless root owns the regular file and all independent issuer fields are proven by external governance.
