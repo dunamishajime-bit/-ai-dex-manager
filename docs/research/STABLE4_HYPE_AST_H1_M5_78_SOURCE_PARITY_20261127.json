@@ -1,0 +1,34 @@
+{
+  "schema": "stable4-hype-source-entry-and-exit-model-parity/v1",
+  "status": "MODEL_REPLAY_PASS_NO_VENUE_CERTIFICATE",
+  "periodUtcStart": "2025-10-01T00:00:00Z",
+  "periodUtcEndExclusive": "2026-10-01T00:00:00Z",
+  "candidates": 78,
+  "entrySignalTimePriceAtrDistanceMatches": 78,
+  "exitStop57": 57,
+  "exitProfit21": 21,
+  "exitReasonPriceConfirmedM5ClockMatches": 78,
+  "sourceCandlesHype5m": 107136,
+  "sourceSha256": {
+    "lib/stable4-hype-offline-m5-exit.ts": "d6825d46ecd1376ad6ab5cedd27a93506b07d25db035a6e420bf05baaac8ddd9",
+    "scripts/stable4-hype-native-annual-source-parity.ts": "2a2cf81c2c5e4fdf0902b4ac3e553d46f6a21d06576d29c19a995d51440b356f",
+    "scripts/stable4-hype-aster-m5-exit-parity.ts": "b419fca86670606cdcc1cdce0fadff2560bf6872ccf5df522a7e818586e615b5"
+  },
+  "entryEvidenceSha256": "fccfd370caa61474e67cb3f8ccdd6db55408917ad5a140360c6e57d700b16141",
+  "exitEvidenceSha256": "9d3868bc56caf15cbe64e3d27b079221d8f31dadf332f93a93e43bae21ebe1fe",
+  "dataSha256": {
+    "btcH1": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+    "hypeH1": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc",
+    "hypeM5Prefix": "7529686c7a509749be040eab12fe7d1e961bc391c43334e14cdfe959c5db046a",
+    "hypeM5Suffix": "21ca2e4c449033f39951a67014d35747af6350b94ed18141a5dfd6a7b4dd1148",
+    "archivedCandidates": "1a996f77e52bc645c517f67f95a89561ca2c01896e3055c562de938b527ed6e6"
+  },
+  "sameM5StopAndTargetTouches": 0,
+  "limit": [
+    "Archived HYPE candidates may overlap and are not portfolio-admitted actual trades",
+    "M5 stop and TP inferred by bar high/low; venue-resident order execution not proven",
+    "No actual exchange fills, funding reconciliation, orderbook queue, signed runner DD account data or production/Owner authorization",
+    "Not a common-wallet current-source annual backtest for all 7 Runner routes"
+  ],
+  "orderAuthority": false
+}
