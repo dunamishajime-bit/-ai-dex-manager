@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import unittest
+import json
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 
 from scripts import stable4_seven_native_coverage_audit as audit
@@ -34,6 +37,25 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
         self.assertFalse(report["portfolioFundingAndExecutableProtectionProven"])
         self.assertFalse(report["orderAuthority"])
         self.assertFalse(report["rootCertificateIssued"])
+
+    def test_real_native_evidence_falsification_rejected(self):
+        for path_attr, mutate, expected in [
+            ("PENGU_NATIVE", lambda x: x["arms"]["BASE"].__setitem__("checked", 53),
+             "PENGU_REAL_H1_NATIVE_ONLY_EVIDENCE_INVALID"),
+            ("Q102_REAL", lambda x: x.__setitem__("portfolioReplayComplete", True),
+             "Q102_LIMITED_REAL_H1_NATIVE_EVIDENCE_INVALID"),
+            ("V52_COVERAGE", lambda x: x["perTicker"]["AMZN"]["asterM5"].__setitem__("rows", 1),
+             "V52_MARKET_COVERAGE_NOT_EXECUTION_EVIDENCE_INVALID"),
+        ]:
+            original = getattr(audit, path_attr)
+            evidence = json.loads(original.read_text(encoding="utf8"))
+            mutate(evidence)
+            with tempfile.TemporaryDirectory() as directory:
+                mock_file = Path(directory) / "fake.json"
+                mock_file.write_text(json.dumps(evidence), encoding="utf8")
+                with patch.object(audit, path_attr, mock_file):
+                    with self.assertRaisesRegex(ValueError, expected):
+                        audit.evaluate()
 
     def test_source_tampering_rejected_before_any_coverage_claim(self):
         with patch.object(audit, "exact_sha", return_value="0" * 64):
