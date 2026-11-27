@@ -1,0 +1,24 @@
+{
+  "title": "Y06-R3 exploratory market-wide bearish veto",
+  "asof": "2026-11-26",
+  "status": "POSTHOC_EXPLORATORY_RESEARCH_ONLY_NO_SOURCE_ADOPTION",
+  "motivation": "R3 reduces DD but synthetic bull tapes still cause significant losses; test whether BTC confirmed bearish regime can causally veto counter-market shorts. Original R3 9-policy test and its results already reviewed; no untouched OOS claims.",
+  "fixed_gate_arms": {
+    "BASE": "Unchanged R3 signal, no BTC direction veto",
+    "BTC12_NEG": "At intended entry timestamp BTC latest fully closed 12h return negative",
+    "BTC_D24_AND12_NEG": "At intended entry timestamp BTC latest fully closed UTC daily and 12h returns both negative"
+  },
+  "candidate_policies": [
+    "DIRECT_CONTROL",
+    "RETEST_H1",
+    "RETEST_M15"
+  ],
+  "exits": "STOP8_TIME24 only, no exit optimization after viewing results",
+  "cost_bps": [
+    10,
+    30
+  ],
+  "portfolio": "R3 same 0.30x max2-position price and 12h cooldown, all 3 archived periods and same 24 synthetic markets",
+  "empirical_limit": "All PRE/TARGET/FORWARD already inspected and synthetic markets known; these are exploratory, not independent validation. No parameter tweaking, report misses and opportunities.",
+  "risk": "No real orders, no change in signed production, VPS, GLOBAL HOLD, 8% resident STOP cannot be removed."
+}

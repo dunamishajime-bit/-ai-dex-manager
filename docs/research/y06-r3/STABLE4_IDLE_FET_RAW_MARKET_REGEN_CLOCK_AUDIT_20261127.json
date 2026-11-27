@@ -1,0 +1,277 @@
+{
+  "idle": {
+    "expected": 849,
+    "actual": 849,
+    "retained": 197,
+    "missing": [],
+    "extra": [],
+    "featureMismatch": [],
+    "errors": {
+      "IDLE_INSUFFICIENT_EXACT_CLOSED_H1_HISTORY": 9687,
+      "IDLE_H1_HISTORY_GAP": 192,
+      "IDLE_VOLUME_MEDIAN_INVALID": 1721
+    }
+  },
+  "fet": {
+    "total": 11,
+    "matched": 4,
+    "results": [
+      {
+        "entryTs": 1774342800000,
+        "entry": 0.2396,
+        "expected": {
+          "ts": 1774360500000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.2274
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1774360200000,
+          "price": 0.2274
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1774386000000,
+        "entry": 0.2497,
+        "expected": {
+          "ts": 1774438200000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.257191
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1774437900000,
+          "price": 0.257191
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1777870800000,
+        "entry": 0.2115,
+        "expected": {
+          "ts": 1777957200000,
+          "reason": "MAX_HOLD",
+          "price": 0.2094
+        },
+        "actual": {
+          "reason": "MAX_HOLD",
+          "ts": 1777957200000,
+          "price": 0.2094
+        },
+        "ok": true
+      },
+      {
+        "entryTs": 1779354000000,
+        "entry": 0.1956,
+        "expected": {
+          "ts": 1779440400000,
+          "reason": "MAX_HOLD",
+          "price": 0.2107
+        },
+        "actual": {
+          "reason": "MAX_HOLD",
+          "ts": 1779440400000,
+          "price": 0.2107
+        },
+        "ok": true
+      },
+      {
+        "entryTs": 1779728400000,
+        "entry": 0.2271,
+        "expected": {
+          "ts": 1779800700000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.251416
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1779800400000,
+          "price": 0.251416
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1780146000000,
+        "entry": 0.2682,
+        "expected": {
+          "ts": 1780154700000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.276246
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1780154400000,
+          "price": 0.276246
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1785877200000,
+        "entry": 0.1483,
+        "expected": {
+          "ts": 1785963600000,
+          "reason": "MAX_HOLD",
+          "price": 0.1446
+        },
+        "actual": {
+          "reason": "MAX_HOLD",
+          "ts": 1785963600000,
+          "price": 0.1446
+        },
+        "ok": true
+      },
+      {
+        "entryTs": 1787245200000,
+        "entry": 0.1392,
+        "expected": {
+          "ts": 1787303400000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.156832
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1787303100000,
+          "price": 0.156832
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1789693200000,
+        "entry": 0.1772,
+        "expected": {
+          "ts": 1789779600000,
+          "reason": "MAX_HOLD",
+          "price": 0.1847
+        },
+        "actual": {
+          "reason": "MAX_HOLD",
+          "ts": 1789779600000,
+          "price": 0.1847
+        },
+        "ok": true
+      },
+      {
+        "entryTs": 1789981200000,
+        "entry": 0.1908,
+        "expected": {
+          "ts": 1789981500000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.18125999999999998
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1789981200000,
+          "price": 0.18125999999999998
+        },
+        "ok": false
+      },
+      {
+        "entryTs": 1789995600000,
+        "entry": 0.198,
+        "expected": {
+          "ts": 1790040300000,
+          "reason": "FET_PROTECTED_STOP",
+          "price": 0.1881
+        },
+        "actual": {
+          "reason": "FET_PROTECTED_STOP",
+          "ts": 1790040000000,
+          "price": 0.1881
+        },
+        "ok": false
+      }
+    ]
+  },
+  "fetClockAudit": {
+    "exactTimestampMatches": 4,
+    "priceAndReasonMatches": 11,
+    "barEndConventionMatches": 11,
+    "rows": [
+      {
+        "entryTs": 1774342800000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1774386000000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1777870800000,
+        "deltaMs": 0,
+        "reason": "MAX_HOLD",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1779354000000,
+        "deltaMs": 0,
+        "reason": "MAX_HOLD",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1779728400000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1780146000000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1785877200000,
+        "deltaMs": 0,
+        "reason": "MAX_HOLD",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1787245200000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1789693200000,
+        "deltaMs": 0,
+        "reason": "MAX_HOLD",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1789981200000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      },
+      {
+        "entryTs": 1789995600000,
+        "deltaMs": 300000,
+        "reason": "FET_PROTECTED_STOP",
+        "priceMatch": true,
+        "reasonMatch": true
+      }
+    ],
+    "conclusion": "Every stop is recorded at bar start+5min in archived tape; modeled price/reason match. Original exit-model implementation not located, so timestamp convention inferred, not live exact execution evidence. No timestamp change to production."
+  },
+  "source": "import {readFileSync,writeFileSync} from \"node:fs\";\nimport {gunzipSync} from \"node:zlib\";\nimport assert from \"node:assert/strict\";\nimport {computeIdlePriorityFeatures,evaluateIdleGenericCandidate,evaluateIdlePriorityShort,type IdleH1Candle} from \"../lib/idle-priority-short-signal\";\nimport {reviewIdleResearchBatch,initialIdleResearch,type IdleTapeRow} from \"../lib/stable4-idle-research-policy\";\nimport {advanceFetBrk48LongTrailingStop,type FetBrk48TrailingStopState} from \"../lib/fet-brk48-trailing-stop\";\nimport {FET_BRK48_RESIDUAL as policy} from \"../config/fetBrk48Runtime\";\nimport type {IdlePrioritySymbol} from \"../config/idlePriorityShortPolicy\";\nconst B=String.raw`C:\\tmp\\disdex-bt-20251001-20261001`,R=String.raw`C:\\tmp\\disdex-d126-crossrunner-research-20261126`,H=3600000,M=300000;\nconst begin=Date.parse(\"2025-10-01T00:00:00Z\"),end=Date.parse(\"2026-10-01T00:00:00Z\");\nconst gzip=(p:string)=>gunzipSync(readFileSync(p)).toString(\"utf8\").trim().split(/\\r?\\n/).map(x=>JSON.parse(x));\nconst load=(s:string):Map<number,IdleH1Candle>=>new Map(gzip(B+\"/aster-public-v3-h1/\"+s+\"-1h-20250924-20261001.jsonl.gz\").map(r=>[Number(r[0]),{ts:Number(r[0]),open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),quoteVolume:Number(r[7])}]));\nconst btc=load(\"BTCUSDT\"),symbols=[\"TAOUSDT\",\"TIAUSDT\",\"DOTUSDT\",\"JUPUSDT\",\"RENDERUSDT\"] as const;\nconst data=new Map(symbols.map(s=>[s,load(s)]));\nconst window=(m:Map<number,IdleH1Candle>,t:number)=>Array.from({length:73},(_,i)=>m.get(t-(73-i)*H)).filter((r):r is IdleH1Candle=>!!r);\nconst errors:Record<string,number>={},actual:IdleTapeRow[]=[],accepted:IdleTapeRow[]=[];let state=initialIdleResearch();\nfor(let t=begin;t<end;t+=H){\n const b=window(btc,t),rows:IdleTapeRow[]=[];\n for(const sym of symbols){\n  try{\n   const f=computeIdlePriorityFeatures(t,window(data.get(sym)!,t),b);\n   const x=evaluateIdlePriorityShort(sym,f,evaluateIdleGenericCandidate(f));\n   if(x.accepted)rows.push({entryTs:t,symbol:sym,route:x.route,features:f});\n  }catch(e){const m=(e as Error).message;errors[m]=(errors[m]??0)+1;}\n }\n actual.push(...rows);const x=reviewIdleResearchBatch(state,t,rows);state=x.state;accepted.push(...x.decisions.filter(d=>d.retained).map(d=>d.row));\n}\nconst raw=readFileSync(B+\"/DIRECTION_RESEARCH_20261109/IDLE_CURRENT_PRODUCTION_REPLAY_20261110/idle-route-candidates-no-cooldown.jsonl\",\"utf8\").trim().split(/\\r?\\n/).map(x=>JSON.parse(x));\nconst key=(x:IdleTapeRow)=>[x.entryTs,x.symbol,x.route].join(\"|\"),expected=new Map<string,any>(raw.map(x=>[key(x),x])),got=new Map(actual.map(x=>[key(x),x]));\nconst missing=[...expected.keys()].filter(k=>!got.has(k)),extra=[...got.keys()].filter(k=>!expected.has(k));const featureMismatch:string[]=[];\nfor(const [k,x]of got){const y=expected.get(k);if(y&&Object.entries(x.features).some(([f,v])=>typeof v===\"number\"?Math.abs(v-y.features[f])>1e-12:v!==y.features[f]))featureMismatch.push(k);}\nconst fet=JSON.parse(readFileSync(B+\"/native-new-signal-20251001-20261001/native-FET-all-intent-modeled-5m-exit-audit.json\",\"utf8\")).trades;\nconst fbars=new Map<number,any[]>([...gzip(B+\"/aster-public-v3-5m-prefix/FETUSDT-5m-20250924-20260803.jsonl.gz\"),...gzip(B+\"/aster-public-v3-5m-suffix/FETUSDT-5m-20260803-20261001.jsonl.gz\")].map(r=>[Number(r[0]),r]));\nconst results:any[]=[];\nfor(const x of fet){\n const t=x.entryTs,entry=Number(fbars.get(t)?.[1]),until=t+policy.holdHours*H;\n let stop=entry*(1-policy.hardStopPct),trail:FetBrk48TrailingStopState|undefined,exit:any;\n for(let j=t;j<until;j+=M){\n  const r=fbars.get(j);if(!r){exit={reason:\"GAP\",ts:j};break;}\n  const [o,h,l,c]=r.slice(1,5).map(Number);\n  if(l<=stop+1e-12){exit={reason:\"FET_PROTECTED_STOP\",ts:j,price:Math.min(o,stop)};break;}\n  const res=advanceFetBrk48LongTrailingStop({entryPrice:entry,state:trail,bar:{timestampMs:j,open:o,high:h,low:l,close:c}});\n  trail=res.state;\n  if(c>=entry*(1+policy.profitFloorTriggerPct)-1e-12)stop=Math.max(stop,entry*(1+policy.profitFloorStopPct));\n  if(trail.stopPrice!==undefined)stop=Math.max(stop,trail.stopPrice);\n }\n if(!exit)exit={reason:\"MAX_HOLD\",ts:until,price:Number(fbars.get(until)?.[1])};\n const ok=entry===x.entryPrice&&exit.ts===x.exitTs&&exit.reason===x.exitReason&&Math.abs(exit.price-x.exitPrice)<1e-10;\n results.push({entryTs:t,entry,expected:{ts:x.exitTs,reason:x.exitReason,price:x.exitPrice},actual:exit,ok});\n}\nconst out={idle:{expected:raw.length,actual:actual.length,retained:accepted.length,missing,extra,featureMismatch,errors},fet:{total:results.length,matched:results.filter(r=>r.ok).length,results}};\nwriteFileSync(R+\"/STABLE4_IDLE_FET_RAW_REGEN_AUDIT_20261127.json\",JSON.stringify(out,null,2));console.log(JSON.stringify(out));if(missing.length||extra.length||featureMismatch.length||accepted.length!==197||results.some(x=>!x.ok))process.exitCode=1;\n",
+  "sha256": {
+    "STABLE4_IDLE_FET_RAW_REGEN_AUDIT_20261127.json": "e9a8419a5cf877bb04eea1eff66d1e29b55420cbac203db15e841e2f677ada95",
+    "stable4-idle-fet-raw-regen.test.ts": "8ce95ecde9c5365b0c7e1487c60c78e72bfcf3d2c47b96cb76b12bb32be4c850"
+  },
+  "status": "RESEARCH_ONLY_NO_LIVE"
+}

@@ -1,0 +1,592 @@
+{
+  "status": "OFFLINE_ONLY_NO_LIVE",
+  "candidate": "3959a0d6fa77a0b882d0f88a833e9147d45b6aca",
+  "findings": {
+    "v4GrossDrift": "plan aggregate2, current planner aggregate3, shared aggregate3; reducer aggregate3 and stale crypto3.5/total4.75. Historical journal must not silently replay under new admission caps.",
+    "v4Integration": "existing source uses H2 native decision; R21 independent H1 needs explicit clock/state/certification; no runtime wiring performed.",
+    "pengu": "41 historical gate decisions and 4 accepted match, native trigger/feature regeneration not yet proven",
+    "idleFet": "latest native research parity not established"
+  },
+  "results": {
+    "status": "OFFLINE_ONLY_NO_LIVE",
+    "pengu_gate": {
+      "rows": 41,
+      "mismatches": [],
+      "accepted": 4,
+      "early_and_missing_rejected": 41,
+      "details": [
+        {
+          "ts": 1760065200000,
+          "expected": [
+            0,
+            2,
+            false
+          ],
+          "actual": [
+            0,
+            2,
+            false
+          ]
+        },
+        {
+          "ts": 1760544000000,
+          "expected": [
+            0.75,
+            0,
+            false
+          ],
+          "actual": [
+            0.75,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1761156000000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1761681600000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1761894000000,
+          "expected": [
+            0.75,
+            0,
+            false
+          ],
+          "actual": [
+            0.75,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1761908400000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1762232400000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1762650000000,
+          "expected": [
+            0.75,
+            -3,
+            false
+          ],
+          "actual": [
+            0.75,
+            -3,
+            false
+          ]
+        },
+        {
+          "ts": 1762682400000,
+          "expected": [
+            0.75,
+            2,
+            true
+          ],
+          "actual": [
+            0.75,
+            2,
+            true
+          ]
+        },
+        {
+          "ts": 1762909200000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1763092800000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1764439200000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1765029600000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1765771200000,
+          "expected": [
+            0.75,
+            0,
+            false
+          ],
+          "actual": [
+            0.75,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1765893600000,
+          "expected": [
+            0.75,
+            2,
+            true
+          ],
+          "actual": [
+            0.75,
+            2,
+            true
+          ]
+        },
+        {
+          "ts": 1766008800000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1766062800000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1766077200000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1766080800000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1766102400000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1768860000000,
+          "expected": [
+            0.5,
+            0,
+            false
+          ],
+          "actual": [
+            0.5,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1768928400000,
+          "expected": [
+            0.5,
+            null,
+            false
+          ],
+          "actual": [
+            0.5,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1769806800000,
+          "expected": [
+            0.75,
+            0,
+            false
+          ],
+          "actual": [
+            0.75,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1771560000000,
+          "expected": [
+            0.75,
+            2,
+            true
+          ],
+          "actual": [
+            0.75,
+            2,
+            true
+          ]
+        },
+        {
+          "ts": 1774540800000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1775167200000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1778670000000,
+          "expected": [
+            0,
+            null,
+            false
+          ],
+          "actual": [
+            0,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1778702400000,
+          "expected": [
+            0,
+            null,
+            false
+          ],
+          "actual": [
+            0,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1778958000000,
+          "expected": [
+            0,
+            null,
+            false
+          ],
+          "actual": [
+            0,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1779998400000,
+          "expected": [
+            0.75,
+            2,
+            true
+          ],
+          "actual": [
+            0.75,
+            2,
+            true
+          ]
+        },
+        {
+          "ts": 1780056000000,
+          "expected": [
+            0.75,
+            0,
+            false
+          ],
+          "actual": [
+            0.75,
+            0,
+            false
+          ]
+        },
+        {
+          "ts": 1781841600000,
+          "expected": [
+            0.75,
+            1,
+            false
+          ],
+          "actual": [
+            0.75,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1782259200000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1783544400000,
+          "expected": [
+            0.75,
+            null,
+            false
+          ],
+          "actual": [
+            0.75,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1785232800000,
+          "expected": [
+            0,
+            1,
+            false
+          ],
+          "actual": [
+            0,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1785297600000,
+          "expected": [
+            0,
+            null,
+            false
+          ],
+          "actual": [
+            0,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1788544800000,
+          "expected": [
+            0,
+            null,
+            false
+          ],
+          "actual": [
+            0,
+            null,
+            false
+          ]
+        },
+        {
+          "ts": 1788559200000,
+          "expected": [
+            0,
+            1,
+            false
+          ],
+          "actual": [
+            0,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1788876000000,
+          "expected": [
+            0.5,
+            1,
+            false
+          ],
+          "actual": [
+            0.5,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1789045200000,
+          "expected": [
+            0.5,
+            1,
+            false
+          ],
+          "actual": [
+            0.5,
+            1,
+            false
+          ]
+        },
+        {
+          "ts": 1789059600000,
+          "expected": [
+            0.5,
+            1,
+            false
+          ],
+          "actual": [
+            0.5,
+            1,
+            false
+          ]
+        }
+      ]
+    },
+    "r21_single_slot": {
+      "10": {
+        "count": 100,
+        "violations": [],
+        "ledger_sha256": "b2dfd67e34d4f9ed1a084cf4b155be27bb7b83f9909d15de477fb974ff84a2e8",
+        "exit_reasons": {
+          "R21_TIME48": 32,
+          "R21_TIME24": 59,
+          "R21_TARGET": 4,
+          "V4_RESEARCH_RESIDENT_STOP8_M5": 5
+        }
+      },
+      "30": {
+        "count": 99,
+        "violations": [],
+        "ledger_sha256": "8673f057a661211a77a48157120289b7b39d9f28378ce7dc81da263db64197e7",
+        "exit_reasons": {
+          "R21_TIME24": 59,
+          "R21_TARGET": 4,
+          "V4_RESEARCH_RESIDENT_STOP8_M5": 5,
+          "R21_TIME48": 31
+        }
+      }
+    },
+    "inputs_sha256": {
+      "PRISM7_P75_BINANCE_NATIVE62_SAME_UTC_DUAL_POINTS_NO025_TRANSFER_20261122.json": "5fcd9bf4dff0085e54c5620753647c069ba6c8671f283c81bce046fcf0fdce5c",
+      "PRISM7_P91_REAL_1Y_BINANCE_V20_ALL_NATIVE_ENTRY_SCORE_DECISIONS_20261122.jsonl": "195e7499079f7d89f7c64a94e0b60516ebeb6903833242284996e2f1c2c44737",
+      "PRISM7_P91_REAL_1Y_BINANCE_TO_ASTER_5M_ACCEPTED_NATIVE_V20_20261122.jsonl": "ce82fe3224bc878f24a9fd73a13467572e254d3c523c09537cdaa397a5763398",
+      "PENGUUSDT-1h-20250924-20261001.jsonl.gz": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "PENGUUSDT-5m-20250924-20260803.jsonl.gz": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "PENGUUSDT-5m-20260803-20261001.jsonl.gz": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b"
+    },
+    "limitations": "P75 Binance native trigger and macro features are frozen inputs; not independently regenerated. R26 completed fill audit only, no runtime pending or exchange certification. No order permissions."
+  },
+  "source": "import pathlib,json,gzip,csv,hashlib,collections,datetime,math\nfrom pathlib import Path\nr=Path(r'C:\\Users\\dis\\Documents\\DisDex_Research\\WINRATE_DEEP_20261122')\nb=Path(r'C:\\tmp\\disdex-bt-20251001-20261001')\no=Path(r'C:\\tmp\\disdex-d126-crossrunner-research-20261126')\nsrc=o/'stable4_p91_offline_entry_parity_20261127.py'\nP=o/'STABLE4_P91_ENTRY_PARITY_20261127.json'\nassert not P.exists()\ndef gate(bull,ascore,bscore,bar,prev,signal_ts,asof):\n    if not isinstance(bull,bool) or not all(math.isfinite(x) for x in (ascore,bscore,prev)) or prev<=0:return {'gross':0.,'score':None,'pass':False,'reason':'MISSING_INPUT'}\n    gross=.5 if bull and ascore>=5 and bscore>=3 else 0. if bull else .75\n    if asof<signal_ts+300000 or bar is None or int(bar[0])!=signal_ts:return {'gross':gross,'score':None,'pass':False,'reason':'UNCLOSED_OR_MISSING_M5'}\n    op,hi,lo,c,v=map(float,bar[1:6])\n    if not all(math.isfinite(x) for x in (op,hi,lo,c,v)) or not (0<lo<=min(op,c)<=max(op,c)<=hi) or v<0:return {'gross':gross,'score':None,'pass':False,'reason':'INVALID_M5'}\n    if v<=0:score=None\n    else:\n        score=int(c<op)+int(c<prev)+int((hi-max(op,c))/max(hi-lo,1e-12)>=.3)\n        if c/op>1.004:score-=2\n        if c/prev>1.003:score-=1\n        if c/prev<.975:score-=1\n    return {'gross':gross,'score':score,'pass':gross>0 and score is not None and score>=2,'reason':'MACRO' if gross==0 else 'M5' if score is None or score<2 else 'ELIGIBLE_OFFLINE'}\ndef raw(p):\n    with gzip.open(p,'rt',encoding='utf8') as f:return {int(z[0]):z for l in f if l.strip() for z in [json.loads(l)]}\np75=r/'results/PRISM7_P75_BINANCE_NATIVE62_SAME_UTC_DUAL_POINTS_NO025_TRANSFER_20261122.json'\np91=r/'results/PRISM7_P91_REAL_1Y_BINANCE_V20_ALL_NATIVE_ENTRY_SCORE_DECISIONS_20261122.jsonl'\npacc=r/'results/PRISM7_P91_REAL_1Y_BINANCE_TO_ASTER_5M_ACCEPTED_NATIVE_V20_20261122.jsonl'\nhpath=b/'aster-public-v3-h1/PENGUUSDT-1h-20250924-20261001.jsonl.gz'\nmpaths=[b/'aster-public-v3-5m-prefix/PENGUUSDT-5m-20250924-20260803.jsonl.gz',b/'aster-public-v3-5m-suffix/PENGUUSDT-5m-20260803-20261001.jsonl.gz']\nm={}\nfor p in mpaths:\n for t,v in raw(p).items():\n  if t in m:assert m[t]==v\n  m[t]=v\nh=raw(hpath)\nold={x['nativeSignalAtUtcH1Close']:x for l in p91.read_text().splitlines() for x in [json.loads(l)]}\naccepted={x['sourceNativeEntryHourTs'] for l in pacc.read_text().splitlines() for x in [json.loads(l)]}\nxs=json.loads(p75.read_text())['independentSource62DualMarketAsOfFeatureLedger']\nrows=[];bad=[];early=0\nfor x in xs:\n t=x['entryTs']\n if t not in old:continue\n z=x['dualSigned'];args=(z['macroBullBothBTCAndEthereum'],z['asterPENGUSignedPoints'],z['binancePENGUSignedPoints'],m[t],float(h[t-3600000][4]),t)\n q=gate(*args,t+300000);v=old[t]\n exp=(v['ownerP73GrossBeforeM5'],v['asterClosedM5Check']['score'],t in accepted)\n got=(q['gross'],q['score'],q['pass'])\n if got!=exp:bad.append((t,exp,got))\n assert not gate(*args,t+299999)['pass'];early+=1\n assert not gate(*args[:3],None,*args[4:],t+300000)['pass']\n rows.append({'ts':t,'expected':exp,'actual':got})\nassert len(rows)==41\n# Validate the saved R26 single-slot modeled fills independently from decision engine.\nout={}\nfor fee in (10,30):\n p=b/'STABLE4_R26_CAPITAL_ALLOCATION_V3_RESEARCH_20261127'/f'R21_ONE_{fee}BPS_FILLS.csv'\n with p.open(encoding='utf-8-sig') as f:a=[x for x in csv.DictReader(f) if x['route'].startswith('R21_')]\n a.sort(key=lambda x:x['entry_utc']);cool={};prev_end=None;viol=[]\n def dt(s):return datetime.datetime.fromisoformat(s.replace('Z','+00:00'))\n for x in a:\n  t,e=dt(x['entry_utc']),dt(x['exit_utc']);s=x['symbol']\n  if prev_end and t<prev_end:viol.append((x['source_signal_id'],'OVERLAP'))\n  if s in cool and t<cool[s]:viol.append((x['source_signal_id'],'COOLDOWN'))\n  if abs(float(x['gross_x'])-.3)>1e-9:viol.append((x['source_signal_id'],'GROSS'))\n  if x['side']!='SHORT':viol.append((x['source_signal_id'],'SIDE'))\n  lim=24 if x['route']=='R21_OLD24' else 48 if x['route']=='R21_NEW48' else 0\n  if not 0<(e-t).total_seconds()<=lim*3600:viol.append((x['source_signal_id'],'HORIZON'))\n  prev_end=e;cool[s]=e+datetime.timedelta(hours=12)\n out[str(fee)]={'count':len(a),'violations':viol,'ledger_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'exit_reasons':dict(collections.Counter(x['exit_model_reason'] for x in a))}\nd={'status':'OFFLINE_ONLY_NO_LIVE','pengu_gate':{'rows':len(rows),'mismatches':bad,'accepted':sum(x['actual'][2] for x in rows),'early_and_missing_rejected':early,'details':rows},'r21_single_slot':out,'inputs_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [p75,p91,pacc,hpath,*mpaths]},'limitations':'P75 Binance native trigger and macro features are frozen inputs; not independently regenerated. R26 completed fill audit only, no runtime pending or exchange certification. No order permissions.'}\nP.write_text(json.dumps(d,indent=2),encoding='utf8');print(json.dumps(d,ensure_ascii=True,separators=(',',':')),flush=True)\n",
+  "sha256": {
+    "STABLE4_P91_ENTRY_PARITY_20261127.json": "552c8f538f98f27ef82066c374c75995d942085c356eec81f3d493f3ba17fa9f",
+    "stable4_p91_offline_entry_parity_20261127.py": "df809dde83b775d2daaf3a109fb8c518f56d95e087eea002a7bfb981c080b233"
+  }
+}

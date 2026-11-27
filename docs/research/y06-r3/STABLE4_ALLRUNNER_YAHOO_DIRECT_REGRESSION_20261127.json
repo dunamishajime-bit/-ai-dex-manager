@@ -1,0 +1,30 @@
+{
+  "status": "OFFLINE_DIRECT_TEST_CALLS_NO_PYTEST",
+  "source_sha256": "978bca0a1a54e933e816baf94ed1b0b540a295886659fe4e887a471304ac9030",
+  "results": [
+    {
+      "test": "test_exact_threshold_is_allowed",
+      "status": "PASS"
+    },
+    {
+      "test": "test_strictly_above_threshold_is_blocked",
+      "status": "PASS"
+    },
+    {
+      "test": "test_incomplete_or_future_bars_are_not_used",
+      "status": "PASS"
+    },
+    {
+      "test": "test_weekend_and_holiday_skip_to_previous_nyse_session",
+      "status": "PASS"
+    },
+    {
+      "test": "test_missing_previous_session_fails_closed",
+      "status": "PASS"
+    },
+    {
+      "test": "test_missing_immediately_previous_nyse_session_does_not_fall_back_to_older_data",
+      "status": "PASS"
+    }
+  ]
+}

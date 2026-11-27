@@ -1,0 +1,130 @@
+{
+  "status": "OFFLINE_SOURCE_CANDIDATE_ONLY",
+  "results": [
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "tests/aster-common-read-resilience.test.ts"
+      ],
+      "exit": 0,
+      "output": "✔ public GET retries transport, timeout and temporary 5xx (27.6398ms)\n✔ malformed success JSON never becomes market data (2.907ms)\n✔ 429 with longer Retry-After is never retried early; 418 and 400 never retried (1.6557ms)\n✔ persistent read failures bounded, later read recovers (23.1982ms)\n✔ signed GET retries re-sign with fresh nonce; POST/DELETE never retry (52.7099ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 112.7473\n"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "tests/aster-rate-limit-cooldown.test.ts"
+      ],
+      "exit": 0,
+      "output": "✔ HTTP 429 publishes a shared cooldown and is not retried locally (47.1902ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 51.5044\n"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "tests/aster-rate-budget-policy.test.ts"
+      ],
+      "exit": 0,
+      "output": "✔ classifies only known pre-request Aster budget failures (1.3525ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9.2338\n"
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "tests/test_public_read_resilience_offline.py"
+      ],
+      "exit": 0,
+      "output": "...\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "tests/test_v52_reference_transient.py"
+      ],
+      "exit": 0,
+      "output": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "tests/test_public_read_resilience_offline.py"
+      ],
+      "exit": 0,
+      "output": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.122s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "scripts/dd-reduction/test_v52_amzn_yahoo_gate.py"
+      ],
+      "exit": 1,
+      "output": "C:\\Users\\dis\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe: No module named pytest\n"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "tests/v12-v4-runner-engine.test.ts"
+      ],
+      "exit": 0,
+      "output": "✔ unresolved V4 entry lifecycle blocks fresh candidate admission (1.0349ms)\n✔ terminal V4 entry intents are not reconciled again after restart (0.1431ms)\n✔ terminal V4 intents do not block flat market-data preparation (14.5264ms)\n✔ terminal V4 reduction intents are not re-queried on every tick (11.2345ms)\n✔ stale V4 exit decisions remain blocked review instead of terminating the daemon (1.179ms)\n✔ account lease renewal failure is a bounded blocked retry, never an order-enabled heartbeat (0.1953ms)\n✔ startup exchange-read failures distinguish bounded transient retries from fatal integrity errors (0.7668ms)\n✔ transient wording alone never downgrades integrity, credential, approval, or risk failures (0.1379ms)\n✔ in-lease rate-budget saturation is BLOCKED when durable state is non-flat (0.1973ms)\n✔ runner takes real shared lock and signed account mark, then stays non-ordering with no signals (55.3452ms)\n✔ market-data prefetch failure stays fail-closed without terminating the V4 tick loop (43.0711ms)\n✔ refreshes peer attestation after slow signed account reads (21.7239ms)\n✔ candidate source errors and stale data remain fail-closed observations (39.8465ms)\n✔ mock Aster dispatch reaches signed entry fill, STOP, and shared reservation retirement (292.1686ms)\n✔ in-lease decision read keeps a protected non-flat store BLOCKED on rate saturation (236.5841ms)\n✔ restart recovers venue-accepted STOP after response loss without duplicate ENTRY or STOP (165.7042ms)\n✔ additional cumulative ENTRY fill re-arms larger STOP before retiring smaller STOP (231.1297ms)\nℹ tests 17\nℹ suites 0\nℹ pass 17\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1121.7493\n"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/tsx/dist/cli.mjs",
+        "scripts/pengu-dual-ls-v2-selftest.ts"
+      ],
+      "exit": 0,
+      "output": "{\"level\":\"info\",\"message\":\"PENGU Dual LS shadow decision\",\"strategyId\":\"PENGU_DUAL_LS_V2_FINAL\",\"side\":0,\"reason\":\"PENGU/BTCの確定1時間足履歴が不足しているためFail Closedです。\",\"referenceTs\":0,\"orderSent\":0}\nPENGU_DUAL_LS_V2_FINAL_SELFTEST_PASS\nordersSent=false\ncancelSent=false\npositionChangesSent=false\n"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false",
+        "-p",
+        "tsconfig.json"
+      ],
+      "exit": 0,
+      "output": ""
+    }
+  ],
+  "files": {
+    "lib/aster-v3-client.ts": {
+      "sha256": "e796da48f8de076ceddd1c220b83d1f9666de5533e9e2b7dc097888dd99fb59b",
+      "diff": "diff --git a/lib/aster-v3-client.ts b/lib/aster-v3-client.ts\nindex 7f8a0ff..5968793 100644\n--- a/lib/aster-v3-client.ts\n+++ b/lib/aster-v3-client.ts\n@@ -13,7 +13,7 @@ export interface AsterV3ClientOptions {\n     privateKey?: `0x${string}`;\n     requestTimeoutMs?: number;\n     recvWindowMs?: number;\n-    /** Retries apply only to read-only 429 responses. HTTP 418 is an IP ban and never retries. Order mutations never retry. */\n+    /** Bounded GET retries for transient transport, 5xx, malformed JSON, and local 429. Shared cooldown and mutations are never retried locally. */\n     readOnlyRateLimitMaxRetries?: number;\n     readOnlyRateLimitBackoffBaseMs?: number;\n     readOnlyRateLimitBackoffMaxMs?: number;\n@@ -344,12 +344,14 @@ export class AsterV3Client {\n         const method = input.method;\n         const params = input.params || {};\n         let retries = 0;\n+        const readOnly=method===\"GET\"&&input.orderMutation!==true;\n+        const readDeadline=Date.now()+Math.min(30000,Math.max(3000,this.timeoutMs*3));\n         while (true) {\n             try {\n                 await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params),\n                     input.ratePriority ?? (input.orderMutation===true?\"NEW_EXPOSURE\":\"RISK_READ\"));\n                 const abort = new AbortController();\n-                const timeout = setTimeout(() => abort.abort(), this.timeoutMs);\n+                const timeout = setTimeout(() => abort.abort(), readOnly?Math.max(1,Math.min(this.timeoutMs,readDeadline-Date.now())):this.timeoutMs);\n                 try {\n                     let query = \"\"; let body: string | undefined;\n                     if (input.signed) {\n@@ -372,20 +374,27 @@ export class AsterV3Client {\n                         }\n                         throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs, executionUnknown, responseBody: payload });\n                     }\n+                    if(readOnly&&(!text||typeof payload===\"string\"||payload===null))\n+                        throw new AsterApiError({path:input.path,message:\"ASTER_READ_INVALID_JSON\",status:502});\n                     return payload as T;\n                 } finally { clearTimeout(timeout); }\n             } catch (error) {\n-                const canRetry = input.orderMutation !== true\n-                    && !String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || \"\").trim()\n-                    && retries < this.readOnlyRateLimitMaxRetries\n-                    && error instanceof AsterApiError\n-                    && isReadOnlyRateLimitError(error);\n-                if (canRetry) {\n-                    const exponential = this.readOnlyRateLimitBackoffBaseMs * (2 ** retries);\n-                    const waitMs = Math.min(this.readOnlyRateLimitBackoffMaxMs, Math.max(exponential, error.retryAfterMs ?? 0));\n-                    retries += 1;\n-                    await sleep(waitMs);\n-                    continue;\n+                // READ_TRANSPORT_RETRY: never retry a mutation or a shared-rate-budget rejection.\n+                const sharedBudget=Boolean(String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH||\"\").trim());\n+                const rateLimited=error instanceof AsterApiError&&isReadOnlyRateLimitError(error);\n+                const transient=error instanceof AsterApiError\n+                    ? !isAsterDepositRequirementError(error)&&error.status!==418&&[408,425,500,502,503,504].includes(error.status)\n+                    : error instanceof TypeError||error instanceof Error&&[\"AbortError\",\"TimeoutError\"].includes(error.name);\n+                const canRetry=readOnly&&retries<this.readOnlyRateLimitMaxRetries&&\n+                    ((rateLimited&&!sharedBudget)||(!rateLimited&&transient));\n+                if(canRetry){\n+                    const exponential=this.readOnlyRateLimitBackoffBaseMs*(2**retries);\n+                    const retryAfter=error instanceof AsterApiError?error.retryAfterMs??0:0;\n+                    const waitMs=Math.max(Math.min(exponential,this.readOnlyRateLimitBackoffMaxMs),retryAfter);\n+                    // Never truncate a venue's requested wait to a shorter delay.\n+                    if(waitMs<=this.readOnlyRateLimitBackoffMaxMs&&Date.now()+waitMs<readDeadline){\n+                        retries+=1;await sleep(waitMs);continue;\n+                    }\n                 }\n                 if (error instanceof AsterApiError) throw error;\n                 if (error instanceof Error && error.name === \"AbortError\") throw new AsterApiError({ message: `Aster request timeout after ${this.timeoutMs}ms`, status: 0, executionUnknown: input.orderMutation === true });\n"
+    },
+    "tests/aster-common-read-resilience.test.ts": {
+      "sha256": "3f079e5fa8652be5f8a94148bf328e252d0319b8259c5288b5e86e77628ccc9d",
+      "source": "import test from \"node:test\";\nimport assert from \"node:assert/strict\";\nimport {AsterApiError,AsterV3Client} from \"../lib/aster-v3-client\";\nconst good=()=>new Response('{\"serverTime\":123}',{status:200});\nconst err=(status:number,headers:Record<string,string>={})=>new Response('{\"msg\":\"temporary\"}',{status,headers});\nfunction fixture(fn:(n:number,init?:RequestInit)=>Response|Promise<Response>){\n let n=0;\n const c=new AsterV3Client({readOnlyRateLimitMaxRetries:2,readOnlyRateLimitBackoffBaseMs:1,readOnlyRateLimitBackoffMaxMs:10,fetchImpl:(async(_u:any,i?:RequestInit)=>fn(++n,i)) as typeof fetch});\n return {c,calls:()=>n};\n}\ntest(\"public GET retries transport, timeout and temporary 5xx\",async()=>{\n const x=fixture(n=>{if(n===1)throw new TypeError(\"fetch failed\");if(n===2)return err(503);return good();});\n assert.deepEqual(await x.c.getServerTime(),{serverTime:123});assert.equal(x.calls(),3);\n const y=fixture(n=>{if(n===1)throw new DOMException(\"timeout\",\"AbortError\");return good();});\n await y.c.getServerTime();assert.equal(y.calls(),2);\n});\ntest(\"malformed success JSON never becomes market data\",async()=>{\n const x=fixture(n=>n===1?new Response(\"<html>gateway</html>\"):good());\n await x.c.getServerTime();assert.equal(x.calls(),2);\n});\ntest(\"429 with longer Retry-After is never retried early; 418 and 400 never retried\",async()=>{\n for(const status of [429,418,400]){\n  const x=fixture(()=>err(status,{\"Retry-After\":\"60\"}));\n  await assert.rejects(x.c.getServerTime(),(e:any)=>e instanceof AsterApiError&&e.status===status);assert.equal(x.calls(),1);\n }\n});\ntest(\"persistent read failures bounded, later read recovers\",async()=>{\n const x=fixture(n=>n<=3?err(503):good());await assert.rejects(x.c.getServerTime(),/temporary/);assert.equal(x.calls(),3);await x.c.getServerTime();assert.equal(x.calls(),4);\n});\ntest(\"signed GET retries re-sign with fresh nonce; POST/DELETE never retry\",async()=>{\n const key=(\"0x\"+\"1\".repeat(64)) as `0x${string}`;let calls=0;const nonces:string[]=[];\n const c=new AsterV3Client({userAddress:\"0x\"+\"2\".repeat(40),privateKey:key,readOnlyRateLimitMaxRetries:2,readOnlyRateLimitBackoffBaseMs:1,readOnlyRateLimitBackoffMaxMs:10,fetchImpl:async(u:any,init?:RequestInit)=>{\n  calls++;if(init?.method===\"GET\"){nonces.push(new URL(String(u)).searchParams.get(\"nonce\")!);return calls===1?err(503):new Response(\"[]\");}return err(503);\n }});\n await c.getBalances();assert.equal(calls,2);assert.ok(BigInt(nonces[1])>BigInt(nonces[0]));\n await assert.rejects(c.setLeverage(\"BTCUSDT\",5));assert.equal(calls,3);\n await assert.rejects(c.cancelOrder(\"BTCUSDT\",\"fixture\"));assert.equal(calls,4);\n});\n"
+    },
+    "scripts/disdex_public_read_resilience.py": {
+      "sha256": "cfe3d809aa570b14e78a1e6d2479ef840949bf43f6902e00b766bfff47b9aed6",
+      "source": "\"\"\"Bounded retry for unsigned read-only data. No account/order transport.\"\"\"\nimport json\nimport time\nimport urllib.error\nimport urllib.parse\nimport urllib.request\nimport email.utils\nimport datetime\nimport threading\n\n_LOCK=threading.Lock()\n_COOLDOWN={}\ndef public_read_json(request,timeout=10.0,*,opener=None,sleep=time.sleep,clock=time.monotonic):\n    if request.get_method()!=\"GET\" or request.data is not None:\n        raise ValueError(\"PUBLIC_READ_ONLY_REQUIRED\")\n    parsed=urllib.parse.urlsplit(request.full_url)\n    if any(k.lower() in {\"signature\",\"nonce\",\"user\",\"signer\",\"apikey\",\"token\"} for k,_ in urllib.parse.parse_qsl(parsed.query)):\n        raise ValueError(\"SIGNED_READ_RETRY_FORBIDDEN\")\n    host=parsed.hostname or \"\"\n    if host not in {\"fapi.asterdex.com\",\"fapi3.asterdex.com\",\"query1.finance.yahoo.com\",\"query2.finance.yahoo.com\"} or parsed.scheme!=\"https\":\n        raise ValueError(\"PUBLIC_READ_HOST_UNAPPROVED\")\n    if opener is None:\n        class NoRedirect(urllib.request.HTTPRedirectHandler):\n            def redirect_request(self,*args,**kwargs):\n                raise RuntimeError(\"PUBLIC_REDIRECT_FORBIDDEN\")\n        opener=urllib.request.build_opener(NoRedirect()).open\n    deadline=clock()+min(30.0,max(3.0,timeout*3))\n    for attempt in range(3):\n        with _LOCK: wait=max(0.0,_COOLDOWN.get(host,0)-clock())\n        if clock()+wait>=deadline: raise RuntimeError(\"PUBLIC_READ_COOLDOWN\")\n        if wait: sleep(wait)\n        try:\n            with opener(request,timeout=min(timeout,max(.1,deadline-clock()))) as response:\n                return json.loads(response.read().decode())\n        except urllib.error.HTTPError as exc:\n            retryable=exc.code in {408,425,429,500,502,503,504}\n            delay=0.0\n            value=exc.headers.get(\"Retry-After\") if exc.headers else None\n            if value:\n                try: delay=max(0.0,float(value))\n                except ValueError:\n                    try: delay=max(0.0,email.utils.parsedate_to_datetime(value).timestamp()-time.time())\n                    except (ValueError,TypeError,OverflowError): pass\n            if exc.code in {418,429}:\n                with _LOCK: _COOLDOWN[host]=max(_COOLDOWN.get(host,0),clock()+max(delay,120 if exc.code==418 else 2))\n            if not retryable or attempt==2: raise\n            delay=max(delay,.5*2**attempt)\n            if clock()+delay>=deadline: raise\n            sleep(delay)\n        except (urllib.error.URLError,TimeoutError,ConnectionError,json.JSONDecodeError,UnicodeDecodeError):\n            if attempt==2 or clock()+.5*2**attempt>=deadline: raise\n            sleep(.5*2**attempt)\n    raise RuntimeError(\"PUBLIC_READ_RETRY_EXHAUSTED\")\n"
+    },
+    "scripts/disdex_v13d_v11eq_stock_live_engine.py": {
+      "sha256": "b695c6b22edfdd3b0f54a4d5aed52ebfbbf98c0865072500f27185d2a57de4e6",
+      "diff": "diff --git a/scripts/disdex_v13d_v11eq_stock_live_engine.py b/scripts/disdex_v13d_v11eq_stock_live_engine.py\nindex 05f3cce..db856f4 100644\n--- a/scripts/disdex_v13d_v11eq_stock_live_engine.py\n+++ b/scripts/disdex_v13d_v11eq_stock_live_engine.py\n@@ -167,6 +167,16 @@ def http_json(\n         headers={\"User-Agent\": \"DisDex-V13D-V11EQ-Live/1.0\", **(headers or {})},\n     )\n     try:\n+        # Only allowlisted unsigned public GETs use bounded retries.\n+        # Signed requests and mutations retain their original single-attempt semantics.\n+        parsed = urllib.parse.urlsplit(target)\n+        query_keys = {key.lower() for key, _ in urllib.parse.parse_qsl(parsed.query)}\n+        public = method.upper() == \"GET\" and parsed.scheme == \"https\" and parsed.hostname in {\n+            \"fapi.asterdex.com\", \"fapi3.asterdex.com\", \"query1.finance.yahoo.com\", \"query2.finance.yahoo.com\"\n+        } and not query_keys.intersection({\"signature\", \"nonce\", \"user\", \"signer\", \"apikey\", \"token\"})\n+        if public:\n+            from disdex_public_read_resilience import public_read_json\n+            return public_read_json(request, timeout)\n         with urllib.request.urlopen(request, timeout=timeout) as response:\n             text = response.read().decode()\n             return json.loads(text) if text else {}\n"
+    },
+    "tests/test_public_read_resilience_offline.py": {
+      "sha256": "e61a178d3ebb96fe646275839c49abf0126547a20a9bfce892360d0cb34b3b17",
+      "source": "import sys,unittest,io,json,urllib.request,urllib.error\nfrom pathlib import Path\nsys.path.insert(0,str(Path(__file__).resolve().parents[1]/\"scripts\"))\nimport disdex_public_read_resilience as m\nclass Response:\n def __enter__(self):return self\n def __exit__(self,*args):pass\n def read(self):return b'{\"ok\":true}'\nclass Tests(unittest.TestCase):\n def setUp(self):m._COOLDOWN.clear();self.t=0;self.n=0\n def sleep(self,n):self.t+=n\n def request(self,fn,method=\"GET\",query=\"\"):\n  req=urllib.request.Request(\"https://fapi.asterdex.com/fapi/v3/klines\"+query,method=method)\n  def op(*a,**k):self.n+=1;return fn(self.n)\n  return m.public_read_json(req,opener=op,sleep=self.sleep,clock=lambda:self.t)\n def test_recovery(self):\n  def f(n):\n   if n==1:raise urllib.error.URLError(\"timeout\")\n   if n==2:raise urllib.error.HTTPError(\"url\",503,\"unavailable\",{},io.BytesIO())\n   return Response()\n  self.assertEqual(self.request(f),{\"ok\":True});self.assertEqual(self.n,3)\n def test_long_retry_after(self):\n  def f(n):raise urllib.error.HTTPError(\"url\",429,\"limit\",{\"Retry-After\":\"60\"},io.BytesIO())\n  with self.assertRaises(urllib.error.HTTPError):self.request(f)\n  with self.assertRaisesRegex(RuntimeError,\"COOLDOWN\"):self.request(f)\n  self.assertEqual(self.n,1);self.t+=61;self.assertEqual(self.request(lambda n:Response()),{\"ok\":True})\n def test_no_mutation_or_signed_replay(self):\n  for method,query in [(\"POST\",\"\"),(\"DELETE\",\"\"),(\"GET\",\"?signature=fixture\")]:\n   with self.assertRaises(ValueError):self.request(lambda n:Response(),method,query)\n  self.assertEqual(self.n,0)\n def test_yahoo_wrapper_routes_to_shared_get(self):\n  import ast\n  from typing import Any\n  from unittest.mock import patch\n  tree=ast.parse((Path(__file__).resolve().parents[1]/\"scripts/dd-reduction/v52_amzn_yahoo_gate.py\").read_text(encoding=\"utf8\"))\n  fn=next(x for x in tree.body if isinstance(x,ast.FunctionDef) and x.name==\"_http_json\")\n  scope={\"urllib\":__import__(\"urllib\"),\"Any\":Any}\n  exec(compile(ast.Module(body=[fn],type_ignores=[]),\"yahoo_wrapper\",\"exec\"),scope)\n  with patch.object(m,\"public_read_json\",return_value={\"chart\":{}}) as get:\n   self.assertEqual(scope[\"_http_json\"](\"https://query1.finance.yahoo.com/v8/finance/chart/AMZN\",5),{\"chart\":{}})\n   self.assertEqual(get.call_args.args[0].get_method(),\"GET\")\n   self.assertEqual(get.call_count,1)\nif __name__==\"__main__\":unittest.main()\n"
+    },
+    "scripts/dd-reduction/v52_amzn_yahoo_gate.py": {
+      "sha256": "55a2f2208d2a7cd9f85dd022828e053cf1aa9e5af763881e182bc4ac9be4522a",
+      "diff": "diff --git a/scripts/dd-reduction/v52_amzn_yahoo_gate.py b/scripts/dd-reduction/v52_amzn_yahoo_gate.py\nindex c15306c..ac95630 100644\n--- a/scripts/dd-reduction/v52_amzn_yahoo_gate.py\n+++ b/scripts/dd-reduction/v52_amzn_yahoo_gate.py\n@@ -255,9 +255,8 @@ def _http_json(url: str, timeout_seconds: float) -> dict[str, Any]:\n             \"Accept\": \"application/json\",\n         },\n     )\n-    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:\n-        payload = response.read().decode(\"utf-8\")\n-    decoded = json.loads(payload)\n+    from disdex_public_read_resilience import public_read_json\n+    decoded = public_read_json(request, timeout_seconds)\n     if not isinstance(decoded, dict):\n         raise ValueError(\"Yahoo chart response is not an object\")\n     return decoded\n"
+    }
+  },
+  "limitations": "Detached worktree; common TypeScript client applies to V4/Q102/PENGU/IDLE/FET/HYPE. V52 Python allowlisted public GET and Yahoo wrapper connected. Signed Python GET and local reference service unchanged, Python process cooldown not cross-process. No deployment, no stale fallback, no order mutation retry. Existing shared rate-limit coordination preserved in TS.",
+  "full_evidence_sha256": "ad512544a5d613c7988910373c0ff230bc0b0040d61f29578ae7c2fcf44f4cba"
+}

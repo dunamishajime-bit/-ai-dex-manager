@@ -1,0 +1,92 @@
+{
+  "status": "PRELIVE_NOT_CERTIFIED",
+  "researchBranch": "research/y06r3-bear-retest-bt-20261126",
+  "sourceOnlyPR": 676,
+  "sourceSha": "403e4226dae164e433200b18901ea757ba496002",
+  "sourceCI": {
+    "run": 45939470808,
+    "conclusion": "success"
+  },
+  "integratedPinnedSourceGate": {
+    "run": 45939470754,
+    "conclusion": "failure",
+    "reason": "INTEGRATED_SOURCE_SHA_MISMATCH:lib/aster-v3-client.ts",
+    "interpretation": "Safety gate blocked, not certified; do not change an approved production SHA pin merely to green CI"
+  },
+  "annualBTRecheck": {
+    "status": "INCOMPLETE",
+    "elapsedLimitSec": 210,
+    "reason": "Full 11-arm archived R26 replay timed out. Existing results independently audited for partial-aware gross/fees/net, not native current-source parity."
+  },
+  "cases": {
+    "10": {
+      "archivedR26": {
+        "initial_jpy": 10000,
+        "final_compounded_jpy": 22247848.470790964,
+        "max_hourly_dd_pct": -22.211052959077193,
+        "win_rate_pct": 61.92236598890942,
+        "modeled_fills": 1082,
+        "profit_factor": 2.170101442422735,
+        "terminal_open_count": 1
+      },
+      "accounting": {
+        "fills": 1082,
+        "partialEvents": 3,
+        "partialTrades": 3,
+        "errorCount": 0,
+        "errors": [],
+        "fillsSha256": "b2dfd67e34d4f9ed1a084cf4b155be27bb7b83f9909d15de477fb974ff84a2e8",
+        "partialSha256": "ccab26ea252470e7a3011fdbee9938b118d66502bcfb314481322a58f40a0fd6"
+      },
+      "frozenSignalStress": {
+        "caseCount": 12,
+        "lowestFinalJpy": 1662.0532945386499,
+        "highestDrawdownPct": 97.07245269077467,
+        "medianDrawdownPct": 75.09296494662034,
+        "allSevenStrategiesFrozenSignals": true
+      }
+    },
+    "30": {
+      "archivedR26": {
+        "initial_jpy": 10000,
+        "final_compounded_jpy": 6574419.518648017,
+        "max_hourly_dd_pct": -23.086190282664422,
+        "win_rate_pct": 58.51851851851851,
+        "modeled_fills": 1080,
+        "profit_factor": 1.9274086477932078,
+        "terminal_open_count": 1
+      },
+      "accounting": {
+        "fills": 1080,
+        "partialEvents": 3,
+        "partialTrades": 3,
+        "errorCount": 0,
+        "errors": [],
+        "fillsSha256": "8673f057a661211a77a48157120289b7b39d9f28378ce7dc81da263db64197e7",
+        "partialSha256": "828662821736a9a3436860f7571266b3e9331b4c5d7c547530d37e6d9d7f0f10"
+      },
+      "frozenSignalStress": {
+        "caseCount": 12,
+        "lowestFinalJpy": 433.51740751573755,
+        "highestDrawdownPct": 98.88699330354106,
+        "medianDrawdownPct": 85.57936388653884,
+        "allSevenStrategiesFrozenSignals": true
+      }
+    }
+  },
+  "limitations": [
+    "Cumulative DD component is account-relative contribution index; no root-signed live MTM feed wired to all seven entries",
+    "IDLE latest policy in SHADOW/PAPER only; TAO historical lookback gap causes 51 would-be research entries to fail closed",
+    "R21 and PENGU observational wiring cannot authorize orders; no signed R21 slot and venue-resident STOP/TP lifecycle",
+    "Full synthetic signal regeneration from seven native codepaths and production cutover not done",
+    "FET 5m STOP event close-time +5m vs bar start in archived model; source exact execution unverified",
+    "Root-issued certificate and Owner approval not issued"
+  ],
+  "sourceHashes": {
+    "Y06_R26_CAPITAL_ALLOCATION_V3_RESULTS_20261127.json": "25870e8d8a3ccb016981dfc17da0d49241b1fd09fbc5b4c774c9ee80c3a8b678",
+    "STABLE4_R26_7RUNNER_FROZEN_SIGNAL_ARTIFICIAL_STRESS_20261127.json": "dc540dc41bd79b822b27de13f5eb8cd1eee2fb7ecab34f5036c9f7adc2bc4623",
+    "STABLE4_R26_7RUNNER_PARTIAL_AWARE_ACCOUNTING_AUDIT_20261127.json": "a44aa066c82823153587e3a4e1067553155cd8d5e674385af3f08022d296a8b0",
+    "STABLE4_IDLE_FET_RAW_REGEN_WITH_CLOCK_AUDIT_20261127.json": "4742578fc3f62b6d941d6a82007c2d0ba92a4215105bb64fc8402dcbf6a21056",
+    "STABLE4_R21_PUBLIC_OBSERVATION_FEED_20261127.json": "55577efde49a6d89945aa84614711d064c16578b1568a63d3ebfbda702c64a7c"
+  }
+}

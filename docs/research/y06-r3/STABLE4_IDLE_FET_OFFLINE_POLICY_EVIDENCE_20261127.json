@@ -1,0 +1,37 @@
+{
+  "status": "RESEARCH_ONLY_NO_LIVE",
+  "results": [
+    {
+      "command": "peer parity",
+      "exit": 0,
+      "output": "{\"idle\":{\"input\":849,\"retained\":197,\"counts\":{\"RETAINED\":197,\"RENDER_REMOVED\":234,\"JUP_GATE\":162,\"TAO_RISK_OFF\":256},\"matched\":197},\"fet\":{\"expected\":11,\"actual\":11,\"missing\":[],\"extra\":[]}}\n"
+    },
+    {
+      "command": "tests/idle-priority-short-signal.test.ts",
+      "exit": 0,
+      "output": "✔ production contract pins gross/leverage/cross/protection (1.2431ms)\n✔ generic priority is BREAKOUT then RELATIVE then MOMENTUM (0.2275ms)\n✔ all five selected routes remain SHORT with exact holds (0.2536ms)\n✔ generic archetype gates cannot be bypassed (0.1539ms)\n✔ symbol filters remain additional to generic gates (0.1462ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 10.7874\n"
+    },
+    {
+      "command": "tests/fet-brk48-signal.test.ts",
+      "exit": 0,
+      "output": "✔ BRK48 uses previous completed H1 at entry hour%4==1 (1.1763ms)\n✔ no lookahead and threshold gates (0.1812ms)\n✔ late entry window is rejected instead of chasing the H1 open (0.1462ms)\n✔ DD1296 FET causal +2% minimum rejects a otherwise valid +1.99% breakout (0.1893ms)\n✔ VOL10_RET15 rejects a breakout whose volume ratio exceeds 10 (0.1436ms)\n✔ VOL10_RET15 rejects a breakout whose completed 72h return exceeds 15 percent (0.1791ms)\n✔ VOL10_RET15 keeps both exact upper boundaries eligible (0.1727ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9.8538\n"
+    },
+    {
+      "command": "tests/disdex-runner-cumulative-dd.test.ts",
+      "exit": 0,
+      "output": "✔ V4 DD ignores another runner loss; Q102 independently holds above 30 percent (1.3526ms)\n✔ maximum is cumulative, not reset by new day or recovery of current DD (0.3248ms)\n✔ cash deposit is a neutral flow; denominator is prior account equity (0.1598ms)\n✔ mutated, missing or non-reconciled snapshot fails closed (0.5671ms)\n✔ per runner index changes exactly by its own delta divided by prior account equity (0.1543ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 10.0052\n"
+    }
+  ],
+  "files": {
+    "lib/stable4-idle-research-policy.ts": {
+      "sha256": "42f1fc19fe2c71d15cf2f85ab5cb0bb90b06cc45249a19754559c03cdd3aaba2",
+      "source": "/** Offline research policy replay, not an order admission authority. */\nexport type IdleTapeRow={entryTs:number;symbol:string;route:string;features:{rel24:number;volumeRatio:number}};\nconst H=3600000;\nexport const JUP_REL_MIN=-0.04089204262472046,JUP_VOLUME_MIN=1.2568362211142174;\nexport type IdleResearchState={lastDecisionTs:number;taoRiskUntil:number};\nexport const initialIdleResearch=():IdleResearchState=>({lastDecisionTs:0,taoRiskUntil:0});\nexport function reviewIdleResearchBatch(prior:IdleResearchState,t:number,rows:IdleTapeRow[]){\n if(!Number.isSafeInteger(t)||t%H!==0||t<=prior.lastDecisionTs||rows.some(x=>x.entryTs!==t))throw Error(\"IDLE_RESEARCH_CLOCK\");\n if(!Number.isSafeInteger(prior.taoRiskUntil)||prior.taoRiskUntil<0)throw Error(\"IDLE_RESEARCH_STATE\");\n const tao=rows.some(x=>x.route===\"IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2\"&&x.symbol===\"TAOUSDT\");\n const state={lastDecisionTs:t,taoRiskUntil:Math.max(prior.taoRiskUntil,tao?t+12*H:0)};\n const decisions=rows.map(row=>{\n  let reason=\"RETAINED\";\n  if(row.route===\"IDLE_RENDER_RELATIVE_SHORT\")reason=\"RENDER_REMOVED\";\n  else if(t<state.taoRiskUntil)reason=\"TAO_RISK_OFF\";\n  else if(row.route===\"IDLE_JUP_RELATIVE_SHORT\"){\n   if(!Number.isFinite(row.features?.rel24)||!Number.isFinite(row.features?.volumeRatio))throw Error(\"IDLE_JUP_FEATURE_MISSING\");\n   if(row.features.rel24<JUP_REL_MIN||row.features.volumeRatio<JUP_VOLUME_MIN)reason=\"JUP_GATE\";\n  }\n  return {row,retained:reason===\"RETAINED\",reason,orderAuthority:false as const};\n });\n return {state,decisions};\n}\n"
+    },
+    "research-offline-contract-20261127/stable4-idle-fet-research-parity.test.ts": {
+      "sha256": "c4f9a4673bbce651a36b7ba14c9eb5a8473f68713173ef6b5d5a70277fbb6039",
+      "source": "import {readFileSync,writeFileSync} from \"node:fs\";\nimport {gunzipSync} from \"node:zlib\";\nimport assert from \"node:assert/strict\";\nimport {reviewIdleResearchBatch,initialIdleResearch,JUP_REL_MIN,JUP_VOLUME_MIN,type IdleTapeRow} from \"../lib/stable4-idle-research-policy\";\nimport {buildFetBrk48Signal,normalizeFetH1} from \"../lib/fet-brk48-signal\";\nconst B=String.raw`C:\\tmp\\disdex-bt-20251001-20261001`,R=String.raw`C:\\tmp\\disdex-d126-crossrunner-research-20261126`,H=3600000;\nconst begin=Date.parse(\"2025-10-01T00:00:00Z\"),end=Date.parse(\"2026-10-01T00:00:00Z\");\nconst jsonl=(p:string)=>readFileSync(p,\"utf8\").trim().split(/\\r?\\n/).map(x=>JSON.parse(x));\nconst raw:IdleTapeRow[]=jsonl(B+\"/DIRECTION_RESEARCH_20261109/IDLE_CURRENT_PRODUCTION_REPLAY_20261110/idle-production-candidates-with-m5-exits.jsonl\").filter(x=>x.entryTs>=begin&&x.entryTs<end);\nconst windows=raw.filter(x=>x.route===\"IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2\").map(x=>[x.entryTs,x.entryTs+12*H]);\nconst reference=raw.filter(x=>x.route!==\"IDLE_RENDER_RELATIVE_SHORT\"&&!windows.some(([a,b])=>a<=x.entryTs&&x.entryTs<b)&&(x.route!==\"IDLE_JUP_RELATIVE_SHORT\"||(x.features.rel24>=JUP_REL_MIN&&x.features.volumeRatio>=JUP_VOLUME_MIN)));\nconst key=(x:IdleTapeRow)=>[x.entryTs,x.symbol,x.route].join(\"|\");\nconst groups=new Map<number,IdleTapeRow[]>();for(const x of raw){const a=groups.get(x.entryTs)??[];a.push(x);groups.set(x.entryTs,a);}\nlet state=initialIdleResearch();const retained:IdleTapeRow[]=[];const counts:Record<string,number>={};\nfor(const [t,rows] of [...groups].sort((a,b)=>a[0]-b[0])){\n const x=reviewIdleResearchBatch(state,t,rows);state=JSON.parse(JSON.stringify(x.state));\n for(const d of x.decisions){assert.equal(d.orderAuthority,false);counts[d.reason]=(counts[d.reason]??0)+1;if(d.retained)retained.push(d.row);}\n}\nconst a=retained.map(key).sort(),b=reference.map(key).sort();\nassert.deepEqual(a,b);assert.equal(raw.length,849);assert.equal(retained.length,197);\nconst fet=jsonl(B+\"/native-new-signal-20251001-20261001/native-FET-raw-intentions.jsonl\").filter(x=>x.entryTs>=begin&&x.entryTs<end);\nconst bars=JSON.parse(\"[\"+gunzipSync(readFileSync(B+\"/aster-public-v3-h1/FETUSDT-1h-20250924-20261001.jsonl.gz\")).toString(\"utf8\").trim().split(/\\r?\\n/).join(\",\")+\"]\");\nconst normalized=normalizeFetH1(bars,end);\nconst actual:number[]=[];\nfor(let t=begin;t<end;t+=H){\n const x=buildFetBrk48Signal(normalized.filter(r=>r.openTs>=t-80*H&&r.openTs<t),t);\n if(x)actual.push(x.entryTs);\n}\nconst expected=fet.map(x=>x.entryTs).sort((a,b)=>a-b);\nconst missing=expected.filter(t=>!actual.includes(t)),extra=actual.filter(t=>!expected.includes(t));\nconst out={idle:{input:raw.length,retained:retained.length,counts,matched:a.length},fet:{expected:expected.length,actual:actual.length,missing,extra}};\nwriteFileSync(R+\"/STABLE4_IDLE_FET_RESEARCH_PARITY_20261127.json\",JSON.stringify(out,null,2));console.log(JSON.stringify(out));\nif(missing.length||extra.length)process.exitCode=1;\n"
+    }
+  },
+  "limits": "IDLE policy replay uses archived native candidate tape, not regenerated candles; FET checks native H1 candidate generation, not all exit execution. No live admission.",
+  "evidence_sha256": "9010af10396fda505d6f6dea0332349bbfa19c0c4930a8abd4a8afe0e4290d22"
+}

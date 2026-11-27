@@ -1,0 +1,67 @@
+{
+  "status": "PENGU_P91_ARCHIVED_NATIVE_MARKET_REPLAY_ONLY",
+  "scope": "384 archived generated market paths; original native V20 signals and exit event evidence already precomputed on each artificial market, P91 scoring and one-slot capital replay rerun; NOT current source or full seven-runner BT",
+  "results": {
+    "established": {
+      "10": {
+        "paths": 192,
+        "raw": 235,
+        "eligible": 72,
+        "closed": 55,
+        "wins": 34,
+        "censored": 0,
+        "worstDD": 14.280303,
+        "medianNAV": 10000,
+        "minimumNAV": 8820.76,
+        "positivePaths": 28,
+        "zeroPositionPaths": 147
+      },
+      "30": {
+        "paths": 192,
+        "raw": 235,
+        "eligible": 72,
+        "closed": 55,
+        "wins": 33,
+        "censored": 0,
+        "worstDD": 14.299879,
+        "medianNAV": 10000,
+        "minimumNAV": 8805.76,
+        "positivePaths": 27,
+        "zeroPositionPaths": 147
+      }
+    },
+    "holdout": {
+      "10": {
+        "paths": 192,
+        "raw": 211,
+        "eligible": 65,
+        "closed": 45,
+        "wins": 28,
+        "censored": 0,
+        "worstDD": 11.53793,
+        "medianNAV": 10000,
+        "minimumNAV": 9392.5,
+        "positivePaths": 23,
+        "zeroPositionPaths": 156
+      },
+      "30": {
+        "paths": 192,
+        "raw": 211,
+        "eligible": 65,
+        "closed": 45,
+        "wins": 26,
+        "censored": 0,
+        "worstDD": 11.554254,
+        "medianNAV": 10000,
+        "minimumNAV": 9377.5,
+        "positivePaths": 22,
+        "zeroPositionPaths": 156
+      }
+    }
+  },
+  "inputs": {
+    "established": "ea3b5c8d081a147ae73fb7e37ecc2a238d1a56ee3b14f53028d69fd34ae5909f",
+    "holdout": "eb67d6e5240b16216f69543f638210e53b2d6f42abeef2dda3bc7cd74d9f9e36"
+  },
+  "fullLedgerSha256": "ce517973f9f214e5cb14961513d1e145ccb0817ccce37640798c84c881aec3db"
+}

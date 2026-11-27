@@ -1,0 +1,36 @@
+{
+  "title": "Y06-R3 — confirmed bearish breakdown and failed retest; independent SHORT only",
+  "created_jst": "2026-11-26",
+  "status": "FROZEN_BEFORE_R3_BACKTEST_READOUT_RESEARCH_ONLY",
+  "origin": "Deep-dive of synthetic 12,092 JPY independent bearish D126-break strategy, which failed historical PRE and random-entry tests. No adoption implied.",
+  "test_windows_utc": {
+    "PRE": [
+      "2025-03-24T00:00:00Z",
+      "2025-10-01T00:00:00Z"
+    ],
+    "TARGET": [
+      "2025-10-01T00:00:00Z",
+      "2026-10-01T00:00:00Z"
+    ],
+    "FORWARD_INSPECTED": [
+      "2026-10-01T00:00:00Z",
+      "2026-11-23T00:00:00Z"
+    ]
+  },
+  "assets": "BTC reference + 13 native archived V4 alts, ASTER H1 + M5",
+  "entry_candidates": {
+    "DIRECT_CONTROL": "From completed H1: asset completed D,12H,6H all bearish (D126), asset minus BTC 6h performance < 0, last H1 close < prior 12 H1 low - 0.1 ATR14. Enter next H1 open",
+    "RETEST_H1": "Same DIRECT setup arms (does not enter), remembers former 12H floor. Within 12h require later H1 high >= floor-0.25ATR, then in a strictly subsequent closed H1 a bearish close < floor-0.1ATR, < its previous H1 close, and < its own open; new D126 BEAR still valid. Enter next H1 open",
+    "RETEST_M15": "Same RETEST_H1 confirmation but additionally wait up to 2h for a completed 15m bearish candle to close below the lows of preceding 2 completed 15m candles. Enter next 5m open"
+  },
+  "quality": "prior 48 H1+M5 complete and 75% nonzero M5 volume, OHLC H1-M5 match last six fully completed H1 candles within 0.1%, missing/invalid fails closed",
+  "exits": {
+    "STOP8_TIME24": "Hard STOP -8% (plus adverse 5m gap at open), else time24h",
+    "STRUCT_2R_TIME24": "Structural invalidation stop=max(1.5%, min(8%, max(1.2ATR, past retest high +0.25ATR - entry)/entry)), target2R, time24h; hard STOP8 always enforced, stop first on dual hit",
+    "STOP8_TIME48": "Hard STOP -8%, time48h"
+  },
+  "economics": "gross0.30 per independent position, max 2 simultaneous same-symbol exclusive, cooldown12h from exit, start JPY10000 compounded, 10bps and 30bps separate with hourly mark-to-market maxDD, no Funding or real venue fills",
+  "selection": "Nine predeclared entry x exit combinations, no parameter changes after looking at TARGET/FORWARD, no cherry-picking. Evaluate PRE_TRAIN before 2025-07-01 and PRE_VALID July-Sep separately, then previously inspected TARGET/FORWARD; none is untouched OOS. Compare pass/fail, not select on TARGET.",
+  "hard_gates": "At 30bps: PRE train>=30 trades and PRE valid>=20, PF>1 in each and positive average in each; TARGET and FORWARD positive and <=30% DD with sufficient count>=50 each; trigger expectancy must exceed same-symbol near-time random controls; separate future untouched OOS mandatory for production",
+  "safety": "No live order API, no modifications to authenticated Runner, no global HOLD bypass, no deployment; research-only code in separate branch/PR; maintain resident hard STOP8."
+}
