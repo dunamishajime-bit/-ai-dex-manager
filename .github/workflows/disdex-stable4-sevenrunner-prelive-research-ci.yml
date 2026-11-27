@@ -107,7 +107,7 @@ jobs:
               source_digest=hashlib.sha256(pathlib.Path(source).read_bytes()).hexdigest()
               output_digest=hashlib.sha256(path.read_bytes()).hexdigest()
               evidence.append({"source":source,"sourceSha256":source_digest,"output":output,"outputSha256":output_digest,"status":obj["status"],"orderAuthority":False})
-          (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\\n",encoding="utf8")
+          (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\n",encoding="utf8")
           print(json.dumps(evidence))
           PY
       - name: Preserve independently regenerated research artifacts
