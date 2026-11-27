@@ -78,6 +78,7 @@ jobs:
           # Time-contiguous V52 M5 bars have high zero-volume even in NY regular hours.
           # Verify pinned actual yearly market-data audit, never infer venue fills.
           python -B -m unittest -v tests.test_stable4_q102_aster_h1_archive_source_audit
+          python -B -m unittest -v tests.test_stable4_q102_extended_aster_h1_archive_coverage
           python -B -m unittest -v tests.test_stable4_q102_181d_monthly_readiness
           python -B -m unittest -v tests.test_stable4_v52_regular_session_liquidity
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
