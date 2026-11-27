@@ -120,6 +120,10 @@ jobs:
           # reject false 1,500ms V13D book-age claims. No account data or
           # online HTTP in CI; historical observed freshness is necessary only.
           python -B -m unittest -v tests.test_stable4_v52_paired_onehour_source_freshness_evidence
+          # Detect exactly paired Aster source snapshot-receipt resets,
+          # update ID chain breaks and 20+20 HL snapshot row-grain. Reject
+          # native book reconstruction claims without verified repair.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_sequence_quality
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
