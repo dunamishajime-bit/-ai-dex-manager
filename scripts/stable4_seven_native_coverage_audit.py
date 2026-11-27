@@ -35,7 +35,12 @@ def evaluate() -> dict:
     q102_real = json.loads(Q102_REAL.read_text(encoding="utf8"))
     v52_coverage = json.loads(V52_COVERAGE.read_text(encoding="utf8"))
     v52_liquidity = json.loads(V52_LIQUIDITY.read_text(encoding="utf8"))
-    from scripts.research.stable4_v52_regular_session_liquidity_audit import verify_report
+    # Both direct "python scripts/..." CLI and package unit-test imports are
+    # supported; never skip the provenance verifier in either invocation.
+    if __package__:
+        from .research.stable4_v52_regular_session_liquidity_audit import verify_report
+    else:
+        from research.stable4_v52_regular_session_liquidity_audit import verify_report
     verify_report(v52_liquidity, v52_coverage)
     if (pengu_native.get("status") != "NATIVE_REAL_H1_RAW_SIGNAL_PARITY_PASS"
             or any(pengu_native.get("arms", {}).get(mode, {}).get("checked") != count
