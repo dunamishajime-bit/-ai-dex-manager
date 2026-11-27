@@ -6,7 +6,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot, verify_btc_aster_binance_conflict, verify_btc_native_m5_disagreement
+from scripts.research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot, verify_btc_aster_binance_conflict, verify_btc_native_m5_disagreement, verify_btc_181d_h1_m5_source_parity
 
 EVIDENCE = Path(__file__).resolve().parents[1] / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
 
@@ -87,6 +87,28 @@ class Q102AsterHistoryTests(unittest.TestCase):
             f(forged)
             with self.assertRaisesRegex(ValueError,"Q102_BTC_M5_H1"):
                 verify_btc_native_m5_disagreement(forged,h1)
+
+
+    def test_btc_full_181d_h1_m5_differences_not_silently_erased(self):
+        report=json.loads((EVIDENCE.parent/"STABLE4_Q102_BTC_181D_ASTER_H1_M5_SOURCE_PARITY_20261128.json").read_text(encoding="utf8"))
+        verify_btc_181d_h1_m5_source_parity(report,self.report)
+        self.assertEqual(report["hoursCompared"],4344)
+        self.assertEqual(report["mismatchHours"],85)
+        self.assertEqual(report["invalidH1Bars"],1)
+        self.assertEqual(report["invalidM5Bars"],1)
+        self.assertFalse(report["nativeQ102ProductionParityProven"])
+        for change in (
+            lambda d:d.__setitem__("mismatchHours",0),
+            lambda d:d["mismatchedFields"].__setitem__("high",0),
+            lambda d:d.__setitem__("autoRepairApplied",True),
+            lambda d:d["monthly"]["2025-09"].__setitem__("different",0),
+            lambda d:d["m5Source"].__setitem__("sha256","f"*64),
+            lambda d:d.__setitem__("executionPriceCertified",True),
+        ):
+            forged=copy.deepcopy(report)
+            change(forged)
+            with self.assertRaisesRegex(ValueError,"Q102_BTC_181D_PARITY"):
+                verify_btc_181d_h1_m5_source_parity(forged,self.report)
 
 
 if __name__ == "__main__":
