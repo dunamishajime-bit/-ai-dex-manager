@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {observeStable4PenguH1,observeStable4Q102H1} from "../lib/stable4-native-pengu-q102-source-observer";
+import {observeStable4PenguH1,observeStable4Q102H1,bindStable4NativeH1Observation,type SourceObservation} from "../lib/stable4-native-pengu-q102-source-observer";
 import {buildPenguDualLsV2Signal} from "../lib/pengu-dual-ls-v2";
 import {buildQuality102CausalV1Signal} from "../lib/disdex-quality102-causal-v1-signal";
 
@@ -57,4 +57,48 @@ test("native Q102 rejects 180-day-only, missing BTC, future candles and unverifi
  const bad=qrows();bad[bad.length-1]={...bad.at(-1)!,timestampMs:t};
  assert.equal(run({candlesBySymbol:{BTCUSDT:qrows(),SOLUSDT:bad}}).status,"BLOCKED_SOURCE");
  assert.equal(observeStable4Q102H1({history:qhistory(),decisionTs:t,sourcePin:sha,occupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:"unknown" as any}}).reason,"NATIVE_Q102_OCCUPANCY_UNVERIFIED");
+});
+
+
+test("source-bound PENGU/Q102 observations remain ineligible until real ASTER M5 source confirmation",()=>{
+ const native:SourceObservation={
+  status:"NATIVE_ENTRY_OBSERVED",reason:"NATIVE_H1_SIGNAL_ONLY_M5_UNCONFIRMED",
+  runner:"PENGU",symbol:"PENGUUSDT",side:-1,
+  decisionTs:t,sourceDataCutoffTs:t-H,sourcePin:sha,
+  gross:1,route:"SHORT_V20",orderAuthority:false,asterM5EntryConfirmed:false,
+ };
+ const candidate={
+  sleeve:"PENGU" as const,symbol:"PENGUUSDT",side:"SHORT" as const,
+  gross:1,route:"SHORT_V20",entryTs:t,sourceReleaseSha:sha,
+  sourceDecisionTs:t,sourceComplete:true,
+ };
+ const bind=(observation:SourceObservation=native,c=candidate)=>
+   bindStable4NativeH1Observation({candidate:c,observation});
+ const good=bind();
+ assert.equal(good.status,"NATIVE_H1_OBSERVED_ONLY");
+ assert.equal(good.nativeH1Bound,true);
+ assert.equal(good.eligibleForPortfolioEntry,false);
+ assert.equal(good.orderAuthority,false);
+ assert.equal(good.reason,"ASTER_M5_ENTRY_CONFIRMATION_NOT_SOURCE_CERTIFIED");
+ for(const observation of [
+  {...native,sourcePin:"b".repeat(40)},
+  {...native,sourceDataCutoffTs:t},
+  {...native,status:"NO_SOURCE_ENTRY" as const},
+  {...native,gross:.5},
+  {...native,side:1 as const},
+  {...native,asterM5EntryConfirmed:true as any},
+ ])assert.equal(bind(observation).status,"BLOCKED");
+ assert.equal(bind(undefined as any,{...candidate,sourceComplete:false}).status,"BLOCKED");
+ assert.equal(bind(undefined as any,{...candidate,entryTs:t+H}).status,"BLOCKED");
+ assert.equal(bind(undefined as any,{...candidate,symbol:"ETHUSDT"}).status,"BLOCKED");
+ assert.equal(bind({...native,runner:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:1},
+   {...candidate,sleeve:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:"LONG"}).status,"NATIVE_H1_OBSERVED_ONLY");
+});
+
+test("181-day Q102 source minimum and PENGU funding cadence remain explicit in source",()=>{
+ const {readFileSync}=require("node:fs");
+ const q=readFileSync("lib/disdex-quality102-causal-v1-signal.ts","utf8");
+ assert.match(q,/const MINIMUM_HISTORY_HOURS = 181 \* 24/);
+ const p=readFileSync("lib/pengu-dual-ls-v2.ts","utf8");
+ assert.match(p,/export function buildPenguDualLsV2Signal/);
 });
