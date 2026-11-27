@@ -21,6 +21,7 @@ Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
 Q102_H1_ARCHIVE = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
+Q102_EXTENDED_H1 = ROOT / "docs/research/STABLE4_Q102_36MAIN_31EARLY_ASTERV3_H1_SOURCE_READINESS_20261128.json"
 Q102_H1_MONTHLY = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_MONTHLY_181D_READINESS_20261128.json"
 Q102_BTC_BAD_BAR = ROOT / "docs/research/STABLE4_Q102_BTC_H1_ASTERVS_BINANCE_BAD_BAR_20261128.json"
 Q102_BTC_M5_BAD_BAR = ROOT / "docs/research/STABLE4_Q102_BTC_H1_ASTERNAMED_M5_12BAR_CONFLICT_20261128.json"
@@ -58,6 +59,11 @@ def evaluate() -> dict:
     else:
         from research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot as verify_q102_archive
     verify_q102_archive(q102_archive)
+    if __package__:
+        from .research.stable4_q102_extended_aster_h1_archive_coverage import verify_reviewed_snapshot as verify_extended_h1
+    else:
+        from research.stable4_q102_extended_aster_h1_archive_coverage import verify_reviewed_snapshot as verify_extended_h1
+    q102_extended_h1 = verify_extended_h1(Q102_EXTENDED_H1.read_bytes())
     q102_btc_conflict = json.loads(Q102_BTC_BAD_BAR.read_text(encoding="utf8"))
     if __package__:
         from .research.stable4_q102_aster_h1_archive_source_audit import verify_btc_aster_binance_conflict
@@ -197,6 +203,12 @@ def evaluate() -> dict:
         },
         "q102AsterArchiveCausal181d": {
             "matchingWarmupFiles": q102_archive["matchingCount"],
+            "crossDirectoryMainH1Symbols": q102_extended_h1["mainSymbols"],
+            "crossDirectoryEarlyH1Symbols": q102_extended_h1["earlySymbols"],
+            "sourceCausal181dAndAnnualH1ReadySymbols": q102_extended_h1["yearAndPrior181dReadySymbols"],
+            "sourceCausal181dAndAnnualH1ReadyCount": q102_extended_h1["yearAndPrior181dReadyCount"],
+            "btcInvalidAtStudyStart": q102_extended_h1["perTicker"]["BTC"]["prior181d"]["invalidHours"] == 1,
+            "h1HistoryReadinessIsNativeEntryOrFillProof": False,
             "causallyValidWarmupAtTargetStart": q102_archive["matchedWarmupCoveringTargetStart"],
             "monthlyRolling181dReadyByTicker": {
                 ticker: row["historyReadyMonths"] for ticker, row in q102_monthly["byTicker"].items()
