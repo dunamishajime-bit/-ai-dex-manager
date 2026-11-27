@@ -1,4 +1,5 @@
 import test from "node:test";
+import {readFileSync} from "node:fs";
 import assert from "node:assert/strict";
 import {observeStable4PenguH1,observeStable4Q102H1,bindStable4NativeH1Observation,type SourceObservation} from "../lib/stable4-native-pengu-q102-source-observer";
 import {buildPenguDualLsV2Signal} from "../lib/pengu-dual-ls-v2";
@@ -91,12 +92,13 @@ test("source-bound PENGU/Q102 observations remain ineligible until real ASTER M5
  assert.equal(bind(undefined as any,{...candidate,sourceComplete:false}).status,"BLOCKED");
  assert.equal(bind(undefined as any,{...candidate,entryTs:t+H}).status,"BLOCKED");
  assert.equal(bind(undefined as any,{...candidate,symbol:"ETHUSDT"}).status,"BLOCKED");
- assert.equal(bind({...native,runner:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:1},
-   {...candidate,sleeve:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:"LONG"}).status,"NATIVE_H1_OBSERVED_ONLY");
+ assert.equal(bindStable4NativeH1Observation({
+  observation:{...native,runner:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:1},
+  candidate:{...candidate,sleeve:"Q102",symbol:"SOLUSDT",route:"HIGH_VOL|SOLUSDT",side:"LONG"},
+ }).status,"NATIVE_H1_OBSERVED_ONLY");
 });
 
 test("181-day Q102 source minimum and PENGU funding cadence remain explicit in source",()=>{
- const {readFileSync}=require("node:fs");
  const q=readFileSync("lib/disdex-quality102-causal-v1-signal.ts","utf8");
  assert.match(q,/const MINIMUM_HISTORY_HOURS = 181 \* 24/);
  const p=readFileSync("lib/pengu-dual-ls-v2.ts","utf8");
