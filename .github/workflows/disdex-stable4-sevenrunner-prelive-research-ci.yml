@@ -8,6 +8,7 @@ on:
       - 'lib/v12-v4-*.ts'
       - 'lib/pengu-dual-ls-v2*.ts'
       - 'scripts/stable4-market-observe.ts'
+      - 'scripts/stable4-four-sleeve-native-synthetic.ts'
       - 'scripts/disdex_public_read_resilience.py'
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
       - 'scripts/dd-reduction/v52_amzn_yahoo_gate.py'
@@ -90,12 +91,14 @@ jobs:
         run: |
           set -euo pipefail
           npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/three-sleeve-native-current.json"
+          npx tsx scripts/stable4-four-sleeve-native-synthetic.ts "$RUNNER_TEMP/four-sleeve-native-current.json"
           npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/q102-hype-native-current.json"
           python - <<'PY'
           import hashlib,json,os,pathlib
           root=pathlib.Path(os.environ["RUNNER_TEMP"])
           pairs=[
             ("scripts/stable4-three-sleeve-native-synthetic.ts","three-sleeve-native-current.json"),
+            ("scripts/stable4-four-sleeve-native-synthetic.ts","four-sleeve-native-current.json"),
             ("scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts","q102-hype-native-current.json"),
           ]
           evidence=[]
@@ -118,6 +121,7 @@ jobs:
           retention-days: 7
           path: |
             ${{ runner.temp }}/three-sleeve-native-current.json
+            ${{ runner.temp }}/four-sleeve-native-current.json
             ${{ runner.temp }}/q102-hype-native-current.json
             ${{ runner.temp }}/source-native-replay-fingerprints.json
       - name: Source-level validation only; NO certificate or LIVE activation
