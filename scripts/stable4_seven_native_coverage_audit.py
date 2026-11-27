@@ -18,6 +18,7 @@ PENGU_NATIVE = ROOT / "docs/research/STABLE4_PENGU_BINANCE_NATIVE_H1_LEDGER_2026
 Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE_H1_20261128.json"
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
+Q102_H1_ARCHIVE = ROOT / "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -35,6 +36,12 @@ def evaluate() -> dict:
     q102_real = json.loads(Q102_REAL.read_text(encoding="utf8"))
     v52_coverage = json.loads(V52_COVERAGE.read_text(encoding="utf8"))
     v52_liquidity = json.loads(V52_LIQUIDITY.read_text(encoding="utf8"))
+    q102_archive = json.loads(Q102_H1_ARCHIVE.read_text(encoding="utf8"))
+    if __package__:
+        from .research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot as verify_q102_archive
+    else:
+        from research.stable4_q102_aster_h1_archive_source_audit import verify_snapshot as verify_q102_archive
+    verify_q102_archive(q102_archive)
     # Both direct "python scripts/..." CLI and package unit-test imports are
     # supported; never skip the provenance verifier in either invocation.
     if __package__:
@@ -132,6 +139,11 @@ def evaluate() -> dict:
             "V52": "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY",
         },
         "noCurrentSourceNativeSharedWalletPortfolioResult": True,
+        "q102AsterArchiveCausal181d": {
+            "matchingWarmupFiles": q102_archive["matchingCount"],
+            "causallyValidWarmupAtTargetStart": q102_archive["matchedWarmupCoveringTargetStart"],
+            "wholeNativeQ102UniverseOrFillsProven": False,
+        },
         "v52RegularSessionVolumeAudit": {
             "status": v52_liquidity["status"],
             "zeroVolumePercentByTicker": {
