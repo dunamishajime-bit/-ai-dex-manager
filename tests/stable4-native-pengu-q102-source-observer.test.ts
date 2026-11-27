@@ -2,7 +2,7 @@ import test from "node:test";
 import {readFileSync} from "node:fs";
 import assert from "node:assert/strict";
 import {observeStable4PenguH1,observeStable4Q102H1,bindStable4NativeH1Observation,type SourceObservation} from "../lib/stable4-native-pengu-q102-source-observer";
-import {buildPenguDualLsV2Signal} from "../lib/pengu-dual-ls-v2";
+import {buildPenguDualLsV2Signal,type PenguDualLsV2History} from "../lib/pengu-dual-ls-v2";
 import {buildQuality102CausalV1Signal} from "../lib/disdex-quality102-causal-v1-signal";
 
 const H=3_600_000,t=5_000*H,sha="a".repeat(40);
@@ -10,7 +10,7 @@ const history=(n:number)=>Array.from({length:n},(_,i)=>{
  const openTime=t-(n-i)*H;
  return {openTime,closeTime:openTime+H-1,open:100,high:100.05,low:99.95,close:100,volume:1000};
 });
-const pengu=(n=220)=>({pengu1h:history(n),btc1h:history(n),penguFunding:[]});
+const pengu=(n=220):PenguDualLsV2History=>({pengu1h:history(n),btc1h:history(n),penguFunding:[]});
 const qrows=(n=181*24)=>Array.from({length:n},(_,i)=>{
  const timestampMs=t-(n-i)*H;
  return {timestampMs,open:100,high:100.05,low:99.95,close:100,baseVolume:1000,quoteVolume:100000};
