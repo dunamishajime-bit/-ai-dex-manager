@@ -1,0 +1,437 @@
+{
+  "schema": "stable4-pengu-long-source-native-h1-exit-observations/v1",
+  "status": "ISOLATED_LONG_H1_NATIVE_EXIT_ONLY_NOT_VENUE_FILL",
+  "inputPins": {
+    "ledger": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
+    "quality": "f22b0aa4d9afcde3f0336d1884be54330d9c15b7ab6a2c6281e0f11f455a6f0d",
+    "inventorySha256": "abfb9b38fc6df8656cd62c35396c04541b4d00dec676cc2f30b2c842842fc16d"
+  },
+  "sourcePins": {
+    "scripts/research/stable4-pengu-long-native-h1-risk-audit.ts": "cabdaf53c6d466ecf12ada406e17a6d45e9f0dcef1e357b5b634b968c08da3de",
+    "lib/pengu-dual-ls-v2.ts": "5a7a0941245a594ec594ee0cc0fbb96ad14ae6e4e4962ccf1d512c90e68f7355",
+    "config/penguDualLsV2Runtime.ts": "18ed5fee4f5f40cb012285a76f5bf9215d03961153df493a362d09aa4dcf26d0"
+  },
+  "files": {
+    "h1": {
+      "folder": "aster-public-v3-h1",
+      "file": "PENGUUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+      "rows": 8928
+    },
+    "m5": [
+      {
+        "folder": "aster-public-v3-5m-prefix",
+        "file": "PENGUUSDT-5m-20250924-20260803.jsonl.gz",
+        "sha256": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+        "rows": 90144
+      },
+      {
+        "folder": "aster-public-v3-5m-suffix",
+        "file": "PENGUUSDT-5m-20260803-20261001.jsonl.gz",
+        "sha256": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+        "rows": 16992
+      }
+    ]
+  },
+  "summary": {
+    "rawLongBase": 13,
+    "rawLongV8V64": 23,
+    "modelStatus": {
+      "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL": 17,
+      "FIRST_M5_CONFIRMATION_UNAVAILABLE": 6
+    },
+    "modeledExitReasons": {
+      "LONG_TRAILING_STOP": 11,
+      "LONG_MAX_HOLD": 2,
+      "LONG_HARD_STOP": 4
+    }
+  },
+  "outcomes": [
+    {
+      "sourceDecisionTs": 1759309200000,
+      "sourceEntryTs": 1759312800000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1759313100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.030513,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1759654800000,
+        "observedAfterTs": 1759658400000,
+        "stopPrice": 0.033174,
+        "modeledExitPrice": 0.033174,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1759330800000,
+      "sourceEntryTs": 1759334400000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1759334700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.031664,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_MAX_HOLD",
+        "referenceTs": 1759766400000,
+        "observedAfterTs": 1759770000000,
+        "stopPrice": null,
+        "modeledExitPrice": 0.03295,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1762747200000,
+      "sourceEntryTs": 1762750800000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1762751100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.016266,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_HARD_STOP",
+        "referenceTs": 1762887600000,
+        "observedAfterTs": 1762891200000,
+        "stopPrice": 0.014964719999999999,
+        "modeledExitPrice": 0.014964719999999999,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1764684000000,
+      "sourceEntryTs": 1764687600000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1764687900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.011094,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1764698400000,
+        "observedAfterTs": 1764702000000,
+        "stopPrice": 0.012383990000000001,
+        "modeledExitPrice": 0.012383990000000001,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1765296000000,
+      "sourceEntryTs": 1765299600000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1765299900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.01301,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_HARD_STOP",
+        "referenceTs": 1765400400000,
+        "observedAfterTs": 1765404000000,
+        "stopPrice": 0.011969200000000001,
+        "modeledExitPrice": 0.011969200000000001,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1767326400000,
+      "sourceEntryTs": 1767330000000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1767330300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1767391200000,
+      "sourceEntryTs": 1767394800000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1767395100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.010827,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1767488400000,
+        "observedAfterTs": 1767492000000,
+        "stopPrice": 0.0115915,
+        "modeledExitPrice": 0.0115915,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1767405600000,
+      "sourceEntryTs": 1767409200000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1767409500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.011231,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1767531600000,
+        "observedAfterTs": 1767535200000,
+        "stopPrice": 0.0124839,
+        "modeledExitPrice": 0.0124839,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1767513600000,
+      "sourceEntryTs": 1767517200000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1767517500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.012076,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1767657600000,
+        "observedAfterTs": 1767661200000,
+        "stopPrice": 0.01303195,
+        "modeledExitPrice": 0.01303195,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1771034400000,
+      "sourceEntryTs": 1771038000000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1771038300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.00687,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1771110000000,
+        "observedAfterTs": 1771113600000,
+        "stopPrice": 0.00794333,
+        "modeledExitPrice": 0.00794333,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1771066800000,
+      "sourceEntryTs": 1771070400000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1771070700000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1771081200000,
+      "sourceEntryTs": 1771084800000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1771085100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1772020800000,
+      "sourceEntryTs": 1772024400000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1772024700000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1777251600000,
+      "sourceEntryTs": 1777255200000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1777255500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.009639,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_MAX_HOLD",
+        "referenceTs": 1777687200000,
+        "observedAfterTs": 1777690800000,
+        "stopPrice": null,
+        "modeledExitPrice": 0.009881,
+        "h1PositiveVolumeExPost": false,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1777982400000,
+      "sourceEntryTs": 1777986000000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1777986300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.011489,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_HARD_STOP",
+        "referenceTs": 1778090400000,
+        "observedAfterTs": 1778094000000,
+        "stopPrice": 0.01056988,
+        "modeledExitPrice": 0.01056988,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1787277600000,
+      "sourceEntryTs": 1787281200000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1787281500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007461,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1787328000000,
+        "observedAfterTs": 1787331600000,
+        "stopPrice": 0.008248879999999998,
+        "modeledExitPrice": 0.008248879999999998,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1787288400000,
+      "sourceEntryTs": 1787292000000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1787292300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007526,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1787328000000,
+        "observedAfterTs": 1787331600000,
+        "stopPrice": 0.008248879999999998,
+        "modeledExitPrice": 0.008248879999999998,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1787295600000,
+      "sourceEntryTs": 1787299200000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1787299500000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1787306400000,
+      "sourceEntryTs": 1787310000000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1787310300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007883,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1787371200000,
+        "observedAfterTs": 1787374800000,
+        "stopPrice": 0.00907823,
+        "modeledExitPrice": 0.00907823,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1787317200000,
+      "sourceEntryTs": 1787320800000,
+      "firstM5ConfirmedPositiveVolume": false,
+      "nextM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1787321100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "sourceDecisionTs": 1787349600000,
+      "sourceEntryTs": 1787353200000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1787353500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.008844,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_HARD_STOP",
+        "referenceTs": 1787374800000,
+        "observedAfterTs": 1787378400000,
+        "stopPrice": 0.00813648,
+        "modeledExitPrice": 0.00813648,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1790002800000,
+      "sourceEntryTs": 1790006400000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1790006700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.0088,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1790110800000,
+        "observedAfterTs": 1790114400000,
+        "stopPrice": 0.01017142,
+        "modeledExitPrice": 0.01017142,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    },
+    {
+      "sourceDecisionTs": 1790096400000,
+      "sourceEntryTs": 1790100000000,
+      "firstM5ConfirmedPositiveVolume": true,
+      "nextM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1790100300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.009504,
+      "status": "ISOLATED_NATIVE_LONG_RISK_EXIT_NOT_FILL",
+      "exit": {
+        "kind": "LONG_TRAILING_STOP",
+        "referenceTs": 1790110800000,
+        "observedAfterTs": 1790114400000,
+        "stopPrice": 0.01017142,
+        "modeledExitPrice": 0.01017142,
+        "h1PositiveVolumeExPost": true,
+        "venueFillVerified": false
+      }
+    }
+  ],
+  "orderAuthority": false,
+  "fullPenguAnnualTradeReplay": false,
+  "fullSevenRunnerWalletReplay": false,
+  "limitations": [
+    "Direct evaluatePenguDualLsV2PositionBar native LONG_V2_FINAL exit branch only, driven by ASTER source-verified H1 OHLC price bars instead of Binance source-native H1 risk features. Not full source feed parity or runner lifecycle",
+    "The first M5 confirms after t+5m and next M5 open at t+5m is a hypothetical price. Future next-bar volume is recorded ex-post, not an entry permission condition; actual venue quote/lot/order/fill is missing",
+    "No first partial-hour M5-resident STOP lifecycle, intrabar ordering, actual venue STOP, or known-gap execution price, and max-hold uses H1 finished bar close as proxy",
+    "No source position priority, interleaved SHORT/RECOVERY, cooldown, funding, account Gross/DD or owner certificate"
+  ]
+}
