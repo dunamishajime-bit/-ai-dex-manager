@@ -39,6 +39,6 @@ test("SHA-256 source pins reject byte-level changes, including line-ending subst
  const path="lib/aster-v3-client.ts";
  const bytes=readFileSync(resolve(root,path));
  assert.equal(sha256(bytes),m.sourceSha256[path]);
- assert.notEqual(sha256(Buffer.concat([bytes,Buffer.from("\\n")])),m.sourceSha256[path]);
- assert.notEqual(sha256(Buffer.from("line\\r\\n")),sha256(Buffer.from("line\\n")));
+ assert.notEqual(sha256(Buffer.concat([bytes,Buffer.from("\n")])),m.sourceSha256[path]);
+ assert.notEqual(sha256(Buffer.from("line\r\n")),sha256(Buffer.from("line\n")));
 });
