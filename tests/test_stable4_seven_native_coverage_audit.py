@@ -16,6 +16,13 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
         self.assertEqual(report["threeSleeveSharedWalletCases"], 12)
         self.assertEqual(report["fourSleeveSharedWalletCases"], 12)
         self.assertFalse(report["fourSleeveComparisonAdopted"])
+        self.assertTrue(report["noCurrentSourceNativeSharedWalletPortfolioResult"])
+        self.assertEqual(report["realMarketNativeSourceScope"]["PENGU"],
+            "BINANCE_H1_RAW_SOURCE_ENTRY_166_OF_166_ONLY_NOT_VENUE")
+        self.assertEqual(report["realMarketNativeSourceScope"]["Q102"],
+            "BTC_SOL_12_MONTH_START_SOURCE_HIGH_VOL_CHECKPOINTS_ONLY")
+        self.assertEqual(report["realMarketNativeSourceScope"]["V52"],
+            "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY")
         self.assertEqual(report["runnerCoverage"]["HYPE"], "PARTIAL_NATIVE_HYPE_IN_FOUR_SLEEVE_SHARED_WALLET")
         self.assertTrue(report["sourceEvidenceIntegrity"]["fourSleeveCurrentSource"]["matched"])
         self.assertEqual(report["q102IsolatedCases"], 8)
