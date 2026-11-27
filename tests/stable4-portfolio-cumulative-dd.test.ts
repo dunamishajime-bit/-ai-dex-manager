@@ -44,3 +44,12 @@ test("all seven candidate entries must pass portfolio and runner DD independentl
  const broken=advancePortfolioDd(b,mark(t+H,6999,"breach"));
  assert.equal(evaluateStable4DryEntry({...base,asof:t+H, candidate:{...candidate,entryTs:t+H},portfolioDdState:broken}).reason,"PORTFOLIO_CUMULATIVE_MAX_DD_EXCEEDED");
 });
+
+
+test("corrupted reported DD cannot contradict the time-weighted peak/index",()=>{
+ const actual=advancePortfolioDd(b,mark(t+H,9000,"drop10"));
+ const forged={...actual,currentDd:0,maximumDd:0};
+ assert.equal(evaluatePortfolioDdEntry(forged,t+H,sha).reason,"PORTFOLIO_DD_STALE_OR_INVALID");
+ assert.throws(()=>advancePortfolioDd(forged,mark(t+2*H,9000,"after-forgery")),/PORTFOLIO_DD_STATE_INVALID/);
+ assert.equal(evaluatePortfolioDdEntry(actual,t+H,sha).status,"ELIGIBLE_OFFLINE");
+});
