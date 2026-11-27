@@ -17,6 +17,7 @@ FOUR_REEXEC = ROOT / "docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARI
 PENGU_NATIVE = ROOT / "docs/research/STABLE4_PENGU_BINANCE_NATIVE_H1_LEDGER_20261128.json"
 Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE_H1_20261128.json"
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
+V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
 RUNNERS = ("V4", "PENGU", "Q102", "IDLE", "FET", "HYPE", "V52")
 
 
@@ -33,6 +34,9 @@ def evaluate() -> dict:
     pengu_native = json.loads(PENGU_NATIVE.read_text(encoding="utf8"))
     q102_real = json.loads(Q102_REAL.read_text(encoding="utf8"))
     v52_coverage = json.loads(V52_COVERAGE.read_text(encoding="utf8"))
+    v52_liquidity = json.loads(V52_LIQUIDITY.read_text(encoding="utf8"))
+    from scripts.research.stable4_v52_regular_session_liquidity_audit import verify_report
+    verify_report(v52_liquidity, v52_coverage)
     if (pengu_native.get("status") != "NATIVE_REAL_H1_RAW_SIGNAL_PARITY_PASS"
             or any(pengu_native.get("arms", {}).get(mode, {}).get("checked") != count
                    for mode, count in (("BASE", 54), ("V8_V64", 112)))
@@ -123,6 +127,14 @@ def evaluate() -> dict:
             "V52": "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY",
         },
         "noCurrentSourceNativeSharedWalletPortfolioResult": True,
+        "v52RegularSessionVolumeAudit": {
+            "status": v52_liquidity["status"],
+            "zeroVolumePercentByTicker": {
+                ticker: stats["regularSessionZeroVolumePct"]
+                for ticker, stats in v52_liquidity["perTicker"].items()
+            },
+            "fiveStockVenueExecutablePricesOrFillsProven": False,
+        },
         "q102IsolatedCases": other["summary"]["q102"]["cases"],
         "hypeIsolatedCases": other["summary"]["hype"]["cases"],
         "singleSevenRunnerNativeReplay": False,
