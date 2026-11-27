@@ -1,0 +1,164 @@
+{
+  "schema": "stable4-four-native-source-synthetic-comparison/v1",
+  "status": "REVIEW_ONLY_PARTIAL_SOURCE_REPLAY_NO_ADOPTION",
+  "sourceOnlyResearchCi": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/46023658149",
+  "artifact": "stable4-native-replay-46023658149",
+  "verifiedResearchCi": "SUCCESS",
+  "sourceRevision": "3027d047062abeb451a5ebe3621f4ea145239834",
+  "generatedUtc": "2026-11-27",
+  "syntheticWindow": {
+    "days": 72,
+    "warmupDays": 10,
+    "regimes": [
+      "BULL",
+      "BEAR",
+      "RANGE",
+      "SQUEEZE",
+      "REVERSAL",
+      "PULLBACK"
+    ],
+    "seeds": [
+      2026112801,
+      2026112802
+    ],
+    "cases": 12
+  },
+  "capitalJPY": 10000,
+  "compare": {
+    "threeSource": [
+      "V4_R21_SUBSET",
+      "IDLE_R26_SUBSET",
+      "FET_BRK48"
+    ],
+    "fourSource": [
+      "V4_R21_SUBSET",
+      "IDLE_R26_SUBSET",
+      "FET_BRK48",
+      "HYPE_TREND_LONG"
+    ],
+    "sameInitialSeedMarkets": true,
+    "accounting": "one_offline_wallet_no_exchange_orders",
+    "feeBpsModel": "round_trip_10_or_30_bps",
+    "arms": [
+      {
+        "feeBps": 10,
+        "stopGapReserve": false,
+        "three": {
+          "avgFinalJPY": 9239.0283,
+          "worstDDPct": 30.3143,
+          "trades": 450,
+          "wins": 195
+        },
+        "four": {
+          "avgFinalJPY": 8921.3987,
+          "worstDDPct": 32.4964,
+          "trades": 413,
+          "wins": 163
+        }
+      },
+      {
+        "feeBps": 10,
+        "stopGapReserve": true,
+        "three": {
+          "avgFinalJPY": 9240.8135,
+          "worstDDPct": 28.0285,
+          "trades": 445,
+          "wins": 192
+        },
+        "four": {
+          "avgFinalJPY": 9006.4115,
+          "worstDDPct": 28.1466,
+          "trades": 456,
+          "wins": 187
+        }
+      },
+      {
+        "feeBps": 30,
+        "stopGapReserve": false,
+        "three": {
+          "avgFinalJPY": 8928.3432,
+          "worstDDPct": 31.953,
+          "trades": 450,
+          "wins": 188
+        },
+        "four": {
+          "avgFinalJPY": 8611.2329,
+          "worstDDPct": 30.7667,
+          "trades": 412,
+          "wins": 156
+        }
+      },
+      {
+        "feeBps": 30,
+        "stopGapReserve": true,
+        "three": {
+          "avgFinalJPY": 8967.7214,
+          "worstDDPct": 27.9807,
+          "trades": 442,
+          "wins": 185
+        },
+        "four": {
+          "avgFinalJPY": 8689.6504,
+          "worstDDPct": 29.3333,
+          "trades": 455,
+          "wins": 179
+        }
+      }
+    ],
+    "principal30bpsReserved": {
+      "meanFinalDifferenceJPY": -278.071,
+      "worstDDDifferencePercentagePoints": 1.3526,
+      "tradeCountDifference": 13,
+      "winCountDifference": -6,
+      "hypeEntries": 41,
+      "improvedMarkets": 2,
+      "worsenedMarkets": 9,
+      "unchangedMarkets": 1
+    },
+    "decision": "NO_HYPE_ADOPTION_FROM_THIS_SYNTHETIC_REPLAY"
+  },
+  "evidence": [
+    {
+      "name": "threeSleeve",
+      "source": "scripts/stable4-three-sleeve-native-synthetic.ts",
+      "sourceSha256": "2a9234b659876425249566d36e089d0eaef457f3f096897e97523ee6f1defaf2",
+      "output": "three-sleeve-native-current.json",
+      "rawOutputSha256": "7a64c3516a88f6101077a0bee156f3f940bac1a3f44b4421575ae3f9801082fb",
+      "canonicalResultSha256": "14e0c3bebeb32e3d1f5931254cee86518d1e36ce7ec0c527a43d48d87a04752b"
+    },
+    {
+      "name": "fourSleeve",
+      "source": "scripts/stable4-four-sleeve-native-synthetic.ts",
+      "sourceSha256": "c24afba64a85211dc11458c49e5176eb74b2ffb5ba120ecaaeac644cca07444e",
+      "output": "four-sleeve-native-current.json",
+      "rawOutputSha256": "0260a6ead3f1d522ee25a8b07367c33df9c4011bdfdff7f450f1f69b731b635a",
+      "canonicalResultSha256": "c42eb90c4dda46a8d91b92c5b55d9ecc4ab87c449c114aaec616311684db815b"
+    },
+    {
+      "name": "q102HypeIsolated",
+      "source": "scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts",
+      "sourceSha256": "2388abfb9480905c6a8128bf7a62baa53929d6030a3f0b6ea2dca13aea40e0c3",
+      "output": "q102-hype-native-current.json",
+      "rawOutputSha256": "2759c8595e41203e3a472006761cbf0bfe34aee9a436af7ca59ab5924ef65814",
+      "canonicalResultSha256": "da83618bcf74deb5950fc21bc00a0ea8cd5b84003d18056b19a7ce2c5f171aed"
+    }
+  ],
+  "nonDeterministicFieldExcludedFromCanonicalDigest": [
+    "runtimeMs"
+  ],
+  "observation": "Q102/HYPE raw output SHA changes across runs solely from runtimeMs; canonical trading evidence SHA reproduced exactly.",
+  "limitations": [
+    "Mathematical 72-day markets, not specified 2025-10-01 to 2026-10-01 annual exact-source backtest",
+    "Only R21 subset of V4, IDLE R26 subset, FET and HYPE share this wallet; PENGU, Q102, V52 and V4 legacy native sources are missing",
+    "Fees are modeled, but funding, venue book/depth, partial fills, live source SHA, cross-process order ownership and protected orders are not re-executed",
+    "New entry DD30 and projected STOP gap reserve cannot guarantee actual maximum drawdown at/below 30 percent",
+    "Four-sleeve portfolio average capital is below starting capital in all fee/reserve arms; do not adopt",
+    "No Root issuer/Owner signed source release, no authenticated live account mark, no LIVE/venue order authority"
+  ],
+  "portfolioNativeSevenComplete": false,
+  "adoptFourSleeveHype": false,
+  "productionEligible": false,
+  "liveOrderAuthority": false,
+  "rootCertificateIssued": false,
+  "ownerApprovalVerified": false
+}
