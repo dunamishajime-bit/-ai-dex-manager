@@ -33,3 +33,13 @@ Optional DISDEX_IDLE_R26_LIVE_CERTIFIED=1 does not itself permit orders. The new
 
 ## Multi-SHA seven-sleeve decision ordering — offline only
 The standalone research coordinator reads per-runner source SHA pins, checks H1 decision clocks including PENGU M5 confirmation, rejects incomplete native sources/unknown owners/reconciled R21 slot uncertainty, and reserves an in-memory PENDING position on each accepted dry decision so same-timestamp proposals cannot double count capacity. Frozen historical ranking V52 > PENGU > V4 (R21) > Q102 > FET > HYPE > IDLE. No venue orders, asset transfers, or signing are exposed. This test verifies priority and Gross competition, not live multi-process atomic reservation. A production authority-compatible 7-sleeve order state machine remains blocked.
+
+
+## Re-executed research and stress methodology (27 Nov 2026)
+The archived source R26 "R21_ONE" 7-runner account replay was rerun for 10bps/30bps and its summary matched the saved reference exactly: 10bps 1082 fills, max DD 22.21%, win 61.92%; 30bps 1080 fills, max DD 23.09%, win 58.52%. The source still relies on historical native entry-intent tapes and V52 price proxy, so it is **not** pinned current-source complete.
+
+Synthetic: 6 regimes x 4 seeds, 72d each, dynamically regenerated R21 prices/order flows, independent source entries, source STOP8/TP8/24-48h exit, 1 slot and candidate-time DD30 latch: at 10bps worst DD 31.36%; at 30bps worst DD 31.04%. Two/23 DD30 new-entry blocks by fee case. Due to surviving positions and 5m price moves, DD30 does not guarantee <=30% actual DD. The other six native runners were **not regenerated** from synthetic price; prior fixed-signal 98.89% pseudo-stress should be excluded from adoption evidence.
+
+Research evidence is separately preserved in docs/research/y06-r3/STABLE4_R26_REEXEC_AND_R21_NATIVE_SYNTH_DD30_V2_20261127.json on the #674 draft research branch. It provides both reproducible Python sources and SHA-256 output fingerprints.
+
+The independent entry-risk gate is an orderless research component. It cannot control real existing stops, authorize order sends, issue root proofs, or assert full native 7-runner simulation. Formal current-source/pinned-SHA CI remains blocked and is not bypassed.

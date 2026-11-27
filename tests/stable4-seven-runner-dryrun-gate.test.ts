@@ -1,4 +1,4 @@
-import {initializePortfolioDd} from "../lib/stable4-portfolio-cumulative-dd";
+import {initializePortfolioDd,advancePortfolioDd} from "../lib/stable4-portfolio-cumulative-dd";
 import test from "node:test";import assert from "node:assert/strict";
 import {evaluateStable4DryEntry,evaluateR21ResearchExit} from "../lib/stable4-seven-runner-dryrun-gate";
 import {initializeRunnerCumulativeDd,advanceRunnerCumulativeDd,RUNNER_DD_IDS} from "../lib/disdex-runner-cumulative-dd";
@@ -31,4 +31,14 @@ test("R21 STOP8 precedes TP8 if both touched; worse-open gap; exact H24 time",()
  const flat=Array.from({length:288},(_,i)=>({ts:t+i*M,open:100,high:100.01,low:99.99,close:100}));
  assert.deepEqual(evaluateR21ResearchExit({route:"R21_OLD24",entryTs:t,entryPrice:100,asof:t+24*H,bars:[...flat,{ts:t+24*H,open:101,high:101.01,low:100.99,close:101}]}),{kind:"TIME",ts:t+24*H,price:101,orderAuthority:false});
  assert.equal(evaluateR21ResearchExit({route:"R21_OLD24",entryTs:t,entryPrice:100,asof:t+M,bars:[]}).kind,"SOURCE_UNAVAILABLE");
+});
+
+test("portfolio DD does not disable a resident STOP exit",()=>{
+ const at=t+H;
+ const breached=advancePortfolioDd(portfolio,{atMs:at,releaseSha:sha,proofId:"dd-breach",equity:699,externalNetFlow:0,source:"OFFLINE_RECONCILED_MTM_ONLY"});
+ const d=evaluateStable4DryEntry({...x,portfolioDdState:breached,asof:at,candidate:{...c,entryTs:at}});
+ assert.equal(d.reason,"PORTFOLIO_CUMULATIVE_MAX_DD_EXCEEDED");
+ const r=evaluateR21ResearchExit({route:"R21_NEW48",entryTs:at,entryPrice:100,asof:at+M,
+   bars:[{ts:at,open:101,high:110,low:99,close:105}]});
+ assert.equal(r.kind,"STOP8");assert.equal(r.orderAuthority,false);
 });
