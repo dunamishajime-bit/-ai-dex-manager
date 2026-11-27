@@ -255,9 +255,8 @@ def _http_json(url: str, timeout_seconds: float) -> dict[str, Any]:
             "Accept": "application/json",
         },
     )
-    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-        payload = response.read().decode("utf-8")
-    decoded = json.loads(payload)
+    from disdex_public_read_resilience import public_read_json
+    decoded = public_read_json(request, timeout_seconds)
     if not isinstance(decoded, dict):
         raise ValueError("Yahoo chart response is not an object")
     return decoded

@@ -17,6 +17,7 @@ import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLi
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
+import {evaluateIdleLatestFromClosedMarket} from "./stable4-idle-research-policy";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
@@ -890,7 +891,17 @@ export class IdlePriorityShortRunner {
                 .filter((row) => row.generic.accepted);
             const routeCandidates = rawGeneric
                 .filter((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic).accepted);
-            const lifecycleCandidates = routeCandidates.filter((row) => this.candidateLifecycleAllows(state, row));
+            // STABLE4 R26 candidate-only admission. SHADOW/PAPER exercise the
+            // newest research policy. LIVE awaits a root-owned exact-SHA
+            // parity certificate; neither exits nor legacy owned legs change.
+            const latestResearchOnly = this.dependencies.runtime.mode !== "LIVE";
+            const selectedRoutes = latestResearchOnly
+                ? routeCandidates.filter(row=>evaluateIdleLatestFromClosedMarket({
+                    decisionTs:market.decisionTs,btc:market.btc,tao:market.symbols.TAOUSDT,
+                  },{route:IDLE_PRIORITY_SHORT_POLICY.routes[row.symbol].route,
+                    symbol:row.symbol,features:row.features}).retained)
+                : routeCandidates;
+            const lifecycleCandidates = selectedRoutes.filter((row) => this.candidateLifecycleAllows(state, row));
             // New independent model may become eligible even when the generic
             // IDLE route does not. A certified model score and completed 6h
             // hypothetical outcomes are required; default LIVE switch is OFF.

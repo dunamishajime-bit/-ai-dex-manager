@@ -232,3 +232,38 @@ test("claimed source parity never certifies native generation or unlocks order a
  assert.equal(out.orderEnabled,false);assert.equal(out.realOrderEnabledV4,0);
  assert.equal(out.featureAudits[0].policyTemporalCausal,false);
 });
+
+test("candidate aggregate2: legacy history is recoverable, strict append and store reject new overcap",async()=>{
+ const r1=await reserve(createProductionState(initial),candidate("REC_X01_TIME_24H","ETHUSDT",1),"old1");
+ const r2=await reserve(createProductionState(initial),candidate("REC_X01_TIME_24H","SOLUSDT",1),"old2");
+ const r3=await reserve(createProductionState(initial),candidate("REC_X01_TIME_24H","BNBUSDT",.3),"old3");
+ let state=applyProductionEvent(applyProductionEvent(createProductionState(initial),r1),r2);
+ assert.equal(productionGross(state).v12,2);
+ await assert.rejects(reserve(state,r3.leg.candidate,"new3"),/V12_GROSS_CAP/);
+ assert.throws(()=>applyProductionEvent(state,r3),/RESERVATION_RECHECK_FAILED/);
+ const historic=replayProductionJournal(initial,[r1,r2,r3]);
+ assert.equal(productionGross(historic).v12,2.3);
+ const cleared=applyProductionEvent(historic,{type:"ENTRY_TERMINAL",id:r3.leg.id,eventId:"old3-terminal",ts});
+ assert.equal(productionGross(cleared).v12,2);
+ const {V4ExecutionStore}=await import("../lib/v12-v4-execution-store");
+ const {mkdtempSync,rmSync}=await import("node:fs");
+ const {tmpdir}=await import("node:os");
+ const {join}=await import("node:path");
+ const dir=mkdtempSync(join(tmpdir(),"gross-recheck-"));
+ try {
+  const store=new V4ExecutionStore(join(dir,"state.json"),"a".repeat(40));
+  let doc=store.initialize(initial);
+  doc=store.commit(doc.revision,{...doc,state});
+  assert.throws(()=>store.commit(doc.revision,{...doc,state:historic}),/RESERVATION_RECHECK_FAILED/);
+  assert.equal(productionGross(store.read().state).v12,2);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("strict reducer rejects stale crypto and total gross even when formerly admissible",async()=>{
+ const r=await reserve();
+ const f=(owner:string,gross:number,crypto:boolean)=>({owner,symbol:owner+"USDT",side:"SHORT" as const,qty:0,gross:0,pendingGross:gross,crypto});
+ for(const foreign of [[f("PENGU",3.1,true)],[f("PENGU",2.8,true),f("V52",1.5,false)]]){
+  const i={...initial,foreign};
+  assert.throws(()=>applyProductionEvent(createProductionState(i),r),/RESERVATION_RECHECK_FAILED/);
+  assert.equal(replayProductionJournal(i,[r]).journal.length,1);
+ }
+});

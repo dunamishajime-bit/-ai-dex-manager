@@ -9,7 +9,7 @@ import type {AccountLockHandle} from "./disdex-account-order-lock";
 import {readPendingExposureRegistry,upsertPendingExposure,releasePendingExposure,type PendingExposureEntry} from "./disdex-pending-exposure-registry";
 import {V4ExecutionStore,type V4ExecutionDocument} from "./v12-v4-execution-store";
 import type {V4DurableOrderCommand,V4DispatchGuards} from "./v12-v4-durable-orders";
-import {productionGross} from "./v12-v4-production-lifecycle";
+import {productionGross,STABLE4_V4_ADMISSION_CAPS} from "./v12-v4-production-lifecycle";
 import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {isV4LocalEntryRejection} from "./v12-v4-local-entry-rejection";
@@ -90,7 +90,7 @@ export class V4SharedReservations{
   }
   for(const [k,notional]of peers)if((covered.get(k)??0)+1e-8<notional)throw Error("PEER_RESERVATION_NOT_IN_ACCOUNT_LEDGER:"+k);
   const gross=productionGross(doc.state);
-  if(gross.recovery>2.5+1e-12||gross.v12>3+1e-12||gross.crypto>3.0+1e-12||gross.total>4.25+1e-12)throw Error("V4_SHARED_GROSS_CAP");
+  if(gross.recovery>2.5+1e-12||gross.v12>STABLE4_V4_ADMISSION_CAPS.v12+1e-12||gross.crypto>3.0+1e-12||gross.total>4.25+1e-12)throw Error("V4_SHARED_GROSS_CAP");
   const prior=registry.entries.find(x=>x.reservationId===cid);
   if(prior){
    this.verifyRow(prior,doc,cid);

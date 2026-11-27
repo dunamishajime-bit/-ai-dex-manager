@@ -1,0 +1,58 @@
+name: STABLE4 seven-runner research prelive source CI
+on:
+  pull_request:
+    paths:
+      - 'lib/stable4-*.ts'
+      - 'lib/idle-priority-short-runner.ts'
+      - 'lib/aster-v3-client.ts'
+      - 'lib/v12-v4-*.ts'
+      - 'lib/pengu-dual-ls-v2*.ts'
+      - 'scripts/stable4-market-observe.ts'
+      - 'scripts/disdex_public_read_resilience.py'
+      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - 'scripts/dd-reduction/v52_amzn_yahoo_gate.py'
+      - 'tests/stable4-*.test.ts'
+      - '.github/workflows/disdex-stable4-sevenrunner-prelive-research-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prelive-source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: TypeScript entire candidate source
+        run: npx tsc --noEmit --incremental false -p tsconfig.json
+      - name: No-trade R21 P91, IDLE and shared API regression
+        run: |
+          for name in \
+            tests/stable4-seven-runner-dryrun-gate.test.ts \
+            tests/stable4-observation-snapshot.test.ts \
+            tests/stable4-r21-public-observation-feed.test.ts \
+            tests/stable4-public-get-resilience.test.ts \
+            tests/stable4-research-runner-observation.test.ts \
+            tests/aster-common-read-resilience.test.ts \
+            tests/disdex-runner-cumulative-dd.test.ts \
+            tests/idle-priority-short-signal.test.ts \
+            tests/idle-priority-short-live-path.test.ts \
+            tests/idle-priority-short-baseline-admission.test.ts \
+            tests/fet-brk48-signal.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-runner-engine.test.ts; do
+              npx tsx "$name"
+            done
+          python -B tests/test_public_read_resilience_offline.py
+      - name: Source-level validation only; NO certificate or LIVE activation
+        run: |
+          echo "PRELIVE_SOURCE_ONLY=true"
+          echo "productionInstalled=false"
+          echo "liveOrderAuthorization=false"

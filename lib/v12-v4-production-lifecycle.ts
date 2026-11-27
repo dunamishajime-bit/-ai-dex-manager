@@ -14,6 +14,8 @@ import { V12_V4_ROUTE_CATALOG, type V12V4ShadowCandidate } from "./v12-multilogi
 import { V12_V4_V2_CAPS, V12_V4_FIRST_PASS_REPAIRS, V12_V4_SECOND_PASS_REPAIRS } from "./v12-v4-v2-shadow";
 
 export const HOUR = 3600000;
+// Candidate policy; legacy shadow research caps remain unchanged.
+export const STABLE4_V4_ADMISSION_CAPS=Object.freeze({recovery:2.5,v12:2.0,crypto:3.0,total:4.25});
 export type ExitSpec = { kind: "TIME"; hours: number } |
   { kind: "ATR"; hours: number; tp: number; sl: number } |
   { kind: "NATIVE"; hours:number; source:"WR60_BASELINE_1978_PARITY" };
@@ -169,7 +171,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   });
   const g=productionGross(state), worst=notional/equity;
   if (c.family.startsWith("RECOVERY_")&&g.recovery+worst>V12_V4_V2_CAPS.recoveryFamilyGross+1e-12) throw Error("RECOVERY_FAMILY_GROSS_CAP");
-  if (g.v12+worst>3+1e-12) throw Error("V12_GROSS_CAP");
+  if (g.v12+worst>STABLE4_V4_ADMISSION_CAPS.v12+1e-12) throw Error("V12_GROSS_CAP");
   if (g.crypto+worst>3.0+1e-12) throw Error("CRYPTO_GROSS_CAP");
   if (g.total+worst>4.25+1e-12) throw Error("TOTAL_GROSS_CAP");
   return { type:"RESERVE", eventId:input.eventId, ts:observedAtMs, leg:{
@@ -198,6 +200,10 @@ function cloneStateForEvent(state: State): State {
   };
 }
 export function applyProductionEvent(state: State, event: Event): State {
+  return applyEvent(state,event,false);
+}
+// Legacy limits only for replay of already-persisted history. New append is strict.
+function applyEvent(state: State, event: Event, historicalReplay:boolean): State {
   const duplicate=state.journal.find(x=>x.eventId===event.eventId);
   if (duplicate) {
     if (JSON.stringify(duplicate)!==JSON.stringify(event)) throw Error("EVENT_ID_CONFLICT");
@@ -239,8 +245,9 @@ export function applyProductionEvent(state: State, event: Event): State {
     if (next.legs[event.leg.id]) throw Error("DUPLICATE_LEG");
     // Re-check immutable event against current reservations; planned events may race.
     const g=productionGross(next), add=event.leg.reservationUsd/next.equityUsd;
+    const caps=historicalReplay?{recovery:2.5,v12:3,crypto:3.5,total:4.75}:STABLE4_V4_ADMISSION_CAPS;
     if (next.initial.holdProtected || next.executionReview || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
-      (recovery(event.leg)&&g.recovery+add>2.5+1e-12)||g.v12+add>3+1e-12||g.crypto+add>3.5+1e-12||g.total+add>4.75+1e-12)
+      (recovery(event.leg)&&g.recovery+add>caps.recovery+1e-12)||g.v12+add>caps.v12+1e-12||g.crypto+add>caps.crypto+1e-12||g.total+add>caps.total+1e-12)
       throw Error("RESERVATION_RECHECK_FAILED");
     next.legs[event.leg.id]=structuredClone(event.leg);
   } else {
@@ -301,7 +308,7 @@ export function applyProductionEvent(state: State, event: Event): State {
   next.journal.push(structuredClone(event));return next;
 }
 export function replayProductionJournal(initial: InitialState, events: Event[]): State {
-  return events.reduce(applyProductionEvent,createProductionState(initial));
+  return events.reduce((s,e)=>applyEvent(s,e,true),createProductionState(initial));
 }
 export function productionSnapshot(state: State) {
   return { ...structuredClone(state), gross:productionGross(state), orderEnabled:false as const,
