@@ -14,7 +14,7 @@ const base={asof:t,releaseSha:sha,portfolioDdState:portfolio,ddState:dd,equityUs
  sourcePins:Object.fromEntries(RUNNER_DD_IDS.map(x=>[x,sha])) as Record<typeof RUNNER_DD_IDS[number],string>,open:[]};
 test("seven native strategies sorted by frozen R26 precedence, no order authority",()=>{
  const a=[f("H","HYPE","ADAUSDT"),f("I","IDLE","JUPUSDT"),f("F","FET","FETUSDT","BASE",.7),
- f("V","V4","ETHUSDT","R21_OLD24"),f("Q","Q102","AVAXUSDT","BASE",.5),f("P","PENGU","PENGUUSDT","BASE",.75),f("S","V52","AMZNUSDT","V50",2)];
+ f("V","V4","ETHUSDT","R21_OLD24"),f("Q","Q102","AVAXUSDT","BASE",.5),f("P","PENGU","PENGUUSDT","BASE",.75),f("S","V52","AMZN","V50",2)];
  const r=coordinateStable4DryCandidates({...base,candidates:a});
  assert.deepEqual(r.decisions.map(x=>x.candidateId),["S","P","V","Q","F","H","I"]);
  assert.deepEqual(r.decisions.map(x=>x.status),["RETAINED_OFFLINE","RETAINED_OFFLINE","RETAINED_OFFLINE","RETAINED_OFFLINE","RETAINED_OFFLINE","BLOCKED","BLOCKED"]);
@@ -46,4 +46,16 @@ test("same source timestamp, duplicate candidate and unknown owner fail closed",
  assert.equal(coordinateStable4DryCandidates({...base,candidates:[{...a,sourceDecisionTs:t-H}]}).decisions[0].reason,"NATIVE_SOURCE_UNVERIFIED");
  assert.equal(coordinateStable4DryCandidates({...base,candidates:[a],sourcePins:{...base.sourcePins,V4:"b".repeat(40)}}).decisions[0].reason,"NATIVE_SOURCE_UNVERIFIED");
  assert.equal(coordinateStable4DryCandidates({...base,candidates:[a],open:[{id:"missing",symbol:"BTCUSDT",sleeve:"V4",route:"X",gross:0,stock:false,status:"UNKNOWN"}]}).decisions[0].reason,"ALL_OWNER_POSITIONS_UNVERIFIED");
+});
+
+
+test("real V52 stock and crypto use distinct symbol grammar with shared gross",()=>{
+ const good=coordinateStable4DryCandidates({...base,candidates:[
+  f("S","V52","AMZN","V50",2),
+  f("C","PENGU","PENGUUSDT","SHORT_V20",.75),
+ ]});
+ assert.deepEqual(good.decisions.map(x=>x.status),["RETAINED_OFFLINE","RETAINED_OFFLINE"]);
+ const fake=coordinateStable4DryCandidates({...base,candidates:[f("S","V52","AMZNUSDT","V50",2)]});
+ assert.equal(fake.decisions[0].reason,"SOURCE_INVALID");
+ assert.equal(fake.orderAuthority,false);
 });
