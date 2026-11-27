@@ -43,11 +43,18 @@ def evaluate() -> dict:
             "expected": other.get("sourceSha256"),
         },
     }
-    for item in sources.values():
+    integrity = {}
+    for source_name, item in sources.items():
         if not isinstance(item["expected"], str) or len(item["expected"]) != 64:
             raise ValueError("SYNTHETIC_SOURCE_DIGEST_UNAVAILABLE")
-        if exact_sha(ROOT / item["path"]) != item["expected"]:
-            raise ValueError("SYNTHETIC_SOURCE_SHA_MISMATCH:" + item["path"])
+        actual = exact_sha(ROOT / item["path"])
+        integrity[source_name] = {
+            "path": item["path"],
+            "expected": item["expected"],
+            "actual": actual,
+            "matched": actual == item["expected"],
+        }
+    all_source_matched = all(x["matched"] for x in integrity.values())
     coverage = {
         "V4": "PARTIAL_R21_ROUTE_IN_THREE_SLEEVE_WALLET",
         "PENGU": "NO_NATIVE_SYNTHETIC_REPLAY",
@@ -61,7 +68,7 @@ def evaluate() -> dict:
         raise ValueError("SEVEN_RUNNER_COVERAGE_INCOMPLETE")
     return {
         "schema": "stable4-seven-native-synthetic-coverage/v1",
-        "status": "BLOCKED_INCOMPLETE_RESEARCH",
+        "status": "BLOCKED_INCOMPLETE_RESEARCH" if all_source_matched else "BLOCKED_SOURCE_SHA_MISMATCH",
         "runnerCoverage": coverage,
         "threeSleeveSharedWalletCases": len(three["cases"]),
         "q102IsolatedCases": other["summary"]["q102"]["cases"],
@@ -69,7 +76,8 @@ def evaluate() -> dict:
         "singleSevenRunnerNativeReplay": False,
         "completeYearFromCurrentPinnedRunnerSources": False,
         "portfolioFundingAndExecutableProtectionProven": False,
-        "sourceEvidenceByteDigestsMatched": True,
+        "sourceEvidenceByteDigestsMatched": all_source_matched,
+        "sourceEvidenceIntegrity": integrity,
         "rootCertificateIssued": False,
         "orderAuthority": False,
     }
