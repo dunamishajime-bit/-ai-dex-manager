@@ -116,6 +116,10 @@ jobs:
           # research environment. Pinned file sha/row clocks, NOT maker fills.
           # No network, external data download or private local files in CI.
           python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_profile_evidence
+          # Source-receiver 1s-grid freshness for one paired public L2 hour:
+          # reject false 1,500ms V13D book-age claims. No account data or
+          # online HTTP in CI; historical observed freshness is necessary only.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_source_freshness_evidence
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
