@@ -1,0 +1,3058 @@
+{
+  "archiveClockCoverage": {
+    "fromMs": 1758672000000,
+    "invalidM5": 0,
+    "totalM5": 107136,
+    "untilMsExclusive": 1790812800000,
+    "zeroVolumeM5": 57483
+  },
+  "arms": {
+    "BASE": {
+      "actualVenueFillsVerified": 0,
+      "first15mAllThreePositiveVolume": 15,
+      "first15mAllZero": 9,
+      "first15mAnyPositiveVolume": 45,
+      "first15mInvalidOrMissing": 0,
+      "first5mPositiveVolume": 32,
+      "noOrderAuthority": true,
+      "rawH1Signals": 54
+    },
+    "V8_V64": {
+      "actualVenueFillsVerified": 0,
+      "first15mAllThreePositiveVolume": 36,
+      "first15mAllZero": 18,
+      "first15mAnyPositiveVolume": 94,
+      "first15mInvalidOrMissing": 0,
+      "first5mPositiveVolume": 69,
+      "noOrderAuthority": true,
+      "rawH1Signals": 112
+    }
+  },
+  "asterM5SourceFiles": [
+    {
+      "file": "PENGUUSDT-5m-20250924-20260803.jsonl.gz",
+      "firstMs": 1758672000000,
+      "folder": "aster-public-v3-5m-prefix",
+      "lastMs": 1785714900000,
+      "rows": 90144,
+      "sha256": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4"
+    },
+    {
+      "file": "PENGUUSDT-5m-20260803-20261001.jsonl.gz",
+      "firstMs": 1785715200000,
+      "folder": "aster-public-v3-5m-suffix",
+      "lastMs": 1790812500000,
+      "rows": 16992,
+      "sha256": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b"
+    }
+  ],
+  "entryExecutionOrNativeExitCertified": false,
+  "events": {
+    "BASE": [
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1760065200000,
+        "first15MinutesCompleteAt": 1760066100000,
+        "firstM5CompleteAt": 1760065500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1760544000000,
+        "first15MinutesCompleteAt": 1760544900000,
+        "firstM5CompleteAt": 1760544300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761156000000,
+        "first15MinutesCompleteAt": 1761156900000,
+        "firstM5CompleteAt": 1761156300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761681600000,
+        "first15MinutesCompleteAt": 1761682500000,
+        "firstM5CompleteAt": 1761681900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761894000000,
+        "first15MinutesCompleteAt": 1761894900000,
+        "firstM5CompleteAt": 1761894300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761908400000,
+        "first15MinutesCompleteAt": 1761909300000,
+        "firstM5CompleteAt": 1761908700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762232400000,
+        "first15MinutesCompleteAt": 1762233300000,
+        "firstM5CompleteAt": 1762232700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762650000000,
+        "first15MinutesCompleteAt": 1762650900000,
+        "firstM5CompleteAt": 1762650300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762682400000,
+        "first15MinutesCompleteAt": 1762683300000,
+        "firstM5CompleteAt": 1762682700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1762909200000,
+        "first15MinutesCompleteAt": 1762910100000,
+        "firstM5CompleteAt": 1762909500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1763092800000,
+        "first15MinutesCompleteAt": 1763093700000,
+        "firstM5CompleteAt": 1763093100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1764439200000,
+        "first15MinutesCompleteAt": 1764440100000,
+        "firstM5CompleteAt": 1764439500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765029600000,
+        "first15MinutesCompleteAt": 1765030500000,
+        "firstM5CompleteAt": 1765029900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765299600000,
+        "first15MinutesCompleteAt": 1765300500000,
+        "firstM5CompleteAt": 1765299900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765771200000,
+        "first15MinutesCompleteAt": 1765772100000,
+        "firstM5CompleteAt": 1765771500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765893600000,
+        "first15MinutesCompleteAt": 1765894500000,
+        "firstM5CompleteAt": 1765893900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766008800000,
+        "first15MinutesCompleteAt": 1766009700000,
+        "firstM5CompleteAt": 1766009100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1766062800000,
+        "first15MinutesCompleteAt": 1766063700000,
+        "firstM5CompleteAt": 1766063100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766077200000,
+        "first15MinutesCompleteAt": 1766078100000,
+        "firstM5CompleteAt": 1766077500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766080800000,
+        "first15MinutesCompleteAt": 1766081700000,
+        "firstM5CompleteAt": 1766081100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766102400000,
+        "first15MinutesCompleteAt": 1766103300000,
+        "firstM5CompleteAt": 1766102700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767394800000,
+        "first15MinutesCompleteAt": 1767395700000,
+        "firstM5CompleteAt": 1767395100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767409200000,
+        "first15MinutesCompleteAt": 1767410100000,
+        "firstM5CompleteAt": 1767409500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767517200000,
+        "first15MinutesCompleteAt": 1767518100000,
+        "firstM5CompleteAt": 1767517500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1768860000000,
+        "first15MinutesCompleteAt": 1768860900000,
+        "firstM5CompleteAt": 1768860300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1768928400000,
+        "first15MinutesCompleteAt": 1768929300000,
+        "firstM5CompleteAt": 1768928700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1769806800000,
+        "first15MinutesCompleteAt": 1769807700000,
+        "firstM5CompleteAt": 1769807100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771070400000,
+        "first15MinutesCompleteAt": 1771071300000,
+        "firstM5CompleteAt": 1771070700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771084800000,
+        "first15MinutesCompleteAt": 1771085700000,
+        "firstM5CompleteAt": 1771085100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771560000000,
+        "first15MinutesCompleteAt": 1771560900000,
+        "firstM5CompleteAt": 1771560300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1774540800000,
+        "first15MinutesCompleteAt": 1774541700000,
+        "firstM5CompleteAt": 1774541100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1775167200000,
+        "first15MinutesCompleteAt": 1775168100000,
+        "firstM5CompleteAt": 1775167500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778670000000,
+        "first15MinutesCompleteAt": 1778670900000,
+        "firstM5CompleteAt": 1778670300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778702400000,
+        "first15MinutesCompleteAt": 1778703300000,
+        "firstM5CompleteAt": 1778702700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778958000000,
+        "first15MinutesCompleteAt": 1778958900000,
+        "firstM5CompleteAt": 1778958300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779998400000,
+        "first15MinutesCompleteAt": 1779999300000,
+        "firstM5CompleteAt": 1779998700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1780056000000,
+        "first15MinutesCompleteAt": 1780056900000,
+        "firstM5CompleteAt": 1780056300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1781841600000,
+        "first15MinutesCompleteAt": 1781842500000,
+        "firstM5CompleteAt": 1781841900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1782259200000,
+        "first15MinutesCompleteAt": 1782260100000,
+        "firstM5CompleteAt": 1782259500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1783544400000,
+        "first15MinutesCompleteAt": 1783545300000,
+        "firstM5CompleteAt": 1783544700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1785232800000,
+        "first15MinutesCompleteAt": 1785233700000,
+        "firstM5CompleteAt": 1785233100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1785297600000,
+        "first15MinutesCompleteAt": 1785298500000,
+        "firstM5CompleteAt": 1785297900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787281200000,
+        "first15MinutesCompleteAt": 1787282100000,
+        "firstM5CompleteAt": 1787281500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787292000000,
+        "first15MinutesCompleteAt": 1787292900000,
+        "firstM5CompleteAt": 1787292300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1787299200000,
+        "first15MinutesCompleteAt": 1787300100000,
+        "firstM5CompleteAt": 1787299500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787310000000,
+        "first15MinutesCompleteAt": 1787310900000,
+        "firstM5CompleteAt": 1787310300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787320800000,
+        "first15MinutesCompleteAt": 1787321700000,
+        "firstM5CompleteAt": 1787321100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787353200000,
+        "first15MinutesCompleteAt": 1787354100000,
+        "firstM5CompleteAt": 1787353500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788544800000,
+        "first15MinutesCompleteAt": 1788545700000,
+        "firstM5CompleteAt": 1788545100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788559200000,
+        "first15MinutesCompleteAt": 1788560100000,
+        "firstM5CompleteAt": 1788559500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788876000000,
+        "first15MinutesCompleteAt": 1788876900000,
+        "firstM5CompleteAt": 1788876300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789045200000,
+        "first15MinutesCompleteAt": 1789046100000,
+        "firstM5CompleteAt": 1789045500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789059600000,
+        "first15MinutesCompleteAt": 1789060500000,
+        "firstM5CompleteAt": 1789059900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1790100000000,
+        "first15MinutesCompleteAt": 1790100900000,
+        "firstM5CompleteAt": 1790100300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      }
+    ],
+    "V8_V64": [
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1759312800000,
+        "first15MinutesCompleteAt": 1759313700000,
+        "firstM5CompleteAt": 1759313100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1759334400000,
+        "first15MinutesCompleteAt": 1759335300000,
+        "firstM5CompleteAt": 1759334700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1759633200000,
+        "first15MinutesCompleteAt": 1759634100000,
+        "firstM5CompleteAt": 1759633500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1759914000000,
+        "first15MinutesCompleteAt": 1759914900000,
+        "firstM5CompleteAt": 1759914300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1760065200000,
+        "first15MinutesCompleteAt": 1760066100000,
+        "firstM5CompleteAt": 1760065500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1760544000000,
+        "first15MinutesCompleteAt": 1760544900000,
+        "firstM5CompleteAt": 1760544300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761156000000,
+        "first15MinutesCompleteAt": 1761156900000,
+        "firstM5CompleteAt": 1761156300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761681600000,
+        "first15MinutesCompleteAt": 1761682500000,
+        "firstM5CompleteAt": 1761681900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761894000000,
+        "first15MinutesCompleteAt": 1761894900000,
+        "firstM5CompleteAt": 1761894300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1761908400000,
+        "first15MinutesCompleteAt": 1761909300000,
+        "firstM5CompleteAt": 1761908700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762232400000,
+        "first15MinutesCompleteAt": 1762233300000,
+        "firstM5CompleteAt": 1762232700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762650000000,
+        "first15MinutesCompleteAt": 1762650900000,
+        "firstM5CompleteAt": 1762650300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762682400000,
+        "first15MinutesCompleteAt": 1762683300000,
+        "firstM5CompleteAt": 1762682700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1762750800000,
+        "first15MinutesCompleteAt": 1762751700000,
+        "firstM5CompleteAt": 1762751100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1762909200000,
+        "first15MinutesCompleteAt": 1762910100000,
+        "firstM5CompleteAt": 1762909500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1763013600000,
+        "first15MinutesCompleteAt": 1763014500000,
+        "firstM5CompleteAt": 1763013900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1763092800000,
+        "first15MinutesCompleteAt": 1763093700000,
+        "firstM5CompleteAt": 1763093100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1764320400000,
+        "first15MinutesCompleteAt": 1764321300000,
+        "firstM5CompleteAt": 1764320700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1764439200000,
+        "first15MinutesCompleteAt": 1764440100000,
+        "firstM5CompleteAt": 1764439500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1764687600000,
+        "first15MinutesCompleteAt": 1764688500000,
+        "firstM5CompleteAt": 1764687900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765029600000,
+        "first15MinutesCompleteAt": 1765030500000,
+        "firstM5CompleteAt": 1765029900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765033200000,
+        "first15MinutesCompleteAt": 1765034100000,
+        "firstM5CompleteAt": 1765033500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765299600000,
+        "first15MinutesCompleteAt": 1765300500000,
+        "firstM5CompleteAt": 1765299900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765486800000,
+        "first15MinutesCompleteAt": 1765487700000,
+        "firstM5CompleteAt": 1765487100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765771200000,
+        "first15MinutesCompleteAt": 1765772100000,
+        "firstM5CompleteAt": 1765771500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765782000000,
+        "first15MinutesCompleteAt": 1765782900000,
+        "firstM5CompleteAt": 1765782300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765886400000,
+        "first15MinutesCompleteAt": 1765887300000,
+        "firstM5CompleteAt": 1765886700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765893600000,
+        "first15MinutesCompleteAt": 1765894500000,
+        "firstM5CompleteAt": 1765893900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1765983600000,
+        "first15MinutesCompleteAt": 1765984500000,
+        "firstM5CompleteAt": 1765983900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766008800000,
+        "first15MinutesCompleteAt": 1766009700000,
+        "firstM5CompleteAt": 1766009100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1766062800000,
+        "first15MinutesCompleteAt": 1766063700000,
+        "firstM5CompleteAt": 1766063100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766077200000,
+        "first15MinutesCompleteAt": 1766078100000,
+        "firstM5CompleteAt": 1766077500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766080800000,
+        "first15MinutesCompleteAt": 1766081700000,
+        "firstM5CompleteAt": 1766081100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766102400000,
+        "first15MinutesCompleteAt": 1766103300000,
+        "firstM5CompleteAt": 1766102700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1766592000000,
+        "first15MinutesCompleteAt": 1766592900000,
+        "firstM5CompleteAt": 1766592300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767110400000,
+        "first15MinutesCompleteAt": 1767111300000,
+        "firstM5CompleteAt": 1767110700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767330000000,
+        "first15MinutesCompleteAt": 1767330900000,
+        "firstM5CompleteAt": 1767330300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767394800000,
+        "first15MinutesCompleteAt": 1767395700000,
+        "firstM5CompleteAt": 1767395100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767409200000,
+        "first15MinutesCompleteAt": 1767410100000,
+        "firstM5CompleteAt": 1767409500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767517200000,
+        "first15MinutesCompleteAt": 1767518100000,
+        "firstM5CompleteAt": 1767517500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1767888000000,
+        "first15MinutesCompleteAt": 1767888900000,
+        "firstM5CompleteAt": 1767888300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1768597200000,
+        "first15MinutesCompleteAt": 1768598100000,
+        "firstM5CompleteAt": 1768597500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1768860000000,
+        "first15MinutesCompleteAt": 1768860900000,
+        "firstM5CompleteAt": 1768860300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1768928400000,
+        "first15MinutesCompleteAt": 1768929300000,
+        "firstM5CompleteAt": 1768928700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1769806800000,
+        "first15MinutesCompleteAt": 1769807700000,
+        "firstM5CompleteAt": 1769807100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771038000000,
+        "first15MinutesCompleteAt": 1771038900000,
+        "firstM5CompleteAt": 1771038300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771070400000,
+        "first15MinutesCompleteAt": 1771071300000,
+        "firstM5CompleteAt": 1771070700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771084800000,
+        "first15MinutesCompleteAt": 1771085700000,
+        "firstM5CompleteAt": 1771085100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771549200000,
+        "first15MinutesCompleteAt": 1771550100000,
+        "firstM5CompleteAt": 1771549500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1771560000000,
+        "first15MinutesCompleteAt": 1771560900000,
+        "firstM5CompleteAt": 1771560300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1772024400000,
+        "first15MinutesCompleteAt": 1772025300000,
+        "firstM5CompleteAt": 1772024700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1772287200000,
+        "first15MinutesCompleteAt": 1772288100000,
+        "firstM5CompleteAt": 1772287500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1773032400000,
+        "first15MinutesCompleteAt": 1773033300000,
+        "firstM5CompleteAt": 1773032700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1773612000000,
+        "first15MinutesCompleteAt": 1773612900000,
+        "firstM5CompleteAt": 1773612300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1774242000000,
+        "first15MinutesCompleteAt": 1774242900000,
+        "firstM5CompleteAt": 1774242300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1774540800000,
+        "first15MinutesCompleteAt": 1774541700000,
+        "firstM5CompleteAt": 1774541100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1774713600000,
+        "first15MinutesCompleteAt": 1774714500000,
+        "firstM5CompleteAt": 1774713900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1774839600000,
+        "first15MinutesCompleteAt": 1774840500000,
+        "firstM5CompleteAt": 1774839900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1775167200000,
+        "first15MinutesCompleteAt": 1775168100000,
+        "firstM5CompleteAt": 1775167500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1775433600000,
+        "first15MinutesCompleteAt": 1775434500000,
+        "firstM5CompleteAt": 1775433900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1775728800000,
+        "first15MinutesCompleteAt": 1775729700000,
+        "firstM5CompleteAt": 1775729100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1776088800000,
+        "first15MinutesCompleteAt": 1776089700000,
+        "firstM5CompleteAt": 1776089100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1776607200000,
+        "first15MinutesCompleteAt": 1776608100000,
+        "firstM5CompleteAt": 1776607500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1776672000000,
+        "first15MinutesCompleteAt": 1776672900000,
+        "firstM5CompleteAt": 1776672300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1777255200000,
+        "first15MinutesCompleteAt": 1777256100000,
+        "firstM5CompleteAt": 1777255500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1777849200000,
+        "first15MinutesCompleteAt": 1777850100000,
+        "firstM5CompleteAt": 1777849500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1777986000000,
+        "first15MinutesCompleteAt": 1777986900000,
+        "firstM5CompleteAt": 1777986300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778670000000,
+        "first15MinutesCompleteAt": 1778670900000,
+        "firstM5CompleteAt": 1778670300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778702400000,
+        "first15MinutesCompleteAt": 1778703300000,
+        "firstM5CompleteAt": 1778702700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1778958000000,
+        "first15MinutesCompleteAt": 1778958900000,
+        "firstM5CompleteAt": 1778958300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779055200000,
+        "first15MinutesCompleteAt": 1779056100000,
+        "firstM5CompleteAt": 1779055500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779138000000,
+        "first15MinutesCompleteAt": 1779138900000,
+        "firstM5CompleteAt": 1779138300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779548400000,
+        "first15MinutesCompleteAt": 1779549300000,
+        "firstM5CompleteAt": 1779548700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779804000000,
+        "first15MinutesCompleteAt": 1779804900000,
+        "firstM5CompleteAt": 1779804300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1779998400000,
+        "first15MinutesCompleteAt": 1779999300000,
+        "firstM5CompleteAt": 1779998700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1780056000000,
+        "first15MinutesCompleteAt": 1780056900000,
+        "firstM5CompleteAt": 1780056300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1781150400000,
+        "first15MinutesCompleteAt": 1781151300000,
+        "firstM5CompleteAt": 1781150700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1781474400000,
+        "first15MinutesCompleteAt": 1781475300000,
+        "firstM5CompleteAt": 1781474700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1781820000000,
+        "first15MinutesCompleteAt": 1781820900000,
+        "firstM5CompleteAt": 1781820300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1781841600000,
+        "first15MinutesCompleteAt": 1781842500000,
+        "firstM5CompleteAt": 1781841900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1781892000000,
+        "first15MinutesCompleteAt": 1781892900000,
+        "firstM5CompleteAt": 1781892300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1782259200000,
+        "first15MinutesCompleteAt": 1782260100000,
+        "firstM5CompleteAt": 1782259500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1783353600000,
+        "first15MinutesCompleteAt": 1783354500000,
+        "firstM5CompleteAt": 1783353900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1783447200000,
+        "first15MinutesCompleteAt": 1783448100000,
+        "firstM5CompleteAt": 1783447500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1783544400000,
+        "first15MinutesCompleteAt": 1783545300000,
+        "firstM5CompleteAt": 1783544700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1783648800000,
+        "first15MinutesCompleteAt": 1783649700000,
+        "firstM5CompleteAt": 1783649100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1784037600000,
+        "first15MinutesCompleteAt": 1784038500000,
+        "firstM5CompleteAt": 1784037900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1784998800000,
+        "first15MinutesCompleteAt": 1784999700000,
+        "firstM5CompleteAt": 1784999100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1785232800000,
+        "first15MinutesCompleteAt": 1785233700000,
+        "firstM5CompleteAt": 1785233100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1785254400000,
+        "first15MinutesCompleteAt": 1785255300000,
+        "firstM5CompleteAt": 1785254700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1785297600000,
+        "first15MinutesCompleteAt": 1785298500000,
+        "firstM5CompleteAt": 1785297900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1785380400000,
+        "first15MinutesCompleteAt": 1785381300000,
+        "firstM5CompleteAt": 1785380700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1785420000000,
+        "first15MinutesCompleteAt": 1785420900000,
+        "firstM5CompleteAt": 1785420300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1786615200000,
+        "first15MinutesCompleteAt": 1786616100000,
+        "firstM5CompleteAt": 1786615500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787281200000,
+        "first15MinutesCompleteAt": 1787282100000,
+        "firstM5CompleteAt": 1787281500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787292000000,
+        "first15MinutesCompleteAt": 1787292900000,
+        "firstM5CompleteAt": 1787292300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": false,
+        "entryExecuted": false,
+        "entryTs": 1787299200000,
+        "first15MinutesCompleteAt": 1787300100000,
+        "firstM5CompleteAt": 1787299500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_15M_ALL_ZERO_VOLUME"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787310000000,
+        "first15MinutesCompleteAt": 1787310900000,
+        "firstM5CompleteAt": 1787310300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787320800000,
+        "first15MinutesCompleteAt": 1787321700000,
+        "firstM5CompleteAt": 1787321100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1787353200000,
+        "first15MinutesCompleteAt": 1787354100000,
+        "firstM5CompleteAt": 1787353500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788094800000,
+        "first15MinutesCompleteAt": 1788095700000,
+        "firstM5CompleteAt": 1788095100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788544800000,
+        "first15MinutesCompleteAt": 1788545700000,
+        "firstM5CompleteAt": 1788545100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_ZERO_VOLUME",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": false,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788559200000,
+        "first15MinutesCompleteAt": 1788560100000,
+        "firstM5CompleteAt": 1788559500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1788876000000,
+        "first15MinutesCompleteAt": 1788876900000,
+        "firstM5CompleteAt": 1788876300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789045200000,
+        "first15MinutesCompleteAt": 1789046100000,
+        "firstM5CompleteAt": 1789045500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789059600000,
+        "first15MinutesCompleteAt": 1789060500000,
+        "firstM5CompleteAt": 1789059900000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "SHORT_V20",
+        "side": "SHORT",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789135200000,
+        "first15MinutesCompleteAt": 1789136100000,
+        "firstM5CompleteAt": 1789135500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": false,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789408800000,
+        "first15MinutesCompleteAt": 1789409700000,
+        "firstM5CompleteAt": 1789409100000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_ZERO_VOLUME"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1789603200000,
+        "first15MinutesCompleteAt": 1789604100000,
+        "firstM5CompleteAt": 1789603500000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1790006400000,
+        "first15MinutesCompleteAt": 1790007300000,
+        "firstM5CompleteAt": 1790006700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1790100000000,
+        "first15MinutesCompleteAt": 1790100900000,
+        "firstM5CompleteAt": 1790100300000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "LONG_V2_FINAL",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      },
+      {
+        "allThreeM5PositiveNotFillProof": true,
+        "anyPositiveVolumeInFirst15m": true,
+        "entryExecuted": false,
+        "entryTs": 1790600400000,
+        "first15MinutesCompleteAt": 1790601300000,
+        "firstM5CompleteAt": 1790600700000,
+        "m5BarsAfterSignal": [
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED",
+          "M5_BAR_POSITIVE_VOLUME_UNCERTIFIED"
+        ],
+        "m5HasPositiveVolumeNotFillProof": true,
+        "nativeExitReplayed": false,
+        "route": "RECOVERY_V8",
+        "side": "LONG",
+        "status": "M5_VOLUME_PRESENT_NOT_EXECUTION_PROOF"
+      }
+    ]
+  },
+  "limitations": [
+    "ASTER public M5 candle close becomes observable only at t+5m; a 15m window only at t+15m",
+    "A nonzero M5 volume does not certify executable entry, size, slippage, exchange order, or fill",
+    "This is 166 H1 raw-source candidates across two alternate configuration arms, NOT 166 unique trades",
+    "No signed Binance-to-ASTER 5m confirmation policy, actual venue fills, STOP, fees, funding, Gross or DD",
+    "No source-native exit lifecycle, cross-runner one-wallet replay, certificate or Owner permission"
+  ],
+  "liveEligible": false,
+  "orderAuthority": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-pengu-h1-signal-aster-m5-tape-quality/v1",
+  "singleSevenWalletNativeReplay": false,
+  "sourceH1LedgerSha256": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
+  "status": "H1_EVENTS_M5_MARKET_DATA_INSPECTED_NO_FILLS"
+}
