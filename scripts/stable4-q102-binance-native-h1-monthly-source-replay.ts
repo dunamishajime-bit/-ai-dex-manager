@@ -36,7 +36,7 @@ function gitBlobSha(raw:Buffer){
  const text=raw.toString("utf8");
  if(/\r(?!\n)/.test(text))fail("SOURCE_MIXED_LINE_ENDINGS");
  const blob=Buffer.from(text.replace(/\r\n/g,"\n"),"utf8");
- return createHash("sha1").update("blob "+blob.length+"\\0").update(blob).digest("hex");
+ return createHash("sha1").update("blob "+blob.length+"\0").update(blob).digest("hex");
 }
 (async()=>{
  const [root,btcPath,solPath,output]=process.argv.slice(2);
