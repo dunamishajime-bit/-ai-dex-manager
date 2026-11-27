@@ -292,6 +292,16 @@ def verify_btc_181d_h1_m5_source_parity(parity:dict, integrity:dict)->None:
                           "2025-07":744,"2025-08":744,"2025-09":720}
     expected_month_diffs={"2025-04":51,"2025-05":0,"2025-06":1,
                           "2025-07":13,"2025-08":17,"2025-09":3}
+    segmentation=parity.get("mismatchSegmentation")
+    if (not isinstance(segmentation,dict)
+            or segmentation.get("firstM5ZeroVolumeHours")!=86
+            or segmentation.get("h1M5OpenDifferencesWithFirstM5Zero")!=84
+            or segmentation.get("anyOHLCMismatchWithFirstM5Zero")!=84
+            or segmentation.get("anyOHLCMismatchWithFirstM5Positive")!=1
+            or segmentation.get("highDifferencesWithinFirstM5ZeroHours")!=16
+            or segmentation.get("lowDifferencesWithinFirstM5ZeroHours")!=18
+            or segmentation.get("onlyMismatchWithFirstM5PositiveUtc")!="2025-09-13T13:00:00Z"):
+        raise ValueError("Q102_BTC_181D_PARITY_ZERO_VOLUME_SEGMENTATION_INVALID")
     if (parity.get("expectedHours")!=4344 or parity.get("hoursCompared")!=4344
             or parity.get("missingPairedHours")!=0 or parity.get("mismatchHours")!=85
             or fields!=expected or parity.get("invalidH1Bars")!=1
