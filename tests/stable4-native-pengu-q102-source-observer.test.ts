@@ -60,6 +60,14 @@ test("native Q102 rejects 180-day-only, missing BTC, future candles and unverifi
  const bad=qrows();bad[bad.length-1]={...bad.at(-1)!,timestampMs:t};
  assert.equal(run({candlesBySymbol:{BTCUSDT:qrows(),SOLUSDT:bad}}).status,"BLOCKED_SOURCE");
  assert.equal(observeStable4Q102H1({history:qhistory(),decisionTs:t,sourcePin:sha,occupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:"unknown" as any}}).reason,"NATIVE_Q102_OCCUPANCY_UNVERIFIED");
+ assert.equal(observeStable4Q102H1({
+  history:{...qhistory(),entryOpenBySymbol:{SOLUSDT:{timestampMs:t+H,open:100}}},
+  decisionTs:t,sourcePin:sha,occupancy,
+ }).reason,"NATIVE_Q102_ENTRY_OPEN_UNVERIFIED");
+ assert.equal(observeStable4Q102H1({
+  history:{...qhistory(),entryOpenBySymbol:{FAKEUSDT:{timestampMs:t,open:100}}},
+  decisionTs:t,sourcePin:sha,occupancy,
+ }).reason,"NATIVE_Q102_ENTRY_OPEN_UNVERIFIED");
 });
 
 
