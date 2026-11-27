@@ -1,0 +1,1044 @@
+{
+  "archiveSourceSymbols": 10,
+  "byTicker": {
+    "APT": {
+      "historyReadyMonths": 12,
+      "inputSha256": "38380069cdfcd467516ce1579a2221f76ecee8515d7a58744701d99a28f09cfc",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "ARB": {
+      "historyReadyMonths": 12,
+      "inputSha256": "dd446b5f461ba133e6e326f9af0da745ebd86e7705f71d9dd74fd5f2f050ea73",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "BTC": {
+      "historyReadyMonths": 6,
+      "inputSha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0",
+      "months": [
+        {
+          "badH1": 1,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 1,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 1,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 1,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 1,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 1,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_INVALID_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "ENA": {
+      "historyReadyMonths": 10,
+      "inputSha256": "755639e19659250b6293a85a917248fec79f254e2bad87c835d3eff53dc29fa3",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 1309,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 565,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "FIL": {
+      "historyReadyMonths": 4,
+      "inputSha256": "5a0f23003dd43d2601090c9c0b383f33cc787f7b1330d882efbdb391a1a2903e",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 4344,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 4344,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 3783,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 3039,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 2295,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 1623,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 879,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 159,
+          "signalComputed": false,
+          "status": "H1_181D_INCOMPLETE_SOURCE",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "ONDO": {
+      "historyReadyMonths": 12,
+      "inputSha256": "1d8c5ca42f471deb803429ca13210da0ea81881b01600f62d63e8e0a970e963c",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "OP": {
+      "historyReadyMonths": 12,
+      "inputSha256": "7b9dbd39aabed32c590389e9bcc43e019a44d7267a7a7768bf060fc8f5847239",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "SEI": {
+      "historyReadyMonths": 12,
+      "inputSha256": "d498d40d05d0472ef8a4b680940dc145c9ff87f46d1f4eb3b30e4ab85fa6a46e",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "SUI": {
+      "historyReadyMonths": 12,
+      "inputSha256": "d674f88c0b39070a9068342e3a3b06ae4daf5bdf6959c14a3f15ef559a58621c",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    },
+    "TRX": {
+      "historyReadyMonths": 12,
+      "inputSha256": "1489b0f8e5d9e0031fb4fa1223cb9279a42684c142896e78f8a2581b893c8e59",
+      "months": [
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-10",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-11",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2025-12",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-01",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-02",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-03",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-04",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-05",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-06",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-07",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-08",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        },
+        {
+          "badH1": 0,
+          "decisionMonth": "2026-09",
+          "missingH1": 0,
+          "signalComputed": false,
+          "status": "H1_181D_CLOSED_HISTORY_ONLY",
+          "venueEntryProven": false
+        }
+      ]
+    }
+  },
+  "fullQ102NativeTradeReplay": false,
+  "fullSevenRunnerWalletReplay": false,
+  "intervalUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "limitations": [
+    "Only Q102 Aster warmup directory's ten tickers, not complete native selector or all portfolios",
+    "181d closed H1 continuity alone cannot establish source entry, Binance direction, ASTER M5 confirmation, fills or STOP",
+    "No interpolation of invalid BTC September 2025 H1 or missing ENA/FIL prehistory",
+    "Alternative market-data archives were not searched; no proof of actual live pin, funding or margin"
+  ],
+  "monthlyClocks": 12,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "requiredPriorDays": 181,
+  "rootCertificateIssued": false,
+  "schema": "stable4-q102-archived-h1-monthly-181d-readiness/v1",
+  "status": "PARTIAL_H1_HISTORY_READINESS_NO_NATIVE_SIGNALS_OR_FILLS"
+}
