@@ -18,7 +18,7 @@ test("no DD proof, stale proof, 31% DD all fail closed",()=>{
 });
 test("same-symbol unresolved, R21 occupied, V4/crypto/total caps and known-equal DD",()=>{
  assert.equal(evaluateStable4DryEntry(x).status,"ELIGIBLE_OFFLINE");
- const y={id:"X",sleeve:"PENGU" as const,symbol:"ETHUSDT",gross:.5,stock:false,status:"UNKNOWN" as const,route:"SHORT_V20"};
+ const y={id:"X",sleeve:"PENGU" as const,symbol:"ETHUSDT",gross:.5,stock:false,status:"OPEN" as const,route:"SHORT_V20"};
  assert.equal(evaluateStable4DryEntry({...x,open:[y]}).reason,"SAME_SYMBOL_OWNERSHIP_UNRESOLVED");
  assert.equal(evaluateStable4DryEntry({...x,open:[{...y,symbol:"SOLUSDT",route:"R21_OLD24"}]}).reason,"R21_SINGLE_SLOT_CONTRACT");
  assert.equal(evaluateStable4DryEntry({...x,open:[{...y,symbol:"SOLUSDT",sleeve:"V4",gross:1.8}]}).reason,"V4_GROSS_CAP");
@@ -50,4 +50,21 @@ test("nonfinite capital, unknown direction and invalid V4 cap never pass dry-run
  assert.equal(evaluateStable4DryEntry({...x,candidate:{...c,side:"INVALID" as any}}).reason,"SOURCE_INVALID");
  assert.equal(evaluateStable4DryEntry({...x,v4GrossCap:NaN}).reason,"SOURCE_INVALID");
  assert.equal(evaluateStable4DryEntry({...x,v4GrossCap:Infinity}).reason,"SOURCE_INVALID");
+});
+
+
+test("unknown owner, duplicate IDs, false stock classification and invalid open rows are blocked",()=>{
+ const position={id:"existing",sleeve:"V52" as const,symbol:"AMZNUSDT",route:"V50",gross:1,stock:true,status:"OPEN" as const};
+ const evaluate=(open:any[])=>evaluateStable4DryEntry({...x,open}).reason;
+ assert.equal(evaluate([position]),"ALL_OBSERVED_RISK_CHECKS_WITHIN_LIMIT");
+ assert.equal(evaluate([{...position,status:"UNKNOWN"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,status:"CLOSED"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,stock:false}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,sleeve:"PENGU",stock:true}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,gross:0}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,gross:Infinity}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([position,{...position,symbol:"TSLAUSDT"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,id:c.id}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([null]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+ assert.equal(evaluate([{...position,symbol:"NOT_A_SYMBOL"}]),"OPEN_OWNER_EXPOSURE_UNVERIFIED");
 });
