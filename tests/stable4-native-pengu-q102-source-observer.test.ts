@@ -52,7 +52,7 @@ test("native Q102 H1 flat-market replay respects 181-day history and remains obs
 test("native Q102 rejects 180-day-only, missing BTC, future candles and unverified owner occupancy",()=>{
  const run=(history:ReturnType<typeof qhistory>,state=occupancy)=>
    observeStable4Q102H1({history,decisionTs:t,sourcePin:sha,occupancy:state});
- assert.equal(run(qhistory(180*24)).reason,"NATIVE_Q102_180D_CLOSED_HISTORY_UNAVAILABLE");
+ assert.equal(run(qhistory(180*24)).reason,"NATIVE_Q102_181D_CLOSED_HISTORY_UNAVAILABLE");
  assert.equal(run({candlesBySymbol:{BTCUSDT:qrows()}} as any).status,"BLOCKED_SOURCE");
  const bad=qrows();bad[bad.length-1]={...bad.at(-1)!,timestampMs:t};
  assert.equal(run({candlesBySymbol:{BTCUSDT:qrows(),SOLUSDT:bad}}).status,"BLOCKED_SOURCE");
