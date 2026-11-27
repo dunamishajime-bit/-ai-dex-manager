@@ -16,6 +16,7 @@ from pathlib import Path
 M5 = 300_000
 H = 3_600_000
 REVIEWED_PENGU_H1_LEDGER_SHA256 = "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc"
+REVIEWED_M5_OBSERVATIONS_CANONICAL_SHA256 = "4a4a420ae2ae6f47f94520f4742ea5da1d1ded9063ba2fd696ecf8c1c4eab6ce"
 START = int(datetime(2025, 9, 24, tzinfo=timezone.utc).timestamp() * 1000)
 END = int(datetime(2026, 10, 1, tzinfo=timezone.utc).timestamp() * 1000)
 INPUTS = (
@@ -203,6 +204,14 @@ def verify_report(report: dict, ledger: dict, ledger_raw: bytes) -> None:
                 ("singleSevenWalletNativeReplay","entryExecutionOrNativeExitCertified",
                  "liveEligible","rootCertificateIssued","orderAuthority"))):
         raise ValueError("PENGU_M5_REPORT_SOURCE_OR_RELEASE_SCOPE_INVALID")
+    # Independently regenerated on the owner's PC from the two exact ASTER
+    # archive byte pins; JSON serialization order/spacing is irrelevant.
+    canonical = hashlib.sha256(json.dumps(
+        report, sort_keys=True, ensure_ascii=False, separators=(",",":"),
+        allow_nan=False,
+    ).encode("utf8")).hexdigest()
+    if canonical != REVIEWED_M5_OBSERVATIONS_CANONICAL_SHA256:
+        raise ValueError("PENGU_M5_REPORT_REGENERATED_RESULT_SHA_MISMATCH")
     summary = report.get("archiveClockCoverage", {})
     files = report.get("asterM5SourceFiles", [])
     if (summary.get("fromMs") != START or summary.get("untilMsExclusive") != END
