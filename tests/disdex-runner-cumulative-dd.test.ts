@@ -55,3 +55,13 @@ test("per runner index changes exactly by its own delta divided by prior account
  assert.ok(Math.abs(s.runners.HYPE.maximumDd-.05)<1e-12);
  assert.equal(s.runners.Q102.index,1);
 });
+
+
+test("corrupt runner DD snapshots with fabricated zero drawdown fail closed",()=>{
+ const initial=initializeRunnerCumulativeDd(obs(t,1000,zero()));
+ const actual=advanceRunnerCumulativeDd(initial,obs(t+60000,900,{...zero(),V4:-100}));
+ const forged={...actual,runners:{...actual.runners,V4:{...actual.runners.V4,currentDd:0,maximumDd:0}}};
+ assert.equal(evaluateRunnerDdEntry(forged,"V4",t+60000,sha).reason,"RUNNER_DD_STATE_INVALID");
+ assert.throws(()=>advanceRunnerCumulativeDd(forged,obs(t+120000,900,{...zero(),V4:-100})),/RUNNER_CUMULATIVE_DD_STATE_INVALID/);
+ assert.equal(evaluateRunnerDdEntry(actual,"V4",t+60000,sha).status,"ENTRY_ALLOWED_BY_THIS_DD_ONLY");
+});
