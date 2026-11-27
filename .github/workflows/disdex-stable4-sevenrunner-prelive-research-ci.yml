@@ -86,6 +86,40 @@ jobs:
             tests/shared-risk-transient-refresh-retry.test.ts
           echo 'INDEPENDENT_RESEARCH_REGRESSION_ONLY=true'
           echo 'LIVE_ORDER_PERMIT=FALSE'
+      - name: Regenerate current source synthetic report artifacts (partial, no orders)
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/three-sleeve-native-current.json"
+          npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/q102-hype-native-current.json"
+          python - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          pairs=[
+            ("scripts/stable4-three-sleeve-native-synthetic.ts","three-sleeve-native-current.json"),
+            ("scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts","q102-hype-native-current.json"),
+          ]
+          evidence=[]
+          for source,output in pairs:
+              path=root/output
+              obj=json.loads(path.read_text(encoding="utf-8"))
+              if len(obj.get("rows",obj.get("cases",[]))) not in (8,12):
+                  raise ValueError("REPLAY_EXPECTED_CASES_MISSING:"+output)
+              source_digest=hashlib.sha256(pathlib.Path(source).read_bytes()).hexdigest()
+              output_digest=hashlib.sha256(path.read_bytes()).hexdigest()
+              evidence.append({"source":source,"sourceSha256":source_digest,"output":output,"outputSha256":output_digest,"status":obj["status"],"orderAuthority":False})
+          (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\\n",encoding="utf8")
+          print(json.dumps(evidence))
+          PY
+      - name: Preserve independently regenerated research artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable4-native-replay-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/three-sleeve-native-current.json
+            ${{ runner.temp }}/q102-hype-native-current.json
+            ${{ runner.temp }}/source-native-replay-fingerprints.json
       - name: Source-level validation only; NO certificate or LIVE activation
         run: |
           echo "PRELIVE_SOURCE_ONLY=true"
