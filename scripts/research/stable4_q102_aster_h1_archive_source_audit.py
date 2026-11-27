@@ -213,6 +213,56 @@ def verify_btc_aster_binance_conflict(conflict:dict, integrity:dict)->None:
         raise ValueError("Q102_BTC_CROSS_VENUE_SOURCE_CONFLICT_INVALID")
 
 
+def verify_btc_native_m5_disagreement(m5:dict,conflict:dict)->None:
+    """Never promote an inconsistent M5 aggregation to a repaired H1 price."""
+    if (m5.get("schema")!="stable4-q102-btc-aster-named-m5-aggregation-crosscheck/v1"
+            or m5.get("status")!="BLOCKED_H1_AGGREGATION_MISMATCH_WITH_CORRUPT_M5_BAR"
+            or m5.get("timestampUtc")!="2025-09-13T13:00:00Z"
+            or any(m5.get(k) is not False for k in (
+                "automaticH1RepairApplied","venueExecutionCertified","rootCertificateIssued",
+                "orderAuthority","productionEligible"))):
+        raise ValueError("Q102_BTC_M5_H1_RELEASE_BOUNDARY_INVALID")
+    source=m5.get("source",{})
+    if (source.get("file")!="PREPERIOD_TRAIN_20250322_20251001/aster-m5/BTCUSDT-5m-20250322-20251001.jsonl.gz"
+            or source.get("sha256")!="59aa88e6bc1943945167aebca3c01b67f50d86810731b07b2df44a707607b589"):
+        raise ValueError("Q102_BTC_M5_H1_SOURCE_PIN_INVALID")
+    rows=m5.get("m5Rows")
+    if not isinstance(rows,list) or len(rows)!=12 or m5.get("m5RowsObserved")!=12:
+        raise ValueError("Q102_BTC_M5_H1_EXPECTED_TWELVE_CANDLES")
+    open_ts=1757768400000
+    invalid=[]
+    for i,bar in enumerate(rows):
+        values=[bar.get(k) for k in ("open","high","low","close","volume")]
+        if (bar.get("openTimeMs")!=open_ts+i*300_000
+                or any(type(v) not in (int,float) or not math.isfinite(v) for v in values)):
+            raise ValueError("Q102_BTC_M5_H1_CAUSAL_CLOCK_OR_VALUE_INVALID")
+        op,hi,lo,cl,vol=values
+        good=(op>0 and lo>0 and cl>0 and hi>=max(op,cl)
+              and lo<=min(op,cl) and vol>=0)
+        if bar.get("ohlcValid") is not good:
+            raise ValueError("Q102_BTC_M5_H1_INVALID_FLAG_FALSIFIED")
+        if not good:
+            invalid.append(i)
+    if invalid!=[10] or m5.get("invalidM5Indices")!=[10]:
+        raise ValueError("Q102_BTC_M5_H1_CORRUPT_BAR_NOT_PRESERVED")
+    aggregated={
+        "open":rows[0]["open"],
+        "high":max(r["high"] for r in rows),
+        "low":min(r["low"] for r in rows),
+        "close":rows[-1]["close"],
+        "volume":round(sum(r["volume"] for r in rows),6),
+    }
+    h1=m5.get("h1Recorded",{})
+    aster=conflict.get("aster",{})
+    if (m5.get("m5Aggregate")!=aggregated
+            or any(h1.get(k)!=aster.get(k) for k in aggregated)
+            or not h1["high"]<h1["open"]
+            or not aggregated["high"]>h1["high"]
+            or m5.get("h1HighLessThanOpen") is not True
+            or m5.get("m5HighExceedsH1High") is not True):
+        raise ValueError("Q102_BTC_M5_H1_AGGREGATION_RECONCILIATION_FAILED")
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
