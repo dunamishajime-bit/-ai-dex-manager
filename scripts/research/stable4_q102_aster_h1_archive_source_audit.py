@@ -27,6 +27,8 @@ def audit_h1(path: Path) -> dict:
             h.update(chunk)
     rows = gaps = duplicated = bad = zero = 0
     first = last = previous = None
+    prehistory_rows = prehistory_bad = prehistory_missing = 0
+    prehistory_first = prehistory_last = prehistory_prev = None
     with gzip.open(path, "rt", encoding="utf8") as stream:
         for line in stream:
             bar = json.loads(line)
@@ -44,11 +46,19 @@ def audit_h1(path: Path) -> dict:
                     gaps += (ts - previous) // H - 1
                 elif ts != previous + H:
                     bad += 1
-            if (ts % H or close_ts != ts + H - 1
-                    or not all(math.isfinite(z) for z in (op, high, low, close, volume))
-                    or min(op, low, close) <= 0 or low > min(op, close)
-                    or high < max(op, close) or volume < 0):
-                bad += 1
+            bar_invalid = (ts % H or close_ts != ts + H - 1
+                           or not all(math.isfinite(z) for z in (op, high, low, close, volume))
+                           or min(op, low, close) <= 0 or low > min(op, close)
+                           or high < max(op, close) or volume < 0)
+            bad += int(bool(bar_invalid))
+            if CAUSAL_181D_START <= ts < TARGET_START:
+                prehistory_rows += 1
+                if prehistory_first is None:
+                    prehistory_first = ts
+                if prehistory_prev is not None and ts != prehistory_prev + H:
+                    prehistory_missing += 1
+                prehistory_bad += int(bool(bar_invalid))
+                prehistory_prev = prehistory_last = ts
             zero += int(volume == 0)
             rows += 1
             last = previous = ts
@@ -59,9 +69,13 @@ def audit_h1(path: Path) -> dict:
         "firstOpenMs": first, "lastOpenMs": last,
         "rows": rows, "missingH1Slots": gaps, "duplicateOrReversed": duplicated,
         "invalidOHLCOrTime": bad, "zeroVolumeHours": zero,
-        "covers181dToTargetStart": first <= CAUSAL_181D_START
-            and last >= TARGET_START - H and gaps == 0
-            and duplicated == 0 and bad == 0,
+        "prehistory181dRows": prehistory_rows,
+        "prehistory181dInvalidOHLCOrTime": prehistory_bad,
+        "prehistory181dDiscontinuities": prehistory_missing,
+        "covers181dToTargetStart": prehistory_rows == 181 * 24
+            and prehistory_first == CAUSAL_181D_START
+            and prehistory_last == TARGET_START - H
+            and prehistory_missing == 0 and prehistory_bad == 0,
         "fillsOrPricesCertified": False,
     }
 
