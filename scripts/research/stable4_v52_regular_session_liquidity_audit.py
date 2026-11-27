@@ -101,8 +101,8 @@ def audit_ticker(path: Path, expected_sha: str) -> dict:
     }
 
 
-def evaluate(data_root: Path, coverage_file: Path) -> dict:
-    coverage = json.loads(coverage_file.read_text(encoding="utf8"))
+def evaluate(data_root: Path, coverage_file: Path | dict) -> dict:
+    coverage = coverage_file if isinstance(coverage_file, dict) else json.loads(coverage_file.read_text(encoding="utf8"))
     if (coverage.get("schema") != "stable4-v52-stock-m5-h1-coverage-audit/v1"
             or coverage.get("status") != "COVERAGE_REVIEW_ONLY"
             or coverage.get("orderAuthority") is not False):
