@@ -40,7 +40,7 @@ const validPenguRows=(rows:readonly DisDexV35Candle[],ts:number):boolean=>{
  return rows.at(-1)!.openTime===ts-H;
 };
 const validQualityRows=(rows:readonly Quality102Candle[],ts:number):boolean=>{
- if(!Array.isArray(rows)||rows.length<180*24)return false;
+ if(!Array.isArray(rows)||rows.length<181*24)return false;
  for(let i=0;i<rows.length;i++){
   const b=rows[i];
   if(!b||!Number.isSafeInteger(b.timestampMs)||b.timestampMs<=0||b.timestampMs%H!==0
@@ -95,7 +95,7 @@ export function observeStable4Q102H1(input:{
  const entries=history?.candlesBySymbol?Object.entries(history.candlesBySymbol):[];
  if(entries.length<2||!entries.some(([s])=>s==="BTCUSDT")||
     entries.some(([s,rows])=>!/^[A-Z0-9]{2,20}USDT$/.test(s)||!validQualityRows(rows,decisionTs)))
-   return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_180D_CLOSED_HISTORY_UNAVAILABLE");
+   return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_181D_CLOSED_HISTORY_UNAVAILABLE");
  if(!occupancy||typeof occupancy.activePosition!=="boolean"||
     typeof occupancy.unresolvedPendingEntry!=="boolean"||
     (occupancy.basePositionActive!==undefined&&typeof occupancy.basePositionActive!=="boolean"))
