@@ -27,7 +27,7 @@ const result=(runner:Runner,decisionTs:number,sourcePin:string,reason:string,
 });
 const validClock=(ts:number,pin:string)=>Number.isSafeInteger(ts)&&ts>H&&ts%H===0&&PIN.test(pin);
 const validPenguRows=(rows:readonly DisDexV35Candle[],ts:number):boolean=>{
- if(!Array.isArray(rows)||rows.length<169)return false;
+ if(!Array.isArray(rows)||rows.length<181)return false;
  for(let i=0;i<rows.length;i++){
   const b=rows[i];
   if(!b||!Number.isSafeInteger(b.openTime)||b.openTime<=0||b.openTime%H!==0
