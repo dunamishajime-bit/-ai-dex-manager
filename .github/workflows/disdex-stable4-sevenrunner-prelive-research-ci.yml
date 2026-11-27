@@ -56,6 +56,16 @@ jobs:
               npx tsx "$name"
             done
           python -B tests/test_public_read_resilience_offline.py
+          python -B -m unittest -q \
+            tests.test_v52_market_closed_gate \
+            tests.test_v52_real_tick \
+            tests.test_v52_preserve_peer_protection \
+            tests.test_v52_daily_loss_recovery \
+            tests.test_v52_safety_regressions \
+            tests.test_v52_stock_quote_local_hold_20261027 \
+            tests.test_v52_q102_independent_pin \
+            tests.test_v52_upstream_fail_closed \
+            tests.test_v52_reference_transient
       - name: Source-level validation only; NO certificate or LIVE activation
         run: |
           echo "PRELIVE_SOURCE_ONLY=true"

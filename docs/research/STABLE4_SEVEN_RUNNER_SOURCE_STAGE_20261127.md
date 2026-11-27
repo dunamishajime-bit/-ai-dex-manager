@@ -56,3 +56,7 @@ Eight paired 280-day mathematical H1 markets were regenerated with 180-day Q102 
 
 ## Proposed source integrity (NOT a replacement authorization)
 The old production manifest remains immutable. A newly generated *review-only* manifest records the exact SHA256 digests of all 23 old-manifest source files in this draft checkout, and explicitly identifies precisely four source digests different from the historical approved manifest. It can pass source integrity checks without asserting signed runtime equivalence, exchange protection, Owner approval, or formal release credentials. The candidate manifest labels all these controls UNISSUED / false. Official pinned historical source gate is expected to remain FAIL until the actual exact-SHA formal review process issues an appropriate new release proof. See tests/stable4-proposed-source-integrity.test.ts.
+
+
+## V52 source safety regression, not synthetic stock BT
+Nine local no-venue V52 Python test modules (29 tests) passed on the isolated offline source at review time, covering equity session/halt boundaries, actual heartbeat atomicity, peer order preservation, sticky daily-loss latch, transient reference failure isolation, stock quote staleness, Q102 independent pin, and source integrity Fail Closed. Their SHA256 and console endings are recorded in STABLE4_V52_OFFLINE_RUNNER_SAFETY_REGRESSION_20261127.json. CI replays them as offline-only tests. This does NOT establish native V52 V11/V50 synthetic stock bar/session entry and exit parity or a production certificate.
