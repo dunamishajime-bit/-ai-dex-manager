@@ -109,9 +109,43 @@ export function observeStable4Q102H1(input:{
       !Number.isFinite(s.requestedGross)||s.requestedGross<=0)
    return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_ENTRY_UNVERIFIED");
   return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_H1_SIGNAL_ONLY_VENUE_UNCONFIRMED","NATIVE_ENTRY_OBSERVED",{
-   symbol:s.symbol,side:s.side,gross:s.requestedGross,route:s.family,cutoff:s.dataCutoffTs,
+   symbol:s.symbol,side:s.side,gross:s.requestedGross,route:s.family+"|"+s.symbol,cutoff:s.dataCutoffTs,
   });
  }catch{
   return result("Q102",decisionTs,sourcePin,"NATIVE_Q102_SOURCE_EVALUATION_FAILED");
  }
+}
+
+
+/** Source observation can constrain research selection, but CANNOT certify
+ * Binance->ASTER 5m entry confirmation or live/venue parity. A separately
+ * pinned and source-tested M5 entry policy is mandatory before admission.
+ */
+export type NativeSourceBinding={
+ status:"BLOCKED"|"NATIVE_H1_OBSERVED_ONLY";
+ reason:string;nativeH1Bound:boolean;eligibleForPortfolioEntry:false;orderAuthority:false;
+};
+export function bindStable4NativeH1Observation(input:{
+ candidate:{sleeve:Runner;symbol:string;side:"LONG"|"SHORT";route:string;
+  gross:number;entryTs:number;sourceReleaseSha:string;sourceDecisionTs:number;
+  sourceComplete:boolean};
+ observation?:SourceObservation;
+}):NativeSourceBinding{
+ const blocked=(reason:string):NativeSourceBinding=>({
+  status:"BLOCKED",reason,nativeH1Bound:false,
+  eligibleForPortfolioEntry:false,orderAuthority:false,
+ });
+ const {candidate:c,observation:o}=input;
+ if(!o||o.runner!==c.sleeve||o.status!=="NATIVE_ENTRY_OBSERVED")
+  return blocked("NATIVE_H1_ENTRY_OBSERVATION_MISSING");
+ if(!validClock(c.sourceDecisionTs,c.sourceReleaseSha)||c.entryTs!==c.sourceDecisionTs||
+    c.sourceReleaseSha!==o.sourcePin||o.decisionTs!==c.sourceDecisionTs||
+    o.sourceDataCutoffTs!==c.sourceDecisionTs-H||
+    o.symbol!==c.symbol||o.side!==(c.side==="LONG"?1:-1)||
+    o.route!==c.route||!Number.isFinite(c.gross)||c.gross<=0||
+    Math.abs(c.gross-o.gross)>1e-9||c.sourceComplete!==true||
+    o.orderAuthority!==false||o.asterM5EntryConfirmed!==false)
+  return blocked("NATIVE_H1_SOURCE_BINDING_MISMATCH");
+ return {status:"NATIVE_H1_OBSERVED_ONLY",reason:"ASTER_M5_ENTRY_CONFIRMATION_NOT_SOURCE_CERTIFIED",
+  nativeH1Bound:true,eligibleForPortfolioEntry:false,orderAuthority:false};
 }
