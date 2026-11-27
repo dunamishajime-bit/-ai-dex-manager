@@ -29,6 +29,13 @@ export function evaluateStable4DryEntry(x:RiskInput):Decision{
  if(portfolio.status!=="ELIGIBLE_OFFLINE")return blocked(portfolio.reason);
  const dd=evaluateRunnerDdEntry(x.ddState,c.sleeve,x.asof,x.releaseSha,0.30);
  if(dd.status!=="ENTRY_ALLOWED_BY_THIS_DD_ONLY")return blocked(dd.reason,dd.runnerMaxDd);
+ // Even fresh portfolio and seven-runner proofs cannot be mixed with an
+ // unrelated equity denominator. A full account replay must use one mark.
+ const coherent=(a:number,b:number)=>Number.isFinite(a)&&Number.isFinite(b)&&
+  Math.abs(a-b)<=Math.max(.01,1e-8*Math.max(Math.abs(a),Math.abs(b)));
+ if(!coherent(x.equityUsd,x.portfolioDdState!.equity)||
+    !coherent(x.equityUsd,x.ddState!.accountEquityUsd))
+    return blocked("ACCOUNT_MTM_EQUITY_MISMATCH",dd.runnerMaxDd);
  const used=x.open.reduce((z,a)=>({crypto:z.crypto+(a.stock?0:a.gross),stock:z.stock+(a.stock?a.gross:0),v4:z.v4+(a.sleeve==="V4"?a.gross:0)}),{crypto:0,stock:0,v4:0});
  const stock=c.sleeve==="V52",crypto=used.crypto+(stock?0:c.gross),shares=used.stock+(stock?c.gross:0);
  if(crypto>3+EPS||shares>4+EPS||crypto+shares>4.25+EPS)return blocked("SHARED_GROSS_CAP",dd.runnerMaxDd);
