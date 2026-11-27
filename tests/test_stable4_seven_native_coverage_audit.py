@@ -39,6 +39,11 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
         self.assertEqual(report["q102AsterArchiveCausal181d"]["btcPrior181dM5FirstBarZeroMismatchHours"], 84)
         self.assertEqual(report["q102AsterArchiveCausal181d"]["btcPrior181dM5FirstBarPositiveMismatchHours"], 1)
         self.assertFalse(report["q102AsterArchiveCausal181d"]["btcH1VsM5PriceParityProven"])
+        self.assertEqual(report["q102AsterArchiveCausal181d"]["crossDirectoryMainH1Symbols"], 36)
+        self.assertEqual(report["q102AsterArchiveCausal181d"]["crossDirectoryEarlyH1Symbols"], 31)
+        self.assertEqual(report["q102AsterArchiveCausal181d"]["sourceCausal181dAndAnnualH1ReadyCount"], 21)
+        self.assertTrue(report["q102AsterArchiveCausal181d"]["btcInvalidAtStudyStart"])
+        self.assertFalse(report["q102AsterArchiveCausal181d"]["h1HistoryReadinessIsNativeEntryOrFillProof"])
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["BTC"], 6)
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["ENA"], 10)
         self.assertEqual(report["realMarketNativeSourceScope"]["PENGU"],
