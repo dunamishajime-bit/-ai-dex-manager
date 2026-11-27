@@ -1,6 +1,7 @@
 import {initializePortfolioDd,advancePortfolioDd} from "../lib/stable4-portfolio-cumulative-dd";
+import {readFileSync} from "node:fs";
 import test from "node:test";import assert from "node:assert/strict";
-import {evaluateStable4DryEntry,evaluateR21ResearchExit} from "../lib/stable4-seven-runner-dryrun-gate";
+import {evaluateStable4DryEntry,evaluateR21ResearchExit,STABLE4_V52_EQUITY_BASES,STABLE4_V52_MAX_SLOT_GROSS} from "../lib/stable4-seven-runner-dryrun-gate";
 import {initializeRunnerCumulativeDd,advanceRunnerCumulativeDd,RUNNER_DD_IDS} from "../lib/disdex-runner-cumulative-dd";
 const H=3600000,M=300000,sha="a".repeat(40),t=200*H;
 const pnl=Object.fromEntries(RUNNER_DD_IDS.map(x=>[x,0])) as any;
@@ -98,4 +99,16 @@ test("V52 stock source symbols are admitted only as equities; crypto stays USDT-
  assert.equal(evaluateStable4DryEntry({...x,candidate:{...v52,gross:2.01}}).reason,"V52_SLOT_GROSS_CAP");
  assert.equal(evaluateStable4DryEntry({...x,open:[{id:"excess",sleeve:"V52",symbol:"TSLA",route:"V11",gross:2.01,stock:true,status:"OPEN"}],candidate:v52}).reason,"OPEN_OWNER_EXPOSURE_UNVERIFIED");
  assert.equal(evaluateStable4DryEntry({...x,open:[{id:"wrong",sleeve:"V4",symbol:"TSLA",route:"BASE",gross:1,stock:false,status:"OPEN"}],candidate:v52}).reason,"OPEN_OWNER_EXPOSURE_UNVERIFIED");
+});
+
+test("V52 research stock aliases and slot gross are pinned to the actual Python source",()=>{
+ const source=readFileSync("scripts/disdex_v13d_v11eq_stock_live_engine.py","utf8");
+ const declaration=source.match(/^SYMBOLS = \(([^\n]+)\)$/m);
+ assert.ok(declaration,"V52 stock source SYMBOLS declaration missing");
+ const underlying=[...declaration![1].matchAll(/"([A-Z]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(underlying,[...STABLE4_V52_EQUITY_BASES]);
+ assert.ok(source.includes('ASTER_SYMBOL = {symbol: f"{symbol}USDT" for symbol in SYMBOLS}'));
+ const policy=JSON.parse(readFileSync("config/v52V50Runtime.json","utf8"));
+ assert.equal(policy.slotGross,STABLE4_V52_MAX_SLOT_GROSS);
+ assert.equal(policy.stockAggregateGross,4.0);
 });
