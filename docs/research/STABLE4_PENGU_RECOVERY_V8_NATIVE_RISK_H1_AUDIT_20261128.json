@@ -1,0 +1,1164 @@
+{
+  "schema": "stable4-pengu-recovery-v8-native-risk-h1-observations/v1",
+  "status": "SOURCE_HELPER_RISK_EXIT_ONLY_NO_ACTUAL_FILL_OR_YIELD",
+  "inputPins": {
+    "ledger": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
+    "quality": "f22b0aa4d9afcde3f0336d1884be54330d9c15b7ab6a2c6281e0f11f455a6f0d",
+    "inventorySha256": "abfb9b38fc6df8656cd62c35396c04541b4d00dec676cc2f30b2c842842fc16d"
+  },
+  "sourcePins": {
+    "scripts/research/stable4-pengu-recovery-v8-native-risk-h1-audit.ts": "34e8d95b3a1017eb41ca84e90db3f5a5f37bcc5e71611b4276e914109ca83e9d",
+    "lib/pengu-recovery-v8.ts": "5eae34015f3b06ad2ecdd98c0f2366e46513eb7577d6c2c2c1cdca20a827b5ad",
+    "config/penguRecoveryV8.ts": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+    "lib/pengu-dual-ls-v2.ts": "5a7a0941245a594ec594ee0cc0fbb96ad14ae6e4e4962ccf1d512c90e68f7355"
+  },
+  "h1": {
+    "folder": "aster-public-v3-h1",
+    "file": "PENGUUSDT-1h-20250924-20261001.jsonl.gz",
+    "sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+    "rows": 8928
+  },
+  "m5Files": [
+    {
+      "folder": "aster-public-v3-5m-prefix",
+      "file": "PENGUUSDT-5m-20250924-20260803.jsonl.gz",
+      "sha256": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "rows": 90144
+    },
+    {
+      "folder": "aster-public-v3-5m-suffix",
+      "file": "PENGUUSDT-5m-20260803-20261001.jsonl.gz",
+      "sha256": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "rows": 16992
+    }
+  ],
+  "summary": {
+    "recoveryRawH1Candidates": 48,
+    "modelStatus": {
+      "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL": 29,
+      "FIRST_M5_CONFIRMATION_UNAVAILABLE": 19
+    },
+    "modeledExitReasons": {
+      "TRAILING_STOP": 13,
+      "HARD_STOP": 12,
+      "MAX_HOLD": 4
+    },
+    "modeledPartialCandidates": 8
+  },
+  "outcomes": [
+    {
+      "signalTs": 1759629600000,
+      "originalEntryTs": 1759633200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1759633500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.0314,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1759654800000,
+          "observedAfterTs": 1759658400000,
+          "stopPrice": 0.033174,
+          "exitPriceProxy": 0.033174,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.033174,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1759910400000,
+      "originalEntryTs": 1759914000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1759914300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.03114,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1759971600000,
+          "observedAfterTs": 1759975200000,
+          "stopPrice": 0.03228257,
+          "exitPriceProxy": 0.03228257,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.03228257,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1763010000000,
+      "originalEntryTs": 1763013600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1763013900000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1764316800000,
+      "originalEntryTs": 1764320400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1764320700000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1765029600000,
+      "originalEntryTs": 1765033200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1765033500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.010811,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1765072800000,
+          "observedAfterTs": 1765076400000,
+          "stopPrice": 0.01132184,
+          "exitPriceProxy": 0.01132184,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.01132184,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1765483200000,
+      "originalEntryTs": 1765486800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1765487100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.01127,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1765710000000,
+          "observedAfterTs": 1765713600000,
+          "stopPrice": 0.0108192,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1765731600000,
+          "observedAfterTs": 1765735200000,
+          "stopPrice": 0.0105938,
+          "exitPriceProxy": 0.0105938,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.0105938,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1765778400000,
+      "originalEntryTs": 1765782000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1765782300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1765882800000,
+      "originalEntryTs": 1765886400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1765886700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.010239,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1765980000000,
+          "observedAfterTs": 1765983600000,
+          "stopPrice": 0.00982944,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1765990800000,
+          "observedAfterTs": 1765994400000,
+          "stopPrice": 0.00962466,
+          "exitPriceProxy": 0.00962466,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00962466,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1765980000000,
+      "originalEntryTs": 1765983600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1765983900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.010334,
+      "events": [
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1765987200000,
+          "observedAfterTs": 1765990800000,
+          "stopPrice": 0.009713959999999999,
+          "exitPriceProxy": 0.009713959999999999,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.009713959999999999,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1766588400000,
+      "originalEntryTs": 1766592000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1766592300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.00891,
+      "events": [
+        {
+          "kind": "MAX_HOLD",
+          "decisionOpenTs": 1766851200000,
+          "observedAfterTs": 1766854800000,
+          "stopPrice": null,
+          "exitPriceProxy": 0.009151,
+          "volumePositive": true,
+          "sourceEvents": [
+            "MAX_HOLD"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "MAX_HOLD",
+      "exitPriceProxy": 0.009151,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1767106800000,
+      "originalEntryTs": 1767110400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1767110700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.009131,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1767200400000,
+          "observedAfterTs": 1767204000000,
+          "stopPrice": 0.00876576,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1767204000000,
+          "observedAfterTs": 1767207600000,
+          "stopPrice": 0.00858314,
+          "exitPriceProxy": 0.00858314,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00858314,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1767884400000,
+      "originalEntryTs": 1767888000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1767888300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.012279,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1768017600000,
+          "observedAfterTs": 1768021200000,
+          "stopPrice": 0.011787839999999999,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "MAX_HOLD",
+          "decisionOpenTs": 1768147200000,
+          "observedAfterTs": 1768150800000,
+          "stopPrice": null,
+          "exitPriceProxy": 0.012261,
+          "volumePositive": true,
+          "sourceEvents": [
+            "MAX_HOLD"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "MAX_HOLD",
+      "exitPriceProxy": 0.012261,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1768593600000,
+      "originalEntryTs": 1768597200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1768597500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.012292,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1768698000000,
+          "observedAfterTs": 1768701600000,
+          "stopPrice": 0.01180032,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1768744800000,
+          "observedAfterTs": 1768748400000,
+          "stopPrice": 0.01155448,
+          "exitPriceProxy": 0.01155448,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.01155448,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1771545600000,
+      "originalEntryTs": 1771549200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1771549500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006689,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1771808400000,
+          "observedAfterTs": 1771812000000,
+          "stopPrice": 0.00642144,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1771808400000,
+          "observedAfterTs": 1771812000000,
+          "stopPrice": 0.00628766,
+          "exitPriceProxy": 0.00628766,
+          "volumePositive": true,
+          "sourceEvents": [
+            "PARTIAL_DEFENSE",
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00628766,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1772283600000,
+      "originalEntryTs": 1772287200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1772287500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006556,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1772337600000,
+          "observedAfterTs": 1772341200000,
+          "stopPrice": 0.00709264,
+          "exitPriceProxy": 0.00709264,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00709264,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1773028800000,
+      "originalEntryTs": 1773032400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1773032700000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1773608400000,
+      "originalEntryTs": 1773612000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1773612300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1774238400000,
+      "originalEntryTs": 1774242000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1774242300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1774710000000,
+      "originalEntryTs": 1774713600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1774713900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006582,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1774803600000,
+          "observedAfterTs": 1774807200000,
+          "stopPrice": 0.00631872,
+          "volumePositive": true,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1774821600000,
+          "observedAfterTs": 1774825200000,
+          "stopPrice": 0.00618708,
+          "exitPriceProxy": 0.00618708,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00618708,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1774836000000,
+      "originalEntryTs": 1774839600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1774839900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006446,
+      "events": [
+        {
+          "kind": "MAX_HOLD",
+          "decisionOpenTs": 1775098800000,
+          "observedAfterTs": 1775102400000,
+          "stopPrice": null,
+          "exitPriceProxy": 0.006244,
+          "volumePositive": true,
+          "sourceEvents": [
+            "MAX_HOLD"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "MAX_HOLD",
+      "exitPriceProxy": 0.006244,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1775430000000,
+      "originalEntryTs": 1775433600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1775433900000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006404,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1775646000000,
+          "observedAfterTs": 1775649600000,
+          "stopPrice": 0.00670658,
+          "exitPriceProxy": 0.00670658,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00670658,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1775725200000,
+      "originalEntryTs": 1775728800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1775729100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1776085200000,
+      "originalEntryTs": 1776088800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1776089100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006633,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1776142800000,
+          "observedAfterTs": 1776146400000,
+          "stopPrice": 0.00687148,
+          "exitPriceProxy": 0.00687148,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00687148,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1776603600000,
+      "originalEntryTs": 1776607200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1776607500000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1776668400000,
+      "originalEntryTs": 1776672000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1776672300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007236,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1776772800000,
+          "observedAfterTs": 1776776400000,
+          "stopPrice": 0.00768725,
+          "exitPriceProxy": 0.00768725,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00768725,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1777845600000,
+      "originalEntryTs": 1777849200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1777849500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.010033,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1777950000000,
+          "observedAfterTs": 1777953600000,
+          "stopPrice": 0.010572999999999999,
+          "exitPriceProxy": 0.010572999999999999,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.010572999999999999,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1779051600000,
+      "originalEntryTs": 1779055200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1779055500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.008566,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1779300000000,
+          "observedAfterTs": 1779303600000,
+          "stopPrice": 0.00925574,
+          "exitPriceProxy": 0.00925574,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00925574,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1779134400000,
+      "originalEntryTs": 1779138000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1779138300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.00842,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1779300000000,
+          "observedAfterTs": 1779303600000,
+          "stopPrice": 0.00925574,
+          "exitPriceProxy": 0.00925574,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00925574,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1779544800000,
+      "originalEntryTs": 1779548400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1779548700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.00882,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1779570000000,
+          "observedAfterTs": 1779573600000,
+          "stopPrice": 0.00912964,
+          "exitPriceProxy": 0.00912964,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00912964,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1779800400000,
+      "originalEntryTs": 1779804000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1779804300000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.008988,
+      "events": [
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1779832800000,
+          "observedAfterTs": 1779836400000,
+          "stopPrice": 0.00844872,
+          "exitPriceProxy": 0.00844872,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00844872,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1781146800000,
+      "originalEntryTs": 1781150400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1781150700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006736,
+      "events": [
+        {
+          "kind": "MAX_HOLD",
+          "decisionOpenTs": 1781409600000,
+          "observedAfterTs": 1781413200000,
+          "stopPrice": null,
+          "exitPriceProxy": 0.006771,
+          "volumePositive": true,
+          "sourceEvents": [
+            "MAX_HOLD"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "MAX_HOLD",
+      "exitPriceProxy": 0.006771,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1781470800000,
+      "originalEntryTs": 1781474400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1781474700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006951,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1781550000000,
+          "observedAfterTs": 1781553600000,
+          "stopPrice": 0.00726239,
+          "exitPriceProxy": 0.00726239,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.00726239,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1781816400000,
+      "originalEntryTs": 1781820000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1781820300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1781888400000,
+      "originalEntryTs": 1781892000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1781892300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1783350000000,
+      "originalEntryTs": 1783353600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1783353900000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1783443600000,
+      "originalEntryTs": 1783447200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1783447500000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1783645200000,
+      "originalEntryTs": 1783648800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1783649100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1784034000000,
+      "originalEntryTs": 1784037600000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1784037900000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1784995200000,
+      "originalEntryTs": 1784998800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1784999100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1785250800000,
+      "originalEntryTs": 1785254400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1785254700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006056,
+      "events": [
+        {
+          "kind": "PARTIAL_DEFENSE",
+          "decisionOpenTs": 1785344400000,
+          "observedAfterTs": 1785348000000,
+          "stopPrice": 0.005813759999999999,
+          "volumePositive": false,
+          "quantityModel": 0.5,
+          "requiresActualPartialFill": true
+        },
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1785355200000,
+          "observedAfterTs": 1785358800000,
+          "stopPrice": 0.00569264,
+          "exitPriceProxy": 0.00569264,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00569264,
+      "modeledPartial": true,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1785376800000,
+      "originalEntryTs": 1785380400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1785380700000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1785416400000,
+      "originalEntryTs": 1785420000000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": false,
+      "modelEntryTs": 1785420300000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1786611600000,
+      "originalEntryTs": 1786615200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1786615500000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1788091200000,
+      "originalEntryTs": 1788094800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": false,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1788095100000,
+      "orderAuthority": false,
+      "status": "FIRST_M5_CONFIRMATION_UNAVAILABLE"
+    },
+    {
+      "signalTs": 1789131600000,
+      "originalEntryTs": 1789135200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1789135500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007724,
+      "events": [
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1789149600000,
+          "observedAfterTs": 1789153200000,
+          "stopPrice": 0.007260559999999999,
+          "exitPriceProxy": 0.007260559999999999,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.007260559999999999,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1789405200000,
+      "originalEntryTs": 1789408800000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1789409100000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.007239,
+      "events": [
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1789495200000,
+          "observedAfterTs": 1789498800000,
+          "stopPrice": 0.00680466,
+          "exitPriceProxy": 0.00680466,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.00680466,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1789599600000,
+      "originalEntryTs": 1789603200000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1789603500000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.006978,
+      "events": [
+        {
+          "kind": "TRAILING_STOP",
+          "decisionOpenTs": 1789732800000,
+          "observedAfterTs": 1789736400000,
+          "stopPrice": 0.0075369,
+          "exitPriceProxy": 0.0075369,
+          "volumePositive": true,
+          "sourceEvents": [
+            "TRAILING_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "TRAILING_STOP",
+      "exitPriceProxy": 0.0075369,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    },
+    {
+      "signalTs": 1790596800000,
+      "originalEntryTs": 1790600400000,
+      "route": "RECOVERY_V8",
+      "firstM5ConfirmedPositiveVolume": true,
+      "followingM5PositiveVolumeExPost": true,
+      "modelEntryTs": 1790600700000,
+      "orderAuthority": false,
+      "entryPriceProxy": 0.009944,
+      "events": [
+        {
+          "kind": "HARD_STOP",
+          "decisionOpenTs": 1790607600000,
+          "observedAfterTs": 1790611200000,
+          "stopPrice": 0.009347359999999999,
+          "exitPriceProxy": 0.009347359999999999,
+          "volumePositive": true,
+          "sourceEvents": [
+            "HARD_STOP"
+          ],
+          "actualVenueFillVerified": false
+        }
+      ],
+      "status": "MODELED_SOURCE_NATIVE_RISK_EXIT_NOT_FILL",
+      "exitReason": "HARD_STOP",
+      "exitPriceProxy": 0.009347359999999999,
+      "modeledPartial": false,
+      "yieldBaseLongNotReplayed": true
+    }
+  ],
+  "orderAuthority": false,
+  "fullPenguAnnualTradeReplay": false,
+  "fullSevenRunnerWalletReplay": false,
+  "limitations": [
+    "Source-native evaluateRecoveryV8PositionBar helper, but price input is ASTER closed H1 bars, whereas Binance H1 authored the source entry; no actual ASTER fill, protected STOP or cross-venue quote parity",
+    "First positive ASTER 5m volume observed at t+5m. Next bar's open price is only a proxy at t+5m. Its future volume is recorded separately and is NEVER used for entry admission",
+    "Risk-only isolated model, BASE_LONG yield disabled because complete Binance-native contemporaneous features and V8 yield precedence are not reconstructed. Exit outcomes can change materially if yield is restored",
+    "No first partial-hour STOP fill proof, no intrabar H1 event ordering or guaranteed liquidity, and partial defense is modeled with instant quantity change without actual reduce-only fill",
+    "No signed venue order lifecycle, no cooling or overlapping-slot replay, fees/funding, all-runner DD, gross, CI release certificate or Owner approval"
+  ]
+}
