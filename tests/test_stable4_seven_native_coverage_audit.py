@@ -32,6 +32,8 @@ class SevenRunnerNativeCoverageTests(unittest.TestCase):
         self.assertEqual(report["q102AsterArchiveCausal181d"]["btcDuplicatedCorruptAsterH1Bar"],
                          "2025-09-13T13:00:00Z")
         self.assertFalse(report["q102AsterArchiveCausal181d"]["binanceSubstitutionAuthorized"])
+        self.assertEqual(report["q102AsterArchiveCausal181d"]["btcNativeM5InvalidBars"], 1)
+        self.assertFalse(report["q102AsterArchiveCausal181d"]["btcM5AggregateCanRepairH1"])
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["BTC"], 6)
         self.assertEqual(report["q102AsterArchiveCausal181d"]["monthlyRolling181dReadyByTicker"]["ENA"], 10)
         self.assertEqual(report["realMarketNativeSourceScope"]["PENGU"],
