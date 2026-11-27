@@ -20,7 +20,7 @@ const occupancy={activePosition:false,unresolvedPendingEntry:false,basePositionA
 
 test("native PENGU H1 flat-market replay matches pinned source and grants zero orders",()=>{
  const native=buildPenguDualLsV2Signal(pengu(),undefined,t,0,{recoveryV8Enabled:false,v64DynamicLongEnabled:false});
- const observed=observeStable4PenguH1({history:pengu(),decisionTs:t,sourcePin:sha});
+ const observed=observeStable4PenguH1({options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false},history:pengu(),decisionTs:t,sourcePin:sha});
  assert.equal(native.side,0);
  assert.equal(observed.status,"NO_SOURCE_ENTRY");
  assert.equal(observed.reason,"NATIVE_PENGU_NO_ENTRY");
@@ -31,13 +31,14 @@ test("native PENGU H1 flat-market replay matches pinned source and grants zero o
 
 test("native PENGU rejects missing, future, incomplete, desynchronised, or fake funding data",()=>{
  const valid=pengu();
- const run=(x:ReturnType<typeof pengu>)=>observeStable4PenguH1({history:x,decisionTs:t,sourcePin:sha});
+ const run=(x:ReturnType<typeof pengu>)=>observeStable4PenguH1({options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false},history:x,decisionTs:t,sourcePin:sha});
  assert.equal(run({...valid,pengu1h:valid.pengu1h.slice(1)}).status,"BLOCKED_SOURCE");
  assert.equal(run({...valid,pengu1h:[...valid.pengu1h,{...valid.pengu1h.at(-1)!,openTime:t,closeTime:t+H-1}]}).reason,"NATIVE_H1_HISTORY_OR_FUNDING_INVALID");
  assert.equal(run({...valid,btc1h:[...valid.btc1h.slice(0,-1),{...valid.btc1h.at(-1)!,closeTime:t+10}]}).status,"BLOCKED_SOURCE");
  assert.equal(run({...valid,btc1h:[...valid.btc1h.slice(0,-1),{...valid.btc1h.at(-1)!,openTime:t-2*H,closeTime:t-H-1}]}).status,"BLOCKED_SOURCE");
  assert.equal(run({...valid,penguFunding:[{fundingTime:t,fundingRate:.001}]}).status,"BLOCKED_SOURCE");
- assert.equal(observeStable4PenguH1({history:valid,decisionTs:t,sourcePin:"not-a-sha"}).reason,"SOURCE_PIN_OR_CLOCK_INVALID");
+ assert.equal(observeStable4PenguH1({options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false},history:valid,decisionTs:t,sourcePin:"not-a-sha"}).reason,"SOURCE_PIN_OR_CLOCK_INVALID");
+ assert.equal(observeStable4PenguH1({history:valid,decisionTs:t,sourcePin:sha}).reason,"NATIVE_PENGU_RUNTIME_MODE_UNVERIFIED");
 });
 
 test("native Q102 H1 flat-market replay respects 181-day history and remains observational",()=>{
