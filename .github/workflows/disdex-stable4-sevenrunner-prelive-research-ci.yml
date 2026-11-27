@@ -18,6 +18,9 @@ on:
       - 'scripts/stable4-q102-s34-*.ts'
       - 'docs/research/STABLE4_Q102_S34_*.json'
       - 'tests/test_stable4_q102_s34_*.py'
+      - 'scripts/research/stable4_q102_native_full_selector_*.py'
+      - 'tests/test_stable4_q102_native_full_s34_*.py'
+      - 'docs/research/STABLE4_Q102_FULL_SOURCE_S34_*.json'
       - 'scripts/stable4-market-observe.ts'
       - 'scripts/stable4-four-sleeve-native-synthetic.ts'
       - 'scripts/disdex_public_read_resilience.py'
@@ -107,6 +110,9 @@ jobs:
           # 5m bar must close before a next-5m-open model price is observed.
           # Never promote these model positions to native Q102 or fills.
           python -B -m unittest -v tests.test_stable4_q102_s34_conditional_native_evidence
+          # Cross-compare 20-symbol real V4 selector at 96 source-ready clocks.
+          # Exact S34 signal/gate match is narrower than full-year certified Q102.
+          python -B -m unittest -v tests.test_stable4_q102_native_full_s34_cross_parity
           python -B scripts/research/stable4_q102_real_monthly_ledger_audit.py
           python -B scripts/stable4_seven_native_coverage_audit.py
           python -B tests/test_public_read_resilience_offline.py
