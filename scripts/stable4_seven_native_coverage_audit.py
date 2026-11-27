@@ -15,6 +15,7 @@ THREE = ROOT / "docs/research/STABLE4_THREE_NATIVE_SLEEVE_SYNTHETIC_20261127.jso
 OTHER = ROOT / "docs/research/STABLE4_Q102_V4_HYPE_NATIVE_SYNTHETIC_EVIDENCE_20261127.json"
 FOUR_REEXEC = ROOT / "docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json"
 PENGU_NATIVE = ROOT / "docs/research/STABLE4_PENGU_BINANCE_NATIVE_H1_LEDGER_20261128.json"
+PENGU_M5 = ROOT / "docs/research/STABLE4_PENGU_BINANCE_H1_ASTER_M5_CANDIDATE_QUALITY_20261128.json"
 Q102_REAL = ROOT / "docs/research/STABLE4_Q102_BINANCE_BTC_SOL_12_MONTHLY_NATIVE_H1_20261128.json"
 V52_COVERAGE = ROOT / "docs/research/STABLE4_V52_STOCK_ASTER5M_YAHOO1H_COVERAGE_20261128.json"
 V52_LIQUIDITY = ROOT / "docs/research/STABLE4_V52_REGULAR_SESSION_LIQUIDITY_20261128.json"
@@ -33,7 +34,14 @@ def evaluate() -> dict:
     three = json.loads(THREE.read_text(encoding="utf-8"))
     other = json.loads(OTHER.read_text(encoding="utf-8"))
     four = json.loads(FOUR_REEXEC.read_text(encoding="utf-8"))
-    pengu_native = json.loads(PENGU_NATIVE.read_text(encoding="utf8"))
+    pengu_native_raw = PENGU_NATIVE.read_bytes()
+    pengu_native = json.loads(pengu_native_raw)
+    pengu_m5 = json.loads(PENGU_M5.read_text(encoding="utf8"))
+    if __package__:
+        from .research.stable4_pengu_aster_m5_after_h1_source_audit import verify_report as verify_pengu_m5
+    else:
+        from research.stable4_pengu_aster_m5_after_h1_source_audit import verify_report as verify_pengu_m5
+    verify_pengu_m5(pengu_m5, pengu_native, pengu_native_raw)
     q102_real = json.loads(Q102_REAL.read_text(encoding="utf8"))
     v52_coverage = json.loads(V52_COVERAGE.read_text(encoding="utf8"))
     v52_liquidity = json.loads(V52_LIQUIDITY.read_text(encoding="utf8"))
@@ -146,6 +154,19 @@ def evaluate() -> dict:
             "V52": "FIVE_STOCK_ASTER_M5_YAHOO_H1_INPUT_COVERAGE_ONLY",
         },
         "noCurrentSourceNativeSharedWalletPortfolioResult": True,
+        "penguAsterM5SignalTape": {
+            "h1RawSignalArmCounts": {
+                mode: row["rawH1Signals"] for mode, row in pengu_m5["arms"].items()
+            },
+            "first5mPositiveVolumeByArm": {
+                mode: row["first5mPositiveVolume"] for mode, row in pengu_m5["arms"].items()
+            },
+            "first15mAllZeroByArm": {
+                mode: row["first15mAllZero"] for mode, row in pengu_m5["arms"].items()
+            },
+            "verifiedVenueFills": 0,
+            "m5VolumeIsNotExecutableFillProof": True,
+        },
         "q102AsterArchiveCausal181d": {
             "matchingWarmupFiles": q102_archive["matchingCount"],
             "causallyValidWarmupAtTargetStart": q102_archive["matchedWarmupCoveringTargetStart"],
