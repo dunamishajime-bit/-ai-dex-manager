@@ -61,13 +61,21 @@ function tape(reg:typeof regimes[number],seed:number):Tape{
 function one(reg:typeof regimes[number],seed:number){
  const data=tape(reg,seed);
  const cases=[];
- const counts={penguLong:0,penguShort:0,q102Long:0,q102Short:0,
+ const counts={penguLong:0,penguShort:0,penguV8Long:0,penguV8Short:0,q102Long:0,q102Short:0,
   noSignal:0,blocked:0,asterM5Confirmed:0,portfolioAdmitted:0};
  for(const h of checkpoints){
   const decisionTs=T+h*H;
   const history={pengu1h:data.pengu.slice(0,h),btc1h:data.btc.slice(0,h),penguFunding:[]};
   const pengu=observeStable4PenguH1({decisionTs,sourcePin:BASE_SHA,
    history,options:{recoveryV8Enabled:false,v64DynamicLongEnabled:false}});
+  const penguV8=observeStable4PenguH1({decisionTs,sourcePin:BASE_SHA,
+   history,options:{recoveryV8Enabled:true,v64DynamicLongEnabled:true}});
+  if(penguV8.status==="NATIVE_ENTRY_OBSERVED"){
+   if(penguV8.side===1)counts.penguV8Long++;
+   else if(penguV8.side===-1)counts.penguV8Short++;
+  }
+  if(penguV8.orderAuthority!==false||penguV8.asterM5EntryConfirmed!==false)
+   throw Error("PENGU_V8_FALSE_VENUE_CERTIFICATION");
   const quality=observeStable4Q102H1({decisionTs,sourcePin:BASE_SHA,
    history:{candlesBySymbol:Object.fromEntries(symbols.map(s=>[s,data.quality[s].slice(0,h)]))},
    occupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:false}});
@@ -91,7 +99,9 @@ function one(reg:typeof regimes[number],seed:number){
    if(s.orderAuthority!==false||s.asterM5EntryConfirmed!==false)
     throw Error("RESEARCH_ORDER_AUTHORITY_VIOLATION");
   }
-  cases.push({decisionTs,pengu:{status:pengu.status,reason:pengu.reason,
+  cases.push({decisionTs,penguV8:{status:penguV8.status,reason:penguV8.reason,
+    symbol:penguV8.symbol,side:penguV8.side,gross:penguV8.gross,route:penguV8.route},
+    pengu:{status:pengu.status,reason:pengu.reason,
     symbol:pengu.symbol,side:pengu.side,gross:pengu.gross,route:pengu.route},
     q102:{status:quality.status,reason:quality.reason,
     symbol:quality.symbol,side:quality.side,gross:quality.gross,route:quality.route}});
@@ -101,18 +111,19 @@ function one(reg:typeof regimes[number],seed:number){
 const output=process.argv[2];if(!output)throw Error("OUTPUT_REQUIRED");
 const rows=regimes.flatMap((reg,idx)=>[one(reg,2026112821+idx)]);
 const aggregate={penguSignals:rows.reduce((s,r)=>s+r.counts.penguLong+r.counts.penguShort,0),
+ penguV8Signals:rows.reduce((s,r)=>s+r.counts.penguV8Long+r.counts.penguV8Short,0),
  q102Signals:rows.reduce((s,r)=>s+r.counts.q102Long+r.counts.q102Short,0),
  blocked:rows.reduce((s,r)=>s+r.counts.blocked,0)};
 writeFileSync(output,JSON.stringify({
  schema:"stable4-native-pengu-q102-artificial-h1-observation/v1",
  status:"NATIVE_H1_OBSERVATION_ONLY_NO_VENUE_CERTIFICATION",
- sourceNote:"Actual PENGU dual LS V2 signal and Q102 causal V1 HIGH_VOL functions; explicit PENGU V8/DynamicLong false arm; other routes unobserved",
+ sourceNote:"Actual PENGU dual LS V2 source in separate base-mode false/false AND recoveryV8+dynamicLong true/true observation arms; Q102 causal V1 HIGH_VOL; no fills or certified live mode selection",
  artificialData:{regimes:regimes.map(r=>r[0]),seeds:rows.map(r=>r.seed),
   days:280,checkpointsDays:checkpoints.map(h=>h/24),marketSources:["BTCUSDT","PENGUUSDT","SOLUSDT"]},
  rows,aggregate,
  limitations:["Synthetic OHLC only; no independent Binance/ASTER prices, signed funding, live depth, slippage, lot and partial fills",
   "Observes 8 H1 decision checkpoints per 280d path; does NOT reconstruct every H1 entry",
-  "No route verified for PENGU recovery V8 or dynamic long; this is explicit base-mode research",
+  "PENGU recovery V8/Dynamic Long options are observed in a second arm; live config attestation, M5 entry and source-accurate exits remain unverified",
   "Q102 causal V1 HIGH_VOL only; no S34/PB/MR/BRK/REV native coverage",
   "No shared-wallet order admissions, resident STOP, aggregate fees/funding or equity/DD result",
   "Source pin string is an offline placeholder, NOT Root attested release; no 5m ASTER confirmation"],
