@@ -1,0 +1,1560 @@
+{
+  "earlySymbols": 31,
+  "fullNativeQ102AnnualEntryOrExitProven": false,
+  "fullSevenRunnerSharedWalletReplayed": false,
+  "limitations": [
+    "Two exact ASTER-named local public H1 archive directories only, not signed ASTER source or actual venue execution",
+    "A valid hour with zero volume is usable as a closed H1 candle only under native source policy, never by itself an executable price",
+    "Fails closed on missing, corrupt or duplicate causal H1 history, does not interpolate or substitute Binance",
+    "H1 price history readiness is NOT the current approved Q102 multi-route universe, signal, ASTER M5 fill or STOP parity",
+    "No PENGU/V4/IDLE/FET/HYPE/V52 native portfolio execution or account funding/Gross/DD, certificates or Owner approval"
+  ],
+  "mainSymbols": 36,
+  "missingEarlySymbols": [
+    "FET",
+    "JUP",
+    "RENDER",
+    "TAO",
+    "TIA"
+  ],
+  "orderAuthority": false,
+  "perTicker": {
+    "AAVE": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1",
+        "zeroVolumeH1": 1477
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+        "zeroVolumeH1": 87
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "ADA": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ADAUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "16333557a90dd6bac94465d49527396ff816df94dc43a9e2db152d82d67726de",
+        "zeroVolumeH1": 487
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ADAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29",
+        "zeroVolumeH1": 13
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "AMZN": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "AMZNUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752580800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1692,
+        "sha256": "9d75d1e3c82883bc2910fe8cea1d2d2a37b39cafd27a3906d2abc8ab727d17bd",
+        "zeroVolumeH1": 1602
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "AMZNUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "374141d594fcd482f1ab7c997c0ee3300b6194f67f1afbe7fc4aae5c84c078f8",
+        "zeroVolumeH1": 5407
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2484,
+        "requiredHours": 4344,
+        "validHours": 1860
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "APT": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "APTUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "3a937531ab57dae81d492af93680a6f4fddf8c3bde594e240e04f460c1544729",
+        "zeroVolumeH1": 1783
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "APTUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "38f010783a4a404eb2d1222a3ec1ead226702467f4e0ad106a297c9f7b89de5e",
+        "zeroVolumeH1": 1053
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "ARB": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ARBUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "64c14297f5e4c15ce7f72102e755c926a8374e29b6af5de9f4e315b7692ac814",
+        "zeroVolumeH1": 1507
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ARBUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "6c8dd74b981ea182a08eb9ed685e81f92deaeefe3b80254036cbfadf1b5e0a8d",
+        "zeroVolumeH1": 1338
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "ATOM": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ATOMUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "75b195cf7eba220ca9277deed05609626963b9c3b8c1aeefbe8e860e98c42112",
+        "zeroVolumeH1": 2556
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ATOMUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e",
+        "zeroVolumeH1": 2046
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "AVAX": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c",
+        "zeroVolumeH1": 1205
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+        "zeroVolumeH1": 150
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "BNB": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "BNBUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "3c40a959a8e3c68b66f36d8babe31cc262556cbe4d0c40ea9e1884d18b887f8d",
+        "zeroVolumeH1": 264
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "BNBUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "BTC": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "BTCUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [
+          1757768400000
+        ],
+        "invalidH1": 1,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3",
+        "zeroVolumeH1": 18
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "BTCUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 1,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4343
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "DOGE": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff",
+        "zeroVolumeH1": 440
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "DOT": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "DOTUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695",
+        "zeroVolumeH1": 1834
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "DOTUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e",
+        "zeroVolumeH1": 901
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "ENA": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ENAUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1748350800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 2867,
+        "sha256": "434c65c1fc4d07374a8201f3d4e31e13176e60caca552abe396fdf3bbaafb99b",
+        "zeroVolumeH1": 53
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ENAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "318787f0dc48498ce97c8b814316bd14716e0dc3d6516fb0df17a32d2d3f011c",
+        "zeroVolumeH1": 230
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 1309,
+        "requiredHours": 4344,
+        "validHours": 3035
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "ETH": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ETHUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "6ec736aa3ce259ce795ab47695bf3a12b454ab07e3f28f1d48858d1e20d6d24f",
+        "zeroVolumeH1": 39
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ETHUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "FET": {
+      "early": null,
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "FETUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767981600000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6342,
+        "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477",
+        "zeroVolumeH1": 1465
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2418,
+        "requiredHours": 8760,
+        "validHours": 6342
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "HYPE": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "HYPEUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1758546000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 35,
+        "sha256": "89a0f6104f166ba9c87a42d1c54c99f702532ffeae34186fcbfb4e61f08b638e",
+        "zeroVolumeH1": 0
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "HYPEUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4141,
+        "requiredHours": 4344,
+        "validHours": 203
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "INJ": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "INJUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "9de4b5b0bbc9ec089f91234a7ff10e51d794740728cb6ed9ff63c8421d98f8d7",
+        "zeroVolumeH1": 2653
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "INJUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42",
+        "zeroVolumeH1": 1218
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "JUP": {
+      "early": null,
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "JUPUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767967200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6346,
+        "sha256": "8ff145ed07cd872ce4cc8845d780ea8a094bd963ad6accd534f745a97644e908",
+        "zeroVolumeH1": 1136
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2414,
+        "requiredHours": 8760,
+        "validHours": 6346
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "LDO": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "LDOUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": null,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": null,
+        "missingH1Slots": 0,
+        "rows": 0,
+        "sha256": "b42d032b44a0a2bd6a0c790ed5451e9c796a793c0355e5f39b1e8b699dda6e58",
+        "zeroVolumeH1": 0
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "LDOUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767981600000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6342,
+        "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0",
+        "zeroVolumeH1": 2553
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2418,
+        "requiredHours": 8760,
+        "validHours": 6342
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "LINK": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "LINKUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "a329fd68e24826077d55143ee3e0dfc0a02961c413828dd03b2d42c5504a5412",
+        "zeroVolumeH1": 1651
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "LINKUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb",
+        "zeroVolumeH1": 38
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "LTC": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "LTCUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "32f07b6911ab9640dc8cbedc4f8ca9c071690e670bdf1170ea2ba674b77dae24",
+        "zeroVolumeH1": 1587
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "LTCUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53",
+        "zeroVolumeH1": 120
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "META": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "METAUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752580800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1692,
+        "sha256": "2f1eafd81a92cfde922794bbf2caddbd10f11a9e44c879b273dc58bf6d5f0a83",
+        "zeroVolumeH1": 1622
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "METAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "0e1511dcc60e40a9e3000faffedffcfd918d4700e7bdce7813759516cfc63a67",
+        "zeroVolumeH1": 5422
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2484,
+        "requiredHours": 4344,
+        "validHours": 1860
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "MSFT": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "MSFTUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752580800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1692,
+        "sha256": "b4167d894657209c5f94da36a949c4cd0df74a334172cdbbfeda2bf4b8daac9c",
+        "zeroVolumeH1": 1646
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "MSFTUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "8a7ff7005a0b96e5163d48c1048a5244f97972847488bda4ee1d73b9f0147ba3",
+        "zeroVolumeH1": 5735
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2484,
+        "requiredHours": 4344,
+        "validHours": 1860
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "NEAR": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "NEARUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231",
+        "zeroVolumeH1": 2072
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "NEARUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+        "zeroVolumeH1": 471
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "NVDA": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "NVDAUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752580800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1692,
+        "sha256": "9f6f86317d5794b74ee2e1b5382f51036b2061ab2abc2b8eb242284a559be29c",
+        "zeroVolumeH1": 1562
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "NVDAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "710d12c72a9e802e2d40da146631ec38b63aecafa0c3e7851db987dabb18f37f",
+        "zeroVolumeH1": 2748
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2484,
+        "requiredHours": 4344,
+        "validHours": 1860
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "ONDO": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "ONDOUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "e1101ca566744a1acc732d46acce105fed1b9bab600b72eb18ac06a9e06300a8",
+        "zeroVolumeH1": 4784
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "ONDOUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "0b2e632331672cf8a86730953035a9e3b8922c8ddee2aa8ecc0f8e64e581a263",
+        "zeroVolumeH1": 1069
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "OP": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "OPUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "e3e640488aab5e74a84367d5c7dbd698c508964f34d7f68ae59717d6613c1c9f",
+        "zeroVolumeH1": 2007
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "OPUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "bc19af06abb844d3aa84dad726d19281f6e33f37cf8c87ca9eb4575345918411",
+        "zeroVolumeH1": 1958
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "PENGU": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "PENGUUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752840000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1620,
+        "sha256": "1b7f8467db39df935c14c8a1ada1e9d72040cac2efc7b9a7ecd39437ac21adc4",
+        "zeroVolumeH1": 348
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "PENGUUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "6c582efbb1113f7e1917c290a418b70324d1a8e77ecbf22eeb9898d98f1161c8",
+        "zeroVolumeH1": 641
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2556,
+        "requiredHours": 4344,
+        "validHours": 1788
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "RENDER": {
+      "early": null,
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767704400000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6419,
+        "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02",
+        "zeroVolumeH1": 1183
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2341,
+        "requiredHours": 8760,
+        "validHours": 6419
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "SEI": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "SEIUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "49a78a2894b52936af9f41e6fc4c2ddf0ebcc12e0812caba755072e933477363",
+        "zeroVolumeH1": 1551
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "SEIUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "e736f602afb91583bebd848f0630271277b1a7f3e4aa8a522a96aa97152764ed",
+        "zeroVolumeH1": 2009
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "SOL": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "SOLUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d",
+        "zeroVolumeH1": 55
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "SOLUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "SUI": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "SUIUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "750a231b0a0decb0fd27fd5b6e104e619cae6376a1cec20845d4c31bb15931f4",
+        "zeroVolumeH1": 461
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "SUIUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "a6fc865a20f24d72adef6f6b92b58e6a4bd0a63308ef1774ded1b715edb5ed8c",
+        "zeroVolumeH1": 5
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "TAO": {
+      "early": null,
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "TAOUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767967200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6346,
+        "sha256": "f8e0ab84c87a112ff052ed6d1175b9a0a5a7b61c3db7a24e7e01b592caacc35b",
+        "zeroVolumeH1": 155
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2414,
+        "requiredHours": 8760,
+        "validHours": 6346
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "TIA": {
+      "early": null,
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "TIAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1767981600000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 6342,
+        "sha256": "09916a5857d775a904976e150bc653aa35cea8fdc0a03f5a1b435e052ca6feb6",
+        "zeroVolumeH1": 1881
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 4344,
+        "requiredHours": 4344,
+        "validHours": 0
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2418,
+        "requiredHours": 8760,
+        "validHours": 6342
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "TSLA": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "TSLAUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1752580800000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 1692,
+        "sha256": "ccdb1e1ccb7d032b77a241457fb1b63da31f7d7d2f4c4fa1619df329d5a0aa0f",
+        "zeroVolumeH1": 1492
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "TSLAUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "bc304b9c736e6a1c2786437603f20d9cac4d9e31f276f07791559ae081560abe",
+        "zeroVolumeH1": 2201
+      },
+      "prior181d": {
+        "closedH1HistoryReady": false,
+        "invalidHours": 0,
+        "missingHours": 2484,
+        "requiredHours": 4344,
+        "validHours": 1860
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": false
+    },
+    "UNI": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "UNIUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462",
+        "zeroVolumeH1": 777
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "UNIUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e",
+        "zeroVolumeH1": 179
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    },
+    "XRP": {
+      "early": {
+        "duplicateOrReversed": 0,
+        "file": "XRPUSDT-1h-20250301-20250924.jsonl.gz",
+        "firstOpenMs": 1740787200000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1758668400000,
+        "missingH1Slots": 0,
+        "rows": 4968,
+        "sha256": "9f5a5bc8b9df118404db89219cd74a145dd5b874ecd8ed344024a811833cf3c8",
+        "zeroVolumeH1": 176
+      },
+      "earlyMainTimestampOverlap": 0,
+      "main": {
+        "duplicateOrReversed": 0,
+        "file": "XRPUSDT-1h-20250924-20261001.jsonl.gz",
+        "firstOpenMs": 1758672000000,
+        "invalidExampleOpenMs": [],
+        "invalidH1": 0,
+        "lastOpenMs": 1790809200000,
+        "missingH1Slots": 0,
+        "rows": 8928,
+        "sha256": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03",
+        "zeroVolumeH1": 0
+      },
+      "prior181d": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 4344,
+        "validHours": 4344
+      },
+      "signalOrVenueExecutionProven": false,
+      "studyYear": {
+        "closedH1HistoryReady": true,
+        "invalidHours": 0,
+        "missingHours": 0,
+        "requiredHours": 8760,
+        "validHours": 8760
+      },
+      "yearAndCausalPrior181dReady": true
+    }
+  },
+  "prior181dHours": 4344,
+  "prior181dWindowUtc": [
+    "2025-04-03T00:00:00Z",
+    "2025-10-01T00:00:00Z"
+  ],
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-q102-aster-main-early-h1-full-year-pre181d-source-inventory/v1",
+  "sourceDirectories": [
+    "aster-public-v3-h1",
+    "aster-public-v3-h1-early"
+  ],
+  "status": "LOCAL_H1_PRICE_HISTORY_READINESS_ONLY_NO_SOURCE_NATIVE_TRADES",
+  "studyWindowUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "yearAndPrior181dReadyCount": 21,
+  "yearAndPrior181dReadySymbols": [
+    "AAVE",
+    "ADA",
+    "APT",
+    "ARB",
+    "ATOM",
+    "AVAX",
+    "BNB",
+    "DOGE",
+    "DOT",
+    "ETH",
+    "INJ",
+    "LINK",
+    "LTC",
+    "NEAR",
+    "ONDO",
+    "OP",
+    "SEI",
+    "SOL",
+    "SUI",
+    "UNI",
+    "XRP"
+  ],
+  "yearHours": 8760
+}
