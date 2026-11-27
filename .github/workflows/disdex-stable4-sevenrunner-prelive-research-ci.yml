@@ -70,6 +70,7 @@ jobs:
           # validate all 166 events against pinned native source + immutable data SHA.
           # This deliberately does not claim ASTER M5 fills or a seven-runner BT.
           python -B -m unittest -v tests.test_stable4_pengu_real_h1_ledger_audit
+          python -B -m unittest -v tests.test_stable4_pengu_aster_m5_after_h1_source_audit
           python -B scripts/research/stable4_pengu_native_h1_ledger_audit.py
           # Separate partial 12-month Q102 BTC/SOL native H1 source proof.
           # Does not claim the full Q102 source universe or fills.
