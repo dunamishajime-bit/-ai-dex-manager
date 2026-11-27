@@ -96,10 +96,15 @@ class Q102AsterHistoryTests(unittest.TestCase):
         self.assertEqual(report["mismatchHours"],85)
         self.assertEqual(report["invalidH1Bars"],1)
         self.assertEqual(report["invalidM5Bars"],1)
+        self.assertEqual(report["mismatchSegmentation"]["anyOHLCMismatchWithFirstM5Zero"],84)
+        self.assertEqual(report["mismatchSegmentation"]["anyOHLCMismatchWithFirstM5Positive"],1)
+        self.assertEqual(report["mismatchSegmentation"]["firstM5ZeroVolumeHours"],86)
         self.assertFalse(report["nativeQ102ProductionParityProven"])
         for change in (
             lambda d:d.__setitem__("mismatchHours",0),
             lambda d:d["mismatchedFields"].__setitem__("high",0),
+            lambda d:d["mismatchSegmentation"].__setitem__("firstM5ZeroVolumeHours",0),
+            lambda d:d["mismatchSegmentation"].__setitem__("anyOHLCMismatchWithFirstM5Positive",0),
             lambda d:d.__setitem__("autoRepairApplied",True),
             lambda d:d["monthly"]["2025-09"].__setitem__("different",0),
             lambda d:d["m5Source"].__setitem__("sha256","f"*64),
