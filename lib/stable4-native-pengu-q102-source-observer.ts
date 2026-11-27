@@ -60,6 +60,11 @@ export function observeStable4PenguH1(input:{
 }):SourceObservation{
  const {decisionTs,sourcePin,history}=input;
  if(!validClock(decisionTs,sourcePin))return result("PENGU",decisionTs,sourcePin,"SOURCE_PIN_OR_CLOCK_INVALID");
+ // LIVE source evaluates these two pinned route flags explicitly. A missing
+ // mode must not silently become a different native signal strategy.
+ if(!input.options||typeof input.options.recoveryV8Enabled!=="boolean"||
+    typeof input.options.v64DynamicLongEnabled!=="boolean")
+  return result("PENGU",decisionTs,sourcePin,"NATIVE_PENGU_RUNTIME_MODE_UNVERIFIED");
  if(!history||!validPenguRows(history.pengu1h,decisionTs)
     ||!validPenguRows(history.btc1h,decisionTs)
     ||history.pengu1h.length!==history.btc1h.length
@@ -69,8 +74,8 @@ export function observeStable4PenguH1(input:{
   return result("PENGU",decisionTs,sourcePin,"NATIVE_H1_HISTORY_OR_FUNDING_INVALID");
  try{
   const s=buildPenguDualLsV2Signal(history,undefined,decisionTs,0,{
-    recoveryV8Enabled:input.options?.recoveryV8Enabled===true,
-    v64DynamicLongEnabled:input.options?.v64DynamicLongEnabled===true,
+    recoveryV8Enabled:input.options.recoveryV8Enabled,
+    v64DynamicLongEnabled:input.options.v64DynamicLongEnabled,
   });
   if(s.referenceTs!==decisionTs-H)return result("PENGU",decisionTs,sourcePin,"NATIVE_SOURCE_CUTOFF_MISMATCH");
   if(s.side===0)return result("PENGU",decisionTs,sourcePin,"NATIVE_PENGU_NO_ENTRY","NO_SOURCE_ENTRY");
