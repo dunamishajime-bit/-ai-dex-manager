@@ -208,6 +208,8 @@ def evaluate() -> dict:
             "btcM5AggregateCanRepairH1": False,
             "btcPrior181dH1VsM5HoursCompared": q102_btc_181d["hoursCompared"],
             "btcPrior181dH1VsM5MismatchHours": q102_btc_181d["mismatchHours"],
+            "btcPrior181dM5FirstBarZeroMismatchHours": q102_btc_181d["mismatchSegmentation"]["anyOHLCMismatchWithFirstM5Zero"],
+            "btcPrior181dM5FirstBarPositiveMismatchHours": q102_btc_181d["mismatchSegmentation"]["anyOHLCMismatchWithFirstM5Positive"],
             "btcH1VsM5PriceParityProven": False,
             "wholeNativeQ102UniverseOrFillsProven": False,
         },
