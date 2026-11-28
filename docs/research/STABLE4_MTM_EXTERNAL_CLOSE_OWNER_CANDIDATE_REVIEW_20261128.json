@@ -1,0 +1,37 @@
+{
+  "candidateOwners": {
+    "FET_BRK48_RESIDUAL": 1,
+    "PENGU_DUAL_LS_V2_FINAL": 1,
+    "V12_V4": 3,
+    "V52": 1
+  },
+  "combinedMatchesAndCandidates": 177,
+  "formalCertificateIssued": false,
+  "limitations": [
+    "Quantity, direction and adjacent known entry evidence support candidates only; initial flatness and full position history not independently proven",
+    "Previous blocked state archive access not retried",
+    "No actual owner attestation or signed account MTM observation issued",
+    "Review counts only; no production state changes"
+  ],
+  "newCandidateOriginCounts": {
+    "MARGIN_GUARD": 1,
+    "WEB_OR_OPERATOR": 5
+  },
+  "newCandidates": 6,
+  "officialTrades": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "previousMatchesAndCandidates": 171,
+  "remainingReviewed": 22,
+  "schema": "stable4-mtm-external-close-owner-candidate-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "7d60a8c9810494e282aac42bc11bba753ce24ec7",
+  "status": "SAVED_FILL_REVIEW_COMPLETED_PARTIAL_OWNERSHIP",
+  "unresolved": 16,
+  "unresolvedOrigins": {
+    "IDLE": 5,
+    "MARGIN_GUARD": 2,
+    "PENGU_RECOVERY": 3,
+    "WEB_OR_OPERATOR": 6
+  }
+}
