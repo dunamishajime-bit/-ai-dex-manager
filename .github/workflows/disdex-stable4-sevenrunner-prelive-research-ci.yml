@@ -22,6 +22,9 @@ on:
       - 'scripts/research/stable4_r21_native_dd30_projected_headroom_audit.py'
       - 'docs/research/STABLE4_R21_24CASE_NATIVE_SYNTHETIC_DD30_STOP_GAP_HEADROOM_20261128.json'
       - 'tests/test_stable4_r21_24case_stop_gap_headroom_evidence.py'
+      - 'scripts/research/stable4_idle_r26_only_all_runner_ab_replay.py'
+      - 'docs/research/STABLE4_IDLE_R26_197_VS_OLD849_FROZEN_SEVEN_RUNNER_SHARED_WALLET_AB_20261128.json'
+      - 'tests/test_stable4_idle_r26_only_sevenrunner_ab_provenance.py'
       - 'scripts/stable4-q102-s34-*.ts'
       - 'docs/research/STABLE4_Q102_S34_*.json'
       - 'tests/test_stable4_q102_s34_*.py'
@@ -110,6 +113,10 @@ jobs:
           # This is an offline immutable report; private input files NEVER
           # uploaded into GitHub Actions. No orders, no live adoption.
           python -B -m unittest -v tests.test_stable4_r21_24case_stop_gap_headroom_evidence
+          # IDLE-only source-frozen 849 -> 197 7-runner A/B: source-SHA,
+          # both 10/30bps, full-wallet/DD/peer opportunity parity. Offline
+          # artifact only: never consume owner-PC data or send orders in CI.
+          python -B -m unittest -v tests.test_stable4_idle_r26_only_sevenrunner_ab_provenance
           # A partially regenerated/isolated sleeve study cannot stand in for one
           # complete, current-source, shared-wallet seven-runner artificial BT.
           python -B -m unittest -v tests.test_stable4_seven_native_coverage_audit
