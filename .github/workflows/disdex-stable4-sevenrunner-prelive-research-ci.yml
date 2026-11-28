@@ -14,6 +14,10 @@ on:
       - 'docs/research/STABLE4_PENGU_*.json'
       - 'scripts/research/stable4_v52_*.py'
       - 'tests/test_stable4_v52_*.py'
+      - 'scripts/research/stable4_v52_public_l2_monthly_dual_venue_coverage_probe.py'
+      - 'scripts/research/stable4_v52_l2_monthly_throttled_source_guard.py'
+      - 'docs/research/STABLE4_V52_12_MONTHLY_ASTERVSXYZ_L2_SOURCE_HEADERS_20261128.json'
+      - 'docs/research/STABLE4_V52_MONTHLY_L2_PUBLIC_PROVIDER_404VS429_GUARD_20261128.json'
       - 'docs/research/STABLE4_V52_*.json'
       - 'scripts/stable4-q102-s34-*.ts'
       - 'docs/research/STABLE4_Q102_S34_*.json'
@@ -131,6 +135,10 @@ jobs:
           # reject conflating raw mid difference with native V52 trade basis.
           # No historical HTTP calls, no account/fill claims in CI.
           python -B -m unittest -v tests.test_stable4_v52_paired_onehour_snapshot_quote_overlap
+          # 12-month bounded public-source snapshot only (120 header probes).
+          # HTTP 429 is UNKNOWN, never conflated with HTTP 404 missing data.
+          # Validation is offline and NEVER contacts provider in CI.
+          python -B -m unittest -v tests.test_stable4_v52_l2_monthly_429_fail_closed
           python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
           # Exact source S34 priority and no-backfill: this tests the
           # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
