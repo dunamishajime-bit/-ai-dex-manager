@@ -13,7 +13,7 @@ import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
 REPORT="docs/research/STABLE4_IDLE_R26_197_VS_OLD849_FROZEN_SEVEN_RUNNER_SHARED_WALLET_AB_20261128.json"
-REPORT_SHA="96e3d459f10c99d6e1d4bbf5273c7201853b5840ee105240bbbc9df93441c6ce"
+REPORT_SHA="3ac5e1f20b32b6d9805147d47700972be7d4575ec85068bbeabe9be4a8d59fe9"
 SCRIPT="scripts/research/stable4_idle_r26_only_all_runner_ab_replay.py"
 SCRIPT_SHA="064fc23e65e269918f1b848ec0b8cf8239ebc26e8b1bdb9a80b93db1507159e5"
 EXPECTED={
@@ -39,9 +39,9 @@ PIN_SHAS={
 def load():
     report=(ROOT/REPORT).read_bytes()
     code=(ROOT/SCRIPT).read_bytes()
-    if sha256(report).hexdigest()!=REPORT_SHA:
+    if sha256(report.replace(b"\r\n",b"\n")).hexdigest()!=REPORT_SHA:
         raise ValueError("IDLE_R26_A_B_SOURCE_MODEL_REPORT_SHA_CHANGED")
-    if sha256(code).hexdigest()!=SCRIPT_SHA:
+    if sha256(code.replace(b"\r\n",b"\n")).hexdigest()!=SCRIPT_SHA:
         raise ValueError("IDLE_R26_A_B_COMPARISON_SOURCE_CHANGED")
     return json.loads(report)
 def validate(j):
