@@ -1,4 +1,5 @@
 import {observeP91,type P91Input} from "./stable4-research-decision-observation";
+import { selectAdoptedP91Candidate } from "./pengu-adopted-p91";
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -114,6 +115,7 @@ export interface PenguDualLsV2AccountLock extends LiveRunnerLock {
 export interface PenguDualLsV2PortfolioRunnerDependencies {
     /** Optional evidence feed; never used for order-side or size selection. */
     researchP91Input?:(asof:number)=>Promise<P91Input|undefined>;
+    adoptedP91Selected?: boolean;
     marketData: {
         load(force?: boolean): Promise<PenguDualLsV2History>;
         loadFiveMinuteSince?(startTs: number, endTs?: number): Promise<import("@/lib/disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[]>;
@@ -385,10 +387,16 @@ export class PenguDualLsV2PortfolioRunner {
     private readonly now: () => number;
 
     async observeResearchP91(base:PenguDualLsV2Signal,hasPosition:boolean):Promise<PenguDualLsV2Signal>{
-        if(hasPosition||!this.dependencies.researchP91Input)return base;
+        if(hasPosition)return base;
+        const selected=this.dependencies.adoptedP91Selected===true;
+        if(!selected&&!this.dependencies.researchP91Input)return base;
         const asof=this.now();
-        try{return {...base,diagnostics:{...base.diagnostics,researchP91:observeP91(await this.dependencies.researchP91Input(asof),asof)}};}
-        catch{return {...base,diagnostics:{...base.diagnostics,researchP91:observeP91(undefined,asof)}};}
+        let input:P91Input|undefined;
+        try { input=await this.dependencies.researchP91Input?.(asof); }
+        catch { input=undefined; }
+        const observed={...base,diagnostics:{...base.diagnostics,researchP91:observeP91(input,asof)}};
+        return selected ? selectAdoptedP91Candidate(observed,input,asof,hasPosition,
+            this.dependencies.config.mode==="SHADOW"?"SHADOW":"LIVE") : observed;
     }
     constructor(private readonly dependencies: PenguDualLsV2PortfolioRunnerDependencies) {
         this.log = dependencies.logger || defaultLogger();

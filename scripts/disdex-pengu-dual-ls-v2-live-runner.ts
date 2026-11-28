@@ -125,6 +125,7 @@ async function main() {
     });
     const accountLock = new FileAccountOrderLock(process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
     const runner = new PenguDualLsV2PortfolioRunner({
+        adoptedP91Selected: process.env.DISDEX_STABLE4_PENGU_ENTRY_POLICY === "P91",
         researchP91Input:process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH&&process.env.DISDEX_RELEASE_SHA?
             (at)=>readP91Observation(process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH!,process.env.DISDEX_RELEASE_SHA!,at):undefined,
         marketData,
