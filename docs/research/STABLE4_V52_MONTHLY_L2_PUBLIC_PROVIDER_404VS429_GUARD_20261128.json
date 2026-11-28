@@ -1,0 +1,268 @@
+{
+  "allSampleMonths": {
+    "2025-10": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2025-10-08",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 1,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 4,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2025-11": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2025-11-12",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 1,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 4,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2025-12": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2025-12-10",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 5,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2026-01": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2026-01-14",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 5,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2026-02": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2026-02-11",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 5,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2026-03": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "BLOCKED_404_AT_SAMPLED_HOUR",
+      "sampleDateUtc": "2026-03-11",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 5,
+          "unconfirmed429RateLimited": 0
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 5,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 0
+        }
+      }
+    },
+    "2026-04": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-04-08",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    },
+    "2026-05": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-05-13",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    },
+    "2026-06": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-06-10",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    },
+    "2026-07": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-07-08",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    },
+    "2026-08": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-08-12",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    },
+    "2026-09": {
+      "noAnnualCoverageInferred": true,
+      "pairedAllFiveAtSampleHourState": "UNKNOWN_RATE_LIMITED",
+      "sampleDateUtc": "2026-09-09",
+      "sampleHourUtc": 16,
+      "venues": {
+        "ASTER": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        },
+        "HYPERLIQUID_XYZ": {
+          "confirmed404AtOneSampleHour": 0,
+          "confirmedFullYearlyCoverage": false,
+          "headerPresentOnly": 0,
+          "unconfirmed429RateLimited": 5
+        }
+      }
+    }
+  },
+  "counts": {
+    "HTTP_404_NO_SAMPLE_FILE": 32,
+    "HTTP_ERROR_UNCONFIRMED": 60,
+    "ZSTD_MAGIC_HEADER_ONLY": 28
+  },
+  "historicalAnnualDualVenueBooksPresent": false,
+  "limitations": [
+    "120 four-byte Range GETs at one selected hour on second Wednesday of each month, not 8760 hours. A 404 confirms absent at that sampled filename only, not global venue inception date or all-hours coverage.",
+    "All 60 HTTP 429 requests in Apr-Sep 2026 are explicitly UNKNOWN: do not infer absence, success, or retry aggressively; respect the public provider rate limit.",
+    "2025 Oct-Mar six monthly market-hour samples include 5/5 XYZ 404. No claim that historical data is impossible from all providers; alternate authorized sources or verified reconstructed venue snapshots may exist.",
+    "No L2 book reconstruction, source 2s/30s price windows, real maker/hedge queues, fills, seven-runner Gross/DD or new exact-source owner certificate."
+  ],
+  "monthsUnknownBecauseProvider429": 6,
+  "monthsWithSampledVenue404": 6,
+  "nativeV52AnnualReplayReady": false,
+  "neverTreat429As404": true,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "sampleCount": 120,
+  "sampledHoursBothVenuesAllFiveAvailable": 0,
+  "schema": "stable4-v52-public-monthly-5stock-dual-venue-header-rate-limit-guard/v1",
+  "sourceEvidenceSha256": "a903a34bbf74468c3e05693baf415884e8952b0d2de895db2798183d7d7bc533",
+  "sourceNativeFiveStockAnnualPortfolioReady": false,
+  "status": "LIMITED_SOURCE_SAMPLE_404_AND_429_DISTINCT_12_MONTHS_NOT_ANNUAL_BT"
+}

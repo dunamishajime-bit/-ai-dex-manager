@@ -1,0 +1,40 @@
+{
+  "additionalExactClientIdNotificationCandidates": 5,
+  "additionalOwners": {
+    "IDLE_PRIORITY_SHORT": 5
+  },
+  "closedIntervals": 72,
+  "combinedTradeCandidates": 182,
+  "formalCertificateIssued": false,
+  "fundingNewCandidates": 119,
+  "fundingOwners": {
+    "IDLE_PRIORITY_SHORT": 21,
+    "PENGU_DUAL_LS_V2_FINAL": 29,
+    "V12_V4": 46,
+    "V12_X1.00_ALL": 23
+  },
+  "fundingPreviousCandidates": 47,
+  "fundingRows": 145,
+  "fundingUnresolved": 26,
+  "limits": [
+    "Exact symbol and client order ID, side and five-minute time proximity matched existing notifications; no independently attested ownership",
+    "Reconstructed six prior external-close candidates from saved fills and retained them in private review artifact",
+    "Funding closed quantity intervals do not independently establish initial venue flatness or complete historical position inventory",
+    "The blocked state archive was not accessed",
+    "No trade or position mutations, no signed MTM observation, no production activation"
+  ],
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "previousTradeCandidates": 177,
+  "remainingTradeOrigins": {
+    "MARGIN_GUARD": 2,
+    "PENGU_RECOVERY": 3,
+    "WEB_OR_OPERATOR": 6
+  },
+  "remainingTradeRows": 11,
+  "schema": "stable4-mtm-expanded-funding-owner-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "0f62a93a9b07f876af9503fb245382492ba7f4b7",
+  "status": "ADDITIONAL_NOTIFICATION_AND_CLOSED_INTERVAL_CANDIDATES"
+}

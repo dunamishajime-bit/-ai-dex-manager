@@ -1,0 +1,58 @@
+{
+  "candidateSummary": {
+    "BASE": {
+      "longs": 13,
+      "rawCandidates": 54,
+      "shorts": 41
+    },
+    "V8_V64": {
+      "longs": 71,
+      "rawCandidates": 112,
+      "shorts": 41
+    }
+  },
+  "dataDigests": {
+    "btc": {
+      "count": 10512,
+      "oldBytePinMatched": false,
+      "oldSha256": "155accb6e2885bdafe72c0eb48c3737f85daca44caaea4272c932c41a826ac6c",
+      "refetchedSha256": "3adbbf56c632ae8ffd18078ac6813905053de28a109c36e721f12e8a34ac55b3"
+    },
+    "funding": {
+      "count": 2627,
+      "oldBytePinMatched": true,
+      "oldSha256": "f2220113447f695ffd40a8cd59c4428d3dc9cb9c30ee8b7e3884dd3ee279738a",
+      "refetchedSha256": "f2220113447f695ffd40a8cd59c4428d3dc9cb9c30ee8b7e3884dd3ee279738a"
+    },
+    "pengu": {
+      "count": 10512,
+      "oldBytePinMatched": false,
+      "oldSha256": "9f287209dbffc67d447433cdc5f8b159a459659554b2e07282b236bab1676af0",
+      "refetchedSha256": "ea5df42ad4a1d1de9cef577104138860f5fd3563b73c1a4a03cc85a09a72a0c3"
+    }
+  },
+  "frozenSourceLedgerSha256": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
+  "fullPenguAnnualTradeReplay": false,
+  "limitations": [
+    "Private H1 input files retained on owner PC, only hashes and independent outputs here. Two H1 serialized byte hashes differ from frozen inputs, so original SHA pins are NOT replaced or silently accepted as identical bytes.",
+    "All 54 BASE and 112 V8_V64 raw signals match exactly. This is native H1 ENTRY parity only; no ASTER M5 fill, order/STOP proof, source-native portfolio exits, funding PnL, Gross or DD.",
+    "New public source observations may change in later re-fetches; do not infer a release certificate or LIVE eligibility."
+  ],
+  "orderAuthority": false,
+  "periodUtc": [
+    "2025-10-01T00:00:00.000Z",
+    "2026-10-01T00:00:00.000Z"
+  ],
+  "privateInputNewReplaySha256": "bc20c91fffcd71bac7064b184deb3e1e96c6b4a2898d876d820294fd03c5d7ee",
+  "privateManifestSha256": "02c898c74ae65040c7996e382766051403504496223920b77248713741373b15",
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-pengu-binance-independent-h1-native-entry-parity/v1",
+  "semanticParity": {
+    "allNativeArmsExact": true,
+    "ambiguousExact": true,
+    "missingFeaturesExact": true,
+    "sourceNativeRawEventsExact": true
+  },
+  "status": "INDEPENDENT_REAL_H1_SOURCE_ENTRY_PARITY_PASS_NOT_EXECUTION"
+}

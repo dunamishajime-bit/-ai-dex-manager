@@ -1,0 +1,34 @@
+{
+  "additionalIncomeCandidates": {
+    "COMMISSION": 30,
+    "REALIZED_PNL": 12
+  },
+  "combinedMatchesAndCandidates": 171,
+  "failed": {},
+  "formalCertificateIssued": false,
+  "generationCounts": {
+    "CURRENT": 5,
+    "LEGACY_PINNED_V4": 25
+  },
+  "intentSnapshotSha256": "3080c25233f27f0699c3fbb3f58addf2c26b331d55fff203b97a81f660f14207",
+  "limits": [
+    "Exact deterministic identity and terminal intent are owner candidate evidence, not a root owner attestation",
+    "HP legacy V12 aggregate group remains unchanged; event variant and strategy ID distinguish V4",
+    "No complete MTM baseline, Funding or rebate attribution"
+  ],
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "previousMatchesAndCandidates": 141,
+  "remainingPrefixGroups": {
+    "OTHER": 14,
+    "idle-": 5,
+    "mg-": 3
+  },
+  "remainingUnmatched": 22,
+  "resolvedNamespaceConflicts": 30,
+  "schema": "stable4-mtm-v4-namespace-conflict-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "0b4992ef94404687907916895d8894920259451a",
+  "status": "DETERMINISTIC_V4_ORDER_INTENT_CANDIDATES"
+}

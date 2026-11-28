@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import disdex_v11eq_aster_only_live_engine as legacy
-from disdex_v52_daily_loss import update_v52_strategy_daily_latch
+from disdex_v52_daily_loss import update_v52_strategy_daily_latch, update_v52_strategy_daily_flatten, complete_v52_strategy_daily_flatten
 from disdex_account_order_lock import AccountOrderLock
 from disdex_pending_exposure_registry import release_pending, upsert_pending
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
@@ -1236,6 +1236,29 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
 
+    def _refresh_v52_daily_flatten_intent(self) -> bool:
+        previous = self.state.get("v52DailyFlatten")
+        updated = update_v52_strategy_daily_flatten(
+            previous if isinstance(previous, dict) else None,
+            self.state.get("v52StrategyDailyLossLatch"),
+            base.now_ms(),
+        )
+        if updated != previous and (previous is not None or updated):
+            self.state["v52DailyFlatten"] = updated
+            self.save()  # Durable intent before any reduce-only request.
+        return updated.get("pending") is True
+
+    def _finish_v52_daily_flatten(self) -> None:
+        # Only this Runner's V11/V50 slots can be acted on; a venue mismatch
+        # or incomplete close preserves the persisted pending intent.
+        self.flatten_all("V52_STRATEGY_DAILY_LOSS_3P5")
+        if self.positions() or self.state.get("pendingOrder"):
+            raise RuntimeError("V52_DAILY_FLATTEN_REQUIRES_CONFIRMED_FLAT")
+        state = self.state.get("v52DailyFlatten")
+        self.state["v52DailyFlatten"] = complete_v52_strategy_daily_flatten(state, base.now_ms())
+        self.save()
+        self.log("v52-strategy-daily-loss-flatten-complete", newOrdersAllowed=False)
+
     def _flat_requires_account_lock(self, sec: int) -> bool:
         if base.clock("09:59:55") <= sec <= base.clock("10:00:20"):
             return True
@@ -1264,7 +1287,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             # above remains serialized, and the independent Margin Guard retains
             # account-level protection for every managed position.
             return {"local": local, "rows": None, "skipWithoutLock": True, "marketClosed": True}
-        if not positions_open and not self._flat_requires_account_lock(sec):
+        pending_flatten = bool((self.state.get("v52DailyFlatten") or {}).get("pending"))
+        if not positions_open and not pending_flatten and not self._flat_requires_account_lock(sec):
             return {"local": local, "rows": None, "skipWithoutLock": True}
         return {"local": local, "rows": self.books_and_refs(), "skipWithoutLock": False}
 
@@ -1275,6 +1299,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             return
         self.reset_days()
         self.enforce_daily_loss()
+        self._refresh_v52_daily_flatten_intent()
         local = prepared["local"]
         if not regular_us_equity_session(local):
             self.log(
@@ -1304,9 +1329,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         # missed-checkpoint, and time/session exits. Keep the original
         # FLATTEN_MANAGED and HOLD_PROTECTED decisions above unchanged.
         strategy_daily_loss_held = self.enforce_daily_loss()
+        daily_flatten_pending = self._refresh_v52_daily_flatten_intent()
+        if daily_flatten_pending:
+            soft_hold = True  # No new V52 exposure while exits are pending.
         if strategy_daily_loss_held:
             soft_hold = True
-            if not self.positions():
+            if not self.positions() and not daily_flatten_pending:
                 self.log(
                     "v52-strategy-daily-loss-flat-entry-held",
                     newOrdersAllowed=False,
@@ -1343,6 +1371,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 newOrdersAllowed=False,
             )
             return
+        if daily_flatten_pending:
+            self._finish_v52_daily_flatten()
+            return  # Do not re-enter even when all scoped exits verified.
         self.update_history()
         sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):

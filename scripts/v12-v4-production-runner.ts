@@ -1,4 +1,6 @@
-﻿import "dotenv/config";
+import {attachAdoptedR21CandidateBatch} from "../lib/v12-v4-adopted-r21";
+import {readR21Observation} from "../lib/stable4-observation-snapshot";
+import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
 import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
 import {dirname} from "node:path";
@@ -331,10 +333,16 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
   throw Error("V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE:"+failure.reason);
  }
  const symbols=new Map(info.symbols.map(row=>[row.symbol,row]));
- let cache:{boundary:number;value:ReturnType<typeof buildV4LiveDecisionBatch>}|undefined;
+ let cache:{boundary:number;value:ReturnType<typeof buildV4LiveDecisionBatch>;bars:Awaited<ReturnType<typeof loadV4ClosedCandles>>}|undefined;
  const fetchDecision=async()=>{
-  const now=Date.now(),boundary=now-now%H2;
-  if(cache&&cache.boundary===boundary)return cache.value;
+  const now=Date.now(),r21Selected=process.env.DISDEX_STABLE4_V4_ENTRY_POLICY==="R21_ONE";
+  const step=r21Selected?3600000:H2,boundary=now-now%step;
+  const attachSelected=async(value:ReturnType<typeof buildV4LiveDecisionBatch>,bars:Awaited<ReturnType<typeof loadV4ClosedCandles>>)=>{
+   if(!r21Selected)return value;
+   const source=process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH,at=Date.now();
+   return attachAdoptedR21CandidateBatch(value,source?await readR21Observation(source,releaseSha,at):undefined,bars,at);
+  };
+  if(cache&&cache.boundary===boundary)return attachSelected(cache.value,cache.bars);
   const bars=await loadV4ClosedCandles(client,now);
   let value=buildV4LiveDecisionBatch(bars,now);
   if(value.nativeCoreEvents.length){
@@ -348,11 +356,13 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
    }
    value=attachV4NativeCoreCandidates(value,bars,refs);
   }
-  cache={boundary,value};
-  return value;
+  cache={boundary,value,bars};
+  return attachSelected(value,bars);
  };
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
+  researchR21Input:process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH?
+   (at)=>readR21Observation(process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH!,releaseSha,at):undefined,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async (symbol,fromTs,untilTs)=>{
    const now=Date.now();

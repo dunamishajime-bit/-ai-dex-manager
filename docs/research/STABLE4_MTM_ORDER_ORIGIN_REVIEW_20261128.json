@@ -1,0 +1,31 @@
+{
+  "formalCertificateIssued": false,
+  "limits": [
+    "Previous protected archive access was blocked; not repeated",
+    "Actual eight deterministic order proofs remain unverified",
+    "Review-only; no production code path or order permissions changed",
+    "Funding ownership and account-wide MTM remain unverified"
+  ],
+  "newlyVerifiedActualOwners": 0,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "previousMatchesAndCandidates": 171,
+  "previousOfficialTradeRows": 193,
+  "regressionTestsPassed": 12,
+  "remainingOrderOriginCandidates": {
+    "IDLE": 5,
+    "MARGIN_GUARD": 3,
+    "PENGU_RECOVERY": 3,
+    "WEB_OR_OPERATOR": 11
+  },
+  "remainingUnverified": 22,
+  "requirements": [
+    "Exact deterministic ID reconstruction from historical signal or entry timestamp and role",
+    "Independent symbol, side, order ID, reduce-only and archived lineage evidence",
+    "Manual and margin-guard origin is not owner of the affected position"
+  ],
+  "schema": "stable4-mtm-order-origin-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "58f665b65facb3741787866b8e43516655bcd199",
+  "status": "OFFLINE_DETERMINISTIC_OWNER_REVIEW_IMPLEMENTED"
+}

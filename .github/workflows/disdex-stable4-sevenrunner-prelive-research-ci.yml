@@ -1,0 +1,463 @@
+name: STABLE4 seven-runner research prelive source CI
+on:
+  pull_request:
+    paths:
+      - 'lib/stable4-*.ts'
+      - 'deploy/v4-staged-overlay/**'
+      - 'scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py'
+      - 'tests/test_stable4_dd30_monitor_cutover.py'
+      - 'scripts/ops/deploy/stable4_adopted_monitor_bundle.py'
+      - 'ops/systemd/disdex-h48-stop8-shadow@.service'
+      - 'ops/systemd/disdex-stable4-market-observer@.*'
+      - 'tests/test_stable4_adopted_monitor_bundle.py'
+      - 'lib/hype-h48-*.ts'
+      - 'lib/disdex-quality102-*.ts'
+      - 'lib/pengu-adopted-p91.ts'
+      - 'config/idlePriorityShortRuntime.ts'
+      - 'scripts/disdex_v52_*.py'
+      - 'scripts/disdex-v52-*.py'
+      - 'tests/pengu-adopted-p91.test.ts'
+      - 'tests/hype-h48-*.test.ts'
+      - 'tests/v12-v4-adopted-r21.test.ts'
+      - 'tests/idle-r26-selected-release.test.ts'
+      - 'ops/systemd/disdex-h48-stop8-shadow@.service'
+      - 'ops/systemd/disdex-stable4-market-observer@.*'
+      - 'scripts/ops/deploy/stable4_adopted_monitor_bundle.py'
+      - 'tests/test_stable4_adopted_monitor_bundle.py'
+      - 'scripts/stable4-adopted-authorization-preflight.ts'
+      - 'lib/idle-priority-short-runner.ts'
+      - 'lib/aster-v3-client.ts'
+      - 'lib/v12-v4-*.ts'
+      - 'lib/pengu-dual-ls-v2*.ts'
+      - 'scripts/research/stable4-pengu-*'
+      - 'scripts/research/stable4_pengu_*'
+      - 'scripts/stable4-pengu-*'
+      - 'tests/test_stable4_pengu_*.py'
+      - 'docs/research/STABLE4_PENGU_*.json'
+      - 'scripts/research/stable4_v52_*.py'
+      - 'tests/test_stable4_v52_*.py'
+      - 'scripts/research/stable4_v52_public_l2_monthly_dual_venue_coverage_probe.py'
+      - 'scripts/research/stable4_v52_l2_monthly_throttled_source_guard.py'
+      - 'docs/research/STABLE4_V52_12_MONTHLY_ASTERVSXYZ_L2_SOURCE_HEADERS_20261128.json'
+      - 'docs/research/STABLE4_V52_MONTHLY_L2_PUBLIC_PROVIDER_404VS429_GUARD_20261128.json'
+      - 'docs/research/STABLE4_V52_*.json'
+      - 'scripts/research/stable4_r21_native_dd30_projected_headroom_audit.py'
+      - 'docs/research/STABLE4_R21_24CASE_NATIVE_SYNTHETIC_DD30_STOP_GAP_HEADROOM_20261128.json'
+      - 'tests/test_stable4_r21_24case_stop_gap_headroom_evidence.py'
+      - 'scripts/research/stable4_idle_r26_only_all_runner_ab_replay.py'
+      - 'docs/research/STABLE4_IDLE_R26_197_VS_OLD849_FROZEN_SEVEN_RUNNER_SHARED_WALLET_AB_20261128.json'
+      - 'tests/test_stable4_idle_r26_only_sevenrunner_ab_provenance.py'
+      - 'scripts/stable4-q102-s34-*.ts'
+      - 'docs/research/STABLE4_Q102_S34_*.json'
+      - 'tests/test_stable4_q102_s34_*.py'
+      - 'scripts/research/stable4_q102_native_full_selector_*.py'
+      - 'tests/test_stable4_q102_native_full_s34_*.py'
+      - 'scripts/research/stable4_q102_942_ready_native_grid_decision_coverage.py'
+      - 'scripts/research/stable4_dd30_formal_source_drift_owner_review_evidence.py'
+      - 'docs/research/STABLE4_DD30_23_SOURCE_4_SHA_DRIFT_OWNER_REVIEW_20261128.json'
+      - 'tests/test_stable4_dd30_formal_old_source_owner_review_blockers.py'
+      - 'docs/research/STABLE4_Q102_942_READY_SOURCE_NATIVE_GRID_*.json'
+      - 'tests/test_stable4_q102_942_ready_native_grid_source_coverage.py'
+      - 'scripts/research/stable4_q102_official_aster_h1_historical_availability_probe.py'
+      - 'docs/research/STABLE4_Q102_OFFICIAL_ASTER_FET_LDO_H1_SOURCE_SAMPLE_20261128.json'
+      - 'tests/test_stable4_q102_official_aster_h1_sample_readiness.py'
+      - 'docs/research/STABLE4_Q102_FULL_SOURCE_S34_*.json'
+      - 'scripts/stable4-q102-selected-native-exit-model-v2.ts'
+      - 'scripts/research/stable4_q102_selected_one_slot_delayed_m5_v2.py'
+      - 'docs/research/STABLE4_Q102_SELECTED_*_V2_20261128.json'
+      - 'tests/test_stable4_q102_selected_delayed_m5_one_slot_evidence.py'
+      - 'scripts/stable4-market-observe.ts'
+      - 'scripts/stable4-four-sleeve-native-synthetic.ts'
+      - 'scripts/disdex_public_read_resilience.py'
+      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - 'scripts/dd-reduction/v52_amzn_yahoo_gate.py'
+      - 'tests/stable4-*.test.ts'
+      - '.github/workflows/disdex-stable4-sevenrunner-prelive-research-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-research-snapshot:
+    name: Historical evidence only (66c1764, NOT current source)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 66c1764a4f78790537aed6b9cf95d913d3639807
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: TypeScript entire candidate source
+        run: npx tsc --noEmit --incremental false -p tsconfig.json
+      - name: No-trade R21 P91, IDLE and shared API regression
+        run: |
+          for name in \
+            tests/stable4-portfolio-cumulative-dd.test.ts \
+            tests/stable4-source-only-stop-reserve.test.ts \
+            tests/stable4-source-only-seven-runner-stop-headroom.test.ts \
+            tests/idle-r26-entry-certificate.test.ts \
+            tests/stable4-seven-runner-dryrun-gate.test.ts \
+            tests/stable4-q102-hype-risk-policy-contract.test.ts \
+            tests/stable4-proposed-source-integrity.test.ts \
+            tests/stable4-hype-offline-m5-exit.test.ts \
+            tests/stable4-fet-offline-m5-exit.test.ts \
+            tests/stable4-seven-runner-dry-coordinator.test.ts \
+            tests/stable4-native-pengu-q102-source-observer.test.ts \
+            tests/stable4-native-aster-m5-causal-observation.test.ts \
+            tests/stable4-observation-snapshot.test.ts \
+            tests/stable4-r21-public-observation-feed.test.ts \
+            tests/stable4-public-get-resilience.test.ts \
+            tests/stable4-research-runner-observation.test.ts \
+            tests/aster-common-read-resilience.test.ts \
+            tests/stable4-four-formal-source-delta-readonly-regression.test.ts \
+            tests/disdex-runner-cumulative-dd.test.ts \
+            tests/idle-priority-short-signal.test.ts \
+            tests/idle-priority-short-live-path.test.ts \
+            tests/idle-priority-short-baseline-admission.test.ts \
+            tests/fet-brk48-signal.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-runner-engine.test.ts; do
+              npx tsx "$name"
+            done
+          # Independently validate 23 exact-byte pins and all original safety tokens.
+          # This MUST NOT replace the failing formal historical approval gate.
+          python -B -m unittest -v tests.test_stable4_candidate_source_safety_contract
+          # The 2026-11-23 formal 23-file manifest is stale at four exact
+          # source SHAs. Independent audit MUST preserve failing old Owner
+          # boundary; this is a candidate identity, NOT a new approval.
+          python -B -m unittest -v tests.test_stable4_dd30_formal_old_source_owner_review_blockers
+          # 24 original R21 source-generated artificial regimes (6x4),
+          # 10/30 bps; projected STOP8 + 2% gap reserve improves observed
+          # model DD <30, but never certifies 70% wins or live protection.
+          # This is an offline immutable report; private input files NEVER
+          # uploaded into GitHub Actions. No orders, no live adoption.
+          python -B -m unittest -v tests.test_stable4_r21_24case_stop_gap_headroom_evidence
+          # IDLE-only source-frozen 849 -> 197 7-runner A/B: source-SHA,
+          # both 10/30bps, full-wallet/DD/peer opportunity parity. Offline
+          # artifact only: never consume owner-PC data or send orders in CI.
+          python -B -m unittest -v tests.test_stable4_idle_r26_only_sevenrunner_ab_provenance
+          # A partially regenerated/isolated sleeve study cannot stand in for one
+          # complete, current-source, shared-wallet seven-runner artificial BT.
+          python -B -m unittest -v tests.test_stable4_seven_native_coverage_audit
+          python -B -m unittest -v tests.test_stable4_synthetic_evidence_fingerprint
+          # Full-year, true Binance PENGU raw H1 trigger replay:
+          # validate all 166 events against pinned native source + immutable data SHA.
+          # This deliberately does not claim ASTER M5 fills or a seven-runner BT.
+          python -B -m unittest -v tests.test_stable4_pengu_real_h1_ledger_audit
+          python -B -m unittest -v tests.test_stable4_pengu_aster_m5_after_h1_source_audit
+          # PENGU source-native H1 position exit and conditional one-slot/cooldown
+          # evidence MUST remain explicitly non-venue and non-production. These
+          # tests reject lookahead, source-SHA drift, false fills/STOPs, forged
+          # annual certification and overlapping model positions.
+          python -B -m unittest -v tests.test_stable4_pengu_partial_native_exit_evidence
+          python -B -m unittest -v tests.test_stable4_pengu_scoped_native_one_slot_evidence
+          python -B scripts/research/stable4_pengu_native_h1_ledger_audit.py
+          # Separate partial 12-month Q102 BTC/SOL native H1 source proof.
+          # Does not claim the full Q102 source universe or fills.
+          # Time-contiguous V52 M5 bars have high zero-volume even in NY regular hours.
+          # Verify pinned actual yearly market-data audit, never infer venue fills.
+          python -B -m unittest -v tests.test_stable4_q102_aster_h1_archive_source_audit
+          python -B -m unittest -v tests.test_stable4_q102_extended_aster_h1_archive_coverage
+          python -B -m unittest -v tests.test_stable4_q102_181d_monthly_readiness
+          python -B -m unittest -v tests.test_stable4_v52_regular_session_liquidity
+          # Native V52 V13D/V11EQ requires synchronous ASTER/XYZ L2 data.
+          # Reject any attempt to turn M5+Yahoo H1 into invented native fills.
+          python -B -m unittest -v tests.test_stable4_v52_native_entry_source_gap
+          # Historical third-party ASTER/xyz L2 source exists on sampled hours,
+          # but old missing hours and absent L3/venue fills must stay blocked.
+          # Pure offline source-pin test; DO NOT fetch live external API in CI.
+          python -B -m unittest -v tests.test_stable4_v52_public_paired_l2_sample_evidence
+          # One actual public AMZN same-hour L2 pair parsed in isolated
+          # research environment. Pinned file sha/row clocks, NOT maker fills.
+          # No network, external data download or private local files in CI.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_profile_evidence
+          # Source-receiver 1s-grid freshness for one paired public L2 hour:
+          # reject false 1,500ms V13D book-age claims. No account data or
+          # online HTTP in CI; historical observed freshness is necessary only.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_source_freshness_evidence
+          # Detect exactly paired Aster source snapshot-receipt resets,
+          # update ID chain breaks and 20+20 HL snapshot row-grain. Reject
+          # native book reconstruction claims without verified repair.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_sequence_quality
+          # ASTER delta/snapshot L2 reconstruction HYPOTHESIS from private
+          # source-pinned one-hour Parquet. CI tests only immutable offline
+          # evidence, including 12 ambiguous mixed clocks fail-closed and
+          # 19 identical snapshot pairs. Never claim native V52 / fills.
+          python -B -m unittest -v tests.test_stable4_v52_aster_l2_book_hypothesis
+          # Only 6 paired snapshot receipts / 3 unique ASTER source IDs;
+          # reject conflating raw mid difference with native V52 trade basis.
+          # No historical HTTP calls, no account/fill claims in CI.
+          python -B -m unittest -v tests.test_stable4_v52_paired_onehour_snapshot_quote_overlap
+          # 12-month bounded public-source snapshot only (120 header probes).
+          # HTTP 429 is UNKNOWN, never conflated with HTTP 404 missing data.
+          # Validation is offline and NEVER contacts provider in CI.
+          python -B -m unittest -v tests.test_stable4_v52_l2_monthly_429_fail_closed
+          python -B -m unittest -v tests.test_stable4_q102_real_monthly_ledger_audit
+          # Exact source S34 priority and no-backfill: this tests the
+          # conditional HIGH_VOL-absent, base-idle sleeve ONLY. A prior
+          # 5m bar must close before a next-5m-open model price is observed.
+          # Never promote these model positions to native Q102 or fills.
+          python -B -m unittest -v tests.test_stable4_q102_s34_conditional_native_evidence
+          # Cross-compare 20-symbol real V4 selector at 96 source-ready clocks.
+          # Exact S34 signal/gate match is narrower than full-year certified Q102.
+          python -B -m unittest -v tests.test_stable4_q102_native_full_s34_cross_parity
+          # All 942 20-symbol source-ready H1 clocks are raw-generator
+          # screened. Full native selector ran at 96 raw-candidate clocks only.
+          # 846 raw-empty hours are explicitly NOT full-selector invoked.
+          python -B -m unittest -v tests.test_stable4_q102_942_ready_native_grid_source_coverage
+          # Official ASTER public GET-only FET/LDO two-date source probe: Oct
+          # 2025 no H1 rows, Jan 2026 three. Date-scoped only, not annual.
+          # Offline PIN audit, NEVER call venue APIs in CI or place orders.
+          python -B -m unittest -v tests.test_stable4_q102_official_aster_h1_sample_readiness
+          # Preserve actual 38 source-native Q102 signals but avoid Q102
+          # M5 same-bar-volume lookahead; strict unresolved slot remains latched.
+          # Model-only, not venue fills or LIVE stop readback.
+          python -B -m unittest -v tests.test_stable4_q102_selected_delayed_m5_one_slot_evidence
+          python -B scripts/research/stable4_q102_real_monthly_ledger_audit.py
+          python -B scripts/stable4_seven_native_coverage_audit.py
+          python -B tests/test_public_read_resilience_offline.py
+          python -B -m unittest -q \
+            tests.test_v52_market_closed_gate \
+            tests.test_v52_real_tick \
+            tests.test_v52_preserve_peer_protection \
+            tests.test_v52_daily_loss_recovery \
+            tests.test_v52_safety_regressions \
+            tests.test_v52_stock_quote_local_hold_20261027 \
+            tests.test_v52_q102_independent_pin \
+            tests.test_v52_upstream_fail_closed \
+            tests.test_v52_reference_transient
+      - name: Independent V4 resident STOP and Shared Risk regressions (no formal approval)
+        run: |
+          python -B -m unittest -v tests.test_v4_dynamic_resident_stop_and_margin_script
+          python -B -m unittest -v tests.test_stable4_dd30_shared_writer_singleton
+          python -B -m unittest -v tests.test_disdex_verify_singlewriter_candidate
+          node --import tsx --test \
+            tests/shared-risk-writer-pin.test.ts \
+            tests/shared-risk-writer-persist-guard.test.ts \
+            tests/shared-risk-transient-refresh-retry.test.ts
+          echo 'INDEPENDENT_RESEARCH_REGRESSION_ONLY=true'
+          echo 'LIVE_ORDER_PERMIT=FALSE'
+      - name: Regenerate frozen historical synthetic report artifacts (partial, no orders)
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/three-sleeve-native-current.json"
+          npx tsx scripts/stable4-four-sleeve-native-synthetic.ts "$RUNNER_TEMP/four-sleeve-native-current.json"
+          npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/q102-hype-native-current.json"
+          python - <<'PY'
+          import hashlib,json,os,pathlib
+          from scripts.stable4_synthetic_evidence_fingerprint import canonical_result_sha256
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          review=json.loads(pathlib.Path("docs/research/STABLE4_FOUR_NATIVE_SOURCE_SYNTHETIC_COMPARISON_20261128.json").read_text(encoding="utf8"))
+          if review.get("productionEligible") is not False or review.get("liveOrderAuthority") is not False:
+              raise ValueError("SYNTHETIC_REVIEW_ORDER_AUTHORITY_FORBIDDEN")
+          frozen={item["source"]:item for item in review["evidence"]}
+          pairs=[
+            ("scripts/stable4-three-sleeve-native-synthetic.ts","three-sleeve-native-current.json"),
+            ("scripts/stable4-four-sleeve-native-synthetic.ts","four-sleeve-native-current.json"),
+            ("scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts","q102-hype-native-current.json"),
+          ]
+          evidence=[]
+          for source,output in pairs:
+              path=root/output
+              obj=json.loads(path.read_text(encoding="utf-8"))
+              if len(obj.get("rows",obj.get("cases",[]))) not in (8,12):
+                  raise ValueError("REPLAY_EXPECTED_CASES_MISSING:"+output)
+              source_digest=hashlib.sha256(pathlib.Path(source).read_bytes()).hexdigest()
+              output_digest=hashlib.sha256(path.read_bytes()).hexdigest()
+              canonical_digest=canonical_result_sha256(obj)
+              pinned=frozen.get(source)
+              if not pinned or pinned["sourceSha256"]!=source_digest or pinned["canonicalResultSha256"]!=canonical_digest:
+                  raise ValueError("SYNTHETIC_CURRENT_SOURCE_OR_TRADING_RESULTS_CHANGED:"+source)
+              # The Q102/HYPE output includes runtimeMs; exact raw bytes are not
+              # stable across hosts. Trading outcome fields are still signed by
+              # the canonical digest, excluding runtimeMs only.
+              if source!="scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts" and pinned["rawOutputSha256"]!=output_digest:
+                  raise ValueError("SYNTHETIC_DETERMINISTIC_OUTPUT_CHANGED:"+source)
+              evidence.append({"source":source,"sourceSha256":source_digest,"output":output,
+                               "outputSha256":output_digest,"canonicalResultSha256":canonical_digest,
+                               "status":obj["status"],"orderAuthority":False})
+          (root/"source-native-replay-fingerprints.json").write_text(json.dumps({"status":"PARTIAL_SYNTHETIC_NO_SEVEN_WALLET_CERTIFICATION","evidence":evidence},indent=2)+"\n",encoding="utf8")
+          print(json.dumps(evidence))
+          PY
+      - name: Co-observe native PENGU and Q102 H1 on independent 280d artificial prices (no trade)
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-pengu-q102-native-h1-artificial-observations.ts "$RUNNER_TEMP/pengu-q102-native-h1-current.json"
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"pengu-q102-native-h1-current.json"
+          o=json.loads(p.read_text(encoding="utf8"))
+          if (o.get("status")!="NATIVE_H1_OBSERVATION_ONLY_NO_VENUE_CERTIFICATION"
+              or len(o.get("rows",[]))!=4
+              or any(len(r.get("cases",[]))!=8 for r in o["rows"])
+              or o.get("orderAuthority") is not False
+              or o.get("asterM5Confirmed") is not False
+              or o.get("fullSevenNativeReplay") is not False
+              or o.get("liveEligible") is not False):
+              raise ValueError("NATIVE_H1_RESEARCH_SCOPE_OR_COVERAGE_INVALID")
+          for r in o["rows"]:
+              for case in r["cases"]:
+                  for name in ("pengu","penguV8","q102"):
+                      item=case[name]
+                      if item["status"] not in ("NO_SOURCE_ENTRY","NATIVE_ENTRY_OBSERVED","BLOCKED_SOURCE"):
+                          raise ValueError("NATIVE_H1_OBSERVATION_UNRECOGNISED")
+          print(json.dumps({"observationOnly":True,"noOrders":True,"cases":32,"aggregate":o["aggregate"]}))
+          PY
+      - name: Preserve independently regenerated research artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable4-historical-66c1764-replay-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/three-sleeve-native-current.json
+            ${{ runner.temp }}/four-sleeve-native-current.json
+            ${{ runner.temp }}/q102-hype-native-current.json
+            ${{ runner.temp }}/source-native-replay-fingerprints.json
+            ${{ runner.temp }}/pengu-q102-native-h1-current.json
+      - name: Source-level validation only; NO certificate or LIVE activation
+        run: |
+          echo "PRELIVE_SOURCE_ONLY=true"
+          echo "productionInstalled=false"
+          echo "liveOrderAuthorization=false"
+
+  current-restored-source:
+    name: Current restored candidate regression (NO LIVE)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: Full candidate typecheck
+        run: npx tsc --noEmit --incremental false -p tsconfig.json
+      - name: Restored seven-runner candidate and risk regressions (mock / offline only)
+        run: |
+          set -euo pipefail
+          node --import tsx --test \
+            tests/v12-v4-adopted-r21.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-live-exit-feed.test.ts \
+            tests/v12-v4-runner-engine.test.ts \
+            tests/idle-r26-selected-release.test.ts \
+            tests/idle-r26-entry-certificate.test.ts \
+            tests/idle-priority-short-signal.test.ts \
+            tests/idle-priority-short-live-path.test.ts \
+            tests/idle-priority-short-baseline-admission.test.ts \
+            tests/pengu-adopted-p91.test.ts \
+            tests/pengu-short-v20-timed-stop.test.ts \
+            tests/pengu-route-quarantine-dd-governor.test.ts \
+            tests/fet-brk48-signal.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/fet-vol10-ret15-contract.test.ts \
+            tests/fet-brk48-trailing-contract.test.ts \
+            tests/hype-h48-*.test.ts \
+            tests/stable4-dd30-owner-hard-gross-candidate.test.ts \
+            tests/disdex-runner-cumulative-dd.test.ts \
+            tests/stable4-mtm-attribution-review.test.ts \
+            tests/stable4-mtm-income-window-review.test.ts \
+            tests/stable4-mtm-lossless-income-json.test.ts \
+            tests/stable4-v4-lineage-namespace.test.ts \
+            tests/stable4-mtm-order-origin-review.test.ts \
+            tests/stable4-portfolio-cumulative-dd.test.ts \
+            tests/stable4-seven-runner-dryrun-gate.test.ts \
+            tests/stable4-seven-runner-dry-coordinator.test.ts \
+            tests/stable4-source-only-stop-reserve.test.ts \
+            tests/stable4-source-only-seven-runner-stop-headroom.test.ts \
+            tests/stable4-observation-snapshot.test.ts \
+            tests/stable4-research-runner-observation.test.ts \
+            tests/stable4-four-formal-source-delta-readonly-regression.test.ts
+          npx tsx scripts/disdex-quality102-highvol-d126-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
+          python -B -m unittest -v tests.test_stable4_adopted_monitor_bundle
+          python -B -m unittest -v tests.test_stable4_dd30_monitor_cutover
+          python -B -m tests.test_v52_daily_flatten_lifecycle
+          python -B tests/test_v52_daily_flatten_engine_offline.py
+          python -B scripts/disdex-v52-existing-exit-latch-selftest.py
+          python -B -m unittest -q tests.test_v52_daily_loss_recovery tests.test_v52_market_closed_gate tests.test_v52_real_tick tests.test_v52_preserve_peer_protection
+      - name: Exact candidate service bundle and staged source manifest (no install)
+        run: |
+          set -euo pipefail
+          python -B scripts/ops/deploy/stable4_adopted_monitor_bundle.py --sha "$GITHUB_SHA" > "$RUNNER_TEMP/adopted-monitor-bundle.json"
+          python -B - <<'PY2'
+          import hashlib,json,os,pathlib,subprocess,sys
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          sha=os.environ["GITHUB_SHA"]
+          assert subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()==sha
+          bundle=json.loads((root/"adopted-monitor-bundle.json").read_bytes())
+          assert bundle["sourceSha"]==sha and bundle["ordersEnabled"] is False and bundle["formalCertificateIssued"] is False
+          files={}
+          tracked=subprocess.check_output(["git","ls-tree","-r","--name-only","-z",sha]).decode().split("\0")
+          for rel in tracked:
+              if not rel or not (rel.startswith(("lib/","config/","scripts/","ops/systemd/","deploy/v4-staged-overlay/")) or rel in ("package.json","package-lock.json","tsconfig.json","docs/production/stable4-dd30-h48-stop8-risk-owner-candidate-20261126.json")): continue
+              raw=subprocess.check_output(["git","show",sha+":"+rel])
+              files[rel]=hashlib.sha256(raw).hexdigest()
+          required=("lib/v12-v4-adopted-r21.ts","lib/pengu-adopted-p91.ts","lib/idle-r26-entry-certificate.ts","scripts/disdex-hype-h48-native-shadow.ts","scripts/stable4-market-observe.ts","scripts/stable4-adopted-authorization-preflight.ts","ops/systemd/disdex-h48-stop8-shadow@.service")
+          assert all(rel in files for rel in required)
+          overlay=json.loads(pathlib.Path("deploy/v4-staged-overlay/manifest.json").read_bytes())
+          for row in overlay["files"]:
+              src="deploy/v4-staged-overlay/"+row["source"]
+              assert src in files
+              if row["target"] in files:
+                  assert files[src]==files[row["target"]], "TRACKED_SOURCE_OVERLAY_MISMATCH:"+row["target"]
+          receipt={"schema":"stable4-adopted-candidate-source-review/v1","sourceSha":sha,"status":"REVIEW_ONLY_NOT_APPROVED_OR_INSTALLED","ordersEnabled":False,"formalCertificateIssued":False,"productionInstalled":False,"serviceBundleSha256":hashlib.sha256((root/"adopted-monitor-bundle.json").read_bytes()).hexdigest(),"files":files}
+          (root/"adopted-source-review.json").write_text(json.dumps(receipt,sort_keys=True,indent=2)+"\n")
+          print("CANDIDATE_REVIEW_FILES="+str(len(files)))
+          PY2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stable4-adopted-monitor-review-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/adopted-monitor-bundle.json
+            ${{ runner.temp }}/adopted-source-review.json
+      - name: Regenerate partial models on CURRENT source; no historical parity claim
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/current-three-sleeve.json"
+          npx tsx scripts/stable4-four-sleeve-native-synthetic.ts "$RUNNER_TEMP/current-four-sleeve.json"
+          npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/current-q102-hype.json"
+          python - <<'PY2'
+          import json,os,pathlib,hashlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          records=[]
+          for name,count in [("current-three-sleeve.json",12),("current-four-sleeve.json",12),("current-q102-hype.json",8)]:
+              p=root/name
+              raw=p.read_bytes()
+              x=json.loads(raw)
+              if "PARTIAL_RESEARCH_ONLY" not in x.get("status","") or len(x.get("rows",x.get("cases",[])))!=count or x.get("orderAuthority",False) is not False:
+                  raise ValueError("CURRENT_PARTIAL_MODEL_SCOPE_INVALID:"+name)
+              records.append({"file":name,"sha256":hashlib.sha256(raw).hexdigest(),"status":x["status"],"cases":count})
+          (root/"current-partial-synthetic-identity.json").write_text(json.dumps({"scope":"CURRENT_PARTIAL_MODELS_ONLY","githubCheckoutSha":os.environ["GITHUB_SHA"],"fullSevenRunnerReplay":False,"orderAuthority":False,"productionEligible":False,"records":records},indent=2)+"\n")
+          PY2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stable4-current-partial-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/current-three-sleeve.json
+            ${{ runner.temp }}/current-four-sleeve.json
+            ${{ runner.temp }}/current-q102-hype.json
+            ${{ runner.temp }}/current-partial-synthetic-identity.json
+      - name: Release authority remains unissued
+        run: |
+          echo "FULL_SEVEN_RUNNER_NATIVE_BT=false"
+          echo "LIVE_ORDER_PERMIT=false"
+          echo "PRODUCTION_INSTALLED=false"

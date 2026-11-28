@@ -1,0 +1,254 @@
+{
+  "annualFiveStockPairedCoverageProven": false,
+  "aster": {
+    "deltaPackets": 39876,
+    "distinctSnapshotSequenceIds": 19,
+    "restartGapsWithTwoSnapshotReceipts": 19,
+    "snapshotClockOccurrences": 38,
+    "snapshotIdsRepeatedAtTwoReceiveClocks": 19,
+    "updateBreaks": [
+      {
+        "afterReceivedNs": 1788365720830749527,
+        "beforeReceivedNs": 1788365461348464133,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526030348895,
+        "priorUpdateFinalId": 526026301346,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 259.482285
+      },
+      {
+        "afterReceivedNs": 1788365897136871692,
+        "beforeReceivedNs": 1788365888812350000,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 7.466943,
+        "nextDeltaDeclaredPriorId": 526033068995,
+        "priorUpdateFinalId": 526032942967,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.324522
+      },
+      {
+        "afterReceivedNs": 1788366048892208217,
+        "beforeReceivedNs": 1788366036591329930,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.538953,
+        "nextDeltaDeclaredPriorId": 526035354583,
+        "priorUpdateFinalId": 526035180582,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 12.300878
+      },
+      {
+        "afterReceivedNs": 1788366197761435188,
+        "beforeReceivedNs": 1788366184342958656,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 5.569918,
+        "nextDeltaDeclaredPriorId": 526037569526,
+        "priorUpdateFinalId": 526037377794,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 13.418477
+      },
+      {
+        "afterReceivedNs": 1788366344482135168,
+        "beforeReceivedNs": 1788366334165449246,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526039846250,
+        "priorUpdateFinalId": 526039678073,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 10.316686
+      },
+      {
+        "afterReceivedNs": 1788366483052395803,
+        "beforeReceivedNs": 1788366469941281323,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 2.548277,
+        "nextDeltaDeclaredPriorId": 526041928720,
+        "priorUpdateFinalId": 526041736557,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 13.111114
+      },
+      {
+        "afterReceivedNs": 1788366620108067633,
+        "beforeReceivedNs": 1788366609730797414,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 2.345881,
+        "nextDeltaDeclaredPriorId": 526043998966,
+        "priorUpdateFinalId": 526043826957,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 10.37727
+      },
+      {
+        "afterReceivedNs": 1788366759625602069,
+        "beforeReceivedNs": 1788366749537155561,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526046185280,
+        "priorUpdateFinalId": 526046027144,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 10.088447
+      },
+      {
+        "afterReceivedNs": 1788366911632002900,
+        "beforeReceivedNs": 1788366903286185482,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526048463501,
+        "priorUpdateFinalId": 526048340524,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.345817
+      },
+      {
+        "afterReceivedNs": 1788367053349260827,
+        "beforeReceivedNs": 1788367044965029474,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.952011,
+        "nextDeltaDeclaredPriorId": 526050834605,
+        "priorUpdateFinalId": 526050692716,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.384231
+      },
+      {
+        "afterReceivedNs": 1788367189086064991,
+        "beforeReceivedNs": 1788367180748303706,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 5.911543,
+        "nextDeltaDeclaredPriorId": 526052880557,
+        "priorUpdateFinalId": 526052776278,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.337761
+      },
+      {
+        "afterReceivedNs": 1788367330852380512,
+        "beforeReceivedNs": 1788367322535156618,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526055023717,
+        "priorUpdateFinalId": 526054902191,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.317224
+      },
+      {
+        "afterReceivedNs": 1788367492632758834,
+        "beforeReceivedNs": 1788367484281090529,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526057259503,
+        "priorUpdateFinalId": 526057156198,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.351668
+      },
+      {
+        "afterReceivedNs": 1788367634389370656,
+        "beforeReceivedNs": 1788367624043208068,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526059370905,
+        "priorUpdateFinalId": 526059230322,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 10.346163
+      },
+      {
+        "afterReceivedNs": 1788367772097154345,
+        "beforeReceivedNs": 1788367763788246337,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526061324209,
+        "priorUpdateFinalId": 526061212177,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.308908
+      },
+      {
+        "afterReceivedNs": 1788367909881446512,
+        "beforeReceivedNs": 1788367901585133382,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526063346528,
+        "priorUpdateFinalId": 526063235040,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 8.296313
+      },
+      {
+        "afterReceivedNs": 1788368109595038925,
+        "beforeReceivedNs": 1788368099332325507,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526066223138,
+        "priorUpdateFinalId": 526066071060,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 10.262713
+      },
+      {
+        "afterReceivedNs": 1788368255438439336,
+        "beforeReceivedNs": 1788368249047820900,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526068316489,
+        "priorUpdateFinalId": 526068227689,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 6.390618
+      },
+      {
+        "afterReceivedNs": 1788368395283209011,
+        "beforeReceivedNs": 1788368388840073655,
+        "nativeBookReconciled": false,
+        "nearestSnapshotToResumedDeltaMs": 0.0,
+        "nextDeltaDeclaredPriorId": 526070261405,
+        "priorUpdateFinalId": 526070172082,
+        "snapshotsInsideSourceGap": 2,
+        "sourceGapSeconds": 6.443135
+      }
+    ],
+    "updateChainBreaks": 19
+  },
+  "fullHistoricalL2BookReplayCertified": false,
+  "hourUtc": "2026-09-02T16:00:00Z",
+  "hyperliquidXyz": {
+    "distinctSnapshots": 649,
+    "exactTwentyBidAndAskLevels": 649,
+    "incrementalBookUpdatesInSample": 0
+  },
+  "inputPairedHourlyProfileSha256": "59cd3a3008c8a7a465750ae5109767e39418d083487290929b027ec558590860",
+  "limitations": [
+    "The 19 ASTER delta-chain nonadjacent prev-final IDs coincide with two snapshot receipt clocks per gap. Sequence resets require independently correct snapshot application and cancellation handling; no book was reconstructed.",
+    "Distinct snapshot IDs at two Aster receipt clocks do NOT prove identical payloads or duplicate live orderbook states; publisher/reconnect semantics and empty-book clearing require further validation.",
+    "Hyperliquid 649 same-hour received clocks contain exactly 20 bid+20 ask level rows each, but event snapshots are not guaranteed to be true exchange-synchronized books. No order updates were provided in this file.",
+    "Row-level received-event lag summarizes third-party publisher event/ingestion delay; separate 1-second both-venue freshness is a necessary V13D condition, not a fill or native trade.",
+    "No continuous annual source coverage, reference feeds, per-trader maker queue, hedge orders, fees/slippage, seven-runner DD/Gross, production or Owner approval."
+  ],
+  "nativeStockEngineSha256": "e1c6f16b5deb514fa636c44a859294fec8ee8f81e0dac3ef405cd55a3056a9d8",
+  "nativeV52EntryOrHedgeFillProven": false,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "schema": "stable4-v52-paired-onehour-l2-source-update-sequence-quality/v1",
+  "status": "PARTIAL_ONE_HOUR_SEQUENCE_AUDIT_WITH_RESTARTS_NOT_RECONSTRUCTED_BOOK",
+  "venueRowHealth": {
+    "ASTER": {
+      "negativeQuantities": 0,
+      "nonPositivePrices": 0,
+      "receivedBeforeSourceEventRows": 0,
+      "receivedMinusEventTimeMs": {
+        "max": 412.0029,
+        "median": 129.823043,
+        "min": 124.590175,
+        "p95": 145.457142
+      },
+      "rows": 93372,
+      "unparseablePriceOrQuantity": 0,
+      "zeroQuantityLevelRows": 8992
+    },
+    "HYPERLIQUID_XYZ": {
+      "negativeQuantities": 0,
+      "nonPositivePrices": 0,
+      "receivedBeforeSourceEventRows": 0,
+      "receivedMinusEventTimeMs": {
+        "max": 9224.722376,
+        "median": 994.176107,
+        "min": 0.0,
+        "p95": 1233.253772
+      },
+      "rows": 25960,
+      "unparseablePriceOrQuantity": 0,
+      "zeroQuantityLevelRows": 0
+    }
+  }
+}

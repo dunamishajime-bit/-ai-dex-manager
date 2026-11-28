@@ -36,16 +36,48 @@ def load_manifest(repo: Path):
             raise ValueError("V4_OVERLAY_SOURCE_ESCAPE:"+source)
     return value
 
-def archive_base(repo: Path, output: Path):
-    probe=subprocess.run(["git","cat-file","-e",BASE_SHA+"^{commit}"],cwd=repo)
+def archive_commit(repo: Path, output: Path, sha: str):
+    probe=subprocess.run(["git","cat-file","-e",sha+"^{commit}"],cwd=repo)
     if probe.returncode: raise RuntimeError("V4_BASE_COMMIT_MISSING")
-    raw=subprocess.check_output(["git","archive","--format=tar",BASE_SHA],cwd=repo)
+    raw=subprocess.check_output(["git","-c","core.autocrlf=false","-c","core.eol=lf","archive","--format=tar",sha],cwd=repo)
     with tarfile.open(fileobj=io.BytesIO(raw),mode="r:") as tf:
         for member in tf.getmembers():
             if member.issym() or member.islnk():
                 raise RuntimeError("V4_BASE_ARCHIVE_LINK_NOT_ALLOWED:"+member.name)
             safe_target(output,member.name)
         tf.extractall(output,filter="data")
+
+def archive_base(repo: Path, output: Path):
+    archive_commit(repo, output, BASE_SHA)
+
+
+def build_exact_candidate(repo: Path, output: Path, candidate_sha: str):
+    """Preview the exact current commit; never overwrite a tracked candidate file."""
+    if not __import__("re").fullmatch(r"[0-9a-f]{40}", candidate_sha):
+        raise ValueError("V4_CANDIDATE_SHA_INVALID")
+    output.mkdir(parents=True, mode=0o750, exist_ok=False)
+    archive_commit(repo, output, candidate_sha)
+    manifest = load_manifest(output)
+    applied = []
+    for row in manifest["files"]:
+        src = safe_target(output / "deploy/v4-staged-overlay", row["source"])
+        dst = safe_target(output, row["target"])
+        if dst.exists():
+            if not dst.is_file() or dst.read_bytes() != src.read_bytes():
+                raise ValueError("V4_OVERLAY_TRACKED_SOURCE_CONFLICT:" + row["target"])
+        else:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, dst)
+        applied.append(row["target"])
+    if (output / ".disdex-release-sha").exists():
+        raise ValueError("V4_PREVIEW_UNEXPECTED_RELEASE_MARKER")
+    evidence = {"schema": "disdex-v4-staged-release/v1",
+                "candidateSha": candidate_sha, "sourceArchiveSha": candidate_sha,
+                "overlayTargets": applied, "productionRelease": False}
+    (output / ".disdex-v4-staged-release.json").write_text(
+        json.dumps(evidence, indent=2) + "\n", encoding="utf-8", newline="\n")
+    return evidence
+
 
 def build(repo: Path, output: Path, candidate_sha: str):
     if not __import__("re").fullmatch(r"[0-9a-f]{40}",candidate_sha):

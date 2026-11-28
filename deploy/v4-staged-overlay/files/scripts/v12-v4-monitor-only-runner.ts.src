@@ -4,9 +4,11 @@ import { dirname } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
+import {attachAdoptedR21CandidateBatch} from "../lib/v12-v4-adopted-r21";
+import {readR21Observation} from "../lib/stable4-observation-snapshot";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
-import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, readV4StalePendingProofIfNeeded, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
 import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 import {v4MonitorIdentity,type V4MonitorIdentity} from "../lib/v12-v4-execution-phase";
 
@@ -56,6 +58,10 @@ async function decision(client:AsterV3Client,now:number){
   }
   value=attachV4NativeCoreCandidates(value,bars,refs);
  }
+ if(process.env.DISDEX_STABLE4_V4_ENTRY_POLICY==="R21_ONE"){
+  const source=process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH,at=Date.now();
+  value=attachAdoptedR21CandidateBatch(value,source?await readR21Observation(source,releaseSha(),at):undefined,bars,at);
+ }
  return value;
 }
 async function cycle(now=Date.now()){
@@ -70,16 +76,18 @@ async function cycle(now=Date.now()){
  const entrySafetyError=await assertV4EntrySafety().then(()=>null,(error)=>safeReason(error));
  const pendingPath=process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH||"/var/lib/disdex/shared/pending-exposure.json";
  const proofPath=process.env.V12_V4_PENDING_READONLY_PROOF_PATH||"/var/lib/disdex/v12-v4/monitor/pending-proof.json";
- const [risk,margin,killSwitch,pendingSource,pendingProof,positions,openOrders,market]=await Promise.all([
+ const {positions,openOrders,decision:market}=await collectV4MonitorReads({
+  positions:()=>client.getPositions(),openOrders:()=>client.getOpenOrders(),decision:()=>decision(client,now),
+ });
+ const [risk,margin,killSwitch,pendingSource]=await Promise.all([
   trustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH||"/var/lib/disdex/shared/crypto-daily-risk.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH||"/var/lib/disdex/shared/margin-risk/guard-live.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH||"/var/lib/disdex/shared/kill-switch.json"),
   trustedJsonWithHash(pendingPath),
-  trustedJson(proofPath,0),
-  client.getPositions(),client.getOpenOrders(),decision(client,now),
  ]);
+ const pendingProof=await readV4StalePendingProofIfNeeded(pendingSource.value,Date.now(),()=>trustedJson(proofPath,0));
  return {sha,result:evaluateV4MonitorCompletedDecision({
-  now,risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
+  now:Date.now(),risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
   pendingHash:pendingSource.hash,pendingProof,
   positions:positions as unknown as JsonRecord[],openOrders:openOrders as unknown as JsonRecord[],
   decision:market as unknown as JsonRecord,
@@ -118,4 +126,3 @@ export async function runV4ReadOnlyMonitor(identity:V4MonitorIdentity){
 if(process.argv[1]?.includes("v12-v4-monitor-only-runner"))
  runV4ReadOnlyMonitor(v4MonitorIdentity(releaseSha(),false,process.env)).catch(error=>{console.error(JSON.stringify({status:"V4_MONITOR_FAILED_CLOSED",error:safeReason(error),
  ordersSent:0,cancelsSent:0,positionChangesSent:0}));process.exitCode=2;});
-

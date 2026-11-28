@@ -1,5 +1,6 @@
 import type {V12AsterOrderView} from "./v12-aster-live-adapter";
 import type {V4VenueTrade} from "./v12-v4-venue-fills";
+import {isAdoptedR21Route} from "./v12-v4-adopted-r21";
 import {cooldownAfterV4ShortInitialFill} from "./v12-v4-four-rule-policy";
 import {applyProductionEvent,type State,type Event} from "./v12-v4-production-lifecycle";
 import type {AsterIncomeRow,AsterUserTradeRow,AsterOrderResponse} from "./aster-v3-client";
@@ -92,7 +93,8 @@ export function reconcileV4ExitTrades(state:State,id:string,cid:string,order:V12
   if(!(qty>0)||!(price>0)||!Number.isFinite(fee)||fee<0)throw Error("V4_EXIT_FILL_INVALID");
   quantity+=qty;quote+=qty*price;
   actualFillTs=actualFillTs===undefined?trade.time:Math.max(actualFillTs,trade.time);
-  events.push({type:"EXIT_FILL",eventId:"venue-exit:"+key,ts:at,id,qty,price,feeUsd:fee,cooldownUntil});
+  events.push({type:"EXIT_FILL",eventId:"venue-exit:"+key,ts:at,id,qty,price,feeUsd:fee,cooldownUntil,
+   ...(isAdoptedR21Route(leg.candidate.route)?{actualFillTs:trade.time}:{})});
  }
  if(Math.abs(quantity-executed)>Math.max(1e-8,executed*1e-10))
   throw Error("V4_EXIT_TRADE_HISTORY_INCOMPLETE");

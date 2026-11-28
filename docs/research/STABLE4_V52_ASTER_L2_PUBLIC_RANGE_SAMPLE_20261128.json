@@ -1,0 +1,250 @@
+{
+  "actualHistoricalL2DataDownloaded": false,
+  "confirmedSampleFilesPerSymbol": {
+    "AMZNUSDT": 1,
+    "METAUSDT": 1,
+    "MSFTUSDT": 1,
+    "NVDAUSDT": 1,
+    "TSLAUSDT": 1
+  },
+  "continuousYearlyL2Proven": false,
+  "fillsCertified": false,
+  "limitations": [
+    "Only four UTC-hour probes per symbol using public HTTP Range and Parquet magic, not row or book reconstruction; provider data may have known gaps or imprecise exchange timestamps.",
+    "A positive 4-byte Parquet header does not prove the file contains nonempty usable orderbook rows, native V52 order queues, synchronous Hyperliquid xyz books or maker/hedge fills.",
+    "No authenticated provider account, no bulk historical downloads, no API charges, no venue orders, no live authorization and no source-pin substitution."
+  ],
+  "nativeV52EntryReplayProven": false,
+  "observations": [
+    {
+      "contentRange": "bytes 0-3/1764",
+      "datasetFile": "aster_futures/2025-10-01/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "datasetFile": "aster_futures/2025-10-01/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "hourUtc": 12,
+      "httpStatus": 404,
+      "rangeRequest": "bytes=0-3",
+      "status": "NOT_CONFIRMED_HTTP_ERROR",
+      "symbol": "METAUSDT"
+    },
+    {
+      "datasetFile": "aster_futures/2025-10-01/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "hourUtc": 12,
+      "httpStatus": 404,
+      "rangeRequest": "bytes=0-3",
+      "status": "NOT_CONFIRMED_HTTP_ERROR",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/3353",
+      "datasetFile": "aster_futures/2025-10-01/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/1952",
+      "datasetFile": "aster_futures/2025-10-01/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2025-10-01",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/738389",
+      "datasetFile": "aster_futures/2026-01-10/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/687771",
+      "datasetFile": "aster_futures/2026-01-10/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/815139",
+      "datasetFile": "aster_futures/2026-01-10/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/781627",
+      "datasetFile": "aster_futures/2026-01-10/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/740012",
+      "datasetFile": "aster_futures/2026-01-10/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-01-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/88970",
+      "datasetFile": "aster_futures/2026-05-10/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/297652",
+      "datasetFile": "aster_futures/2026-05-10/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/928576",
+      "datasetFile": "aster_futures/2026-05-10/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/35904",
+      "datasetFile": "aster_futures/2026-05-10/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentRange": "bytes 0-3/128066",
+      "datasetFile": "aster_futures/2026-05-10/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-05-10",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "responsePrefixHex": "28b52ffd",
+      "status": "UNVERIFIED_OR_UNEXPECTED_RANGE_RESPONSE",
+      "symbol": "TSLAUSDT"
+    },
+    {
+      "contentLengthBytes": 2244978,
+      "datasetFile": "aster_futures/2026-09-02/12/AMZNUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "AMZNUSDT"
+    },
+    {
+      "contentLengthBytes": 1880314,
+      "datasetFile": "aster_futures/2026-09-02/12/METAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "METAUSDT"
+    },
+    {
+      "contentLengthBytes": 2346575,
+      "datasetFile": "aster_futures/2026-09-02/12/MSFTUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "MSFTUSDT"
+    },
+    {
+      "contentLengthBytes": 1939487,
+      "datasetFile": "aster_futures/2026-09-02/12/NVDAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "NVDAUSDT"
+    },
+    {
+      "contentLengthBytes": 1273704,
+      "datasetFile": "aster_futures/2026-09-02/12/TSLAUSDT_orderbook.parquet",
+      "dateUtc": "2026-09-02",
+      "hourUtc": 12,
+      "httpStatus": 206,
+      "rangeRequest": "bytes=0-3",
+      "status": "PARQUET_MAGIC_RANGE_CONFIRMED",
+      "symbol": "TSLAUSDT"
+    }
+  ],
+  "observedAtUtc": "2026-11-27T23:31:50.303346+00:00",
+  "orderAuthority": false,
+  "provider": "CryptoHFTData public historical Aster futures orderbook file endpoint",
+  "providerDataset": "https://www.cryptohftdata.com/datasets/aster-orderbook-data",
+  "sampleDatesUtc": [
+    "2025-10-01",
+    "2026-01-10",
+    "2026-05-10",
+    "2026-09-02"
+  ],
+  "schema": "stable4-v52-third-party-aster-l2-public-range-presence/v1",
+  "status": "SAMPLE_ONLY_NO_ANNUAL_COVERAGE_OR_SOURCE_FILL_PROOF",
+  "symbols": [
+    "AMZNUSDT",
+    "METAUSDT",
+    "MSFTUSDT",
+    "NVDAUSDT",
+    "TSLAUSDT"
+  ]
+}

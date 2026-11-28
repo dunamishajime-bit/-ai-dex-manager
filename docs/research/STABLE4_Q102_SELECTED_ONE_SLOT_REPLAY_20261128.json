@@ -1,0 +1,365 @@
+{
+  "decisions": [
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1787461200000,
+      "family": "PB",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_AND_EXIT",
+      "entryTs": 1787464800000,
+      "exitTs": 1787652000000,
+      "family": "HIGH_VOL",
+      "reason": "TRAIL_5P_AFTER_12P",
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "ONDOUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1787504400000,
+      "family": "MR",
+      "occupyingEntryTs": 1787464800000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "BLOCKED_OCCUPIED_SLOT",
+      "entryTs": 1787518800000,
+      "family": "MR",
+      "occupyingEntryTs": 1787464800000,
+      "side": -1,
+      "sourceStatus": "TIME_EXIT_PRICE_UNAVAILABLE",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "NO_MODELED_ENTRY_PRICE",
+      "entryTs": 1787720400000,
+      "family": "PB",
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "MODELED_ADMIT_UNRESOLVED_LATCH",
+      "entryTs": 1787821200000,
+      "family": "MR",
+      "observedThrough": 1787907600000,
+      "side": -1,
+      "sourceStatus": "TIME_EXIT_PRICE_UNAVAILABLE",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788224400000,
+      "family": "BRK",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788238800000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788411600000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "TIME_EXIT_PRICE_UNAVAILABLE",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788440400000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788469200000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788584400000,
+      "family": "REV",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788616800000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788624000000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788642000000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788901200000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788915600000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788930000000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "TIME_EXIT_PRICE_UNAVAILABLE",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788973200000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1788987600000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "ENTRY_M5_ZERO_VOLUME",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789002000000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789632000000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789639200000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789650000000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789657200000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "ONDOUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789664400000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789722000000,
+      "family": "BRK",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789779600000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1789981200000,
+      "family": "BRK",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "RENDERUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790024400000,
+      "family": "BRK",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "RENDERUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790038800000,
+      "family": "MR",
+      "occupyingEntryTs": 1787821200000,
+      "side": -1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790067600000,
+      "family": "BRK",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790154000000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790168400000,
+      "family": "PB",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "FETUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790182800000,
+      "family": "REV",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790226000000,
+      "family": "REV",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "APTUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790254800000,
+      "family": "REV",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "MODELED_EXIT_NOT_FILL",
+      "symbol": "APTUSDT"
+    },
+    {
+      "decision": "BLOCKED_UNRESOLVED_SLOT",
+      "entryTs": 1790654400000,
+      "family": "HIGH_VOL",
+      "occupyingEntryTs": 1787821200000,
+      "side": 1,
+      "sourceStatus": "STUDY_END_OPEN_POSITION",
+      "symbol": "SUIUSDT"
+    }
+  ],
+  "fullQ102AnnualReplay": false,
+  "inputPins": {
+    "STABLE4_Q102_FULL_UNIVERSE_ALL_READY_CLOCK_SCREEN_20261128.json": "8bcaa800393b4cd920c3524f0ba242bc482c54fa05564ed4c8b53276a49864f0",
+    "STABLE4_Q102_SELECTED_NATIVE_EXIT_MODEL_20261128.json": "2d208ef1252884bdf60720802ce78ee65f84f45afe221edccfaeb411481bb5f0"
+  },
+  "limitations": [
+    "All other sleeves assumed empty; this is a conditional Q102-only model on 942 hours, not a full wallet replay.",
+    "Entry M5 zero volume is treated as no modeled entry, not proof that a live order failed. An admitted position with unknown exit latches slot indefinitely, not released by assumed deadline.",
+    "Exit at same timestamp frees modeled slot before next entry. No quote/fill/funding/fees or DD inference."
+  ],
+  "orderAuthority": false,
+  "schema": "stable4-q102-selected-one-slot-replay/v1",
+  "status": "PARTIAL_ONE_SLOT_MODEL_NO_EXECUTION_PROOF",
+  "summary": {
+    "BLOCKED_OCCUPIED_SLOT": 2,
+    "BLOCKED_UNRESOLVED_SLOT": 32,
+    "MODELED_ADMIT_AND_EXIT": 1,
+    "MODELED_ADMIT_UNRESOLVED_LATCH": 1,
+    "NO_MODELED_ENTRY_PRICE": 2
+  }
+}

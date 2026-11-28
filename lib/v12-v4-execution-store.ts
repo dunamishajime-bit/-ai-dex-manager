@@ -107,6 +107,10 @@ export class V4ExecutionStore{
    if(JSON.stringify(current.legacyReleaseShas??[])!==JSON.stringify(proposed.legacyReleaseShas??[]))throw Error("LEGACY_RELEASE_LINEAGE_IMMUTABLE");
    if(JSON.stringify(current.state.initial)!==JSON.stringify(proposed.state.initial))throw Error("INITIAL_STATE_MUTATION");
    if(JSON.stringify(proposed.state.journal.slice(0,current.state.journal.length))!==JSON.stringify(current.state.journal))throw Error("JOURNAL_HISTORY_MUTATION");
+   // Validate appended events under current admission limits.
+   const appended=proposed.state.journal.slice(current.state.journal.length);
+   const strict=appended.reduce(applyProductionEvent,current.state);
+   if(JSON.stringify(strict)!==JSON.stringify(proposed.state))throw Error("CURRENT_ADMISSION_RECHECK_FAILED");
    for(const [cid,prior]of Object.entries(current.intents)){
     const next=proposed.intents[cid];
     if(!next||next.legId!==prior.legId||next.action!==prior.action||next.sequence!==prior.sequence||next.createdAt!==prior.createdAt||JSON.stringify(next.command)!==JSON.stringify(prior.command)||next.updatedAt<prior.updatedAt||

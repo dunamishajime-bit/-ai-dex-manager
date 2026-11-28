@@ -1,0 +1,61 @@
+{
+  "status": "OFFLINE_UNIT_TESTS_ONLY_NO_STOCK_NATIVE_SYNTHETIC_BT",
+  "results": [
+    {
+      "name": "tests/test_v52_market_closed_gate.py",
+      "exit": 0,
+      "tail": "test_exchange_holiday_defers_before_reference_fetch (tests.test_v52_market_closed_gate.V52MarketClosedGateTest.test_exchange_holiday_defers_before_reference_fetch) ... ok\ntest_market_closed_with_local_position_never_refreshes_reference_history (tests.test_v52_market_closed_gate.V52MarketClosedGateTest.test_market_closed_with_local_position_never_refreshes_reference_history) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK\n",
+      "sourceSha256": "d1f5deaf76b4972373387c4784f114c8650e7ff0d2dd4c39a6c7f8b33d4fdbd1"
+    },
+    {
+      "name": "tests/test_v52_real_tick.py",
+      "exit": 0,
+      "tail": "test_invalid_identity_time_or_failed_publication_does_not_replace_a_real_tick (tests.test_v52_real_tick.TickWriterTest.test_invalid_identity_time_or_failed_publication_does_not_replace_a_real_tick) ... ok\ntest_monitor_state_writer_also_survives_eighty_same_pid_collisions (tests.test_v52_real_tick.TickWriterTest.test_monitor_state_writer_also_survives_eighty_same_pid_collisions) ... ok\ntest_real_identity_and_atomic_eighty_same_pid_same_millisecond_writes (tests.test_v52_real_tick.TickWriterTest.test_real_identity_and_atomic_eighty_same_pid_same_millisecond_writes) ... ok\ntest_actual_wrapper_methods_emit_only_after_engine_and_state_persistence_complete (tests.test_v52_real_tick.WrapperCompletionTest.test_actual_wrapper_methods_emit_only_after_engine_and_state_persistence_complete) ... ok\ntest_monitor_read_failure_retains_last_actual_tick_without_inventing_a_new_one (tests.test_v52_real_tick.WrapperCompletionTest.test_monitor_read_failure_retains_last_actual_tick_without_inventing_a_new_one) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.340s\n\nOK\n",
+      "sourceSha256": "91d40e338ceed77b84647d4235f8d86f2ceb998754713145061dce962707b08b"
+    },
+    {
+      "name": "tests/test_v52_preserve_peer_protection.py",
+      "exit": 0,
+      "tail": "test_entry_uses_only_confirmed_capacity (tests.test_v52_preserve_peer_protection.PreservePeerProtection.test_entry_uses_only_confirmed_capacity) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nOK\n",
+      "sourceSha256": "8082e053d45133776852bec7ef0b1a44da02ca56bb362442d5f02df03586d3af"
+    },
+    {
+      "name": "tests/test_v52_daily_loss_recovery.py",
+      "exit": 0,
+      "tail": "test_data_failure_latch_is_recomputed_after_data_recovers (tests.test_v52_daily_loss_recovery.V52DailyLossRecoveryTests.test_data_failure_latch_is_recomputed_after_data_recovers) ... ok\ntest_real_daily_loss_latch_remains_sticky (tests.test_v52_daily_loss_recovery.V52DailyLossRecoveryTests.test_real_daily_loss_latch_remains_sticky) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n",
+      "sourceSha256": "2f4590a78c54b7af41278ff5c09ba2fb91c15e7b4c55887905ed945b2190b2a4"
+    },
+    {
+      "name": "tests/test_v52_safety_regressions.py",
+      "exit": 0,
+      "tail": "test_expired_recovery_hold_requires_review_without_flattening (tests.test_v52_safety_regressions.V52SafetyRegressionTests.test_expired_recovery_hold_requires_review_without_flattening) ... ok\ntest_string_state_path_from_environment_is_read_as_a_path (tests.test_v52_safety_regressions.V52SafetyRegressionTests.test_string_state_path_from_environment_is_read_as_a_path) ... ok\ntest_successful_managed_tick_keeps_recoverable_kill_switch_active (tests.test_v52_safety_regressions.V52SafetyRegressionTests.test_successful_managed_tick_keeps_recoverable_kill_switch_active) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.042s\n\nOK\n",
+      "sourceSha256": "255b59ead8c0df6b7a23bcfd6d6a6f429a027bc21e2b36753538615f19be521d"
+    },
+    {
+      "name": "tests/test_v52_stock_quote_local_hold_20261027.py",
+      "exit": 0,
+      "tail": "test_brief_stale_keeps_position_and_pauses_entry (tests.test_v52_stock_quote_local_hold_20261027.QuoteRecoveryContract.test_brief_stale_keeps_position_and_pauses_entry) ... ok\ntest_flat_retry_never_places_orders (tests.test_v52_stock_quote_local_hold_20261027.QuoteRecoveryContract.test_flat_retry_never_places_orders) ... ok\ntest_only_exact_local_staleness_is_scoped (tests.test_v52_stock_quote_local_hold_20261027.QuoteRecoveryContract.test_only_exact_local_staleness_is_scoped) ... ok\ntest_sustained_stale_escalates_instead_of_bypassing_safety (tests.test_v52_stock_quote_local_hold_20261027.QuoteRecoveryContract.test_sustained_stale_escalates_instead_of_bypassing_safety) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+      "sourceSha256": "fdeb39192760df3cb59ac450c41ec149614f998bfc9b783e8f9874210b23b3b3"
+    },
+    {
+      "name": "tests/test_v52_q102_independent_pin.py",
+      "exit": 0,
+      "tail": "test_each_peer_requires_its_own_named_pin (tests.test_v52_q102_independent_pin.IndependentPinTest.test_each_peer_requires_its_own_named_pin) ... ok\ntest_q102_pin_is_independent_of_v52_sha (tests.test_v52_q102_independent_pin.IndependentPinTest.test_q102_pin_is_independent_of_v52_sha) ... ok\ntest_untrusted_or_mismatching_identity_fails_closed (tests.test_v52_q102_independent_pin.IndependentPinTest.test_untrusted_or_mismatching_identity_fails_closed) ... ok\ntest_wrong_target_and_service_fail_closed (tests.test_v52_q102_independent_pin.IndependentPinTest.test_wrong_target_and_service_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n",
+      "sourceSha256": "5ac0867c2db54ec1a7e657236163ce29a7274c1cdd87a6325f7db477bd3f7fdb"
+    },
+    {
+      "name": "tests/test_v52_upstream_fail_closed.py",
+      "exit": 0,
+      "tail": "test_classifies_observed_aster_transport_failures_as_upstream_fail_closed (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_classifies_observed_aster_transport_failures_as_upstream_fail_closed) ... ok\ntest_existing_upstream_kill_reason_holds_without_flatten_mutations (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_existing_upstream_kill_reason_holds_without_flatten_mutations) ... ok\ntest_invalid_shared_kill_switch_does_not_restart_v52_or_mutate_orders (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_invalid_shared_kill_switch_does_not_restart_v52_or_mutate_orders) ... ok\ntest_known_stable4_global_hold_is_preserved_without_reinterpreting_as_clear (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_known_stable4_global_hold_is_preserved_without_reinterpreting_as_clear) ... ok\ntest_local_rate_budget_saturation_is_deferred_not_upstream_kill (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_local_rate_budget_saturation_is_deferred_not_upstream_kill) ... ok\ntest_new_upstream_failure_activates_kill_but_never_flattens_while_state_is_unverified (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_new_upstream_failure_activates_kill_but_never_flattens_while_state_is_unverified) ... ok\ntest_only_known_integrity_errors_are_handled_as_local_hold (tests.test_v52_upstream_fail_closed.V52UpstreamFailClosedTests.test_only_known_integrity_errors_are_handled_as_local_hold) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.063s\n\nOK\n",
+      "sourceSha256": "b07cafc1bc97ff6b8c77627aaed52bf928de4ae0b04f3702d980dabd2f269fc8"
+    },
+    {
+      "name": "tests/test_v52_reference_transient.py",
+      "exit": 0,
+      "tail": "test_local_reference_stale_and_unavailable_are_transient_for_every_v52_symbol (tests.test_v52_reference_transient.V52ReferenceTransientTests.test_local_reference_stale_and_unavailable_are_transient_for_every_v52_symbol) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+      "sourceSha256": "017af292f371aeddc5509ee7d226ef6727b2b8c91beb2bb792d91c5d82fe928d"
+    }
+  ],
+  "allPass": true,
+  "limitations": "All tests use local test doubles and/or AST inspections, not a multi-day synthetic stock session generator or live signed broker/venue state; no orders or credentials used"
+}

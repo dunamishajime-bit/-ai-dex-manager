@@ -15,6 +15,36 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
             self.assertFalse((out/".disdex-release-sha").exists())
             self.assertIs(evidence["productionRelease"],False)
 
+    def test_exact_candidate_keeps_r21_and_current_engine_bytes(self):
+        repo=Path(__file__).parents[1]
+        sha=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
+        with tempfile.TemporaryDirectory() as td:
+            out=Path(td)/"candidate"
+            evidence=m.build_exact_candidate(repo,out,sha)
+            self.assertEqual(evidence["sourceArchiveSha"],sha)
+            self.assertIs(evidence["productionRelease"],False)
+            self.assertFalse((out/".disdex-release-sha").exists())
+            for rel in ("lib/v12-v4-adopted-r21.ts","lib/v12-v4-runner-engine.ts"):
+                expected=subprocess.check_output(["git","show",sha+":"+rel],cwd=repo)
+                self.assertEqual((out/rel).read_bytes(),expected)
+
+    def test_exact_candidate_rejects_overlay_conflict(self):
+        repo=Path(__file__).parents[1]
+        def fake_archive(repo, out, sha):
+            overlay=out/"deploy/v4-staged-overlay"
+            overlay.mkdir(parents=True)
+            (overlay/"test.src").write_text("new")
+            (out/"target.ts").write_text("different")
+            (overlay/"manifest.json").write_text(json.dumps({
+                "schema":"disdex-v4-staged-overlay/v1","baseSha":m.BASE_SHA,
+                "files":[{"source":"test.src","target":"target.ts"}]}))
+        with tempfile.TemporaryDirectory() as td:
+            out=Path(td)/"candidate"
+            with patch.object(m,"archive_commit",side_effect=fake_archive):
+                with self.assertRaisesRegex(ValueError,"V4_OVERLAY_TRACKED_SOURCE_CONFLICT"):
+                    m.build_exact_candidate(repo,out,"a"*40)
+            self.assertEqual((out/"target.ts").read_text(),"different")
+
     def test_existing_output_directory_is_never_deleted(self):
         repo=Path(__file__).parents[1]
         with tempfile.TemporaryDirectory() as td:

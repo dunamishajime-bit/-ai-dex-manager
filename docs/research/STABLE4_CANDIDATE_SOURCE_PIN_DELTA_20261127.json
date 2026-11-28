@@ -1,0 +1,43 @@
+{
+  "status": "REVIEW_ONLY_NO_ORDER_AUTHORITY",
+  "base": "e770a4179d329f04bcfb668bcde3eea462955121",
+  "candidateBeforeThisWork": "21d1ef9ac29cfc2e548a5d15b32fc73e2e97f664",
+  "historicalManifest": "docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json",
+  "manifestSHA256": "4609dec4085f03b3be28d9fd69ff8f76e7bfad2766f49dc3a8e3f03f1566ec1e",
+  "changes": [
+    {
+      "path": "lib/aster-v3-client.ts",
+      "approvedHistoricalManifestDigest": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+      "candidateDigest": "3d1ac92985c99f7a78963a1897a118dff31fffa0f4504b3339c3292ef47dbeb8",
+      "masterMatchesHistorical": true
+    },
+    {
+      "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+      "approvedHistoricalManifestDigest": "60a0322431b2399a5529f7be1e79878514387d69be680b45f6933ab69121e62a",
+      "candidateDigest": "ea95ad0cc86c3aa592c3b6b16d0d45106a0170f31a7b7c8008e2fa411f9be546",
+      "masterMatchesHistorical": true
+    },
+    {
+      "path": "lib/v12-v4-runner-engine.ts",
+      "approvedHistoricalManifestDigest": "4ae0423f0df8c3ff0823ae7698aeb9de16bb0bab09ccdf241bdc527d3810e04f",
+      "candidateDigest": "a0bff768c5782ceda4f5e44e80b27e143db75b8ba2ef2e6ee96e982a76061e0b",
+      "masterMatchesHistorical": true
+    },
+    {
+      "path": "lib/v12-v4-shared-reservations.ts",
+      "approvedHistoricalManifestDigest": "20d2856af6cbe952cb85ef41c67feb3d916248de3d367245db9e1dc8767d0711",
+      "candidateDigest": "834e74aa42d09d8f09bbcd7e8a53224dbde2e9cf36ffe91fe8ab0ebb10bc1958",
+      "masterMatchesHistorical": true
+    }
+  ],
+  "liveOrderAuthority": false,
+  "ownerApprovalVerified": false,
+  "productionInstalled": false,
+  "limitations": "Historical manifest remains unchanged; this is a diff audit, not replacement release authority.",
+  "Y06_R21_RISK_HEADROOM_RESULTS_20261127.json": {
+    "sha256": "5abb14f0736fc3f99f8a88aaf680a7b4c9a4f95d956eeafc7cf2c811e0dbf8e4"
+  },
+  "y06_r21_risk_headroom_20261127.py": {
+    "sha256": "1692beb87de4d67578e4ca47af86845637c04fb29154c6053a4c76b4535ba232"
+  }
+}

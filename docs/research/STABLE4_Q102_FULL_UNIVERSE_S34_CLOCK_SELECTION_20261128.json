@@ -1,0 +1,1193 @@
+{
+  "schema": "stable4-q102-full-universe-s34-clock-selection/v1",
+  "status": "PARTIAL_NATIVE_SELECTOR_ALL_READY_S34_CANDIDATE_CLOCKS_ONLY",
+  "periodUtc": [
+    "2025-10-01T00:00:00.000Z",
+    "2026-10-01T00:00:00.000Z"
+  ],
+  "sourcePins": {
+    "scripts/ops/root/disdex-current-runtime-wiring": "3f8128436d20fc0fed92698ff9d9f88db9db742ad53dc42589877a8a3b310109",
+    "scripts/disdex-quality102-causal-v1-live-runner.ts": "3fd6839769e2e98ff0321ccd97d7b56067f0db9616e0c2cacd5c692c9d0981fb",
+    "lib/disdex-quality102-causal-v1-market-data.ts": "b7b6af93a39222b8cf635e478cc89113d0001d00b1d25b2cf6737343d4341333",
+    "config/disdexQuality102CausalV4Model.ts": "4f2b3d6ad2b7fc4a6f4278cfffdfc0007a85e65afe8a03a0978187593bc23c50",
+    "lib/disdex-quality102-causal-v4-signal.ts": "05c86a2f5f617854555eca4f9952ce4a1844b821a52d419ced780c1c6914e0c1",
+    "lib/disdex-quality102-causal-v1-signal.ts": "340139275f8ba4637eb3f9d8081118e23c027c8cbfec7b64c8889b9c012d33e5",
+    "lib/disdex-quality102-causal-v4-s34.ts": "d549f1db65c2714854d9c9018258c43d1afc3bcbeeda9979d35aaf06c825b741",
+    "lib/disdex-quality102-causal-pipeline.ts": "60506624475511abfca2941f267c81d32c112c9d8bd6345995abc30cfa26aa81",
+    "lib/disdex-quality102-causal-selector.ts": "6bdd82f6230d54a1c40f58d13b2719db60bda6369135da417c04563efc4fab24",
+    "docs/research/STABLE4_Q102_36MAIN_31EARLY_ASTERV3_H1_SOURCE_READINESS_20261128.json": "abfb9b38fc6df8656cd62c35396c04541b4d00dec676cc2f30b2c842842fc16d",
+    "docs/research/STABLE4_Q102_ASTER_H1_181D_ARCHIVE_SOURCE_INTEGRITY_20261128.json": "71750d1ec9700f4a59e701162f7e2a19a50457c8fd39a8258cd570804f428d85",
+    "docs/research/STABLE4_Q102_S34_ANNUAL_SOURCE_INVENTORY_20261128.json": "04209f9c8e49d8fcb781f6aa2afa7a16952dd9a3f2e876866ee1fa40bf73eeac",
+    "scripts/stable4-q102-full-universe-s34-clock-selection.ts": "765f991a895c663c5a0d3c6b39992f853cf01e05055509f78d8de759bf177eaf"
+  },
+  "highVol": [
+    "APTUSDT",
+    "ARBUSDT",
+    "ENAUSDT",
+    "FILUSDT",
+    "ONDOUSDT",
+    "OPUSDT",
+    "SEIUSDT",
+    "SUIUSDT",
+    "TRXUSDT"
+  ],
+  "symbols": [
+    "AAVEUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "AVAXUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "ENAUSDT",
+    "FETUSDT",
+    "FILUSDT",
+    "LDOUSDT",
+    "NEARUSDT",
+    "ONDOUSDT",
+    "OPUSDT",
+    "RENDERUSDT",
+    "SEIUSDT",
+    "SOLUSDT",
+    "SUIUSDT",
+    "TRXUSDT",
+    "UNIUSDT"
+  ],
+  "historyHours": 5400,
+  "files": [
+    {
+      "symbol": "AAVEUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "AAVEUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "AAVEUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d"
+    },
+    {
+      "symbol": "APTUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "APTUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "38380069cdfcd467516ce1579a2221f76ecee8515d7a58744701d99a28f09cfc"
+    },
+    {
+      "symbol": "ARBUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "ARBUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "dd446b5f461ba133e6e326f9af0da745ebd86e7705f71d9dd74fd5f2f050ea73"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "AVAXUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "AVAXUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "BTCUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "DOGEUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "DOGEUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "DOTUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "54a82232a2aee09cfee9f27f6ff5d572f3888ee53b939b1440354c5394f87695"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "DOTUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "50f7ae4847cab6914125ed0bb12961d4a77b4b29554ab78dfe00e34e2e443d4e"
+    },
+    {
+      "symbol": "ENAUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "ENAUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "755639e19659250b6293a85a917248fec79f254e2bad87c835d3eff53dc29fa3"
+    },
+    {
+      "symbol": "FETUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "FETUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "26d4ed70c9e887e655505b8824fe791effc1e9c566318bbed464d0f438eba477"
+    },
+    {
+      "symbol": "FILUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "FILUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "5a0f23003dd43d2601090c9c0b383f33cc787f7b1330d882efbdb391a1a2903e"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "LDOUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "b42d032b44a0a2bd6a0c790ed5451e9c796a793c0355e5f39b1e8b699dda6e58"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "LDOUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "40b3b6be0d5e10a324511aa86905f130c7e5c5c018adec369ef4ab6203ba55a0"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "NEARUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "NEARUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "ONDOUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "1d8c5ca42f471deb803429ca13210da0ea81881b01600f62d63e8e0a970e963c"
+    },
+    {
+      "symbol": "OPUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "OPUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "7b9dbd39aabed32c590389e9bcc43e019a44d7267a7a7768bf060fc8f5847239"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "RENDERUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "cca4f2ba2c98dfdfded02b5a12e20953ee65e4456ad01a21680d43c1478e2e02"
+    },
+    {
+      "symbol": "SEIUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "SEIUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "d498d40d05d0472ef8a4b680940dc145c9ff87f46d1f4eb3b30e4ab85fa6a46e"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "SOLUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "SOLUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "SUIUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "d674f88c0b39070a9068342e3a3b06ae4daf5bdf6959c14a3f15ef559a58621c"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "folder": "aster-public-v3-h1-q102-warmup",
+      "file": "TRXUSDT-1h-20250301-20261001.jsonl.gz",
+      "sha256": "1489b0f8e5d9e0031fb4fa1223cb9279a42684c142896e78f8a2581b893c8e59"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "folder": "aster-public-v3-h1-early",
+      "file": "UNIUSDT-1h-20250301-20250924.jsonl.gz",
+      "sha256": "3e648cf67ccac47d547820d439dd33f0a75e3010668c0ff68380a6b5c8828462"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "folder": "aster-public-v3-h1",
+      "file": "UNIUSDT-1h-20250924-20261001.jsonl.gz",
+      "sha256": "017d940ed8f61e662f9edcf60721d961b19b444d0f1d35d75fb7a879cb181d4e"
+    }
+  ],
+  "totalClocks": 8760,
+  "readyClocks": 942,
+  "blockedClocks": 7818,
+  "firstReadyUtc": "2026-08-22T18:00:00.000Z",
+  "lastReadyUtc": "2026-09-30T23:00:00.000Z",
+  "missingCounts": {
+    "AAVEUSDT": 264,
+    "APTUSDT": 264,
+    "ARBUSDT": 264,
+    "AVAXUSDT": 264,
+    "BTCUSDT": 4982,
+    "DOGEUSDT": 264,
+    "DOTUSDT": 264,
+    "ENAUSDT": 2365,
+    "FETUSDT": 7818,
+    "FILUSDT": 6303,
+    "LDOUSDT": 7818,
+    "NEARUSDT": 264,
+    "ONDOUSDT": 264,
+    "OPUSDT": 264,
+    "RENDERUSDT": 7741,
+    "SEIUSDT": 264,
+    "SOLUSDT": 264,
+    "SUIUSDT": 264,
+    "TRXUSDT": 264,
+    "UNIUSDT": 264
+  },
+  "byMonth": {
+    "2025-10": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2025-11": {
+      "ready": 0,
+      "blocked": 720
+    },
+    "2025-12": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2026-01": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2026-02": {
+      "ready": 0,
+      "blocked": 672
+    },
+    "2026-03": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2026-04": {
+      "ready": 0,
+      "blocked": 720
+    },
+    "2026-05": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2026-06": {
+      "ready": 0,
+      "blocked": 720
+    },
+    "2026-07": {
+      "ready": 0,
+      "blocked": 744
+    },
+    "2026-08": {
+      "ready": 222,
+      "blocked": 522
+    },
+    "2026-09": {
+      "ready": 720,
+      "blocked": 0
+    }
+  },
+  "eligibleCandidateClocks": 52,
+  "observations": [
+    {
+      "decisionTs": 1787446800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787446800000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787443200000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787461200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787461200000,
+        "side": 1,
+        "symbol": "AVAXUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.04_H24",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1787457600000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787504400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787504400000,
+        "side": -1,
+        "symbol": "UNIUSDT",
+        "family": "MR",
+        "variant": "MR48_Z1.5_H24",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1787500800000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787518800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787518800000,
+        "side": -1,
+        "symbol": "UNIUSDT",
+        "family": "MR",
+        "variant": "MR48_Z1.5_H24",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1787515200000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787691600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787691600000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787688000000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787706000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787706000000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787702400000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787720400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787720400000,
+        "side": 1,
+        "symbol": "AVAXUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.04_H24",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1787716800000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787734800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787734800000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787731200000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787763600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787763600000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787760000000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787821200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787821200000,
+        "side": -1,
+        "symbol": "AVAXUSDT",
+        "family": "MR",
+        "variant": "MR24_Z1.5_H24",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1787817600000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787936400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787936400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787932800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787950800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787950800000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787947200000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787965200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787965200000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787961600000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787979600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787979600000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787976000000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1787994000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1787994000000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1787990400000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788008400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788008400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1788004800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788138000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788138000000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1788134400000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788152400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788152400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1788148800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788224400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788224400000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "BRK",
+        "variant": "BRK24_H48_V1.2",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788220800000,
+        "hardStop": 0.08,
+        "maxHoldHours": 48,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788238800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788238800000,
+        "side": -1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2.5,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788235200000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788411600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788411600000,
+        "side": -1,
+        "symbol": "AVAXUSDT",
+        "family": "MR",
+        "variant": "MR24_Z1.5_H24",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788408000000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788440400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788440400000,
+        "side": -1,
+        "symbol": "DOGEUSDT",
+        "family": "MR",
+        "variant": "MR48_Z2.0_H12",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788436800000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788469200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788469200000,
+        "side": -1,
+        "symbol": "DOGEUSDT",
+        "family": "MR",
+        "variant": "MR48_Z2.0_H12",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788465600000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788584400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788584400000,
+        "side": -1,
+        "symbol": "FETUSDT",
+        "family": "REV",
+        "variant": "REV12_T0.05_H12",
+        "layer": "S3",
+        "requestedGross": 1.25,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788580800000,
+        "hardStop": 0.045,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788901200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788901200000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788897600000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788915600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788915600000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788912000000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788930000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788930000000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788926400000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788973200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788973200000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788969600000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1788987600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1788987600000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788984000000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789002000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789002000000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1788998400000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789117200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789117200000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789113600000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789160400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789160400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789156800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789174800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789174800000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789171200000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789347600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789347600000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789344000000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789650000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789650000000,
+        "side": -1,
+        "symbol": "UNIUSDT",
+        "family": "MR",
+        "variant": "MR72_Z1.5_H24",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1789646400000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789722000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789722000000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "BRK",
+        "variant": "BRK24_H48_V1.2",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1789718400000,
+        "hardStop": 0.08,
+        "maxHoldHours": 48,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789779600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789779600000,
+        "side": -1,
+        "symbol": "AVAXUSDT",
+        "family": "MR",
+        "variant": "MR24_Z1.5_H24",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1789776000000,
+        "hardStop": 0.07,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789808400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789808400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789804800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789880400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789880400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1789876800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1789981200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1789981200000,
+        "side": 1,
+        "symbol": "RENDERUSDT",
+        "family": "BRK",
+        "variant": "BRK168_H12_V1.2",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1789977600000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790024400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790024400000,
+        "side": 1,
+        "symbol": "RENDERUSDT",
+        "family": "BRK",
+        "variant": "BRK168_H12_V1.2",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790020800000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790038800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790038800000,
+        "side": -1,
+        "symbol": "DOGEUSDT",
+        "family": "MR",
+        "variant": "MR72_Z1.5_H12",
+        "layer": "S4",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790035200000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790053200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790053200000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1790049600000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790067600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790067600000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "BRK",
+        "variant": "BRK24_H48_V1.2",
+        "layer": "S3",
+        "requestedGross": 0.75,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790064000000,
+        "hardStop": 0.08,
+        "maxHoldHours": 48,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790154000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790154000000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790150400000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790168400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790168400000,
+        "side": 1,
+        "symbol": "FETUSDT",
+        "family": "PB",
+        "variant": "PB168_0.1_P24_0.02_H12",
+        "layer": "S3",
+        "requestedGross": 2,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790164800000,
+        "hardStop": 0.05,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790182800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790182800000,
+        "side": 1,
+        "symbol": "AVAXUSDT",
+        "family": "REV",
+        "variant": "REV12_T0.03_H12",
+        "layer": "S3",
+        "requestedGross": 1.5,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790179200000,
+        "hardStop": 0.045,
+        "maxHoldHours": 12,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790197200000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790197200000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1790193600000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790211600000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790211600000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1790208000000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790226000000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790226000000,
+        "side": 1,
+        "symbol": "APTUSDT",
+        "family": "REV",
+        "variant": "REV24_T0.05_H24",
+        "layer": "S3",
+        "requestedGross": 1.5,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790222400000,
+        "hardStop": 0.06,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790240400000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790240400000,
+        "side": 0,
+        "requestedGross": 0,
+        "reason": "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+        "dataCutoffTs": 1790236800000,
+        "brkEnabled": true
+      }
+    },
+    {
+      "decisionTs": 1790254800000,
+      "candidateClock": true,
+      "signal": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "referenceTs": 1790254800000,
+        "side": 1,
+        "symbol": "APTUSDT",
+        "family": "REV",
+        "variant": "REV24_T0.05_H24",
+        "layer": "S3",
+        "requestedGross": 1.5,
+        "reason": "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
+        "dataCutoffTs": 1790251200000,
+        "hardStop": 0.06,
+        "maxHoldHours": 24,
+        "exitPolicy": "FIXED_HOLD_STOP",
+        "brkEnabled": true
+      }
+    }
+  ],
+  "orderAuthority": false,
+  "fullQ102AnnualReplay": false,
+  "limitations": [
+    "Configured monitor/root source universe and default history, not attested effective LIVE environment",
+    "Separate archive-source arm: pinned whole Q102 warmup archives for its ten symbols, early/main pair for remaining symbols. No intra-symbol stitching to repair conflicting records; no cross-venue substitution. 225d closed history and current hour open only",
+    "All ready S34 candidate clocks from prior inventory; full CAUSAL_V4 selector with all sleeves assumed idle. Other clocks (including standalone HIGH_VOL) not tested. No real occupancy, execution or exit replay"
+  ]
+}

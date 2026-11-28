@@ -1,0 +1,151 @@
+{
+  "automaticH1RepairApplied": false,
+  "h1HighLessThanOpen": true,
+  "h1Recorded": {
+    "close": 115707.3,
+    "high": 115916.1,
+    "low": 115580.7,
+    "open": 115941.8,
+    "volume": 285.98
+  },
+  "invalidM5Indices": [
+    10
+  ],
+  "limitations": [
+    "Source archive path suggests ASTER but cannot independently certify signed venue origin",
+    "13:50 M5 high is below its own open; aggregate M5 is NOT a certified corrected H1",
+    "No Binance-to-ASTER substitutions or arithmetic repair applied",
+    "This specific hour remains ineligible for native Q102 causal input without a verified source correction"
+  ],
+  "m5Aggregate": {
+    "close": 115707.3,
+    "high": 115947.5,
+    "low": 115580.7,
+    "open": 115941.8,
+    "volume": 285.98
+  },
+  "m5HighExceedsH1High": true,
+  "m5Rows": [
+    {
+      "close": 115900.1,
+      "high": 115947.5,
+      "low": 115900.1,
+      "ohlcValid": true,
+      "open": 115941.8,
+      "openTimeMs": 1757768400000,
+      "volume": 20.972
+    },
+    {
+      "close": 115860.3,
+      "high": 115900.1,
+      "low": 115860.3,
+      "ohlcValid": true,
+      "open": 115900,
+      "openTimeMs": 1757768700000,
+      "volume": 16.286
+    },
+    {
+      "close": 115860.3,
+      "high": 115862.1,
+      "low": 115854.7,
+      "ohlcValid": true,
+      "open": 115862.1,
+      "openTimeMs": 1757769000000,
+      "volume": 24.968
+    },
+    {
+      "close": 115853,
+      "high": 115860.3,
+      "low": 115838.3,
+      "ohlcValid": true,
+      "open": 115860.3,
+      "openTimeMs": 1757769300000,
+      "volume": 27.735
+    },
+    {
+      "close": 115860.3,
+      "high": 115860.4,
+      "low": 115858.2,
+      "ohlcValid": true,
+      "open": 115858.9,
+      "openTimeMs": 1757769600000,
+      "volume": 18.578
+    },
+    {
+      "close": 115916.1,
+      "high": 115916.1,
+      "low": 115860.6,
+      "ohlcValid": true,
+      "open": 115860.6,
+      "openTimeMs": 1757769900000,
+      "volume": 25.076
+    },
+    {
+      "close": 115854.2,
+      "high": 115916.1,
+      "low": 115854.2,
+      "ohlcValid": true,
+      "open": 115916.1,
+      "openTimeMs": 1757770200000,
+      "volume": 11.406
+    },
+    {
+      "close": 115846.2,
+      "high": 115854.3,
+      "low": 115846.2,
+      "ohlcValid": true,
+      "open": 115854.2,
+      "openTimeMs": 1757770500000,
+      "volume": 18.416
+    },
+    {
+      "close": 115800,
+      "high": 115838.1,
+      "low": 115800,
+      "ohlcValid": true,
+      "open": 115838,
+      "openTimeMs": 1757770800000,
+      "volume": 25.309
+    },
+    {
+      "close": 115777,
+      "high": 115800,
+      "low": 115777,
+      "ohlcValid": true,
+      "open": 115800,
+      "openTimeMs": 1757771100000,
+      "volume": 28.337
+    },
+    {
+      "close": 115693.4,
+      "high": 115774.3,
+      "low": 115580.7,
+      "ohlcValid": false,
+      "open": 115777,
+      "openTimeMs": 1757771400000,
+      "volume": 37.653
+    },
+    {
+      "close": 115707.3,
+      "high": 115720,
+      "low": 115688.9,
+      "ohlcValid": true,
+      "open": 115693.4,
+      "openTimeMs": 1757771700000,
+      "volume": 31.244
+    }
+  ],
+  "m5RowsObserved": 12,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-q102-btc-aster-named-m5-aggregation-crosscheck/v1",
+  "source": {
+    "file": "PREPERIOD_TRAIN_20250322_20251001/aster-m5/BTCUSDT-5m-20250322-20251001.jsonl.gz",
+    "label": "ASTER-named preperiod public M5 archive; signed venue provenance NOT verified",
+    "sha256": "59aa88e6bc1943945167aebca3c01b67f50d86810731b07b2df44a707607b589"
+  },
+  "status": "BLOCKED_H1_AGGREGATION_MISMATCH_WITH_CORRUPT_M5_BAR",
+  "timestampUtc": "2025-09-13T13:00:00Z",
+  "venueExecutionCertified": false
+}

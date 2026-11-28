@@ -1,0 +1,83 @@
+{
+  "schema": "stable4-q102-btc-181d-aster-archive-h1-vs-m5-timeframe-parity/v1",
+  "status": "BLOCKED_SOURCE_PRICE_PARITY_UNVERIFIED",
+  "windowUtc": [
+    "2025-04-03T00:00:00Z",
+    "2025-10-01T00:00:00Z"
+  ],
+  "h1Source": {
+    "path": "aster-public-v3-h1-q102-warmup/BTCUSDT-1h-20250301-20261001.jsonl.gz",
+    "sha256": "d2a29b0142c096ebe2de1cf02010fc25464f7a8a00bccabe3a119a9400ff2ba0"
+  },
+  "m5Source": {
+    "path": "PREPERIOD_TRAIN_20250322_20251001/aster-m5/BTCUSDT-5m-20250322-20251001.jsonl.gz",
+    "sha256": "59aa88e6bc1943945167aebca3c01b67f50d86810731b07b2df44a707607b589"
+  },
+  "compareMethod": "For each of 4,344 UTC H1 hours exactly match 12 contiguous 5m bars; compare H1 open/high/low/close/volume to M5 first-open/max-high/min-low/last-close/sum-volume with absolute relative tolerance 1e-5 * max(1,abs(x),abs(y)). Distinct source aggregation rules may legitimately differ; no interpolation or substitution.",
+  "expectedHours": 4344,
+  "hoursCompared": 4344,
+  "missingPairedHours": 0,
+  "mismatchHours": 85,
+  "mismatchedFields": {
+    "open": 84,
+    "high": 17,
+    "low": 18,
+    "close": 0,
+    "volume": 0
+  },
+  "invalidH1Bars": 1,
+  "invalidM5Bars": 1,
+  "monthly": {
+    "2025-04": {
+      "paired": 672,
+      "different": 51
+    },
+    "2025-05": {
+      "paired": 744,
+      "different": 0
+    },
+    "2025-06": {
+      "paired": 720,
+      "different": 1
+    },
+    "2025-07": {
+      "paired": 744,
+      "different": 13
+    },
+    "2025-08": {
+      "paired": 744,
+      "different": 17
+    },
+    "2025-09": {
+      "paired": 720,
+      "different": 3
+    }
+  },
+  "knownInvalidHourUtc": "2025-09-13T13:00:00Z",
+  "limitations": [
+    "Comparing two ASTER-named local archives does not prove their actual venue provenance or shared aggregation specification",
+    "Many H1 vs M5 discrepancies can reflect distinct feed construction, especially sparse H1 opening trades, not necessarily invalid individual OHLC",
+    "Exactly one H1 and one M5 candle are internally invalid in this window; no cross-venue or arithmetic repair allowed",
+    "Cannot infer orders, fills, venue liquidity, funding, STOP, portfolio Gross, DD, or full Q102 native strategy parity",
+    "84 price discrepancies are associated with zero-volume first 5m candles; they are NOT automatically malformed H1 candles or reason to reject the entire 181-day H1 signal history",
+    "Do not use zero-volume M5 candle open as an executable fill or automatically correct H1 from these 5m bars"
+  ],
+  "sameVenueByteAuthenticated": false,
+  "uniformCrossTimeframeSemanticsProven": false,
+  "autoRepairApplied": false,
+  "nativeQ102ProductionParityProven": false,
+  "executionPriceCertified": false,
+  "rootCertificateIssued": false,
+  "orderAuthority": false,
+  "productionEligible": false,
+  "mismatchSegmentation": {
+    "firstM5ZeroVolumeHours": 86,
+    "h1M5OpenDifferencesWithFirstM5Zero": 84,
+    "anyOHLCMismatchWithFirstM5Zero": 84,
+    "anyOHLCMismatchWithFirstM5Positive": 1,
+    "highDifferencesWithinFirstM5ZeroHours": 16,
+    "lowDifferencesWithinFirstM5ZeroHours": 18,
+    "onlyMismatchWithFirstM5PositiveUtc": "2025-09-13T13:00:00Z",
+    "interpretation": "84/85 H1-M5 OHLC mismatches coincide with the first M5 candle having ZERO volume, and all 84 opening-price mismatches do. This supports a sparse no-trade candle opening convention difference, but exact vendor source semantics remain unverified. The remaining 1 is the internally invalid 2025-09-13 H1/M5 source hour."
+  }
+}

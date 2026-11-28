@@ -1,0 +1,522 @@
+{
+  "limitations": [
+    "Historical publisher received_time is NOT the exact native live Aster/XYZ websocket receipt clock. At 1-second grid, recent RECEIVED timestamp is a necessary observation, not a valid 20-level book or executable quote.",
+    "V13D uses a strict 1,500 ms source-book age gate; crossed quotes, missing-book clears, unknown sequence resets, maker queue, reference freshness and hedge flow are NOT replayed.",
+    "One public AMZN paired NY market-hour sample only. The 2025-10 to 2026-10 complete 5-symbol pair does not exist in this evidence. No venue fills, account Gross/DD or OWNER release certification."
+  ],
+  "longestConsecutiveBothStaleSeconds": 262,
+  "minuteBuckets": [
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 59,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 17
+      },
+      "utcMinute": 0
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 1
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 2
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 3
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 18
+      },
+      "utcMinute": 4
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 5
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 18
+      },
+      "utcMinute": 6
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 7
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 8
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 9
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 10
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 3,
+        "HYPERLIQUID_XYZ": 0,
+        "both": 0
+      },
+      "utcMinute": 11
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 0,
+        "HYPERLIQUID_XYZ": 0,
+        "both": 0
+      },
+      "utcMinute": 12
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 0,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 0
+      },
+      "utcMinute": 13
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 0,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 0
+      },
+      "utcMinute": 14
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 39,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 10
+      },
+      "utcMinute": 15
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 16
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 15,
+        "both": 15
+      },
+      "utcMinute": 17
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 18
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 15,
+        "both": 15
+      },
+      "utcMinute": 19
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 50,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 15
+      },
+      "utcMinute": 20
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 18
+      },
+      "utcMinute": 21
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 22
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 48,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 14
+      },
+      "utcMinute": 23
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 24
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 51,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 14
+      },
+      "utcMinute": 25
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 15,
+        "both": 15
+      },
+      "utcMinute": 26
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 52,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 15
+      },
+      "utcMinute": 27
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 56,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 28
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 29
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 51,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 15
+      },
+      "utcMinute": 30
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 31
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 52,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 14
+      },
+      "utcMinute": 32
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 33
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 14,
+        "both": 14
+      },
+      "utcMinute": 34
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 35
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 36
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 19,
+        "both": 17
+      },
+      "utcMinute": 37
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 38
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 16
+      },
+      "utcMinute": 39
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 40
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 41
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 54,
+        "HYPERLIQUID_XYZ": 19,
+        "both": 17
+      },
+      "utcMinute": 42
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 14,
+        "both": 14
+      },
+      "utcMinute": 43
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 44
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 16
+      },
+      "utcMinute": 45
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 19,
+        "both": 19
+      },
+      "utcMinute": 46
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 51,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 47
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 48
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 53,
+        "HYPERLIQUID_XYZ": 20,
+        "both": 18
+      },
+      "utcMinute": 49
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 50
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 54,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 16
+      },
+      "utcMinute": 51
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 52
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 15,
+        "both": 15
+      },
+      "utcMinute": 53
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 15,
+        "both": 15
+      },
+      "utcMinute": 54
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 51,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 15
+      },
+      "utcMinute": 55
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 17,
+        "both": 17
+      },
+      "utcMinute": 56
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 55,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 15
+      },
+      "utcMinute": 57
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 60,
+        "HYPERLIQUID_XYZ": 18,
+        "both": 18
+      },
+      "utcMinute": 58
+    },
+    {
+      "sourceClockFreshOneSecondTicks": {
+        "ASTER": 55,
+        "HYPERLIQUID_XYZ": 16,
+        "both": 14
+      },
+      "utcMinute": 59
+    }
+  ],
+  "nativeSourcePolicyMaxBookAgeMs": 1500,
+  "nativeStockEngineSha256": "e1c6f16b5deb514fa636c44a859294fec8ee8f81e0dac3ef405cd55a3056a9d8",
+  "nativeV52EntryReplayProven": false,
+  "orderAuthority": false,
+  "pairSampleSha256": "59cd3a3008c8a7a465750ae5109767e39418d083487290929b027ec558590860",
+  "productionEligible": false,
+  "realClockAtSourceWindow": {
+    "asterAndXyzSourceTimestampsWithin1500ms": true,
+    "lastPublisherReceivedAgeMs": {
+      "ASTER": 190.050885,
+      "HYPERLIQUID_XYZ": 778.075113
+    },
+    "nativeV52SignalOrFillProven": false,
+    "utcClock": "2026-09-02T16:30:00Z"
+  },
+  "sampleHourUtc": "2026-09-02T16:00:00Z",
+  "sampledEverySeconds": 1,
+  "sampledSeconds": 3600,
+  "schema": "stable4-v52-paired-public-aster-xyz-l2-source-clock-freshness/v1",
+  "sharedSevenRunnerAnnualBtComplete": false,
+  "sourceAgeWithin1500msPct": {
+    "ASTER": 88.861111,
+    "HYPERLIQUID_XYZ": 26.972222,
+    "both": 24.805556
+  },
+  "sourceAgeWithin1500msSeconds": {
+    "ASTER": 3199,
+    "HYPERLIQUID_XYZ": 971,
+    "both": 893
+  },
+  "status": "PARTIAL_ONEHOUR_SOURCE_CLOCK_FRESHNESS_NECESSARY_ONLY",
+  "twoVenueL2SnapshotReplayProven": false
+}

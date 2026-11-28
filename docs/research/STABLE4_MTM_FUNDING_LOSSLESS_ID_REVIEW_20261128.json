@@ -1,0 +1,30 @@
+{
+  "formalCertificateIssued": false,
+  "initialBatch": {
+    "cause": "Not classified by original diagnostic; no full batch file issued",
+    "status": "BLOCKED"
+  },
+  "limitations": [
+    "Review-only parser; production Aster client unchanged",
+    "All remaining windows require exact-wire recapture",
+    "Funding owner lineage and rebate classification remain unresolved",
+    "No complete MTM observation or order authorization"
+  ],
+  "orderAuthority": false,
+  "realWindow": {
+    "allExactStringIds": true,
+    "fromUtc": "2026-09-20",
+    "index": 1,
+    "previousNonIdFieldsMatch": true,
+    "rows": 17,
+    "savedPrivatelyOnVps": true,
+    "throughUtc": "2026-09-26"
+  },
+  "remainingFundingRows": 128,
+  "schema": "stable4-mtm-funding-lossless-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "3bdb0129a7cf3144fe09d6514694b3acf5704f3c",
+  "status": "LOSSLESS_PARSER_TESTED_AND_ONE_REAL_WINDOW_VERIFIED",
+  "testsPassed": 13,
+  "totalPriorFundingRows": 145
+}

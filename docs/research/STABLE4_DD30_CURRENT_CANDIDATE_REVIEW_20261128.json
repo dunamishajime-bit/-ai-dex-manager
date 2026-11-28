@@ -1,0 +1,61 @@
+{
+  "candidateSnapshotRevision": "54a88533e8d64d1082832a54804034a0b57aec37",
+  "changedPaths": [
+    "lib/aster-v3-client.ts",
+    "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+    "lib/v12-v4-runner-engine.ts",
+    "lib/v12-v4-shared-reservations.ts",
+    "lib/v12-v4-venue-exit.ts",
+    "scripts/disdex_v52_aster_only_legacy_engine.py"
+  ],
+  "deltaNotes": {
+    "lib/aster-v3-client.ts": "bounded GET retry and cooldown changes",
+    "lib/pengu-dual-ls-v2-portfolio-runner.ts": "P91 selected candidate qualification; existing position path preserved",
+    "lib/v12-v4-runner-engine.ts": "R21 selected route qualification blocks old certificate",
+    "lib/v12-v4-shared-reservations.ts": "current gross caps",
+    "lib/v12-v4-venue-exit.ts": "R21 actual fill timestamp in exit event",
+    "scripts/disdex_v52_aster_only_legacy_engine.py": "scoped persisted V52 daily-loss flatten intent and confirmed-flat requirement"
+  },
+  "historicalManifest": "docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json",
+  "historicalManifestSha256": "4609dec4085f03b3be28d9fd69ff8f76e7bfad2766f49dc3a8e3f03f1566ec1e",
+  "orderAuthority": false,
+  "ownerApprovalVerified": false,
+  "previousResearchManifest": "docs/research/STABLE4_PROPOSED_SOURCE_INTEGRITY_20261127.json",
+  "previousResearchManifestSha256": "4e68c8c2ddabf9944ca0d21ea82d20e3aa0357ca848f3c183d9aa44ed9c59c81",
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "schema": "stable4-proposed-source-integrity/v1",
+  "scope": "offline source review only; no economic or order authority",
+  "sourceSha256": {
+    ".github/workflows/disdex-owner-goal-candidate-ci.yml": "078c89f635a5a75fd10a234d571fe0c6de47498a85db9bd1ee64f4392efdff2d",
+    "app/api/system/deploy-approval/route.ts": "0ee036a323098a557249201789e7c9b45208978b4a54b0f835a03d6e2ee99191",
+    "config/hypeTrendLongPolicy.ts": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad",
+    "config/integratedProductionRiskPolicy.ts": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+    "config/q102FamilySideGross.json": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+    "config/v12V4AdoptionRiskPolicy.ts": "97ddd1beef1e75f1a38b2f62b436a45b8e59c6b95d0e936f720b854e9260f672",
+    "config/v52V50Runtime.json": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+    "lib/aster-v3-client.ts": "3d1ac92985c99f7a78963a1897a118dff31fffa0f4504b3339c3292ef47dbeb8",
+    "lib/direct-trade-executor.ts": "c4cd45387531a7e315e1bc361e6ddd3f5f38ba341b6c6929069651ec6911aab1",
+    "lib/disdex-quality102-causal-v1-runner.ts": "0df4e331a08fcb187336e13c635685c0a8339193618db22003d7a38bca1375e2",
+    "lib/disdex-v96-live-risk-controls.ts": "00a516fca1b247b57c04507f98f680995d275f24338697cb8c70f21e9686fe47",
+    "lib/disdex-v96-operator-override-audit.ts": "0d889d32e1d8156670c73d514e2886f9708fdf59b4e1ca13d788f92092a8f4dc",
+    "lib/owner-goal-approval.ts": "5806955ec4cd140688357ec4fabfc0caaa7e263df74273d6f3956d320aa61bf4",
+    "lib/pengu-dual-ls-v2-portfolio-runner.ts": "efb790eec6b44be68537e2222c7962a1291c97be32d2de3b16e0db0f72360520",
+    "lib/server/owner-goal-attestation.ts": "f2811a1b341c4e3939f21ea0f48da917ac93b300d60c490e35c7eabf0b4fe300",
+    "lib/v12-v4-runner-engine.ts": "b217deffbb2002f4ed3cf052dd91b06f9e84d1a845e1b400d49ec1f0e83847d0",
+    "lib/v12-v4-shared-reservations.ts": "834e74aa42d09d8f09bbcd7e8a53224dbde2e9cf36ffe91fe8ab0ebb10bc1958",
+    "lib/v12-v4-venue-exit.ts": "1de7150682ea78295edf21b41cec54a39d4ddb77c1b7aa9ff93b6de3647aff08",
+    "scripts/disdex_v12_v52_margin_guard_runtime.py": "606159e0ca28bacab5b221841fb1292ea69ba9dec7a9bfc5836f9fd25458296e",
+    "scripts/disdex_v52_aster_only_legacy_engine.py": "62d108844c999e4bd3579da1cac550a25bb55557727041092e21c8546b3693e5",
+    "scripts/disdex_v96_v52_margin_guard_runtime.py": "3396aa15a0ee9041dc1029d612124e8891fdaa09565e1703e4e2c176a40a5b43",
+    "scripts/ops/deploy/disdex_owner_approval.py": "cdb7c79ee8585f2b8b72976cf507e90fed1afbf37952f43824a174883ae5f58b",
+    "scripts/ops/root/disdex-v4-resident-stop-crosscheck.py": "8ce9bd4a482b45121909ad2d5e267d13440dfe94777eec6376ba58cb3f941c63"
+  },
+  "status": "REVIEW_ONLY_NO_CERTIFICATE",
+  "unresolved": [
+    "formal semantic and operational review of exact current source",
+    "new exact-release owner approval and root certificate",
+    "current-source all-runner annual and artificial parity",
+    "signed account and venue protection readback"
+  ]
+}

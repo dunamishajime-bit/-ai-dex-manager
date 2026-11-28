@@ -1,0 +1,148 @@
+{
+  "schema": "stable4-v52-stock-m5-h1-coverage-audit/v1",
+  "status": "COVERAGE_REVIEW_ONLY",
+  "source": "archived ASTER public market 5m and Yahoo public stock reference H1; no signed quote provenance",
+  "windowUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "perTicker": {
+    "AMZN": {
+      "asterM5": {
+        "file": "AMZNUSDT-5m-20251001-20261001.jsonl.gz",
+        "sha256": "d84d4d5b7da27b155230f593a532bc384a6a485ca86fcf198fc7450709498d53",
+        "rows": 105120,
+        "firstUtc": "2025-10-01T00:00:00+00:00",
+        "lastUtc": "2026-09-30T23:55:00+00:00",
+        "missingBarSlots": 0,
+        "duplicateOrReversed": 0,
+        "invalidOHLC": 0,
+        "zeroVolumeBars": 93555,
+        "zeroVolumeRatio": 0.889983,
+        "completeClockCoverage": true
+      },
+      "yahooH1": {
+        "file": "AMZN-Yahoo-H1-20251001-20261001.json",
+        "sha256": "179c7ebd3a87c027dcc215023c555edbe7d93ac0c4d9521dfc06cfe67bd69bf8",
+        "rows": 1742,
+        "badOHLC": 0,
+        "outsideWindow": 0,
+        "nonascendingTime": 0,
+        "firstUtc": "2025-10-01T13:30:00+00:00",
+        "lastUtc": "2026-09-30T19:30:00+00:00"
+      }
+    },
+    "META": {
+      "asterM5": {
+        "file": "METAUSDT-5m-20251001-20261001.jsonl.gz",
+        "sha256": "54e3f005206caa131511b8cccacc621bb5503d71b19c55aafdecfcbcf40b8368",
+        "rows": 105120,
+        "firstUtc": "2025-10-01T00:00:00+00:00",
+        "lastUtc": "2026-09-30T23:55:00+00:00",
+        "missingBarSlots": 0,
+        "duplicateOrReversed": 0,
+        "invalidOHLC": 0,
+        "zeroVolumeBars": 92058,
+        "zeroVolumeRatio": 0.875742,
+        "completeClockCoverage": true
+      },
+      "yahooH1": {
+        "file": "META-Yahoo-H1-20251001-20261001.json",
+        "sha256": "96e4d944f00f4b0258cdd2f1a2c78bcae1f2724a6e08b3ce373317015305ebbb",
+        "rows": 1742,
+        "badOHLC": 0,
+        "outsideWindow": 0,
+        "nonascendingTime": 0,
+        "firstUtc": "2025-10-01T13:30:00+00:00",
+        "lastUtc": "2026-09-30T19:30:00+00:00"
+      }
+    },
+    "MSFT": {
+      "asterM5": {
+        "file": "MSFTUSDT-5m-20251001-20261001.jsonl.gz",
+        "sha256": "8ef26027389a1b6c6943d63865fb2da05bf0fe5c260ead38bf1cc6cae58b10a6",
+        "rows": 105120,
+        "firstUtc": "2025-10-01T00:00:00+00:00",
+        "lastUtc": "2026-09-30T23:55:00+00:00",
+        "missingBarSlots": 0,
+        "duplicateOrReversed": 0,
+        "invalidOHLC": 0,
+        "zeroVolumeBars": 93555,
+        "zeroVolumeRatio": 0.889983,
+        "completeClockCoverage": true
+      },
+      "yahooH1": {
+        "file": "MSFT-Yahoo-H1-20251001-20261001.json",
+        "sha256": "6c9a5ba76f92c826279ac051f981bd3f5549435abe40eec797c018caccb1924f",
+        "rows": 1742,
+        "badOHLC": 0,
+        "outsideWindow": 0,
+        "nonascendingTime": 0,
+        "firstUtc": "2025-10-01T13:30:00+00:00",
+        "lastUtc": "2026-09-30T19:30:00+00:00"
+      }
+    },
+    "NVDA": {
+      "asterM5": {
+        "file": "NVDAUSDT-5m-20251001-20261001.jsonl.gz",
+        "sha256": "a164a703b13ade1deeaa47cc3744e63eaf8bdf113b13a9a7d479ae7b76f4186d",
+        "rows": 105120,
+        "firstUtc": "2025-10-01T00:00:00+00:00",
+        "lastUtc": "2026-09-30T23:55:00+00:00",
+        "missingBarSlots": 0,
+        "duplicateOrReversed": 0,
+        "invalidOHLC": 0,
+        "zeroVolumeBars": 79547,
+        "zeroVolumeRatio": 0.756726,
+        "completeClockCoverage": true
+      },
+      "yahooH1": {
+        "file": "NVDA-Yahoo-H1-20251001-20261001.json",
+        "sha256": "3f0037c52ab98985262c9eb172d67dfabc73203cec6ec16cdea02bafa7c15989",
+        "rows": 1742,
+        "badOHLC": 0,
+        "outsideWindow": 0,
+        "nonascendingTime": 0,
+        "firstUtc": "2025-10-01T13:30:00+00:00",
+        "lastUtc": "2026-09-30T19:30:00+00:00"
+      }
+    },
+    "TSLA": {
+      "asterM5": {
+        "file": "TSLAUSDT-5m-20251001-20261001.jsonl.gz",
+        "sha256": "ddbf9351faacd2777ab77a7bffe3ceb7f89ee86a7c6266af1902159e740a8e56",
+        "rows": 105120,
+        "firstUtc": "2025-10-01T00:00:00+00:00",
+        "lastUtc": "2026-09-30T23:55:00+00:00",
+        "missingBarSlots": 0,
+        "duplicateOrReversed": 0,
+        "invalidOHLC": 0,
+        "zeroVolumeBars": 75625,
+        "zeroVolumeRatio": 0.719416,
+        "completeClockCoverage": true
+      },
+      "yahooH1": {
+        "file": "TSLA-Yahoo-H1-20251001-20261001.json",
+        "sha256": "f82ec00d598e677e74e7e91f02b853a00466bda33cc6437a0bcd0701205c63c6",
+        "rows": 1742,
+        "badOHLC": 0,
+        "outsideWindow": 0,
+        "nonascendingTime": 0,
+        "firstUtc": "2025-10-01T13:30:00+00:00",
+        "lastUtc": "2026-09-30T19:30:00+00:00"
+      }
+    }
+  },
+  "limitations": [
+    "Data coverage inspection only; V52 native source strategy, stock session and venue quote validity not yet replayed",
+    "M5 zero-volume bars are NOT evidence of executable prices; off-session/holidays must be independently masked",
+    "Yahoo hourly public reference cannot attest signed stock venue quote/fill",
+    "No paired depth, ASTER executable fills, basis/spread/slippage, order cancels, positions, fees, funding or resident STOP"
+  ],
+  "allSevenNativeReplay": false,
+  "sourceFillParityProven": false,
+  "portfolioGrossDdProven": false,
+  "orderAuthority": false,
+  "rootCertificateIssued": false,
+  "productionEligible": false
+}

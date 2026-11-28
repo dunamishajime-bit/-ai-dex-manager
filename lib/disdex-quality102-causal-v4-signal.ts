@@ -1,3 +1,4 @@
+import { evaluateQ102HighVolD126 } from "./disdex-quality102-highvol-d126";
 import { causalReturn, q102ExhaustionReason } from "./dd1296-entry-policy";
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
@@ -104,10 +105,20 @@ export function buildQuality102CausalV4Signal(
         const entryOpen = input.history.entryOpenBySymbol?.[legacy.symbol];
         if (!entryOpen) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_MISSING:${legacy.symbol}`);
         if (entryOpen.timestampMs !== entryTs) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_STALE:${legacy.symbol}`);
+        const d126 = legacy.side === -1
+            ? evaluateQ102HighVolD126(input.history.candlesBySymbol[legacy.symbol] ?? [], entryTs)
+            : undefined;
+        if (d126?.status === "DATA_INVALID") {
+            return idleSignal(legacy, "QUALITY102_HIGH_VOL_D126_DATA_INVALID", entryTs);
+        }
+        const flip = d126?.status === "LONG_OVERRIDE";
         return {
             ...legacy,
             referenceTs: entryTs,
             family: "HIGH_VOL",
+            side: flip ? 1 : legacy.side,
+            reason: flip ? "QUALITY102_HIGH_VOL_D126_CONFIRMED_LONG" : legacy.reason,
+            // Preserve the original SHORT gross for this specific direction override.
             requestedGross: quality102GrossForFamily("HIGH_VOL", legacy.side),
             exitPolicy: "HIGH_VOL_TRAIL72",
             maxHoldHours: 72,

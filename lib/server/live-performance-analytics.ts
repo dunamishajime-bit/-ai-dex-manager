@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
+import { strategyFromClientOrderId } from "@/lib/server/fill-lineage-evidence";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
 export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "HYPE", "V52", "UNATTRIBUTED"] as const;
@@ -212,15 +213,7 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
   const hzSymbol = String(event?.symbol || "").trim().toUpperCase();
   const clientStrategy = clientOrderId.startsWith("hz-") && hzSymbol === "HYPEUSDT"
     ? "HYPE_LONG"
-    : clientOrderId.startsWith("q102v1-")
-    ? "QUALITY102_CAUSAL_V1"
-    : clientOrderId.startsWith("fet-")
-      ? "FET_BRK48_RESIDUAL"
-      : clientOrderId.startsWith("v12-")
-        ? "V12_X1.00_ALL"
-        : clientOrderId.startsWith("dualls2-") || clientOrderId.startsWith("rec-v8-")
-          ? "PENGU_DUAL_LS_V2_FINAL"
-          : "";
+    : strategyFromClientOrderId(clientOrderId) || "";
   const strategyId = clientStrategy || String(event?.strategyId || "").trim();
   const upper = strategyId.toUpperCase();
   const trace = [
@@ -233,6 +226,7 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
     event?.metadata ? JSON.stringify(event.metadata) : "",
   ].filter(Boolean).join(" ").toUpperCase();
 
+  if (upper === "V12_V4") return { logic: "V12", variant: "V4", strategyId };
   if (upper.startsWith("V12")) {
     if (/ALTERNATE|ALT_ROUTE|RESIDUAL|DYNAMIC/.test(trace)) return { logic: "V12", variant: "V12 別ルート / Dynamic Residual", strategyId };
     if (/RANK3/.test(trace)) return { logic: "V12", variant: "V12 Rank3", strategyId };

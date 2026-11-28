@@ -1,0 +1,26 @@
+{
+  "schema": "stable4-fet-model-parity-evidence/v1",
+  "status": "SOURCE_MODEL_PARITY_PASS_NOT_PRODUCTION_CERTIFIED",
+  "sourceSha256": {
+    "lib/stable4-fet-offline-m5-exit.ts": "56acf1025d0f0d258da1cf721728147ec2c66ca4d9265e7a4cb43e2bd8500df4",
+    "scripts/stable4-fet-aster-m5-model-parity.ts": "3a0919593dde67a9f1a9cabab007c6290bda5691591ee5d32ff8258221bfcba0"
+  },
+  "inputSha256": {
+    "prefix": "5da9f44eefb90996aa323b1ce6a4ea656564a956ccc7ce48474156bdc345ed17",
+    "suffix": "87a865c46f59e4cc739a331ca799719f9b8d080a9c0166c647747beb0c17fa09",
+    "tape": "190c204a065d0eaaee3aa02ef9d8b91dab6c3968feede2f2e2d68539f9c6ecc7"
+  },
+  "modelEvidenceSha256": "b7312cb6b4071c64beeb48eaf1a22a8be6980bc8e27616e0a688ae6a9886ac68",
+  "entryMatched": 11,
+  "exitMatched": 11,
+  "stopMatched": 7,
+  "timeExitMatched": 4,
+  "m5Candles": 76110,
+  "limitations": [
+    "Model STOP clock uses confirmed 5m bar-close, not an actual ASTER signed order fill timestamp",
+    "Profit floor, trailing and max-hold from current pure source, original 11 archived modeled exits, not portfolio-admitted fills",
+    "No funding, venue book depth, real order receipt or Owner release certificate"
+  ],
+  "sourceAuthority": false,
+  "productionInstalled": false
+}

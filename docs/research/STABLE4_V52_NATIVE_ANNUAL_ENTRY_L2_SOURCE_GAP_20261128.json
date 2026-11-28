@@ -1,0 +1,105 @@
+{
+  "engineSourceSha256": "e1c6f16b5deb514fa636c44a859294fec8ee8f81e0dac3ef405cd55a3056a9d8",
+  "limitations": [
+    "This is an exact StockEngine source-contract and historical archive scope analysis, not a claim that no data exists in other accounts or providers.",
+    "V13D candidate requires two venue L2 books plus a contemporaneous hedge/adverse-flow gate, and V11EQ uses precise spread/mid history and prior NY session signal; no OHLC-only substitute is source-native.",
+    "Zero-volume ASTER 5m candles remain non-executable evidence. Even positive-volume historical OHLC cannot imply bid/ask depth or executable maker/hedge fills.",
+    "No actual V52 native entry/exit replay, 10/30bps economic outcomes, shared DD, formal certification, production or order authority."
+  ],
+  "nativeEntryReplayComplete": false,
+  "orderAuthority": false,
+  "perTicker": {
+    "AMZN": {
+      "aster5mByteSha256": "d84d4d5b7da27b155230f593a532bc384a6a485ca86fcf198fc7450709498d53",
+      "aster5mRows": 105120,
+      "nativeCurrentBookCoverageProven": false,
+      "nativeVenueFillCoverageProven": false,
+      "regularSessionZeroVolumePct": 61.7153,
+      "yahooH1ByteSha256": "179c7ebd3a87c027dcc215023c555edbe7d93ac0c4d9521dfc06cfe67bd69bf8",
+      "yahooH1Rows": 1742
+    },
+    "META": {
+      "aster5mByteSha256": "54e3f005206caa131511b8cccacc621bb5503d71b19c55aafdecfcbcf40b8368",
+      "aster5mRows": 105120,
+      "nativeCurrentBookCoverageProven": false,
+      "nativeVenueFillCoverageProven": false,
+      "regularSessionZeroVolumePct": 54.9022,
+      "yahooH1ByteSha256": "96e4d944f00f4b0258cdd2f1a2c78bcae1f2724a6e08b3ce373317015305ebbb",
+      "yahooH1Rows": 1742
+    },
+    "MSFT": {
+      "aster5mByteSha256": "8ef26027389a1b6c6943d63865fb2da05bf0fe5c260ead38bf1cc6cae58b10a6",
+      "aster5mRows": 105120,
+      "nativeCurrentBookCoverageProven": false,
+      "nativeVenueFillCoverageProven": false,
+      "regularSessionZeroVolumePct": 59.3084,
+      "yahooH1ByteSha256": "6c9a5ba76f92c826279ac051f981bd3f5549435abe40eec797c018caccb1924f",
+      "yahooH1Rows": 1742
+    },
+    "NVDA": {
+      "aster5mByteSha256": "a164a703b13ade1deeaa47cc3744e63eaf8bdf113b13a9a7d479ae7b76f4186d",
+      "aster5mRows": 105120,
+      "nativeCurrentBookCoverageProven": false,
+      "nativeVenueFillCoverageProven": false,
+      "regularSessionZeroVolumePct": 36.6883,
+      "yahooH1ByteSha256": "3f0037c52ab98985262c9eb172d67dfabc73203cec6ec16cdea02bafa7c15989",
+      "yahooH1Rows": 1742
+    },
+    "TSLA": {
+      "aster5mByteSha256": "ddbf9351faacd2777ab77a7bffe3ceb7f89ee86a7c6266af1902159e740a8e56",
+      "aster5mRows": 105120,
+      "nativeCurrentBookCoverageProven": false,
+      "nativeVenueFillCoverageProven": false,
+      "regularSessionZeroVolumePct": 29.6198,
+      "yahooH1ByteSha256": "f82ec00d598e677e74e7e91f02b853a00466bda33cc6437a0bcd0701205c63c6",
+      "yahooH1Rows": 1742
+    }
+  },
+  "pinnedReceiptSha256": {
+    "m5_yahoo": "dd4aebf5e0140913732d0154baa7c547413aa5606f10816622211c7e9ca5a62a",
+    "session": "6ff0dd1f05f9c5185c5a1b648a35de79afa191c46984a00912094f77f86e64a4"
+  },
+  "productionEligible": false,
+  "providedArchivedClasses": [
+    "ASTER 5-minute OHLCV historical candles",
+    "Yahoo 1-hour underlying OHLCV historical reference"
+  ],
+  "rootCertificateIssued": false,
+  "routeRequirements": {
+    "V11EQ": {
+      "ASTER_2S_MID_HISTORY": "intra-second adverse movement and stale-data gate",
+      "ASTER_30S_SPREAD_HISTORY": "recent observed spread median, not one H1 price",
+      "ASTER_L2_ORDER_BOOK": "mid, spread, depth VWAP and slippage for chosen side",
+      "CONTEMPORANEOUS_REFERENCE_QUOTE": "fresh reference for basis now, not delayed Yahoo H1 candle",
+      "EXECUTION_QUOTE_AND_FILL": "post-only maker and taker fallback quote/order/fill sequence",
+      "PRIOR_NY_SESSION_SIGNAL_SNAPSHOT": "recorded universe top1 daily v11 signal basis from source books and reference"
+    },
+    "V13D": {
+      "ASTER_L2_ORDER_BOOK": "bid/ask and maker-side queue, adverse flow from Aster current depth",
+      "HYPERLIQUID_XYZ_L2_ORDER_BOOK": "bid/ask and hedge-side top notional on XYZ with fresh clock",
+      "MAKER_HEDGE_LIVE_EXECUTION": "maker fill, hedge IOC fill, quantity and resident risk recheck",
+      "SYNCHRONIZED_BOOK_TIME": "native freshness and reference-move checks, not 5m candle time"
+    }
+  },
+  "schema": "stable4-v52-native-entry-required-market-data-gap/v1",
+  "sevenRunnerSharedWalletBtComplete": false,
+  "sourceEngine": "scripts/disdex_v13d_v11eq_stock_live_engine.py",
+  "status": "BLOCKED_NATIVE_ANNUAL_ENTRY_REPLAY_L2_AND_TIME_SYNC_UNAVAILABLE",
+  "studyPeriodUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "symbols": [
+    "AMZN",
+    "META",
+    "MSFT",
+    "NVDA",
+    "TSLA"
+  ],
+  "unavailableInProvidedAnnualArchives": [
+    "historical synchronized ASTER and Hyperliquid XYZ level-2 order books",
+    "native 2s/30s price-spread windows",
+    "contemporaneous exact reference quotes",
+    "signed maker/follower hedge fill and resident STOP lifecycle"
+  ]
+}

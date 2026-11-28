@@ -5,6 +5,7 @@
  */
 import {open,constants} from "node:fs/promises";
 import {resolve} from "node:path";
+import {isAdoptedR21Route} from "./v12-v4-adopted-r21";
 import {productionExitSpec} from "./v12-v4-production-lifecycle";
 import {V12_V4_TIME_EMERGENCY_RESEARCH_ID} from "./v12-v4-time-emergency-stop-research";
 export const V4_TIME_STOP_APPROVAL_DIRECTORY="/etc/disdex/v12-v4-time-stop-approvals";
@@ -52,6 +53,7 @@ export function approvedV4TimeStopQuote(input:{
  route:string;side:"LONG"|"SHORT";signedAverageEntryFill:number;
  approval:V4TimeApproval;
 }):number{
+ if(isAdoptedR21Route(input.route))throw Error("R21_EXACT_NEW_ROUTE_STOP_APPROVAL_REQUIRED");
  if(input.approval.policyId!==V12_V4_TIME_EMERGENCY_RESEARCH_ID||
   input.approval.routeCount!==37||productionExitSpec(input.route).kind!=="TIME"||
   !["LONG","SHORT"].includes(input.side)||

@@ -1,0 +1,106 @@
+{
+  "schema": "stable4-current-source-native-synthetic-reexecution/v1",
+  "status": "REPRODUCED_PARTIAL_NATIVE_RESEARCH_ONLY",
+  "ciRun": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/46020522064",
+  "artifact": "stable4-native-replay-46020522064",
+  "verifiedResearchCi": "SUCCESS",
+  "dateUtc": "2026-11-27",
+  "initialCapitalJPY": 10000,
+  "sourceEvidence": [
+    {
+      "label": "threeSleeve",
+      "source": "scripts/stable4-three-sleeve-native-synthetic.ts",
+      "sourceSha256": "2a9234b659876425249566d36e089d0eaef457f3f096897e97523ee6f1defaf2",
+      "output": "three-sleeve-native-current.json",
+      "outputSha256": "7a64c3516a88f6101077a0bee156f3f940bac1a3f44b4421575ae3f9801082fb",
+      "markets": 12,
+      "accountType": "one_wallet_three_partial_sleeves",
+      "nativeRoutes": [
+        "V4_R21_SUBSET",
+        "IDLE_R26_SUBSET",
+        "FET_BRK48"
+      ]
+    },
+    {
+      "label": "isolatedQ102Hype",
+      "source": "scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts",
+      "sourceSha256": "2388abfb9480905c6a8128bf7a62baa53929d6030a3f0b6ea2dca13aea40e0c3",
+      "output": "q102-hype-native-current.json",
+      "outputSha256": "914f1371e4354641098f2551d539f817063d182d72d5d76034529b79d8371025",
+      "markets": 8,
+      "accountType": "separate_sleeve_accounts",
+      "nativeRoutes": [
+        "Q102_CAUSAL_V4",
+        "HYPE_TREND_LONG"
+      ]
+    }
+  ],
+  "threeSleeveByFeeCase": [
+    {
+      "feeModelBps": 10,
+      "stopReserve": false,
+      "meanFinalJPY": 9239.028316609287,
+      "worstDrawdownPct": 30.314301217746543,
+      "totalTrades": 450,
+      "totalWins": 195,
+      "profitableMarketCases": 2
+    },
+    {
+      "feeModelBps": 10,
+      "stopReserve": true,
+      "meanFinalJPY": 9240.813464556586,
+      "worstDrawdownPct": 28.02852160164181,
+      "totalTrades": 445,
+      "totalWins": 192,
+      "profitableMarketCases": 2
+    },
+    {
+      "feeModelBps": 30,
+      "stopReserve": false,
+      "meanFinalJPY": 8928.343152522113,
+      "worstDrawdownPct": 31.95303673002622,
+      "totalTrades": 450,
+      "totalWins": 188,
+      "profitableMarketCases": 2
+    },
+    {
+      "feeModelBps": 30,
+      "stopReserve": true,
+      "meanFinalJPY": 8967.721420456342,
+      "worstDrawdownPct": 27.980701599421277,
+      "totalTrades": 442,
+      "totalWins": 185,
+      "profitableMarketCases": 2
+    }
+  ],
+  "q102Isolated": {
+    "marketCases": 8,
+    "opened": 4,
+    "wins": 0,
+    "worstDrawdownPct": 9.18,
+    "meanFinalJPY": 9616,
+    "profitableCases": 0
+  },
+  "hypeIsolated": {
+    "marketCases": 8,
+    "opened": 378,
+    "wins": 108,
+    "worstDrawdownPct": 28.101311287229112,
+    "meanFinalJPY": 9390.635219373311,
+    "profitableCases": 2
+  },
+  "comparisonWithArchived": "aggregate_metrics_reproduced; previous archived source SHA metadata does not match current checked-in scripts; exact row-by-row parity not asserted here",
+  "sourceMetadataIssue": "Historical evidence source digest mismatch; preserve archived reports unchanged, use new artifact and hashes for current-source verification.",
+  "limitations": [
+    "Mathematical artificial paths; not a one-year current-source live-native seven-runner market and order replay",
+    "PENGU and V52 not present; V4 only R21 subset; IDLE and FET partial; Q102/HYPE isolated wallets not combined",
+    "Missing funding, venue quote/depth, lot rounding, real account marks and authenticated resident STOP lifecycle",
+    "STOP reserve uses projected STOP loss plus 2 pct gap and cannot establish a strict DD bound",
+    "Reported mean final equity below initial 10000 JPY in all four three-sleeve fee/reserve variants",
+    "Root-issued certificate, Owner approval, venue order permit and formal source pin parity not established"
+  ],
+  "fullNativeSevenRunnerReplay": false,
+  "productionEligible": false,
+  "rootCertificateIssued": false,
+  "orderAuthority": false
+}

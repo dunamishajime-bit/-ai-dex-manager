@@ -1,3 +1,5 @@
+import {observeP91,type P91Input} from "./stable4-research-decision-observation";
+import { selectAdoptedP91Candidate } from "./pengu-adopted-p91";
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -111,6 +113,9 @@ export interface PenguDualLsV2AccountLock extends LiveRunnerLock {
 }
 
 export interface PenguDualLsV2PortfolioRunnerDependencies {
+    /** Optional evidence feed; never used for order-side or size selection. */
+    researchP91Input?:(asof:number)=>Promise<P91Input|undefined>;
+    adoptedP91Selected?: boolean;
     marketData: {
         load(force?: boolean): Promise<PenguDualLsV2History>;
         loadFiveMinuteSince?(startTs: number, endTs?: number): Promise<import("@/lib/disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[]>;
@@ -381,6 +386,18 @@ export class PenguDualLsV2PortfolioRunner {
     private readonly log: PenguDualLsV2RunnerLogger;
     private readonly now: () => number;
 
+    async observeResearchP91(base:PenguDualLsV2Signal,hasPosition:boolean):Promise<PenguDualLsV2Signal>{
+        if(hasPosition)return base;
+        const selected=this.dependencies.adoptedP91Selected===true;
+        if(!selected&&!this.dependencies.researchP91Input)return base;
+        const asof=this.now();
+        let input:P91Input|undefined;
+        try { input=await this.dependencies.researchP91Input?.(asof); }
+        catch { input=undefined; }
+        const observed={...base,diagnostics:{...base.diagnostics,researchP91:observeP91(input,asof)}};
+        return selected ? selectAdoptedP91Candidate(observed,input,asof,hasPosition,
+            this.dependencies.config.mode==="SHADOW"?"SHADOW":"LIVE") : observed;
+    }
     constructor(private readonly dependencies: PenguDualLsV2PortfolioRunnerDependencies) {
         this.log = dependencies.logger || defaultLogger();
         this.now = dependencies.now || Date.now;
@@ -882,7 +899,7 @@ export class PenguDualLsV2PortfolioRunner {
             if (state.pending) return await this.reconcilePending(state);
             const history = preloadedHistory ?? await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
-                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
+                const signal = await this.observeResearchP91(buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true }),Boolean(state.position));
                 state.lastSignalReferenceTs = signal.referenceTs;
                 state.latestSignal = signal;
                 await this.dependencies.stateStore.save(state);
@@ -1011,7 +1028,7 @@ export class PenguDualLsV2PortfolioRunner {
                 await this.dependencies.stateStore.save(state);
             }
 
-            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
+            const baseSignal = await this.observeResearchP91(buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true }),Boolean(state.position));
             const timedSignal: PenguDualLsV2Signal = timedStopAction && state.position && !baseSignal.exit
                 ? {
                     ...baseSignal,

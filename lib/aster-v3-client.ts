@@ -13,7 +13,7 @@ export interface AsterV3ClientOptions {
     privateKey?: `0x${string}`;
     requestTimeoutMs?: number;
     recvWindowMs?: number;
-    /** Retries apply only to read-only 429 responses. HTTP 418 is an IP ban and never retries. Order mutations never retry. */
+    /** Bounded GET retries for transient transport, 5xx, malformed JSON, and local 429. Shared cooldown and mutations are never retried locally. */
     readOnlyRateLimitMaxRetries?: number;
     readOnlyRateLimitBackoffBaseMs?: number;
     readOnlyRateLimitBackoffMaxMs?: number;
@@ -344,12 +344,14 @@ export class AsterV3Client {
         const method = input.method;
         const params = input.params || {};
         let retries = 0;
+        const readOnly=method==="GET"&&input.orderMutation!==true;
+        const readDeadline=Date.now()+Math.min(30000,Math.max(3000,this.timeoutMs*3));
         while (true) {
             try {
                 await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params),
                     input.ratePriority ?? (input.orderMutation===true?"NEW_EXPOSURE":"RISK_READ"));
                 const abort = new AbortController();
-                const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
+                const timeout = setTimeout(() => abort.abort(), readOnly?Math.max(1,Math.min(this.timeoutMs,readDeadline-Date.now())):this.timeoutMs);
                 try {
                     let query = ""; let body: string | undefined;
                     if (input.signed) {
@@ -372,20 +374,27 @@ export class AsterV3Client {
                         }
                         throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs, executionUnknown, responseBody: payload });
                     }
+                    if(readOnly&&(!text||typeof payload==="string"||payload===null))
+                        throw new AsterApiError({path:input.path,message:"ASTER_READ_INVALID_JSON",status:502});
                     return payload as T;
                 } finally { clearTimeout(timeout); }
             } catch (error) {
-                const canRetry = input.orderMutation !== true
-                    && !String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim()
-                    && retries < this.readOnlyRateLimitMaxRetries
-                    && error instanceof AsterApiError
-                    && isReadOnlyRateLimitError(error);
-                if (canRetry) {
-                    const exponential = this.readOnlyRateLimitBackoffBaseMs * (2 ** retries);
-                    const waitMs = Math.min(this.readOnlyRateLimitBackoffMaxMs, Math.max(exponential, error.retryAfterMs ?? 0));
-                    retries += 1;
-                    await sleep(waitMs);
-                    continue;
+                // READ_TRANSPORT_RETRY: never retry a mutation or a shared-rate-budget rejection.
+                const sharedBudget=Boolean(String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH||"").trim());
+                const rateLimited=error instanceof AsterApiError&&isReadOnlyRateLimitError(error);
+                const transient=error instanceof AsterApiError
+                    ? !isAsterDepositRequirementError(error)&&error.status!==418&&[408,425,500,502,503,504].includes(error.status)
+                    : error instanceof TypeError||error instanceof Error&&["AbortError","TimeoutError"].includes(error.name);
+                const canRetry=readOnly&&retries<this.readOnlyRateLimitMaxRetries&&
+                    ((rateLimited&&!sharedBudget)||(!rateLimited&&transient));
+                if(canRetry){
+                    const exponential=this.readOnlyRateLimitBackoffBaseMs*(2**retries);
+                    const retryAfter=error instanceof AsterApiError?error.retryAfterMs??0:0;
+                    const waitMs=Math.max(Math.min(exponential,this.readOnlyRateLimitBackoffMaxMs),retryAfter);
+                    // Never truncate a venue's requested wait to a shorter delay.
+                    if(waitMs<=this.readOnlyRateLimitBackoffMaxMs&&Date.now()+waitMs<readDeadline){
+                        retries+=1;await sleep(waitMs);continue;
+                    }
                 }
                 if (error instanceof AsterApiError) throw error;
                 if (error instanceof Error && error.name === "AbortError") throw new AsterApiError({ message: `Aster request timeout after ${this.timeoutMs}ms`, status: 0, executionUnknown: input.orderMutation === true });

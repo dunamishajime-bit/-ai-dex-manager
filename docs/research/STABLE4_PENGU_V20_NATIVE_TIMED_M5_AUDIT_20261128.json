@@ -1,0 +1,707 @@
+{
+  "schema": "stable4-pengu-v20-native-timed-aster-m5-isolated/v1",
+  "status": "PARTIAL_NATIVE_TIMED_CHECK_AND_CAUSAL_M5_PRICE_PROXY_ONLY",
+  "inputPins": {
+    "native": "d128ad78aed642b84eed105e85b73dc1856a3e657e1ad924ec17e5a9aff023fc",
+    "quality": "f22b0aa4d9afcde3f0336d1884be54330d9c15b7ab6a2c6281e0f11f455a6f0d"
+  },
+  "sourcePins": {
+    "scripts/research/stable4-pengu-v20-native-timed-m5-audit.ts": "9d07c7e1786e81ffc1c620b5a92729c1faa07132a2d975a934692e8dafaaf9e1",
+    "lib/pengu-short-v20-timed-stop.ts": "5ef6fc34d5ceb1c2a528488c02e07ed6401e9337de3e556145b2817f600820ba",
+    "lib/pengu-dual-ls-v2.ts": "5a7a0941245a594ec594ee0cc0fbb96ad14ae6e4e4962ccf1d512c90e68f7355",
+    "lib/pengu-short-v20.ts": "b1cc8d66decba4f7ddcdd13330d31df42f8460722e17c0fea296b43c36ef9e46",
+    "config/penguDualLsV2Runtime.ts": "18ed5fee4f5f40cb012285a76f5bf9215d03961153df493a362d09aa4dcf26d0"
+  },
+  "files": [
+    {
+      "folder": "aster-public-v3-5m-prefix",
+      "file": "PENGUUSDT-5m-20250924-20260803.jsonl.gz",
+      "sha256": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+      "rows": 90144
+    },
+    {
+      "folder": "aster-public-v3-5m-suffix",
+      "file": "PENGUUSDT-5m-20260803-20261001.jsonl.gz",
+      "sha256": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b",
+      "rows": 16992
+    }
+  ],
+  "periodUtc": [
+    "2025-10-01T00:00:00.000Z",
+    "2026-10-01T00:00:00.000Z"
+  ],
+  "separateModes": {
+    "BASE": 54,
+    "V8_V64": 112
+  },
+  "summary": {
+    "rawShortV20EachArm": 41,
+    "uniqueShortV20": 41,
+    "firstM5Positive": 23,
+    "priceProxyAfter5m": 12,
+    "nativeTimed3hThreshold": 2,
+    "nativeTimed8hThreshold": 0,
+    "notTriggered": 10,
+    "unknownOrBlocked": 29
+  },
+  "records": [
+    {
+      "entryTs": 1760065200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1760065500000,
+      "nextM5OpenPriceProxy": 0.029982,
+      "modelEntryTs": 1760065500000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 4,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLD_REACHED_NOT_EXECUTION",
+      "threshold": {
+        "kind": "TIMED_NEGATIVE_3H_EXIT",
+        "referenceTs": 1760076600000,
+        "lossPct": 2.561536922153,
+        "referenceM5PositiveVolume": false,
+        "priceProxyFromConfirmedClose": 0.03075
+      },
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1760076600000,
+        "triggered": true
+      },
+      "stage8h": {
+        "checked": false,
+        "checkTs": null,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1760544000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1760544300000,
+      "nextM5OpenPriceProxy": 0.023609,
+      "modelEntryTs": 1760544300000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 19,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1760555400000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1760573400000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1761156000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1761156300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1761156300000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1761681600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1761681900000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1761681900000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1761894000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1761894300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1761894300000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1761908400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1761908700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1761908700000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1762232400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1762232700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1762232700000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1762650000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1762650300000,
+      "nextM5OpenPriceProxy": 0.014651,
+      "modelEntryTs": 1762650300000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 53,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1762661400000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1762679400000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1762682400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1762682700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1762682700000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1762909200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1762909500000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1762909500000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1763092800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1763093100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1763093100000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1764439200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1764439500000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1764439500000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1765029600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1765029900000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1765029900000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1765771200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1765771500000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1765771500000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1765893600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1765893900000,
+      "nextM5OpenPriceProxy": 0.010028,
+      "modelEntryTs": 1765893900000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 33,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLD_REACHED_NOT_EXECUTION",
+      "threshold": {
+        "kind": "TIMED_NEGATIVE_3H_EXIT",
+        "referenceTs": 1765905000000,
+        "lossPct": 3.131232548863,
+        "referenceM5PositiveVolume": true,
+        "priceProxyFromConfirmedClose": 0.010342
+      },
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1765905000000,
+        "triggered": true
+      },
+      "stage8h": {
+        "checked": false,
+        "checkTs": null,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1766008800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1766009100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1766009100000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1766062800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1766063100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1766063100000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1766077200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1766077500000,
+      "nextM5OpenPriceProxy": 0.009154,
+      "modelEntryTs": 1766077500000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 37,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1766088600000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1766106600000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1766080800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1766081100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1766081100000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1766102400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1766102700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1766102700000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1768860000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1768860300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1768860300000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1768928400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1768928700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1768928700000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1769806800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1769807100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1769807100000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1771560000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1771560300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1771560300000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1774540800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1774541100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1774541100000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1775167200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1775167500000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1775167500000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1778670000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1778670300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1778670300000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1778702400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1778702700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1778702700000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1778958000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1778958300000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1778958300000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1779998400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1779998700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1779998700000,
+      "modelOrderAuthority": false,
+      "status": "FOLLOWING_M5_PRICE_UNEXECUTABLE_OR_UNAVAILABLE"
+    },
+    {
+      "entryTs": 1780056000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1780056300000,
+      "nextM5OpenPriceProxy": 0.007618,
+      "modelEntryTs": 1780056300000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 3,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1780067400000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1780085400000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1781841600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1781841900000,
+      "nextM5OpenPriceProxy": 0.006479,
+      "modelEntryTs": 1781841900000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 39,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1781853000000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1781871000000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1782259200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1782259500000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1782259500000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1783544400000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1783544700000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1783544700000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1785232800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1785233100000,
+      "nextM5OpenPriceProxy": 0.005924,
+      "modelEntryTs": 1785233100000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 78,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1785244200000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1785262200000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1785297600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1785297900000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1785297900000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1788544800000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": false,
+      "firstConfirmedM5Ts": 1788545100000,
+      "nextM5OpenPriceProxy": null,
+      "modelEntryTs": 1788545100000,
+      "modelOrderAuthority": false,
+      "status": "FIRST_CONFIRMED_M5_NOT_POSITIVE_VOLUME"
+    },
+    {
+      "entryTs": 1788559200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1788559500000,
+      "nextM5OpenPriceProxy": 0.008266,
+      "modelEntryTs": 1788559500000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 68,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1788570600000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1788588600000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1788876000000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1788876300000,
+      "nextM5OpenPriceProxy": 0.00815,
+      "modelEntryTs": 1788876300000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 0,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1788887400000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1788905400000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1789045200000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1789045500000,
+      "nextM5OpenPriceProxy": 0.007502,
+      "modelEntryTs": 1789045500000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 66,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1789056600000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1789074600000,
+        "triggered": false
+      }
+    },
+    {
+      "entryTs": 1789059600000,
+      "route": "SHORT_V20",
+      "side": "SHORT",
+      "gross": 1,
+      "firstConfirmedM5PositiveVolume": true,
+      "firstConfirmedM5Ts": 1789059900000,
+      "nextM5OpenPriceProxy": 0.007402,
+      "modelEntryTs": 1789059900000,
+      "modelOrderAuthority": false,
+      "zeroVolumeIn8h": 66,
+      "status": "ISOLATED_NATIVE_TIMED_THRESHOLDS_NOT_REACHED",
+      "threshold": null,
+      "stage3h": {
+        "checked": true,
+        "checkTs": 1789071000000,
+        "triggered": false
+      },
+      "stage8h": {
+        "checked": true,
+        "checkTs": 1789089000000,
+        "triggered": false
+      }
+    }
+  ],
+  "orderAuthority": false,
+  "fullPenguAnnualTradeReplay": false,
+  "fullSevenRunnerWalletReplay": false,
+  "limitations": [
+    "All 41 SHORT_V20 H1 events appear in both arms and are deduplicated; raw entry signals are not trades",
+    "First ASTER M5 bar has positive volume only after its close at H1 t+5m; hypothetical entry is the next M5 open (t+5m), never the same unfinished M5 open",
+    "Native advancePenguShortV20TimedStops is called with stage-only state; real V20 entry ATR/counterwind/probation/progression, native H1 hard/trailed exits, resident stops and entry fills have NOT been recreated",
+    "V20 stage-only check is a conditional sensitivity after a hypothetical price proxy, not validated position or executable order. M5 price and volume are not venue fill confirmations",
+    "RECOVERY_V8, LONG, cooldown, fees/funding, shared account MTM, DD and Gross are untested. Do not classify this as complete PENGU lifecycle or release evidence"
+  ]
+}

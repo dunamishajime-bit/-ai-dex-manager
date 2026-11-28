@@ -7,6 +7,7 @@ import {open,lstat} from "node:fs/promises";
 import {constants} from "node:fs";
 import {dirname} from "node:path";
 import {createHash} from "node:crypto";
+import {isAdoptedR21Route} from "./v12-v4-adopted-r21";
 import {PRODUCTION_EXIT_CATALOG} from "./v12-v4-production-lifecycle";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import type {V4DurableOrderCommand} from "./v12-v4-durable-orders";
@@ -206,6 +207,7 @@ export async function readV4ProductionCertificate(sha:string,
  }finally{await f.close();}
 }
 export async function assertV4CertifiedSource(sha:string,decision:V4LiveDecisionSnapshot){
+ if(decision.adoptedR21||decision.candidates.some(c=>isAdoptedR21Route(c.route)))throw Error("R21_EXACT_NEW_ROUTE_SOURCE_CERT_REQUIRED");
  await readV4ProductionCertificate(sha);
  if(decision.policyId!==V12_V4_V2_POLICY||decision.schema!=="v12-v4-live-decision/v1"||
    decision.orderEnabled!==false||decision.realOrderEnabledV4!==0||
@@ -219,7 +221,10 @@ export async function assertV4CertifiedOrder(sha:string,command:V4DurableOrderCo
  if(!command.legId||!command.symbol||!(command.quantity>0)||!(command.price>0)||
    !["ENTRY","STOP","TAKE_PROFIT","EXIT"].includes(command.action))
   throw Error("V4_CERTIFIED_ORDER_COMMAND_INVALID");
- if(command.action==="ENTRY")return readV4ProductionCertificate(sha);
+ if(command.action==="ENTRY"){
+  if(command.legId.split(":").some(isAdoptedR21Route))throw Error("R21_EXACT_NEW_ROUTE_ORDER_CERT_REQUIRED");
+  return readV4ProductionCertificate(sha);
+ }
  // New entries require a fresh certificate; signed reduce-only exits and
  // protection of an already held leg must remain possible after expiration.
  if(!ownedDocument||ownedDocument.releaseSha!==sha)

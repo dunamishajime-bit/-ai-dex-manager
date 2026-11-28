@@ -1,0 +1,1604 @@
+{
+  "status": "PARTIAL_NATIVE_SOURCE_RESEARCH_ONLY",
+  "source_sha256": "a80fc095036953d947541f07cbaba36509d5ce2f38987f0c2019ffe4bbad24e0",
+  "result_sha256": "7a64c3516a88f6101077a0bee156f3f940bac1a3f44b4421575ae3f9801082fb",
+  "cases": [
+    {
+      "regime": "BULL",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 9170.579660715399,
+          "dd": 11.327081268948291,
+          "trades": 36,
+          "wins": 10,
+          "raw": {
+            "R21": 162,
+            "IDLE": 247,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 26,
+            "FET:TIME": 2,
+            "IDLE:TIME": 7,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 17,
+            "SLOT": 117,
+            "IDLE_R26_FILTER": 223,
+            "PREEMPTION_NOT_MODELED": 19,
+            "COOLDOWN": 1
+          },
+          "entryFees": 79.96058109291253,
+          "exitFees": 79.96058109291253
+        },
+        "10/true": {
+          "final": 9170.579660715399,
+          "dd": 11.327081268948291,
+          "trades": 36,
+          "wins": 10,
+          "raw": {
+            "R21": 162,
+            "IDLE": 247,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 26,
+            "FET:TIME": 2,
+            "IDLE:TIME": 7,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 17,
+            "SLOT": 117,
+            "IDLE_R26_FILTER": 223,
+            "PREEMPTION_NOT_MODELED": 19,
+            "COOLDOWN": 1
+          },
+          "entryFees": 79.96058109291253,
+          "exitFees": 79.96058109291253
+        },
+        "30/false": {
+          "final": 8875.39570492569,
+          "dd": 12.935993941874703,
+          "trades": 36,
+          "wins": 8,
+          "raw": {
+            "R21": 162,
+            "IDLE": 247,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 26,
+            "FET:TIME": 2,
+            "IDLE:TIME": 7,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 17,
+            "SLOT": 117,
+            "IDLE_R26_FILTER": 223,
+            "PREEMPTION_NOT_MODELED": 19,
+            "COOLDOWN": 1
+          },
+          "entryFees": 236.18560622805342,
+          "exitFees": 236.18560622805342
+        },
+        "30/true": {
+          "final": 8875.39570492569,
+          "dd": 12.935993941874703,
+          "trades": 36,
+          "wins": 8,
+          "raw": {
+            "R21": 162,
+            "IDLE": 247,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 26,
+            "FET:TIME": 2,
+            "IDLE:TIME": 7,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 17,
+            "SLOT": 117,
+            "IDLE_R26_FILTER": 223,
+            "PREEMPTION_NOT_MODELED": 19,
+            "COOLDOWN": 1
+          },
+          "entryFees": 236.18560622805342,
+          "exitFees": 236.18560622805342
+        }
+      }
+    },
+    {
+      "regime": "BULL",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 8521.121877258447,
+          "dd": 15.259839778727425,
+          "trades": 33,
+          "wins": 9,
+          "raw": {
+            "R21": 110,
+            "IDLE": 137,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 22,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 22,
+            "IDLE:TIME": 11
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 120,
+            "BASELINE_OCCUPIED": 1,
+            "SLOT": 85,
+            "PREEMPTION_NOT_MODELED": 6,
+            "COOLDOWN": 2
+          },
+          "entryFees": 70.3980994635801,
+          "exitFees": 70.3980994635801
+        },
+        "10/true": {
+          "final": 8521.121877258447,
+          "dd": 15.259839778727425,
+          "trades": 33,
+          "wins": 9,
+          "raw": {
+            "R21": 110,
+            "IDLE": 137,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 22,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 22,
+            "IDLE:TIME": 11
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 120,
+            "BASELINE_OCCUPIED": 1,
+            "SLOT": 85,
+            "PREEMPTION_NOT_MODELED": 6,
+            "COOLDOWN": 2
+          },
+          "entryFees": 70.3980994635801,
+          "exitFees": 70.3980994635801
+        },
+        "30/false": {
+          "final": 8261.369038714824,
+          "dd": 17.645599062993846,
+          "trades": 33,
+          "wins": 9,
+          "raw": {
+            "R21": 110,
+            "IDLE": 137,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 22,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 22,
+            "IDLE:TIME": 11
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 120,
+            "BASELINE_OCCUPIED": 1,
+            "SLOT": 85,
+            "PREEMPTION_NOT_MODELED": 6,
+            "COOLDOWN": 2
+          },
+          "entryFees": 208.15985896054008,
+          "exitFees": 208.15985896054008
+        },
+        "30/true": {
+          "final": 8261.369038714824,
+          "dd": 17.645599062993846,
+          "trades": 33,
+          "wins": 9,
+          "raw": {
+            "R21": 110,
+            "IDLE": 137,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 22,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 22,
+            "IDLE:TIME": 11
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 120,
+            "BASELINE_OCCUPIED": 1,
+            "SLOT": 85,
+            "PREEMPTION_NOT_MODELED": 6,
+            "COOLDOWN": 2
+          },
+          "entryFees": 208.15985896054008,
+          "exitFees": 208.15985896054008
+        }
+      }
+    },
+    {
+      "regime": "BEAR",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 8515.76285730691,
+          "dd": 18.99266297796335,
+          "trades": 40,
+          "wins": 18,
+          "raw": {
+            "R21": 164,
+            "IDLE": 544,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 10,
+            "FET": 4
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "FET:STOP": 2,
+            "R21:TIME": 24,
+            "FET:TIME": 2,
+            "IDLE:STOP": 1,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 85,
+            "IDLE_R26_FILTER": 504,
+            "PREEMPTION_NOT_MODELED": 54,
+            "BASELINE_OCCUPIED": 28,
+            "COOLDOWN": 1
+          },
+          "entryFees": 89.7505101439162,
+          "exitFees": 89.7505101439162
+        },
+        "10/true": {
+          "final": 8515.76285730691,
+          "dd": 18.99266297796335,
+          "trades": 40,
+          "wins": 18,
+          "raw": {
+            "R21": 164,
+            "IDLE": 544,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 10,
+            "FET": 4
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "FET:STOP": 2,
+            "R21:TIME": 24,
+            "FET:TIME": 2,
+            "IDLE:STOP": 1,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 85,
+            "IDLE_R26_FILTER": 504,
+            "PREEMPTION_NOT_MODELED": 54,
+            "BASELINE_OCCUPIED": 28,
+            "COOLDOWN": 1
+          },
+          "entryFees": 89.7505101439162,
+          "exitFees": 89.7505101439162
+        },
+        "30/false": {
+          "final": 8186.446558864906,
+          "dd": 20.71965371481935,
+          "trades": 40,
+          "wins": 18,
+          "raw": {
+            "R21": 164,
+            "IDLE": 544,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 10,
+            "FET": 4
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "FET:STOP": 2,
+            "R21:TIME": 24,
+            "FET:TIME": 2,
+            "IDLE:STOP": 1,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 85,
+            "IDLE_R26_FILTER": 504,
+            "PREEMPTION_NOT_MODELED": 54,
+            "BASELINE_OCCUPIED": 28,
+            "COOLDOWN": 1
+          },
+          "entryFees": 264.26067605030255,
+          "exitFees": 264.26067605030255
+        },
+        "30/true": {
+          "final": 8186.446558864906,
+          "dd": 20.71965371481935,
+          "trades": 40,
+          "wins": 18,
+          "raw": {
+            "R21": 164,
+            "IDLE": 544,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 10,
+            "FET": 4
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "FET:STOP": 2,
+            "R21:TIME": 24,
+            "FET:TIME": 2,
+            "IDLE:STOP": 1,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 85,
+            "IDLE_R26_FILTER": 504,
+            "PREEMPTION_NOT_MODELED": 54,
+            "BASELINE_OCCUPIED": 28,
+            "COOLDOWN": 1
+          },
+          "entryFees": 264.26067605030255,
+          "exitFees": 264.26067605030255
+        }
+      }
+    },
+    {
+      "regime": "BEAR",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 9700.737560341266,
+          "dd": 10.910708246341748,
+          "trades": 38,
+          "wins": 17,
+          "raw": {
+            "R21": 179,
+            "IDLE": 357,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 12,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 8,
+            "R21:STOP": 2,
+            "IDLE:STOP": 4
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 321,
+            "BASELINE_OCCUPIED": 14,
+            "SLOT": 141,
+            "PREEMPTION_NOT_MODELED": 18,
+            "COOLDOWN": 4
+          },
+          "entryFees": 69.52672329223806,
+          "exitFees": 69.52672329223806
+        },
+        "10/true": {
+          "final": 9700.737560341266,
+          "dd": 10.910708246341748,
+          "trades": 38,
+          "wins": 17,
+          "raw": {
+            "R21": 179,
+            "IDLE": 357,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 12,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 8,
+            "R21:STOP": 2,
+            "IDLE:STOP": 4
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 321,
+            "BASELINE_OCCUPIED": 14,
+            "SLOT": 141,
+            "PREEMPTION_NOT_MODELED": 18,
+            "COOLDOWN": 4
+          },
+          "entryFees": 69.52672329223806,
+          "exitFees": 69.52672329223806
+        },
+        "30/false": {
+          "final": 9422.278235820942,
+          "dd": 11.297512570571422,
+          "trades": 38,
+          "wins": 16,
+          "raw": {
+            "R21": 179,
+            "IDLE": 357,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 12,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 8,
+            "R21:STOP": 2,
+            "IDLE:STOP": 4
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 321,
+            "BASELINE_OCCUPIED": 14,
+            "SLOT": 141,
+            "PREEMPTION_NOT_MODELED": 18,
+            "COOLDOWN": 4
+          },
+          "entryFees": 205.67729082082292,
+          "exitFees": 205.67729082082292
+        },
+        "30/true": {
+          "final": 9422.278235820942,
+          "dd": 11.297512570571422,
+          "trades": 38,
+          "wins": 16,
+          "raw": {
+            "R21": 179,
+            "IDLE": 357,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 12,
+            "FET": 0
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 8,
+            "R21:STOP": 2,
+            "IDLE:STOP": 4
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 321,
+            "BASELINE_OCCUPIED": 14,
+            "SLOT": 141,
+            "PREEMPTION_NOT_MODELED": 18,
+            "COOLDOWN": 4
+          },
+          "entryFees": 205.67729082082292,
+          "exitFees": 205.67729082082292
+        }
+      }
+    },
+    {
+      "regime": "RANGE",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 9502.559061710239,
+          "dd": 13.098401481140476,
+          "trades": 37,
+          "wins": 14,
+          "raw": {
+            "R21": 180,
+            "IDLE": 439,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 28,
+            "IDLE": 6,
+            "FET": 3
+          },
+          "exits": {
+            "R21:TIME": 28,
+            "FET:STOP": 1,
+            "IDLE:TIME": 6,
+            "FET:TIME": 2
+          },
+          "counts": {
+            "SLOT": 147,
+            "BASELINE_OCCUPIED": 21,
+            "IDLE_R26_FILTER": 408,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 1
+          },
+          "entryFees": 82.86225420726672,
+          "exitFees": 82.86225420726672
+        },
+        "10/true": {
+          "final": 9502.559061710239,
+          "dd": 13.098401481140476,
+          "trades": 37,
+          "wins": 14,
+          "raw": {
+            "R21": 180,
+            "IDLE": 439,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 28,
+            "IDLE": 6,
+            "FET": 3
+          },
+          "exits": {
+            "R21:TIME": 28,
+            "FET:STOP": 1,
+            "IDLE:TIME": 6,
+            "FET:TIME": 2
+          },
+          "counts": {
+            "SLOT": 147,
+            "BASELINE_OCCUPIED": 21,
+            "IDLE_R26_FILTER": 408,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 1
+          },
+          "entryFees": 82.86225420726672,
+          "exitFees": 82.86225420726672
+        },
+        "30/false": {
+          "final": 9190.919124235363,
+          "dd": 14.344538747147828,
+          "trades": 37,
+          "wins": 14,
+          "raw": {
+            "R21": 180,
+            "IDLE": 439,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 28,
+            "IDLE": 6,
+            "FET": 3
+          },
+          "exits": {
+            "R21:TIME": 28,
+            "FET:STOP": 1,
+            "IDLE:TIME": 6,
+            "FET:TIME": 2
+          },
+          "counts": {
+            "SLOT": 147,
+            "BASELINE_OCCUPIED": 21,
+            "IDLE_R26_FILTER": 408,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 1
+          },
+          "entryFees": 244.60910925367466,
+          "exitFees": 244.60910925367466
+        },
+        "30/true": {
+          "final": 9190.919124235363,
+          "dd": 14.344538747147828,
+          "trades": 37,
+          "wins": 14,
+          "raw": {
+            "R21": 180,
+            "IDLE": 439,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 28,
+            "IDLE": 6,
+            "FET": 3
+          },
+          "exits": {
+            "R21:TIME": 28,
+            "FET:STOP": 1,
+            "IDLE:TIME": 6,
+            "FET:TIME": 2
+          },
+          "counts": {
+            "SLOT": 147,
+            "BASELINE_OCCUPIED": 21,
+            "IDLE_R26_FILTER": 408,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 1
+          },
+          "entryFees": 244.60910925367466,
+          "exitFees": 244.60910925367466
+        }
+      }
+    },
+    {
+      "regime": "RANGE",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 9681.618118727132,
+          "dd": 8.300744165473484,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 162,
+            "IDLE": 289,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 0
+          },
+          "exits": {
+            "R21:STOP": 1,
+            "R21:TIME": 26,
+            "IDLE:TIME": 7
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 264,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 127,
+            "PREEMPTION_NOT_MODELED": 5,
+            "COOLDOWN": 3
+          },
+          "entryFees": 65.6899210535964,
+          "exitFees": 65.6899210535964
+        },
+        "10/true": {
+          "final": 9681.618118727132,
+          "dd": 8.300744165473484,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 162,
+            "IDLE": 289,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 0
+          },
+          "exits": {
+            "R21:STOP": 1,
+            "R21:TIME": 26,
+            "IDLE:TIME": 7
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 264,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 127,
+            "PREEMPTION_NOT_MODELED": 5,
+            "COOLDOWN": 3
+          },
+          "entryFees": 65.6899210535964,
+          "exitFees": 65.6899210535964
+        },
+        "30/false": {
+          "final": 9421.76866073669,
+          "dd": 9.049014758631714,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 162,
+            "IDLE": 289,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 0
+          },
+          "exits": {
+            "R21:STOP": 1,
+            "R21:TIME": 26,
+            "IDLE:TIME": 7
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 264,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 127,
+            "PREEMPTION_NOT_MODELED": 5,
+            "COOLDOWN": 3
+          },
+          "entryFees": 194.50304370647865,
+          "exitFees": 194.50304370647865
+        },
+        "30/true": {
+          "final": 9421.76866073669,
+          "dd": 9.049014758631714,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 162,
+            "IDLE": 289,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 27,
+            "IDLE": 7,
+            "FET": 0
+          },
+          "exits": {
+            "R21:STOP": 1,
+            "R21:TIME": 26,
+            "IDLE:TIME": 7
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 264,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 127,
+            "PREEMPTION_NOT_MODELED": 5,
+            "COOLDOWN": 3
+          },
+          "entryFees": 194.50304370647865,
+          "exitFees": 194.50304370647865
+        }
+      }
+    },
+    {
+      "regime": "SQUEEZE",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 11262.101224465936,
+          "dd": 14.437473483074903,
+          "trades": 38,
+          "wins": 22,
+          "raw": {
+            "R21": 162,
+            "IDLE": 710,
+            "FET": 3
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 11,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 20,
+            "FET:STOP": 2,
+            "R21:STOP": 5,
+            "IDLE:TIME": 8,
+            "IDLE:STOP": 3
+          },
+          "counts": {
+            "SLOT": 115,
+            "BASELINE_OCCUPIED": 24,
+            "IDLE_R26_FILTER": 667,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 1,
+            "DAILY_7P5": 2
+          },
+          "entryFees": 92.11647938891103,
+          "exitFees": 92.11647938891103
+        },
+        "10/true": {
+          "final": 11262.101224465936,
+          "dd": 14.437473483074903,
+          "trades": 38,
+          "wins": 22,
+          "raw": {
+            "R21": 162,
+            "IDLE": 710,
+            "FET": 3
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 11,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 20,
+            "FET:STOP": 2,
+            "R21:STOP": 5,
+            "IDLE:TIME": 8,
+            "IDLE:STOP": 3
+          },
+          "counts": {
+            "SLOT": 115,
+            "BASELINE_OCCUPIED": 24,
+            "IDLE_R26_FILTER": 667,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 1,
+            "DAILY_7P5": 2
+          },
+          "entryFees": 92.11647938891103,
+          "exitFees": 92.11647938891103
+        },
+        "30/false": {
+          "final": 10877.932589972019,
+          "dd": 15.727477432059,
+          "trades": 38,
+          "wins": 22,
+          "raw": {
+            "R21": 162,
+            "IDLE": 710,
+            "FET": 3
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 11,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 20,
+            "FET:STOP": 2,
+            "R21:STOP": 5,
+            "IDLE:TIME": 8,
+            "IDLE:STOP": 3
+          },
+          "counts": {
+            "SLOT": 115,
+            "BASELINE_OCCUPIED": 24,
+            "IDLE_R26_FILTER": 667,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 1,
+            "DAILY_7P5": 2
+          },
+          "entryFees": 271.6909858969036,
+          "exitFees": 271.6909858969036
+        },
+        "30/true": {
+          "final": 10877.932589972019,
+          "dd": 15.727477432059,
+          "trades": 38,
+          "wins": 22,
+          "raw": {
+            "R21": 162,
+            "IDLE": 710,
+            "FET": 3
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 11,
+            "FET": 2
+          },
+          "exits": {
+            "R21:TIME": 20,
+            "FET:STOP": 2,
+            "R21:STOP": 5,
+            "IDLE:TIME": 8,
+            "IDLE:STOP": 3
+          },
+          "counts": {
+            "SLOT": 115,
+            "BASELINE_OCCUPIED": 24,
+            "IDLE_R26_FILTER": 667,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 1,
+            "DAILY_7P5": 2
+          },
+          "entryFees": 271.6909858969036,
+          "exitFees": 271.6909858969036
+        }
+      }
+    },
+    {
+      "regime": "SQUEEZE",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 7628.818738687318,
+          "dd": 25.00318035240232,
+          "trades": 38,
+          "wins": 17,
+          "raw": {
+            "R21": 133,
+            "IDLE": 523,
+            "FET": 1
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 12,
+            "FET": 1
+          },
+          "exits": {
+            "IDLE:STOP": 5,
+            "R21:TIME": 20,
+            "IDLE:TIME": 7,
+            "R21:STOP": 5,
+            "FET:TIME": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 485,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 107,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 2
+          },
+          "entryFees": 63.93648053243396,
+          "exitFees": 63.93648053243396
+        },
+        "10/true": {
+          "final": 7625.942501042413,
+          "dd": 25.031455853932417,
+          "trades": 37,
+          "wins": 16,
+          "raw": {
+            "R21": 133,
+            "IDLE": 523,
+            "FET": 1
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 11,
+            "FET": 1
+          },
+          "exits": {
+            "IDLE:STOP": 5,
+            "R21:TIME": 20,
+            "IDLE:TIME": 6,
+            "R21:STOP": 5,
+            "FET:TIME": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 485,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 107,
+            "PREEMPTION_NOT_MODELED": 9,
+            "STOP_RESERVE": 1,
+            "COOLDOWN": 2
+          },
+          "entryFees": 59.98588088960604,
+          "exitFees": 59.98588088960604
+        },
+        "30/false": {
+          "final": 7395.876761250317,
+          "dd": 27.199108170248664,
+          "trades": 38,
+          "wins": 16,
+          "raw": {
+            "R21": 133,
+            "IDLE": 523,
+            "FET": 1
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 12,
+            "FET": 1
+          },
+          "exits": {
+            "IDLE:STOP": 5,
+            "R21:TIME": 20,
+            "IDLE:TIME": 7,
+            "R21:STOP": 5,
+            "FET:TIME": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 485,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 107,
+            "PREEMPTION_NOT_MODELED": 9,
+            "COOLDOWN": 2
+          },
+          "entryFees": 189.06468878208912,
+          "exitFees": 189.06468878208912
+        },
+        "30/true": {
+          "final": 7840.733942058891,
+          "dd": 25.12763806799937,
+          "trades": 36,
+          "wins": 16,
+          "raw": {
+            "R21": 133,
+            "IDLE": 523,
+            "FET": 1
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 10,
+            "FET": 1
+          },
+          "exits": {
+            "IDLE:STOP": 5,
+            "R21:TIME": 20,
+            "IDLE:TIME": 5,
+            "R21:STOP": 5,
+            "FET:TIME": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 485,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 107,
+            "PREEMPTION_NOT_MODELED": 9,
+            "STOP_RESERVE": 2,
+            "COOLDOWN": 2
+          },
+          "entryFees": 165.79236930774377,
+          "exitFees": 165.79236930774377
+        }
+      }
+    },
+    {
+      "regime": "REVERSAL",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 11470.386291844059,
+          "dd": 11.842289249278103,
+          "trades": 44,
+          "wins": 24,
+          "raw": {
+            "R21": 166,
+            "IDLE": 603,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 14,
+            "FET": 4
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 10,
+            "FET:STOP": 2,
+            "FET:TIME": 2,
+            "IDLE:STOP": 4,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 118,
+            "BASELINE_OCCUPIED": 20,
+            "IDLE_R26_FILTER": 560,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 3
+          },
+          "entryFees": 106.061016568067,
+          "exitFees": 106.061016568067
+        },
+        "10/true": {
+          "final": 11470.386291844059,
+          "dd": 11.842289249278103,
+          "trades": 44,
+          "wins": 24,
+          "raw": {
+            "R21": 166,
+            "IDLE": 603,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 14,
+            "FET": 4
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 10,
+            "FET:STOP": 2,
+            "FET:TIME": 2,
+            "IDLE:STOP": 4,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 118,
+            "BASELINE_OCCUPIED": 20,
+            "IDLE_R26_FILTER": 560,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 3
+          },
+          "entryFees": 106.061016568067,
+          "exitFees": 106.061016568067
+        },
+        "30/false": {
+          "final": 11010.549768900664,
+          "dd": 12.648678555742555,
+          "trades": 44,
+          "wins": 23,
+          "raw": {
+            "R21": 166,
+            "IDLE": 603,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 14,
+            "FET": 4
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 10,
+            "FET:STOP": 2,
+            "FET:TIME": 2,
+            "IDLE:STOP": 4,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 118,
+            "BASELINE_OCCUPIED": 20,
+            "IDLE_R26_FILTER": 560,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 3
+          },
+          "entryFees": 311.70956073998593,
+          "exitFees": 311.70956073998593
+        },
+        "30/true": {
+          "final": 11010.549768900664,
+          "dd": 12.648678555742555,
+          "trades": 44,
+          "wins": 23,
+          "raw": {
+            "R21": 166,
+            "IDLE": 603,
+            "FET": 4
+          },
+          "entered": {
+            "R21": 26,
+            "IDLE": 14,
+            "FET": 4
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 10,
+            "FET:STOP": 2,
+            "FET:TIME": 2,
+            "IDLE:STOP": 4,
+            "R21:STOP": 2
+          },
+          "counts": {
+            "SLOT": 118,
+            "BASELINE_OCCUPIED": 20,
+            "IDLE_R26_FILTER": 560,
+            "PREEMPTION_NOT_MODELED": 28,
+            "COOLDOWN": 3
+          },
+          "entryFees": 311.70956073998593,
+          "exitFees": 311.70956073998593
+        }
+      }
+    },
+    {
+      "regime": "REVERSAL",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 9145.755076305524,
+          "dd": 19.045863294475872,
+          "trades": 34,
+          "wins": 16,
+          "raw": {
+            "R21": 145,
+            "IDLE": 406,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 23,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 10,
+            "R21:STOP": 2,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 368,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 123,
+            "PREEMPTION_NOT_MODELED": 7,
+            "COOLDOWN": 3
+          },
+          "entryFees": 72.91792093385357,
+          "exitFees": 72.91792093385357
+        },
+        "10/true": {
+          "final": 9145.755076305524,
+          "dd": 19.045863294475872,
+          "trades": 34,
+          "wins": 16,
+          "raw": {
+            "R21": 145,
+            "IDLE": 406,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 23,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 10,
+            "R21:STOP": 2,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 368,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 123,
+            "PREEMPTION_NOT_MODELED": 7,
+            "COOLDOWN": 3
+          },
+          "entryFees": 72.91792093385357,
+          "exitFees": 72.91792093385357
+        },
+        "30/false": {
+          "final": 8849.002236865614,
+          "dd": 19.79084834948924,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 145,
+            "IDLE": 406,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 23,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 10,
+            "R21:STOP": 2,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 368,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 123,
+            "PREEMPTION_NOT_MODELED": 7,
+            "COOLDOWN": 3
+          },
+          "entryFees": 215.35108055008098,
+          "exitFees": 215.35108055008098
+        },
+        "30/true": {
+          "final": 8849.002236865614,
+          "dd": 19.79084834948924,
+          "trades": 34,
+          "wins": 15,
+          "raw": {
+            "R21": 145,
+            "IDLE": 406,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 23,
+            "IDLE": 11,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 10,
+            "R21:STOP": 2,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 368,
+            "BASELINE_OCCUPIED": 16,
+            "SLOT": 123,
+            "PREEMPTION_NOT_MODELED": 7,
+            "COOLDOWN": 3
+          },
+          "entryFees": 215.35108055008098,
+          "exitFees": 215.35108055008098
+        }
+      }
+    },
+    {
+      "regime": "PULLBACK",
+      "seed": 2026112801,
+      "cases": {
+        "10/false": {
+          "final": 8251.478739926897,
+          "dd": 30.314301217746543,
+          "trades": 44,
+          "wins": 22,
+          "raw": {
+            "R21": 189,
+            "IDLE": 602,
+            "FET": 5
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 14,
+            "FET": 5
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 11,
+            "FET:STOP": 3,
+            "FET:TIME": 2,
+            "IDLE:STOP": 3,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 21,
+            "SLOT": 138,
+            "IDLE_R26_FILTER": 564,
+            "PREEMPTION_NOT_MODELED": 28,
+            "DAILY_7P5": 1
+          },
+          "entryFees": 113.11114560248218,
+          "exitFees": 113.11114560248218
+        },
+        "10/true": {
+          "final": 8275.776752939382,
+          "dd": 28.02852160164181,
+          "trades": 40,
+          "wins": 20,
+          "raw": {
+            "R21": 189,
+            "IDLE": 602,
+            "FET": 5
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 11,
+            "FET": 5
+          },
+          "exits": {
+            "R21:TIME": 23,
+            "IDLE:TIME": 8,
+            "FET:STOP": 3,
+            "FET:TIME": 2,
+            "IDLE:STOP": 3,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 20,
+            "SLOT": 135,
+            "IDLE_R26_FILTER": 564,
+            "PREEMPTION_NOT_MODELED": 28,
+            "DAILY_7P5": 1,
+            "STOP_RESERVE": 8
+          },
+          "entryFees": 95.44890506032758,
+          "exitFees": 95.44890506032758
+        },
+        "30/false": {
+          "final": 7869.611824106971,
+          "dd": 31.95303673002622,
+          "trades": 44,
+          "wins": 21,
+          "raw": {
+            "R21": 189,
+            "IDLE": 602,
+            "FET": 5
+          },
+          "entered": {
+            "R21": 25,
+            "IDLE": 14,
+            "FET": 5
+          },
+          "exits": {
+            "R21:TIME": 24,
+            "IDLE:TIME": 11,
+            "FET:STOP": 3,
+            "FET:TIME": 2,
+            "IDLE:STOP": 3,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 21,
+            "SLOT": 138,
+            "IDLE_R26_FILTER": 564,
+            "PREEMPTION_NOT_MODELED": 28,
+            "DAILY_7P5": 1
+          },
+          "entryFees": 331.872502839008,
+          "exitFees": 331.872502839008
+        },
+        "30/true": {
+          "final": 8078.34895701657,
+          "dd": 27.980701599421277,
+          "trades": 39,
+          "wins": 19,
+          "raw": {
+            "R21": 189,
+            "IDLE": 602,
+            "FET": 5
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 10,
+            "FET": 5
+          },
+          "exits": {
+            "R21:TIME": 23,
+            "IDLE:TIME": 7,
+            "FET:STOP": 3,
+            "FET:TIME": 2,
+            "IDLE:STOP": 3,
+            "R21:STOP": 1
+          },
+          "counts": {
+            "BASELINE_OCCUPIED": 20,
+            "SLOT": 135,
+            "IDLE_R26_FILTER": 564,
+            "PREEMPTION_NOT_MODELED": 28,
+            "DAILY_7P5": 1,
+            "STOP_RESERVE": 9
+          },
+          "entryFees": 278.0457559423438,
+          "exitFees": 278.0457559423438
+        }
+      }
+    },
+    {
+      "regime": "PULLBACK",
+      "seed": 2026112802,
+      "cases": {
+        "10/false": {
+          "final": 8017.420592022325,
+          "dd": 20.6641556307266,
+          "trades": 34,
+          "wins": 11,
+          "raw": {
+            "R21": 143,
+            "IDLE": 401,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 10,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "R21:STOP": 3,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 363,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 115,
+            "PREEMPTION_NOT_MODELED": 11,
+            "COOLDOWN": 3
+          },
+          "entryFees": 64.90404731443118,
+          "exitFees": 64.90404731443118
+        },
+        "10/true": {
+          "final": 8017.420592022325,
+          "dd": 20.6641556307266,
+          "trades": 34,
+          "wins": 11,
+          "raw": {
+            "R21": 143,
+            "IDLE": 401,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 10,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "R21:STOP": 3,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 363,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 115,
+            "PREEMPTION_NOT_MODELED": 11,
+            "COOLDOWN": 3
+          },
+          "entryFees": 64.90404731443118,
+          "exitFees": 64.90404731443118
+        },
+        "30/false": {
+          "final": 7778.967325871362,
+          "dd": 22.92029135655369,
+          "trades": 34,
+          "wins": 11,
+          "raw": {
+            "R21": 143,
+            "IDLE": 401,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 10,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 9,
+            "R21:STOP": 3,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 363,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 115,
+            "PREEMPTION_NOT_MODELED": 11,
+            "COOLDOWN": 3
+          },
+          "entryFees": 192.0123566593402,
+          "exitFees": 192.0123566593402
+        },
+        "30/true": {
+          "final": 7597.912227363935,
+          "dd": 24.714317948611598,
+          "trades": 33,
+          "wins": 10,
+          "raw": {
+            "R21": 143,
+            "IDLE": 401,
+            "FET": 0
+          },
+          "entered": {
+            "R21": 24,
+            "IDLE": 9,
+            "FET": 0
+          },
+          "exits": {
+            "IDLE:TIME": 8,
+            "R21:STOP": 3,
+            "R21:TIME": 21,
+            "IDLE:STOP": 1
+          },
+          "counts": {
+            "IDLE_R26_FILTER": 363,
+            "BASELINE_OCCUPIED": 18,
+            "SLOT": 115,
+            "PREEMPTION_NOT_MODELED": 11,
+            "COOLDOWN": 3,
+            "STOP_RESERVE": 1
+          },
+          "entryFees": 179.4176147835255,
+          "exitFees": 179.4176147835255
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "R21 subset of V4; IDLE R26 legacy routes only; FET BRK48; no PENGU Q102 HYPE V52 or legacy V4",
+    "Conservative blocked preemption, no venue depth, funding, tick rounding, signed lifecycle, live API",
+    "5m open/close MTM, daily 7.5% entry latch and shared crypto cap; no formal production parity",
+    "FET profit floor and resident STOP model, source trail functions; IDLE source protection/trail; simulated fills"
+  ],
+  "source_revision": "21d1ef9ac29cfc2e548a5d15b32fc73e2e97f664",
+  "tscExitCode": 0
+}

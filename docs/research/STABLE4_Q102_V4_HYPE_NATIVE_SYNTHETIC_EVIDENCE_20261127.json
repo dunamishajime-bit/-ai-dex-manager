@@ -1,0 +1,343 @@
+{
+  "schema": "stable4-q102-hype-monthly-native-synthetic-evidence/v1",
+  "status": "RESEARCH_ONLY_NOT_CERTIFIED",
+  "source": "scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts",
+  "sourceSha256": "558314c2f6d833ae5491623f99466b20026bc566a9be51eee13ddb4b844f09bd",
+  "outputSha256": "1602cd365774af3c74e1fc730b1bbe7fee62d631c3ab1786efc4dd7f650ab133",
+  "notes": [
+    "Uses live Q102 CAUSAL_V4 family side gross after direct V1 x3 overstated DD; HIGH_VOL LONG=1x SHORT=0.6x. Earlier direct V1 45.9pct not applicable to Q102 V4",
+    "Q102 has 8 monthly-selected samples per 280-day artificial market, 64 decisions total, 4 positions only; cannot conclude DD or win rate reliability",
+    "S34 source selected via native V4 but exit uses conservative H1 stop/hold proxy if selected; no S34 source-native quote/fill parity proof",
+    "HYPE TREND native H1 entry and contract risk/STOP plus ATR-distance FIXED TP, not trailing STOP; no quote, funding, exchange costs beyond fee, unknown venue and exact-session timing",
+    "These are two SEPARATE accounts, not the entire 7-runner production portfolio"
+  ],
+  "summary": {
+    "q102": {
+      "cases": 8,
+      "opened": 4,
+      "wins": 0,
+      "closed": 4,
+      "worstMaxDDPct": 9.18,
+      "minFinalJPY": 9082,
+      "meanFinalJPY": 9616,
+      "positiveCases": 0,
+      "reasonCounts": {
+        "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL": 4,
+        "QUALITY102_CAUSAL_V4_NO_SIGNAL": 60
+      }
+    },
+    "hype": {
+      "cases": 8,
+      "opened": 378,
+      "wins": 108,
+      "closed": 378,
+      "worstMaxDDPct": 28.101311287229112,
+      "minFinalJPY": 8144.801743390659,
+      "meanFinalJPY": 9390.635219373311,
+      "positiveCases": 2,
+      "reasonCounts": {
+        "STOP_RESERVE_2PCT": 143
+      }
+    }
+  },
+  "samples": [
+    {
+      "regime": "BULL",
+      "seed": 2026112711,
+      "hype": {
+        "source": "HYPE",
+        "signals": 113,
+        "opened": 77,
+        "exits": {
+          "STOP": 56,
+          "TAKE_PROFIT": 21
+        },
+        "win": 21,
+        "closed": 77,
+        "terminal": 8144.801743390659,
+        "maxDD": 27.801179151906418,
+        "blocked": {
+          "STOP_RESERVE_2PCT": 36
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 394
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 0,
+        "opened": 0,
+        "exits": {},
+        "win": 0,
+        "closed": 0,
+        "terminal": 10000,
+        "maxDD": 0,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 8
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3921
+      }
+    },
+    {
+      "regime": "BULL",
+      "seed": 2026112767,
+      "hype": {
+        "source": "HYPE",
+        "signals": 117,
+        "opened": 53,
+        "exits": {
+          "STOP": 38,
+          "TAKE_PROFIT": 15
+        },
+        "win": 15,
+        "closed": 53,
+        "terminal": 8934.257299891404,
+        "maxDD": 28.101311287229112,
+        "blocked": {
+          "STOP_RESERVE_2PCT": 64
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 391
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 1,
+        "opened": 1,
+        "exits": {
+          "hard_stop": 1
+        },
+        "win": 0,
+        "closed": 1,
+        "terminal": 9082,
+        "maxDD": 9.18,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 7,
+          "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL": 1
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3724
+      }
+    },
+    {
+      "regime": "BEAR",
+      "seed": 2026112711,
+      "hype": {
+        "source": "HYPE",
+        "signals": 30,
+        "opened": 30,
+        "exits": {
+          "TAKE_PROFIT": 10,
+          "STOP": 20
+        },
+        "win": 10,
+        "closed": 30,
+        "terminal": 10794.191403046954,
+        "maxDD": 14.37412772283767,
+        "blocked": {},
+        "warmupFailures": 0,
+        "runtimeMs": 404
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 0,
+        "opened": 0,
+        "exits": {},
+        "win": 0,
+        "closed": 0,
+        "terminal": 10000,
+        "maxDD": 0,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 8
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3539
+      }
+    },
+    {
+      "regime": "BEAR",
+      "seed": 2026112767,
+      "hype": {
+        "source": "HYPE",
+        "signals": 27,
+        "opened": 27,
+        "exits": {
+          "STOP": 20,
+          "TAKE_PROFIT": 7
+        },
+        "win": 7,
+        "closed": 27,
+        "terminal": 9336.886541527982,
+        "maxDD": 13.113388090107803,
+        "blocked": {},
+        "warmupFailures": 0,
+        "runtimeMs": 356
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 1,
+        "opened": 1,
+        "exits": {
+          "hard_stop": 1
+        },
+        "win": 0,
+        "closed": 1,
+        "terminal": 9082,
+        "maxDD": 9.18,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 7,
+          "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL": 1
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3554
+      }
+    },
+    {
+      "regime": "RANGE",
+      "seed": 2026112711,
+      "hype": {
+        "source": "HYPE",
+        "signals": 78,
+        "opened": 78,
+        "exits": {
+          "STOP": 55,
+          "TAKE_PROFIT": 23
+        },
+        "win": 23,
+        "closed": 78,
+        "terminal": 8998.444148199456,
+        "maxDD": 26.319443087679673,
+        "blocked": {},
+        "warmupFailures": 0,
+        "runtimeMs": 331
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 0,
+        "opened": 0,
+        "exits": {},
+        "win": 0,
+        "closed": 0,
+        "terminal": 10000,
+        "maxDD": 0,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 8
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3791
+      }
+    },
+    {
+      "regime": "RANGE",
+      "seed": 2026112767,
+      "hype": {
+        "source": "HYPE",
+        "signals": 84,
+        "opened": 41,
+        "exits": {
+          "STOP": 30,
+          "TAKE_PROFIT": 11
+        },
+        "win": 11,
+        "closed": 41,
+        "terminal": 9099.232894461895,
+        "maxDD": 28.011445814949344,
+        "blocked": {
+          "STOP_RESERVE_2PCT": 43
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 353
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 1,
+        "opened": 1,
+        "exits": {
+          "hard_stop": 1
+        },
+        "win": 0,
+        "closed": 1,
+        "terminal": 9382,
+        "maxDD": 6.179999999999996,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 7,
+          "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL": 1
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3694
+      }
+    },
+    {
+      "regime": "REVERSAL",
+      "seed": 2026112711,
+      "hype": {
+        "source": "HYPE",
+        "signals": 33,
+        "opened": 33,
+        "exits": {
+          "TAKE_PROFIT": 10,
+          "STOP": 23
+        },
+        "win": 10,
+        "closed": 33,
+        "terminal": 10130.053589470383,
+        "maxDD": 20.071182341721983,
+        "blocked": {},
+        "warmupFailures": 0,
+        "runtimeMs": 344
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 0,
+        "opened": 0,
+        "exits": {},
+        "win": 0,
+        "closed": 0,
+        "terminal": 10000,
+        "maxDD": 0,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 8
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3607
+      }
+    },
+    {
+      "regime": "REVERSAL",
+      "seed": 2026112767,
+      "hype": {
+        "source": "HYPE",
+        "signals": 39,
+        "opened": 39,
+        "exits": {
+          "STOP": 28,
+          "TAKE_PROFIT": 11
+        },
+        "win": 11,
+        "closed": 39,
+        "terminal": 9687.214134997748,
+        "maxDD": 13.95455442203415,
+        "blocked": {},
+        "warmupFailures": 0,
+        "runtimeMs": 343
+      },
+      "q102": {
+        "source": "Q102",
+        "signals": 1,
+        "opened": 1,
+        "exits": {
+          "hard_stop": 1
+        },
+        "win": 0,
+        "closed": 1,
+        "terminal": 9382,
+        "maxDD": 6.179999999999996,
+        "blocked": {
+          "QUALITY102_CAUSAL_V4_NO_SIGNAL": 7,
+          "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL": 1
+        },
+        "warmupFailures": 0,
+        "runtimeMs": 3547
+      }
+    }
+  ]
+}

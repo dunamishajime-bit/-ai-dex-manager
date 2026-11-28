@@ -34,7 +34,11 @@ def main() -> int:
         raise RuntimeError("V4_PREVIEW_DEPENDENCIES_MISSING")
     with tempfile.TemporaryDirectory(prefix="disdex-v4-preview-") as directory:
         preview = Path(directory) / "preview"
-        result = overlay.build(ROOT, preview, "a" * 40)
+        candidate_sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        result = overlay.build_exact_candidate(ROOT, preview, candidate_sha)
+        if result.get("sourceArchiveSha") != candidate_sha:
+            raise RuntimeError("V4_PREVIEW_CANDIDATE_SHA_MISMATCH")
         if result.get("productionRelease") is not False or (preview / ".disdex-release-sha").exists():
             raise RuntimeError("V4_PREVIEW_UNEXPECTED_RELEASE_MARKER")
         names = ("v12-v4-monitor-only.test.ts", "v4-dynamic-evidence-auth-boundary.test.ts",

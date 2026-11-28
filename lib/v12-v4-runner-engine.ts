@@ -101,7 +101,11 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
    !Number.isFinite(now)||now<entryTs)throw Error("V4_EXIT_FEED_WINDOW_INVALID");
  return {fromTs:entryTs,untilTs:Math.min(now,entryTs+durationHours*3600000)};
 }
+import {isAdoptedR21Route} from "./v12-v4-adopted-r21";
+import {observeR21,type R21ObservationInput} from "./stable4-research-decision-observation";
 export interface V4RunnerDependencies{
+ /** Offline observation dependency, never a source of executable candidates. */
+ researchR21Input?:(asof:number)=>Promise<R21ObservationInput|undefined>;
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
  client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory"|"getOrder">;
@@ -146,13 +150,20 @@ export class V4RunnerEngine{
   * This fetch reads completed venue candles only; no signed account state or
   * order mutation may be hoisted out of the protected section.
   */
+ private async fetchDecisionWithObservation():Promise<V4LiveDecisionSnapshot>{
+   const base=await this.deps.fetchDecision();
+   if(!this.deps.researchR21Input)return base;
+   const asof=this.now();
+   try{return {...base,researchR21:observeR21(await this.deps.researchR21Input(asof),asof)};}
+   catch{return {...base,researchR21:observeR21(undefined,asof)};}
+ }
  async prepareFlatMarketDecision():Promise<V4PreparedDecision|undefined>{
   const local=this.deps.store.read();
   if(Object.values(local.intents).some(intent=>intent.stage!=="TERMINAL")||
     Object.values(local.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"))return;
   const preparedAtMs=this.now();
   try{
-   return {kind:"READY",preparedAtMs,decision:await this.deps.fetchDecision()};
+   return {kind:"READY",preparedAtMs,decision:await this.fetchDecisionWithObservation()};
   }catch(error){
    return {kind:"FAILED",preparedAtMs,
     reason:safeDecisionFailureReason(error)};
@@ -536,6 +547,11 @@ export class V4RunnerEngine{
    return {status:"blocked",reason:error.message,eventTs:this.now(),
     candidateCount:decision.candidateCount,orderEnabled:false};
   }
+  // The selected R21 source can enter the normal decision pipeline for
+  // qualification, but the old 41-route certificate or canary cannot
+  // grant it order authority. Keep both new and legacy entries closed
+  // for this selected release until exact new-route certification exists.
+  if(decision.adoptedR21||decision.candidates.some(c=>isAdoptedR21Route(c.route)))return {status:"blocked",reason:"R21_EXACT_NEW_ROUTE_CERT_REQUIRED",eventTs:now,candidateCount:decision.candidateCount,orderEnabled:false};
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
   const executionReview=d.store.read().state.executionReview;
@@ -576,7 +592,7 @@ export class V4RunnerEngine{
    catch(error){
     const reason=error instanceof Error?error.message:String(error);
     if(!["ENTRY_LIVE_OBSERVATION_EXPIRED","COOLDOWN","OPPOSITE_SYMBOL_ACTIVE","PREEMPT_CLOSE_FILL_REQUIRED","RECOVERY_ROUTE_SLOT_OCCUPIED",
-     "MIN_LIFT_BLOCKED","RECOVERY_FAMILY_GROSS_CAP","V12_GROSS_CAP","CRYPTO_GROSS_CAP","TOTAL_GROSS_CAP"].includes(reason))throw error;
+     "R21_SINGLE_SLOT_OCCUPIED","MIN_LIFT_BLOCKED","RECOVERY_FAMILY_GROSS_CAP","V12_GROSS_CAP","CRYPTO_GROSS_CAP","TOTAL_GROSS_CAP"].includes(reason))throw error;
     // This boundary precedes durable intent preparation and every order send.
     // A normal admission hold must not stop reconciliation of existing legs.
     return {status:"blocked",reason:"V4_ENTRY_ADMISSION_HOLD:"+reason,eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
