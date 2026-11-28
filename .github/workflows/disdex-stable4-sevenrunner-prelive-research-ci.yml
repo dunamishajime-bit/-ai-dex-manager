@@ -25,6 +25,9 @@ on:
       - 'scripts/research/stable4_q102_native_full_selector_*.py'
       - 'tests/test_stable4_q102_native_full_s34_*.py'
       - 'scripts/research/stable4_q102_942_ready_native_grid_decision_coverage.py'
+      - 'scripts/research/stable4_dd30_formal_source_drift_owner_review_evidence.py'
+      - 'docs/research/STABLE4_DD30_23_SOURCE_4_SHA_DRIFT_OWNER_REVIEW_20261128.json'
+      - 'tests/test_stable4_dd30_formal_old_source_owner_review_blockers.py'
       - 'docs/research/STABLE4_Q102_942_READY_SOURCE_NATIVE_GRID_*.json'
       - 'tests/test_stable4_q102_942_ready_native_grid_source_coverage.py'
       - 'docs/research/STABLE4_Q102_FULL_SOURCE_S34_*.json'
@@ -88,6 +91,10 @@ jobs:
           # Independently validate 23 exact-byte pins and all original safety tokens.
           # This MUST NOT replace the failing formal historical approval gate.
           python -B -m unittest -v tests.test_stable4_candidate_source_safety_contract
+          # The 2026-11-23 formal 23-file manifest is stale at four exact
+          # source SHAs. Independent audit MUST preserve failing old Owner
+          # boundary; this is a candidate identity, NOT a new approval.
+          python -B -m unittest -v tests.test_stable4_dd30_formal_old_source_owner_review_blockers
           # A partially regenerated/isolated sleeve study cannot stand in for one
           # complete, current-source, shared-wallet seven-runner artificial BT.
           python -B -m unittest -v tests.test_stable4_seven_native_coverage_audit
