@@ -1,0 +1,16 @@
+# STABLE4 DD30 — four-source exact baseline comparison and functional regression
+
+**Status: research-only functional review; NOT an Owner approval, production release certificate, or complete security review.**
+
+Historical 23-file manifest: `docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json`. The old manifest is unchanged. The exact old byte SHA256s of all four changed sources were found in Git commit `672316e4d6f4a9e3a6977a8094048a5c170e80c2` (prior master history). Current candidate is tracked in [STABLE4_DD30_23_SOURCE_4_SHA_DRIFT_OWNER_REVIEW_20261128.json](./STABLE4_DD30_23_SOURCE_4_SHA_DRIFT_OWNER_REVIEW_20261128.json).
+
+| Source | Delta compared with exact old Git content | Offline regression / outstanding formal review |
+| --- | --- | --- |
+| `lib/aster-v3-client.ts` | +22/-13 lines; bounded read-only GET retries for transient 5xx/408/425/abort/invalid JSON. GET 418 never retries; response Retry-After is not truncated below vendor cooldown. | Fake-fetch GET-only tests: 503 → success; malformed JSON → success; 418 one attempt; 429 Retry-After beyond cap one attempt. **No signed request or order call was executed.** Review provider error/clock behavior and global budget integration before signing a new release. |
+| `lib/pengu-dual-ls-v2-portfolio-runner.ts` | +11/-2 lines; opt-in P91 observation added to SHADOW and entry decision telemetry. | Observed signal preserves side, requested gross, native exit object; `researchP91.orderEnabled=false`. With a live position the adapter returns the untouched base signal; missing provider becomes UNAVAILABLE. Optional async research hook latency remains a formal operational review item. |
+| `lib/v12-v4-runner-engine.ts` | +11/-1 lines; opt-in R21 observation wraps `fetchDecision`, retaining native candidate fields. | Result preserves candidate reference, source timestamp and `orderEnabled=false`, and returns UNAVAILABLE on research-source failures. Optional async research hook latency requires a formal operational review. |
+| `lib/v12-v4-shared-reservations.ts` | +2/-2 lines; source Gross gate now imports `STABLE4_V4_ADMISSION_CAPS.v12` and caps crypto 3.0, total 4.25 (previously 3.5 / 4.75). | Test confirms current source `STABLE4_V4_ADMISSION_CAPS={recovery:2.5,v12:2.0,crypto:3.0,total:4.25}`. Gross policy is tighter, but final production account/venue readbacks remain missing. |
+
+New source-specific **6 offline native TypeScript tests**: `tests/stable4-four-formal-source-delta-readonly-regression.test.ts` (all six passed locally on 2026-11-28, no requests to real venues). The complete candidate TypeScript project also passed `tsc --noEmit --incremental false -p tsconfig.json` locally. The research-only prelive CI runs these six tests as an additional source regression and keeps the existing old formal CI unchanged.
+
+**Approval boundary:** 19 other source SHA pins remain identical; the four reviewed behavior classes are not a substitute for full semantic code review, fresh exact-source Owner goal attestation, signed LIVE certificate, complete source-native seven-runner shared-wallet annual backtest, or venue protection-order/fill evidence. Do not update the old 2026-11-23 SHA manifest to force a green formal CI, reuse its old approval, deploy or place test orders. `LIVE_ORDER_PERMIT=FALSE` remains in force.

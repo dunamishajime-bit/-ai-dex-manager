@@ -79,6 +79,7 @@ jobs:
             tests/stable4-public-get-resilience.test.ts \
             tests/stable4-research-runner-observation.test.ts \
             tests/aster-common-read-resilience.test.ts \
+            tests/stable4-four-formal-source-delta-readonly-regression.test.ts \
             tests/disdex-runner-cumulative-dd.test.ts \
             tests/idle-priority-short-signal.test.ts \
             tests/idle-priority-short-live-path.test.ts \
