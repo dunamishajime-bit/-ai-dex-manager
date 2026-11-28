@@ -1,0 +1,32 @@
+{
+  "additionalIncomeCandidates": {
+    "COMMISSION": 12,
+    "REALIZED_PNL": 5
+  },
+  "additionalTradeCandidates": 12,
+  "candidateOwners": {
+    "FET_BRK48_RESIDUAL": 3,
+    "PENGU_DUAL_LS_V2_FINAL": 3,
+    "V12_X1.00_ALL": 6
+  },
+  "combinedTradeMatchesAndCandidates": 134,
+  "formalCertificateIssued": false,
+  "historicalTableEntries": 26,
+  "historicalTableSha256": "d99e79f9921fa3e4e801eced37850120b4b79417e9030d9c8f7967c0d2f90fc0",
+  "limits": [
+    "Historical table exact symbol/order ID joins are candidate attribution, not fresh independent venue proof",
+    "Initial income join used the wrong field name; corrected in separate v2 private evidence without overwriting initial artifact",
+    "State archives contain client order identifiers but have not established official fill ownership for remaining orders",
+    "Funding and rebate ownership unresolved; legacy V12 distinct from V4"
+  ],
+  "notificationConflictCount": 0,
+  "notificationMatchedTradeRows": 122,
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "remainingUnmatchedTrades": 59,
+  "schema": "stable4-mtm-historical-fill-lineage-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "0d9069fa5b1deccf8673e4207e57c02932bcc6c5",
+  "status": "ADDITIONAL_HISTORICAL_OWNER_CANDIDATES_ONLY"
+}
