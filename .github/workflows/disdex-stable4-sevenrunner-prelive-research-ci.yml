@@ -370,6 +370,7 @@ jobs:
             tests/stable4-dd30-owner-hard-gross-candidate.test.ts \
             tests/disdex-runner-cumulative-dd.test.ts \
             tests/stable4-mtm-attribution-review.test.ts \
+            tests/stable4-mtm-income-window-review.test.ts \
             tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
             tests/stable4-seven-runner-dry-coordinator.test.ts \

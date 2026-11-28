@@ -1,0 +1,49 @@
+{
+  "formalCertificateIssued": false,
+  "limitations": [
+    "Bounded diagnostic only; no full income/fill window coverage or historical position marks",
+    "Unknown rebate cannot be discarded or inferred to belong to a Runner",
+    "No verified starting cumulative DD or complete historical ownership ledger",
+    "No attested signed account observation emitted"
+  ],
+  "orderAuthority": false,
+  "queries": {
+    "balances": {
+      "ok": true,
+      "rows": 35
+    },
+    "income_oct27_utc": {
+      "ok": true,
+      "rows": 6,
+      "types": {
+        "APOLLOX_DEX_REBATE_RECOMMENDED": 1,
+        "COMMISSION": 1,
+        "FUNDING_FEE": 3,
+        "REALIZED_PNL": 1
+      }
+    },
+    "income_recent7d": {
+      "ok": true,
+      "rows": 0
+    },
+    "positions": {
+      "nonzero": 0,
+      "ok": true,
+      "rows": 647
+    },
+    "trades_oct27_AAVEUSDT": {
+      "ok": true,
+      "rows": 0
+    },
+    "trades_oct27_NEARUSDT": {
+      "missingIds": 0,
+      "ok": true,
+      "rows": 1
+    }
+  },
+  "runningReleaseSha": "4786f600ae7bf86ffca948f1412956a9113cb20d",
+  "schema": "stable4-mtm-signed-get-coverage/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "2e91603f0fda0f9a3719c35355a37aad2c4e7498",
+  "status": "SIGNED_GET_READBACK_SUCCESS_NOT_COMPLETE_MTM"
+}
