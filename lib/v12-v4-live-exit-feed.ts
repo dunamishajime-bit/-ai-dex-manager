@@ -1,5 +1,6 @@
 /** Causal, journalled H1 exit evaluation for all 41 frozen exit contracts. */
 import {applyProductionEvent,productionExitSpec,HOUR,type H1Bar,type State} from "./v12-v4-production-lifecycle";
+import {isAdoptedR21Route} from "./v12-v4-adopted-r21";
 import type {V4FourRuleM5Bar} from "./v12-v4-four-rule-policy";
 export type V4ExitFeed={closed:H1Bar[];closedM5?:V4FourRuleM5Bar[];nextOpen?:{ts:number;price:number};nextOpens?:{ts:number;price:number}[]};
 export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:number):State{
@@ -9,6 +10,8 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
  if(original.status!=="OPEN"||original.plannedExit)return next;
  if(!Number.isFinite(at)||at<original.entryTs)throw Error("V4_EXIT_FEED_CLOCK_INVALID");
  const spec=productionExitSpec(original.candidate.route);
+ const r21=isAdoptedR21Route(original.candidate.route);
+ if(r21&&feed.closedM5===undefined)throw Error("R21_M5_EXIT_SOURCE_REQUIRED");
  // The four-rule policy is deliberately opt-in at the feed boundary. Legacy
  // callers that only provide the H1 stream retain their old contract; the
  // production runner always supplies closedM5, so missing M5 data there is a
@@ -20,7 +23,8 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
    m5Seen.add(bar.openTs);m5Indexed.set(bar.openTs,bar);
   }
   const m5End=Math.min(at,original.entryTs+spec.hours*HOUR);
-  let m5Ts=original.fourRuleState?.lastM5OpenTs===undefined?original.entryTs:original.fourRuleState.lastM5OpenTs+300_000;
+  const cursor=r21?original.r21LastM5OpenTs:original.fourRuleState?.lastM5OpenTs;
+  let m5Ts=cursor===undefined?original.entryTs:cursor+300_000;
   while(m5Ts+300_000<=at&&m5Ts<m5End){
    const bar=m5Indexed.get(m5Ts);
    if(!bar)throw Error("V4_EXIT_FEED_M5_GAP:"+m5Ts);

@@ -18,6 +18,7 @@ const H=3600000;
 const TWO_HOURS=2*H;
 export type V4LiveDecisionSnapshot={
  researchR21?:R21Observation;
+ adoptedR21?:{policy:"R21_ONE";sourceStatus:"AVAILABLE"|"UNAVAILABLE";legacyCertificateAccepted:false};
  schema:"v12-v4-live-decision/v1";policyId:typeof V12_V4_V2_POLICY;decisionTs:number;capturedAtMs:number;
  sourceFingerprint:string;candidateCount:number;filteredCount:number;
  sourceCount:number;nativeCoreEvents:NativeCoreEvent[];entryAtrByCandidate:Record<string,number>;errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;

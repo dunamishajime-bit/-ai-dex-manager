@@ -4,6 +4,13 @@ import {constants} from "node:fs";
 import {createPublicKey,verify} from "node:crypto";
 export const IDLE_R26_ENTRY_CERT_SCHEMA="disdex-idle-r26-live-entry-certificate/v2" as const;
 export const IDLE_R26_TRUSTED_ISSUER_PUBLIC_KEY="/etc/disdex/attestation/idle-r26-issuer-ed25519.pem";
+export function resolveIdleR26EntrySelection(input:{mode:"SHADOW"|"LIVE";required:boolean;certifiedFlag:boolean}){
+ const selected=input.required||input.certifiedFlag;
+ return {applyR26:input.mode!=="LIVE"||selected,
+  requireCertificate:input.mode==="LIVE"&&selected,
+  held:input.mode==="LIVE"&&selected&&!input.certifiedFlag,
+  allowIndependentRender:!selected};
+}
 export type IdleR26EntryCert={
  schema:typeof IDLE_R26_ENTRY_CERT_SCHEMA;approvedSha:string;ownerAcknowledgement:string;
  policy:"IDLE_R26_REMOVE_RENDER_TAO12H_JUP_REL24_VOL";

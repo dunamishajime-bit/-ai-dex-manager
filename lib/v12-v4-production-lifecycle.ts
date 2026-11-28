@@ -8,6 +8,7 @@ import {observeV4FourRuleH1,observeV4FourRuleM5,createV4FourRuleState,type V4Fou
  * confirmed by run_v12_logic_dissection.initialize; pure protectiveLevels/nextTrailingStop are reused.
  */
 import { protectiveLevels, nextTrailingStop } from "./v12-x1-all";
+import {isAdoptedR21Route,adoptedR21HoldHours,adoptedR21CandidateIdentity,adoptedR21M5Exit,R21_GROSS,R21_COOLDOWN_MS} from "./v12-v4-adopted-r21";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { normalizeDisDexV96OrderQuantity } from "./disdex-v96-order-quantity";
 import { V12_V4_ROUTE_CATALOG, type V12V4ShadowCandidate } from "./v12-multilogic-v4-shadow";
@@ -20,6 +21,9 @@ export type ExitSpec = { kind: "TIME"; hours: number } |
   { kind: "ATR"; hours: number; tp: number; sl: number } |
   { kind: "NATIVE"; hours:number; source:"WR60_BASELINE_1978_PARITY" };
 export function productionExitSpec(routeName: string): ExitSpec {
+  // Preserve the original 41-route certificate catalog. R21 is a distinct
+  // adopted candidate contract; it has no legacy certificate authority.
+  if(isAdoptedR21Route(routeName))return {kind:"TIME",hours:adoptedR21HoldHours(routeName)};
   const r = V12_V4_ROUTE_CATALOG.find(r => r.route === routeName);
   if (!r) throw Error("UNKNOWN_ROUTE");
   const override = V12_V4_SECOND_PASS_REPAIRS[routeName]?.hours ?? V12_V4_FIRST_PASS_REPAIRS[routeName]?.hours;
@@ -48,6 +52,7 @@ export type Leg = {
   lastExitBarTs?: number; plannedExit?: ExitDecision;
   nativeExitEvidence?:"WR60_BASELINE_1978_PARITY"; nativeStop?:number; nativePeak?:number; previousExitBar?:H1Bar;
   fourRuleState?:V4FourRuleState;
+  r21LastM5OpenTs?:number;
 };
 export type ExitDecision = { exitTs: number; price: number; reason: string; priceModelOnly: true };
 function positive(n: number, label: string) {
@@ -79,6 +84,7 @@ export function evaluateProductionExit(leg: Leg, bar: H1Bar, evaluatedAt: number
       return { exitTs: bar.openTs + HOUR, price: tp, reason: "TP", priceModelOnly: true };
   }
   if (bar.openTs + HOUR === end) {
+    if(isAdoptedR21Route(leg.candidate.route)&&leg.r21LastM5OpenTs!==end-300000)throw Error("R21_M5_EXIT_COVERAGE_REQUIRED");
     if (!nextOpen || nextOpen.ts !== end || nextOpen.ts > evaluatedAt) throw Error("EXIT_NEXT_OPEN_MISSING");
     positive(nextOpen.price, "NEXT_OPEN");
     return { exitTs: end, price: nextOpen.price, reason: "TIME", priceModelOnly: true };
@@ -145,6 +151,9 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
   if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts ||
       (c.effectiveSide==="SHORT"&&(state.cooldown[c.symbol+":SHORT"]??0)>input.ts)) throw Error("COOLDOWN");
+  const r21=isAdoptedR21Route(c.route);
+  if(r21&&!adoptedR21CandidateIdentity(c))throw Error("R21_FROZEN_CANDIDATE_CONTRACT");
+  if(r21&&(state.cooldown[c.symbol+":R21"]??0)>input.ts)throw Error("COOLDOWN");
   const spec = productionExitSpec(c.route);
   if(spec.kind==="NATIVE"&&(input.nativeExitEvidence!==spec.source||input.ts%(2*HOUR)!==0))throw Error("NATIVE_SOURCE_ATR_EVIDENCE_REQUIRED");
   if (spec.kind==="ATR"||spec.kind==="NATIVE") positive(input.entryAtr!, "ENTRY_ATR");
@@ -155,6 +164,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
     throw Error(c.family==="RECOVERY_Y_REVERSAL"&&active.filter(x=>x.candidate.symbol===c.symbol&&x.candidate.effectiveSide!==c.effectiveSide)
       .every(x=>["RECOVERY_X","RECOVERY_G"].includes(x.candidate.family)) ? "PREEMPT_CLOSE_FILL_REQUIRED" : "OPPOSITE_SYMBOL_ACTIVE");
   }
+  if(r21&&active.some(x=>isAdoptedR21Route(x.candidate.route)))throw Error("R21_SINGLE_SLOT_OCCUPIED");
   if (c.family.startsWith("RECOVERY_")&&active.filter(x=>x.candidate.route===c.route).length>=16) throw Error("RECOVERY_ROUTE_SLOT_OCCUPIED");
   const equity = state.equityUsd;
   positive(input.referencePrice, "REFERENCE_PRICE");
@@ -162,7 +172,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   const requested = c.requestedGross*equity;
   const minGross = input.minimumOrderNotionalUsd/equity;
   const catalog = V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route)!;
-  if (requested<input.minimumOrderNotionalUsd && (catalog.minlift==="NO"||minGross>0.30)) throw Error("MIN_LIFT_BLOCKED");
+  if (requested<input.minimumOrderNotionalUsd && (r21||catalog.minlift==="NO"||minGross>0.30)) throw Error("MIN_LIFT_BLOCKED");
   const notional = Math.max(requested,input.minimumOrderNotionalUsd);
   const p = await normalizeDisDexV96OrderQuantity({
     executor: input.quantityNormalizer, symbol:c.symbol, side:c.effectiveSide==="LONG"?"BUY":"SELL",
@@ -232,13 +242,15 @@ function applyEvent(state: State, event: Event, historicalReplay:boolean): State
   } else if (event.type==="RESERVE") {
     const l=event.leg,c=l.candidate, catalog=V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route);
     positive(l.requestedQty,"RESERVED_QTY");positive(l.reservationUsd,"RESERVED_USD");
-    if (!catalog || c.family!==catalog.family || l.id!==key(c) || l.status!=="PENDING_ENTRY" || l.qty!==0 || l.entryNotional!==0 ||
+    const r21=isAdoptedR21Route(c.route);
+    if ((!r21&&(!catalog||c.family!==catalog.family)) || (r21&&!adoptedR21CandidateIdentity(c)) || l.id!==key(c) || l.status!=="PENDING_ENTRY" || l.qty!==0 || l.entryNotional!==0 ||
       l.entryTs!==c.eligibleEntryTs || event.ts<l.entryTs || event.ts-l.entryTs>15*60_000 || c.orderEnabled!==false || c.shadow!==true ||
       !Number.isFinite(c.requestedGross) || c.requestedGross<=0 || c.requestedGross>1 || l.exitRemainingQty!==0 ||
       l.realizedUsd!==0 || l.feesUsd!==0 || l.fundingUsd!==0 ||
       (productionExitSpec(c.route).kind==="NATIVE"&&(l.nativeExitEvidence!=="WR60_BASELINE_1978_PARITY"||!l.entryAtr||l.entryTs%(2*HOUR)!==0))) throw Error("INVALID_RESERVATION");
     const active=Object.values(next.legs).filter(x=>x.status!=="CLOSED"&&x.status!=="CANCELLED");
-    if(active.some(x=>x.candidate.symbol===c.symbol&&x.candidate.effectiveSide!==c.effectiveSide) ||
+    if((r21&&(active.some(x=>isAdoptedR21Route(x.candidate.route))||(next.cooldown[c.symbol+":R21"]??0)>event.ts||l.reservationUsd>next.equityUsd*R21_GROSS+1e-8)) ||
+      active.some(x=>x.candidate.symbol===c.symbol&&x.candidate.effectiveSide!==c.effectiveSide) ||
       (recovery(l)&&active.filter(x=>x.candidate.route===c.route).length>=16) ||
       (next.cooldown[c.symbol+":"+c.route]??0)>event.ts ||
       (c.effectiveSide==="SHORT"&&(next.cooldown[c.symbol+":SHORT"]??0)>event.ts)) throw Error("RESERVATION_OWNERSHIP_RECHECK_FAILED");
@@ -257,22 +269,29 @@ function applyEvent(state: State, event: Event, historicalReplay:boolean): State
       if(l.status!=="OPEN"||l.plannedExit)throw Error("INVALID_EXIT_BAR_STATE");
       if(event.ts<event.bar.openTs+HOUR || event.ts-event.bar.openTs>72*HOUR || event.bar.openTs!==(l.lastExitBarTs===undefined?l.entryTs:l.lastExitBarTs+HOUR)) throw Error("EXIT_BAR_STREAM_GAP");
       const decision=evaluateProductionExit(l,event.bar,event.ts,event.nextOpen);
-      const policy=observeV4FourRuleH1({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
+      const policy=isAdoptedR21Route(l.candidate.route)?undefined:observeV4FourRuleH1({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
        fill:l.entryNotional/l.qty,state:l.fourRuleState??createV4FourRuleState(),bar:{...event.bar,observedAt:event.ts}});
-      l.fourRuleState=policy.state;
+      if(policy)l.fourRuleState=policy.state;
       if(productionExitSpec(l.candidate.route).kind==="NATIVE"){
         const n=evaluateNativeProductionExit(l,event.bar,event.ts,event.nextOpen);l.nativeStop=n.stop;l.nativePeak=n.peak;l.previousExitBar=event.bar;
       }
       l.lastExitBarTs=event.bar.openTs;
       if(decision)l.plannedExit=decision;
-      else if(policy.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
+      else if(policy?.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
     } else if (event.type==="M5_POLICY_BAR") {
       if(l.status!=="OPEN"||l.plannedExit)throw Error("INVALID_M5_POLICY_BAR_STATE");
       if(event.bar.openTs+300_000>event.ts)throw Error("V4_FOUR_RULE_M5_EVENT_NOT_CLOSED");
-      const policy=observeV4FourRuleM5({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
-       fill:l.entryNotional/l.qty,state:l.fourRuleState??createV4FourRuleState(),bar:event.bar});
-      l.fourRuleState=policy.state;
-      if(policy.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
+      if(isAdoptedR21Route(l.candidate.route)){
+       const expected=l.r21LastM5OpenTs===undefined?l.entryTs:l.r21LastM5OpenTs+300000;
+       const decision=adoptedR21M5Exit(l.candidate.route,l.entryTs,l.entryNotional/l.qty,event.bar,expected,event.ts);
+       l.r21LastM5OpenTs=event.bar.openTs;
+       if(decision)l.plannedExit=decision;
+      }else{
+       const policy=observeV4FourRuleM5({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
+        fill:l.entryNotional/l.qty,state:l.fourRuleState??createV4FourRuleState(),bar:event.bar});
+       l.fourRuleState=policy.state;
+       if(policy.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
+      }
     } else if (event.type==="ENTRY_FILL") {
       positive(event.qty,"FILL_QTY");positive(event.price,"FILL_PRICE");
       if (l.status!=="PENDING_ENTRY" || l.qty+event.qty>l.requestedQty+1e-12 ||
@@ -292,11 +311,16 @@ function applyEvent(state: State, event: Event, historicalReplay:boolean): State
       if(l.status!=="PENDING_EXIT"||event.qty>l.exitRemainingQty+1e-12||event.qty>l.qty+1e-12||
         !Number.isFinite(event.feeUsd)||event.feeUsd<0||!Number.isFinite(event.cooldownUntil)||event.cooldownUntil<event.ts||
         (event.actualFillTs!==undefined&&(!Number.isFinite(event.actualFillTs)||event.actualFillTs<l.entryTs||event.actualFillTs>event.ts))) throw Error("INVALID_EXIT_FILL");
+      if(isAdoptedR21Route(l.candidate.route)&&event.actualFillTs===undefined)throw Error("R21_ACTUAL_CLOSE_FILL_CLOCK_REQUIRED");
       const basis=l.entryNotional/l.qty, sg=l.candidate.effectiveSide==="LONG"?1:-1;
       l.realizedUsd+=sg*(event.price-basis)*event.qty;l.entryNotional-=basis*event.qty;
       l.qty-=event.qty;l.exitRemainingQty-=event.qty;l.feesUsd+=event.feeUsd;
       if(l.qty<=1e-12){l.qty=0;l.entryNotional=0;l.status="CLOSED";
-       if(event.routeCooldown!==false)next.cooldown[l.candidate.symbol+":"+l.candidate.route]=event.cooldownUntil;
+       if(isAdoptedR21Route(l.candidate.route)){
+        const previous=next.journal.filter((e):e is Extract<Event,{type:"EXIT_FILL"}>=>e.type==="EXIT_FILL"&&e.id===l.id);
+        const closeTs=Math.max(event.actualFillTs!,...previous.map(e=>e.actualFillTs??0));
+        next.cooldown[l.candidate.symbol+":R21"]=Math.max(next.cooldown[l.candidate.symbol+":R21"]??0,closeTs+R21_COOLDOWN_MS);
+       }else if(event.routeCooldown!==false)next.cooldown[l.candidate.symbol+":"+l.candidate.route]=event.cooldownUntil;
        if(event.cooldownKey)next.cooldown[event.cooldownKey]=event.cooldownUntil;
       }
       else if(l.exitRemainingQty<=1e-12){l.exitRemainingQty=0;l.status="OPEN";}

@@ -18,7 +18,7 @@ import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-a
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import {evaluateIdleLatestFromClosedMarket} from "./stable4-idle-research-policy";
-import {assertRootOwnedIdleR26EntryCertificate} from "./idle-r26-entry-certificate";
+import {assertRootOwnedIdleR26EntryCertificate,resolveIdleR26EntrySelection} from "./idle-r26-entry-certificate";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
@@ -895,10 +895,14 @@ export class IdlePriorityShortRunner {
             // STABLE4 R26 candidate-only admission. SHADOW/PAPER exercise the
             // newest research policy. LIVE awaits a root-owned exact-SHA
             // parity certificate; neither exits nor legacy owned legs change.
-            const latestResearchOnly = this.dependencies.runtime.mode !== "LIVE" || this.dependencies.runtime.r26LiveCertified;
-            // Exit and resident STOP reconciliation happened above. A missing
-            // R26 certificate can only suppress a NEW LIVE entry, never an exit.
-            if(this.dependencies.runtime.mode==="LIVE" && this.dependencies.runtime.r26LiveCertified){
+            const r26Selection=resolveIdleR26EntrySelection({mode:this.dependencies.runtime.mode,
+                required:this.dependencies.runtime.r26Required,certifiedFlag:this.dependencies.runtime.r26LiveCertified});
+            // Existing positions and resident STOP reconciliation happened above.
+            // An explicitly selected R26 release cannot silently trade legacy
+            // routes or independent RENDER when the new approval is missing.
+            if(r26Selection.held)return {status:"held",message:"IDLE_R26_SELECTED_CERT_REQUIRED",
+                ordersSent:0,cancelsSent:0,positionChangesSent:0};
+            if(r26Selection.requireCertificate){
                 try {await assertRootOwnedIdleR26EntryCertificate(
                   this.dependencies.runtime.r26EntryCertPath,this.dependencies.runtime.runtimeSha);
                 }catch(error){
@@ -907,7 +911,7 @@ export class IdlePriorityShortRunner {
                     ordersSent:0,cancelsSent:0,positionChangesSent:0};
                 }
             }
-            const selectedRoutes = latestResearchOnly
+            const selectedRoutes = r26Selection.applyR26
                 ? routeCandidates.filter(row=>evaluateIdleLatestFromClosedMarket({
                     decisionTs:market.decisionTs,btc:market.btc,tao:market.symbols.TAOUSDT,
                   },{route:IDLE_PRIORITY_SHORT_POLICY.routes[row.symbol].route,
@@ -919,7 +923,7 @@ export class IdlePriorityShortRunner {
             // hypothetical outcomes are required; default LIVE switch is OFF.
             const independentFeatures = diagnosticSymbols.find(row=>row.symbol==="RENDERUSDT")?.features;
             const independentCandidate: IdleSignal|undefined =
-                this.dependencies.runtime.renderIndependentLiveAuthorized &&
+                r26Selection.allowIndependentRender && this.dependencies.runtime.renderIndependentLiveAuthorized &&
                 renderShadowDecision?.priority.accepted===true &&
                 independentFeatures?.decisionTs===market.decisionTs &&
                 this.candidateLifecycleAllows(state,{symbol:"RENDERUSDT",features:independentFeatures})
@@ -932,12 +936,12 @@ export class IdlePriorityShortRunner {
                     lastDecision: {
                         decisionTs: market.decisionTs,
                         accepted: false,
-                        reason: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "NO_GENERIC_IDLE_CANDIDATE",
+                        reason: routeCandidates.length && !selectedRoutes.length ? "IDLE_R26_POLICY_FILTERED" : routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "NO_GENERIC_IDLE_CANDIDATE",
                     },
                 });
                 return {
                     status: "no-change",
-                    message: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "IDLE_NO_GENERIC_CANDIDATE",
+                    message: routeCandidates.length && !selectedRoutes.length ? "IDLE_R26_POLICY_FILTERED" : routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "IDLE_NO_GENERIC_CANDIDATE",
                     ordersSent: 0,
                     cancelsSent: 0,
                     positionChangesSent: 0,

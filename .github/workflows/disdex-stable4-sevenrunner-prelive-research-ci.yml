@@ -76,6 +76,8 @@ jobs:
             tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/stable4-source-only-stop-reserve.test.ts \
             tests/stable4-source-only-seven-runner-stop-headroom.test.ts \
+            tests/v12-v4-adopted-r21.test.ts \
+            tests/idle-r26-selected-release.test.ts \
             tests/idle-r26-entry-certificate.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
             tests/stable4-q102-hype-risk-policy-contract.test.ts \

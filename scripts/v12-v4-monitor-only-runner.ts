@@ -4,6 +4,8 @@ import { dirname } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
+import {attachAdoptedR21CandidateBatch} from "../lib/v12-v4-adopted-r21";
+import {readR21Observation} from "../lib/stable4-observation-snapshot";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
 import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, readV4StalePendingProofIfNeeded, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
@@ -55,6 +57,10 @@ async function decision(client:AsterV3Client,now:number){
    refs.set(event.symbol+"|"+event.entry_ts_ms,Number(opened[1]));
   }
   value=attachV4NativeCoreCandidates(value,bars,refs);
+ }
+ if(process.env.DISDEX_STABLE4_V4_ENTRY_POLICY==="R21_ONE"){
+  const source=process.env.DISDEX_STABLE4_RESEARCH_OBSERVATION_PATH,at=Date.now();
+  value=attachAdoptedR21CandidateBatch(value,source?await readR21Observation(source,releaseSha(),at):undefined,bars,at);
  }
  return value;
 }
