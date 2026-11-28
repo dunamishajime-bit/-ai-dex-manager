@@ -1,9 +1,11 @@
 import unittest
+from unittest.mock import patch
+import hashlib
 import sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts/ops/deploy"))
-from stable4_adopted_monitor_bundle import render
+from stable4_adopted_monitor_bundle import render, bind_pengu_instance
 
 class TestMonitorBundle(unittest.TestCase):
     def test_exact_sha_observer_and_policy_selection(self):
@@ -85,6 +87,7 @@ class TestMonitorBundle(unittest.TestCase):
             self.assertIn("DISDEX_H48_MODE=SHADOW ",line)
             self.assertIn("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json ",line)
             self.assertIn("--protected-stop8-shadow",line)
+            self.assertIn("DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock ",line)
 
     def test_observer_uses_same_sha_broker_without_credentials_or_direct_fallback(self):
         unit=render("a"*40)["files"]["disdex-stable4-market-observer@.service"]
@@ -100,6 +103,23 @@ class TestMonitorBundle(unittest.TestCase):
         self.assertIn("InaccessiblePaths=/etc/disdex",unit)
         self.assertIn("ProtectSystem=strict",unit)
         self.assertIn("scripts/stable4-market-observe.ts %i /var/lib/disdex/stable4-observation/%i/snapshot.json",launch)
+
+    def test_pengu_instance_explicit_safety_writer_pins(self):
+        sha="a"*40
+        margin="disdex-v12-v52-margin-guard@"+"b"*40+".service"
+        risk="disdex-shared-crypto-risk@"+"c"*40+".service"
+        raw=b"[Unit]\nAfter=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service\nWants=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service\n"
+        with patch("stable4_adopted_monitor_bundle.PENGU_TEMPLATE_SHA256",hashlib.sha256(raw).hexdigest()):
+            bundle=render(sha,pengu_template=raw,margin_unit=margin,risk_unit=risk)
+            self.assertTrue(bundle["connectionPlan"]["penguInstanceBoundToExistingWriters"])
+            self.assertFalse(bundle["connectionPlan"]["preStartBlockers"])
+            unit=bundle["files"]["disdex-pengu-dual-ls-v2@"+sha+".service"]
+            self.assertIn("After=network-online.target "+risk+" "+margin,unit)
+            self.assertNotIn("disdex-shared-crypto-risk@%i.service",unit)
+            with self.assertRaises(ValueError):bind_pengu_instance(sha,raw+b" ",margin,risk)
+            with self.assertRaises(ValueError):bind_pengu_instance(sha,raw,margin.replace("b"*40,sha),risk)
+        self.assertTrue(render(sha)["connectionPlan"]["preStartBlockers"])
+        with self.assertRaises(ValueError):render(sha,pengu_template=raw)
 
     def test_bad_sha_rejected(self):
         for bad in ("master","../other","a"*39,"a"*40+";"):

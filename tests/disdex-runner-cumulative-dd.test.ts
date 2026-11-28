@@ -74,3 +74,8 @@ test("nonfinite clock, corrupted proof and denominator never qualify a runner",(
  }
  assert.equal(evaluateRunnerDdEntry({...s,releaseSha:"bad"},"V4",t+1,"bad").status,"BLOCKED");
 });
+
+test("missing runner map returns a blocked diagnostic rather than throwing",()=>{
+ const s=initializeRunnerCumulativeDd(obs(t,1000,zero()));
+ assert.equal(evaluateRunnerDdEntry({...s,runners:undefined} as any,"V4",t+1,sha).status,"BLOCKED");
+});

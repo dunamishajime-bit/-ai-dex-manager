@@ -109,7 +109,7 @@ export function evaluateRunnerDdEntry(
     ||atMs<state.updatedAt||atMs-state.updatedAt>maxAgeMs
     ||!eligible(maxAgeMs)||!eligible(maximumDd)||maximumDd>1)
     return block("RUNNER_DD_STALE_OR_INVALID");
-  const r=state.runners[runner];
+  const r=state.runners?.[runner];
   if(!r||!valid(r.maximumDd)||!valid(r.currentDd)||!eligible(r.peak)
     ||!eligible(r.index)||r.peak<r.index||r.currentDd<0
     ||r.maximumDd<r.currentDd-1e-12||r.maximumDd>1

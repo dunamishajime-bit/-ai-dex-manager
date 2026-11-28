@@ -5,14 +5,37 @@ This is not the historic fixed-SHA cutover helper and never activates a runner.
 from __future__ import annotations
 import argparse
 import json
+import hashlib
 import re
 from pathlib import Path
-from disdex_stable4_dd30_monitor_cutover import dropin_text
+from disdex_stable4_dd30_monitor_cutover import dropin_text, PENGU_TEMPLATE_SHA256
 
 ROOT = Path(__file__).resolve().parents[3]
 SHA = re.compile(r"^[a-f0-9]{40}$")
 
-def render(sha: str) -> dict:
+def bind_pengu_instance(sha: str, raw: bytes, margin: str, risk: str) -> str:
+    """Bind the audited template to existing canonical writers; no installation."""
+    if not SHA.fullmatch(sha):
+        raise ValueError("EXACT_CANDIDATE_SHA_REQUIRED")
+    for unit, family in ((margin, "disdex-v12-v52-margin-guard"), (risk, "disdex-shared-crypto-risk")):
+        match = re.fullmatch(re.escape(family) + r"@([a-f0-9]{40})\.service", unit)
+        if not match or match.group(1) == sha:
+            raise ValueError("PENGU_EXISTING_SAFETY_WRITER_REQUIRED")
+    if hashlib.sha256(raw).hexdigest() != PENGU_TEMPLATE_SHA256:
+        raise ValueError("PENGU_TEMPLATE_SHA_MISMATCH")
+    text = raw.decode("utf-8")
+    previous = "network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service"
+    updated = "network-online.target " + risk + " " + margin
+    for key in ("After=", "Wants="):
+        if text.count(key+previous) != 1:
+            raise ValueError("PENGU_TEMPLATE_DEPENDENCIES_UNEXPECTED")
+        text = text.replace(key+previous, key+updated, 1)
+    if "disdex-shared-crypto-risk@%i.service" in text or "disdex-v12-v52-margin-guard@%i.service" in text:
+        raise ValueError("PENGU_SAME_SHA_WRITER_REMAINS")
+    return text
+
+def render(sha: str, *, pengu_template: bytes | None = None,
+           margin_unit: str | None = None, risk_unit: str | None = None) -> dict:
     if not SHA.fullmatch(sha):
         raise ValueError("EXACT_CANDIDATE_SHA_REQUIRED")
     source = f"/var/lib/disdex/stable4-observation/{sha}/snapshot.json"
@@ -85,6 +108,12 @@ def render(sha: str) -> dict:
         if runner != "IDLE_PRIORITY_SHORT":
             lines.insert(lines.index("[Service]"), "Wants="+timer)
         files[unit+".d/90-adopted-monitor.conf"] = "\n".join(lines)+"\n"
+    supplied = (pengu_template is not None, margin_unit is not None, risk_unit is not None)
+    if any(supplied) and not all(supplied):
+        raise ValueError("PENGU_TEMPLATE_AND_BOTH_EXISTING_WRITERS_REQUIRED")
+    if all(supplied):
+        files[f"disdex-pengu-dual-ls-v2@{sha}.service"] = bind_pengu_instance(
+            sha, pengu_template, margin_unit, risk_unit)
     names=("disdex-stable4-market-observer@.service",
            "disdex-stable4-market-observer@.timer","disdex-h48-stop8-shadow@.service")
     for name in names:
@@ -100,7 +129,12 @@ def render(sha: str) -> dict:
         "installBeforeAnyStart": sorted(files),
         "startOrder": [timer, *runner_units, h48],
         "stopOrder": [h48, *reversed(runner_units), timer, observer],
-        "requiredExternalUnits": [f"disdex-v4-rate-budget-broker@{sha}.service"],
+        "requiredExternalUnits": [f"disdex-v4-rate-budget-broker@{sha}.service"] + ([margin_unit, risk_unit] if all(supplied) else []),
+        "penguInstanceBoundToExistingWriters": all(supplied),
+        "preStartBlockers": ([] if all(supplied) else ["PENGU_EXACT_INSTANCE_AND_EXISTING_WRITER_PINS_REQUIRED"]),
+        "preStartRequirements": ["EXACT_CANDIDATE_OWNER_MONITOR_PLAN", "EXISTING_RUNNER_STATE_AND_PROTECTION_RECONCILED",
+                                 "SINGLE_CANDIDATE_BROKER", "PENGU_EFFECTIVE_SAFETY_DEPENDENCIES_MATCH_EXISTING_PINS",
+                                 "LEGACY_HYPE_INACTIVE_AND_H48_OWNERSHIP_RECONCILED"],
         "observationPath": source,
         "requiresSeparateOwnerApprovedMonitorPlan": True,
         "automaticActivation": False,
@@ -125,4 +159,9 @@ def render(sha: str) -> dict:
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--sha",required=True)
-    print(json.dumps(render(parser.parse_args().sha),indent=2,sort_keys=True))
+    parser.add_argument("--pengu-template",type=Path)
+    parser.add_argument("--margin-unit")
+    parser.add_argument("--risk-unit")
+    args=parser.parse_args()
+    print(json.dumps(render(args.sha,pengu_template=args.pengu_template.read_bytes() if args.pengu_template else None,
+                            margin_unit=args.margin_unit,risk_unit=args.risk_unit),indent=2,sort_keys=True))
