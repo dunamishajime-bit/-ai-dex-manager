@@ -1,0 +1,37 @@
+{
+  "candidateCount": 47,
+  "candidateOwnerCounts": {
+    "IDLE_PRIORITY_SHORT": 15,
+    "PENGU_DUAL_LS_V2_FINAL": 12,
+    "V12_X1.00_ALL": 20
+  },
+  "closedMatchedIntervals": 45,
+  "completedNonemptyWindows": 10,
+  "exactUniqueIds": 145,
+  "formalCertificateIssued": false,
+  "fundingRows": 145,
+  "lastEmptyWindow": {
+    "previousRows": 0,
+    "requeryBlockedByRateBudget": true
+  },
+  "limitations": [
+    "All previously observed Funding rows recovered exactly, final zero-row window not rechecked",
+    "Candidate ownership based on exact notification and closed fill intervals is not independent proof of initial flatness or complete venue history",
+    "Legacy V12 cannot be assigned to V4",
+    "Rebates have no linked trade ID; classification unresolved",
+    "No attested account marks, external flows or continuous DD baseline"
+  ],
+  "notificationMatchedTradeRows": 122,
+  "notificationUnmatchedTradeRows": 71,
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "priorNonIdFieldsMatch": true,
+  "rebateRows": 132,
+  "rebateTradeIdsPresent": 0,
+  "schema": "stable4-mtm-funding-exact-id-owner-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "98a1df657b16cbc87479507aa50c129de160e01f",
+  "status": "ALL_PRIOR_FUNDING_ROWS_EXACT_IDS_RECOVERED_OWNER_CANDIDATES_ONLY",
+  "unresolvedCount": 98
+}
