@@ -6,7 +6,9 @@ import test from "node:test";
 import {AsterV3Client} from "../lib/aster-v3-client";
 import {PenguDualLsV2PortfolioRunner} from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
-import {STABLE4_V4_ADMISSION_CAPS} from "../lib/v12-v4-production-lifecycle";
+import {STABLE4_V4_ADMISSION_CAPS,createProductionState,planProductionEntry} from "../lib/v12-v4-production-lifecycle";
+import {adaptProductionCandidates} from "../lib/v12-v4-production-features";
+import fixture from "./fixtures/v12-v4-native-route-20261009.json";
 import {initial} from "../lib/stable4-research-decision-observation";
 
 const H=3_600_000, M5=300_000;
@@ -100,4 +102,33 @@ test("V4 shared Gross source policy matches strict runtime admission cap 2/3/4.2
   assert.deepEqual(STABLE4_V4_ADMISSION_CAPS,{recovery:2.5,v12:2.0,crypto:3.0,total:4.25});
   assert.ok(STABLE4_V4_ADMISSION_CAPS.crypto < 3.5);
   assert.ok(STABLE4_V4_ADMISSION_CAPS.total < 4.75);
+});
+
+
+test("V4 native planning rejects crypto exposure above 3.0x before any order path",async()=>{
+  const state=createProductionState({equityUsd:1000,holdProtected:false,
+    foreign:[{owner:"PENGU_SOURCE_ONLY",symbol:"PENGUUSDT",side:"SHORT",
+      crypto:true,qty:1,gross:2.8,pendingGross:0}]});
+  const native=adaptProductionCandidates({...fixture,source:{...fixture.source,
+    side:"SHORT",sourceEngine:"buildV12Signals"}}).candidates[0];
+  const candidate={...native,eligibleEntryTs:t,sourceSignalTs:t,requestedGross:.5};
+  const normalizer:any={normalizeMarketQuantity:async (_s:string,q:number,p:number)=>
+    ({quantity:q,quantityText:String(q),notional:q*p})};
+  await assert.rejects(planProductionEntry(state,{candidate,ts:t,observedAtMs:t,
+    eventId:"offline-crypto-cap",referencePrice:100,minimumOrderNotionalUsd:5,
+    quantityNormalizer:normalizer}),/CRYPTO_GROSS_CAP/);
+});
+
+test("V4 native planning rejects aggregate Gross above 4.25x with stock exposure",async()=>{
+  const state=createProductionState({equityUsd:1000,holdProtected:false,
+    foreign:[{owner:"V52_SOURCE_ONLY",symbol:"AMZNUSDT",side:"SHORT",
+      crypto:false,qty:1,gross:4.1,pendingGross:0}]});
+  const native=adaptProductionCandidates({...fixture,source:{...fixture.source,
+    side:"SHORT",sourceEngine:"buildV12Signals"}}).candidates[0];
+  const candidate={...native,eligibleEntryTs:t,sourceSignalTs:t,requestedGross:.5};
+  const normalizer:any={normalizeMarketQuantity:async (_s:string,q:number,p:number)=>
+    ({quantity:q,quantityText:String(q),notional:q*p})};
+  await assert.rejects(planProductionEntry(state,{candidate,ts:t,observedAtMs:t,
+    eventId:"offline-total-cap",referencePrice:100,minimumOrderNotionalUsd:5,
+    quantityNormalizer:normalizer}),/TOTAL_GROSS_CAP/);
 });
