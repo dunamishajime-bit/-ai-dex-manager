@@ -393,7 +393,7 @@ jobs:
           python -B scripts/disdex-v52-existing-exit-latch-selftest.py
           python -B -m unittest -q tests.test_v52_daily_loss_recovery tests.test_v52_market_closed_gate tests.test_v52_real_tick tests.test_v52_preserve_peer_protection
       - name: MTM commission and account rebate review (fixtures only, NO LIVE)
-        run: node --test tests/stable4-mtm-mixed-commission-review.test.mjs tests/stable4-mtm-account-rebate-review.test.mjs
+        run: node --test tests/stable4-mtm-mixed-commission-review.test.mjs tests/stable4-mtm-account-rebate-review.test.mjs tests/stable4-mtm-separated-account-review.test.mjs
       - name: Exact candidate service bundle and staged source manifest (no install)
         run: |
           set -euo pipefail
