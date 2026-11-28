@@ -371,6 +371,7 @@ jobs:
             tests/disdex-runner-cumulative-dd.test.ts \
             tests/stable4-mtm-attribution-review.test.ts \
             tests/stable4-mtm-income-window-review.test.ts \
+            tests/stable4-mtm-lossless-income-json.test.ts \
             tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
             tests/stable4-seven-runner-dry-coordinator.test.ts \
