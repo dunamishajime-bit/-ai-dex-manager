@@ -36,6 +36,56 @@ class TestMonitorBundle(unittest.TestCase):
         self.assertIn("/var/lib/disdex/stable4-shadow/%i/h48/journal.json",h)
         self.assertNotIn("disdex-hype-trend-live-runner",h)
         self.assertIn("OnCalendar=*-*-* *:06:00 UTC",files["disdex-stable4-market-observer@.timer"])
+    def test_posix_state_and_final_exec_pins(self):
+        sha="a"*40
+        files=render(sha)["files"]
+        root="/var/lib/disdex/stable4-dd30-monitor/"+sha
+        for unit, pins in (
+            ("disdex-pengu-dual-ls-v2", {
+                "PENGU_DUAL_LS_V2_STATE_DIR":root+"/pengu",
+                "PENGU_DUAL_LS_V2_MONITOR_TICK_PATH":root+"/pengu/monitor-tick.json",
+                "PENGU_DUAL_LS_V2_MODE":"SHADOW",
+                "PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED":"false"}),
+            ("disdex-idle-priority-short", {
+                "DISDEX_IDLE_PRIORITY_STATE_PATH":root+"/idle/state.json",
+                "DISDEX_IDLE_PRIORITY_DECISION_PATH":root+"/idle/decision.json",
+                "DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH":root+"/idle/decision-details.json",
+                "DISDEX_IDLE_RESIDUAL_LONG_ENABLED":"false",
+                "DISDEX_IDLE_RESIDUAL_LONG_OPERATOR_ARMED":"false",
+                "DISDEX_IDLE_PRIORITY_OPERATOR_ARMED":"false"})):
+            text=files[unit+"@"+sha+".service.d/90-adopted-monitor.conf"]
+            launch=next(x for x in text.splitlines() if x.startswith("ExecStart=/usr/bin/env "))
+            for k,v in pins.items():
+                self.assertIn(k+"="+v+" ",launch+" ")
+                self.assertEqual([x for x in text.splitlines() if x.startswith("Environment="+k+"=")],["Environment="+k+"="+v])
+            self.assertNotIn(chr(92)+"var"+chr(92),text)
+
+    def test_lifecycle_is_review_only_and_exact_sha_scoped(self):
+        sha="a"*40
+        bundle=render(sha)
+        plan=bundle["connectionPlan"]
+        self.assertFalse(plan["automaticActivation"])
+        self.assertTrue(plan["requiresSeparateOwnerApprovedMonitorPlan"])
+        self.assertFalse(plan["legacyHypeUnitMayBeStarted"])
+        self.assertEqual(plan["installBeforeAnyStart"],sorted(bundle["files"]))
+        self.assertEqual(plan["startOrder"][0],bundle["observerTimer"])
+        self.assertEqual(plan["startOrder"][-1],bundle["h48ShadowUnit"])
+        self.assertEqual(plan["stopOrder"][0],bundle["h48ShadowUnit"])
+        self.assertEqual(plan["stopOrder"][-1],plan["observerUnit"])
+        self.assertTrue(all(sha in u for u in plan["startOrder"]+plan["stopOrder"]))
+        self.assertTrue(all(sha in d and d.startswith("/var/lib/disdex/") for d in plan["stateDirectories"]))
+        self.assertEqual(plan["requiredExternalUnits"],["disdex-v4-rate-budget-broker@"+sha+".service"])
+        for unit in plan["runnerUnits"][:2]:
+            self.assertIn("Wants="+bundle["observerTimer"],bundle["files"][unit+".d/90-adopted-monitor.conf"])
+
+    def test_h48_read_only_budget_is_pinned_at_both_exec_boundaries(self):
+        text=render("a"*40)["files"]["disdex-h48-stop8-shadow@.service"]
+        for prefix in ("ExecStartPre=/usr/bin/env ", "ExecStart=/usr/bin/env "):
+            line=next(x for x in text.splitlines() if x.startswith(prefix))
+            self.assertIn("DISDEX_H48_MODE=SHADOW ",line)
+            self.assertIn("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json ",line)
+            self.assertIn("--protected-stop8-shadow",line)
+
     def test_bad_sha_rejected(self):
         for bad in ("master","../other","a"*39,"a"*40+";"):
             with self.assertRaises(ValueError):render(bad)
