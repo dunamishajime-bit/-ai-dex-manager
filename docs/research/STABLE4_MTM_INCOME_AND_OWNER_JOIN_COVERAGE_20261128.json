@@ -1,0 +1,94 @@
+{
+  "formalCertificateIssued": false,
+  "incomeCoverage": {
+    "assets": [
+      "USDT"
+    ],
+    "cappedWindows": 0,
+    "completeHistoryProven": false,
+    "duplicateIncomeIds": 0,
+    "fromUtc": "2026-09-13T00:00:00.000Z",
+    "invalidTimeRows": 0,
+    "missingIncomeIds": 0,
+    "toUtc": "2026-11-28T07:34:34.918Z",
+    "totalRows": 560,
+    "typeCounts": {
+      "APOLLOX_DEX_REBATE_RECOMMENDED": 132,
+      "COMMISSION": 190,
+      "FUNDING_FEE": 145,
+      "REALIZED_PNL": 93
+    },
+    "weeklyWindowCounts": [
+      78,
+      140,
+      54,
+      74,
+      36,
+      54,
+      31,
+      17,
+      55,
+      21,
+      0
+    ],
+    "windowsSucceeded": 11
+  },
+  "limitations": [
+    "Only two weeks of income-to-fill-to-notification joins executed, not all eleven",
+    "Legacy V12 is not V4; no implicit attribution",
+    "Funding ownership and rebate classification require independent evidence",
+    "No proof of complete historical account marks, external flows, or cumulative DD baseline"
+  ],
+  "orderAuthority": false,
+  "ownerJoin": {
+    "matchedRows": 88,
+    "ownerAttestationIssued": false,
+    "scope": "Two selected UTC weeks only; exact symbol/tradeId/orderId and notification side/time checks, no owner attestation",
+    "unmatchedRows": 106,
+    "weeks": [
+      {
+        "duplicateTradeKeys": 0,
+        "fromUtc": "2026-09-20",
+        "incomeRows": 140,
+        "matched": {
+          "COMMISSION": 52,
+          "REALIZED_PNL": 24
+        },
+        "notificationOwners": {
+          "PENGU_DUAL_LS_V2_FINAL": 1,
+          "V12_X1.00_ALL": 75
+        },
+        "symbolQueries": 12,
+        "unmatched": {
+          "ACCOUNT_CREDIT_UNCLASSIFIED": 36,
+          "FUNDING_OWNERSHIP_UNPROVEN": 17,
+          "NOTIFICATION_OWNER_NOT_MATCHED": 11
+        }
+      },
+      {
+        "duplicateTradeKeys": 0,
+        "fromUtc": "2026-10-18",
+        "incomeRows": 54,
+        "matched": {
+          "COMMISSION": 9,
+          "REALIZED_PNL": 3
+        },
+        "notificationOwners": {
+          "IDLE_PRIORITY_SHORT": 9,
+          "V12_V4": 3
+        },
+        "symbolQueries": 5,
+        "unmatched": {
+          "ACCOUNT_CREDIT_UNCLASSIFIED": 8,
+          "FUNDING_OWNERSHIP_UNPROVEN": 30,
+          "NOTIFICATION_OWNER_NOT_MATCHED": 4
+        }
+      }
+    ]
+  },
+  "runningReleaseSha": "4786f600ae7bf86ffca948f1412956a9113cb20d",
+  "schema": "stable4-mtm-income-and-owner-join-coverage/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "5837e60761783f027f622ce1c4175a9dc50d5a42",
+  "status": "SIGNED_GET_INCOME_WINDOWS_AND_PARTIAL_OWNER_JOIN_OBSERVED"
+}
