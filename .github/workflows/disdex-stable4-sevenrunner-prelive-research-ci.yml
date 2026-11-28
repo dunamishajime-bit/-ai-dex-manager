@@ -72,6 +72,8 @@ on:
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
       - 'scripts/dd-reduction/v52_amzn_yahoo_gate.py'
       - 'tests/stable4-*.test.ts'
+      - 'tests/stable4-mtm-*.test.mjs'
+      - 'scripts/research/stable4-mtm-*.mjs'
       - '.github/workflows/disdex-stable4-sevenrunner-prelive-research-ci.yml'
   workflow_dispatch:
 permissions:
@@ -390,6 +392,8 @@ jobs:
           python -B tests/test_v52_daily_flatten_engine_offline.py
           python -B scripts/disdex-v52-existing-exit-latch-selftest.py
           python -B -m unittest -q tests.test_v52_daily_loss_recovery tests.test_v52_market_closed_gate tests.test_v52_real_tick tests.test_v52_preserve_peer_protection
+      - name: MTM commission and account rebate review (fixtures only, NO LIVE)
+        run: node --test tests/stable4-mtm-mixed-commission-review.test.mjs tests/stable4-mtm-account-rebate-review.test.mjs
       - name: Exact candidate service bundle and staged source manifest (no install)
         run: |
           set -euo pipefail
