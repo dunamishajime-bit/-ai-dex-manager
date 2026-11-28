@@ -53,8 +53,10 @@ def load_tick():
 
 
 class FakeRunner:
-    def __init__(self, *, daily_held=False, open_position=False, kill=None, live=False):
+    def __init__(self, *, daily_held=False, verified_loss=False,
+                 open_position=False, kill=None, live=False):
         self.daily_held = daily_held
+        self.verified_loss = verified_loss
         self.open_position = open_position
         self.kill = kill
         self.live = live
@@ -76,6 +78,18 @@ class FakeRunner:
     def enforce_daily_loss(self):
         self.calls.append("enforce_daily_loss")
         return self.daily_held
+
+    def _refresh_v52_daily_flatten_intent(self):
+        self.calls.append("refresh_scoped_flatten_intent")
+        # Existing entry-latch scenarios simulate unverified API issues,
+        # which must not initiate an automatic liquidation. A separate
+        # explicit verified-loss case below must use the scoped flatten.
+        return self.verified_loss
+
+    def _finish_v52_daily_flatten(self):
+        assert self.verified_loss, "ONLY_VERIFIED_V52_LOSS_MAY_FLATTEN"
+        self.calls.append("v52_verified_loss_scoped_flatten")
+        self.open_position = False
 
     def positions(self):
         return {"V50": {"symbol": "NVDA"}} if self.open_position else {}
@@ -124,6 +138,17 @@ def main():
     assert "v52-strategy-daily-loss-exit-management-continues" in held_position.calls
     assert "v52-soft-hold-entry-blocked" in held_position.calls
 
+    # A proven V52 daily loss is different from an unknown API failure:
+    # it must retire V52-owned exposure through scoped exit, not leave it
+    # managed indefinitely or permit a fresh entry in that same tick.
+    tripped = FakeRunner(daily_held=True, verified_loss=True, open_position=True)
+    tick(tripped, prepared)
+    assert tripped.calls.count("v52_verified_loss_scoped_flatten") == 1, tripped.calls
+    assert tripped.open_position is False
+    assert "manage_positions" not in tripped.calls
+    assert "update_history" not in tripped.calls
+    assert "v52-soft-hold-entry-blocked" not in tripped.calls
+
     # The same latch must not permit an entry when flat.
     held_flat = FakeRunner(daily_held=True, open_position=False)
     tick(held_flat, prepared)
@@ -168,7 +193,8 @@ def main():
     assert shared_block.calls.count("manage_positions") == 1
     assert "v52-soft-hold-entry-blocked" in shared_block.calls
 
-    print("V52_DAILY_LOSS_ENTRY_ONLY_EXIT_CONTINUES: PASS")
+    print("V52_UNVERIFIED_API_HOLD_EXISTING_EXITS_CONTINUE: PASS")
+    print("V52_VERIFIED_3P5_LOSS_SCOPED_FLATTEN: PASS")
     print("V52_FLAT_HOLD_NEW_ENTRIES_BLOCKED: PASS")
     print("V52_BASELINE_MANAGE_POSITIONS: PASS")
     print("V52_KILL_FLATTEN_PRIORITY: PASS")
