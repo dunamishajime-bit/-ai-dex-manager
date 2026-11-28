@@ -5,12 +5,14 @@ on:
     branches:
       - prep/stable4-dd30-integrated-source-20261123
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
     paths:
       - 'lib/**'
       - 'config/**'
       - 'scripts/**'
       - 'ops/**'
       - 'tests/**'
+      - 'docs/research/STABLE4_DD30_CURRENT_CANDIDATE_REVIEW_20261128.json'
       - 'docs/production/STABLE4_DD30_INTEGRATED_SOURCE_MANIFEST_20261123.json'
       - 'docs/production/STABLE4_DD30_MONITOR_ONLY_ROOT_PLAN_20261123.json'
       - 'scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py'
@@ -38,11 +40,27 @@ jobs:
       - name: Install reviewed project dependencies (no lifecycle scripts)
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Exact source & Owner approval boundary gate
+      - name: Exact historical source gate (strict, non-review route)
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.draft && github.event.pull_request.number == 676 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/stable4-sevenrunner-clean-20261127') }}
         run: |
           set -euo pipefail
           python3 scripts/ops/deploy/stable4_dd30_integrated_source_gate.py
           python3 -m unittest -v tests/test_stable4_dd30_integrated_source_gate.py
+
+      - name: Exact candidate review gate (draft PR 676, NOT formal approval)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft && github.event.pull_request.number == 676 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/stable4-sevenrunner-clean-20261127' }}
+        run: |
+          set -euo pipefail
+          python3 -m scripts.ops.deploy.stable4_dd30_candidate_review_gate
+          python3 -m unittest -v tests.test_stable4_dd30_candidate_review_gate
+          echo 'HISTORICAL_FORMAL_GATE=BLOCKED_EXPECTED_SOURCE_DRIFT'
+          echo 'DD30 candidate review only; historical formal gate remains BLOCKED and no LIVE authority exists.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'DD30_FORMAL_APPROVAL=NOT_GRANTED'
+          echo 'LIVE_ORDER_PERMIT=FALSE'
+
+      - name: STOP and monitor safety regressions (no order authority)
+        run: |
+          set -euo pipefail
           python3 -m unittest -v tests/test_v4_dynamic_resident_stop_and_margin_script.py
           python3 -m py_compile scripts/disdex_v12_v52_margin_guard_runtime.py \
             scripts/disdex_v96_v52_margin_guard_runtime.py \
