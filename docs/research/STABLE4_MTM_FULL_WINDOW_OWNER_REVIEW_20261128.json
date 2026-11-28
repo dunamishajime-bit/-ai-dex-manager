@@ -1,0 +1,60 @@
+{
+  "capture": {
+    "completedWindows": 11,
+    "fetWindowRecovery": {
+      "index": 3,
+      "originalPreserved": true,
+      "resumed": true,
+      "tradeRows": 24
+    },
+    "incomeRows": 560,
+    "incomeTypes": {
+      "APOLLOX_DEX_REBATE_RECOMMENDED": 132,
+      "COMMISSION": 190,
+      "FUNDING_FEE": 145,
+      "REALIZED_PNL": 93
+    },
+    "officialTradeRows": 193,
+    "requestedWindows": 11,
+    "symbolQueries": 57
+  },
+  "completeHistoryProven": false,
+  "formalCertificateIssued": false,
+  "identityAudit": {
+    "note": "The initial strict identity scan collapsed unsafe numeric IDs to null and counted 144 repeated null keys. These are not confirmed duplicate venue transactions. Original wire identity precision is unverified; exact integer-preserving parsing must precede re-capture.",
+    "rawSerializedIdDuplicateCount": 0,
+    "unsafeJavascriptNumericFundingTransactionIds": 145
+  },
+  "limitations": [
+    "All requested 11 windows captured, not proof of full account history",
+    "No owner attribution attestation; historical V12 not V4",
+    "No exact Funding ID preservation or historical MTM baseline",
+    "Unknown credits and missing notification ownership remain unresolved"
+  ],
+  "orderAuthority": false,
+  "ownerJoin": {
+    "duplicateTradeKeys": 0,
+    "matchedIncomeTypes": {
+      "COMMISSION": 119,
+      "REALIZED_PNL": 57
+    },
+    "matchedRows": 176,
+    "notificationOwners": {
+      "IDLE_PRIORITY_SHORT": 18,
+      "PENGU_DUAL_LS_V2_FINAL": 9,
+      "V12_V4": 3,
+      "V12_X1.00_ALL": 142,
+      "V52": 4
+    },
+    "unmatched": {
+      "ACCOUNT_CREDIT_UNCLASSIFIED": 132,
+      "FUNDING_OWNERSHIP_UNPROVEN": 145,
+      "NOTIFICATION_OWNER_NOT_MATCHED": 107
+    },
+    "unmatchedRows": 384
+  },
+  "schema": "stable4-mtm-full-window-owner-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "bcab552a3a77c6430c50760ab94186bd2a18133c",
+  "status": "ALL_REQUESTED_WINDOWS_CAPTURED_PARTIAL_OWNERSHIP"
+}
