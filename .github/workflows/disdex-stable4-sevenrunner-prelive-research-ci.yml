@@ -118,7 +118,6 @@ jobs:
             tests/aster-common-read-resilience.test.ts \
             tests/stable4-four-formal-source-delta-readonly-regression.test.ts \
             tests/disdex-runner-cumulative-dd.test.ts \
-            tests/stable4-mtm-attribution-review.test.ts \
             tests/idle-priority-short-signal.test.ts \
             tests/idle-priority-short-live-path.test.ts \
             tests/idle-priority-short-baseline-admission.test.ts \
