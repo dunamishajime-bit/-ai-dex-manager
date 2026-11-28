@@ -25,8 +25,10 @@ function text(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function strategyFromClientOrderId(clientOrderId: string | undefined) {
-  const value = String(clientOrderId || "").toLowerCase();
+export function strategyFromClientOrderId(clientOrderId: string | undefined) {
+  const value = String(clientOrderId || "").trim().toLowerCase();
+  // V4 has a separate deterministic namespace. Never let it fall through to legacy V12.
+  if (value.startsWith("v12-v4-")) return /^v12-v4-[a-f0-9]{28}$/.test(value) ? "V12_V4" : undefined;
   if (value.startsWith("q102v1-")) return "QUALITY102_CAUSAL_V1";
   if (value.startsWith("fet-")) return "FET_BRK48_RESIDUAL";
   if (value.startsWith("v12-")) return "V12_X1.00_ALL";
