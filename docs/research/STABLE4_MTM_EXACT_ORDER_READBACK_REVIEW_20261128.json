@@ -1,0 +1,58 @@
+{
+  "archivedOrderReview": {
+    "additionalCandidates": 3,
+    "additionalIncomeCandidates": {
+      "COMMISSION": 3,
+      "REALIZED_PNL": 1
+    },
+    "archiveFilesRead": 761,
+    "candidateOwners": {
+      "FET_BRK48_RESIDUAL": 2,
+      "V12_X1.00_ALL": 1
+    },
+    "existingCandidateConflicts": 0,
+    "officialOrderEvidenceRows": 273,
+    "remainingUnmatched": 56,
+    "v4IntentRows": 64
+  },
+  "combinedTradeMatchesAndCandidates": 141,
+  "directOrderReadback": {
+    "additionalCandidates": 4,
+    "additionalIncomeCandidates": {
+      "COMMISSION": 4,
+      "REALIZED_PNL": 3
+    },
+    "candidateOwners": {
+      "FET_BRK48_RESIDUAL": 2,
+      "V12_X1.00_ALL": 2
+    },
+    "evidenceSha256": [
+      "0d3a227c10b9107ae7d0bfa04c2f50cf6b51b0c336c15d4dc4140db2708dbe1b",
+      "282b6b35d01e75d131a529e18b3fcec5134ef3f1ee3ef7cd70c7e8553cab455d"
+    ],
+    "successfulOrders": 36,
+    "targetOrders": 36,
+    "targetTradeRows": 42
+  },
+  "formalCertificateIssued": false,
+  "limits": [
+    "Exact venue order readback is not a strategy owner attestation",
+    "Owner candidates from archived state and known client prefixes require independent validation; conflicting evidence is not assigned",
+    "Legacy V12 distinct from V4",
+    "Historical Funding/rebate ownership and complete continuous account MTM remain unproven"
+  ],
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "previousNotificationAndHistoricalCandidates": 134,
+  "remainingReasons": {
+    "NO_OWNER_LINEAGE": 8,
+    "OWNER_CONFLICT": 30,
+    "PRIOR_ARCHIVE_ORDER_NO_OWNER": 14
+  },
+  "remainingUnmatched": 52,
+  "schema": "stable4-mtm-exact-order-readback-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "e44a2adc97041ec9bc1bf22982f75e4d5d4eabb6",
+  "status": "ALL_TARGETED_ORDER_READBACKS_SUCCEEDED_PARTIAL_OWNER_CANDIDATES"
+}
