@@ -1,0 +1,110 @@
+{
+  "actualSourceNativeAnnualQ102ReplayComplete": false,
+  "annualAll20SymbolHistoryProven": false,
+  "annualRequestedRangeUtc": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "defaultQ102SourceHistoryHours": 5400,
+  "historical225dWarmupFullyProven": false,
+  "limitations": [
+    "Four public unauthenticated GET klines requests: one day Oct 2025 and one day Jan 2026 for FET/LDO. Empty response on one day does not prove unlisted trading market, permanent provider absence or all-day data gaps elsewhere.",
+    "Return of at most three rows per date only establishes presence or absence at sampled startTime; no complete 225d contiguous 20-symbol source or monthly HIGH_VOL walk-forward training reconstructed.",
+    "ASTER public H1 and Binance H1 are not interchangeable for exact production Q102 matching; do not infer real fills or live entry authority from these presence tests.",
+    "No POST/DELETE, signed GET, API keys, test orders, VPS production, Root, Owner, approval or release certificate."
+  ],
+  "observedAtUtc": "2026-11-28T00:36:24.528436+00:00",
+  "orderAuthority": false,
+  "productionEligible": false,
+  "realTradesOrFillsProven": false,
+  "sampleObservations": [
+    {
+      "endpointPath": "/fapi/v3/klines",
+      "firstOpenMs": null,
+      "httpMethod": "GET",
+      "httpStatus": 200,
+      "lastOpenMs": null,
+      "liveOrderOrAccountAccess": false,
+      "requestParams": {
+        "endTime": 1759363200000,
+        "interval": "1h",
+        "limit": 3,
+        "startTime": 1759276800000,
+        "symbol": "FETUSDT"
+      },
+      "requestedUtcDate": "2025-10-01T00:00:00Z",
+      "returnedRows": 0,
+      "sourceRawResponseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "EMPTY_H1_ON_EXACT_SAMPLED_DAY",
+      "symbol": "FETUSDT",
+      "venue": "ASTER_FAPI_PUBLIC"
+    },
+    {
+      "endpointPath": "/fapi/v3/klines",
+      "firstOpenMs": null,
+      "httpMethod": "GET",
+      "httpStatus": 200,
+      "lastOpenMs": null,
+      "liveOrderOrAccountAccess": false,
+      "requestParams": {
+        "endTime": 1759363200000,
+        "interval": "1h",
+        "limit": 3,
+        "startTime": 1759276800000,
+        "symbol": "LDOUSDT"
+      },
+      "requestedUtcDate": "2025-10-01T00:00:00Z",
+      "returnedRows": 0,
+      "sourceRawResponseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "EMPTY_H1_ON_EXACT_SAMPLED_DAY",
+      "symbol": "LDOUSDT",
+      "venue": "ASTER_FAPI_PUBLIC"
+    },
+    {
+      "endpointPath": "/fapi/v3/klines",
+      "firstOpenMs": 1768003200000,
+      "httpMethod": "GET",
+      "httpStatus": 200,
+      "lastOpenMs": 1768010400000,
+      "liveOrderOrAccountAccess": false,
+      "requestParams": {
+        "endTime": 1768089600000,
+        "interval": "1h",
+        "limit": 3,
+        "startTime": 1768003200000,
+        "symbol": "FETUSDT"
+      },
+      "requestedUtcDate": "2026-01-10T00:00:00Z",
+      "returnedRows": 3,
+      "sourceRawResponseSha256": "962cab92314a35852b34ee54c9398c16a6b3fc7c9521a759ebfb9bb208461aeb",
+      "status": "H1_BARS_PRESENT_ON_EXACT_SAMPLED_DAY",
+      "symbol": "FETUSDT",
+      "venue": "ASTER_FAPI_PUBLIC"
+    },
+    {
+      "endpointPath": "/fapi/v3/klines",
+      "firstOpenMs": 1768003200000,
+      "httpMethod": "GET",
+      "httpStatus": 200,
+      "lastOpenMs": 1768010400000,
+      "liveOrderOrAccountAccess": false,
+      "requestParams": {
+        "endTime": 1768089600000,
+        "interval": "1h",
+        "limit": 3,
+        "startTime": 1768003200000,
+        "symbol": "LDOUSDT"
+      },
+      "requestedUtcDate": "2026-01-10T00:00:00Z",
+      "returnedRows": 3,
+      "sourceRawResponseSha256": "f306acee34337d3b75cfa07dd98de575d8f4eca55346852e8efeaf7323171659",
+      "status": "H1_BARS_PRESENT_ON_EXACT_SAMPLED_DAY",
+      "symbol": "LDOUSDT",
+      "venue": "ASTER_FAPI_PUBLIC"
+    }
+  ],
+  "sampleRequestCount": 4,
+  "schema": "stable4-q102-official-aster-public-h1-four-source-date-probe/v1",
+  "sourceOrigin": "Official ASTER public FAPI klines endpoint",
+  "status": "TWO_DATE_PER_SYMBOL_H1_PUBLIC_SOURCE_SAMPLE_NOT_ANNUAL_BT"
+}

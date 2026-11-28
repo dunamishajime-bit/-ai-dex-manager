@@ -30,6 +30,9 @@ on:
       - 'tests/test_stable4_dd30_formal_old_source_owner_review_blockers.py'
       - 'docs/research/STABLE4_Q102_942_READY_SOURCE_NATIVE_GRID_*.json'
       - 'tests/test_stable4_q102_942_ready_native_grid_source_coverage.py'
+      - 'scripts/research/stable4_q102_official_aster_h1_historical_availability_probe.py'
+      - 'docs/research/STABLE4_Q102_OFFICIAL_ASTER_FET_LDO_H1_SOURCE_SAMPLE_20261128.json'
+      - 'tests/test_stable4_q102_official_aster_h1_sample_readiness.py'
       - 'docs/research/STABLE4_Q102_FULL_SOURCE_S34_*.json'
       - 'scripts/stable4-q102-selected-native-exit-model-v2.ts'
       - 'scripts/research/stable4_q102_selected_one_slot_delayed_m5_v2.py'
@@ -160,6 +163,10 @@ jobs:
           # screened. Full native selector ran at 96 raw-candidate clocks only.
           # 846 raw-empty hours are explicitly NOT full-selector invoked.
           python -B -m unittest -v tests.test_stable4_q102_942_ready_native_grid_source_coverage
+          # Official ASTER public GET-only FET/LDO two-date source probe: Oct
+          # 2025 no H1 rows, Jan 2026 three. Date-scoped only, not annual.
+          # Offline PIN audit, NEVER call venue APIs in CI or place orders.
+          python -B -m unittest -v tests.test_stable4_q102_official_aster_h1_sample_readiness
           # Preserve actual 38 source-native Q102 signals but avoid Q102
           # M5 same-bar-volume lookahead; strict unresolved slot remains latched.
           # Model-only, not venue fills or LIVE stop readback.
