@@ -1,0 +1,29 @@
+{
+  "blockers": [
+    "Notification spool is not authoritative complete venue income or order history",
+    "No Q102/FET/HYPE fill notifications in inspected spool; not proof of no trades",
+    "Legacy V12 must not be implicitly assigned to V4",
+    "No authenticated complete period account marks, external flow history or owner lineage",
+    "No verified continuous starting DD state"
+  ],
+  "formalCertificateIssued": false,
+  "offlineReconciliationTests": 19,
+  "ordersEnabled": false,
+  "schema": "stable4-mtm-attribution-review-coverage/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "4a330d82948104efd6f10e2ea424bbb20446a482",
+  "status": "BLOCKED_LIVE_MTM_LINEAGE_INCOMPLETE",
+  "vpsFillNotificationInbox": {
+    "ageSecondsAtRead": 1337788,
+    "malformed": 0,
+    "missingOrderId": 2,
+    "observedStrategyCounts": {
+      "IDLE_PRIORITY_SHORT": 12,
+      "PENGU_DUAL_LS_V2_FINAL": 6,
+      "V12_V4": 2,
+      "V12_X1.00_ALL": 83,
+      "V52": 5
+    },
+    "rows": 108
+  }
+}
