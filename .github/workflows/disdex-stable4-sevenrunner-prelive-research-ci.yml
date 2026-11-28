@@ -364,6 +364,7 @@ jobs:
             tests/pengu-route-quarantine-dd-governor.test.ts \
             tests/fet-brk48-signal.test.ts \
             tests/fet-brk48-live-runner.test.ts \
+            tests/fet-vol10-ret15-contract.test.ts \
             tests/fet-brk48-trailing-contract.test.ts \
             tests/hype-h48-*.test.ts \
             tests/stable4-dd30-owner-hard-gross-candidate.test.ts \
