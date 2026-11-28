@@ -86,6 +86,21 @@ class TestMonitorBundle(unittest.TestCase):
             self.assertIn("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json ",line)
             self.assertIn("--protected-stop8-shadow",line)
 
+    def test_observer_uses_same_sha_broker_without_credentials_or_direct_fallback(self):
+        unit=render("a"*40)["files"]["disdex-stable4-market-observer@.service"]
+        self.assertIn("Requires=disdex-v4-rate-budget-broker@%i.service",unit)
+        self.assertIn("After=disdex-v4-rate-budget-broker@%i.service",unit)
+        self.assertIn("ExecStartPre=/usr/bin/test -S /run/disdex-v4-budget-%i/budget.sock",unit)
+        launch=next(x for x in unit.splitlines() if x.startswith("ExecStart="))
+        self.assertTrue(launch.startswith("ExecStart=/usr/bin/env -i "))
+        for pin in ("DISDEX_RELEASE_SHA=%i", "DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json", "DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock"):
+            self.assertIn(pin+" ",launch)
+        self.assertNotIn("EnvironmentFile=",unit)
+        self.assertNotIn("ReadWritePaths=/var/lib/disdex/shared",unit)
+        self.assertIn("InaccessiblePaths=/etc/disdex",unit)
+        self.assertIn("ProtectSystem=strict",unit)
+        self.assertIn("scripts/stable4-market-observe.ts %i /var/lib/disdex/stable4-observation/%i/snapshot.json",launch)
+
     def test_bad_sha_rejected(self):
         for bad in ("master","../other","a"*39,"a"*40+";"):
             with self.assertRaises(ValueError):render(bad)

@@ -2,6 +2,8 @@
 Description=DisDex adopted R21/P91 public market source (%i)
 After=network-online.target
 Wants=network-online.target
+Requires=disdex-v4-rate-budget-broker@%i.service
+After=disdex-v4-rate-budget-broker@%i.service
 
 [Service]
 Type=oneshot
@@ -12,10 +14,13 @@ StateDirectory=disdex/stable4-observation/%i
 StateDirectoryMode=0700
 Environment=NODE_ENV=production
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
-ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/stable4-market-observe.ts %i /var/lib/disdex/stable4-observation/%i/snapshot.json
+ExecStartPre=/usr/bin/test -S /run/disdex-v4-budget-%i/budget.sock
+ExecStart=/usr/bin/env -i PATH=/usr/bin:/bin NODE_ENV=production DISDEX_RELEASE_SHA=%i DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock /home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/stable4-market-observe.ts %i /var/lib/disdex/stable4-observation/%i/snapshot.json
 TimeoutStartSec=8min
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
+InaccessiblePaths=/etc/disdex
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 UMask=0077
