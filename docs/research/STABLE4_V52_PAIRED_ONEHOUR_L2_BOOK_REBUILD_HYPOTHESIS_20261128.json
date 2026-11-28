@@ -1,0 +1,519 @@
+{
+  "actualVenueOrdersOrFillsProven": false,
+  "asterAppliedDeltaPackets": 11706,
+  "asterCrossedOrMissingSidePackets": 0,
+  "asterDeltaReceivedPackets": 39876,
+  "asterFirstValidSnapshotReceivedNs": 1788365720787536474,
+  "asterFullSnapshotResets": 19,
+  "asterIdenticalDuplicateSnapshotReceiptsProcessed": 7,
+  "asterInvalidatedOrDiscardedDeltaPackets": 28170,
+  "asterMixedSnapshotAndDeltaSameReceivedClocksQuarantined": 12,
+  "asterOldOrEqualDeltaPacketsSkippedAfterSnapshot": 7,
+  "asterSequenceRejections": 0,
+  "asterSourceIdenticalSnapshotIdPairs": 19,
+  "asterUnknownExistingPriceDeletes": 51,
+  "asterZeroQuantityLevelDeletes": 2713,
+  "fullAnnualTwoVenueFiveStockReconstructionProven": false,
+  "hyperliquidFullSnapshots": 649,
+  "limitations": [
+    "This is a **hypothesis** of third-party absolute L2 event semantics, not publisher exchange-source official state validation or native V52 V11EQ 2s/30s reference and hedge reconstruction.",
+    "Updates before the first ASTER snapshot are deliberately discarded; gaps, mixed-timestamp snapshot+delta or crossed books invalidate until a new clean snapshot. No 1-hour coverage claim before the first valid book.",
+    "Use only private locally SHA-pinned source data; no new HTTP/network, credentials, trading or production mutation.",
+    "No spread-based synthetic PnL, no maker queue, short locate, slippage/fees/funding, actual signed order lifecycle, resident stops, cumulative account DD or Owner approval."
+  ],
+  "longestPairedSourceUnavailableSeconds": 1100,
+  "nativeV52BookParityProven": false,
+  "nativeV52EngineSha256": "e1c6f16b5deb514fa636c44a859294fec8ee8f81e0dac3ef405cd55a3056a9d8",
+  "oneSecondSourceConditionCounts": {
+    "asterStateAvailable": 1000,
+    "asterStateFresh": 939,
+    "pairedSourceFreshState": 265,
+    "xyzSnapshotFresh": 971
+  },
+  "oneSecondSourceConditionPct": {
+    "asterStateAvailable": 27.777778,
+    "asterStateFresh": 26.083333,
+    "pairedSourceFreshState": 7.361111,
+    "xyzSnapshotFresh": 26.972222
+  },
+  "orderAuthority": false,
+  "perMinute": [
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 0,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 1,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 2,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 3,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 4,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 5,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 6,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 7,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 8,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 9,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 10,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 11,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 0
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 12,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 0
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 13,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 14,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 15,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 16,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 17,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 15
+    },
+    {
+      "asterStateAvailable": 42,
+      "asterStateFresh": 42,
+      "minuteUtc": 18,
+      "pairedSourceFreshState": 12,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 19,
+      "pairedSourceFreshState": 15,
+      "xyzSnapshotFresh": 15
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 50,
+      "minuteUtc": 20,
+      "pairedSourceFreshState": 15,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 21,
+      "pairedSourceFreshState": 18,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 22,
+      "pairedSourceFreshState": 16,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 48,
+      "minuteUtc": 23,
+      "pairedSourceFreshState": 14,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 24,
+      "pairedSourceFreshState": 17,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 45,
+      "asterStateFresh": 36,
+      "minuteUtc": 25,
+      "pairedSourceFreshState": 9,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 26,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 15
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 27,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 56,
+      "asterStateFresh": 56,
+      "minuteUtc": 28,
+      "pairedSourceFreshState": 15,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 29,
+      "pairedSourceFreshState": 17,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 51,
+      "minuteUtc": 30,
+      "pairedSourceFreshState": 15,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 31,
+      "pairedSourceFreshState": 17,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 40,
+      "asterStateFresh": 32,
+      "minuteUtc": 32,
+      "pairedSourceFreshState": 9,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 33,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 34,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 14
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 35,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 36,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 26,
+      "asterStateFresh": 26,
+      "minuteUtc": 37,
+      "pairedSourceFreshState": 9,
+      "xyzSnapshotFresh": 19
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 38,
+      "pairedSourceFreshState": 17,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 53,
+      "minuteUtc": 39,
+      "pairedSourceFreshState": 16,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 40,
+      "pairedSourceFreshState": 17,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 60,
+      "asterStateFresh": 60,
+      "minuteUtc": 41,
+      "pairedSourceFreshState": 16,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 11,
+      "asterStateFresh": 5,
+      "minuteUtc": 42,
+      "pairedSourceFreshState": 1,
+      "xyzSnapshotFresh": 19
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 43,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 14
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 44,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 45,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 46,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 19
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 47,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 48,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 49,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 20
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 50,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 51,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 52,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 53,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 15
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 54,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 15
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 55,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 56,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 17
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 57,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 58,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 18
+    },
+    {
+      "asterStateAvailable": 0,
+      "asterStateFresh": 0,
+      "minuteUtc": 59,
+      "pairedSourceFreshState": 0,
+      "xyzSnapshotFresh": 16
+    }
+  ],
+  "productionEligible": false,
+  "reconstructionAssumptions": [
+    "Each ASTER update packet shares receive_clock and first/final/previous IDs, and price/quantity levels are ABSOLUTE replacements by (side, price); qty=0 deletes.",
+    "An ASTER full snapshot resets the local test book to exactly the published nonzero levels with its last_update_id. Nineteen repeated-snapshot-ID pairs must be identical; identical receipts are skipped only when not mixed with a delta at the same timestamp.",
+    "Twelve source received_time clocks have BOTH snapshot and delta rows. Without a demonstrated within-timestamp feed order, mark the reconstructed book invalid until a later clean full snapshot; never resolve ambiguous order by guessing.",
+    "Any delta with final_update_id <= current snapshot/update ID is stale and skipped (never applied twice); any unexpected delta prev_final_update_id or crossed/missing best side invalidates until an independent full snapshot.",
+    "Hyperliquid XYZ snapshot of 20 bid and 20 ask absolute rows is usable only as-of that snapshot receipt clock. Both source books must have age <= 1500 ms, not native live venue websocket latency."
+  ],
+  "sampleHourUtc": "2026-09-02T16:00:00Z",
+  "sampleObservationsNotNativeBasis": [
+    {
+      "asterAsk": "255.410000",
+      "asterBid": "255.320000",
+      "asterSourceAgeMs": 63.970772,
+      "sec": 1100,
+      "xyzAsk": "255.06",
+      "xyzBid": "255.04",
+      "xyzSourceAgeMs": 569.798339
+    },
+    {
+      "asterAsk": "255.400000",
+      "asterBid": "255.320000",
+      "asterSourceAgeMs": 15.399252,
+      "sec": 1105,
+      "xyzAsk": "255.06",
+      "xyzBid": "255.04",
+      "xyzSourceAgeMs": 497.035474
+    },
+    {
+      "asterAsk": "255.400000",
+      "asterBid": "255.320000",
+      "asterSourceAgeMs": 10.293604,
+      "sec": 1106,
+      "xyzAsk": "255.06",
+      "xyzBid": "255.04",
+      "xyzSourceAgeMs": 1497.035474
+    },
+    {
+      "asterAsk": "255.390000",
+      "asterBid": "255.310000",
+      "asterSourceAgeMs": 0.882198,
+      "sec": 1111,
+      "xyzAsk": "255.07",
+      "xyzBid": "255.04",
+      "xyzSourceAgeMs": 965.679973
+    }
+  ],
+  "schema": "stable4-v52-public-l2-aster-book-hypothesis-xyz-paired-1h/v1",
+  "secondsChecked": 3600,
+  "sharedSevenRunnerAnnualBtComplete": false,
+  "sourceHourlyProfileSha256": "59cd3a3008c8a7a465750ae5109767e39418d083487290929b027ec558590860",
+  "sourceRowCount": {
+    "ASTER": 93372,
+    "HYPERLIQUID_XYZ": 25960
+  },
+  "sourceSequenceQualitySha256": "f878a19d0174ab655fe772641c78bffe3ec61cbd67bef67d168a60935d4366f8",
+  "status": "SOURCE_ONLY_RECONSTRUCTION_HYPOTHESIS_NOT_V52_NATIVE_BOOK_OR_FILLS"
+}

@@ -142,6 +142,11 @@ jobs:
           # update ID chain breaks and 20+20 HL snapshot row-grain. Reject
           # native book reconstruction claims without verified repair.
           python -B -m unittest -v tests.test_stable4_v52_paired_onehour_l2_sequence_quality
+          # ASTER delta/snapshot L2 reconstruction HYPOTHESIS from private
+          # source-pinned one-hour Parquet. CI tests only immutable offline
+          # evidence, including 12 ambiguous mixed clocks fail-closed and
+          # 19 identical snapshot pairs. Never claim native V52 / fills.
+          python -B -m unittest -v tests.test_stable4_v52_aster_l2_book_hypothesis
           # Only 6 paired snapshot receipts / 3 unique ASTER source IDs;
           # reject conflating raw mid difference with native V52 trade basis.
           # No historical HTTP calls, no account/fill claims in CI.
