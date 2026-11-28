@@ -1,0 +1,37 @@
+{
+  "schema": "stable4-mtm-offline-accounting-validation/v1",
+  "testedSha": "843dfa2116f3c06f7b5cc6828363b785ecc02c5e",
+  "execution": {
+    "nodeTest": true,
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "exitCode": 0,
+    "sourceHashes": {
+      "scripts/research/stable4-mtm-account-rebate-review.mjs": "ea96c5b11f1782fbd4246dda2bfa917537e6d73e225740ab4b1e5af2edfc8fde",
+      "tests/stable4-mtm-account-rebate-review.test.mjs": "4c9ff227cf39dba76b8375b9c4522d7621f2f8df72c818315c49241900ef147a",
+      "scripts/research/stable4-mtm-mixed-commission-review.mjs": "386447cfb047b8e562a78328fb6a28230c9efc7b09f12660044a119cfbdb196f",
+      "tests/stable4-mtm-mixed-commission-review.test.mjs": "aac69b1bd2d1ee6986ca8281914e476af026501f1668db0ca45f6bcbf3d7b6a9"
+    }
+  },
+  "lastPriorEvidenceSha": "76ed1eed41765220393cc7b568b2e316aa5628bd",
+  "officialTradeRowsPreviouslyClassified": 193,
+  "fundingOwnerCandidatesPreviouslyReported": 119,
+  "fundingUnresolved": 26,
+  "rebateRowsUnresolved": 132,
+  "actualRowsProcessedThisRun": 0,
+  "privateEvidencePathVerified": false,
+  "policyStatus": "PROPOSED_OFFLINE_ONLY",
+  "productionIntegration": false,
+  "formalCiExecuted": false,
+  "ownerAttestationIssued": false,
+  "signedObservationIssued": false,
+  "orderAuthority": false,
+  "limitations": [
+    "Fixture tests only; actual ETH fee and rebate amounts not recovered",
+    "Quantity-proportional split is a proposed internal accounting rule, not verified venue allocation",
+    "Unallocated rebate bucket is a proposed review accounting treatment, not approved Runner DD policy",
+    "Prior protected archive access not repeated",
+    "No historical completeness or starting account equity attestation"
+  ]
+}
