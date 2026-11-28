@@ -7,6 +7,11 @@
  * SHA-certified LIVE adapter is separately approved by the Owner/Codex.
  */
 import "dotenv/config";
+import {lstat,readFile} from "node:fs/promises";
+import {createHash} from "node:crypto";
+import {dirname,resolve} from "node:path";
+import {FileH48Stop8Store} from "../lib/hype-h48-stop8-journal-store";
+import {FileH48Stop8RetirementStore} from "../lib/hype-h48-stop8-retirement-store";
 import {AsterV3Client,type AsterKline} from "../lib/aster-v3-client";
 import {AsterDirectTradeExecutor} from "../lib/direct-trade-executor";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
@@ -52,7 +57,27 @@ async function main(){
   const statePath=String(process.env.DISDEX_H48_JOURNAL_PATH??"");
   if(!statePath.startsWith("/")&&!/^[A-Za-z]:[\\/]/.test(statePath))
     fail("ABSOLUTE_SHADOW_JOURNAL_REQUIRED");
+  const protectedMode=process.argv.includes("--protected-stop8-shadow");
+  const initialize=process.argv.includes("--initialize-shadow-if-flat");
+  if(initialize&&!protectedMode)fail("INITIALIZATION_REQUIRES_PROTECTED_SHADOW");
+  if(protectedMode&&statePath!==resolve("/var/lib/disdex/stable4-shadow/"+sha+"/h48/journal.json"))
+    fail("DEDICATED_SHA_SHADOW_JOURNAL_REQUIRED");
+  const planPath="docs/production/stable4-dd30-h48-stop8-risk-owner-candidate-20261126.json";
+  const planSha=protectedMode?createHash("sha256").update(await readFile(planPath)).digest("hex"):undefined;
+  const stopPath=resolve(dirname(statePath),"stop8.json"),retirePath=resolve(dirname(statePath),"stop8-retirement.json");
+  const optional=async <T>(load:()=>Promise<T>):Promise<T|null>=>{
+    try{return await load()}catch(e){if((e as NodeJS.ErrnoException)?.code==="ENOENT")return null;throw e}
+  };
+  const protection=planSha?{
+    planSha256:planSha,
+    stop8:()=>optional(()=>new FileH48Stop8Store(stopPath,sha,planSha).load()),
+    stopRetirement:()=>optional(()=>new FileH48Stop8RetirementStore(retirePath,sha,planSha).load()),
+  }:undefined;
   const client=new AsterV3Client({
+    fetchImpl:async (url,init)=>{
+      if((init?.method??"GET").toUpperCase()!=="GET")throw Error("H48_SHADOW_GET_ONLY");
+      return fetch(url,init);
+    },
     baseUrl:process.env.ASTER_FUTURES_BASE_URL,
     userAddress:process.env.ASTER_USER_ADDRESS,
     privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,
@@ -74,6 +99,7 @@ async function main(){
   do{
     const lock=await orderLock.acquire("H48_NATIVE_SHADOW:"+sha,"ASTER_FUTURES");
     if(!lock){
+      if(initialize)fail("SHADOW_INITIALIZATION_ACCOUNT_LOCK_BUSY");
       console.log(JSON.stringify({event:"h48-shadow",status:"HOLD",
         reason:"ASTER_SINGLE_WRITER_LOCK_BUSY",ordersSent:0,cancelsSent:0}));
       if(!daemon||stopping)break;
@@ -84,7 +110,18 @@ async function main(){
       const now=Date.now();
       // getPositions, getOpenOrders, getAccountSnapshot are authenticated
       // GET, never a synthetic flat snapshot. Reject failed account state.
-      await readAuthenticatedH48Inventory({executor,lease:lock});
+      const inventory=await readAuthenticatedH48Inventory({executor,lease:lock});
+      if(initialize){
+        const existing=await optional(()=>lstat(statePath));
+        if(!existing){
+          if(await optional(()=>lstat(stopPath))||await optional(()=>lstat(retirePath)))
+            fail("ORPHANED_PROTECTION_LEDGER_NO_INITIALIZATION");
+          await store.initialize({lease:lock,venue:inventory,now:Date.now()});
+        }else await store.load();
+        console.log(JSON.stringify({event:"h48-shadow-initialization",sourceSha:sha,
+          status:"SHADOW_JOURNAL_PRESENT",ordersSent:0,cancelsSent:0,positionChangesSent:0}));
+        return;
+      }
       const [h,b]=await Promise.all([
         client.getKlines("HYPEUSDT","1h",120),
         client.getKlines("BTCUSDT","1h",120),
@@ -98,7 +135,7 @@ async function main(){
         rows.filter(row=>row.openTs+H<=gridTs)
           .slice(-25).map(row=>({openTs:row.openTs,close:row.close}));
       const monitor=new H48NativeReadOnlyMonitor({
-        runtimeSha:sha,store,executor,lease:lock,
+        runtimeSha:sha,store,executor,lease:lock,protectedStop8:protection,
       });
       const record=await store.load();
       const dueTs=record.mode==="OPEN"?record.position?.contract.logicalExitTs:undefined;
@@ -114,6 +151,7 @@ async function main(){
         sourceSha:sha,mode,asOf:now,...outcome,
         ordersSent:0,cancelsSent:0,positionChangesSent:0}));
     }catch(error){
+      if(initialize)throw error;
       console.error(JSON.stringify({event:"h48-native-shadow-tick",
         status:"HOLD",reason:error instanceof Error?error.message:String(error),
         ordersSent:0,cancelsSent:0,positionChangesSent:0}));

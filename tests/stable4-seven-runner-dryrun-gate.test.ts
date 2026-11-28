@@ -112,3 +112,22 @@ test("V52 research stock aliases and slot gross are pinned to the actual Python 
  assert.equal(policy.slotGross,STABLE4_V52_MAX_SLOT_GROSS);
  assert.equal(policy.stockAggregateGross,4.0);
 });
+
+test("restored seven-sleeve risk contract counts pending Q102 and V52 slots and sleeve gross ceilings",()=>{
+ const check=(sleeve:any,symbol:string,gross:number,open:any[]=[])=>evaluateStable4DryEntry({...x,candidate:{...c,sleeve,symbol,gross,route:"BASE"},open});
+ const position=(sleeve:any,symbol:string,gross:number,id:string)=>({sleeve,symbol,gross,id,route:"BASE",stock:sleeve==="V52",status:"PENDING" as const});
+ assert.equal(check("Q102","SOLUSDT",.6,[position("Q102","BTCUSDT",.6,"Q")]).reason,"Q102_SINGLE_SLOT_OR_GROSS_CAP");
+ assert.equal(check("Q102","SOLUSDT",.6).status,"ELIGIBLE_OFFLINE");
+ assert.equal(check("V52","MSFT",.5,[position("V52","AMZN",.5,"S1"),position("V52","TSLA",.5,"S2")]).reason,"V52_TWO_SLOT_CAP");
+ assert.equal(check("HYPE","HYPEUSDT",1.51).reason,"HYPE_GROSS_CAP");
+ assert.equal(check("PENGU","PENGUUSDT",1.01).reason,"PENGU_GROSS_CAP");
+ assert.equal(check("FET","FETUSDT",1.01).reason,"FET_GROSS_CAP");
+ assert.equal(evaluateStable4DryEntry({...x,v4GrossCap:3,open:[position("V4","SOLUSDT",1.8,"V")]}).reason,"V4_GROSS_CAP");
+});
+test("same equity but mismatched fresh DD observation clocks are rejected",()=>{
+ assert.equal(evaluateStable4DryEntry({...x,ddState:{...base,updatedAt:t+1000}}).reason,"ACCOUNT_MTM_CLOCK_MISMATCH");
+});
+test("R21 NEW48 target uses frozen target price, not a favorable gap-open windfall",()=>{
+ const bars=[{ts:t,open:90,high:91,low:89,close:90}];
+ assert.equal(evaluateR21ResearchExit({route:"R21_NEW48",entryTs:t,entryPrice:100,asof:t+M,bars}).price,92);
+});

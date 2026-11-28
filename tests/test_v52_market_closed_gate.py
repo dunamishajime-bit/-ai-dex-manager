@@ -25,6 +25,7 @@ class V52MarketClosedGateTest(unittest.TestCase):
         engine.positions = Mock(return_value={})
         engine.books_and_refs = Mock()
         engine.log = Mock()
+        engine.save = Mock()
         return engine
 
     def test_exchange_holiday_defers_before_reference_fetch(self):
@@ -34,6 +35,7 @@ class V52MarketClosedGateTest(unittest.TestCase):
         engine.tick()
 
         engine.books_and_refs.assert_not_called()
+        engine.save.assert_not_called()  # No empty daily-flatten journal on a no-op.
         engine.update_history.assert_not_called()
         engine.log.assert_any_call(
             "v52-market-closed",
@@ -52,6 +54,7 @@ class V52MarketClosedGateTest(unittest.TestCase):
         engine.tick({"local": after_hours, "rows": None, "skipWithoutLock": False})
 
         engine.books_and_refs.assert_not_called()
+        engine.save.assert_not_called()  # No empty daily-flatten journal on a no-op.
         engine.update_history.assert_not_called()
         engine.log.assert_any_call(
             "v52-market-closed",

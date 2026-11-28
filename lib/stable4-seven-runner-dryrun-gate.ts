@@ -1,6 +1,7 @@
 /** STABLE4 integration dry-run contract. No order or certificate authority. */
 import {evaluateRunnerDdEntry,type RunnerDdState,type RunnerDdId} from "./disdex-runner-cumulative-dd";
 import {evaluatePortfolioDdEntry,type PortfolioDdState} from "./stable4-portfolio-cumulative-dd";
+import {INTEGRATED_PRODUCTION_RISK_POLICY as P} from "../config/integratedProductionRiskPolicy";
 const H=3600000,M=300000,EPS=1e-12;
 export type Sleeve=RunnerDdId;
 /** Exactly the five equity bases in pinned V52 source; Aster quotes them as XXXUSDT. */
@@ -51,16 +52,25 @@ export function evaluateStable4DryEntry(x:RiskInput):Decision{
  // unrelated equity denominator. A full account replay must use one mark.
  const coherent=(a:number,b:number)=>Number.isFinite(a)&&Number.isFinite(b)&&
   Math.abs(a-b)<=Math.max(.01,1e-8*Math.max(Math.abs(a),Math.abs(b)));
+ if(x.portfolioDdState!.updatedAt!==x.ddState!.updatedAt)return blocked("ACCOUNT_MTM_CLOCK_MISMATCH",dd.runnerMaxDd);
  if(!coherent(x.equityUsd,x.portfolioDdState!.equity)||
     !coherent(x.equityUsd,x.ddState!.accountEquityUsd))
     return blocked("ACCOUNT_MTM_EQUITY_MISMATCH",dd.runnerMaxDd);
  const used=x.open.reduce((z,a)=>({crypto:z.crypto+(a.stock?0:a.gross),stock:z.stock+(a.stock?a.gross:0),v4:z.v4+(a.sleeve==="V4"?a.gross:0)}),{crypto:0,stock:0,v4:0});
  const stock=c.sleeve==="V52",crypto=used.crypto+(stock?0:c.gross),shares=used.stock+(stock?c.gross:0);
  if(crypto>3+EPS||shares>4+EPS||crypto+shares>4.25+EPS)return blocked("SHARED_GROSS_CAP",dd.runnerMaxDd);
- if(c.sleeve==="V4"&&used.v4+c.gross>(x.v4GrossCap??2)+EPS)return blocked("V4_GROSS_CAP",dd.runnerMaxDd);
+ if(c.sleeve==="V4"&&used.v4+c.gross>Math.min(x.v4GrossCap??P.v12BaseAggregateGross,P.v12BaseAggregateGross)+EPS)return blocked("V4_GROSS_CAP",dd.runnerMaxDd);
  if(stock&&c.gross>STABLE4_V52_MAX_SLOT_GROSS+EPS)return blocked("V52_SLOT_GROSS_CAP",dd.runnerMaxDd);
  if(x.open.some(y=>stable4ResearchVenueAsset(y.sleeve,y.symbol)===stable4ResearchVenueAsset(c.sleeve,c.symbol)))return blocked("SAME_SYMBOL_OWNERSHIP_UNRESOLVED",dd.runnerMaxDd);
  if(c.route.startsWith("R21_")&&(c.sleeve!=="V4"||c.side!=="SHORT"||Math.abs(c.gross-.3)>EPS||x.open.some(y=>y.route.startsWith("R21_"))))return blocked("R21_SINGLE_SLOT_CONTRACT",dd.runnerMaxDd);
+ // Keep the adopted per-sleeve slot and gross ceilings even when shared headroom remains.
+ const own=x.open.filter(y=>y.sleeve===c.sleeve);
+ const ownGross=own.reduce((z,y)=>z+y.gross,0)+c.gross;
+ if(c.sleeve==="Q102"&&(own.length>=P.q102MaximumPositions||ownGross>P.q102CausalV4MaximumGross+EPS))return blocked("Q102_SINGLE_SLOT_OR_GROSS_CAP",dd.runnerMaxDd);
+ if(c.sleeve==="V52"&&own.length>=2)return blocked("V52_TWO_SLOT_CAP",dd.runnerMaxDd);
+ if(c.sleeve==="HYPE"&&ownGross>P.hypeLongMaximumGross+EPS)return blocked("HYPE_GROSS_CAP",dd.runnerMaxDd);
+ if(c.sleeve==="PENGU"&&ownGross>P.penguMaximumGross+EPS)return blocked("PENGU_GROSS_CAP",dd.runnerMaxDd);
+ if(c.sleeve==="FET"&&ownGross>P.fetResidualMaximumGross+EPS)return blocked("FET_GROSS_CAP",dd.runnerMaxDd);
  return {status:"ELIGIBLE_OFFLINE",reason:"ALL_OBSERVED_RISK_CHECKS_WITHIN_LIMIT",orderAuthority:false,ddMax:dd.runnerMaxDd};
 }
 export type ClosedM5={ts:number;open:number;high:number;low:number;close:number};
@@ -75,7 +85,7 @@ export function evaluateR21ResearchExit(input:{route:"R21_OLD24"|"R21_NEW48";ent
   if(b.ts>=expiry)break;
   if(b.ts!==next||b.ts+M>asof||!Number.isSafeInteger(b.ts)||b.ts%M||![b.open,b.high,b.low,b.close].every(Number.isFinite)||b.low<=0||b.low>Math.min(b.open,b.close)||b.high<Math.max(b.open,b.close))return {kind:"SOURCE_UNAVAILABLE",ts:next,price:null,orderAuthority:false};
   if(b.high>=stop-EPS)return {kind:"STOP8",ts:b.ts+M,price:Math.max(stop,b.open),orderAuthority:false};
-  if(route==="R21_NEW48"&&b.low<=tp+EPS)return {kind:"TP8",ts:b.ts+M,price:Math.min(tp,b.open),orderAuthority:false};
+  if(route==="R21_NEW48"&&b.low<=tp+EPS)return {kind:"TP8",ts:b.ts+M,price:tp,orderAuthority:false};
   next+=M;
  }
  if(next===expiry&&asof>=expiry){

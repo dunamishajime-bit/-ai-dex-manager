@@ -3,6 +3,21 @@ on:
   pull_request:
     paths:
       - 'lib/stable4-*.ts'
+      - 'lib/hype-h48-*.ts'
+      - 'lib/disdex-quality102-*.ts'
+      - 'lib/pengu-adopted-p91.ts'
+      - 'config/idlePriorityShortRuntime.ts'
+      - 'scripts/disdex_v52_*.py'
+      - 'scripts/disdex-v52-*.py'
+      - 'tests/pengu-adopted-p91.test.ts'
+      - 'tests/hype-h48-*.test.ts'
+      - 'tests/v12-v4-adopted-r21.test.ts'
+      - 'tests/idle-r26-selected-release.test.ts'
+      - 'ops/systemd/disdex-h48-stop8-shadow@.service'
+      - 'ops/systemd/disdex-stable4-market-observer@.*'
+      - 'scripts/ops/deploy/stable4_adopted_monitor_bundle.py'
+      - 'tests/test_stable4_adopted_monitor_bundle.py'
+      - 'scripts/stable4-adopted-authorization-preflight.ts'
       - 'lib/idle-priority-short-runner.ts'
       - 'lib/aster-v3-client.ts'
       - 'lib/v12-v4-*.ts'
@@ -55,11 +70,15 @@ on:
 permissions:
   contents: read
 jobs:
-  prelive-source-only:
+  historical-research-snapshot:
+    name: Historical evidence only (66c1764, NOT current source)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 66c1764a4f78790537aed6b9cf95d913d3639807
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -76,8 +95,6 @@ jobs:
             tests/stable4-portfolio-cumulative-dd.test.ts \
             tests/stable4-source-only-stop-reserve.test.ts \
             tests/stable4-source-only-seven-runner-stop-headroom.test.ts \
-            tests/v12-v4-adopted-r21.test.ts \
-            tests/idle-r26-selected-release.test.ts \
             tests/idle-r26-entry-certificate.test.ts \
             tests/stable4-seven-runner-dryrun-gate.test.ts \
             tests/stable4-q102-hype-risk-policy-contract.test.ts \
@@ -220,7 +237,7 @@ jobs:
             tests/shared-risk-transient-refresh-retry.test.ts
           echo 'INDEPENDENT_RESEARCH_REGRESSION_ONLY=true'
           echo 'LIVE_ORDER_PERMIT=FALSE'
-      - name: Regenerate current source synthetic report artifacts (partial, no orders)
+      - name: Regenerate frozen historical synthetic report artifacts (partial, no orders)
         run: |
           set -euo pipefail
           npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/three-sleeve-native-current.json"
@@ -289,7 +306,7 @@ jobs:
       - name: Preserve independently regenerated research artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: stable4-native-replay-${{ github.run_id }}
+          name: stable4-historical-66c1764-replay-${{ github.run_id }}
           if-no-files-found: error
           retention-days: 7
           path: |
@@ -303,3 +320,93 @@ jobs:
           echo "PRELIVE_SOURCE_ONLY=true"
           echo "productionInstalled=false"
           echo "liveOrderAuthorization=false"
+
+  current-restored-source:
+    name: Current restored candidate regression (NO LIVE)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: Full candidate typecheck
+        run: npx tsc --noEmit --incremental false -p tsconfig.json
+      - name: Restored seven-runner candidate and risk regressions (mock / offline only)
+        run: |
+          set -euo pipefail
+          node --import tsx --test \
+            tests/v12-v4-adopted-r21.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-live-exit-feed.test.ts \
+            tests/v12-v4-runner-engine.test.ts \
+            tests/idle-r26-selected-release.test.ts \
+            tests/idle-r26-entry-certificate.test.ts \
+            tests/idle-priority-short-signal.test.ts \
+            tests/idle-priority-short-live-path.test.ts \
+            tests/idle-priority-short-baseline-admission.test.ts \
+            tests/pengu-adopted-p91.test.ts \
+            tests/pengu-short-v20-timed-stop.test.ts \
+            tests/pengu-route-quarantine-dd-governor.test.ts \
+            tests/fet-brk48-signal.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/fet-brk48-trailing-contract.test.ts \
+            tests/hype-h48-*.test.ts \
+            tests/stable4-dd30-owner-hard-gross-candidate.test.ts \
+            tests/disdex-runner-cumulative-dd.test.ts \
+            tests/stable4-portfolio-cumulative-dd.test.ts \
+            tests/stable4-seven-runner-dryrun-gate.test.ts \
+            tests/stable4-seven-runner-dry-coordinator.test.ts \
+            tests/stable4-source-only-stop-reserve.test.ts \
+            tests/stable4-source-only-seven-runner-stop-headroom.test.ts \
+            tests/stable4-observation-snapshot.test.ts \
+            tests/stable4-research-runner-observation.test.ts \
+            tests/stable4-four-formal-source-delta-readonly-regression.test.ts
+          npx tsx scripts/disdex-quality102-highvol-d126-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
+          python -B -m unittest -v tests.test_stable4_adopted_monitor_bundle
+          python -B -m tests.test_v52_daily_flatten_lifecycle
+          python -B tests/test_v52_daily_flatten_engine_offline.py
+          python -B scripts/disdex-v52-existing-exit-latch-selftest.py
+          python -B -m unittest -q tests.test_v52_daily_loss_recovery tests.test_v52_market_closed_gate tests.test_v52_real_tick tests.test_v52_preserve_peer_protection
+      - name: Regenerate partial models on CURRENT source; no historical parity claim
+        run: |
+          set -euo pipefail
+          npx tsx scripts/stable4-three-sleeve-native-synthetic.ts "$RUNNER_TEMP/current-three-sleeve.json"
+          npx tsx scripts/stable4-four-sleeve-native-synthetic.ts "$RUNNER_TEMP/current-four-sleeve.json"
+          npx tsx scripts/stable4-q102-hype-monthly-native-v4-synthetic.ts "$RUNNER_TEMP/current-q102-hype.json"
+          python - <<'PY2'
+          import json,os,pathlib,hashlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          records=[]
+          for name,count in [("current-three-sleeve.json",12),("current-four-sleeve.json",12),("current-q102-hype.json",8)]:
+              p=root/name
+              raw=p.read_bytes()
+              x=json.loads(raw)
+              if "PARTIAL_RESEARCH_ONLY" not in x.get("status","") or len(x.get("rows",x.get("cases",[])))!=count or x.get("orderAuthority",False) is not False:
+                  raise ValueError("CURRENT_PARTIAL_MODEL_SCOPE_INVALID:"+name)
+              records.append({"file":name,"sha256":hashlib.sha256(raw).hexdigest(),"status":x["status"],"cases":count})
+          (root/"current-partial-synthetic-identity.json").write_text(json.dumps({"scope":"CURRENT_PARTIAL_MODELS_ONLY","githubCheckoutSha":os.environ["GITHUB_SHA"],"fullSevenRunnerReplay":False,"orderAuthority":False,"productionEligible":False,"records":records},indent=2)+"\n")
+          PY2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stable4-current-partial-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/current-three-sleeve.json
+            ${{ runner.temp }}/current-four-sleeve.json
+            ${{ runner.temp }}/current-q102-hype.json
+            ${{ runner.temp }}/current-partial-synthetic-identity.json
+      - name: Release authority remains unissued
+        run: |
+          echo "FULL_SEVEN_RUNNER_NATIVE_BT=false"
+          echo "LIVE_ORDER_PERMIT=false"
+          echo "PRODUCTION_INSTALLED=false"

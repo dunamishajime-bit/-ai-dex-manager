@@ -233,6 +233,39 @@ async function rootImmutable(path:string) {
     fail("ROOT_FILE_CHANGED_DURING_READ");
   return bytes;
 }
+/** Read-only evidence check; never returns a scoped order grant.
+ * Same immutable files and canonical signature checks as the actual authority.
+ */
+async function readH48Stop8RootEvidence(sourceSha:string,planSha256:string,now:number){
+  if(process.platform!=="linux"||!SHA.test(sourceSha)||!HEX64.test(planSha256)||!uint(now))fail("PREFLIGHT_IDENTITY");
+  const root=await rootImmutable(H48_STOP8_ROOT_DIR+"/"+sourceSha+".json");
+  const ownerKey=await rootImmutable(H48_OWNER_PUBKEY);
+  const certificate=attestH48Stop8RootBundle({
+    bundle:parseJsonUnique(root.toString("utf8")),
+    rootCertificateBytes:root,trustedOwnerEd25519PublicPem:ownerKey,
+    sourceSha,planSha256,now,
+  });
+  const receiptRaw=await rootImmutable(H48_STOP8_RECEIPT_DIR+"/"+sourceSha+".json");
+  attestH48Stop8IssuanceReceipt({
+    receipt:parseJsonUnique(receiptRaw.toString("utf8")),rawBytes:receiptRaw,
+    certificateSha256:certificate.certificateSha256,
+    approvedSha:sourceSha,planSha256,
+    approvalId:certificate.bundle.approvalId,issuedAt:certificate.bundle.issuedAt,
+  });
+  return certificate;
+}
+export async function checkH48Stop8RootAuthorizationEvidence(sourceSha:string,planSha256:string,now=Date.now()){
+  const certificate=await readH48Stop8RootEvidence(sourceSha,planSha256,now);
+  const raw=await rootImmutable(H48_STOP8_ROOT_DIR+"/"+sourceSha+".order-enable.json");
+  const permit=attestH48Stop8ScopedOrderPermit({
+    permit:parseJsonUnique(raw.toString("utf8")),rawBytes:raw,
+    certificateSha256:certificate.certificateSha256,approvedSha:sourceSha,planSha256,
+    approvalId:certificate.bundle.approvalId,now,
+  });
+  return {status:"CERTIFICATE_AND_PERMIT_READBACK_VALID_NOT_ORDER_GRANT" as const,
+    sourceSha,planSha256,certificateSha256:certificate.certificateSha256,
+    expiresAt:Math.min(certificate.bundle.expiresAt,permit.expiresAt),orderAuthority:false as const};
+}
 /** Root directory/key and current SHA are fixed; no alternate path or
  * caller-provided public key can be supplied in the production verifier. */
 export class FileH48Stop8RootAuthority
@@ -246,21 +279,7 @@ export class FileH48Stop8RootAuthority
        ||doc.leaseId!==lease.leaseId||doc.ownerId!==lease.ownerId
        ||doc.expiresAt<=now||doc.acquiredAt>now)
       fail("SINGLE_WRITER_LEASE_NOT_ATTESTED");
-    const root=await rootImmutable(H48_STOP8_ROOT_DIR+"/"+this.sourceSha+".json");
-    const ownerKey=await rootImmutable(H48_OWNER_PUBKEY);
-    const certificate=attestH48Stop8RootBundle({
-      bundle:parseJsonUnique(root.toString("utf8")),
-      rootCertificateBytes:root,trustedOwnerEd25519PublicPem:ownerKey,
-      sourceSha:this.sourceSha,planSha256:this.planSha256,now,
-    });
-    const receiptRaw=await rootImmutable(H48_STOP8_RECEIPT_DIR+"/"+this.sourceSha+".json");
-    attestH48Stop8IssuanceReceipt({
-      receipt:parseJsonUnique(receiptRaw.toString("utf8")),rawBytes:receiptRaw,
-      certificateSha256:certificate.certificateSha256,
-      approvedSha:this.sourceSha,planSha256:this.planSha256,
-      approvalId:certificate.bundle.approvalId,issuedAt:certificate.bundle.issuedAt,
-    });
-    return certificate;
+    return readH48Stop8RootEvidence(this.sourceSha,this.planSha256,now);
   }
   async attestPosition(input:{
     contract:HypeH48TimeOnlyContract;quantity:number;

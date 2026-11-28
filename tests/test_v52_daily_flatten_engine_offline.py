@@ -55,7 +55,8 @@ def test_offline_failclosed_api_no_automatic_liquidation() -> None:
     fake = FakeV52()
     fake.state["v52StrategyDailyLossLatch"]["failClosed"] = True
     assert not fake._refresh_v52_daily_flatten_intent()
-    assert fake.state["positions"] and not fake.state["v52DailyFlatten"].get("pending")
+    assert fake.state["positions"] and not fake.state.get("v52DailyFlatten", {}).get("pending")
+    assert not fake.saved  # No loss-confirmed intent means no new persistent write.
 
 
 if __name__ == "__main__":

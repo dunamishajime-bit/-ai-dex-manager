@@ -1243,7 +1243,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.state.get("v52StrategyDailyLossLatch"),
             base.now_ms(),
         )
-        if updated != previous:
+        if updated != previous and (previous is not None or updated):
             self.state["v52DailyFlatten"] = updated
             self.save()  # Durable intent before any reduce-only request.
         return updated.get("pending") is True

@@ -1,0 +1,11 @@
+[Unit]
+Description=DisDex adopted R21/P91 hourly closed-bar capture (%i)
+
+[Timer]
+OnCalendar=*-*-* *:06:00 UTC
+AccuracySec=1s
+Persistent=false
+Unit=disdex-stable4-market-observer@%i.service
+
+[Install]
+WantedBy=timers.target
