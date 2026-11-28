@@ -1,0 +1,36 @@
+{
+  "brokerGeneration": "4786f600ae7bf86ffca948f1412956a9113cb20d",
+  "bundleSha256": "088f41b555abfe77fcc1ddbe4653d238b3aec2732a5459db6cce43088a533431",
+  "firstCapture": {
+    "capturedAt": 1795845965193,
+    "decisionTs": 1795845600000,
+    "mode": "OBSERVATION_ONLY",
+    "orderEnabled": false,
+    "p91": "NO_SIGNAL_OR_WINDOW",
+    "r21": "AVAILABLE",
+    "r21Candidates": 0,
+    "status": "CAPTURE_COMPLETED"
+  },
+  "formalCertificateIssued": false,
+  "limitations": [
+    "Independent public observation only; not connected to the formal Runner input path",
+    "P91 no signal or window does not establish complete positive-signal native parity",
+    "No H48 STOP8 release service installed; current exact candidate release absent",
+    "Existing seven native shadow files stale; no authoritative cumulative runner MTM lineage",
+    "No actual orders, certificate issuance, or owner authorization; not root-signed evidence"
+  ],
+  "observedBrokerSocketCount": 1,
+  "orderAuthority": false,
+  "productionInstalled": false,
+  "retiredUnusedBrokerGenerations": [
+    "795fefbbbb1c1176c80c7fd8391347578dadd0d5",
+    "e788abc82e80f9fc7ab0e1ba83fdb8be267eb513"
+  ],
+  "schema": "stable4-public-observer-vps-observation-receipt/v1",
+  "service": "disdex-stable4-public-observer.service",
+  "sourceSha": "b16408c05d3aef96d1a19955ac1fe08e8165fb75",
+  "status": "PUBLIC_MARKET_CAPTURE_OBSERVED_NOT_FORMAL_RELEASE",
+  "timer": "disdex-stable4-public-observer.timer",
+  "timerActive": true,
+  "timerEnabled": true
+}
