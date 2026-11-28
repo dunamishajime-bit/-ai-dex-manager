@@ -1,0 +1,28 @@
+{
+  "ethMixedCommissionAllocationVerified": false,
+  "ethQuantityAndRealizedPnlExact": true,
+  "formalCertificateIssued": false,
+  "limits": [
+    "All observed fills classified for review; not an owner attestation",
+    "Mixed reversal has two candidate ownership components but one official fill; commission split unverified",
+    "Initial venue flatness and full historical position coverage not independently proven",
+    "Funding and rebate attribution remain separate tasks"
+  ],
+  "manualCloseCandidateRows": 1,
+  "manualRoundTripCandidateRows": 4,
+  "mixedRunnerManualCandidateRows": 1,
+  "newGroupedCloseCandidates": {
+    "PENGU_MARGIN_GUARD": 2,
+    "PENGU_RECOVERY_V8": 3
+  },
+  "officialTradeRows": 193,
+  "orderAuthority": false,
+  "ownerAttestationIssued": false,
+  "privateEvidenceSha256": "8c25bd7daae376d4c75e570d70f5cc3a7a5154262c109c27800789bcd1593c10",
+  "runnerMatchesAndCandidates": 187,
+  "schema": "stable4-mtm-final-trade-origin-candidate-review/v1",
+  "signedObservationIssued": false,
+  "sourceSha": "df7feca61b45351177dba9a577928589cc6b40c1",
+  "status": "ALL_193_REVIEW_CLASSIFIED_CANDIDATES_ONLY",
+  "unclassifiedTradeRows": 0
+}
