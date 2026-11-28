@@ -3,6 +3,13 @@ on:
   pull_request:
     paths:
       - 'lib/stable4-*.ts'
+      - 'deploy/v4-staged-overlay/**'
+      - 'scripts/ops/deploy/disdex_stable4_dd30_monitor_cutover.py'
+      - 'tests/test_stable4_dd30_monitor_cutover.py'
+      - 'scripts/ops/deploy/stable4_adopted_monitor_bundle.py'
+      - 'ops/systemd/disdex-h48-stop8-shadow@.service'
+      - 'ops/systemd/disdex-stable4-market-observer@.*'
+      - 'tests/test_stable4_adopted_monitor_bundle.py'
       - 'lib/hype-h48-*.ts'
       - 'lib/disdex-quality102-*.ts'
       - 'lib/pengu-adopted-p91.ts'
@@ -372,10 +379,48 @@ jobs:
           npx tsx scripts/disdex-quality102-highvol-d126-selftest.ts
           npx tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
           python -B -m unittest -v tests.test_stable4_adopted_monitor_bundle
+          python -B -m unittest -v tests.test_stable4_dd30_monitor_cutover
           python -B -m tests.test_v52_daily_flatten_lifecycle
           python -B tests/test_v52_daily_flatten_engine_offline.py
           python -B scripts/disdex-v52-existing-exit-latch-selftest.py
           python -B -m unittest -q tests.test_v52_daily_loss_recovery tests.test_v52_market_closed_gate tests.test_v52_real_tick tests.test_v52_preserve_peer_protection
+      - name: Exact candidate service bundle and staged source manifest (no install)
+        run: |
+          set -euo pipefail
+          python -B scripts/ops/deploy/stable4_adopted_monitor_bundle.py --sha "$GITHUB_SHA" > "$RUNNER_TEMP/adopted-monitor-bundle.json"
+          python -B - <<'PY2'
+          import hashlib,json,os,pathlib,subprocess,sys
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          sha=os.environ["GITHUB_SHA"]
+          assert subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()==sha
+          bundle=json.loads((root/"adopted-monitor-bundle.json").read_bytes())
+          assert bundle["sourceSha"]==sha and bundle["ordersEnabled"] is False and bundle["formalCertificateIssued"] is False
+          files={}
+          tracked=subprocess.check_output(["git","ls-tree","-r","--name-only","-z",sha]).decode().split("\0")
+          for rel in tracked:
+              if not rel or not (rel.startswith(("lib/","config/","scripts/","ops/systemd/","deploy/v4-staged-overlay/")) or rel in ("package.json","package-lock.json","tsconfig.json","docs/production/stable4-dd30-h48-stop8-risk-owner-candidate-20261126.json")): continue
+              raw=subprocess.check_output(["git","show",sha+":"+rel])
+              files[rel]=hashlib.sha256(raw).hexdigest()
+          required=("lib/v12-v4-adopted-r21.ts","lib/pengu-adopted-p91.ts","lib/idle-r26-entry-certificate.ts","scripts/disdex-hype-h48-native-shadow.ts","scripts/stable4-market-observe.ts","scripts/stable4-adopted-authorization-preflight.ts","ops/systemd/disdex-h48-stop8-shadow@.service")
+          assert all(rel in files for rel in required)
+          overlay=json.loads(pathlib.Path("deploy/v4-staged-overlay/manifest.json").read_bytes())
+          for row in overlay["files"]:
+              src="deploy/v4-staged-overlay/"+row["source"]
+              assert src in files
+              if row["target"] in files:
+                  assert files[src]==files[row["target"]], "TRACKED_SOURCE_OVERLAY_MISMATCH:"+row["target"]
+          receipt={"schema":"stable4-adopted-candidate-source-review/v1","sourceSha":sha,"status":"REVIEW_ONLY_NOT_APPROVED_OR_INSTALLED","ordersEnabled":False,"formalCertificateIssued":False,"productionInstalled":False,"serviceBundleSha256":hashlib.sha256((root/"adopted-monitor-bundle.json").read_bytes()).hexdigest(),"files":files}
+          (root/"adopted-source-review.json").write_text(json.dumps(receipt,sort_keys=True,indent=2)+"\n")
+          print("CANDIDATE_REVIEW_FILES="+str(len(files)))
+          PY2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stable4-adopted-monitor-review-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/adopted-monitor-bundle.json
+            ${{ runner.temp }}/adopted-source-review.json
       - name: Regenerate partial models on CURRENT source; no historical parity claim
         run: |
           set -euo pipefail
