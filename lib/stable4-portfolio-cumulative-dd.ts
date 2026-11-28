@@ -28,6 +28,7 @@ export function initializePortfolioDd(o:EquityMark):PortfolioDdState{
 export function advancePortfolioDd(p:PortfolioDdState,o:EquityMark):PortfolioDdState{
  check(o);
  if(!p||p.schema!==STABLE4_PORTFOLIO_DD_SCHEMA||p.source!=="OFFLINE_RECONCILED_MTM_ONLY"||
+ !Number.isSafeInteger(p.updatedAt)||p.updatedAt<=0||typeof p.proofId!=="string"||!p.proofId||p.proofId.length>160||
  !Number.isFinite(p.index)||p.index<=0||!Number.isFinite(p.peak)||p.peak<p.index||
  !Number.isFinite(p.maximumDd)||p.maximumDd<0||p.maximumDd>1||
  !Number.isFinite(p.currentDd)||p.currentDd<0||p.currentDd>p.maximumDd+1e-12||
@@ -37,14 +38,17 @@ export function advancePortfolioDd(p:PortfolioDdState,o:EquityMark):PortfolioDdS
  const growth=(o.equity-o.externalNetFlow)/p.equity;
  if(!Number.isFinite(growth)||growth<=0)throw Error("PORTFOLIO_DD_EQUITY_OR_FLOW_INVALID");
  const index=p.index*growth,peak=Math.max(p.peak,index);
+ if(!Number.isFinite(index)||index<=0||!Number.isFinite(peak))throw Error("PORTFOLIO_DD_EQUITY_OR_FLOW_INVALID");
  const currentDd=Math.max(0,1-index/peak),maximumDd=Math.max(p.maximumDd,currentDd);
  return {...p,updatedAt:o.atMs,proofId:o.proofId,equity:o.equity,index,peak,currentDd,maximumDd};
 }
 export type PortfolioDdGate=Readonly<{status:"ELIGIBLE_OFFLINE"|"BLOCKED";reason:string;currentDd?:number;maximumDd?:number;orderAuthority:false}>;
 export function evaluatePortfolioDdEntry(p:PortfolioDdState|undefined,atMs:number,releaseSha:string,limit=0.30,maxAgeMs=120000):PortfolioDdGate{
  const blocked=(reason:string):PortfolioDdGate=>({status:"BLOCKED",reason,currentDd:p?.currentDd,maximumDd:p?.maximumDd,orderAuthority:false});
- if(!p||p.schema!==STABLE4_PORTFOLIO_DD_SCHEMA||p.source!=="OFFLINE_RECONCILED_MTM_ONLY"||p.releaseSha!==releaseSha)return blocked("PORTFOLIO_DD_MARK_UNAVAILABLE");
- if(!Number.isSafeInteger(atMs)||atMs<p.updatedAt||atMs-p.updatedAt>maxAgeMs||
+ if(!p||p.schema!==STABLE4_PORTFOLIO_DD_SCHEMA||p.source!=="OFFLINE_RECONCILED_MTM_ONLY"||p.releaseSha!==releaseSha||!/^[a-f0-9]{40}$/.test(releaseSha))return blocked("PORTFOLIO_DD_MARK_UNAVAILABLE");
+ if(!Number.isSafeInteger(atMs)||!Number.isSafeInteger(p.updatedAt)||p.updatedAt<=0||
+ typeof p.proofId!=="string"||!p.proofId||p.proofId.length>160||
+ !Number.isFinite(maxAgeMs)||maxAgeMs<=0||atMs<p.updatedAt||atMs-p.updatedAt>maxAgeMs||
  !Number.isFinite(p.equity)||p.equity<=0||!Number.isFinite(p.index)||p.index<=0||
  !Number.isFinite(p.peak)||p.peak<p.index||!Number.isFinite(p.maximumDd)||p.maximumDd<0||p.maximumDd>1||
  !Number.isFinite(p.currentDd)||p.currentDd<0||p.currentDd>p.maximumDd+1e-12||

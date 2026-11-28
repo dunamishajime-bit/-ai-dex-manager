@@ -65,3 +65,12 @@ test("corrupt runner DD snapshots with fabricated zero drawdown fail closed",()=
  assert.throws(()=>advanceRunnerCumulativeDd(forged,obs(t+120000,900,{...zero(),V4:-100})),/RUNNER_CUMULATIVE_DD_STATE_INVALID/);
  assert.equal(evaluateRunnerDdEntry(actual,"V4",t+60000,sha).status,"ENTRY_ALLOWED_BY_THIS_DD_ONLY");
 });
+
+test("nonfinite clock, corrupted proof and denominator never qualify a runner",()=>{
+ const s=initializeRunnerCumulativeDd(obs(t,1000,zero()));
+ for(const bad of [{...s,updatedAt:NaN},{...s,updatedAt:0},{...s,proofId:""},{...s,accountEquityUsd:Infinity}]){
+  assert.equal(evaluateRunnerDdEntry(bad,"V4",t+1,sha).status,"BLOCKED");
+  assert.throws(()=>advanceRunnerCumulativeDd(bad,obs(t+60000,1000,zero())),/STATE_INVALID/);
+ }
+ assert.equal(evaluateRunnerDdEntry({...s,releaseSha:"bad"},"V4",t+1,"bad").status,"BLOCKED");
+});

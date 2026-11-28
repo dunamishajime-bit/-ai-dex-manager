@@ -1,0 +1,135 @@
+{
+  "formalCertificateIssued": false,
+  "offlineRegression": {
+    "cumulativeDdAndCoordinator": 31,
+    "h48": 131,
+    "legacyHypeM5": 5
+  },
+  "openBlockers": [
+    "FET historical production target file docs/production/current-live-target.json absent; production telemetry test not satisfied",
+    "HYPE TREND parity is not selected H48 STOP8 native annual parity",
+    "No signed fills, issuer-signed MTM, all-seven current-source shared-wallet BT, root release certificate or Owner authority"
+  ],
+  "orderAuthority": false,
+  "periodEndExclusiveUtc": "2026-10-01T00:00:00Z",
+  "periodStartUtc": "2025-10-01T00:00:00Z",
+  "productionInstalled": false,
+  "results": {
+    "fet": {
+      "matched": 11,
+      "referenceOutputSha256": "b7312cb6b4071c64beeb48eaf1a22a8be6980bc8e27616e0a688ae6a9886ac68",
+      "regeneratedOutputSha256": "b7312cb6b4071c64beeb48eaf1a22a8be6980bc8e27616e0a688ae6a9886ac68",
+      "result": {
+        "candleCount": 76110,
+        "examples": [],
+        "limitations": [
+          "Model STOP clock uses confirmed 5m bar-close, not an actual ASTER signed order fill timestamp",
+          "Profit floor, trailing and max-hold from current pure source, original 11 archived modeled exits, not portfolio-admitted fills",
+          "No funding, venue book depth, real order receipt or Owner release certificate"
+        ],
+        "matched": 11,
+        "matchedEntry": 11,
+        "mismatches": {},
+        "orderAuthority": false,
+        "schema": "stable4-fet-brk48-native-m5-model-parity/v1",
+        "sourceSha256": {
+          "prefix": "5da9f44eefb90996aa323b1ce6a4ea656564a956ccc7ce48474156bdc345ed17",
+          "suffix": "87a865c46f59e4cc739a331ca799719f9b8d080a9c0166c647747beb0c17fa09",
+          "tape": "190c204a065d0eaaee3aa02ef9d8b91dab6c3968feede2f2e2d68539f9c6ecc7"
+        },
+        "status": "RESEARCH_ONLY_NOT_SIGNED_VENUE",
+        "stops": 7,
+        "timeExits": 4,
+        "trades": 11
+      }
+    },
+    "hype_h1": {
+      "matched": 78,
+      "referenceOutputSha256": "fccfd370caa61474e67cb3f8ccdd6db55408917ad5a140360c6e57d700b16141",
+      "regeneratedOutputSha256": "fccfd370caa61474e67cb3f8ccdd6db55408917ad5a140360c6e57d700b16141",
+      "result": {
+        "errors": {},
+        "examples": [],
+        "inputSha": {
+          "btc": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+          "hype": "2c12139b4b28bc86526a68bd32c73fa158388a103b993c73f29e257169d8d7bc",
+          "tape": "1a996f77e52bc645c517f67f95a89561ca2c01896e3055c562de938b527ed6e6"
+        },
+        "limitations": [
+          "ASTER 1H source entry signal only; not re-executing historical M5 STOP/TP or fills",
+          "Current HEAD source vs pinned 2026-10 source may differ in EMA initiation; report all mismatches, no fuzzy matching",
+          "Not complete current-runner production bot order authority; entry open is model proxy"
+        ],
+        "matched": 78,
+        "matchedAtr": 78,
+        "matchedEntry": 78,
+        "matchedSignalTs": 78,
+        "matchedStopDistance": 78,
+        "orderAuthority": false,
+        "status": "ARCHIVED_HYPE_ENTRY_SOURCE_PARITY_ONLY_NO_LIVE",
+        "tapeCount": 78
+      }
+    },
+    "hype_m5": {
+      "matched": 78,
+      "referenceOutputSha256": "9d3868bc56caf15cbe64e3d27b079221d8f31dadf332f93a93e43bae21ebe1fe",
+      "regeneratedOutputSha256": "9d3868bc56caf15cbe64e3d27b079221d8f31dadf332f93a93e43bae21ebe1fe",
+      "result": {
+        "candidateCount": 78,
+        "errors": {},
+        "examples": [],
+        "exitProfitCount": 21,
+        "exitStopCount": 57,
+        "limitations": [
+          "Source M5 close timestamp (bar start+300000) for first confirmed STOP/TP touch; simulated stop and TP touch only: no signed venue order placement, execution book, queue position or funding",
+          "Uses archived model protective stop/TP targets whose derivation was separately checked against current HYPE entry source; no independent root certificate",
+          "No account-wide portfolio allocation; 78 independent candidate outcome models may overlap in real time"
+        ],
+        "matched": 78,
+        "orderAuthority": false,
+        "schema": "hype-aster-5m-native-model-exit-parity/v1",
+        "sourceCandles": 107136,
+        "sourceHashes": {
+          "prefix": "7529686c7a509749be040eab12fe7d1e961bc391c43334e14cdfe959c5db046a",
+          "suffix": "21ca2e4c449033f39951a67014d35747af6350b94ed18141a5dfd6a7b4dd1148",
+          "tape": "1a996f77e52bc645c517f67f95a89561ca2c01896e3055c562de938b527ed6e6"
+        },
+        "status": "RESEARCH_ONLY_NO_VENUE_FILLS",
+        "stopFirstSameM5Ambiguities": 0
+      }
+    }
+  },
+  "schema": "stable4-exit-model-revalidation/v1",
+  "sourceFiles": {
+    "config/fetBrk48Runtime.ts": {
+      "gitBlobSha256": "39151c4ae6950bd14e89410ccbf6ca0f411798da44639fe5eef9e3c987b518be",
+      "windowsCheckoutSha256": "8a96dc4a7cf224d3012947ab882a88f71b2431f0b5b9df8adde9c7e53dfa06bf"
+    },
+    "lib/hype-trend-long-signal.ts": {
+      "gitBlobSha256": "ee81fe2beeaeacaf5ce3bd06cbeb9aa76cb00086e35878e9b7435d8584d5f13c",
+      "windowsCheckoutSha256": "82a16decc1f1c0506461b2e06666f872ee5655ed36ca683d4dc738751ac7f137"
+    },
+    "lib/stable4-fet-offline-m5-exit.ts": {
+      "gitBlobSha256": "42ed94e32016fe5849c7713efcbaa0d7162ad453dc8a87e375ddbf6251e8c6c2",
+      "windowsCheckoutSha256": "56acf1025d0f0d258da1cf721728147ec2c66ca4d9265e7a4cb43e2bd8500df4"
+    },
+    "lib/stable4-hype-offline-m5-exit.ts": {
+      "gitBlobSha256": "8b41ea2baeea0d2b75edafc3e6cc37a5632b64398259d48503fe5e7e88d26806",
+      "windowsCheckoutSha256": "d6825d46ecd1376ad6ab5cedd27a93506b07d25db035a6e420bf05baaac8ddd9"
+    },
+    "scripts/stable4-fet-aster-m5-model-parity.ts": {
+      "gitBlobSha256": "8d6d4188d7da12904c826a7d5f63f5a561578ee57914238fd1fe1cdb378c11c8",
+      "windowsCheckoutSha256": "3a0919593dde67a9f1a9cabab007c6290bda5691591ee5d32ff8258221bfcba0"
+    },
+    "scripts/stable4-hype-aster-m5-exit-parity.ts": {
+      "gitBlobSha256": "042c1e15a98e7b17ce8ab6374268adf5cbe0103e9f531285658c4e34cac73c3f",
+      "windowsCheckoutSha256": "b419fca86670606cdcc1cdce0fadff2560bf6872ccf5df522a7e818586e615b5"
+    },
+    "scripts/stable4-hype-native-annual-source-parity.ts": {
+      "gitBlobSha256": "91700fba4b77b01377741e757cd7e12ee1360165d4535d4b0b73cccfe26150c1",
+      "windowsCheckoutSha256": "2a2cf81c2c5e4fdf0902b4ac3e553d46f6a21d06576d29c19a995d51440b356f"
+    }
+  },
+  "sourceRevision": "8bcf6a3416cd33d216e372500299a743dffada3c",
+  "status": "OFFLINE_MODEL_PARITY_ONLY"
+}

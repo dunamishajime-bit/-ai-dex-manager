@@ -36,7 +36,7 @@ const valid=(x:number)=>typeof x==="number"&&Number.isFinite(x);
 const eligible=(x:number)=>valid(x)&&x>0;
 const err=(code:string):never=>{throw Error("RUNNER_CUMULATIVE_DD_"+code);};
 function validate(obs:RunnerDdObservation){
-  if(!Number.isSafeInteger(obs.atMs)||obs.atMs<=0||!eligible(obs.accountEquityUsd)
+  if(!obs||!Number.isSafeInteger(obs.atMs)||obs.atMs<=0||!eligible(obs.accountEquityUsd)
     ||!valid(obs.externalNetFlowUsd)||!/^([a-f0-9]{40})$/.test(obs.exactReleaseSha)
     ||typeof obs.proofId!=="string"||!obs.proofId||obs.proofId.length>160
     ||obs.provenance!=="SIGNED_ACCOUNT_MARK_AND_RUNNER_LEDGER_RECONCILED")
@@ -57,7 +57,9 @@ export function advanceRunnerCumulativeDd(
   prior:RunnerDdState,obs:RunnerDdObservation,
 ):RunnerDdState{
   validate(obs);
-  if(prior.schema!==RUNNER_DD_SCHEMA||!eligible(prior.accountEquityUsd)
+  if(!prior||prior.schema!==RUNNER_DD_SCHEMA||!eligible(prior.accountEquityUsd)
+    ||!Number.isSafeInteger(prior.updatedAt)||prior.updatedAt<=0
+    ||typeof prior.proofId!=="string"||!prior.proofId||prior.proofId.length>160
     ||RUNNER_DD_IDS.some(k=>!prior.runners?.[k]||!valid(prior.netMtmPnlUsd?.[k])
       ||!eligible(prior.runners[k].index)||!eligible(prior.runners[k].peak)
       ||prior.runners[k].peak<prior.runners[k].index
@@ -70,7 +72,7 @@ export function advanceRunnerCumulativeDd(
     ||obs.proofId===prior.proofId)err("PROOF_OR_TIME_REPLAY");
   const pnlDelta=RUNNER_DD_IDS.reduce((sum,k)=>sum+obs.netMtmPnlUsd[k]-prior.netMtmPnlUsd[k],0);
   const accountDelta=obs.accountEquityUsd-prior.accountEquityUsd-obs.externalNetFlowUsd;
-  if(Math.abs(accountDelta-pnlDelta)>Math.max(0.00001,1e-8*Math.max(
+  if(!valid(accountDelta)||!valid(pnlDelta)||Math.abs(accountDelta-pnlDelta)>Math.max(0.00001,1e-8*Math.max(
     Math.abs(prior.accountEquityUsd),Math.abs(obs.accountEquityUsd))))
     err("ACCOUNT_TO_RUNNER_MTM_RECONCILIATION_FAILED");
   const runners={} as Record<RunnerDdId,RunnerDdIndexRow>;
@@ -79,6 +81,7 @@ export function advanceRunnerCumulativeDd(
     const factor=1+delta/prior.accountEquityUsd;
     if(!eligible(factor))err("RUNNER_EQUITY_INDEX_NONPOSITIVE");
     const index=old.index*factor,peak=Math.max(old.peak,index);
+    if(!eligible(index)||!eligible(peak))err("RUNNER_EQUITY_INDEX_NONPOSITIVE");
     const currentDd=Math.max(0,1-index/peak);
     runners[k]={index,peak,currentDd,maximumDd:Math.max(old.maximumDd,currentDd)};
   }
@@ -100,8 +103,10 @@ export function evaluateRunnerDdEntry(
   const block=(reason:string):RunnerDdAdmission=>({status:"BLOCKED",reason,
     orderAuthority:false,runnerMaxDd:state?.runners?.[runner]?.maximumDd});
   if(!RUNNER_DD_IDS.includes(runner)||!state||state.schema!==RUNNER_DD_SCHEMA
-    ||state.releaseSha!==releaseSha)return block("RUNNER_DD_SOURCE_UNAVAILABLE");
-  if(!Number.isSafeInteger(atMs)||atMs<state.updatedAt||atMs-state.updatedAt>maxAgeMs
+    ||state.releaseSha!==releaseSha||!/^[a-f0-9]{40}$/.test(releaseSha))return block("RUNNER_DD_SOURCE_UNAVAILABLE");
+  if(!Number.isSafeInteger(atMs)||!Number.isSafeInteger(state.updatedAt)||state.updatedAt<=0
+    ||!eligible(state.accountEquityUsd)||typeof state.proofId!=="string"||!state.proofId||state.proofId.length>160
+    ||atMs<state.updatedAt||atMs-state.updatedAt>maxAgeMs
     ||!eligible(maxAgeMs)||!eligible(maximumDd)||maximumDd>1)
     return block("RUNNER_DD_STALE_OR_INVALID");
   const r=state.runners[runner];

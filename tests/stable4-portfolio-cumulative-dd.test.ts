@@ -53,3 +53,14 @@ test("corrupted reported DD cannot contradict the time-weighted peak/index",()=>
  assert.throws(()=>advancePortfolioDd(forged,mark(t+2*H,9000,"after-forgery")),/PORTFOLIO_DD_STATE_INVALID/);
  assert.equal(evaluatePortfolioDdEntry(actual,t+H,sha).status,"ELIGIBLE_OFFLINE");
 });
+
+test("malformed mark clock, proof, and age limit cannot qualify a portfolio",()=>{
+ for(const bad of [{...b,updatedAt:NaN},{...b,updatedAt:0},{...b,proofId:""}]){
+  assert.equal(evaluatePortfolioDdEntry(bad,t+1,sha).status,"BLOCKED");
+  assert.throws(()=>advancePortfolioDd(bad,mark(t+H,10000,"next")),/STATE_INVALID/);
+ }
+ for(const age of [NaN,Infinity,0,-1]){
+  assert.equal(evaluatePortfolioDdEntry(b,t+1,sha,.30,age).status,"BLOCKED");
+ }
+ assert.equal(evaluatePortfolioDdEntry({...b,releaseSha:"bad"},t+1,"bad").status,"BLOCKED");
+});
