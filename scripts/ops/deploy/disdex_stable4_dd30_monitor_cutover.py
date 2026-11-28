@@ -190,7 +190,14 @@ def materialize_v4_staged_overlay(stage: Path) -> None:
         # material is present.  Avoid applying POSIX mode bits while building
         # the temporary tree so the pure helper remains portable on Windows CI.
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dst)
+        # Already-tracked candidate source is authoritative. A staged overlay
+        # may supply an absent support file, but must never replace a differing
+        # source after the archive manifest has been verified.
+        if dst.exists():
+            require(dst.is_file() and dst.read_bytes() == src.read_bytes(),
+                    "V4_OVERLAY_TRACKED_SOURCE_CONFLICT:" + target)
+        else:
+            shutil.copyfile(src, dst)
 
 
 def harden_immutable_tree(root: Path) -> None:
@@ -889,6 +896,12 @@ def stage_candidate(tar_path: Path, manifest_path: Path, target: str) -> None:
         # Validate the immutable Git archive first; the reviewed V4 overlay is
         # then expanded deterministically into the release paths it declares.
         materialize_v4_staged_overlay(stage)
+        # Recheck manifest after all transformations; no verified source may
+        # differ from the original exact candidate bytes.
+        for rel, expected in (manifest.get("files") or {}).items():
+            path = stage / rel
+            require(path.is_file() and not path.is_symlink() and hashlib.sha256(path.read_bytes()).hexdigest() == expected,
+                    "POST_OVERLAY_CANDIDATE_SOURCE_HASH_MISMATCH:" + str(rel))
         harden_immutable_tree(stage)
         os.replace(stage, release)
     except Exception:

@@ -298,6 +298,41 @@ class Stable4Dd30MonitorCutoverTest(unittest.TestCase):
             target = stage / "scripts" / "ops" / "root" / "disdex-v4-rate-budget-broker.ts"
             self.assertEqual(target.read_text(encoding="utf-8"), "export const broker = true;\n")
 
+            # Equal bytes are idempotent. A conflicting tracked file must
+            # survive intact; staging may never change verified source.
+            materialize_v4_staged_overlay(stage)
+            target.write_bytes(b"new candidate source")
+            with self.assertRaisesRegex(cutover.ContractError, "V4_OVERLAY_TRACKED_SOURCE_CONFLICT"):
+                materialize_v4_staged_overlay(stage)
+            self.assertEqual(target.read_bytes(), b"new candidate source")
+
+    def test_current_overlay_preserves_every_existing_candidate_file(self):
+        manifest_dir = ROOT / "deploy" / "v4-staged-overlay"
+        manifest = json.loads((manifest_dir / "manifest.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            stage = pathlib.Path(directory)
+            import shutil
+            shutil.copytree(manifest_dir, stage / "deploy" / "v4-staged-overlay")
+            existing = {}
+            for row in manifest["files"]:
+                target = ROOT / row["target"]
+                if target.is_file():
+                    data = target.read_bytes().replace(b"\r\n", b"\n")
+                    staged = stage / row["target"]
+                    staged.parent.mkdir(parents=True, exist_ok=True)
+                    staged.write_bytes(data)
+                    overlay = stage / "deploy" / "v4-staged-overlay" / row["source"]
+                    overlay.write_bytes(overlay.read_bytes().replace(b"\r\n", b"\n"))
+                    existing[row["target"]] = data
+            self.assertGreaterEqual(len(existing), 7)
+            materialize_v4_staged_overlay(stage)
+            for rel, data in existing.items():
+                self.assertEqual((stage / rel).read_bytes(), data, rel)
+            for row in manifest["files"]:
+                self.assertTrue((stage / row["target"]).is_file(), row["target"])
+            for rel in ("scripts/v12-v4-production-runner.ts", "scripts/v12-v4-monitor-only-runner.ts"):
+                self.assertIn(b"attachAdoptedR21CandidateBatch", (stage / rel).read_bytes())
+
     def test_v4_kill_switch_block_is_accepted_as_safe_monitor_evidence(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             path = pathlib.Path(directory) / "v4.json"

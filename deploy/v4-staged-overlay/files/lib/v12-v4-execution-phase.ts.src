@@ -52,4 +52,3 @@ export function v4MonitorIdentity(sha:string,production:boolean,env:Environment)
  return {runnerId:'V12_V4_MONITOR',serviceUnit:`disdex-v12-v4-monitor@${sha}.service`,healthPath,
   healthSchema:'disdex-v12-v4-monitor-heartbeat/v1'};
 }
-
